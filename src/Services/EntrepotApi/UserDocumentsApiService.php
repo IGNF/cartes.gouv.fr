@@ -4,7 +4,7 @@ namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
 use App\ApiClient\PaginatedResponse;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -30,10 +30,10 @@ final class UserDocumentsApiService
 
         unset($query['detailed']);
 
-        return $this->api->get('users/me/documents', $query)->jsonWithHeaders();
+        return $this->api->get('users/me/documents', $query)->arrayWithHeaders();
     }
 
-    public function get(string $documentId): PendingResponse
+    public function get(string $documentId): ResponsePromise
     {
         return $this->api->get("users/me/documents/$documentId");
     }
@@ -58,7 +58,7 @@ final class UserDocumentsApiService
             $formFields['public_url'] = true === $publicUrl ? 'true' : 'false';
         }
 
-        $response = $this->api->sendFile('POST', 'users/me/documents', $filePath, $formFields)->json();
+        $response = $this->api->sendFile('POST', 'users/me/documents', $filePath, $formFields)->array();
         $this->filesystem->remove($filePath);
 
         return $response;
@@ -68,7 +68,7 @@ final class UserDocumentsApiService
      * @param array<mixed>  $extra
      * @param array<string> $labels
      */
-    public function modify(string $documentId, ?string $name = null, ?string $description = null, ?array $extra = null, ?array $labels = null, ?bool $publicUrl = null): PendingResponse
+    public function modify(string $documentId, ?string $name = null, ?string $description = null, ?array $extra = null, ?array $labels = null, ?bool $publicUrl = null): ResponsePromise
     {
         $body = [];
 
@@ -97,23 +97,23 @@ final class UserDocumentsApiService
 
     public function replaceFile(string $documentId, string $filePath): array
     {
-        $response = $this->api->sendFile('PUT', "users/me/documents/$documentId", $filePath)->json();
+        $response = $this->api->sendFile('PUT', "users/me/documents/$documentId", $filePath)->array();
         $this->filesystem->remove($filePath);
 
         return $response;
     }
 
-    public function remove(string $documentId): PendingResponse
+    public function remove(string $documentId): ResponsePromise
     {
         return $this->api->delete("users/me/documents/$documentId");
     }
 
-    public function download(string $documentId): PendingResponse
+    public function download(string $documentId): ResponsePromise
     {
         return $this->api->get("users/me/documents/$documentId/file");
     }
 
-    public function getSharings(string $documentId): PendingResponse
+    public function getSharings(string $documentId): ResponsePromise
     {
         return $this->api->get("users/me/documents/$documentId/sharings");
     }
@@ -121,7 +121,7 @@ final class UserDocumentsApiService
     /**
      * @param array<string> $userIds
      */
-    public function addSharing(string $documentId, array $userIds): PendingResponse
+    public function addSharing(string $documentId, array $userIds): ResponsePromise
     {
         return $this->api->post("users/me/documents/$documentId/sharings", $userIds);
     }
@@ -129,7 +129,7 @@ final class UserDocumentsApiService
     /**
      * @param array<string> $userIds
      */
-    public function removeSharing(string $documentId, array $userIds): PendingResponse
+    public function removeSharing(string $documentId, array $userIds): ResponsePromise
     {
         return $this->api->delete("users/me/documents/$documentId/sharings", ['users' => implode(',', $userIds)]);
     }

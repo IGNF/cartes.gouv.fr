@@ -33,7 +33,7 @@ class ProcessingController extends AbstractController implements ApiControllerIn
         try {
             $query = $request->query->all();
 
-            $uploadList = $this->processingApiService->getAll($datastoreId, $query);
+            $uploadList = $this->processingApiService->getAll($datastoreId, $query)->resolve();
 
             return $this->json($uploadList);
         } catch (ApiException $ex) {
@@ -50,7 +50,7 @@ class ProcessingController extends AbstractController implements ApiControllerIn
                 unset($query['detailed']);
             }
 
-            $uploadList = $detailed ? $this->processingApiService->getAllExecutionsDetailed($datastoreId, $query) : $this->processingApiService->getAllExecutions($datastoreId, $query);
+            $uploadList = $detailed ? $this->processingApiService->getAllExecutionsDetailed($datastoreId, $query) : $this->processingApiService->getAllExecutions($datastoreId, $query)->resolve();
 
             return $this->json($uploadList);
         } catch (ApiException $ex) {

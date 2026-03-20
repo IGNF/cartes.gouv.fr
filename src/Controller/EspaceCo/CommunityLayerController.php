@@ -40,7 +40,7 @@ class CommunityLayerController extends AbstractController implements ApiControll
         #[MapQueryParameter] ?array $fields = [],
     ): JsonResponse {
         try {
-            $layers = $this->communityLayerApiService->getLayers($communityId, $fields);
+            $layers = $this->communityLayerApiService->getLayers($communityId, $fields)->resolve();
 
             return new JsonResponse($layers);
         } catch (ApiException $ex) {
@@ -57,7 +57,7 @@ class CommunityLayerController extends AbstractController implements ApiControll
         #[MapQueryParameter] ?array $fields = [],
     ): JsonResponse {
         try {
-            $layers = $this->communityLayerApiService->getLayers($communityId, $fields);
+            $layers = $this->communityLayerApiService->getLayers($communityId, $fields)->resolve();
 
             // On ne garde que les feature types
             $ftLayers = array_values(array_filter($layers, fn ($layer) => (!is_null($layer['database']) && !is_null($layer['table']))));
@@ -82,7 +82,7 @@ class CommunityLayerController extends AbstractController implements ApiControll
         try {
             $data = json_decode($request->getContent(), true);
             foreach ($data['layer_tools'] as $layerId => $tools) {
-                $this->layerApiService->updateLayer($communityId, $layerId, $tools)->wait();
+                $this->layerApiService->updateLayer($communityId, $layerId, $tools)->await();
             }
 
             return $this->getAll($communityId, $data['fields']);
@@ -96,11 +96,11 @@ class CommunityLayerController extends AbstractController implements ApiControll
      */
     private function _complete(array &$ftLayer): void
     {
-        $db = $this->databaseApiService->getDatabase($ftLayer['database'], ['name', 'title'])->json();
+        $db = $this->databaseApiService->getDatabase($ftLayer['database'], ['name', 'title'])->array();
         $ftLayer['database_name'] = $db['name'];
         $ftLayer['database_title'] = $db['title'];
 
-        $table = $this->databaseApiService->getTable($ftLayer['database'], $ftLayer['table'], ['name', 'title', 'geometry_name', 'columns'])->json();
+        $table = $this->databaseApiService->getTable($ftLayer['database'], $ftLayer['table'], ['name', 'title', 'geometry_name', 'columns'])->array();
         $ftLayer['table_name'] = $table['name'];
         $ftLayer['table_title'] = $table['title'];
 

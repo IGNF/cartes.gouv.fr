@@ -29,7 +29,7 @@ class CatalogsController extends AbstractController implements ApiControllerInte
     public function communities(): JsonResponse
     {
         try {
-            $response = $this->catalogsApiService->getAllCommunities();
+            $response = $this->catalogsApiService->getAllCommunities()->resolve();
 
             return $this->json($response);
         } catch (ApiException $ex) {
@@ -43,7 +43,7 @@ class CatalogsController extends AbstractController implements ApiControllerInte
     public function organizations(): JsonResponse
     {
         try {
-            $organizations = $this->catalogsApiService->getAllOrganizations();
+            $organizations = $this->catalogsApiService->getAllOrganizations()->resolve();
 
             return $this->json($organizations);
         } catch (ApiException $ex) {

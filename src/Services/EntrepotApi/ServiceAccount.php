@@ -41,7 +41,7 @@ class ServiceAccount
             'verify_host' => false,
         ]);
 
-        $this->me = $this->userApiService->getMe()->json();
+        $this->me = $this->userApiService->getMe()->array();
 
         // Recuperation du token du compte de service
         $this->token = $this->getAccessToken();

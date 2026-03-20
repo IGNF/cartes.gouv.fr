@@ -3,7 +3,7 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class GeoserviceApiService
@@ -17,7 +17,7 @@ final class GeoserviceApiService
     /**
      * @param array<string> $fields
      */
-    public function getGeoservice(int $geoserviceId, ?array $fields = []): PendingResponse
+    public function getGeoservice(int $geoserviceId, ?array $fields = []): ResponsePromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 

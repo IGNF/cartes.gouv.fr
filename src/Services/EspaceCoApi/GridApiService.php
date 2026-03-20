@@ -3,7 +3,7 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class GridApiService
@@ -27,7 +27,7 @@ final class GridApiService
             $query['adm'] = $adm;
         }
 
-        $response = $this->api->get('grids', $query)->jsonWithHeaders();
+        $response = $this->api->get('grids', $query)->arrayWithHeaders();
 
         $totalPages = $response->getPageCount($limit) ?? 1;
 
@@ -45,7 +45,7 @@ final class GridApiService
     /**
      * @param array<string> $fields
      */
-    public function get(string $gridName, array $fields = []): PendingResponse
+    public function get(string $gridName, array $fields = []): ResponsePromise
     {
         return $this->api->get("grids/$gridName", ['fields' => $fields]);
     }

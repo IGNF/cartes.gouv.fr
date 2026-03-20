@@ -42,7 +42,7 @@ class StaticController extends AbstractController implements ApiControllerInterf
             unset($query['all']);
 
             if ($all) {
-                return $this->json($this->staticApiService->getAll($datastoreId, $query));
+                return $this->json($this->staticApiService->getAll($datastoreId, $query)->resolve());
             }
 
             $apiResponse = $this->staticApiService->getList($datastoreId, $query);
@@ -59,7 +59,7 @@ class StaticController extends AbstractController implements ApiControllerInterf
     public function delete(string $datastoreId, string $staticFileId): JsonResponse
     {
         try {
-            $this->staticApiService->delete($datastoreId, $staticFileId)->wait();
+            $this->staticApiService->delete($datastoreId, $staticFileId)->await();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {

@@ -3,7 +3,7 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class LayerApiService
@@ -17,7 +17,7 @@ final class LayerApiService
     /**
      * @param array<mixed> $datas
      */
-    public function updateLayer(int $communityId, int $layerId, array $datas): PendingResponse
+    public function updateLayer(int $communityId, int $layerId, array $datas): ResponsePromise
     {
         return $this->api->patch("communities/$communityId/layers/$layerId", $datas);
     }

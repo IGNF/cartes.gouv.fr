@@ -62,7 +62,7 @@ class UserDocumentsController extends AbstractController implements ApiControlle
     public function get(string $documentId): Response
     {
         try {
-            return $this->json($this->userDocumentsApiService->get($documentId)->json());
+            return $this->json($this->userDocumentsApiService->get($documentId)->array());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
@@ -111,7 +111,7 @@ class UserDocumentsController extends AbstractController implements ApiControlle
                 $data['extra'] ?? null,
                 $data['labels'] ?? null,
                 $data['public_url'] ?? null
-            )->json());
+            )->array());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
@@ -143,7 +143,7 @@ class UserDocumentsController extends AbstractController implements ApiControlle
     public function remove(string $documentId): Response
     {
         try {
-            $this->userDocumentsApiService->remove($documentId)->wait();
+            $this->userDocumentsApiService->remove($documentId)->await();
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -165,7 +165,7 @@ class UserDocumentsController extends AbstractController implements ApiControlle
     public function getSharings(string $documentId): Response
     {
         try {
-            return $this->json($this->userDocumentsApiService->getSharings($documentId)->json());
+            return $this->json($this->userDocumentsApiService->getSharings($documentId)->array());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
@@ -177,7 +177,7 @@ class UserDocumentsController extends AbstractController implements ApiControlle
         try {
             $userIds = json_decode($request->getContent(), true);
 
-            return $this->json($this->userDocumentsApiService->addSharing($documentId, $userIds)->json());
+            return $this->json($this->userDocumentsApiService->addSharing($documentId, $userIds)->array());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
@@ -189,7 +189,7 @@ class UserDocumentsController extends AbstractController implements ApiControlle
         try {
             $userIds = explode(',', $request->query->get('users', ''));
 
-            return $this->json($this->userDocumentsApiService->removeSharing($documentId, $userIds)->json());
+            return $this->json($this->userDocumentsApiService->removeSharing($documentId, $userIds)->array());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }

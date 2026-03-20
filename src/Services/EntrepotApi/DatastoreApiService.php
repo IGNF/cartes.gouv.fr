@@ -3,7 +3,8 @@
 namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\ResponsePromise;
 use App\Exception\ApiException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +25,7 @@ final class DatastoreApiService
         return $this->cache->get("datastore-$datastoreId", function (ItemInterface $item) use ($datastoreId) {
             $item->expiresAfter(120);
 
-            return $this->api->get("datastores/$datastoreId")->json();
+            return $this->api->get("datastores/$datastoreId")->array();
         });
     }
 
@@ -85,12 +86,12 @@ final class DatastoreApiService
     /**
      * @param array<string,mixed> $query
      */
-    public function getPermissions(string $datastoreId, array $query = []): array
+    public function getPermissions(string $datastoreId, array $query = []): PaginatedPromise
     {
         return $this->api->requestAll("datastores/$datastoreId/permissions", $query);
     }
 
-    public function getPermission(string $datastoreId, string $permissionId): PendingResponse
+    public function getPermission(string $datastoreId, string $permissionId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/permissions/$permissionId");
     }
@@ -98,7 +99,7 @@ final class DatastoreApiService
     /**
      * @param array<mixed> $body
      */
-    public function addPermission(string $datastoreId, array $body): PendingResponse
+    public function addPermission(string $datastoreId, array $body): ResponsePromise
     {
         return $this->api->post("datastores/$datastoreId/permissions", $body);
     }
@@ -106,12 +107,12 @@ final class DatastoreApiService
     /**
      * @param array<mixed> $body
      */
-    public function updatePermission(string $datastoreId, string $permissionId, array $body): PendingResponse
+    public function updatePermission(string $datastoreId, string $permissionId, array $body): ResponsePromise
     {
         return $this->api->patch("datastores/$datastoreId/permissions/$permissionId", $body);
     }
 
-    public function removePermission(string $datastoreId, string $permissionId): PendingResponse
+    public function removePermission(string $datastoreId, string $permissionId): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/permissions/$permissionId");
     }

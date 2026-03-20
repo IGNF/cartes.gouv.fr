@@ -84,7 +84,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     #[Route('/{datastoreId}/permissions', name: 'get_permissions', methods: ['GET'])]
     public function getPermissions(string $datastoreId, Request $request): JsonResponse
     {
-        $permissions = $this->datastoreApiService->getPermissions($datastoreId, $request->query->all());
+        $permissions = $this->datastoreApiService->getPermissions($datastoreId, $request->query->all())->resolve();
 
         return $this->json($permissions);
     }
@@ -92,7 +92,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     #[Route('/{datastoreId}/permission/{permissionId}', name: 'get_permission', methods: ['GET'])]
     public function getPermission(string $datastoreId, string $permissionId): JsonResponse
     {
-        $permission = $this->datastoreApiService->getPermission($datastoreId, $permissionId)->json();
+        $permission = $this->datastoreApiService->getPermission($datastoreId, $permissionId)->array();
 
         return $this->json($permission);
     }
@@ -111,7 +111,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
         unset($body['beneficiaries']);
 
         // Ajout de la permission
-        $permission = $this->datastoreApiService->addPermission($datastoreId, $body)->json();
+        $permission = $this->datastoreApiService->addPermission($datastoreId, $body)->array();
 
         return $this->json($permission);
     }
@@ -123,7 +123,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     {
         try {
             $body = json_decode(json_encode($dto), true);
-            $permission = $this->datastoreApiService->updatePermission($datastoreId, $permissionId, $body)->json();
+            $permission = $this->datastoreApiService->updatePermission($datastoreId, $permissionId, $body)->array();
 
             return $this->json($permission);
         } catch (ApiException $ex) {
@@ -137,7 +137,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     public function removePermission(string $datastoreId, string $permissionId): JsonResponse
     {
         try {
-            $this->datastoreApiService->removePermission($datastoreId, $permissionId)->wait();
+            $this->datastoreApiService->removePermission($datastoreId, $permissionId)->await();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {

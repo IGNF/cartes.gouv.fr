@@ -3,8 +3,9 @@
 namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
 use App\ApiClient\PaginatedResponse;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use App\Utils;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -24,7 +25,7 @@ final class StoredDataApiService
         $query = Utils::normalize_query($query ?? []);
 
         return $this->api->get("datastores/$datastoreId/stored_data", $query)
-            ->jsonWithHeaders();
+            ->arrayWithHeaders();
     }
 
     /**
@@ -35,7 +36,7 @@ final class StoredDataApiService
         $page = $this->getList($datastoreId, $query);
         $detailed = $this->api->fetchAllDetailsAsync(
             $page->content,
-            fn (array $storedData): PendingResponse => $this->api->get("datastores/$datastoreId/stored_data/{$storedData['_id']}")
+            fn (array $storedData): ResponsePromise => $this->api->get("datastores/$datastoreId/stored_data/{$storedData['_id']}")
         );
 
         return new PaginatedResponse($detailed, $page->headers);
@@ -43,10 +44,8 @@ final class StoredDataApiService
 
     /**
      * @param array<mixed> $query
-     *
-     * @return array<mixed>
      */
-    public function getAll(string $datastoreId, array $query = []): array
+    public function getAll(string $datastoreId, array $query = []): PaginatedPromise
     {
         $query = Utils::normalize_query($query);
 
@@ -60,15 +59,15 @@ final class StoredDataApiService
      */
     public function getAllDetailed(string $datastoreId, array $query = []): array
     {
-        $storedDataList = $this->getAll($datastoreId, $query);
+        $storedDataList = $this->getAll($datastoreId, $query)->resolve();
 
         return $this->api->fetchAllDetailsAsync(
             $storedDataList,
-            fn (array $storedData): PendingResponse => $this->api->get("datastores/$datastoreId/stored_data/{$storedData['_id']}")
+            fn (array $storedData): ResponsePromise => $this->api->get("datastores/$datastoreId/stored_data/{$storedData['_id']}")
         );
     }
 
-    public function get(string $datastoreId, string $storedDataId): PendingResponse
+    public function get(string $datastoreId, string $storedDataId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/stored_data/$storedDataId");
     }
@@ -77,17 +76,17 @@ final class StoredDataApiService
      * @param array<mixed>      $body
      * @param array<mixed>|null $initialStoredData
      */
-    public function modify(string $datastoreId, string $storedDataId, array $body = [], ?array $initialStoredData = null): PendingResponse
+    public function modify(string $datastoreId, string $storedDataId, array $body = [], ?array $initialStoredData = null): ResponsePromise
     {
         if (array_key_exists('extra', $body)) {
-            $initialStoredData ??= $this->get($datastoreId, $storedDataId)->json();
+            $initialStoredData ??= $this->get($datastoreId, $storedDataId)->array();
             $body['extra'] = array_merge($initialStoredData['extra'] ?? [], $body['extra']);
         }
 
         return $this->api->patch("datastores/$datastoreId/stored_data/$storedDataId", $body);
     }
 
-    public function remove(string $datastoreId, string $storedDataId): PendingResponse
+    public function remove(string $datastoreId, string $storedDataId): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/stored_data/$storedDataId");
     }
@@ -95,7 +94,7 @@ final class StoredDataApiService
     /**
      * @param array<mixed> $tags
      */
-    public function addTags(string $datastoreId, string $storedDataId, array $tags): PendingResponse
+    public function addTags(string $datastoreId, string $storedDataId, array $tags): ResponsePromise
     {
         return $this->api->post("datastores/$datastoreId/stored_data/$storedDataId/tags", $tags);
     }
@@ -103,7 +102,7 @@ final class StoredDataApiService
     /**
      * @param array<string> $tags
      */
-    public function removeTags(string $datastoreId, string $storedDataId, array $tags): PendingResponse
+    public function removeTags(string $datastoreId, string $storedDataId, array $tags): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/stored_data/$storedDataId/tags", ['tags' => $tags]);
     }

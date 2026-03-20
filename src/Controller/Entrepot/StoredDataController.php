@@ -57,7 +57,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 return $this->json(
                     $detailed
                     ? $this->storedDataApiService->getAllDetailed($datastoreId, $query)
-                    : $this->storedDataApiService->getAll($datastoreId, $query)
+                    : $this->storedDataApiService->getAll($datastoreId, $query)->resolve()
                 );
             }
 
@@ -78,7 +78,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     public function get(string $datastoreId, string $storedDataId): JsonResponse
     {
         try {
-            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->json();
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
 
             return $this->json($storedData);
         } catch (ApiException $ex) {
@@ -100,10 +100,10 @@ class StoredDataController extends AbstractController implements ApiControllerIn
 
             $procExecList = $this->processingApiService->getAllExecutions($datastoreId, [
                 'input_stored_data' => $storedDataId,
-            ]);
+            ])->resolve();
             foreach ($procExecList as &$procExec) {
                 if (ProcessingStatuses::SUCCESS === $procExec['status']) {
-                    $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id'])->json();
+                    $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id'])->array();
 
                     if (isset($procExec['output']['stored_data']['status']) && StoredDataStatuses::DELETED !== $procExec['output']['stored_data']['status']) {
                         $storedDataList[] = $procExec['output']['stored_data'];
@@ -113,7 +113,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
 
             $offeringsList = $this->configurationApiService->getAllOfferings($datastoreId, [
                 'stored_data' => $storedDataId,
-            ]);
+            ])->resolve();
 
             return $this->json([
                 'stored_data_list' => $storedDataList,
@@ -128,20 +128,20 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     public function getReport(string $datastoreId, string $storedDataId): JsonResponse
     {
         try {
-            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->json();
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
 
             // récupération de détails sur l'upload s'il y en a un qui a servi à créer la stored_data
             if (isset($storedData['tags']['upload_id'])) {
-                $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id'])->json();
+                $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id'])->array();
                 $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id']);
                 $inputUpload['checks'] = [];
-                $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->json();
+                $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
 
                 foreach ($uploadChecks as &$checkType) {
                     foreach ($checkType as &$checkExecution) {
-                        $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->json());
+                        $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->array());
                         try {
-                            $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->json();
+                            $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->array();
                         } catch (ApiException $ex) {
                         }
                         $inputUpload['checks'][] = $checkExecution;
@@ -155,9 +155,9 @@ class StoredDataController extends AbstractController implements ApiControllerIn
 
             // récupération de l'exécution de traitement d'intégration en base de données
             if ($procIntegrationId) {
-                $procIntegrationExec = $this->processingApiService->getExecution($datastoreId, $procIntegrationId)->json();
+                $procIntegrationExec = $this->processingApiService->getExecution($datastoreId, $procIntegrationId)->array();
                 try {
-                    $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId)->json();
+                    $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId)->array();
                 } catch (ApiException $ex) {
                 }
 
@@ -166,9 +166,9 @@ class StoredDataController extends AbstractController implements ApiControllerIn
 
             // récupération de l'exécution de traitement de création de pyramide vecteur
             if ($procPyramidCreationId) {
-                $procPyramidCreationExec = $this->processingApiService->getExecution($datastoreId, $procPyramidCreationId)->json();
+                $procPyramidCreationExec = $this->processingApiService->getExecution($datastoreId, $procPyramidCreationId)->array();
                 try {
-                    $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId)->json();
+                    $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId)->array();
                 } catch (ApiException $ex) {
                 }
                 $procExections[] = $procPyramidCreationExec;

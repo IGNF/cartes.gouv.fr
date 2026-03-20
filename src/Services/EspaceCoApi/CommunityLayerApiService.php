@@ -3,6 +3,7 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class CommunityLayerApiService
@@ -15,10 +16,8 @@ final class CommunityLayerApiService
 
     /**
      * @param array<mixed> $fields
-     *
-     * @return array<mixed>
      */
-    public function getLayers(int $communityId, ?array $fields = []): array
+    public function getLayers(int $communityId, ?array $fields = []): PaginatedPromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 

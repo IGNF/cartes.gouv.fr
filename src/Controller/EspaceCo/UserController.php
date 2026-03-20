@@ -30,7 +30,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function getMe(): JsonResponse
     {
         try {
-            $me = $this->userApiService->getMe()->json();
+            $me = $this->userApiService->getMe()->array();
 
             return $this->json($me);
         } catch (ApiException $ex) {
@@ -43,7 +43,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         #[MapQueryParameter] string $search,
     ): JsonResponse {
         try {
-            $users = $this->userApiService->search($search)->json();
+            $users = $this->userApiService->search($search)->array();
 
             return new JsonResponse($users);
         } catch (ApiException $ex) {

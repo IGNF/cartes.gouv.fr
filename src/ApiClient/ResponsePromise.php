@@ -10,7 +10,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-final class PendingResponse
+final class ResponsePromise
 {
     public function __construct(
         private ResponseInterface $response,
@@ -25,7 +25,7 @@ final class PendingResponse
      *
      * @throws ApiException
      */
-    public function json(): array
+    public function array(): array
     {
         $this->assertSuccess();
 
@@ -53,9 +53,9 @@ final class PendingResponse
      *
      * @throws ApiException
      */
-    public function jsonWithHeaders(): PaginatedResponse
+    public function arrayWithHeaders(): PaginatedResponse
     {
-        return new PaginatedResponse($this->json(), $this->response->getHeaders(false));
+        return new PaginatedResponse($this->array(), $this->response->getHeaders(false));
     }
 
     /**
@@ -65,9 +65,9 @@ final class PendingResponse
      *
      * @throws ApiException
      */
-    public function wait(): array
+    public function await(): array
     {
-        return $this->json();
+        return $this->array();
     }
 
     /**
@@ -75,9 +75,9 @@ final class PendingResponse
      *
      * @param callable(array<mixed>): mixed $transform
      */
-    public function map(callable $transform): mixed
+    public function then(callable $transform): mixed
     {
-        return $transform($this->json());
+        return $transform($this->array());
     }
 
     public function getResponse(): ResponseInterface
@@ -86,11 +86,11 @@ final class PendingResponse
     }
 
     /**
-     * Consomme plusieurs PendingResponses en parallèle (équivalent de Promise.all).
+     * Consomme plusieurs ResponsePromises en parallèle (équivalent de Promise.all).
      * Toutes les réponses doivent provenir de la même instance de HttpClient pour permettre le streaming.
      * Les erreurs sont ignorées si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
      *
-     * @param array<int|string, PendingResponse> $pendingsByKey
+     * @param array<int|string, ResponsePromise> $pendingsByKey
      *
      * @return array<int|string, array<mixed>>
      */
@@ -139,7 +139,7 @@ final class PendingResponse
             }
 
             try {
-                $resolved[$entry['key']] = $entry['pending']->json();
+                $resolved[$entry['key']] = $entry['pending']->array();
             } catch (\Throwable $exception) {
                 if (!$continueOnError) {
                     throw $exception;

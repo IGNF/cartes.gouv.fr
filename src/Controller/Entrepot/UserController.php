@@ -36,7 +36,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         /** @var User */
         $user = $this->getUser();
 
-        $user->updateFromApiInfo($this->userApiService->getMe()->json());
+        $user->updateFromApiInfo($this->userApiService->getMe()->array());
 
         return $this->json($user);
     }
@@ -44,7 +44,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/me/keys', name: 'keys', methods: ['GET'])]
     public function getUserKeys(): JsonResponse
     {
-        $keys = $this->userApiService->getMyKeys();
+        $keys = $this->userApiService->getMyKeys()->resolve();
 
         return $this->json($keys);
     }
@@ -52,7 +52,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/me/keys_with_accesses', name: 'keys_detailed_with_accesses', methods: ['GET'])]
     public function getUserKeysDetailedWithAccesses(): JsonResponse
     {
-        $myKeys = $this->userApiService->getMyKeys();
+        $myKeys = $this->userApiService->getMyKeys()->resolve();
 
         $keys = [];
         foreach ($myKeys as $key) {
@@ -73,7 +73,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/me/permissions', name: 'permissions', methods: ['GET'])]
     public function getUserPermissions(): JsonResponse
     {
-        $permissions = $this->userApiService->getMyPermissions();
+        $permissions = $this->userApiService->getMyPermissions()->resolve();
 
         return $this->json($permissions);
     }
@@ -81,7 +81,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/me/permissions/{permissionId}', name: 'permission', methods: ['GET'])]
     public function getPermission(string $permissionId): JsonResponse
     {
-        $permission = $this->userApiService->getPermission($permissionId)->json();
+        $permission = $this->userApiService->getPermission($permissionId)->array();
 
         return $this->json($permission);
     }
@@ -106,12 +106,12 @@ class UserController extends AbstractController implements ApiControllerInterfac
             }
 
             // Ajout de la cle
-            $key = $this->userApiService->addKey($body)->json();
+            $key = $this->userApiService->addKey($body)->array();
 
             // Ajout des acces
             foreach ($dto->accesses as $access) {
                 $accessBody = (array) $access;
-                $this->userApiService->addAccess($key['_id'], $accessBody)->wait();
+                $this->userApiService->addAccess($key['_id'], $accessBody)->await();
             }
 
             $keyWithAccesses = $this->_getUserKeyWithAccesses($key['_id']);
@@ -132,7 +132,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
                 return !(null === $value || ('' === $value && !in_array($key, ['user_agent', 'referer'])) || in_array($key, $filter));
             }, ARRAY_FILTER_USE_BOTH);
 
-            $key = $this->userApiService->getMyKey($keyId)->json();
+            $key = $this->userApiService->getMyKey($keyId)->array();
 
             // Nom identique, on supprime du body
             if ($dto->name === $key['name']) {
@@ -150,18 +150,18 @@ class UserController extends AbstractController implements ApiControllerInterfac
             $updatedKey = $this->userApiService->updateKey($keyId, $body);
 
             // Suppression de tous les accces pour cette cle
-            $accesses = $this->userApiService->getKeyAccesses($keyId);
+            $accesses = $this->userApiService->getKeyAccesses($keyId)->resolve();
             foreach ($accesses as $access) {
-                $this->userApiService->removeAccess($keyId, $access['_id'])->wait();
+                $this->userApiService->removeAccess($keyId, $access['_id'])->await();
             }
 
             // Ajout des nouveaux access
             foreach ($dto->accesses as $access) {
                 $accessBody = (array) $access;
-                $this->userApiService->addAccess($key['_id'], $accessBody)->wait();
+                $this->userApiService->addAccess($key['_id'], $accessBody)->await();
             }
 
-            $updatedKey['accesses'] = $this->userApiService->getKeyAccesses($key['_id']);
+            $updatedKey['accesses'] = $this->userApiService->getKeyAccesses($key['_id'])->resolve();
 
             return new JsonResponse($updatedKey);
         } catch (ApiException $ex) {
@@ -173,7 +173,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function removeKey(string $keyId): JsonResponse
     {
         try {
-            $this->userApiService->removeKey($keyId)->wait();
+            $this->userApiService->removeKey($keyId)->await();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -193,7 +193,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function leaveCommunity(string $communityId): JsonResponse
     {
         try {
-            $this->userApiService->leaveCommunity($communityId)->wait();
+            $this->userApiService->leaveCommunity($communityId)->await();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -203,8 +203,8 @@ class UserController extends AbstractController implements ApiControllerInterfac
 
     private function _getUserKeyWithAccesses(string $keyId): array
     {
-        $key = $this->userApiService->getMyKey($keyId)->json();
-        $key['accesses'] = $this->userApiService->getKeyAccesses($key['_id']);
+        $key = $this->userApiService->getMyKey($keyId)->array();
+        $key['accesses'] = $this->userApiService->getKeyAccesses($key['_id'])->resolve();
 
         return $key;
     }

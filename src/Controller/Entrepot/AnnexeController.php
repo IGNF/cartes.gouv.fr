@@ -64,7 +64,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             unset($query['all']);
 
             if ($all) {
-                return $this->json($this->annexeApiService->getAll($datastoreId, $mimeType, $path, $labels));
+                return $this->json($this->annexeApiService->getAll($datastoreId, $mimeType, $path, $labels)->resolve());
             }
 
             $apiResponse = $this->annexeApiService->getList($datastoreId, $query);
@@ -90,7 +90,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
                     $data['paths'] ?? null,
                     $data['labels'] ?? null,
                     $data['published'] ?? null
-                )->json()
+                )->array()
             );
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
@@ -176,10 +176,10 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             ];
 
             // On regarde s'il existe deja une vignette
-            $annexes = $this->annexeApiService->getAll($datastoreId, null, null, $labels);
+            $annexes = $this->annexeApiService->getAll($datastoreId, null, null, $labels)->resolve();
 
             if (count($annexes)) {  // Elle existe, on la supprime sinon le path ne change pas
-                $this->annexeApiService->remove($datastoreId, $annexes[0]['_id'])->wait();
+                $this->annexeApiService->remove($datastoreId, $annexes[0]['_id'])->await();
             }
 
             $annexe = $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
@@ -229,7 +229,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function deleteAnnexe(string $datastoreId, string $annexeId): JsonResponse
     {
         try {
-            $this->annexeApiService->remove($datastoreId, $annexeId)->wait();
+            $this->annexeApiService->remove($datastoreId, $annexeId)->await();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {

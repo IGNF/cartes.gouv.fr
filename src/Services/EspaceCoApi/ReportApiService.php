@@ -3,8 +3,9 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
 use App\ApiClient\PaginatedResponse;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class ReportApiService
@@ -23,13 +24,13 @@ final class ReportApiService
         $query['page'] = $page;
         $query['limit'] = $limit;
 
-        return $this->api->get('reports', $query)->jsonWithHeaders();
+        return $this->api->get('reports', $query)->arrayWithHeaders();
     }
 
     /**
      * @param array<mixed> $query
      */
-    public function getAll(array $query = []): array
+    public function getAll(array $query = []): PaginatedPromise
     {
         return $this->api->requestAll('reports', $query);
     }
@@ -37,7 +38,7 @@ final class ReportApiService
     /**
      * @param array<mixed> $body
      */
-    public function add(array $body): PendingResponse
+    public function add(array $body): ResponsePromise
     {
         return $this->api->post('reports', $body);
     }
@@ -45,7 +46,7 @@ final class ReportApiService
     /**
      * @param array<mixed> $fields
      */
-    public function get(string $reportId, $fields = []): PendingResponse
+    public function get(string $reportId, $fields = []): ResponsePromise
     {
         $query = [];
         if (count($fields)) {
@@ -58,7 +59,7 @@ final class ReportApiService
     /**
      * @param array<mixed> $body
      */
-    public function replace(string $reportId, array $body): PendingResponse
+    public function replace(string $reportId, array $body): ResponsePromise
     {
         return $this->api->put("reports/$reportId", $body);
     }
@@ -66,12 +67,12 @@ final class ReportApiService
     /**
      * @param array<mixed> $body
      */
-    public function modify(string $reportId, array $body): PendingResponse
+    public function modify(string $reportId, array $body): ResponsePromise
     {
         return $this->api->patch("reports/$reportId", $body);
     }
 
-    public function delete(string $reportId): PendingResponse
+    public function delete(string $reportId): ResponsePromise
     {
         return $this->api->delete("reports/$reportId");
     }
@@ -79,17 +80,17 @@ final class ReportApiService
     /**
      * @param array<string,string> $files
      */
-    public function addAttachments(string $reportId, array $files): PendingResponse
+    public function addAttachments(string $reportId, array $files): ResponsePromise
     {
         return $this->api->sendFiles('POST', "reports/$reportId/attachments", $files);
     }
 
-    public function deleteAttachment(string $reportId, string $attachmentId): PendingResponse
+    public function deleteAttachment(string $reportId, string $attachmentId): ResponsePromise
     {
         return $this->api->delete("reports/$reportId/attachments/$attachmentId");
     }
 
-    public function getRss(): PendingResponse
+    public function getRss(): ResponsePromise
     {
         return $this->api->get('reports/rss');
     }
@@ -97,7 +98,7 @@ final class ReportApiService
     /**
      * @param array<mixed> $query
      */
-    public function getWfs(array $query = []): PendingResponse
+    public function getWfs(array $query = []): ResponsePromise
     {
         return $this->api->get('reports/wfs', $query);
     }

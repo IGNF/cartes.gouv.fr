@@ -80,15 +80,15 @@ class PyramidRasterController extends ServiceController implements ApiController
             $datastore = $this->datastoreApiService->get($datastoreId);
             $processingId = $this->sandboxService->getProcGeneratePyramidRaster($datastoreId);
 
-            $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $data['wmsv_offering_id'])->json();
-            $wmsvConfiguration = $this->configurationApiService->get($datastoreId, $wmsvOffering['configuration']['_id'])->json();
+            $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $data['wmsv_offering_id'])->array();
+            $wmsvConfiguration = $this->configurationApiService->get($datastoreId, $wmsvOffering['configuration']['_id'])->array();
 
             $vectorDbId = $wmsvConfiguration['type_infos']['used_data'][0]['stored_data'] ?? null;
             if (null === $vectorDbId) {
                 throw new AppException(sprintf('Donnée stockée du type %s référencée par le service WMS-Vecteur non trouvée', StoredDataTypes::VECTOR_DB), Response::HTTP_BAD_REQUEST);
             }
 
-            $vectordb = $this->storedDataApiService->get($datastoreId, $vectorDbId)->json();
+            $vectordb = $this->storedDataApiService->get($datastoreId, $vectorDbId)->array();
 
             $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $wmsvOffering['endpoint']['_id']);
             $endpointUrlBase = $serviceEndpoint['endpoint']['urls'][0]['url'] ?? null;
@@ -142,7 +142,7 @@ class PyramidRasterController extends ServiceController implements ApiController
                 }
             }
 
-            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->json();
+            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
             $pyramidId = $processingExecution['output']['stored_data']['_id'];
 
             $pyramidTags = [
@@ -163,7 +163,7 @@ class PyramidRasterController extends ServiceController implements ApiController
             $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
             $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
 
-            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->wait();
+            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
             $this->storedDataApiService->modify($datastoreId, $pyramidId, [
                 'extra' => [
                     'legend' => [
@@ -171,8 +171,8 @@ class PyramidRasterController extends ServiceController implements ApiController
                         'annexe_id' => $legendAnnexe['_id'],
                     ],
                 ],
-            ])->wait();
-            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->wait();
+            ])->await();
+            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
 
             return new JsonResponse();
         } catch (ApiException|AppException $ex) {
@@ -193,7 +193,7 @@ class PyramidRasterController extends ServiceController implements ApiController
                 throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, join(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
             }
 
-            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->json();
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
 
             // création de requête pour la config
             $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type);
@@ -205,7 +205,7 @@ class PyramidRasterController extends ServiceController implements ApiController
             $finalStyleFileName = sprintf('config_%s_style_%s', $offering['configuration']['_id'], $configType);
             $this->staticApiService->modifyInfo($datastoreId, $typeInfos['styles'][0], [
                 'name' => $finalStyleFileName,
-            ])->wait();
+            ])->await();
 
             return $this->json($offering);
         } catch (ApiException|AppException $ex) {
@@ -228,11 +228,11 @@ class PyramidRasterController extends ServiceController implements ApiController
             }
 
             // récup config et offering existants
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->json();
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
             $oldOffering['configuration'] = $oldConfiguration;
 
-            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->json();
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
 
             // création de requête pour la config
             $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type, $oldConfiguration['_id']);
@@ -306,7 +306,7 @@ class PyramidRasterController extends ServiceController implements ApiController
     {
         $path = "/legend/{$storedDataId}.png";
 
-        $existingAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
+        $existingAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path)->resolve();
         if (count($existingAnnexes) > 0) {
             $existingAnnexe = $existingAnnexes[0];
 
@@ -366,7 +366,7 @@ class PyramidRasterController extends ServiceController implements ApiController
             $existingStatics = $this->staticApiService->getAll($datastoreId, [
                 'type' => StaticFileTypes::ROK4_STYLE,
                 'name' => $finalStyleFileName,
-            ]);
+            ])->resolve();
             if (count($existingStatics) > 0) {
                 $existingStatic = $existingStatics[0];
 

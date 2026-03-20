@@ -35,7 +35,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function get(string $communityId): JsonResponse
     {
         try {
-            $community = $this->communityApiService->get($communityId)->json();
+            $community = $this->communityApiService->get($communityId)->array();
             $community['is_sandbox'] = $this->sandboxService->isSandboxCommunity($community['_id']);
 
             return new JsonResponse($community);
@@ -49,7 +49,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     {
         try {
             $data = json_decode($request->getContent(), true);
-            $community = $this->communityApiService->modifyCommunity($communityId, $data)->json();
+            $community = $this->communityApiService->modifyCommunity($communityId, $data)->array();
             $community['is_sandbox'] = $this->sandboxService->isSandboxCommunity($community['_id']);
 
             return new JsonResponse($community);
@@ -62,7 +62,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function getMembers(string $communityId): JsonResponse
     {
         try {
-            $members = $this->communityApiService->getMembers($communityId);
+            $members = $this->communityApiService->getMembers($communityId)->resolve();
 
             return new JsonResponse($members);
         } catch (ApiException $ex) {
@@ -74,7 +74,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function updateMember(string $communityId, Request $request): JsonResponse
     {
         try {
-            $me = $this->userApiService->getMe()->json();
+            $me = $this->userApiService->getMe()->array();
 
             // Suis-je membre de cette communaute
             $communityMember = array_values(array_filter($me['communities_member'], function ($member) use ($communityId) {
@@ -95,7 +95,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
 
             // Si c'est une creation, on verifie qu'il n'existe pas deja
             if (isset($data['user_creation'])) {
-                $communityMembers = $this->communityApiService->getMembers($communityId);
+                $communityMembers = $this->communityApiService->getMembers($communityId)->resolve();
                 foreach ($communityMembers as $member) {
                     if ($member['user']['_id'] == $userId) {
                         throw new CartesApiException("l'utilisateur $userId est déjà membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
@@ -106,7 +106,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
             // Verification des droits
             $this->_checkRights($rights);
 
-            $this->communityApiService->addOrModifyUserRights($communityId, $userId, ['rights' => $rights])->wait();
+            $this->communityApiService->addOrModifyUserRights($communityId, $userId, ['rights' => $rights])->await();
 
             return new JsonResponse([
                 'user' => $userId,
@@ -121,7 +121,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function removeMember(string $communityId, Request $request): JsonResponse
     {
         try {
-            $me = $this->userApiService->getMe()->json();
+            $me = $this->userApiService->getMe()->array();
 
             // Suis-je membre de cette communaute
             $communityMember = array_values(array_filter($me['communities_member'], function ($member) use ($communityId) {
@@ -139,7 +139,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
                 throw new CartesApiException("Vous n'avez pas les droits pour supprimer un membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
-            $this->communityApiService->removeUserRights($communityId, $userId)->wait();
+            $this->communityApiService->removeUserRights($communityId, $userId)->await();
 
             return new JsonResponse(['user' => $userId]);
         } catch (ApiException $ex) {

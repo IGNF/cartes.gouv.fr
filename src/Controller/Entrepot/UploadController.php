@@ -52,7 +52,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 return $this->json(
                     $detailed
                     ? $this->uploadApiService->getAllDetailed($datastoreId, $query)
-                    : $this->uploadApiService->getAll($datastoreId, $query)
+                    : $this->uploadApiService->getAll($datastoreId, $query)->resolve()
                 );
             }
 
@@ -91,7 +91,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 'type' => UploadTypes::VECTOR,
                 'srs' => $content['data_srid'],
             ];
-            $upload = $this->uploadApiService->add($datastoreId, $uploadData)->json();
+            $upload = $this->uploadApiService->add($datastoreId, $uploadData)->array();
 
             // ajout tags sur la livraison
             $tags = [
@@ -105,7 +105,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 $tags['email_notification'] = (bool) $content['email_notification'];
             }
 
-            $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags)->json();
+            $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags)->array();
 
             // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB
             return $this->json($upload);
@@ -120,7 +120,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
     public function get(string $datastoreId, string $uploadId): JsonResponse
     {
         try {
-            return $this->json($this->uploadApiService->get($datastoreId, $uploadId)->json());
+            return $this->json($this->uploadApiService->get($datastoreId, $uploadId)->array());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
@@ -150,13 +150,13 @@ class UploadController extends AbstractController implements ApiControllerInterf
         #[MapQueryParameter] bool $getOnlyProgress = false,
     ): JsonResponse {
         try {
-            $upload = $this->uploadApiService->get($datastoreId, $uploadId)->json();
+            $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
             $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
 
             if (false === $getOnlyProgress) {
                 $uploadIntegrationWorkflow->advanceIfPossible($datastoreId, $upload, $progress);
 
-                $upload = $this->uploadApiService->get($datastoreId, $uploadId)->json();
+                $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
                 $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
             }
 
@@ -174,12 +174,12 @@ class UploadController extends AbstractController implements ApiControllerInterf
 
             // mise à jour état des étapes de l'intégration uniquement si changement
             if ($existingProgressJson !== $progressJson || $existingStepString !== $stepString) {
-                $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags)->wait();
+                $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags)->await();
             }
 
             // supprime livraison si intégration terminée
             if (false === $getOnlyProgress && $uploadIntegrationWorkflow->isIntegrationCompleted($progress)) {
-                $this->uploadApiService->remove($datastoreId, $uploadId)->wait();
+                $this->uploadApiService->remove($datastoreId, $uploadId)->await();
             }
 
             // retourne l'upload complet + tags de progression pour que le frontend ait les données
@@ -200,7 +200,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
     public function delete(string $datastoreId, string $uploadId): JsonResponse
     {
         try {
-            $this->uploadApiService->remove($datastoreId, $uploadId)->wait();
+            $this->uploadApiService->remove($datastoreId, $uploadId)->await();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -215,16 +215,16 @@ class UploadController extends AbstractController implements ApiControllerInterf
     {
         try {
             // Récupération des détails de l'upload ayant échoué
-            $inputUpload = $this->uploadApiService->get($datastoreId, $uploadId)->json();
+            $inputUpload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
             $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id']);
             $inputUpload['checks'] = [];
-            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->json();
+            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
 
             foreach ($uploadChecks as &$checkType) {
                 foreach ($checkType as &$checkExecution) {
-                    $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->json());
+                    $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->array());
                     try {
-                        $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->json();
+                        $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->array();
                     } catch (ApiException $ex) {
                     }
                     $inputUpload['checks'][] = $checkExecution;

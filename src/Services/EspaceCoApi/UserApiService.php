@@ -3,7 +3,7 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class UserApiService
@@ -14,14 +14,14 @@ final class UserApiService
     ) {
     }
 
-    public function getMe(): PendingResponse
+    public function getMe(): ResponsePromise
     {
         return $this->api->get('users/me');
     }
 
     public function getSharedThemes(): array
     {
-        $result = $this->api->get('users/me', ['fields' => 'shared_themes'])->json();
+        $result = $this->api->get('users/me', ['fields' => 'shared_themes'])->array();
         if (array_key_exists('shared_themes', $result)) {
             return $result['shared_themes'];
         }
@@ -32,12 +32,12 @@ final class UserApiService
     /**
      * @param array<mixed> $query
      */
-    public function getUser(int $userId, array $query = []): PendingResponse
+    public function getUser(int $userId, array $query = []): ResponsePromise
     {
         return $this->api->get("users/$userId", $query);
     }
 
-    public function search(string $search): PendingResponse
+    public function search(string $search): ResponsePromise
     {
         return $this->api->get('users', ['search' => $search, 'fields' => ['id', 'username', 'firstname', 'surname']]);
     }

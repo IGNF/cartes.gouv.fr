@@ -3,7 +3,8 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class EmailPlannerApiService
@@ -14,10 +15,7 @@ final class EmailPlannerApiService
     ) {
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function getAll(int $communityId): array
+    public function getAll(int $communityId): PaginatedPromise
     {
         return $this->api->requestAll("communities/$communityId/emailplanners");
     }
@@ -25,7 +23,7 @@ final class EmailPlannerApiService
     /**
      * @param array<mixed> $data
      */
-    public function add(int $communityId, array $data): PendingResponse
+    public function add(int $communityId, array $data): ResponsePromise
     {
         return $this->api->post("communities/$communityId/emailplanners", $data);
     }
@@ -33,12 +31,12 @@ final class EmailPlannerApiService
     /**
      * @param array<mixed> $data
      */
-    public function update(int $communityId, int $emailPlannerId, array $data): PendingResponse
+    public function update(int $communityId, int $emailPlannerId, array $data): ResponsePromise
     {
         return $this->api->put("communities/$communityId/emailplanners/$emailPlannerId", $data);
     }
 
-    public function remove(int $communityId, int $emailPlannerId): PendingResponse
+    public function remove(int $communityId, int $emailPlannerId): ResponsePromise
     {
         return $this->api->delete("communities/$communityId/emailplanners/$emailPlannerId");
     }

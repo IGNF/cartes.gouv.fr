@@ -122,7 +122,6 @@ export type DatasheetDetailed = Datasheet & {
     pyramid_vector_list: DatasheetStoredDataItem<PyramidVector>[] | undefined;
     pyramid_raster_list: DatasheetStoredDataItem<PyramidRaster>[] | undefined;
     upload_list: DatasheetUploadItem[] | undefined;
-    service_list: Service[] | undefined;
 };
 
 /** stored_data (donnée stockée) */

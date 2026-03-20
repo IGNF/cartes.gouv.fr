@@ -74,7 +74,7 @@ class CapabilitiesService
         // On regarde s'il existe deja un fichier avec ce path
         $path = join('/', [$endpoint['technical_name'], 'capabilities.xml']);
 
-        $annexes = $this->annexeApiService->getAll($datastoreId, null, "/$path");
+        $annexes = $this->annexeApiService->getAll($datastoreId, null, "/$path")->resolve();
         $annexe = null;
         if (count($annexes)) {  // Il existe, on le met a jour
             $annexe = $this->annexeApiService->replaceFile($datastoreId, $annexes[0]['_id'], $filePath);
@@ -94,7 +94,7 @@ class CapabilitiesService
 
     private function filterWFSCapabilities(string $datastoreId, mixed $endpoint, string $offeringUrl): string
     {
-        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']]);
+        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']])->resolve();
 
         // Les couches liees aux offerings
         $layerNames = [];
@@ -141,7 +141,7 @@ class CapabilitiesService
 
     private function filterWMSCapabilities(string $datastoreId, mixed $endpoint, string $url): string
     {
-        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']]);
+        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']])->resolve();
 
         // Les couches liees aux offerings
         $layerNames = [];
@@ -181,7 +181,7 @@ class CapabilitiesService
 
     private function filterWMTSCapabilities(string $datastoreId, mixed $endpoint, string $url): string
     {
-        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']]);
+        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']])->resolve();
 
         $layerNames = [];
         foreach ($allOfferings as $offering) {

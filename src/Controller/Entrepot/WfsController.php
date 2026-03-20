@@ -70,8 +70,8 @@ class WfsController extends ServiceController implements ApiControllerInterface
     ): JsonResponse {
         try {
             // récup config et offering existants
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->json();
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
             $oldOffering['configuration'] = $oldConfiguration;
 
             // création de requête pour la config

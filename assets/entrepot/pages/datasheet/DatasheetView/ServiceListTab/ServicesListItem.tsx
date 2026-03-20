@@ -11,7 +11,7 @@ import { useToggle } from "usehooks-ts";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
-import { DatasheetDetailed, OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
 import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
 import Wait from "../../../../../components/Utils/Wait";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
@@ -47,13 +47,11 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
             return api.service.unpublishService(datastoreId, service._id);
         },
         onSuccess() {
-            queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (oldDatasheet: DatasheetDetailed): DatasheetDetailed => {
-                if (!oldDatasheet) return oldDatasheet;
-
-                return {
-                    ...oldDatasheet,
-                    service_list: oldDatasheet.service_list?.filter((s) => s._id !== service._id),
-                };
+            queryClient.setQueryData(RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName), (servicesList: Service[] | undefined): Service[] => {
+                if (!servicesList) {
+                    return [];
+                }
+                return servicesList.filter((s) => s._id !== service._id);
             });
 
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });

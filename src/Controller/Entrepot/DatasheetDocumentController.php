@@ -189,7 +189,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             if (null !== $document) {
                 switch ($document['type']) {
                     case 'file':
-                        $this->annexeApiService->remove($datastoreId, $document['id'])->wait();
+                        $this->annexeApiService->remove($datastoreId, $document['id'])->await();
                         break;
                 }
 
@@ -217,7 +217,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     {
         $labels = ["datasheet_name=$datasheetName", 'type=document-list'];
 
-        $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, $labels);
+        $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, $labels)->resolve();
 
         // retourne l'annexe s'il existe
         if (count($annexeList) > 0) {

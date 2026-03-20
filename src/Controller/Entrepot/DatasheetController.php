@@ -46,10 +46,22 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getDatasheetList(string $datastoreId): JsonResponse
     {
-        $uploads = $this->uploadApiService->getAll($datastoreId, [
+        $pendingUploads = $this->uploadApiService->getAll($datastoreId, [
             'sort' => 'last_event,desc',
             'fields' => 'tags',
         ]);
+        $pendingStoredData = $this->storedDataApiService->getAll($datastoreId, [
+            'sort' => 'last_event,desc',
+            'fields' => 'tags',
+        ]);
+        $pendingMetadata = $this->metadataApiService->getAll($datastoreId);
+        $pendingConfigurations = $this->configurationApiService->getAll($datastoreId, [
+            'status' => ConfigurationStatuses::PUBLISHED,
+            'fields' => 'tags',
+        ]);
+        $pendingAnnexes = $this->annexeApiService->getAll($datastoreId, null, null, ['type=thumbnail']);
+
+        $uploads = $pendingUploads->resolve();
 
         $uploadDatasheetNames = array_map(function ($upload) {
             if (isset($upload['tags'][CommonTags::DATASHEET_NAME])) {
@@ -57,10 +69,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }, $uploads);
 
-        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
-            'sort' => 'last_event,desc',
-            'fields' => 'tags',
-        ]);
+        $storedDataList = $pendingStoredData->resolve();
 
         $storedDataDatasheetNames = array_map(function ($storedData) {
             if (isset($storedData['tags'][CommonTags::DATASHEET_NAME])) {
@@ -68,7 +77,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }, $storedDataList);
 
-        $metadataList = $this->metadataApiService->getAll($datastoreId);
+        $metadataList = $pendingMetadata->resolve();
 
         $metadataDatasheetNames = array_map(function ($apiMetadata) {
             if (isset($apiMetadata['tags'][CommonTags::DATASHEET_NAME])) {
@@ -84,13 +93,8 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         $datastore = $this->datastoreApiService->get($datastoreId);
 
-        // récupération des configurations publiées et des annexes de type vignette en amont pour le nombre de services publiés et la vignette de chaque fiche de données
-        $configurations = $this->configurationApiService->getAll($datastore['_id'], [
-            'status' => ConfigurationStatuses::PUBLISHED,
-            'fields' => 'tags',
-        ]);
-
-        $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ['type=thumbnail']);
+        $configurations = $pendingConfigurations->resolve();
+        $annexes = $pendingAnnexes->resolve();
 
         foreach ($uniqueDatasheetNames as $datasheetName) {
             $datasheetList[] = $this->getBasicInfo($datastore, $datasheetName, $configurations, $annexes);
@@ -103,19 +107,33 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
         // recherche d'entités API qui représente une fiche de données : upload, stored_data, metadata
-        $uploadList = $this->uploadApiService->getAll($datastoreId, [
+        $pendingUploadList = $this->uploadApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
             'fields' => 'name,description,type,open,status,srs,contact,size,last_event,tags,creation,bbox',
         ]);
 
-        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
+        $pendingStoredDataList = $this->storedDataApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
             'fields' => 'name,description,type,open,status,srs,contact,edition,size,last_event,tags,creation,bbox,public_activity',
         ]);
+
+        $pendingConfigList = $this->configurationApiService->getAll($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+            'status' => ConfigurationStatuses::PUBLISHED,
+        ]);
+
+        $pendingAnnexesList = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
+
+        $uploadList = $pendingUploadList->resolve();
+        $storedDataList = $pendingStoredDataList->resolve();
+        $configurations = $pendingConfigList->resolve();
+        $annexes = $pendingAnnexesList->resolve();
 
         $vectorDbList = array_filter($storedDataList, function ($storedData) {
             return StoredDataTypes::VECTOR_DB === $storedData['type'];
@@ -139,7 +157,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
                 'tags' => [
                     CommonTags::DATASHEET_NAME => $datasheetName,
                 ],
-            ]);
+            ])->resolve();
 
             if (0 === count($metadataList)) {
                 throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
@@ -147,10 +165,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         }
 
         $datastore = $this->datastoreApiService->get($datastoreId);
-        $datasheet = $this->getBasicInfo($datastore, $datasheetName);
-
-        // Recherche de services (configuration et offering)
-        $services = $this->_getServices($datastoreId, $storedDataList);
+        $datasheet = $this->getBasicInfo($datastore, $datasheetName, $configurations, $annexes);
 
         return $this->json([
             ...$datasheet,
@@ -158,7 +173,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'pyramid_vector_list' => $pyramidVectorList,
             'pyramid_raster_list' => $pyramidRasterList,
             'upload_list' => $uploadList,
-            'service_list' => $services,
         ]);
     }
 
@@ -170,9 +184,32 @@ class DatasheetController extends AbstractController implements ApiControllerInt
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
             'fields' => 'status', // on n'a besoin que de l'_id qui est toujours présent, mais on ne peut pas demander "_id" via "fields", donc "status" parce que c'est un champ léger et qui est toujours présent
-        ]);
+        ])->resolve();
 
-        $services = $this->_getServices($datastoreId, $storedDataList);
+        if (0 === count($storedDataList)) {
+            return $this->json([]);
+        }
+
+        // Déclenche toutes les requêtes de la page 1 en simultané (non bloquant)
+        $pendingAllByStoredData = [];
+        foreach ($storedDataList as $storedData) {
+            $pendingAllByStoredData[] = $this->configurationApiService->getAllOfferingsDetailed($datastoreId, [
+                'stored_data' => $storedData['_id'],
+            ]);
+        }
+
+        // Résolution — les réponses de la page 1 sont déjà en cours
+        /** @var array<mixed> $offeringsById clé : offeringId, valeur : offering */
+        $offeringsById = [];
+        foreach ($pendingAllByStoredData as $pendingAll) {
+            foreach ($pendingAll->resolve() as $offering) {
+                $offeringsById[$offering['_id']] = $offering;
+            }
+        }
+
+        $offeringsById = $this->cartesServiceApiService->getServicesFromOfferings($datastoreId, $offeringsById, false);
+
+        $services = array_values($offeringsById);
 
         return $this->json($services);
     }
@@ -199,7 +236,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
                     CommonTags::DATASHEET_NAME => $datasheetName,
                 ],
                 'status' => ConfigurationStatuses::PUBLISHED,
-            ]);
+            ])->resolve();
         }
         $nbPublications = count($datasheetConfigurations);
 
@@ -211,7 +248,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             });
             $datasheetAnnexes = array_values($datasheetAnnexes);
         } else {
-            $datasheetAnnexes = $this->annexeApiService->getAll($datastore['_id'], null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
+            $datasheetAnnexes = $this->annexeApiService->getAll($datastore['_id'], null, null, ["datasheet_name=$datasheetName", 'type=thumbnail'])->resolve();
         }
 
         $thumbnail = null;
@@ -225,35 +262,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'nb_publications' => $nbPublications,
             'thumbnail' => $thumbnail,
         ];
-    }
-
-    /**
-     * Récupère les services (offerings) liés aux stored_data de la fiche de données.
-     *
-     * @param mixed[] $storedDataList
-     */
-    private function _getServices(string $datastoreId, array $storedDataList): array
-    {
-        if (0 === count($storedDataList)) {
-            return [];
-        }
-
-        /** @var array<mixed> $offeringsById clé : offeringId, valeur : offering */
-        $offeringsById = [];
-
-        foreach ($storedDataList as $storedData) {
-            $tmpOfferings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId, [
-                'stored_data' => $storedData['_id'],
-            ]);
-
-            foreach ($tmpOfferings as $offering) {
-                $offeringsById[$offering['_id']] = $offering;
-            }
-        }
-
-        $offeringsById = $this->cartesServiceApiService->getServicesFromOfferings($datastoreId, $offeringsById, false);
-
-        return array_values($offeringsById);
     }
 
     #[Route('/{datasheetName}', name: 'delete', methods: ['DELETE'])]
@@ -272,7 +280,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             // suppr des uploads
             if (isset($datasheet['upload_list'])) {
                 foreach ($datasheet['upload_list'] as $upload) {
-                    $this->uploadApiService->remove($datastoreId, $upload['_id'])->wait();
+                    $this->uploadApiService->remove($datastoreId, $upload['_id'])->await();
                 }
             }
 
@@ -300,23 +308,23 @@ class DatasheetController extends AbstractController implements ApiControllerInt
                 'tags' => [
                     CommonTags::DATASHEET_NAME => $datasheetName,
                 ],
-            ]);
+            ])->resolve();
 
             if (count($metadataList) > 0) {
                 $metadata = $metadataList[0];
 
                 foreach ($metadata['endpoints'] as $metadataEndpoint) {
-                    $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $metadataEndpoint['_id'])->wait();
+                    $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $metadataEndpoint['_id'])->await();
                 }
 
-                $this->metadataApiService->delete($datastoreId, $metadata['_id'])->wait();
+                $this->metadataApiService->delete($datastoreId, $metadata['_id'])->await();
             }
 
             // TODO : autres données à supprimer
             // Suppression des annexes : vignette, documents associés à la fiche de données etc
-            $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"]);
+            $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"])->resolve();
             foreach ($annexes as $annexe) {
-                $this->annexeApiService->remove($datastoreId, $annexe['_id'])->wait();
+                $this->annexeApiService->remove($datastoreId, $annexe['_id'])->await();
             }
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);

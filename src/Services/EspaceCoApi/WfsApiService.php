@@ -3,7 +3,7 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class WfsApiService
@@ -17,7 +17,7 @@ final class WfsApiService
     /**
      * @param array<mixed> $query
      */
-    public function wfsRequest(array $query = [], ?string $databaseName = null): PendingResponse
+    public function wfsRequest(array $query = [], ?string $databaseName = null): ResponsePromise
     {
         $url = $databaseName ? "wfs/$databaseName" : 'wfs';
 

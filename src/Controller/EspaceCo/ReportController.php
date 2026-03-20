@@ -58,7 +58,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
         try {
             $body = json_decode($request->getContent(), true);
 
-            $report = $this->reportApiService->add($body)->json();
+            $report = $this->reportApiService->add($body)->array();
 
             return $this->json($report);
         } catch (ApiException $ex) {
@@ -70,7 +70,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
     public function get(string $reportId): JsonResponse
     {
         try {
-            return $this->json($this->reportApiService->get($reportId)->json());
+            return $this->json($this->reportApiService->get($reportId)->array());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -82,7 +82,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
         try {
             $body = json_decode($request->getContent(), true);
 
-            $report = $this->reportApiService->replace($reportId, $body)->json();
+            $report = $this->reportApiService->replace($reportId, $body)->array();
 
             return $this->json($report);
         } catch (ApiException $ex) {
@@ -96,7 +96,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
         try {
             $body = json_decode($request->getContent(), true);
 
-            $report = $this->reportApiService->modify($reportId, $body)->json();
+            $report = $this->reportApiService->modify($reportId, $body)->array();
 
             return $this->json($report);
         } catch (ApiException $ex) {
@@ -108,7 +108,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
     public function delete(string $reportId): Response
     {
         try {
-            $report = $this->reportApiService->delete($reportId)->json();
+            $report = $this->reportApiService->delete($reportId)->array();
 
             return $this->json($report, Response::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -159,7 +159,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
                 $files[$fieldName] = $filepath;
             }
 
-            return $this->json($this->reportApiService->addAttachments($reportId, $files)->json());
+            return $this->json($this->reportApiService->addAttachments($reportId, $files)->array());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -169,7 +169,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
     public function deleteAttachment(string $reportId, string $attachmentId): JsonResponse
     {
         try {
-            $report = $this->reportApiService->deleteAttachment($reportId, $attachmentId)->json();
+            $report = $this->reportApiService->deleteAttachment($reportId, $attachmentId)->array();
 
             return $this->json($report, Response::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {

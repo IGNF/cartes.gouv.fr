@@ -3,7 +3,8 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class PermissionApiService
@@ -18,7 +19,7 @@ final class PermissionApiService
      * @param array<string> $levels
      * @param array<string> $fields
      */
-    public function getAllByCommunity(int $communityId, array $levels = [], $fields = []): array
+    public function getAllByCommunity(int $communityId, array $levels = [], $fields = []): PaginatedPromise
     {
         $query = ['community' => $communityId];
         if (count($levels)) {
@@ -36,7 +37,7 @@ final class PermissionApiService
      *
      * @param array<mixed> $datas
      */
-    public function add(array $datas): PendingResponse
+    public function add(array $datas): ResponsePromise
     {
         return $this->api->post('permissions', $datas);
     }
@@ -46,7 +47,7 @@ final class PermissionApiService
      *
      * @param array<mixed> $datas
      */
-    public function update(int $permissionId, array $datas): PendingResponse
+    public function update(int $permissionId, array $datas): ResponsePromise
     {
         return $this->api->patch("permissions/$permissionId", $datas);
     }
@@ -54,7 +55,7 @@ final class PermissionApiService
     /**
      * Suppression d'une permission.
      */
-    public function remove(int $permissionId): PendingResponse
+    public function remove(int $permissionId): ResponsePromise
     {
         return $this->api->delete("permissions/$permissionId");
     }

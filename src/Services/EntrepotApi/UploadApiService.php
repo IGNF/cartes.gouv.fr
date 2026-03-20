@@ -3,8 +3,9 @@
 namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
 use App\ApiClient\PaginatedResponse;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\ApiException;
@@ -33,7 +34,7 @@ final class UploadApiService
     {
         $query = Utils::normalize_query($query);
 
-        return $this->api->get("datastores/$datastoreId/uploads", $query)->jsonWithHeaders();
+        return $this->api->get("datastores/$datastoreId/uploads", $query)->arrayWithHeaders();
     }
 
     /**
@@ -44,7 +45,7 @@ final class UploadApiService
         $page = $this->getList($datastoreId, $query);
         $detailed = $this->api->fetchAllDetailsAsync(
             $page->content,
-            fn (array $upload): PendingResponse => $this->get($datastoreId, $upload['_id'])
+            fn (array $upload): ResponsePromise => $this->get($datastoreId, $upload['_id'])
         );
 
         return new PaginatedResponse($detailed, $page->headers);
@@ -53,7 +54,7 @@ final class UploadApiService
     /**
      * @param array<mixed> $query
      */
-    public function getAll(string $datastoreId, array $query = []): array
+    public function getAll(string $datastoreId, array $query = []): PaginatedPromise
     {
         $query = Utils::normalize_query($query);
 
@@ -65,15 +66,15 @@ final class UploadApiService
      */
     public function getAllDetailed(string $datastoreId, array $query = []): array
     {
-        $uploads = $this->getAll($datastoreId, $query);
+        $uploads = $this->getAll($datastoreId, $query)->resolve();
 
         return $this->api->fetchAllDetailsAsync(
             $uploads,
-            fn (array $upload): PendingResponse => $this->get($datastoreId, $upload['_id'])
+            fn (array $upload): ResponsePromise => $this->get($datastoreId, $upload['_id'])
         );
     }
 
-    public function get(string $datastoreId, string $uploadId): PendingResponse
+    public function get(string $datastoreId, string $uploadId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/uploads/$uploadId");
     }
@@ -83,7 +84,7 @@ final class UploadApiService
      *
      * @param array<mixed> $uploadData
      */
-    public function add(string $datastoreId, array $uploadData): PendingResponse
+    public function add(string $datastoreId, array $uploadData): ResponsePromise
     {
         return $this->api->post("datastores/$datastoreId/uploads", [
             'name' => $uploadData['name'],
@@ -216,7 +217,7 @@ final class UploadApiService
         // envoi du fichier téléversé par l'utilisateur
         $this->api->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/data", $pathname, [], [
             'path' => "data/{$relativePath}",
-        ])->wait();
+        ])->await();
 
         // calcul et envoi du md5 du fichier téléversé par l'utilisateur
         $md5 = \md5_file($pathname);
@@ -230,7 +231,7 @@ final class UploadApiService
             throw new AppException('Écriture du fichier md5 échouée');
         }
 
-        $this->api->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/md5", $md5filePath)->wait();
+        $this->api->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/md5", $md5filePath)->await();
 
         $this->filesystem->remove($pathname);
         $this->filesystem->remove($md5filePath);
@@ -241,7 +242,7 @@ final class UploadApiService
      */
     public function getFileTree(string $datastoreId, string $uploadId): array
     {
-        $upload = $this->get($datastoreId, $uploadId)->json();
+        $upload = $this->get($datastoreId, $uploadId)->array();
         if (UploadStatuses::DELETED == $upload['status'] || UploadStatuses::OPEN == $upload['status']) {
             if (array_key_exists(UploadTags::FILE_TREE, $upload['tags'])) {
                 return json_decode($upload['tags'][UploadTags::FILE_TREE], true);
@@ -250,7 +251,7 @@ final class UploadApiService
             return [];
         }
 
-        return $this->api->get("datastores/$datastoreId/uploads/$uploadId/tree")->json();
+        return $this->api->get("datastores/$datastoreId/uploads/$uploadId/tree")->array();
     }
 
     /**
@@ -258,8 +259,8 @@ final class UploadApiService
      */
     public function open(string $datastoreId, string $uploadId): void
     {
-        if (UploadStatuses::OPEN != $this->get($datastoreId, $uploadId)->json()['status']) {
-            $this->api->post("datastores/$datastoreId/uploads/$uploadId/open")->wait();
+        if (UploadStatuses::OPEN != $this->get($datastoreId, $uploadId)->array()['status']) {
+            $this->api->post("datastores/$datastoreId/uploads/$uploadId/open")->await();
         }
     }
 
@@ -268,15 +269,15 @@ final class UploadApiService
      */
     public function close(string $datastoreId, string $uploadId): void
     {
-        if (UploadStatuses::CLOSED != $this->get($datastoreId, $uploadId)->json()['status']) {
-            $this->api->post("datastores/$datastoreId/uploads/$uploadId/close")->wait();
+        if (UploadStatuses::CLOSED != $this->get($datastoreId, $uploadId)->array()['status']) {
+            $this->api->post("datastores/$datastoreId/uploads/$uploadId/close")->await();
         }
     }
 
     /**
      * @param array<mixed> $tags
      */
-    public function addTags(string $datastoreId, string $uploadId, array $tags): PendingResponse
+    public function addTags(string $datastoreId, string $uploadId, array $tags): ResponsePromise
     {
         return $this->api->post("datastores/$datastoreId/uploads/$uploadId/tags", $tags);
     }
@@ -284,19 +285,19 @@ final class UploadApiService
     /**
      * @param array<string> $tags
      */
-    public function removeTags(string $datastoreId, string $uploadId, array $tags): PendingResponse
+    public function removeTags(string $datastoreId, string $uploadId, array $tags): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/uploads/$uploadId/tags", ['tags' => join(',', $tags)]);
     }
 
-    public function remove(string $datastoreId, string $uploadId): PendingResponse
+    public function remove(string $datastoreId, string $uploadId): ResponsePromise
     {
         // sauvegarde dans les tags de l'arborescence de fichiers de la livraison avant de la supprimer, parce qu'une fois supprimée elle ne sera plus récupérable
         try {
             $fileTree = $this->getFileTree($datastoreId, $uploadId);
             $this->addTags($datastoreId, $uploadId, [
                 UploadTags::FILE_TREE => json_encode($fileTree),
-            ])->wait();
+            ])->await();
         } catch (ApiException $ex) {
             // ne rien faire, tant pis si la récupération de l'arborescence a échoué
         }
@@ -304,32 +305,32 @@ final class UploadApiService
         return $this->api->delete("datastores/$datastoreId/uploads/$uploadId");
     }
 
-    public function getEvents(string $datastoreId, string $uploadId): PendingResponse
+    public function getEvents(string $datastoreId, string $uploadId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/uploads/$uploadId/events");
     }
 
-    public function getCheckExecutions(string $datastoreId, string $uploadId): PendingResponse
+    public function getCheckExecutions(string $datastoreId, string $uploadId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/uploads/$uploadId/checks");
     }
 
-    public function getChecks(string $datastoreId): PendingResponse
+    public function getChecks(string $datastoreId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/checks");
     }
 
-    public function getCheck(string $datastoreId, string $checkId): PendingResponse
+    public function getCheck(string $datastoreId, string $checkId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/checks/$checkId");
     }
 
-    public function getCheckExecution(string $datastoreId, string $checkExecutionId): PendingResponse
+    public function getCheckExecution(string $datastoreId, string $checkExecutionId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/checks/executions/$checkExecutionId");
     }
 
-    public function getCheckExecutionLogs(string $datastoreId, string $checkExecutionId): PendingResponse
+    public function getCheckExecutionLogs(string $datastoreId, string $checkExecutionId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/checks/executions/$checkExecutionId/logs");
     }

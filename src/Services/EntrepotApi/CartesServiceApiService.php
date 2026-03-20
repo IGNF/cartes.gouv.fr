@@ -3,6 +3,7 @@
 namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
+use App\ApiClient\ResponsePromise;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationMetadataTypes;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
@@ -69,17 +70,17 @@ class CartesServiceApiService
     public function getService(string $datastoreId, string $offeringId, bool $migrateStyles = true, ?array $offering = null, ?array $configuration = null): array
     {
         if (null === $offering) {
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
         }
 
         if (null === $configuration) {
-            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->json();
+            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
         }
         $offering['configuration'] = $configuration;
 
         // traitement spécial pour WMTS-TMS
         if (OfferingTypes::WMTSTMS === $offering['type']) {
-            $storedData = $this->storedDataApiService->get($datastoreId, $offering['configuration']['type_infos']['used_data'][0]['stored_data'])->json();
+            $storedData = $this->storedDataApiService->get($datastoreId, $offering['configuration']['type_infos']['used_data'][0]['stored_data'])->array();
             $offering['configuration']['pyramid'] = $storedData;
 
             // TMS
@@ -123,7 +124,7 @@ class CartesServiceApiService
             return [];
         }
 
-        /** @var array<string,\App\ApiClient\PendingResponse> $configurationPendingByOfferingId */
+        /** @var array<string,ResponsePromise> $configurationPendingByOfferingId */
         $configurationPendingByOfferingId = [];
         foreach ($offeringsById as $offeringId => $offering) {
             if (!isset($offering['configuration']['_id']) || !is_string($offering['configuration']['_id'])) {
@@ -199,7 +200,7 @@ class CartesServiceApiService
 
     public function unpublish(string $datastoreId, string $offeringId): void
     {
-        $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
+        $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
 
         switch ($offering['type']) {
             case OfferingTypes::WFS:
@@ -219,7 +220,7 @@ class CartesServiceApiService
     private function unpublishOfferingAndConfiguration(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
         // suppression de l'offering
-        $this->configurationApiService->removeOffering($datastoreId, $offering['_id'])->wait();
+        $this->configurationApiService->removeOffering($datastoreId, $offering['_id'])->await();
         $configurationId = $offering['configuration']['_id'];
         $configuration = null;
 
@@ -227,7 +228,7 @@ class CartesServiceApiService
         // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
         for ($attempt = 1; $attempt <= self::UNPUBLISH_MAX_ATTEMPTS; ++$attempt) {
             sleep(self::UNPUBLISH_RETRY_DELAY_SECONDS);
-            $configuration = $this->configurationApiService->get($datastoreId, $configurationId)->json();
+            $configuration = $this->configurationApiService->get($datastoreId, $configurationId)->array();
             if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
                 break;
             }
@@ -245,7 +246,7 @@ class CartesServiceApiService
             throw new CartesApiException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_REQUEST_TIMEOUT, ['offering_id' => $offering['_id'], 'configuration_id' => $configurationId, 'timeout' => $timeoutSeconds]);
         }
 
-        $this->configurationApiService->remove($datastoreId, $configurationId)->wait();
+        $this->configurationApiService->remove($datastoreId, $configurationId)->await();
 
         if (true === $removeStyleFiles) {
             $this->removeStyleFiles($datastoreId, $configuration);
@@ -265,7 +266,7 @@ class CartesServiceApiService
         foreach ($styles as $style) {
             if (array_key_exists('layers', $style)) {
                 foreach ($style['layers'] as $layer) {
-                    $this->annexeApiService->remove($datastoreId, $layer['annexe_id'])->wait();
+                    $this->annexeApiService->remove($datastoreId, $layer['annexe_id'])->await();
                 }
             }
         }
@@ -274,14 +275,14 @@ class CartesServiceApiService
         $relations = $configuration['type_infos']['used_data'][0]['relations'] ?? [];
         foreach ($relations as $relation) {
             if (isset($relation['style'])) {
-                $this->staticApiService->delete($datastoreId, $relation['style'])->wait();
+                $this->staticApiService->delete($datastoreId, $relation['style'])->await();
             }
         }
 
         // WMS-RASTER & WMTS
         $typeInfoStyles = $configuration['type_infos']['styles'] ?? [];
         foreach ($typeInfoStyles as $styleStaticId) {
-            $this->staticApiService->delete($datastoreId, $styleStaticId)->wait();
+            $this->staticApiService->delete($datastoreId, $styleStaticId)->await();
         }
     }
 
@@ -316,34 +317,34 @@ class CartesServiceApiService
             $configTags[CommonTags::DATASHEET_NAME] = $datasheetName;
 
             // Mise à jour de la configuration
-            $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody)->json();
-            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->json();
+            $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody)->array();
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->array();
 
             // On recrée l'offering si changement d'endpoint, sinon demande la synchronisation
             if ($oldOffering['open'] !== $endpoint['open']) {
-                $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id'])->wait();
+                $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id'])->await();
 
-                $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open'])->json();
+                $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open'])->array();
             } else {
-                $offering = $this->configurationApiService->syncOffering($datastoreId, $oldOffering['_id'])->json();
+                $offering = $this->configurationApiService->syncOffering($datastoreId, $oldOffering['_id'])->array();
             }
         } else {
             // Ajout d'un nouveau service
-            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->json();
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
 
             $configTags[CommonTags::DATASHEET_NAME] = $datasheetName;
 
             // Ajout de la configuration
-            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody)->json();
-            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->json();
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody)->array();
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->array();
 
             // Création d'une offering
             try {
-                $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open'])->json();
+                $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open'])->array();
             } catch (\Throwable $th) {
                 // si la création de l'offering plante, on défait la création de la config
-                $this->configurationApiService->remove($datastoreId, $configuration['_id'])->wait();
+                $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
                 throw $th;
             }
         }
@@ -398,14 +399,14 @@ class CartesServiceApiService
 
         foreach ($siblingServices as $siblingServiceId) {
             try {
-                $offering = $this->configurationApiService->getOffering($datastoreId, $siblingServiceId)->json();
-                $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->json();
+                $offering = $this->configurationApiService->getOffering($datastoreId, $siblingServiceId)->array();
+                $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
 
                 // Mise à jour des tags seulement si nécessaire
                 if ($configTheme !== ($configuration['tags'][CommonTags::CONFIG_THEME] ?? '')) {
                     $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
                         CommonTags::CONFIG_THEME => $configTheme,
-                    ])->json();
+                    ])->array();
                 }
 
                 $configMetadata = $this->getNewConfigMetadata($dto->identifier, $configuration['metadata'] ?? []);
@@ -434,8 +435,8 @@ class CartesServiceApiService
                         ];
                     }
 
-                    $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody)->json();
-                    $offering = $this->configurationApiService->syncOffering($datastoreId, $offering['_id'])->json();
+                    $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody)->array();
+                    $offering = $this->configurationApiService->syncOffering($datastoreId, $offering['_id'])->array();
 
                     $endpoint = $this->getEndpointByShareType($datastoreId, $configuration['type'], 'all_public');
                     if (!in_array($endpoint['_id'], array_map(fn (array $endpoint) => $endpoint['endpoint']['_id'], $capabilitiesUpdateArgs))) {
@@ -534,7 +535,7 @@ class CartesServiceApiService
     private function removeExistingConfigPermission(string $datastoreId, array $offering): void
     {
         $configCommunityId = $this->params->get('config')['community_id'];
-        $permissions = $this->datastoreApiService->getPermissions($datastoreId);
+        $permissions = $this->datastoreApiService->getPermissions($datastoreId)->resolve();
 
         $existingPermission = array_filter($permissions, function ($permission) use ($offering, $configCommunityId) {
             return isset($permission['offerings'])
@@ -545,7 +546,7 @@ class CartesServiceApiService
 
         if (!empty($existingPermission)) {
             $permissionId = reset($existingPermission)['_id'];
-            $this->datastoreApiService->removePermission($datastoreId, $permissionId)->wait();
+            $this->datastoreApiService->removePermission($datastoreId, $permissionId)->await();
         }
     }
 
@@ -589,7 +590,7 @@ class CartesServiceApiService
      */
     private function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering): void
     {
-        $permissions = $this->datastoreApiService->getPermissions($producerDatastoreId);
+        $permissions = $this->datastoreApiService->getPermissions($producerDatastoreId)->resolve();
         $offeringId = $offering['_id'];
 
         $offeringPermissions = array_filter($permissions, function ($permission) use ($offeringId) {
@@ -617,7 +618,7 @@ class CartesServiceApiService
             'communities' => [$consumerCommunityId],
         ];
 
-        $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody)->wait();
+        $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody)->await();
     }
 
     /**

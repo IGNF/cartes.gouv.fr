@@ -7,7 +7,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 final class KeycloakTokenManager
 {
-    private const SESSION_KEY = '_keycloak_token';
+    private const SESSION_KEY = 'keycloak_token';
+    private const REQUEST_ATTR = '_keycloak_token';
 
     public function __construct(private RequestStack $requestStack)
     {
@@ -26,8 +27,8 @@ final class KeycloakTokenManager
             return null;
         }
 
-        if ($request->attributes->has(self::SESSION_KEY)) {
-            return $request->attributes->get(self::SESSION_KEY);
+        if ($request->attributes->has(self::REQUEST_ATTR)) {
+            return $request->attributes->get(self::REQUEST_ATTR);
         }
 
         if (!$request->hasSession()) {
@@ -39,7 +40,7 @@ final class KeycloakTokenManager
         /** @var ?AccessToken */
         $token = $session->get(self::SESSION_KEY);
 
-        $request->attributes->set(self::SESSION_KEY, $token);
+        $request->attributes->set(self::REQUEST_ATTR, $token);
         $session->save();
 
         return $token;
@@ -64,6 +65,6 @@ final class KeycloakTokenManager
         }
 
         $request->getSession()->set(self::SESSION_KEY, $token);
-        $request->attributes->set(self::SESSION_KEY, $token);
+        $request->attributes->set(self::REQUEST_ATTR, $token);
     }
 }

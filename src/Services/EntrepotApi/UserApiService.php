@@ -3,7 +3,8 @@
 namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class UserApiService
@@ -14,7 +15,7 @@ final class UserApiService
     ) {
     }
 
-    public function getMe(): PendingResponse
+    public function getMe(): ResponsePromise
     {
         return $this->api->get('users/me');
     }
@@ -24,7 +25,7 @@ final class UserApiService
      */
     public function getMyCommunityRights(string $communityId): ?array
     {
-        $me = $this->getMe()->json();
+        $me = $this->getMe()->array();
 
         foreach ($me['communities_member'] as $communityRights) {
             if ($communityRights['community']['_id'] == $communityId) {
@@ -35,27 +36,27 @@ final class UserApiService
         return null;
     }
 
-    public function getMyKey(string $keyId): PendingResponse
+    public function getMyKey(string $keyId): ResponsePromise
     {
         return $this->api->get("users/me/keys/$keyId");
     }
 
-    public function getMyKeys(): array
+    public function getMyKeys(): PaginatedPromise
     {
         return $this->api->requestAll('users/me/keys');
     }
 
-    public function getKeyAccesses(string $keyId): array
+    public function getKeyAccesses(string $keyId): PaginatedPromise
     {
         return $this->api->requestAll("users/me/keys/$keyId/accesses");
     }
 
-    public function getMyPermissions(): array
+    public function getMyPermissions(): PaginatedPromise
     {
         return $this->api->requestAll('users/me/permissions');
     }
 
-    public function getPermission(string $permissionId): PendingResponse
+    public function getPermission(string $permissionId): ResponsePromise
     {
         return $this->api->get("users/me/permissions/$permissionId");
     }
@@ -63,7 +64,7 @@ final class UserApiService
     /**
      * @param array<mixed> $body
      */
-    public function addKey(array $body): PendingResponse
+    public function addKey(array $body): ResponsePromise
     {
         return $this->api->post('users/me/keys', $body);
     }
@@ -73,12 +74,12 @@ final class UserApiService
      */
     public function updateKey(string $keyId, array $body): array
     {
-        $this->api->patch("users/me/keys/$keyId", $body)->wait();
+        $this->api->patch("users/me/keys/$keyId", $body)->await();
 
-        return $this->getMyKey($keyId)->json();
+        return $this->getMyKey($keyId)->array();
     }
 
-    public function removeKey(string $keyId): PendingResponse
+    public function removeKey(string $keyId): ResponsePromise
     {
         return $this->api->delete("users/me/keys/$keyId");
     }
@@ -86,17 +87,17 @@ final class UserApiService
     /**
      * @param array<mixed> $body
      */
-    public function addAccess(string $keyId, array $body): PendingResponse
+    public function addAccess(string $keyId, array $body): ResponsePromise
     {
         return $this->api->post("users/me/keys/$keyId/accesses", $body);
     }
 
-    public function removeAccess(string $keyId, string $accessId): PendingResponse
+    public function removeAccess(string $keyId, string $accessId): ResponsePromise
     {
         return $this->api->delete("users/me/keys/$keyId/accesses/$accessId");
     }
 
-    public function leaveCommunity(string $communityId): PendingResponse
+    public function leaveCommunity(string $communityId): ResponsePromise
     {
         return $this->api->delete("users/me/communities/$communityId");
     }

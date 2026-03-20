@@ -3,7 +3,7 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class ReplyApiService
@@ -17,7 +17,7 @@ final class ReplyApiService
     /**
      * @param array<mixed> $body
      */
-    public function add(string $reportId, array $body): PendingResponse
+    public function add(string $reportId, array $body): ResponsePromise
     {
         return $this->api->post("reports/$reportId/replies", $body);
     }
@@ -25,7 +25,7 @@ final class ReplyApiService
     /**
      * @param array<mixed> $body
      */
-    public function replace(string $reportId, string $replyId, array $body): PendingResponse
+    public function replace(string $reportId, string $replyId, array $body): ResponsePromise
     {
         return $this->api->put("reports/$reportId/replies/$replyId", $body);
     }
@@ -33,7 +33,7 @@ final class ReplyApiService
     /**
      * @param array<mixed> $body
      */
-    public function modify(string $reportId, string $replyId, array $body): PendingResponse
+    public function modify(string $reportId, string $replyId, array $body): ResponsePromise
     {
         return $this->api->patch("reports/$reportId/replies/$replyId", $body);
     }

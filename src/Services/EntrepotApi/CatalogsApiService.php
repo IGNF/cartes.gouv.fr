@@ -3,6 +3,7 @@
 namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class CatalogsApiService
@@ -13,12 +14,12 @@ final class CatalogsApiService
     ) {
     }
 
-    public function getAllCommunities(): array
+    public function getAllCommunities(): PaginatedPromise
     {
         return $this->api->requestAll('catalogs/communities');
     }
 
-    public function getAllOrganizations(): array
+    public function getAllOrganizations(): PaginatedPromise
     {
         return $this->api->requestAll('catalogs/organizations');
     }

@@ -3,7 +3,7 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class CommunityDocumentApiService
@@ -17,7 +17,7 @@ final class CommunityDocumentApiService
     /**
      * @param array<string> $fields
      */
-    public function getDocuments(int $communityId, ?array $fields = []): PendingResponse
+    public function getDocuments(int $communityId, ?array $fields = []): ResponsePromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
@@ -27,7 +27,7 @@ final class CommunityDocumentApiService
     /**
      * @param array<string> $fields
      */
-    public function getDocument(int $communityId, int $documentId, ?array $fields = []): PendingResponse
+    public function getDocument(int $communityId, int $documentId, ?array $fields = []): ResponsePromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
@@ -41,18 +41,18 @@ final class CommunityDocumentApiService
             $formFields['description'] = $description;
         }
 
-        return $this->api->sendFile('POST', "communities/$communityId/documents", $tempFilePath, $formFields, [], 'document')->json();
+        return $this->api->sendFile('POST', "communities/$communityId/documents", $tempFilePath, $formFields, [], 'document')->array();
     }
 
     /**
      * @param array<mixed> $data
      */
-    public function updateDocument(int $communityId, int $documentId, array $data): PendingResponse
+    public function updateDocument(int $communityId, int $documentId, array $data): ResponsePromise
     {
         return $this->api->patch("communities/$communityId/documents/$documentId", $data);
     }
 
-    public function deleteDocument(int $communityId, int $documentId): PendingResponse
+    public function deleteDocument(int $communityId, int $documentId): ResponsePromise
     {
         return $this->api->delete("communities/$communityId/documents/$documentId");
     }

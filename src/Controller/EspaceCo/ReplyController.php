@@ -32,7 +32,7 @@ class ReplyController extends AbstractController implements ApiControllerInterfa
         try {
             $body = json_decode($request->getContent(), true);
 
-            $report = $this->replyApiService->add($reportId, $body)->json();
+            $report = $this->replyApiService->add($reportId, $body)->array();
 
             return $this->json($report);
         } catch (ApiException $ex) {
@@ -46,7 +46,7 @@ class ReplyController extends AbstractController implements ApiControllerInterfa
         try {
             $body = json_decode($request->getContent(), true);
 
-            $report = $this->replyApiService->replace($reportId, $replyId, $body)->json();
+            $report = $this->replyApiService->replace($reportId, $replyId, $body)->array();
 
             return $this->json($report);
         } catch (ApiException $ex) {
@@ -60,7 +60,7 @@ class ReplyController extends AbstractController implements ApiControllerInterfa
         try {
             $body = json_decode($request->getContent(), true);
 
-            $report = $this->replyApiService->modify($reportId, $replyId, $body)->json();
+            $report = $this->replyApiService->modify($reportId, $replyId, $body)->array();
 
             return $this->json($report);
         } catch (ApiException $ex) {

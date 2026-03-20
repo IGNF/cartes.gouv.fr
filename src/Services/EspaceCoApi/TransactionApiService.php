@@ -4,7 +4,7 @@ namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
 use App\ApiClient\PaginatedResponse;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class TransactionApiService
@@ -20,13 +20,13 @@ final class TransactionApiService
      */
     public function getList(string $databaseId, array $query = []): PaginatedResponse
     {
-        return $this->api->get("databases/{$databaseId}/transactions", $query)->jsonWithHeaders();
+        return $this->api->get("databases/{$databaseId}/transactions", $query)->arrayWithHeaders();
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function add(string $databaseId, array $body): PendingResponse
+    public function add(string $databaseId, array $body): ResponsePromise
     {
         return $this->api->post("databases/{$databaseId}/transactions", $body);
     }
@@ -34,7 +34,7 @@ final class TransactionApiService
     /**
      * @param array<mixed> $query
      */
-    public function get(string $databaseId, string $transactionId, array $query = []): PendingResponse
+    public function get(string $databaseId, string $transactionId, array $query = []): ResponsePromise
     {
         return $this->api->get("databases/{$databaseId}/transactions/{$transactionId}", $query);
     }

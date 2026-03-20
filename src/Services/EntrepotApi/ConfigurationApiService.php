@@ -3,7 +3,8 @@
 namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class ConfigurationApiService
@@ -17,7 +18,7 @@ final class ConfigurationApiService
     /**
      * @param array<mixed> $query
      */
-    public function getAll(string $datastoreId, $query = []): array
+    public function getAll(string $datastoreId, $query = []): PaginatedPromise
     {
         if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
             $query['fields'] = implode(',', $query['fields']);
@@ -31,15 +32,15 @@ final class ConfigurationApiService
      */
     public function getAllDetailed(string $datastoreId, array $query = []): array
     {
-        $configurations = $this->getAll($datastoreId, $query);
+        $configurations = $this->getAll($datastoreId, $query)->resolve();
 
         return $this->api->fetchAllDetailsAsync(
             $configurations,
-            fn (array $configuration): PendingResponse => $this->get($datastoreId, $configuration['_id'])
+            fn (array $configuration): ResponsePromise => $this->get($datastoreId, $configuration['_id'])
         );
     }
 
-    public function get(string $datastoreId, string $configurationId): PendingResponse
+    public function get(string $datastoreId, string $configurationId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/configurations/$configurationId");
     }
@@ -47,7 +48,7 @@ final class ConfigurationApiService
     /**
      * @param array<mixed> $body
      */
-    public function add(string $datastoreId, $body = []): PendingResponse
+    public function add(string $datastoreId, $body = []): ResponsePromise
     {
         return $this->api->post("datastores/$datastoreId/configurations", $body);
     }
@@ -55,7 +56,7 @@ final class ConfigurationApiService
     /**
      * @param array<mixed> $body
      */
-    public function replace(string $datastoreId, string $configurationId, $body = []): PendingResponse
+    public function replace(string $datastoreId, string $configurationId, $body = []): ResponsePromise
     {
         return $this->api->put("datastores/$datastoreId/configurations/$configurationId", $body);
     }
@@ -64,17 +65,17 @@ final class ConfigurationApiService
      * @param array<mixed>      $body
      * @param array<mixed>|null $initialConfiguration
      */
-    public function modify(string $datastoreId, string $configurationId, $body = [], ?array $initialConfiguration = null): PendingResponse
+    public function modify(string $datastoreId, string $configurationId, $body = [], ?array $initialConfiguration = null): ResponsePromise
     {
         if (array_key_exists('extra', $body)) {
-            $initialConfiguration ??= $this->get($datastoreId, $configurationId)->json();
+            $initialConfiguration ??= $this->get($datastoreId, $configurationId)->array();
             $body['extra'] = array_merge($initialConfiguration['extra'] ?? [], $body['extra']);
         }
 
         return $this->api->patch("datastores/$datastoreId/configurations/$configurationId", $body);
     }
 
-    public function remove(string $datastoreId, string $configurationId): PendingResponse
+    public function remove(string $datastoreId, string $configurationId): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/configurations/$configurationId");
     }
@@ -82,7 +83,7 @@ final class ConfigurationApiService
     /**
      * @param array<string,string> $tags
      */
-    public function addTags(string $datastoreId, string $configurationId, array $tags): PendingResponse
+    public function addTags(string $datastoreId, string $configurationId, array $tags): ResponsePromise
     {
         return $this->api->post("datastores/$datastoreId/configurations/$configurationId/tags", $tags);
     }
@@ -90,7 +91,7 @@ final class ConfigurationApiService
     /**
      * @param array<string> $tags
      */
-    public function removeTags(string $datastoreId, string $configurationId, array $tags): PendingResponse
+    public function removeTags(string $datastoreId, string $configurationId, array $tags): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/configurations/$configurationId/tags", ['tags' => $tags]);
     }
@@ -98,7 +99,7 @@ final class ConfigurationApiService
     /**
      * Récupère toutes les offerings associées à la configuration fournie.
      */
-    public function getConfigurationOfferings(string $datastoreId, string $configurationId): array
+    public function getConfigurationOfferings(string $datastoreId, string $configurationId): PaginatedPromise
     {
         return $this->api->requestAll("datastores/$datastoreId/configurations/$configurationId/offerings");
     }
@@ -106,7 +107,7 @@ final class ConfigurationApiService
     /**
      * Alias of postCreateOffering.
      */
-    public function publish(string $datastoreId, string $configurationId, string $endpointId): PendingResponse
+    public function publish(string $datastoreId, string $configurationId, string $endpointId): ResponsePromise
     {
         return $this->addOffering($datastoreId, $configurationId, $endpointId);
     }
@@ -116,7 +117,7 @@ final class ConfigurationApiService
      *
      * @param array<mixed> $query
      */
-    public function getAllOfferings(string $datastoreId, $query = []): array
+    public function getAllOfferings(string $datastoreId, $query = []): PaginatedPromise
     {
         return $this->api->requestAll("datastores/$datastoreId/offerings", $query);
     }
@@ -124,7 +125,7 @@ final class ConfigurationApiService
     /**
      * @param mixed[] $query
      */
-    public function getAllOfferingsDetailed(string $datastoreId, array $query = []): array
+    public function getAllOfferingsDetailed(string $datastoreId, array $query = []): PaginatedPromise
     {
         return $this->getAllOfferings($datastoreId, [
             ...$query,
@@ -132,12 +133,12 @@ final class ConfigurationApiService
         ]);
     }
 
-    public function getOffering(string $datastoreId, string $offeringId): PendingResponse
+    public function getOffering(string $datastoreId, string $offeringId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/offerings/$offeringId");
     }
 
-    public function addOffering(string $datastoreId, string $configurationId, string $endpointId, bool $open = true): PendingResponse
+    public function addOffering(string $datastoreId, string $configurationId, string $endpointId, bool $open = true): ResponsePromise
     {
         $body = [
             // VISIBILITY va disparaître
@@ -148,12 +149,12 @@ final class ConfigurationApiService
         return $this->api->post("datastores/$datastoreId/configurations/$configurationId/offerings", $body);
     }
 
-    public function syncOffering(string $datastoreId, string $offeringId): PendingResponse
+    public function syncOffering(string $datastoreId, string $offeringId): ResponsePromise
     {
         return $this->api->put("datastores/$datastoreId/offerings/$offeringId");
     }
 
-    public function removeOffering(string $datastoreId, string $offeringId): PendingResponse
+    public function removeOffering(string $datastoreId, string $offeringId): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/offerings/$offeringId");
     }

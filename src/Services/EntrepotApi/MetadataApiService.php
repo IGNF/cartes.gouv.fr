@@ -3,7 +3,8 @@
 namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -19,12 +20,12 @@ final class MetadataApiService
     /**
      * @param array<mixed> $query
      */
-    public function getAll(string $datastoreId, array $query = []): array
+    public function getAll(string $datastoreId, array $query = []): PaginatedPromise
     {
         return $this->api->requestAll("datastores/$datastoreId/metadata", $query);
     }
 
-    public function get(string $datastoreId, string $metadataId): PendingResponse
+    public function get(string $datastoreId, string $metadataId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/metadata/$metadataId");
     }
@@ -34,7 +35,7 @@ final class MetadataApiService
         $response = $this->api->sendFile('POST', "datastores/$datastoreId/metadata", $filepath, [], [
             'type' => $type,
             'open_data' => $openData,
-        ])->json();
+        ])->array();
 
         $this->filesystem->remove($filepath);
 
@@ -43,14 +44,14 @@ final class MetadataApiService
 
     public function replaceFile(string $datastoreId, string $metadataId, string $filepath): array
     {
-        $response = $this->api->sendFile('PUT', "datastores/$datastoreId/metadata/$metadataId", $filepath)->json();
+        $response = $this->api->sendFile('PUT', "datastores/$datastoreId/metadata/$metadataId", $filepath)->array();
 
         $this->filesystem->remove($filepath);
 
         return $response;
     }
 
-    public function modifyInfo(string $datastoreId, string $metadataId, ?string $type = 'ISOAP', ?bool $openData = false): PendingResponse
+    public function modifyInfo(string $datastoreId, string $metadataId, ?string $type = 'ISOAP', ?bool $openData = false): ResponsePromise
     {
         return $this->api->patch("datastores/$datastoreId/metadata/$metadataId", [
             'type' => $type,
@@ -58,12 +59,12 @@ final class MetadataApiService
         ]);
     }
 
-    public function delete(string $datastoreId, string $metadataId): PendingResponse
+    public function delete(string $datastoreId, string $metadataId): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/metadata/$metadataId");
     }
 
-    public function downloadFile(string $datastoreId, string $metadataId): PendingResponse
+    public function downloadFile(string $datastoreId, string $metadataId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/metadata/$metadataId/file");
     }
@@ -71,7 +72,7 @@ final class MetadataApiService
     /**
      * @param array<string,string> $tags
      */
-    public function addTags(string $datastoreId, string $metadataId, array $tags): PendingResponse
+    public function addTags(string $datastoreId, string $metadataId, array $tags): ResponsePromise
     {
         return $this->api->post("datastores/$datastoreId/metadata/$metadataId/tags", $tags);
     }
@@ -79,12 +80,12 @@ final class MetadataApiService
     /**
      * @param array<string> $tags
      */
-    public function removeTags(string $datastoreId, string $metadataId, array $tags): PendingResponse
+    public function removeTags(string $datastoreId, string $metadataId, array $tags): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/metadata/$metadataId/tags", ['tags' => $tags]);
     }
 
-    public function publish(string $datastoreId, string $fileIdentifier, string $endpointId): PendingResponse
+    public function publish(string $datastoreId, string $fileIdentifier, string $endpointId): ResponsePromise
     {
         return $this->api->post("datastores/{$datastoreId}/metadata/publication", [
             'file_identifiers' => [$fileIdentifier],
@@ -92,7 +93,7 @@ final class MetadataApiService
         ]);
     }
 
-    public function unpublish(string $datastoreId, string $fileIdentifier, string $endpointId): PendingResponse
+    public function unpublish(string $datastoreId, string $fileIdentifier, string $endpointId): ResponsePromise
     {
         return $this->api->post("datastores/{$datastoreId}/metadata/unpublication", [
             'file_identifiers' => [$fileIdentifier],

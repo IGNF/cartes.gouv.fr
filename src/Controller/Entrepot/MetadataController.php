@@ -39,7 +39,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
         try {
             $query = $request->query->all();
 
-            $metadataList = $this->metadataApiService->getAll($datastoreId, $query);
+            $metadataList = $this->metadataApiService->getAll($datastoreId, $query)->resolve();
 
             return $this->json($metadataList);
         } catch (ApiException $ex) {
@@ -63,7 +63,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
             if (null !== $datasheetName) {
                 $metadata = $this->metadataApiService->addTags($datastoreId, $metadata['_id'], [
                     CommonTags::DATASHEET_NAME => $datasheetName,
-                ])->json();
+                ])->array();
             }
 
             return $this->json($metadata);
@@ -78,7 +78,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function get(string $datastoreId, string $metadataId): JsonResponse
     {
         try {
-            $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->json();
+            $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
 
             $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
             $metadata['csw_metadata'] = $this->cswMetadataHelper->fromXml($fileContent);
@@ -99,7 +99,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
                 'tags' => [
                     CommonTags::DATASHEET_NAME => $datasheetName,
                 ],
-            ]);
+            ])->resolve();
 
             if (0 === count($metadataList)) {
                 throw new CartesApiException("Aucune métadonnée trouvée pour la fiche de données {$datasheetName}", JsonResponse::HTTP_NOT_FOUND);
@@ -121,7 +121,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function getFileContent(string $datastoreId, string $metadataId, Request $request): Response
     {
         try {
-            $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->json();
+            $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
             $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
 
             $format = $request->query->get('format', 'xml');
@@ -146,7 +146,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function delete(string $datastoreId, string $metadataId): JsonResponse
     {
         try {
-            $this->metadataApiService->delete($datastoreId, $metadataId)->wait();
+            $this->metadataApiService->delete($datastoreId, $metadataId)->await();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -160,11 +160,11 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function unpublish(string $datastoreId, string $metadataId): JsonResponse
     {
         try {
-            $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->json();
+            $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
 
             $endpointId = $metadata['endpoints'][0]['_id'] ?? null;
             if (null !== $endpointId) {
-                $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $endpointId)->wait();
+                $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $endpointId)->await();
             }
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);

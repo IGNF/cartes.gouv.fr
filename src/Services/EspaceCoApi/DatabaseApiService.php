@@ -3,7 +3,8 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class DatabaseApiService
@@ -17,7 +18,7 @@ final class DatabaseApiService
     /**
      * @param array<mixed> $fields
      */
-    public function getAll(?array $fields = []): array
+    public function getAll(?array $fields = []): PaginatedPromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
@@ -27,7 +28,7 @@ final class DatabaseApiService
     /**
      * @param array<string> $fields
      */
-    public function searchBy(string $field, string $value, string $sort, ?array $fields = []): array
+    public function searchBy(string $field, string $value, string $sort, ?array $fields = []): PaginatedPromise
     {
         $query = [$field => $value, 'sort' => $sort];
         if (!empty($fields)) {
@@ -40,7 +41,7 @@ final class DatabaseApiService
     /**
      * @param array<mixed> $fields
      */
-    public function getDatabase(int $databaseId, ?array $fields = []): PendingResponse
+    public function getDatabase(int $databaseId, ?array $fields = []): ResponsePromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
@@ -50,7 +51,7 @@ final class DatabaseApiService
     /**
      * @param array<string> $fields
      */
-    public function getTable(int $databaseId, int $tableId, ?array $fields = []): PendingResponse
+    public function getTable(int $databaseId, int $tableId, ?array $fields = []): ResponsePromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
@@ -60,7 +61,7 @@ final class DatabaseApiService
     /**
      * @param array<string> $fields
      */
-    public function getColumn(int $databaseId, int $tableId, int $columnId, ?array $fields = []): PendingResponse
+    public function getColumn(int $databaseId, int $tableId, int $columnId, ?array $fields = []): ResponsePromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
@@ -70,7 +71,7 @@ final class DatabaseApiService
     /**
      * @param array<string> $fields
      */
-    public function getColumnByName(int $databaseId, int $tableId, string $column, ?array $fields = []): PendingResponse
+    public function getColumnByName(int $databaseId, int $tableId, string $column, ?array $fields = []): ResponsePromise
     {
         $query = ['name' => $column];
         if (!empty($fields)) {
@@ -83,7 +84,7 @@ final class DatabaseApiService
     /**
      * @param array<string> $fields
      */
-    public function getAllTables(int $databaseId, ?array $fields = []): array
+    public function getAllTables(int $databaseId, ?array $fields = []): PaginatedPromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 

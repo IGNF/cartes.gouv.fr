@@ -35,7 +35,7 @@ class GeoserviceController extends AbstractController implements ApiControllerIn
         #[MapQueryParameter] ?array $fields = [],
     ): JsonResponse {
         try {
-            $geoservice = $this->geoserviceApiService->getGeoservice($geoserviceId, $fields)->json();
+            $geoservice = $this->geoserviceApiService->getGeoservice($geoserviceId, $fields)->array();
 
             return new JsonResponse($geoservice);
         } catch (ApiException $ex) {

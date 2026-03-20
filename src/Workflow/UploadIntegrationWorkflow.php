@@ -182,7 +182,7 @@ class UploadIntegrationWorkflow
             return JobStatuses::WAITING;
         }
 
-        $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $upload['_id'])->json();
+        $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $upload['_id'])->array();
 
         $askedCount = count($uploadChecks[UploadCheckTypes::ASKED] ?? []);
         $inProgressCount = count($uploadChecks[UploadCheckTypes::IN_PROGRESS] ?? []);
@@ -229,8 +229,8 @@ class UploadIntegrationWorkflow
             return JobStatuses::WAITING;
         }
 
-        $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags']['proc_int_id'])->json();
-        $vectordb = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id'])->json();
+        $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags']['proc_int_id'])->array();
+        $vectordb = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id'])->array();
 
         if (in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS], true)) {
             return JobStatuses::IN_PROGRESS;
@@ -303,14 +303,14 @@ class UploadIntegrationWorkflow
             }
         }
 
-        $processingExec = $this->processingApiService->addExecution($datastoreId, $procExecBody)->json();
+        $processingExec = $this->processingApiService->addExecution($datastoreId, $procExecBody)->array();
         $vectorDb = $processingExec['output']['stored_data'];
 
         // ajout tags sur l'upload
         $this->uploadApiService->addTags($datastoreId, $upload['_id'], [
             'vectordb_id' => $vectorDb['_id'],
             'proc_int_id' => $processingExec['_id'],
-        ])->wait();
+        ])->await();
 
         // ajout tags sur la stored_data
         $tags = [
@@ -324,9 +324,9 @@ class UploadIntegrationWorkflow
         if (isset($upload['tags'][CommonTags::PRODUCTION_YEAR])) {
             $tags[CommonTags::PRODUCTION_YEAR] = $upload['tags'][CommonTags::PRODUCTION_YEAR];
         }
-        $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], $tags)->wait();
+        $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], $tags)->await();
 
-        $this->processingApiService->launchExecution($datastoreId, $processingExec['_id'])->wait();
+        $this->processingApiService->launchExecution($datastoreId, $processingExec['_id'])->await();
     }
 
     /**

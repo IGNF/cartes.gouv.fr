@@ -3,7 +3,8 @@
 namespace App\Services\EspaceCoApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\PendingResponse;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class CommunityApiService
@@ -18,7 +19,7 @@ final class CommunityApiService
 
     public function getCommunities(string $name, int $page, int $limit, string $sort): array
     {
-        $response = $this->api->get('communities', ['name' => $name, 'page' => $page, 'limit' => $limit, 'sort' => $sort])->jsonWithHeaders();
+        $response = $this->api->get('communities', ['name' => $name, 'page' => $page, 'limit' => $limit, 'sort' => $sort])->arrayWithHeaders();
 
         $totalPages = $response->getPageCount($limit) ?? 1;
 
@@ -33,17 +34,16 @@ final class CommunityApiService
         ];
     }
 
-    public function getCommunitiesName(): array
+    public function getCommunitiesName(): PaginatedPromise
     {
-        $communities = $this->api->requestAll('communities', ['fields' => ['name'], 'sort' => 'name:ASC']);
-
-        return array_map(fn ($community) => $community['name'], $communities);
+        return $this->api->requestAll('communities', ['fields' => ['name'], 'sort' => 'name:ASC'])
+            ->then(fn (array $items) => array_map(fn ($community) => $community['name'], $items));
     }
 
     /**
      * @param array<mixed> $fields
      */
-    public function getCommunity(int $communityId, ?array $fields = []): PendingResponse
+    public function getCommunity(int $communityId, ?array $fields = []): ResponsePromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
@@ -56,9 +56,9 @@ final class CommunityApiService
     public function addCommunity(array $datas, ?string $logoFilePath): array
     {
         if ($logoFilePath) {
-            $response = $this->api->sendFile('POST', 'communities', $logoFilePath, $datas, [], 'logo')->json();
+            $response = $this->api->sendFile('POST', 'communities', $logoFilePath, $datas, [], 'logo')->array();
         } else {
-            $response = $this->api->post('communities', $datas)->json();
+            $response = $this->api->post('communities', $datas)->array();
         }
 
         return $response;
@@ -67,7 +67,7 @@ final class CommunityApiService
     /**
      * @param array<mixed> $datas
      */
-    public function updateCommunity(int $communityId, array $datas): PendingResponse
+    public function updateCommunity(int $communityId, array $datas): ResponsePromise
     {
         return $this->api->patch("communities/$communityId", $datas);
     }
@@ -82,11 +82,11 @@ final class CommunityApiService
         $query = ['fields' => 'user_id, grids, role, active, date'];
         $query['roles'] = count($roles) ? $roles : ['member', 'admin'];
 
-        $members = $this->api->requestAll("communities/$communityId/members", $query);
+        $members = $this->api->requestAll("communities/$communityId/members", $query)->resolve();
 
         $gridsRequested = [];
         foreach ($members as &$member) {
-            $user = $this->userApiService->getUser($member['user_id'], ['fields' => ['username', 'firstname', 'surname']])->json();
+            $user = $this->userApiService->getUser($member['user_id'], ['fields' => ['username', 'firstname', 'surname']])->array();
             $member = array_merge($member, $user);
 
             // Ajout des grids
@@ -104,14 +104,14 @@ final class CommunityApiService
         return $members;
     }
 
-    public function addMember(int $communityId, int $userId): PendingResponse
+    public function addMember(int $communityId, int $userId): ResponsePromise
     {
         return $this->api->post("communities/$communityId/members/$userId", ['user_id' => $userId]);
     }
 
     public function updateMember(int $communityId, int $userId, string $field, mixed $value): array
     {
-        $member = $this->api->patch("communities/$communityId/members/$userId", [$field => $value])->json();
+        $member = $this->api->patch("communities/$communityId/members/$userId", [$field => $value])->array();
         if ('grids' === $field) {   // On recupere les grids, pas seulement leur nom
             $member['grids'] = $this->_transformGrids($member['grids']);
         }
@@ -119,17 +119,17 @@ final class CommunityApiService
         return $member;
     }
 
-    public function removeMember(int $communityId, int $userId): PendingResponse
+    public function removeMember(int $communityId, int $userId): ResponsePromise
     {
         return $this->api->delete("communities/$communityId/members/$userId");
     }
 
     public function updateLogo(int $communityId, string $filePath): array
     {
-        return $this->api->sendFile('POST', "communities/$communityId/logo", $filePath, [], [], 'logo')->json();
+        return $this->api->sendFile('POST', "communities/$communityId/logo", $filePath, [], [], 'logo')->array();
     }
 
-    public function removeLogo(int $communityId): PendingResponse
+    public function removeLogo(int $communityId): ResponsePromise
     {
         return $this->api->delete("communities/$communityId/logo");
     }
@@ -147,7 +147,7 @@ final class CommunityApiService
             if (array_key_exists($name, $gridsRequested)) {
                 $grid = $gridsRequested[$name];
             } else {
-                $g = $this->gridApiService->get($name)->json();
+                $g = $this->gridApiService->get($name)->array();
                 if (!($g['deleted'] ?? false)) {
                     $grid = $g;
                 }
