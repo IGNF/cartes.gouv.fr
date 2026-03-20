@@ -4,11 +4,7 @@ namespace App\Security;
 
 use App\Services\EntrepotApi\UserApiService;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
-use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
-use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\Exception\TimeoutException;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,7 +39,7 @@ class KeycloakUserProvider implements UserProviderInterface
             return User::getTestUser();
         }
 
-        /** @var KeycloakClient */
+        /** @var \KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient $keycloakClient */
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 
         $accessToken = $this->tokenManager->getToken();
@@ -52,10 +48,8 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new TokenNotFoundException();
         }
 
-        $accessToken = $this->refreshTokenIfExpiringSoon($accessToken);
-
         try {
-            /** @var KeycloakResourceOwner */
+            /** @var \Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner $keycloakUser */
             $keycloakUser = $this->cache->get('keycloak-user-'.sha1((string) $accessToken), function (ItemInterface $item) use ($accessToken, $keycloakClient) {
                 $item->expiresAfter(60);
 
@@ -123,46 +117,11 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
-        $accessToken = $this->tokenManager->getToken();
-
-        if (null === $accessToken) {
+        if (null === $this->tokenManager->getToken()) {
             throw new AuthenticationExpiredException('No token in session');
         }
 
-        $originalAccessToken = $accessToken;
-        $accessToken = $this->refreshTokenIfExpiringSoon($accessToken);
-
-        // Si le token a été rafraîchi, on recharge l'utilisateur afin de respecter
-        // le contrat de "rafraîchissement" Symfony (rôles, données API/Keycloak, etc.).
-        if ($accessToken !== $originalAccessToken) {
-            return $this->loadUserByIdentifier($user->getUserIdentifier());
-        }
-
-        // Sinon, on peut conserver l'instance actuelle de l'utilisateur.
         return $user;
-    }
-
-    /**
-     * Rafraîchit proactivement le token s'il expire dans moins de 5 minutes.
-     */
-    private function refreshTokenIfExpiringSoon(AccessToken $accessToken): AccessToken
-    {
-        if (!$this->tokenManager->isExpiringSoon($accessToken)) {
-            return $accessToken;
-        }
-
-        $this->logger->debug('{class}: Token expiring soon, refreshing', ['class' => self::class]);
-        try {
-            /** @var KeycloakClient */
-            $keycloakClient = $this->clientRegistry->getClient('keycloak');
-            /** @var AccessToken */
-            $accessToken = $keycloakClient->refreshAccessToken($accessToken->getRefreshToken());
-            $this->tokenManager->setToken($accessToken);
-        } catch (IdentityProviderException $ex) {
-            throw new AuthenticationExpiredException('Failed to refresh keycloak access token', Response::HTTP_UNAUTHORIZED, $ex);
-        }
-
-        return $accessToken;
     }
 
     /**

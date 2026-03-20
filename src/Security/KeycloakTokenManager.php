@@ -39,8 +39,8 @@ final class KeycloakTokenManager
     }
 
     /**
-     * Persiste un token (nouveau ou rafraîchi) en session ET met à jour
-     * le cache de l'attribut de requête pour que la requête courante le voie immédiatement.
+     * Persiste un token en session ET met à jour le cache de l'attribut
+     * de requête pour que la requête courante le voie immédiatement.
      * N'appelle PAS save() — on laisse le SessionListener (ou un save explicite ailleurs)
      * gérer la sauvegarde en fin de requête, afin de ne pas manipuler le verrou de session ici.
      */
@@ -48,13 +48,5 @@ final class KeycloakTokenManager
     {
         $this->requestStack->getSession()->set(self::SESSION_KEY, $token);
         $this->requestStack->getCurrentRequest()?->attributes->set(self::REQUEST_ATTR, $token);
-    }
-
-    /**
-     * Retourne true si le token expire dans moins de 5 minutes.
-     */
-    public function isExpiringSoon(AccessToken $token): bool
-    {
-        return ($token->getExpires() - 300) < time();
     }
 }

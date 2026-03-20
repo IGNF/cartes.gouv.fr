@@ -2,12 +2,11 @@
 
 namespace App\Security;
 
+use App\Controller\ApiControllerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
-use KnpU\OAuth2ClientBundle\Client\OAuth2ClientInterface;
-use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
-use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,6 +27,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public const LOGIN_CHECK_ROUTE = 'cartesgouvfr_security_login_check';
     public const SUCCESS_ROUTE = 'cartesgouvfr_app';
     public const HOME_ROUTE = 'cartesgouvfr_app';
+    private const API_ROUTE_PREFIX = 'cartesgouvfr_api_';
 
     public function __construct(
         private ClientRegistry $clientRegistry,
@@ -43,6 +43,10 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
      */
     public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
+        if ($this->isApiRequest($request)) {
+            return $this->getUnauthorizedApiResponse();
+        }
+
         return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE), Response::HTTP_TEMPORARY_REDIRECT);
     }
 
@@ -61,11 +65,11 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
      */
     public function authenticate(Request $request): Passport
     {
-        /** @var OAuth2ClientInterface|KeycloakClient */
+        /** @var \KnpU\OAuth2ClientBundle\Client\OAuth2ClientInterface|\KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient $keycloakClient */
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 
         try {
-            /** @var AccessToken */
+            /** @var \League\OAuth2\Client\Token\AccessToken $accessToken */
             $accessToken = $this->fetchAccessToken($keycloakClient);
         } catch (\UnexpectedValueException $ex) {
             $message = "Authentication failed, unable to get token from keycloak : {$ex->getMessage()}";
@@ -129,9 +133,35 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
 
         $this->logger->info(self::class, [$message]);
 
+        if ($this->isApiRequest($request)) {
+            return $this->getUnauthorizedApiResponse($message);
+        }
+
         return new RedirectResponse($this->router->generate(self::HOME_ROUTE, [
             'authentication_failed' => true,
         ]).'/decouvrir');
+    }
+
+    private function isApiRequest(Request $request): bool
+    {
+        $route = $request->attributes->get('_route');
+
+        return is_string($route) && str_starts_with($route, self::API_ROUTE_PREFIX);
+    }
+
+    /**
+     * @SuppressWarnings(UndefinedVariable)
+     */
+    private function getUnauthorizedApiResponse(string $message = 'Unauthorized'): JsonResponse
+    {
+        $code = Response::HTTP_UNAUTHORIZED;
+
+        return new JsonResponse([
+            'code' => $code,
+            'status' => Response::$statusTexts[$code] ?? 'Unauthorized',
+            'message' => $message,
+            'details' => ['controller' => ApiControllerInterface::class, 'session_expired' => true],
+        ], $code);
     }
 
     // TODO : A refactoriser
