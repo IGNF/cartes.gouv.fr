@@ -18,6 +18,7 @@ final class KeycloakTokenManager
      * Retourne le token, en utilisant le cache de l'attribut de requête si disponible.
      * Au premier appel : lit depuis la session, prime le cache, puis libère
      * immédiatement le verrou fichier de session via save().
+     * Retourne null si aucune requête ou session n'est disponible (ex. contexte CLI).
      */
     public function getToken(): ?AccessToken
     {
@@ -27,12 +28,16 @@ final class KeycloakTokenManager
             return $request->attributes->get(self::REQUEST_ATTR);
         }
 
-        $session = $this->requestStack->getSession();
+        if (null === $request || !$request->hasSession()) {
+            return null;
+        }
+
+        $session = $request->getSession();
 
         /** @var ?AccessToken */
         $token = $session->get(self::SESSION_KEY);
 
-        $request?->attributes->set(self::REQUEST_ATTR, $token);
+        $request->attributes->set(self::REQUEST_ATTR, $token);
         $session->save();
 
         return $token;
@@ -43,11 +48,23 @@ final class KeycloakTokenManager
      * le cache de l'attribut de requête pour que la requête courante le voie immédiatement.
      * N'appelle PAS save() — on laisse le SessionListener (ou un save explicite ailleurs)
      * gérer la sauvegarde en fin de requête, afin de ne pas manipuler le verrou de session ici.
+     *
+     * @throws \RuntimeException si aucune requête HTTP ou session n'est disponible
      */
     public function setToken(AccessToken $token): void
     {
-        $this->requestStack->getSession()->set(self::SESSION_KEY, $token);
-        $this->requestStack->getCurrentRequest()?->attributes->set(self::REQUEST_ATTR, $token);
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (null === $request) {
+            throw new \RuntimeException('Impossible de persister le token Keycloak : aucune requête HTTP en cours.');
+        }
+
+        if (!$request->hasSession()) {
+            throw new \RuntimeException('Impossible de persister le token Keycloak : aucune session disponible pour la requête courante.');
+        }
+
+        $request->getSession()->set(self::SESSION_KEY, $token);
+        $request->attributes->set(self::REQUEST_ATTR, $token);
     }
 
     /**
