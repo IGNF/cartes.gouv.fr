@@ -4,14 +4,10 @@ namespace App\Listener;
 
 use App\Controller\ApiControllerInterface;
 use App\Exception\CartesApiException;
-use App\Security\KeycloakToken;
-use App\Security\User;
-use League\OAuth2\Client\Token\AccessToken;
-use Symfony\Bundle\SecurityBundle\Security;
+use App\Security\KeycloakTokenManager;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -22,7 +18,7 @@ class InternalApiSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private ParameterBagInterface $parameters,
-        private Security $security,
+        private KeycloakTokenManager $tokenManager,
     ) {
     }
 
@@ -49,18 +45,9 @@ class InternalApiSubscriber implements EventSubscriberInterface
         // vérification de token uniquement si la requête concerne un controller implémentant ApiControllerInterface et que APP_ENV != test
         if ($controller instanceof ApiControllerInterface) {
             if ('test' !== $this->parameters->get('app_env')) {
-                /** @var SessionInterface */
-                $session = $event->getRequest()->getSession();
+                $accessToken = $this->tokenManager->getToken();
 
-                /** @var AccessToken */
-                $accessToken = $session->get(KeycloakToken::SESSION_KEY);
-
-                $user = $this->security->getUser();
-
-                if (null === $user
-                    || !($user instanceof User)
-                    || null == $accessToken
-                    || (null != $accessToken && $accessToken->hasExpired())) {
+                if (null == $accessToken || $accessToken->hasExpired()) {
                     throw new CartesApiException('Unauthorized', Response::HTTP_UNAUTHORIZED, ['controller' => ApiControllerInterface::class, 'session_expired' => true]);
                 }
             }

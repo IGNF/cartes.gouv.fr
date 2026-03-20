@@ -2,13 +2,11 @@
 
 namespace App\Services;
 
-use App\Security\KeycloakToken;
+use App\Security\KeycloakTokenManager;
 use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
@@ -26,7 +24,7 @@ abstract class AbstractApiService
         HttpClientInterface $httpClient,
         protected ParameterBagInterface $parameters,
         protected Filesystem $filesystem,
-        private RequestStack $requestStack,
+        private KeycloakTokenManager $tokenManager,
         private LoggerInterface $logger,
         string $api,
     ) {
@@ -203,16 +201,6 @@ abstract class AbstractApiService
 
     private function getKeycloakToken(): AccessToken
     {
-        /** @var SessionInterface */
-        $session = $this->requestStack->getSession();
-
-        /** @var ?AccessToken */
-        $accessToken = $session->get(KeycloakToken::SESSION_KEY);
-
-        if (null === $accessToken) {
-            throw new AuthenticationExpiredException();
-        }
-
-        return $accessToken;
+        return $this->tokenManager->getToken() ?? throw new AuthenticationExpiredException();
     }
 }

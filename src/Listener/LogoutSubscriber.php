@@ -2,7 +2,7 @@
 
 namespace App\Listener;
 
-use App\Security\KeycloakToken;
+use App\Security\KeycloakTokenManager;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Stevenmaguire\OAuth2\Client\Provider\Keycloak;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -17,6 +17,7 @@ class LogoutSubscriber implements EventSubscriberInterface
         private ClientRegistry $clientRegistry,
         private UrlGeneratorInterface $urlGenerator,
         private ParameterBagInterface $parameters,
+        private KeycloakTokenManager $tokenManager,
     ) {
     }
 
@@ -27,9 +28,9 @@ class LogoutSubscriber implements EventSubscriberInterface
 
     public function onLogout(LogoutEvent $event): void
     {
-        $session = $event->getRequest()->getSession();
-        $idToken = $session->get(KeycloakToken::SESSION_KEY)?->getValues()['id_token'] ?? null;
+        $idToken = $this->tokenManager->getToken()?->getValues()['id_token'] ?? null;
 
+        $session = $event->getRequest()->getSession();
         $session->invalidate();
 
         $redirectUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);

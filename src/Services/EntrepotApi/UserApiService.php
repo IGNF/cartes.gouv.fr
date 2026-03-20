@@ -3,10 +3,10 @@
 namespace App\Services\EntrepotApi;
 
 use App\Exception\ApiException;
+use App\Security\KeycloakTokenManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -16,12 +16,12 @@ class UserApiService extends BaseEntrepotApiService
         HttpClientInterface $httpClient,
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
-        RequestStack $requestStack,
+        KeycloakTokenManager $tokenManager,
         LoggerInterface $logger,
         private DatastoreApiService $datastoreApiService,
         protected CacheInterface $cache,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $cache, $logger);
+        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $cache, $logger);
     }
 
     public function getMe(): array

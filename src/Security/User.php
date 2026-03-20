@@ -134,16 +134,6 @@ class User implements UserInterface
         return $this->communitiesMember;
     }
 
-    /**
-     * @param array<mixed> $communitiesMember
-     */
-    public function setCommunitiesMember(array $communitiesMember): self
-    {
-        $this->communitiesMember = $communitiesMember;
-
-        return $this;
-    }
-
     public function getAccountCreationDate(): ?\DateTimeInterface
     {
         return $this->accountCreationDate;
@@ -172,6 +162,30 @@ class User implements UserInterface
     public function getKeysUse(): ?int
     {
         return $this->keysUse;
+    }
+
+    /**
+     * @param array<mixed> $apiUserInfo
+     */
+    public function updateFromApiInfo(array $apiUserInfo): self
+    {
+        if (array_key_exists('communities_member', $apiUserInfo)) {
+            $this->communitiesMember = $apiUserInfo['communities_member'];
+        }
+        if (array_key_exists('documents_quota', $apiUserInfo)) {
+            $this->documentsQuota = $apiUserInfo['documents_quota'];
+        }
+        if (array_key_exists('documents_use', $apiUserInfo)) {
+            $this->documentsUse = $apiUserInfo['documents_use'];
+        }
+        if (array_key_exists('keys_quota', $apiUserInfo)) {
+            $this->keysQuota = $apiUserInfo['keys_quota'];
+        }
+        if (array_key_exists('keys_use', $apiUserInfo)) {
+            $this->keysUse = $apiUserInfo['keys_use'];
+        }
+
+        return $this;
     }
 
     public static function getTestUser(): User
