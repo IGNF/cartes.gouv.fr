@@ -129,9 +129,16 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new AuthenticationExpiredException('No token in session');
         }
 
+        $originalAccessToken = $accessToken;
         $accessToken = $this->refreshTokenIfExpiringSoon($accessToken);
 
-        // Retourne l'utilisateur existant, les données ne changent pas en cours de session
+        // Si le token a été rafraîchi, on recharge l'utilisateur afin de respecter
+        // le contrat de "rafraîchissement" Symfony (rôles, données API/Keycloak, etc.).
+        if ($accessToken !== $originalAccessToken) {
+            return $this->loadUserByIdentifier($user->getUserIdentifier());
+        }
+
+        // Sinon, on peut conserver l'instance actuelle de l'utilisateur.
         return $user;
     }
 
