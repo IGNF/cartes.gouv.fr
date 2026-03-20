@@ -131,7 +131,7 @@ final class ApiClient
     /**
      * Récupère automatiquement toutes les pages d'un endpoint paginé GET.
      * Tire la page 1 immédiatement (non-bloquant) ; les pages suivantes
-     * sont lancées à la consommation via PaginatedPromise::await().
+     * sont lancées à la consommation via PaginatedPromise::resolve().
      *
      * @param array<string,mixed> $query
      * @param array<string,mixed> $headers

@@ -59,11 +59,12 @@ Node version: **24.14.0** (see `.nvmrc`)
 **API Service architecture (composition via `ApiClient`):**
 
 - `ApiClient` (`src/ApiClient/ApiClient.php`) — HTTP client with async/parallel request support
-    - `get()`, `post()`, `patch()`, `put()`, `delete()`, `sendFile()` — standard HTTP verbs returning `PendingResponse`
-    - `requestAll()` — automatic pagination using parallel requests for subsequent pages
+    - `get()`, `post()`, `patch()`, `put()`, `delete()`, `sendFile()` — standard HTTP verbs returning `ResponsePromise`
+    - `requestAll()` — automatic pagination using parallel requests for subsequent pages, returns `PaginatedPromise`
     - `fetchAllDetailsAsync()` — batch detail fetching
-    - `resolveAll()` — parallel resolution of multiple `PendingResponse`
-- `PendingResponse` — lazy response wrapper; consumed via `->json()`, `->text()`, `->jsonWithHeaders()`
+    - `resolveAll()` — parallel resolution of multiple `ResponsePromise`
+- `ResponsePromise` — lazy single-response wrapper; consumed via `->array()`, `->text()`, `->arrayWithHeaders()`, `->await()` (alias of `array()`)
+- `PaginatedPromise` — lazy all-pages wrapper; consumed via `->resolve()`; supports lazy transforms via `->then()`
 - `PaginatedResponse` — wraps paginated results + headers; `getPageCount(int $limit)` calculates page count from `Content-Range`
 - `ApiClientFactory` — creates pre-configured `ApiClient` instances per API (Entrepôt, EspaceCo, EspaceCo Style)
 - Specialized domain services inject `ApiClient` via `#[Autowire(service: 'app.api_client.*')]`:
@@ -110,7 +111,33 @@ React Query is persisted to localStorage (24h TTL). `@/*` aliases map to `assets
 - Use constructor injection. Use typed DTOs for request/response models.
 - Comments in French; code identifiers in English.
 
+### Language
+
+- All comments (PHP, JS/TS), docblocks, and documentation files (`docs/`) must be written in French.
+
 ## Testing
 
 - Cypress E2E tests are **paused** — ignore unless explicitly reactivated.
 - PHP tests in `tests/`. Developer docs in `docs/developer/`.
+
+## Profileur Symfony (debug)
+
+Le profileur stocke ses données dans `var/cache/dev/profiler/` dans le conteneur :
+
+```bash
+docker exec cartesgouvfr-app_dev-1 php -r "
+require 'vendor/autoload.php';
+use Symfony\Component\HttpKernel\Profiler\FileProfilerStorage;
+\\\$storage = new FileProfilerStorage('file:'.getcwd().'/var/cache/dev/profiler');
+\\\$profile = \\\$storage->read('TOKEN'); // remplacer TOKEN par le token du profiler
+if (!\\\$profile) { echo 'Non trouvé'; exit; }
+echo 'URL: '.\\\$profile->getUrl().PHP_EOL;
+\\\$time = \\\$profile->getCollector('time');
+echo 'Durée: '.\\\$time->getDuration().' ms'.PHP_EOL;
+foreach (\\\$time->getEvents() as \\\$name => \\\$event) {
+    printf('  %-60s %6.1f ms'.PHP_EOL, \\\$name, \\\$event->getDuration());
+}
+"
+```
+
+Autres collectors utiles : `http_client`, `db`, `logger`, `request`, `security`, `exception`.

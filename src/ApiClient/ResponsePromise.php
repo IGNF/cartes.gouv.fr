@@ -59,7 +59,7 @@ final class ResponsePromise
     }
 
     /**
-     * Alias de json(), plus lisible dans les contextes synchrones/bloquants.
+     * Alias de array(), plus lisible dans les contextes synchrones/bloquants.
      *
      * @return array<mixed>
      *
