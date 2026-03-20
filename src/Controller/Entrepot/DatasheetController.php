@@ -121,19 +121,8 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'fields' => 'name,description,type,open,status,srs,contact,edition,size,last_event,tags,creation,bbox,public_activity',
         ]);
 
-        $pendingConfigList = $this->configurationApiService->getAll($datastoreId, [
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-            'status' => ConfigurationStatuses::PUBLISHED,
-        ]);
-
-        $pendingAnnexesList = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
-
         $uploadList = $pendingUploadList->resolve();
         $storedDataList = $pendingStoredDataList->resolve();
-        $configurations = $pendingConfigList->resolve();
-        $annexes = $pendingAnnexesList->resolve();
 
         $vectorDbList = array_filter($storedDataList, function ($storedData) {
             return StoredDataTypes::VECTOR_DB === $storedData['type'];
@@ -165,7 +154,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         }
 
         $datastore = $this->datastoreApiService->get($datastoreId);
-        $datasheet = $this->getBasicInfo($datastore, $datasheetName, $configurations, $annexes);
+        $datasheet = $this->getBasicInfo($datastore, $datasheetName);
 
         return $this->json([
             ...$datasheet,
