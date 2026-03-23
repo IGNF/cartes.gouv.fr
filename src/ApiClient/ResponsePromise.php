@@ -6,6 +6,7 @@ use App\ApiClient\ErrorParser\ErrorParserInterface;
 use App\Exception\ApiException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -29,11 +30,18 @@ final class ResponsePromise
     {
         $this->assertSuccess();
 
-        if ('' === $this->response->getContent()) {
-            return [];
-        }
+        try {
+            $content = $this->response->getContent();
+            if ('' === $content) {
+                return [];
+            }
 
-        return $this->response->toArray();
+            return $this->response->toArray();
+        } catch (DecodingExceptionInterface $e) {
+            throw new ApiException(sprintf('Réponse JSON invalide: %s', $e->getMessage()), Response::HTTP_UNPROCESSABLE_ENTITY, previous: $e);
+        } catch (TransportExceptionInterface $e) {
+            throw new ApiException(sprintf('Erreur réseau lors de la lecture du corps: %s', $e->getMessage()), Response::HTTP_SERVICE_UNAVAILABLE, previous: $e);
+        }
     }
 
     /**
@@ -45,7 +53,11 @@ final class ResponsePromise
     {
         $this->assertSuccess();
 
-        return $this->response->getContent();
+        try {
+            return $this->response->getContent();
+        } catch (TransportExceptionInterface $e) {
+            throw new ApiException(sprintf('Erreur réseau lors de la lecture du corps: %s', $e->getMessage()), Response::HTTP_SERVICE_UNAVAILABLE, previous: $e);
+        }
     }
 
     /**

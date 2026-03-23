@@ -171,9 +171,9 @@ final class ApiClient
      * Consomme les réponses et retourne un tableau de résultats (clé => payload) ou lève une ApiException si l'une des réponses est une erreur.
      * Les erreurs sont ignorées si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
      *
-     * @param array<int|string, ResponsePromise> $pendingsByKey
+     * @param array<int|string,ResponsePromise> $pendingsByKey
      *
-     * @return array<int|string, array<mixed>>
+     * @return array<int|string,array<mixed>|null>
      */
     public function resolveAll(array $pendingsByKey, bool $continueOnError = false): array
     {
