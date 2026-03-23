@@ -61,13 +61,12 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
                             : oldDatasheet.pyramid_vector_list,
                 } satisfies DatasheetDetailed;
             });
-            queryClient.setQueryData(RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName), (servicesList: Service[] | undefined) => {
-                if (!servicesList) {
-                    return [];
+            queryClient.setQueryData(
+                RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
+                (servicesList: Service[] | undefined): Service[] | undefined => {
+                    return servicesList?.filter((service) => !offeringsUsingStoredData.includes(service._id));
                 }
-
-                return servicesList.filter((service) => !offeringsUsingStoredData.includes(service._id));
-            });
+            );
 
             dataUsesQuery.data?.offerings_list?.forEach((offering) => {
                 queryClient.removeQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offering._id) });

@@ -268,7 +268,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                                     <ServicesListTab
                                                         datastoreId={datastoreId}
                                                         datasheet={datasheetQuery.data}
-                                                        services_list_query={serviceListQuery}
+                                                        servicesListQuery={serviceListQuery}
                                                     />
                                                 );
 

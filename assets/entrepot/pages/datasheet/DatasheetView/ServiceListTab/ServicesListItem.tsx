@@ -47,12 +47,12 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
             return api.service.unpublishService(datastoreId, service._id);
         },
         onSuccess() {
-            queryClient.setQueryData(RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName), (servicesList: Service[] | undefined): Service[] => {
-                if (!servicesList) {
-                    return [];
+            queryClient.setQueryData(
+                RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
+                (servicesList: Service[] | undefined): Service[] | undefined => {
+                    return servicesList?.filter((s) => s._id !== service._id);
                 }
-                return servicesList.filter((s) => s._id !== service._id);
-            });
+            );
 
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });

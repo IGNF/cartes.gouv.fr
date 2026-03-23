@@ -7,20 +7,25 @@ import LoadingText from "@/components/Utils/LoadingText";
 import { DatasheetDetailed, Service } from "../../../../../@types/app";
 import { useTranslation } from "../../../../../i18n";
 import ServicesListItem from "./ServicesListItem";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 
 type ServicesListTabProps = {
     datasheet: DatasheetDetailed;
     datastoreId: string;
-    services_list_query: UseQueryResult<Service[]>;
+    servicesListQuery: UseQueryResult<Service[]>;
 };
-const ServicesListTab: FC<ServicesListTabProps> = ({ datastoreId, datasheet, services_list_query }) => {
+const ServicesListTab: FC<ServicesListTabProps> = ({ datastoreId, datasheet, servicesListQuery }) => {
     const { t } = useTranslation("DatasheetView");
 
-    if (services_list_query.isLoading) {
+    if (servicesListQuery.isLoading) {
         return <LoadingText as="p" withSpinnerIcon />;
     }
 
-    const servicesList = services_list_query.data ?? [];
+    if (servicesListQuery.isError) {
+        return <Alert severity="error" title={t("services_tab.query.error")} description={servicesListQuery.error.message} small />;
+    }
+
+    const servicesList = servicesListQuery.data ?? [];
 
     if (!servicesList || servicesList.length === 0) {
         return (

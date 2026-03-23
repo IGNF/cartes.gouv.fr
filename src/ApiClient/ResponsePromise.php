@@ -90,9 +90,9 @@ final class ResponsePromise
      * Toutes les réponses doivent provenir de la même instance de HttpClient pour permettre le streaming.
      * Les erreurs sont ignorées si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
      *
-     * @param array<int|string, ResponsePromise> $pendingsByKey
+     * @param array<int|string,ResponsePromise> $pendingsByKey
      *
-     * @return array<int|string, array<mixed>>
+     * @return array<int|string,array<mixed>|null>
      */
     public static function all(
         HttpClientInterface $httpClient,
