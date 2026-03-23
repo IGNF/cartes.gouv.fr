@@ -259,11 +259,11 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         try {
             $datasheet = json_decode($this->getDetailed($datastoreId, $datasheetName)->getContent(), true);
 
+            $servicesList = json_decode($this->getServices($datastoreId, $datasheetName)->getContent(), true);
+
             // suppr des services (config et offering)
-            if (isset($datasheet['service_list'])) {
-                foreach ($datasheet['service_list'] as $offering) {
-                    $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id']);
-                }
+            foreach ($servicesList as $offering) {
+                $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id']);
             }
 
             // suppr des uploads

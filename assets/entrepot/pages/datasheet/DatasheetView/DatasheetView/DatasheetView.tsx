@@ -14,7 +14,7 @@ import LoadingText from "@/components/Utils/LoadingText";
 import { blockingProcessingStatuses } from "@/hooks/queries/useStoredDataUseProcessings";
 import { delta } from "@/utils";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
-import type { Datasheet, DatasheetDetailed, Metadata } from "../../../../../@types/app";
+import type { Datasheet, DatasheetDetailed, Metadata, Service } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../../components/Utils/Wait";
@@ -87,7 +87,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         enabled: !datasheetDeleteMutation.isPending,
     });
 
-    const serviceListQuery = useQuery({
+    const serviceListQuery = useQuery<Service[], CartesApiException>({
         queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
         staleTime: 60000,

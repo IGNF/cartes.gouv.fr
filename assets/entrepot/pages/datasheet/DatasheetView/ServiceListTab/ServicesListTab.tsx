@@ -1,18 +1,19 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { UseQueryResult } from "@tanstack/react-query";
 import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import LoadingText from "@/components/Utils/LoadingText";
+import { CartesApiException } from "@/modules/jsonFetch";
 import { DatasheetDetailed, Service } from "../../../../../@types/app";
 import { useTranslation } from "../../../../../i18n";
 import ServicesListItem from "./ServicesListItem";
-import Alert from "@codegouvfr/react-dsfr/Alert";
 
 type ServicesListTabProps = {
     datasheet: DatasheetDetailed;
     datastoreId: string;
-    servicesListQuery: UseQueryResult<Service[]>;
+    servicesListQuery: UseQueryResult<Service[], CartesApiException>;
 };
 const ServicesListTab: FC<ServicesListTabProps> = ({ datastoreId, datasheet, servicesListQuery }) => {
     const { t } = useTranslation("DatasheetView");
