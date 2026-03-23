@@ -107,7 +107,7 @@ React Query is persisted to localStorage (24h TTL). `@/*` aliases map to `assets
 
 ### PHP/Symfony
 
-- Extend `AbstractApiService` for all external API clients.
+- Inject `ApiClient` (via `#[Autowire]`) in domain services.
 - Use constructor injection. Use typed DTOs for request/response models.
 - Comments in French; code identifiers in English.
 

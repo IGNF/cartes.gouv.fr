@@ -71,7 +71,7 @@ final class ResponsePromise
     }
 
     /**
-     * Applique une transformation à la réponse JSON, en restant lazy jusqu'à la consommation. Utile pour les cas où on veut faire du mapping ou filtrage avant de consommer la réponse.
+     * Consomme la réponse JSON et applique une transformation au résultat. Raccourci pour éviter une variable intermédiaire.
      *
      * @param callable(array<mixed>): mixed $transform
      */
@@ -104,7 +104,7 @@ final class ResponsePromise
             return [];
         }
 
-        $resolved = [];
+        $resolved = array_fill_keys(array_keys($pendingsByKey), null);
         $responseKeyMap = [];
         $responseList = [];
 

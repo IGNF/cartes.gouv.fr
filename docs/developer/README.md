@@ -8,11 +8,10 @@
 - [Explication des workflows](workflows.md)
 - [Utilisation de l'API Entrepôt](./entrepot/README.md)
 
-## Implémentations et features
+## Implémentations et features spécifiques à ce projet
 
 - [ApiClient (requêtes HTTP, parallélisme, pagination)](./api-client/README.md)
 - [File Uploader](./file-uploader/README.md)
-- [Utilisation de l'API Entrepôt](./entrepot/README.md)
 - Explication des workflows :
     - [Workflow d'intégration d'un upload vecteur](./workflows/upload-integration-vector/README.md)
 
