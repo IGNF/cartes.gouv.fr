@@ -61,7 +61,8 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
             <p className={fr.cx("fr-text--xs", "fr-mb-0")}>{`Formats de fichiers autorisés\u202f:`}</p>
             <ul className={fr.cx("fr-mt-0")}>
                 <li>
-                    <strong>GeoPackage</strong> (.gpkg ou .zip contenant au moins un fichier .gpkg)
+                    <strong>GeoPackage</strong> (.gpkg ou .zip contenant au moins un fichier .gpkg. Le fichier ne doit contenir que des données vectorielles. La
+                    présence de données raster fera échouer l’import.)
                 </li>
                 <li>
                     <strong>GeoJSON</strong> (.geojson ou .zip contenant au moins un fichier .geojson)
