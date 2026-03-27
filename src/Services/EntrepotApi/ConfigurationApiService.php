@@ -11,7 +11,7 @@ final class ConfigurationApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        private readonly ApiClient $api,
+        public readonly ApiClient $api,
     ) {
     }
 

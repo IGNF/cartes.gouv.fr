@@ -41,7 +41,11 @@ const RQKeys = {
     datastore_datasheet_metadata: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName, "metadata"],
     datastore_datasheet_service_list: (datastoreId: string, datasheetName: string) => ["datastore", datastoreId, "datasheet", datasheetName, "services"],
 
-    datastore_offering_list: (datastoreId: string): string[] => ["datastore", datastoreId, "offering"],
+    datastore_offering_list: (datastoreId: string, queryParams?: object): string[] => {
+        const keys = ["datastore", datastoreId, "offering"];
+        if (queryParams) keys.push(JSON.stringify(queryParams));
+        return keys;
+    },
     datastore_layernames_list: (datastoreId: string, configurationType: ConfigurationTypeEnum | OfferingTypeEnum): string[] => [
         "datastore",
         datastoreId,
