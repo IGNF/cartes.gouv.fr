@@ -10,9 +10,10 @@ interface DataCardProps {
     type: ReactNode;
     size?: ReactNode;
     buttons?: (ButtonProps | null | undefined | false)[];
+    datasheetName?: ReactNode;
 }
 export default function DataCard(props: DataCardProps) {
-    const { name, type, size, buttons } = props;
+    const { name, type, size, buttons, datasheetName } = props;
 
     const { classes, cx } = useStyles();
     const _buttons = buttons?.filter((btn): btn is ButtonProps => Boolean(btn));
@@ -24,13 +25,19 @@ export default function DataCard(props: DataCardProps) {
                     <strong>{name}</strong>
                 </div>
                 <div className={cx(fr.cx("fr-text--xs", "fr-m-0", "fr-mb-3v"), classes.type)}>{type}</div>
-                {size && (
-                    <ul className={fr.cx("fr-tags-group")}>
+
+                <ul className={fr.cx("fr-tags-group")}>
+                    {size && (
                         <li>
                             <Tag small>{size}</Tag>
                         </li>
-                    </ul>
-                )}
+                    )}
+                    {datasheetName && (
+                        <li>
+                            <Tag small>{datasheetName}</Tag>
+                        </li>
+                    )}
+                </ul>
             </div>
             {_buttons && isNonEmptyButtonsArray(_buttons) && (
                 <div className={cx(fr.cx("fr-col", "fr-col--bottom"), classes.colButtons)}>

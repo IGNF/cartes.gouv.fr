@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { Datastore, EndpointTypeEnum, Metadata, Offering, OfferingTypeEnum } from "../../../../../@types/app";
+import { Configuration, Datastore, EndpointTypeEnum, Metadata, Offering, OfferingTypeEnum } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
@@ -46,9 +46,11 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
 
     const metadataEndpoints = useMemo(() => endpointsUsage.filter((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA), [endpointsUsage]);
 
-    const offeringsListQuery = useQuery<Offering[], CartesApiException>({
-        queryKey: RQKeys.datastore_offering_list(datastore._id),
-        queryFn: ({ signal }) => api.service.getOfferingsDetailed(datastore._id, { signal }),
+    type OfferingWithFullConfig = Offering & { configuration: Configuration };
+    const queryParams = { detailed: true, detailedConfiguration: true };
+    const offeringsListQuery = useQuery<OfferingWithFullConfig[], CartesApiException>({
+        queryKey: RQKeys.datastore_offering_list(datastore._id, queryParams),
+        queryFn: ({ signal }) => api.service.getOfferings<OfferingWithFullConfig>(datastore._id, queryParams, { signal }),
         staleTime: 60000,
     });
 
@@ -150,6 +152,7 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                                                 key={offering._id}
                                                 name={offering.layer_name}
                                                 type={offering.type}
+                                                datasheetName={offering.configuration?.tags?.datasheet_name}
                                                 buttons={[
                                                     {
                                                         iconId: "fr-icon-delete-line",
@@ -193,6 +196,7 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                                     key={metadata._id}
                                     name={metadata.file_identifier}
                                     type={metadata.type}
+                                    datasheetName={metadata.tags?.datasheet_name}
                                     buttons={[
                                         {
                                             iconId: "fr-icon-delete-line",

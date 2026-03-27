@@ -107,6 +107,7 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
                         name={storedData.name}
                         type={t("stored_data.type.title", { type: storedData.type })}
                         size={storedData.size ? niceBytes(storedData.size?.toString()) : t("data.size.unknown")}
+                        datasheetName={storedData.tags?.datasheet_name}
                         buttons={[
                             {
                                 iconId: "fr-icon-delete-line",

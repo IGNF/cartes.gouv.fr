@@ -107,6 +107,7 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
                         name={vectorDb.name}
                         type={t("stored_data.type.title", { type: vectorDb.type })}
                         size={vectorDb.size ? niceBytes(vectorDb.size?.toString()) : t("data.size.unknown")}
+                        datasheetName={vectorDb.tags?.datasheet_name}
                         buttons={[
                             {
                                 iconId: "fr-icon-delete-line",

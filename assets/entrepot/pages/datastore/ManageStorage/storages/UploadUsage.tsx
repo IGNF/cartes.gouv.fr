@@ -126,6 +126,7 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                         name={upload.name}
                         type={t("storage.upload.type.title", { type: upload.type })}
                         size={upload.size ? niceBytes(upload.size?.toString()) : t("data.size.unknown")}
+                        datasheetName={upload.tags?.datasheet_name}
                         buttons={[
                             {
                                 iconId: "fr-icon-delete-line",

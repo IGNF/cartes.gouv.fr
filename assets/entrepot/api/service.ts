@@ -1,4 +1,4 @@
-import type { OfferingStandardDetailResponseDto, OfferingStandardListResponseDto } from "@/@types/entrepot";
+import type { OfferingStandardListResponseDto } from "@/@types/entrepot";
 import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
 import { ConfigurationTypeEnum, OfferingTypeEnum, type Service } from "../../@types/app";
@@ -10,16 +10,9 @@ const getService = (datastoreId: string, offeringId: string, otherOptions: Reque
     });
 };
 
-const getOfferings = (datastoreId: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_service_get_offerings_list", { datastoreId });
-    return jsonFetch<OfferingStandardListResponseDto[]>(url, {
-        ...otherOptions,
-    });
-};
-
-const getOfferingsDetailed = (datastoreId: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_service_get_offerings_list", { datastoreId, detailed: true });
-    return jsonFetch<OfferingStandardDetailResponseDto[]>(url, {
+const getOfferings = <T = OfferingStandardListResponseDto>(datastoreId: string, queryParams: object = {}, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_service_get_offerings_list", { datastoreId, ...queryParams });
+    return jsonFetch<T[]>(url, {
         ...otherOptions,
     });
 };
@@ -41,7 +34,6 @@ const getExistingLayerNames = (datastoreId: string, type: ConfigurationTypeEnum 
 const service = {
     getService,
     getOfferings,
-    getOfferingsDetailed,
     unpublishService,
     getExistingLayerNames,
 };

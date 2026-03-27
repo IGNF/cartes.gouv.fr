@@ -43,13 +43,30 @@ class ServiceController extends AbstractController implements ApiControllerInter
     }
 
     #[Route('', name: 'get_offerings_list', methods: ['GET'])]
-    public function getOfferings(string $datastoreId, #[MapQueryParameter] bool $detailed = false): JsonResponse
+    public function getOfferings(string $datastoreId, #[MapQueryParameter] bool $detailed = false, #[MapQueryParameter] bool $detailedConfiguration = false): JsonResponse
     {
         try {
             if (true === $detailed) {
                 $offerings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId)->resolve();
             } else {
                 $offerings = $this->configurationApiService->getAllOfferings($datastoreId)->resolve();
+            }
+
+            if (true === $detailedConfiguration) {
+                $pendingConfigurationsById = [];
+
+                foreach ($offerings as $offering) {
+                    $configId = $offering['configuration']['_id'];
+                    $pendingConfigurationsById[$configId] = $this->configurationApiService->get($datastoreId, $configId);
+                }
+
+                $configurationsById = $this->configurationApiService->api->resolveAll($pendingConfigurationsById);
+
+                foreach ($offerings as &$offering) {
+                    $configId = $offering['configuration']['_id'];
+                    $offering['configuration'] = $configurationsById[$configId];
+                }
+                unset($offering);
             }
 
             return $this->json($offerings);

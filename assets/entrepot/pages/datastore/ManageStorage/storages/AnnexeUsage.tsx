@@ -134,6 +134,7 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                             name={annexe.paths?.[0] ?? "-"}
                             type={annexe.mime_type}
                             size={annexe.size ? niceBytes(annexe.size?.toString()) : t("data.size.unknown")}
+                            datasheetName={datasheetName}
                             buttons={[
                                 {
                                     iconId: "fr-icon-delete-line",
