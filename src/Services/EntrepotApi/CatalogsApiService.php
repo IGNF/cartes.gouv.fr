@@ -2,15 +2,25 @@
 
 namespace App\Services\EntrepotApi;
 
-class CatalogsApiService extends BaseEntrepotApiService
+use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+final class CatalogsApiService
 {
-    public function getAllCommunities(): mixed
-    {
-        return $this->requestAll('catalogs/communities');
+    public function __construct(
+        #[Autowire(service: 'app.api_client.entrepot')]
+        private readonly ApiClient $api,
+    ) {
     }
 
-    public function getAllOrganizations(): mixed
+    public function getAllCommunities(): PaginatedPromise
     {
-        return $this->requestAll('catalogs/organizations');
+        return $this->api->requestAll('catalogs/communities');
+    }
+
+    public function getAllOrganizations(): PaginatedPromise
+    {
+        return $this->api->requestAll('catalogs/organizations');
     }
 }

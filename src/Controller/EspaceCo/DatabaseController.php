@@ -33,7 +33,7 @@ class DatabaseController extends AbstractController implements ApiControllerInte
     public function getAll(#[MapQueryParameter] array $fields = []): JsonResponse
     {
         try {
-            $databases = $this->databaseApiService->getAll($fields);
+            $databases = $this->databaseApiService->getAll($fields)->resolve();
 
             return new JsonResponse($databases);
         } catch (ApiException $ex) {
@@ -50,7 +50,7 @@ class DatabaseController extends AbstractController implements ApiControllerInte
         #[MapQueryParameter] array $fields = []): JsonResponse
     {
         try {
-            $database = $this->databaseApiService->getDatabase($databaseId, $fields);
+            $database = $this->databaseApiService->getDatabase($databaseId, $fields)->array();
 
             return new JsonResponse($database);
         } catch (ApiException $ex) {
@@ -69,7 +69,7 @@ class DatabaseController extends AbstractController implements ApiControllerInte
         #[MapQueryParameter] array $fields = []): JsonResponse
     {
         try {
-            $databases = $this->databaseApiService->searchBy($field, $value, $sort, $fields);
+            $databases = $this->databaseApiService->searchBy($field, $value, $sort, $fields)->resolve();
 
             return new JsonResponse($databases);
         } catch (ApiException $ex) {
@@ -87,7 +87,7 @@ class DatabaseController extends AbstractController implements ApiControllerInte
         #[MapQueryParameter] array $fields = []): JsonResponse
     {
         try {
-            $table = $this->databaseApiService->getTable($databaseId, $tableId, $fields);
+            $table = $this->databaseApiService->getTable($databaseId, $tableId, $fields)->array();
 
             return new JsonResponse($table);
         } catch (ApiException $ex) {

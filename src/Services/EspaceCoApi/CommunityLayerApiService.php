@@ -2,32 +2,25 @@
 
 namespace App\Services\EspaceCoApi;
 
-use App\Security\KeycloakTokenManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class CommunityLayerApiService extends BaseEspaceCoApiService
+final class CommunityLayerApiService
 {
-    public function __construct(HttpClientInterface $httpClient,
-        ParameterBagInterface $parameters,
-        Filesystem $filesystem,
-        KeycloakTokenManager $tokenManager,
-        LoggerInterface $logger,
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger);
     }
 
     /**
      * @param array<mixed> $fields
-     *
-     * @return array<mixed>
      */
-    public function getLayers(int $communityId, ?array $fields = []): array
+    public function getLayers(int $communityId, ?array $fields = []): PaginatedPromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->requestAll("communities/$communityId/layers", $query);
+        return $this->api->requestAll("communities/$communityId/layers", $query);
     }
 }

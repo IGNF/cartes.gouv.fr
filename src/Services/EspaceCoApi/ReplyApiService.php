@@ -2,29 +2,39 @@
 
 namespace App\Services\EspaceCoApi;
 
-class ReplyApiService extends BaseEspaceCoApiService
+use App\ApiClient\ApiClient;
+use App\ApiClient\ResponsePromise;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+final class ReplyApiService
 {
-    /**
-     * @param array<mixed> $body
-     */
-    public function add(string $reportId, array $body): array
-    {
-        return $this->request('POST', "reports/$reportId/replies", $body);
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
+    ) {
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function replace(string $reportId, string $replyId, array $body): array
+    public function add(string $reportId, array $body): ResponsePromise
     {
-        return $this->request('PUT', "reports/$reportId/replies/$replyId", $body);
+        return $this->api->post("reports/$reportId/replies", $body);
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function modify(string $reportId, string $replyId, array $body): array
+    public function replace(string $reportId, string $replyId, array $body): ResponsePromise
     {
-        return $this->request('PATCh', "reports/$reportId/replies/$replyId", $body);
+        return $this->api->put("reports/$reportId/replies/$replyId", $body);
+    }
+
+    /**
+     * @param array<mixed> $body
+     */
+    public function modify(string $reportId, string $replyId, array $body): ResponsePromise
+    {
+        return $this->api->patch("reports/$reportId/replies/$replyId", $body);
     }
 }

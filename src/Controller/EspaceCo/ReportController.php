@@ -39,7 +39,9 @@ class ReportController extends AbstractController implements ApiControllerInterf
             $limit = $request->query->get('limit', 10);
             $query = $request->query->all();
 
-            ['content' => $content, 'headers' => $headers] = $this->reportApiService->getList($page, $limit, $query);
+            $result = $this->reportApiService->getList($page, $limit, $query);
+            $content = $result->content;
+            $headers = $result->headers;
 
             $response = new JsonResponse($content, Response::HTTP_PARTIAL_CONTENT);
             $response->headers->set('Content-Range', $headers['content-range'][0]);
@@ -56,7 +58,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
         try {
             $body = json_decode($request->getContent(), true);
 
-            $report = $this->reportApiService->add($body);
+            $report = $this->reportApiService->add($body)->array();
 
             return $this->json($report);
         } catch (ApiException $ex) {
@@ -68,7 +70,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
     public function get(string $reportId): JsonResponse
     {
         try {
-            return $this->json($this->reportApiService->get($reportId));
+            return $this->json($this->reportApiService->get($reportId)->array());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -80,7 +82,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
         try {
             $body = json_decode($request->getContent(), true);
 
-            $report = $this->reportApiService->replace($reportId, $body);
+            $report = $this->reportApiService->replace($reportId, $body)->array();
 
             return $this->json($report);
         } catch (ApiException $ex) {
@@ -94,7 +96,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
         try {
             $body = json_decode($request->getContent(), true);
 
-            $report = $this->reportApiService->modify($reportId, $body);
+            $report = $this->reportApiService->modify($reportId, $body)->array();
 
             return $this->json($report);
         } catch (ApiException $ex) {
@@ -106,7 +108,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
     public function delete(string $reportId): Response
     {
         try {
-            $report = $this->reportApiService->delete($reportId);
+            $report = $this->reportApiService->delete($reportId)->array();
 
             return $this->json($report, Response::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -157,7 +159,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
                 $files[$fieldName] = $filepath;
             }
 
-            return $this->json($this->reportApiService->addAttachments($reportId, $files));
+            return $this->json($this->reportApiService->addAttachments($reportId, $files)->array());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -167,7 +169,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
     public function deleteAttachment(string $reportId, string $attachmentId): JsonResponse
     {
         try {
-            $report = $this->reportApiService->deleteAttachment($reportId, $attachmentId);
+            $report = $this->reportApiService->deleteAttachment($reportId, $attachmentId)->array();
 
             return $this->json($report, Response::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -179,7 +181,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
     public function getRss(): Response
     {
         try {
-            $rss = $this->reportApiService->getRss();
+            $rss = $this->reportApiService->getRss()->text();
 
             return new Response($rss, Response::HTTP_OK, [
                 'Content-Type' => 'application/xml',
@@ -193,7 +195,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
     public function getWfs(Request $request): Response
     {
         try {
-            $wfs = $this->reportApiService->getWfs($request->query->all());
+            $wfs = $this->reportApiService->getWfs($request->query->all())->text();
 
             $contentType = str_starts_with($wfs, '<?xml') ? 'application/xml' : 'application/json';
 

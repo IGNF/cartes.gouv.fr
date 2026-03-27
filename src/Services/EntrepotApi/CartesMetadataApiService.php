@@ -50,7 +50,7 @@ class CartesMetadataApiService
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
-        ]);
+        ])->resolve();
 
         if (0 === count($metadataList)) {
             return null;
@@ -64,7 +64,7 @@ class CartesMetadataApiService
         $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, [
             sprintf('%s=%s', CommonTags::DATASHEET_NAME, $datasheetName),
             'type=thumbnail',
-        ]);
+        ])->resolve();
 
         if (0 === count($annexeList)) {
             return null;
@@ -87,7 +87,7 @@ class CartesMetadataApiService
             return;
         }
 
-        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id']);
+        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $datasheetName);
@@ -99,7 +99,7 @@ class CartesMetadataApiService
 
         // dépublie la metadata (sans la supprimer) s'il n'y a plus de services publiés
         if (0 === count($cswMetadata->layers) && isset($apiMetadata['endpoints'][0]['_id'])) {
-            $this->metadataApiService->unpublish($datastoreId, $cswMetadata->fileIdentifier, $apiMetadata['endpoints'][0]['_id']);
+            $this->metadataApiService->unpublish($datastoreId, $cswMetadata->fileIdentifier, $apiMetadata['endpoints'][0]['_id'])->await();
         }
     }
 
@@ -110,7 +110,7 @@ class CartesMetadataApiService
             return;
         }
 
-        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id']);
+        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
@@ -126,7 +126,7 @@ class CartesMetadataApiService
             return;
         }
 
-        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id']);
+        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->documents = $this->getDatasheetDocuments($datastoreId, $datasheetName);
@@ -152,11 +152,10 @@ class CartesMetadataApiService
             }
 
             return $this->createMetadata($datastoreId, $datasheetName, $formData);
-        } else {
-            // une métadonnée existe déjà qu'on va mettre à jour
-
-            return $this->updateMetadata($datastoreId, $datasheetName, $apiMetadata, $formData);
         }
+        // une métadonnée existe déjà qu'on va mettre à jour
+
+        return $this->updateMetadata($datastoreId, $datasheetName, $apiMetadata, $formData);
     }
 
     /**
@@ -179,9 +178,9 @@ class CartesMetadataApiService
         $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
         $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], [
             CommonTags::DATASHEET_NAME => $datasheetName,
-        ]);
+        ])->array();
 
-        $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id']);
+        $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
 
         $newApiMetadata['csw_metadata'] = $newCswMetadata;
 
@@ -196,7 +195,7 @@ class CartesMetadataApiService
     {
         $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
 
-        $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $oldApiMetadata['_id']);
+        $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $oldApiMetadata['_id'])->text();
         $oldCswMetadata = $this->cswMetadataHelper->fromXml($oldMetadataFileXml);
 
         $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $oldCswMetadata, $formData);
@@ -211,17 +210,17 @@ class CartesMetadataApiService
 
         // suppression et recréation de métadonnées si changement de file_identifier
         if ($oldCswMetadata->fileIdentifier !== $newCswMetadata->fileIdentifier) {
-            $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id']);
-            $this->metadataApiService->delete($datastoreId, $oldApiMetadata['_id']);
+            $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            $this->metadataApiService->delete($datastoreId, $oldApiMetadata['_id'])->await();
 
             $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
         } else {
             $newApiMetadata = $this->metadataApiService->replaceFile($datastoreId, $oldApiMetadata['_id'], $newMetadataFilePath);
         }
-        $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], $oldApiMetadata['tags']);
+        $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], $oldApiMetadata['tags'])->array();
 
         if (0 === count($newApiMetadata['endpoints'])) { // la métadonnée n'est pas déjà publiée
-            $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id']);
+            $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
         }
 
         $newApiMetadata['csw_metadata'] = $newCswMetadata;
@@ -287,16 +286,16 @@ class CartesMetadataApiService
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
-        ]);
+        ])->resolve();
 
         $layers = [];
 
         foreach ($configurationsList as $configuration) {
-            $configurationOfferings = $this->configurationApiService->getConfigurationOfferings($datastoreId, $configuration['_id']);
+            $configurationOfferings = $this->configurationApiService->getConfigurationOfferings($datastoreId, $configuration['_id'])->resolve();
 
             if (count($configurationOfferings) > 0) {
                 $offering = $configurationOfferings[0];
-                $offering = $this->configurationApiService->getOffering($datastoreId, $offering['_id']);
+                $offering = $this->configurationApiService->getOffering($datastoreId, $offering['_id'])->array();
 
                 $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
 
@@ -319,12 +318,12 @@ class CartesMetadataApiService
 
                     case ConfigurationTypes::WMTSTMS:
                         $layerName = $offering['layer_name'];
-                        $configuration = $this->configurationApiService->get($datastoreId, $configuration['_id']);
+                        $configuration = $this->configurationApiService->get($datastoreId, $configuration['_id'])->array();
 
                         if (!isset($configuration['type_infos']['used_data'][0]['stored_data'])) {
                             break;
                         }
-                        $pyramid = $this->storedDataApiService->get($datastoreId, $configuration['type_infos']['used_data'][0]['stored_data']);
+                        $pyramid = $this->storedDataApiService->get($datastoreId, $configuration['type_infos']['used_data'][0]['stored_data'])->array();
 
                         $gmdOnlineResourceProtocol = null;
                         $actualType = null;
@@ -366,7 +365,7 @@ class CartesMetadataApiService
      */
     private function getWfsSubLayers(string $datastoreId, array $configuration, array $offering, string $serviceEndpointUrl): array
     {
-        $configuration = $this->configurationApiService->get($datastoreId, $configuration['_id']);
+        $configuration = $this->configurationApiService->get($datastoreId, $configuration['_id'])->array();
         $configRelations = $configuration['type_infos']['used_data'][0]['relations'];
 
         $relationLayers = array_map(function ($relation) use ($offering, $serviceEndpointUrl) {
@@ -450,7 +449,7 @@ class CartesMetadataApiService
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
             'status' => ConfigurationStatuses::PUBLISHED,
-        ]);
+        ])->resolve();
         $layerTypes = array_map(fn ($config) => $config['type'], $configurationsList);
         $layerTypes = array_values(array_unique($layerTypes));
 
@@ -465,7 +464,7 @@ class CartesMetadataApiService
 
             $technicalName = $endpoint['technical_name'];
 
-            $annexes = $this->annexeApiService->getAll($datastoreId, null, "/$technicalName/capabilities.xml");
+            $annexes = $this->annexeApiService->getAll($datastoreId, null, "/$technicalName/capabilities.xml")->resolve();
             if (1 === count($annexes)) {
                 $capabilitiesFiles[] = new CswCapabilitiesFile(
                     "GetCapabilities - $type",
@@ -485,14 +484,14 @@ class CartesMetadataApiService
     {
         $labels = ["datasheet_name=$datasheetName", 'type=document-list'];
 
-        $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, $labels);
+        $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, $labels)->resolve();
 
         // retourne l'annexe s'il existe
         if (0 === count($annexeList)) {
             return [];
         }
 
-        $docsListJson = $this->annexeApiService->download($datastoreId, $annexeList[0]['_id']);
+        $docsListJson = $this->annexeApiService->download($datastoreId, $annexeList[0]['_id'])->text();
         $documentsList = json_decode($docsListJson, true);
 
         return array_map(fn ($doc) => new CswDocument(

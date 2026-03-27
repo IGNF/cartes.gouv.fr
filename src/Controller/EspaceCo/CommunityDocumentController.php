@@ -44,7 +44,7 @@ class CommunityDocumentController extends AbstractController implements ApiContr
         #[MapQueryParameter] ?array $fields = [],
     ): JsonResponse {
         try {
-            $response = $this->communityDocumentApiService->getDocuments($communityId, $fields);
+            $response = $this->communityDocumentApiService->getDocuments($communityId, $fields)->array();
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {
@@ -82,7 +82,7 @@ class CommunityDocumentController extends AbstractController implements ApiContr
         try {
             $data = json_decode($request->getContent(), true);
 
-            $response = $this->communityDocumentApiService->updateDocument($communityId, $documentId, $data);
+            $response = $this->communityDocumentApiService->updateDocument($communityId, $documentId, $data)->array();
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {
@@ -94,7 +94,7 @@ class CommunityDocumentController extends AbstractController implements ApiContr
     public function deleteDocument(int $communityId, int $documentId): JsonResponse
     {
         try {
-            $this->communityDocumentApiService->deleteDocument($communityId, $documentId);
+            $this->communityDocumentApiService->deleteDocument($communityId, $documentId)->await();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {

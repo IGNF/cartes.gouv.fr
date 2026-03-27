@@ -47,9 +47,9 @@ class ServiceController extends AbstractController implements ApiControllerInter
     {
         try {
             if (true === $detailed) {
-                $offerings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId);
+                $offerings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId)->resolve();
             } else {
-                $offerings = $this->configurationApiService->getAllOfferings($datastoreId);
+                $offerings = $this->configurationApiService->getAllOfferings($datastoreId)->resolve();
             }
 
             return $this->json($offerings);
@@ -76,8 +76,8 @@ class ServiceController extends AbstractController implements ApiControllerInter
         try {
             $datastore = $this->datastoreApiService->get($datastoreId);
 
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
 
             $this->cartesServiceApiService->unpublish($datastoreId, $offeringId);
 
@@ -111,10 +111,10 @@ class ServiceController extends AbstractController implements ApiControllerInter
         try {
             $configurations = $this->configurationApiService->getAll($datastoreId, [
                 'type' => $type,
-            ]);
+            ])->resolve();
             $offerings = $this->configurationApiService->getAllOfferings($datastoreId, [
                 'type' => $type,
-            ]);
+            ])->resolve();
 
             $configLayerNames = array_map(fn ($config) => $config['layer_name'], $configurations);
             $offeringLayerNames = array_map(fn ($offering) => $offering['layer_name'], $offerings);

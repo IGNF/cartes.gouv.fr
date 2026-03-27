@@ -2,27 +2,41 @@
 
 namespace App\Services\EntrepotApi;
 
-class StaticApiService extends BaseEntrepotApiService
+use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\PaginatedResponse;
+use App\ApiClient\ResponsePromise;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Filesystem\Filesystem;
+
+final class StaticApiService
 {
-    /**
-     * @param array<mixed> $query
-     */
-    public function getList(string $datastoreId, array $query = []): array
-    {
-        return $this->request('GET', "datastores/$datastoreId/statics", [], $query, [], false, true, true);
+    public function __construct(
+        #[Autowire(service: 'app.api_client.entrepot')]
+        private readonly ApiClient $api,
+        private readonly Filesystem $filesystem,
+    ) {
     }
 
     /**
      * @param array<mixed> $query
      */
-    public function getAll(string $datastoreId, $query = []): array
+    public function getList(string $datastoreId, array $query = []): PaginatedResponse
     {
-        return $this->requestAll("datastores/$datastoreId/statics", $query);
+        return $this->api->get("datastores/$datastoreId/statics", $query)->arrayWithHeaders();
     }
 
-    public function get(string $datastoreId, string $staticId): array
+    /**
+     * @param array<mixed> $query
+     */
+    public function getAll(string $datastoreId, array $query = []): PaginatedPromise
     {
-        return $this->request('GET', "datastores/$datastoreId/statics/$staticId");
+        return $this->api->requestAll("datastores/$datastoreId/statics", $query);
+    }
+
+    public function get(string $datastoreId, string $staticId): ResponsePromise
+    {
+        return $this->api->get("datastores/$datastoreId/statics/$staticId");
     }
 
     public function add(string $datastoreId, string $filepath, string $name, string $type, ?string $description = null): array
@@ -36,7 +50,7 @@ class StaticApiService extends BaseEntrepotApiService
             $formFields['description'] = $description;
         }
 
-        $response = $this->sendFile('POST', "datastores/$datastoreId/statics", $filepath, $formFields);
+        $response = $this->api->sendFile('POST', "datastores/$datastoreId/statics", $filepath, $formFields)->array();
 
         $this->filesystem->remove($filepath);
 
@@ -45,28 +59,28 @@ class StaticApiService extends BaseEntrepotApiService
 
     public function replaceFile(string $datastoreId, string $staticId, string $filepath): array
     {
-        $response = $this->sendFile('PUT', "datastores/$datastoreId/statics/$staticId", $filepath);
+        $response = $this->api->sendFile('PUT', "datastores/$datastoreId/statics/$staticId", $filepath)->array();
 
         $this->filesystem->remove($filepath);
 
         return $response;
     }
 
-    public function delete(string $datastoreId, string $staticId): array
+    public function delete(string $datastoreId, string $staticId): ResponsePromise
     {
-        return $this->request('DELETE', "datastores/$datastoreId/statics/$staticId");
+        return $this->api->delete("datastores/$datastoreId/statics/$staticId");
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function modifyInfo(string $datastoreId, string $staticId, array $body): array
+    public function modifyInfo(string $datastoreId, string $staticId, array $body): ResponsePromise
     {
-        return $this->request('PATCH', "datastores/$datastoreId/statics/$staticId", $body);
+        return $this->api->patch("datastores/$datastoreId/statics/$staticId", $body);
     }
 
-    public function downloadFile(string $datastoreId, string $staticId): mixed
+    public function downloadFile(string $datastoreId, string $staticId): ResponsePromise
     {
-        return $this->request('GET', "datastores/$datastoreId/statics/$staticId/file", [], [], [], false, false);
+        return $this->api->get("datastores/$datastoreId/statics/$staticId/file");
     }
 }

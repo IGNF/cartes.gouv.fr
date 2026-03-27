@@ -2,13 +2,23 @@
 
 namespace App\Services\EspaceCoApi;
 
-class LayerApiService extends BaseEspaceCoApiService
+use App\ApiClient\ApiClient;
+use App\ApiClient\ResponsePromise;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+final class LayerApiService
 {
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
+    ) {
+    }
+
     /**
      * @param array<mixed> $datas
      */
-    public function updateLayer(int $communityId, int $layerId, array $datas): array
+    public function updateLayer(int $communityId, int $layerId, array $datas): ResponsePromise
     {
-        return $this->request('PATCH', "communities/$communityId/layers/$layerId", $datas);
+        return $this->api->patch("communities/$communityId/layers/$layerId", $datas);
     }
 }

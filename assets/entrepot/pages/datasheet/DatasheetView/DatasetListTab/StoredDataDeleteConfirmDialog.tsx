@@ -6,7 +6,7 @@ import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 
-import { DatasheetDetailed, DatasheetStoredDataItem, StoredDataTypeEnum } from "@/@types/app";
+import { DatasheetDetailed, DatasheetStoredDataItem, Service, StoredDataTypeEnum } from "@/@types/app";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
@@ -43,8 +43,8 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
     const deleteStoredDataMutation = useMutation({
         mutationFn: () => api.storedData.remove(datastoreId, storedData._id),
         onSuccess() {
+            const offeringsUsingStoredData = dataUsesQuery.data?.offerings_list.map((off) => off._id) ?? [];
             queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (oldDatasheet: DatasheetDetailed) => {
-                const offeringsUsingStoredData = dataUsesQuery.data?.offerings_list.map((off) => off._id) ?? [];
                 return {
                     ...oldDatasheet,
                     vector_db_list:
@@ -59,9 +59,14 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
                         storedData.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR
                             ? oldDatasheet.pyramid_vector_list?.filter((pyr) => pyr._id !== storedData._id)
                             : oldDatasheet.pyramid_vector_list,
-                    service_list: oldDatasheet.service_list?.filter((service) => !offeringsUsingStoredData.includes(service._id)),
                 } satisfies DatasheetDetailed;
             });
+            queryClient.setQueryData(
+                RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
+                (servicesList: Service[] | undefined): Service[] | undefined => {
+                    return servicesList?.filter((service) => !offeringsUsingStoredData.includes(service._id));
+                }
+            );
 
             dataUsesQuery.data?.offerings_list?.forEach((offering) => {
                 queryClient.removeQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offering._id) });

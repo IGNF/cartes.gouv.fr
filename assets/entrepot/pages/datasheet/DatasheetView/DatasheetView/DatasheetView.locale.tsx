@@ -27,6 +27,7 @@ const { i18n } = declareComponentKeys<
     | "metadata_tab.metadata.absent"
     | "metadata_tab.metadata.is_loading"
     | "services_tab.no_service"
+    | "services_tab.query.error"
     | "documents_tab.documents_list.is_loading"
     | "documents_tab.add_document"
     | "documents_tab.add_document.type.label"
@@ -95,6 +96,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
         "Les métadonnées de cette fiche ne sont pas encore disponibles. Créez un premier service à partir d’un de vos jeux de données pour les compléter.",
     "metadata_tab.metadata.is_loading": "Les métadonnées sont en cours de chargement",
     "services_tab.no_service": "Aucun service publié. Créez un service à partir de l’onglet Jeux de données en choisissant une base de données d’origine.",
+    "services_tab.query.error": "Une erreur est survenue lors du chargement de la liste des services",
     "documents_tab.documents_list.is_loading": "Les documents sont en cours de chargement",
     "documents_tab.add_document": "Ajouter un document",
     "documents_tab.add_document.type.label": "Type de document",
@@ -206,6 +208,7 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
     "metadata_tab.metadata.absent": undefined,
     "metadata_tab.metadata.is_loading": undefined,
     "services_tab.no_service": undefined,
+    "services_tab.query.error": undefined,
     "documents_tab.documents_list.is_loading": undefined,
     "documents_tab.add_document": undefined,
     "documents_tab.add_document.type.label": undefined,

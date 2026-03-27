@@ -87,7 +87,7 @@ class SandboxService
      */
     private function getSandboxCommunity(string $sandboxCommunityId): array
     {
-        return $this->communityApiService->get($sandboxCommunityId);
+        return $this->communityApiService->get($sandboxCommunityId)->array();
         // $key = "community-{$sandboxCommunityId}";
 
         // return $this->cache->get($key, function (ItemInterface $item) use ($sandboxCommunityId) {

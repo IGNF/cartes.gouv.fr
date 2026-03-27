@@ -2,72 +2,58 @@
 
 namespace App\Services\EspaceCoApi;
 
-use App\Security\KeycloakTokenManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Mime\Part\DataPart;
-use Symfony\Component\Mime\Part\Multipart\FormDataPart;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\ApiClient\ApiClient;
+use App\ApiClient\ResponsePromise;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class CommunityDocumentApiService extends BaseEspaceCoApiService
+final class CommunityDocumentApiService
 {
-    public function __construct(HttpClientInterface $httpClient,
-        ParameterBagInterface $parameters,
-        Filesystem $filesystem,
-        KeycloakTokenManager $tokenManager,
-        LoggerInterface $logger,
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger);
     }
 
     /**
      * @param array<string> $fields
      */
-    public function getDocuments(int $communityId, ?array $fields = []): array
+    public function getDocuments(int $communityId, ?array $fields = []): ResponsePromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->request('GET', "communities/$communityId/documents", $query);
+        return $this->api->get("communities/$communityId/documents", $query);
     }
 
     /**
      * @param array<string> $fields
      */
-    public function getDocument(int $communityId, int $documentId, ?array $fields = []): array
+    public function getDocument(int $communityId, int $documentId, ?array $fields = []): ResponsePromise
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->request('GET', "communities/$communityId/documents/$documentId", $query);
+        return $this->api->get("communities/$communityId/documents/$documentId", $query);
     }
 
     public function addDocument(int $communityId, string $title, ?string $description, string $tempFilePath): array
     {
-        $formFields = [
-            'title' => $title,
-            'document' => DataPart::fromPath($tempFilePath),
-        ];
+        $formFields = ['title' => $title];
         if (!is_null($description)) {
             $formFields['description'] = $description;
         }
 
-        $formData = new FormDataPart($formFields);
-        $body = $formData->bodyToIterable();
-        $headers = $formData->getPreparedHeaders()->toArray();
-
-        return $this->request('POST', "communities/$communityId/documents", $body, [], $headers, true);
+        return $this->api->sendFile('POST', "communities/$communityId/documents", $tempFilePath, $formFields, [], 'document')->array();
     }
 
     /**
      * @param array<mixed> $data
      */
-    public function updateDocument(int $communityId, int $documentId, array $data): array
+    public function updateDocument(int $communityId, int $documentId, array $data): ResponsePromise
     {
-        return $this->request('PATCH', "communities/$communityId/documents/$documentId", $data);
+        return $this->api->patch("communities/$communityId/documents/$documentId", $data);
     }
 
-    public function deleteDocument(int $communityId, int $documentId): array
+    public function deleteDocument(int $communityId, int $documentId): ResponsePromise
     {
-        return $this->request('DELETE', "communities/$communityId/documents/$documentId");
+        return $this->api->delete("communities/$communityId/documents/$documentId");
     }
 }

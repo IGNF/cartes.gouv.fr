@@ -1,17 +1,12 @@
 import SymfonyRouting from "../../modules/Routing";
 
-import { CartesUser, Datastore, UserKeyDetailedWithAccessesResponseDto, UserKeyWithAccessesResponseDto } from "../../@types/app";
+import { CartesUser, UserKeyDetailedWithAccessesResponseDto, UserKeyWithAccessesResponseDto } from "../../@types/app";
 import { PermissionWithOfferingsDetailsResponseDto, UserKeyCreateDtoUserKeyInfoDto, UserKeyResponseDto, UserKeyUpdateDto } from "../../@types/entrepot";
 import { jsonFetch } from "../../modules/jsonFetch";
 
 const getMe = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_me");
     return jsonFetch<CartesUser>(url, { ...otherOptions });
-};
-
-const getDatastoresList = (otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_user_datastores_list");
-    return jsonFetch<Datastore[]>(url, { ...otherOptions });
 };
 
 /* Retourne la cle detaillee de l'utilisateur courant avec ses access */
@@ -108,7 +103,6 @@ const leaveCommunity = (communityId: string) => {
 
 const user = {
     getMe,
-    getDatastoresList,
     getMyKeys,
     getMyKeyDetailedWithAccesses,
     getMyKeysDetailedWithAccesses,

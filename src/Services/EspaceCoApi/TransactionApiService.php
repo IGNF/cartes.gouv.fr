@@ -2,29 +2,40 @@
 
 namespace App\Services\EspaceCoApi;
 
-class TransactionApiService extends BaseEspaceCoApiService
+use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedResponse;
+use App\ApiClient\ResponsePromise;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+final class TransactionApiService
 {
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
+    ) {
+    }
+
     /**
      * @param array<mixed> $query
      */
-    public function getList(string $databaseId, array $query = []): array
+    public function getList(string $databaseId, array $query = []): PaginatedResponse
     {
-        return $this->request('GET', "databases/{$databaseId}/transactions", [], $query, [], false, true, true);
+        return $this->api->get("databases/{$databaseId}/transactions", $query)->arrayWithHeaders();
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function add(string $databaseId, array $body): array
+    public function add(string $databaseId, array $body): ResponsePromise
     {
-        return $this->request('POST', "databases/{$databaseId}/transactions", $body);
+        return $this->api->post("databases/{$databaseId}/transactions", $body);
     }
 
     /**
      * @param array<mixed> $query
      */
-    public function get(string $databaseId, string $transactionId, array $query = []): array
+    public function get(string $databaseId, string $transactionId, array $query = []): ResponsePromise
     {
-        return $this->request('GET', "databases/{$databaseId}/transactions/{$transactionId}", [], $query);
+        return $this->api->get("databases/{$databaseId}/transactions/{$transactionId}", $query);
     }
 }

@@ -32,7 +32,7 @@ class EmailPlannerController extends AbstractController implements ApiController
     public function get(int $communityId): JsonResponse
     {
         try {
-            $response = $this->emailPlannerApiService->getAll($communityId);
+            $response = $this->emailPlannerApiService->getAll($communityId)->resolve();
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {
@@ -45,7 +45,7 @@ class EmailPlannerController extends AbstractController implements ApiController
     {
         try {
             $data = json_decode($request->getContent(), true);
-            $response = $this->emailPlannerApiService->add($communityId, $data);
+            $response = $this->emailPlannerApiService->add($communityId, $data)->array();
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {
@@ -58,7 +58,7 @@ class EmailPlannerController extends AbstractController implements ApiController
     {
         try {
             $data = json_decode($request->getContent(), true);
-            $response = $this->emailPlannerApiService->update($communityId, $emailPlannerId, $data);
+            $response = $this->emailPlannerApiService->update($communityId, $emailPlannerId, $data)->array();
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {
@@ -70,7 +70,7 @@ class EmailPlannerController extends AbstractController implements ApiController
     public function removeEmailPlanners(int $communityId, int $emailPlannerId): JsonResponse
     {
         try {
-            $this->emailPlannerApiService->remove($communityId, $emailPlannerId);
+            $this->emailPlannerApiService->remove($communityId, $emailPlannerId)->await();
 
             return new JsonResponse(['emailplanner_id' => $emailPlannerId]);
         } catch (ApiException $ex) {

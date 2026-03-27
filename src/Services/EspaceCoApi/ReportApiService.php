@@ -2,92 +2,104 @@
 
 namespace App\Services\EspaceCoApi;
 
-class ReportApiService extends BaseEspaceCoApiService
-{
-    /**
-     * @param array<mixed> $query
-     */
-    public function getList(int $page = 1, int $limit = 10, array $query = []): array
-    {
-        $query['page'] = $page;
-        $query['limit'] = $limit;
+use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\PaginatedResponse;
+use App\ApiClient\ResponsePromise;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-        return $this->request('GET', 'reports', [], $query, [], false, true, true);
+final class ReportApiService
+{
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
+    ) {
     }
 
     /**
      * @param array<mixed> $query
      */
-    public function getAll(array $query = []): array
+    public function getList(int $page = 1, int $limit = 10, array $query = []): PaginatedResponse
     {
-        return $this->requestAll('reports', $query);
+        $query['page'] = $page;
+        $query['limit'] = $limit;
+
+        return $this->api->get('reports', $query)->arrayWithHeaders();
+    }
+
+    /**
+     * @param array<mixed> $query
+     */
+    public function getAll(array $query = []): PaginatedPromise
+    {
+        return $this->api->requestAll('reports', $query);
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function add(array $body): array
+    public function add(array $body): ResponsePromise
     {
-        return $this->request('POST', 'reports', $body);
+        return $this->api->post('reports', $body);
     }
 
     /**
      * @param array<mixed> $fields
      */
-    public function get(string $reportId, $fields = []): array
+    public function get(string $reportId, $fields = []): ResponsePromise
     {
         $query = [];
         if (count($fields)) {
             $query['fields'] = $fields;
         }
 
-        return $this->request('GET', "reports/$reportId", [], $query);
+        return $this->api->get("reports/$reportId", $query);
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function replace(string $reportId, array $body): array
+    public function replace(string $reportId, array $body): ResponsePromise
     {
-        return $this->request('PUT', "reports/$reportId", $body);
+        return $this->api->put("reports/$reportId", $body);
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function modify(string $reportId, array $body): array
+    public function modify(string $reportId, array $body): ResponsePromise
     {
-        return $this->request('PATCH', "reports/$reportId", $body);
+        return $this->api->patch("reports/$reportId", $body);
     }
 
-    public function delete(string $reportId): array
+    public function delete(string $reportId): ResponsePromise
     {
-        return $this->request('DELETE', "reports/$reportId");
+        return $this->api->delete("reports/$reportId");
     }
 
     /**
      * @param array<string,string> $files
      */
-    public function addAttachments(string $reportId, array $files): array
+    public function addAttachments(string $reportId, array $files): ResponsePromise
     {
-        return $this->sendFiles('POST', "reports/$reportId/attachments", $files);
+        return $this->api->sendFiles('POST', "reports/$reportId/attachments", $files);
     }
 
-    public function deleteAttachment(string $reportId, string $attachmentId): array
+    public function deleteAttachment(string $reportId, string $attachmentId): ResponsePromise
     {
-        return $this->request('DELETE', "reports/$reportId/attachments/$attachmentId");
+        return $this->api->delete("reports/$reportId/attachments/$attachmentId");
     }
 
-    public function getRss(): string
+    public function getRss(): ResponsePromise
     {
-        return $this->request('GET', 'reports/rss', [], [], [], false, false, false);
+        return $this->api->get('reports/rss');
     }
 
     /**
      * @param array<mixed> $query
      */
-    public function getWfs(array $query = []): string
+    public function getWfs(array $query = []): ResponsePromise
     {
-        return $this->request('GET', 'reports/wfs', [], $query, [], false, false, false);
+        return $this->api->get('reports/wfs', $query);
     }
 }

@@ -2,129 +2,108 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Security\KeycloakTokenManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\PaginatedResponse;
+use App\ApiClient\ResponsePromise;
+use App\Utils;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class StoredDataApiService extends BaseEntrepotApiService
+final class StoredDataApiService
 {
     public function __construct(
-        HttpClientInterface $httpClient,
-        ParameterBagInterface $parameters,
-        Filesystem $filesystem,
-        KeycloakTokenManager $tokenManager,
-        LoggerInterface $logger,
-        protected CacheInterface $cache,
+        #[Autowire(service: 'app.api_client.entrepot')]
+        private readonly ApiClient $api,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $cache, $logger);
     }
 
     /**
      * @param array<mixed>|null $query
      */
-    public function getList(string $datastoreId, ?array $query = []): array
+    public function getList(string $datastoreId, ?array $query = []): PaginatedResponse
     {
-        $query ??= [];
+        $query = Utils::normalize_query($query ?? []);
 
-        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date du dernier évènement décroissante
-            $query['sort'] = 'last_event,desc';
-        }
-
-        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
-            $query['fields'] = implode(',', $query['fields']);
-        }
-
-        return $this->request('GET', "datastores/$datastoreId/stored_data", [], $query, [], false, true, true);
+        return $this->api->get("datastores/$datastoreId/stored_data", $query)
+            ->arrayWithHeaders();
     }
 
     /**
      * @param array<mixed>|null $query
      */
-    public function getListDetailed(string $datastoreId, ?array $query = []): array
+    public function getListDetailed(string $datastoreId, ?array $query = []): PaginatedResponse
     {
-        $query ??= [];
+        $page = $this->getList($datastoreId, $query);
+        $detailed = $this->api->fetchAllDetailsAsync(
+            $page->content,
+            fn (array $storedData): ResponsePromise => $this->api->get("datastores/$datastoreId/stored_data/{$storedData['_id']}")
+        );
 
-        $storedDataList = $this->getList($datastoreId, $query);
-        foreach ($storedDataList['content'] as &$storedData) {
-            $storedData = $this->get($datastoreId, $storedData['_id']);
-        }
-        unset($storedData);
-
-        return $storedDataList;
+        return new PaginatedResponse($detailed, $page->headers);
     }
 
     /**
      * @param array<mixed> $query
      */
-    public function getAll(string $datastoreId, array $query = []): array
+    public function getAll(string $datastoreId, array $query = []): PaginatedPromise
     {
-        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date du dernier évènement décroissante
-            $query['sort'] = 'last_event,desc';
-        }
+        $query = Utils::normalize_query($query);
 
-        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
-            $query['fields'] = implode(',', $query['fields']);
-        }
-
-        return $this->requestAll("datastores/$datastoreId/stored_data", $query);
+        return $this->api->requestAll("datastores/$datastoreId/stored_data", $query);
     }
 
     /**
-     * @param mixed[] $query
+     * @param array<mixed> $query
+     *
+     * @return array<mixed>
      */
     public function getAllDetailed(string $datastoreId, array $query = []): array
     {
-        $storedDataList = $this->getAll($datastoreId, $query);
+        $storedDataList = $this->getAll($datastoreId, $query)->resolve();
 
-        foreach ($storedDataList as &$storedData) {
-            $storedData = $this->get($datastoreId, $storedData['_id']);
-        }
-
-        return $storedDataList;
+        return $this->api->fetchAllDetailsAsync(
+            $storedDataList,
+            fn (array $storedData): ResponsePromise => $this->api->get("datastores/$datastoreId/stored_data/{$storedData['_id']}")
+        );
     }
 
-    public function get(string $datastoreId, string $storedDataId): array
+    public function get(string $datastoreId, string $storedDataId): ResponsePromise
     {
-        return $this->request('GET', "datastores/$datastoreId/stored_data/$storedDataId");
+        return $this->api->get("datastores/$datastoreId/stored_data/$storedDataId");
     }
 
     /**
      * @param array<mixed>      $body
      * @param array<mixed>|null $initialStoredData
      */
-    public function modify(string $datastoreId, string $storedDataId, array $body = [], ?array $initialStoredData = null): array
+    public function modify(string $datastoreId, string $storedDataId, array $body = [], ?array $initialStoredData = null): ResponsePromise
     {
         if (array_key_exists('extra', $body)) {
-            $initialStoredData = $initialStoredData ?? $this->get($datastoreId, $storedDataId);
+            $initialStoredData ??= $this->get($datastoreId, $storedDataId)->array();
             $body['extra'] = array_merge($initialStoredData['extra'] ?? [], $body['extra']);
         }
 
-        return $this->request('PATCH', "datastores/$datastoreId/stored_data/$storedDataId", $body);
+        return $this->api->patch("datastores/$datastoreId/stored_data/$storedDataId", $body);
     }
 
-    public function remove(string $datastoreId, string $storedDataId): void
+    public function remove(string $datastoreId, string $storedDataId): ResponsePromise
     {
-        $this->request('DELETE', "datastores/$datastoreId/stored_data/$storedDataId");
+        return $this->api->delete("datastores/$datastoreId/stored_data/$storedDataId");
     }
 
     /**
      * @param array<mixed> $tags
      */
-    public function addTags(string $datastoreId, string $storedDataId, array $tags): array
+    public function addTags(string $datastoreId, string $storedDataId, array $tags): ResponsePromise
     {
-        return $this->request('POST', "datastores/$datastoreId/stored_data/$storedDataId/tags", $tags);
+        return $this->api->post("datastores/$datastoreId/stored_data/$storedDataId/tags", $tags);
     }
 
     /**
      * @param array<string> $tags
      */
-    public function removeTags(string $datastoreId, string $storedDataId, $tags): array
+    public function removeTags(string $datastoreId, string $storedDataId, array $tags): ResponsePromise
     {
-        return $this->request('DELETE', "datastores/$datastoreId/stored_data/$storedDataId/tags", [], [
-            'tags' => $tags,
-        ]);
+        return $this->api->delete("datastores/$datastoreId/stored_data/$storedDataId/tags", ['tags' => $tags]);
     }
 }

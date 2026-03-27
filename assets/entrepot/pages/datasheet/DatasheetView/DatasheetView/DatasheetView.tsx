@@ -14,7 +14,7 @@ import LoadingText from "@/components/Utils/LoadingText";
 import { blockingProcessingStatuses } from "@/hooks/queries/useStoredDataUseProcessings";
 import { delta } from "@/utils";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
-import type { Datasheet, DatasheetDetailed, Metadata } from "../../../../../@types/app";
+import type { Datasheet, DatasheetDetailed, Metadata, Service } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../../components/Utils/Wait";
@@ -87,14 +87,22 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         enabled: !datasheetDeleteMutation.isPending,
     });
 
+    const serviceListQuery = useQuery<Service[], CartesApiException>({
+        queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
+        staleTime: 60000,
+        retry: false,
+        enabled: !datasheetDeleteMutation.isPending,
+    });
+
     useEffect(() => {
         // On précharge les données des services parce qu'on les a déjà à ce niveau-là
-        if (datasheetQuery.data?.service_list) {
-            datasheetQuery.data.service_list.forEach((service) => {
+        if (serviceListQuery.data) {
+            serviceListQuery.data.forEach((service) => {
                 queryClient.setQueryData(RQKeys.datastore_offering(datastoreId, service._id), service);
             });
         }
-    }, [datasheetQuery.data?.service_list, datastoreId, queryClient]);
+    }, [serviceListQuery.data, datastoreId, queryClient]);
 
     const metadataQuery = useQuery<Metadata, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),
@@ -111,13 +119,11 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         enabled: !datasheetDeleteMutation.isPending,
     });
 
-    // const queryParams = useMemo(() => ({ input_stored_data: vectorDb._id }), [vectorDb._id]);
-
     const storedDataIds = useMemo(
         () => [
             ...(datasheetQuery.data?.vector_db_list?.map((vectorDb) => vectorDb._id) ?? []),
-            // ...(datasheetQuery.data?.pyramid_vector_list?.map((pyramid) => pyramid._id) ?? []),
-            // ...(datasheetQuery.data?.pyramid_raster_list?.map((pyramid) => pyramid._id) ?? []),
+            ...(datasheetQuery.data?.pyramid_vector_list?.map((pyramid) => pyramid._id) ?? []),
+            ...(datasheetQuery.data?.pyramid_raster_list?.map((pyramid) => pyramid._id) ?? []),
         ],
         [datasheetQuery.data]
     );
@@ -235,7 +241,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         tabId: DatasheetViewActiveTabEnum.Dataset,
                                     },
                                     {
-                                        label: t("tab_label.services", { num: datasheetQuery.data.service_list?.length || 0 }),
+                                        label: t("tab_label.services", { num: serviceListQuery.data?.length || 0 }),
                                         tabId: DatasheetViewActiveTabEnum.Services,
                                     },
                                     {
@@ -262,7 +268,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                                     <ServicesListTab
                                                         datastoreId={datastoreId}
                                                         datasheet={datasheetQuery.data}
-                                                        datasheet_services_list={datasheetQuery.data.service_list ?? []}
+                                                        servicesListQuery={serviceListQuery}
                                                     />
                                                 );
 
@@ -327,8 +333,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                     {datasheetQuery?.data?.pyramid_raster_list?.length && datasheetQuery?.data?.pyramid_raster_list.length > 0 ? (
                                         <li>{datasheetQuery?.data?.pyramid_raster_list.length} pyramide(s) de tuiles raster</li>
                                     ) : null}
-                                    {datasheetQuery.data?.service_list?.length && datasheetQuery.data.service_list.length > 0 ? (
-                                        <li>{datasheetQuery.data?.service_list.length} service(s) publié(s)</li>
+                                    {serviceListQuery.data?.length && serviceListQuery.data.length > 0 ? (
+                                        <li>{serviceListQuery.data.length} service(s) publié(s)</li>
                                     ) : null}
                                     {datasheetQuery?.data?.upload_list?.length && datasheetQuery?.data?.upload_list.length > 0 ? (
                                         <li>{datasheetQuery?.data?.upload_list.length} livraison(s)</li>

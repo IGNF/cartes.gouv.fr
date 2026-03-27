@@ -31,6 +31,22 @@ framework:
     serializer:
         name_converter: "serializer.name_converter.camel_case_to_snake_case"
 
+    http_client:
+        default_options:
+            retry_failed:
+                enabled: true
+                max_retries: 3
+                delay: 100
+                multiplier: 2
+                max_delay: 1000
+                jitter: 0.1
+                http_codes:
+                    - { code: 0, methods: ["GET"] }
+                    - { code: 500, methods: ["GET"] }
+                    - { code: 502, methods: ["GET"] }
+                    - { code: 503, methods: ["GET"] }
+                    - { code: 504, methods: ["GET"] }
+
     assets:
         version_strategy: 'Pentatrion\ViteBundle\Asset\ViteAssetVersionStrategy'
 

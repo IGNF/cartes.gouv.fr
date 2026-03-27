@@ -2,31 +2,15 @@
 
 namespace App\Services\EspaceCoApi;
 
-use App\Security\KeycloakTokenManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\ApiClient\ApiClient;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class StyleApiService extends BaseEspaceCoApiService
+final class StyleApiService
 {
-    protected HttpClientInterface $apiClient;
-
     public function __construct(
-        HttpClientInterface $httpClient,
-        ParameterBagInterface $parameters,
-        Filesystem $filesystem,
-        KeycloakTokenManager $tokenManager,
-        LoggerInterface $logger,
+        #[Autowire(service: 'app.api_client.espaceco_style')]
+        private readonly ApiClient $api,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger);
-
-        $this->apiClient = $httpClient->withOptions([
-            'base_uri' => str_replace('/api', '/style', $parameters->get('api_espaceco_url')).'/',
-            'proxy' => $parameters->get('http_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
-        ]);
     }
 
     /**
@@ -34,14 +18,15 @@ class StyleApiService extends BaseEspaceCoApiService
      */
     public function getImage(string $name, array $query): mixed
     {
-        $options = $this->prepareOptions([], $query);
-        $response = $this->apiClient->request('GET', "image/$name", $options);
+        $pending = $this->api->get("image/$name", $query);
+        $content = $pending->text();
+        $response = $pending->getResponse();
 
         $headerKeys = ['date', 'vary', 'content-disposition', 'cache-control', 'expires', 'content-type'];
         $headers = array_filter($response->getHeaders(), fn ($k) => in_array($k, $headerKeys), ARRAY_FILTER_USE_KEY);
 
         return [
-            'content' => $this->handleResponse($response, false),
+            'content' => $content,
             'headers' => $headers,
             'code' => $response->getStatusCode(),
         ];

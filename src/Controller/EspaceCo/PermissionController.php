@@ -43,7 +43,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
             $tables = [];
             $tablesToremove = [];
 
-            $permissions = $this->permissionApiService->getAllByCommunity($communityId);
+            $permissions = $this->permissionApiService->getAllByCommunity($communityId)->resolve();
             foreach ($permissions as $permission) {
                 $tableId = $permission['table'];
 
@@ -52,7 +52,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
 
                 if (is_null($tableId) && $isOK) {	// Permission sur une base de données
                     // Ajout de toutes les tables
-                    $allTables = $this->databaseApiService->getAllTables($permission['database']);
+                    $allTables = $this->databaseApiService->getAllTables($permission['database'])->resolve();
                     foreach ($allTables as $table) {
                         $tables[$table['full_name']] = $table;
                     }
@@ -60,7 +60,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
                 }
 
                 if ($tableId) {
-                    $table = $this->databaseApiService->getTable($permission['database'], $tableId);
+                    $table = $this->databaseApiService->getTable($permission['database'], $tableId)->array();
                     if ($isOK) {
                         if (!array_key_exists($table['full_name'], $tables)) {
                             $tables[$table['full_name']] = $table;
@@ -93,7 +93,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
             $tables = [];
             $tablesToremove = [];
 
-            $permissions = $this->permissionApiService->getAllByCommunity($communityId);
+            $permissions = $this->permissionApiService->getAllByCommunity($communityId)->resolve();
             foreach ($permissions as $permission) {
                 $tableId = $permission['table'];
 
@@ -102,12 +102,12 @@ class PermissionController extends AbstractController implements ApiControllerIn
 
                 if (is_null($tableId) && $isOK) {	// Permission sur une base de données
                     // Ajout de toutes les tables
-                    $allTables = $this->databaseApiService->getAllTables($permission['database'], ['id', 'database_id', 'full_name']);
+                    $allTables = $this->databaseApiService->getAllTables($permission['database'], ['id', 'database_id', 'full_name'])->resolve();
                     foreach ($allTables as $table) {
                         $tables[] = $table['full_name'];
                     }
                 } elseif (!is_null($tableId) && !$isOK) { // Permission sur une table non désirée
-                    $table = $this->databaseApiService->getTable($permission['database'], $tableId, ['full_name']);
+                    $table = $this->databaseApiService->getTable($permission['database'], $tableId, ['full_name'])->array();
                     $fullName = $table['full_name'];
                     if (!in_array($fullName, $tablesToremove)) {
                         $tablesToremove[] = $fullName;
@@ -135,7 +135,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
                 $communityId,
                 ['NONE', 'VIEW', 'EDIT', 'EXPORT'],
                 ['database', 'table', 'column', 'level', 'database_title', 'table_name', 'table_title', 'column_name', 'column_title']
-            );
+            )->resolve();
             $groupBy = $this->_groupBy($permissions);
 
             return new JsonResponse($groupBy);
@@ -151,7 +151,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
             $permissions = $this->permissionApiService->getAllByCommunity(
                 $communityId,
                 ['NONE', 'VIEW', 'EDIT', 'EXPORT']
-            );
+            )->resolve();
 
             $oldPermissionsByKey = [];
 
@@ -174,7 +174,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
                     $oldPermissionConfig = $oldPermissionsByKey[$key];
                     $newPermission = $newPermissionsByKey[$key];
                     if ($newPermission['level'] != $oldPermissionConfig['level']) {
-                        $this->permissionApiService->update($oldPermissionConfig['id'], ['level' => $newPermission['level']]);
+                        $this->permissionApiService->update($oldPermissionConfig['id'], ['level' => $newPermission['level']])->await();
                     }
                 }
             }
@@ -182,14 +182,14 @@ class PermissionController extends AbstractController implements ApiControllerIn
             $diff = array_diff_key($oldPermissionsByKey, $newPermissionsByKey);
             if (0 != count($diff)) {    // Suppressions
                 foreach ($oldPermissionsByKey as $key => $config) {
-                    $this->permissionApiService->remove($config['id']);
+                    $this->permissionApiService->remove($config['id'])->await();
                 }
             }
 
             $diff = array_diff_key($newPermissionsByKey, $oldPermissionsByKey);
             if (0 != count($diff)) {    // Ajouts
                 foreach ($newPermissionsByKey as $key => $config) {
-                    $this->permissionApiService->add($config);
+                    $this->permissionApiService->add($config)->await();
                 }
             }
 
@@ -197,7 +197,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
                 $communityId,
                 ['NONE', 'VIEW', 'EDIT', 'EXPORT'],
                 ['database', 'table', 'column', 'level', 'database_title', 'table_name', 'table_title', 'column_name', 'column_title']
-            );
+            )->resolve();
             $groupBy = $this->_groupBy($permissions);
 
             return new JsonResponse($groupBy);

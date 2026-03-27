@@ -2,49 +2,42 @@
 
 namespace App\Services\EspaceCoApi;
 
-use App\Security\KeycloakTokenManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedPromise;
+use App\ApiClient\ResponsePromise;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class EmailPlannerApiService extends BaseEspaceCoApiService
+final class EmailPlannerApiService
 {
-    public function __construct(HttpClientInterface $httpClient,
-        ParameterBagInterface $parameters,
-        Filesystem $filesystem,
-        KeycloakTokenManager $tokenManager,
-        LoggerInterface $logger,
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger);
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function getAll(int $communityId): array
+    public function getAll(int $communityId): PaginatedPromise
     {
-        return $this->requestAll("communities/$communityId/emailplanners");
+        return $this->api->requestAll("communities/$communityId/emailplanners");
     }
 
     /**
      * @param array<mixed> $data
      */
-    public function add(int $communityId, array $data): array
+    public function add(int $communityId, array $data): ResponsePromise
     {
-        return $this->request('POST', "communities/$communityId/emailplanners", $data);
+        return $this->api->post("communities/$communityId/emailplanners", $data);
     }
 
     /**
      * @param array<mixed> $data
      */
-    public function update(int $communityId, int $emailPlannerId, array $data): array
+    public function update(int $communityId, int $emailPlannerId, array $data): ResponsePromise
     {
-        return $this->request('PUT', "communities/$communityId/emailplanners/$emailPlannerId", $data);
+        return $this->api->put("communities/$communityId/emailplanners/$emailPlannerId", $data);
     }
 
-    public function remove(int $communityId, int $emailPlannerId): array
+    public function remove(int $communityId, int $emailPlannerId): ResponsePromise
     {
-        return $this->request('DELETE', "communities/$communityId/emailplanners/$emailPlannerId");
+        return $this->api->delete("communities/$communityId/emailplanners/$emailPlannerId");
     }
 }
