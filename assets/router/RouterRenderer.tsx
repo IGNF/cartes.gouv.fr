@@ -1,5 +1,6 @@
 import { FC, JSX, Suspense, useMemo } from "react";
 
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import DiscoverPublish from "@/pages/discover/publish/DiscoverPublish";
 import AppLayout from "../components/Layout/AppLayout";
 import Main from "../components/Layout/Main";
@@ -16,8 +17,10 @@ import { groups, knownRoutes, routes, useRoute } from "./router";
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
-    const user = useAuthStore((state) => state.user);
     const logoutInProgress = useAuthStore((state) => state.logoutInProgress);
+
+    const userQuery = useUserQuery();
+    const user = userQuery.data ?? null;
 
     const content: JSX.Element = useMemo(() => {
         // vérification si la route demandée est bien connue/enregistrée

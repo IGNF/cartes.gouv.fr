@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useSandboxDatastorePrefetchQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
 import { externalUrls } from "@/router/externalUrls";
 import { routes, useRoute } from "@/router/router";
-import { useAuthStore } from "@/stores/AuthStore";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import classes from "./DiscoverPublish.module.css";
 
 import backgroundImgUrl from "@/img/discover/publish/background.png?w=400;800;1200;1400;2160&format=png&as=srcset";
@@ -14,7 +14,7 @@ import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
 
 export default function DiscoverPublish() {
     const { params } = useRoute();
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     useEffect(() => {
         if (user !== null && params?.["authentication_failed"] !== undefined) {

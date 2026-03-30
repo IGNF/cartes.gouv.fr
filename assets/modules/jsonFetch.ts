@@ -6,7 +6,13 @@ export type CartesApiException = {
     code: number;
     status: string;
     message: string;
-    details: unknown[];
+    details: unknown;
+};
+
+export const isCartesApiException = (error: unknown): error is CartesApiException => {
+    if (!error || typeof error !== "object") return false;
+    const maybe = error as Partial<CartesApiException>;
+    return typeof maybe.code === "number" && typeof maybe.status === "string";
 };
 
 export async function apiFetch(
@@ -49,13 +55,20 @@ export async function apiFetch(
                     useAuthStore.getState().setSessionExpired(false);
                     resolve(response);
                 } else {
-                    const data = await response.json().catch(() => ({}));
-                    if (hasSessionExpired(data)) {
+                    const data = (await response.json().catch(() => ({}))) as Partial<CartesApiException>;
+                    const error: CartesApiException = {
+                        code: typeof data.code === "number" ? data.code : response.status,
+                        status: typeof data.status === "string" ? data.status : response.statusText,
+                        message: typeof data.message === "string" ? data.message : "Request failed",
+                        details: data.details ?? null,
+                    };
+
+                    if (hasSessionExpired(error)) {
                         if (!useAuthStore.getState().logoutInProgress) {
                             resetAuth("session-expired");
                         }
                     }
-                    reject(data);
+                    reject(error);
                 }
             } catch (error) {
                 if (error instanceof DOMException && (error?.name === "AbortError" || error?.name === "NetworkError")) {
@@ -79,5 +92,12 @@ export async function jsonFetch<T>(
 }
 
 const hasSessionExpired = (error) => {
-    return error.code === 401 && error?.details?.controller === "App\\Controller\\ApiControllerInterface" && error?.details?.session_expired === true;
+    if (!error || typeof error !== "object") return false;
+    const err = error as CartesApiException;
+
+    if (err.code !== 401) return false;
+    if (!err.details || typeof err.details !== "object") return false;
+
+    const details = err.details as Record<string, unknown>;
+    return details.controller === "App\\Controller\\ApiControllerInterface" && details.session_expired === true;
 };

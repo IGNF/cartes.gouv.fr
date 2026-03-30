@@ -18,7 +18,6 @@ import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
-import { useAuthStore } from "../../../../stores/AuthStore";
 import { PermissionCreateDtoTypeEnum } from "../../../../@types/entrepot";
 import CommunityListForm from "./CommunityListForm";
 import ScrollOfferingList from "./ScrollOfferingList";
@@ -26,6 +25,7 @@ import { getAddSchema } from "./ValidationSchemas";
 import createRequestBody, { type AddPermissionFormType } from "./utils";
 import Main from "../../../../components/Layout/Main";
 import { DatastorePermission } from "@/@types/app";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 
 const defaultDate = new Date(new Date().setFullYear(new Date().getFullYear() + 2));
 const defaultOnlyOauth = false;
@@ -38,7 +38,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatastorePermissions");
     const { t: tCommon } = useTranslation("Common");
 
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     const queryClient = useQueryClient();
 

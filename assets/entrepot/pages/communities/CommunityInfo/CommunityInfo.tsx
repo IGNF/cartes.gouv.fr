@@ -28,7 +28,6 @@ import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
-import { useAuthStore } from "@/stores/AuthStore";
 
 type CommunityInfoFormType = {
     name: string;
@@ -74,7 +73,6 @@ export default function CommunityInfo() {
     const { t: tCommon } = useTranslation("Common");
     const { css } = useStyles();
 
-    const user = useAuthStore((state) => state.user);
     const userQuery = useUserQuery();
     const { datastore } = useDatastore();
     const community: Community = useCommunity();
@@ -161,6 +159,7 @@ export default function CommunityInfo() {
         communityModifyMutation.mutate(data);
     }
 
+    const user = userQuery.data;
     const isSupervisor = community.supervisor._id === user?.id;
     const communityUserRights = user?.communities_member.find((member) => member.community?._id === community._id)?.rights ?? [];
     const hasCommunityRight = communityUserRights.includes(CommunityMemberDtoRightsEnum.COMMUNITY);

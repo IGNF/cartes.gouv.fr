@@ -5,7 +5,6 @@ import api from "../../entrepot/api";
 import RQKeys from "../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../modules/jsonFetch";
 import { DatastoreLayoutProps } from "./DatastoreLayout";
-import { useAuthStore } from "../../stores/AuthStore";
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import Forbidden from "../../pages/error/Forbidden";
 import { CommunityProvider } from "../../contexts/community";
@@ -16,6 +15,7 @@ import Main from "./Main";
 import LoadingText from "../Utils/LoadingText";
 import { DatastoreProvider } from "../../contexts/datastore";
 import { canUserAccess } from "@/utils";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 
 export interface CommunityLayoutProps extends Omit<DatastoreLayoutProps, "datastoreId"> {
     accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[];
@@ -25,7 +25,7 @@ export interface CommunityLayoutProps extends Omit<DatastoreLayoutProps, "datast
 const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => {
     const { accessRight, children, communityId, ...rest } = props;
 
-    const { user } = useAuthStore();
+    const { data: user } = useUserQuery();
     const queryClient = useQueryClient();
 
     const { data, error, failureReason, isFetching, isLoading, status } = useQuery<[CommunityDetailResponseDto, Datastore | undefined], CartesApiException>({

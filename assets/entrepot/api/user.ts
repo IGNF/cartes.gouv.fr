@@ -2,11 +2,18 @@ import SymfonyRouting from "../../modules/Routing";
 
 import { CartesUser, UserKeyDetailedWithAccessesResponseDto, UserKeyWithAccessesResponseDto } from "../../@types/app";
 import { PermissionWithOfferingsDetailsResponseDto, UserKeyCreateDtoUserKeyInfoDto, UserKeyResponseDto, UserKeyUpdateDto } from "../../@types/entrepot";
-import { jsonFetch } from "../../modules/jsonFetch";
+import { isCartesApiException, jsonFetch } from "../../modules/jsonFetch";
 
-const getMe = (otherOptions: RequestInit = {}) => {
+const getMe = async (otherOptions: RequestInit = {}): Promise<CartesUser | null> => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_me");
-    return jsonFetch<CartesUser>(url, { ...otherOptions });
+    try {
+        return await jsonFetch<CartesUser>(url, { ...otherOptions });
+    } catch (error) {
+        if (isCartesApiException(error) && error.code === 401) {
+            return null;
+        }
+        throw error;
+    }
 };
 
 /* Retourne la cle detaillee de l'utilisateur courant avec ses access */

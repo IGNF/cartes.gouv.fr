@@ -5,7 +5,7 @@ import SymfonyRouting from "@/modules/Routing";
 import { resetAuth } from "@/modules/authReset";
 import { externalLink, externalUrls } from "@/router/externalUrls";
 import { routes } from "@/router/router";
-import { useAuthStore } from "@/stores/AuthStore";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import HeaderMenu from "./HeaderMenu";
 
 export function HeaderMenuHelp() {
@@ -81,7 +81,7 @@ export function HeaderMenuServices() {
 }
 
 export function HeaderMenuUser() {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     if (!user) {
         return (

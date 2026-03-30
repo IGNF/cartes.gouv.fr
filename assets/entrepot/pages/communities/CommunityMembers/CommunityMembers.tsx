@@ -25,10 +25,10 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";
-import { useAuthStore } from "../../../../stores/AuthStore";
 import api from "../../../api";
 import { AddMember, addMemberModal } from "../AddMember/AddMember";
 import { complete, rightTypes, UserRights } from "../UserRights";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 
 type CommunityMembersProps = {
     userId?: string;
@@ -62,7 +62,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { t: tRights } = useTranslation("Rights");
     const { t } = useTranslation({ CommunityMembers });
 
-    const { user } = useAuthStore();
+    const { data: user } = useUserQuery();
     // const [members, setMembers] = useState<Member[]>([]);
     const [currentMember, setCurrentMember] = useState<string | undefined>(undefined);
 

@@ -23,8 +23,8 @@ import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg?no-inline";
 import padlock from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg?no-inline";
 import Select from "@codegouvfr/react-dsfr/Select";
-import { useAuthStore } from "@/stores/AuthStore";
 import { externalLink } from "@/router/externalUrls";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 
 type UserKeysListTabProps = {
     keys: UserKeyDetailedWithAccessesResponseDto[] | undefined;
@@ -35,7 +35,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UserKeysListTab");
 
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     const [currentKey, setCurrentKey] = useState<string | undefined>(undefined);
 

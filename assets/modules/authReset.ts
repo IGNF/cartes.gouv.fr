@@ -16,7 +16,14 @@ export function resetAuth(reason: AuthResetReason) {
     }
 
     if (reason === "session-expired") {
-        store.setSessionExpired(true);
+        // Avoid showing a "session expired" alert on a cold start when the user is simply unauthenticated.
+        // Only mark the session as expired if we actually had an authenticated user cached.
+        const cachedUser = queryClient.getQueryData(RQKeys.user_me()) as unknown;
+        const hadAuthenticatedUser = cachedUser !== null && cachedUser !== undefined;
+
+        if (store.sessionExpired || hadAuthenticatedUser) {
+            store.setSessionExpired(true);
+        }
     }
 
     // Ensure we don't keep a stale identity cached.

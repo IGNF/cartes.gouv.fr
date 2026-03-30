@@ -12,10 +12,10 @@ import contributorSvgUrl from "@/img/pictograms/contributor.svg?no-inline";
 import keyManagerSvgUrl from "@/img/pictograms/key-manager.svg?no-inline";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg?no-inline";
 import { routes } from "@/router/router";
-import { useAuthStore } from "@/stores/AuthStore";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 
 export default function Dashboard() {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     const isApiEspaceCoDefined = useApiEspaceCoStore((state) => state.isUrlDefined);
 

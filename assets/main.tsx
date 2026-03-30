@@ -5,6 +5,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import App from "@/App";
+import { readBootstrapUser } from "@/modules/bootstrapUser";
+import RQKeys from "@/modules/entrepot/RQKeys";
+import { queryClient } from "@/modules/reactQuery";
 
 // en prod
 if (import.meta.env?.APP_ENV?.toLowerCase() === "prod") {
@@ -16,6 +19,8 @@ if (import.meta.env?.APP_ENV?.toLowerCase() === "prod") {
 startReactDsfr({ defaultColorScheme: "light" });
 
 const head = createHead();
+
+queryClient.setQueryData(RQKeys.user_me(), readBootstrapUser());
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(

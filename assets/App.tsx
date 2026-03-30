@@ -3,8 +3,8 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { FC } from "react";
 
 import AlertProvider from "./components/Provider/AlertProvider";
-import AuthProvider from "./components/Provider/AuthProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
+import useSyncSessionExpiredFromUser from "./hooks/useSyncSessionExpiredFromUser";
 import RQKeys from "./modules/entrepot/RQKeys";
 import { persister, queryClient } from "./modules/reactQuery";
 import { RouteProvider } from "./router/router";
@@ -22,6 +22,11 @@ const isUserMeQueryKey = (queryKey: unknown): boolean => {
     return queryKey.length === userMeKey.length && queryKey.every((value, index) => value === userMeKey[index]);
 };
 
+const AuthSessionSync: FC = () => {
+    useSyncSessionExpiredFromUser();
+    return null;
+};
+
 const App: FC = () => {
     return (
         <PersistQueryClientProvider
@@ -37,12 +42,12 @@ const App: FC = () => {
         >
             <ReactQueryDevtools initialIsOpen={false} />
 
+            <AuthSessionSync />
+
             <RouteProvider>
                 <ErrorBoundary>
                     <AlertProvider>
-                        <AuthProvider>
-                            <RouterRenderer />
-                        </AuthProvider>
+                        <RouterRenderer />
                     </AlertProvider>
                 </ErrorBoundary>
             </RouteProvider>

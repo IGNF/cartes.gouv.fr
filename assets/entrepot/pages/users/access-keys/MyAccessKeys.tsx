@@ -15,7 +15,7 @@ import { routes } from "../../../../router/router";
 import Main from "../../../../components/Layout/Main";
 import Button from "@codegouvfr/react-dsfr/Button";
 import "../../../../sass/components/buttons.scss";
-import { useAuthStore } from "@/stores/AuthStore";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 
 type MyAccessKeysProps = {
     activeTab: string;
@@ -24,7 +24,7 @@ type MyAccessKeysProps = {
 const { t } = getTranslation("MyAccessKeys");
 
 const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     const tab = activeTab;
 

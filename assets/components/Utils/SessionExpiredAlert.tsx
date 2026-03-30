@@ -9,13 +9,11 @@ import { groups, useRoute } from "@/router/router";
 const SessionExpiredAlert: FC = () => {
     const sessionExpired = useAuthStore((state) => state.sessionExpired);
     const logoutInProgress = useAuthStore((state) => state.logoutInProgress);
-    const user = useAuthStore((state) => state.user);
     const route = useRoute();
 
     return (
         !groups.public.has(route) &&
         sessionExpired &&
-        user !== null &&
         !logoutInProgress && (
             <div className={fr.cx("fr-mb-4v")}>
                 <Alert
