@@ -1,19 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
 
+import useUserQuery from "@/hooks/queries/useUserQuery";
+import { canUserAccess } from "@/utils";
 import { Datastore } from "../../@types/app";
+import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
+import { DatastoreProvider } from "../../contexts/datastore";
 import api from "../../entrepot/api";
 import RQKeys from "../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../modules/jsonFetch";
-import AppLayout, { AppLayoutProps } from "./AppLayout";
-import { DatastoreProvider } from "../../contexts/datastore";
-import LoadingText from "../Utils/LoadingText";
-import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
-import { useAuthStore } from "../../stores/AuthStore";
-import Main from "./Main";
-import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import Forbidden from "../../pages/error/Forbidden";
-import { canUserAccess } from "@/utils";
+import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
+import LoadingText from "../Utils/LoadingText";
+import AppLayout, { AppLayoutProps } from "./AppLayout";
+import Main from "./Main";
 
 export interface DatastoreLayoutProps extends Omit<AppLayoutProps, "navItems"> {
     accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[];
@@ -22,7 +22,7 @@ export interface DatastoreLayoutProps extends Omit<AppLayoutProps, "navItems"> {
 const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => {
     const { accessRight, datastoreId, children, ...rest } = props;
 
-    const { user } = useAuthStore();
+    const { data: user } = useUserQuery();
     const { data, error, failureReason, isFetching, isLoading, isPending, status } = useQuery<Datastore, CartesApiException>({
         queryKey: RQKeys.datastore(datastoreId),
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),

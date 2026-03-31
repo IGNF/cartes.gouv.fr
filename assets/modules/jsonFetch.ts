@@ -5,7 +5,7 @@ export type CartesApiException = {
     code: number;
     status: string;
     message: string;
-    details: unknown[];
+    details?: unknown[];
 };
 
 export async function apiFetch(

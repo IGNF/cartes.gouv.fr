@@ -28,7 +28,6 @@ import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
-import { useAuthStore } from "@/stores/AuthStore";
 
 type CommunityInfoFormType = {
     name: string;
@@ -74,8 +73,8 @@ export default function CommunityInfo() {
     const { t: tCommon } = useTranslation("Common");
     const { css } = useStyles();
 
-    const user = useAuthStore((state) => state.user);
     const userQuery = useUserQuery();
+    const { data: user } = userQuery;
     const { datastore } = useDatastore();
     const community: Community = useCommunity();
 

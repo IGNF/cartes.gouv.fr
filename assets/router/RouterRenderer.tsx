@@ -1,12 +1,12 @@
 import { FC, JSX, Suspense, useMemo } from "react";
 
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import DiscoverPublish from "@/pages/discover/publish/DiscoverPublish";
 import AppLayout from "../components/Layout/AppLayout";
 import Main from "../components/Layout/Main";
 import LoadingText from "../components/Utils/LoadingText";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import RedirectToLogin from "../pages/RedirectToLogin";
-import { useAuthStore } from "../stores/AuthStore";
 import GroupApp from "./GroupApp";
 import GroupCommunity from "./GroupCommunity";
 import GroupConfig from "./GroupConfig";
@@ -16,7 +16,7 @@ import { groups, knownRoutes, routes, useRoute } from "./router";
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     const content: JSX.Element = useMemo(() => {
         // vérification si la route demandée est bien connue/enregistrée
@@ -25,7 +25,7 @@ const RouterRenderer: FC = () => {
         }
 
         // vérifier si l'utilisateur est authentifié et éventuellement ses droits à la ressource demandée
-        if (!groups.public.has(route) && user === null) {
+        if (!groups.public.has(route) && !user) {
             return <RedirectToLogin />;
         }
 

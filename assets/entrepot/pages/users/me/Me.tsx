@@ -1,17 +1,17 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 
+import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
+import useUserQuery from "@/hooks/queries/useUserQuery";
+import Main from "../../../../components/Layout/Main";
 import { getTranslation, useTranslation } from "../../../../i18n/i18n";
 import SymfonyRouting from "../../../../modules/Routing";
-import { useAuthStore } from "../../../../stores/AuthStore";
 import { formatDateFromISO } from "../../../../utils";
-import Main from "../../../../components/Layout/Main";
-import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
 
 const Me = () => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = useTranslation({ Me });
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     return (
         <Main title={t("my_account")}>

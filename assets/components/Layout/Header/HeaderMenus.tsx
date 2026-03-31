@@ -1,10 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import SymfonyRouting from "@/modules/Routing";
 import { externalLink, externalUrls } from "@/router/externalUrls";
 import { routes } from "@/router/router";
-import { useAuthStore } from "@/stores/AuthStore";
 import HeaderMenu from "./HeaderMenu";
 
 export function HeaderMenuHelp() {
@@ -80,7 +80,7 @@ export function HeaderMenuServices() {
 }
 
 export function HeaderMenuUser() {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     if (!user) {
         return (

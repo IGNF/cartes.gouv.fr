@@ -3,19 +3,20 @@ import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
+import useUserQuery from "@/hooks/queries/useUserQuery";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { UserKeyDetailedWithAccessesResponseDto } from "../../../../@types/app";
 import { PermissionWithOfferingsDetailsResponseDto, UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum } from "../../../../@types/entrepot";
+import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { getTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
+import { routes } from "../../../../router/router";
 import api from "../../../api";
 import UserKeysListTab from "../keys/UserKeysListTab/UserKeysListTab";
 import PermissionsListTab from "../permissions/PermissionsListTab";
-import { routes } from "../../../../router/router";
-import Main from "../../../../components/Layout/Main";
-import Button from "@codegouvfr/react-dsfr/Button";
+
 import "../../../../sass/components/buttons.scss";
-import { useAuthStore } from "@/stores/AuthStore";
 
 type MyAccessKeysProps = {
     activeTab: string;
@@ -24,7 +25,7 @@ type MyAccessKeysProps = {
 const { t } = getTranslation("MyAccessKeys");
 
 const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     const tab = activeTab;
 

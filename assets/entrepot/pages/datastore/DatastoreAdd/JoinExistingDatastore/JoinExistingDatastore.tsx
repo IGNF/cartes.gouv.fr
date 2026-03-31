@@ -6,10 +6,10 @@ import { useMemo, useState } from "react";
 
 import { CommunityListResponseDto } from "@/@types/entrepot";
 import api from "@/entrepot/api";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
-import { useAuthStore } from "@/stores/AuthStore";
 import { regex, removeDiacritics } from "@/utils";
 import { JoinExistingDatastoreModal } from "./JoinExistingDatastoreModal";
 import { joinModal } from "./modal";
@@ -17,7 +17,7 @@ import { joinModal } from "./modal";
 import placeholder16x9 from "@/img/placeholder.16x9.png";
 
 export default function JoinExistingDatastore() {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
     const [searchText, setSearchText] = useState<string>("");
 
     const [selectedCommunity, setSelectedCommunity] = useState<CommunityListResponseDto>();

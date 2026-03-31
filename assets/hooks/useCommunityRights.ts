@@ -1,11 +1,11 @@
 import { useDatastore } from "@/contexts/datastore";
-import { useAuthStore } from "@/stores/AuthStore";
+import useUserQuery from "./queries/useUserQuery";
 
 /**
  * Hook utilitaire pour centraliser le calcul des droits de l'utilisateur sur la communauté liée à l'entrepôt courant.
  */
 const useCommunityRights = () => {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
     if (!user) {
         throw new Error("useCommunityRights must be used within an authenticated context (i.e., where user is logged in)");
     }

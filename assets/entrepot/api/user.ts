@@ -6,7 +6,7 @@ import { jsonFetch } from "../../modules/jsonFetch";
 
 const getMe = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_me");
-    return jsonFetch<CartesUser>(url, { ...otherOptions });
+    return jsonFetch<CartesUser | null>(url, { ...otherOptions });
 };
 
 /* Retourne la cle detaillee de l'utilisateur courant avec ses access */
