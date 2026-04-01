@@ -1,11 +1,11 @@
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import { defaultShouldDehydrateQuery } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { FC } from "react";
 
 import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
-import RQKeys from "./modules/entrepot/RQKeys";
 import { queryClient } from "./modules/queryClient";
 import { RouteProvider } from "./router/router";
 import RouterRenderer from "./router/RouterRenderer";
@@ -31,7 +31,7 @@ const App: FC = () => {
                 maxAge,
                 dehydrateOptions: {
                     // ne pas persister (localstorage) les données utilisateur : elles sont rechargées depuis le serveur à chaque chargement de page
-                    shouldDehydrateQuery: (query) => query.queryHash !== JSON.stringify(RQKeys.user_me()),
+                    shouldDehydrateQuery: (query) => defaultShouldDehydrateQuery(query) && query.queryKey[0] !== "user",
                 },
             }}
         >
