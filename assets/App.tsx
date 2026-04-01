@@ -5,12 +5,13 @@ import { FC } from "react";
 
 import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
+import RQKeys from "./modules/entrepot/RQKeys";
 import { queryClient } from "./modules/queryClient";
 import { RouteProvider } from "./router/router";
 import RouterRenderer from "./router/RouterRenderer";
+import { bootstrapUser } from "./utils";
 
 import "./sass/helpers.scss";
-import { bootstrapUser } from "./utils";
 
 const persister = createAsyncStoragePersister({
     storage: window.localStorage,
@@ -29,9 +30,8 @@ const App: FC = () => {
                 buster: __GIT_COMMIT__ ?? "buster-react-query",
                 maxAge,
                 dehydrateOptions: {
-                    // ne pas persister les données utilisateur : elles sont
-                    // rechargées depuis le serveur à chaque chargement de page
-                    // shouldDehydrateQuery: (query) => !query.queryKey.includes("user"),
+                    // ne pas persister (localstorage) les données utilisateur : elles sont rechargées depuis le serveur à chaque chargement de page
+                    shouldDehydrateQuery: (query) => query.queryHash !== JSON.stringify(RQKeys.user_me()),
                 },
             }}
         >

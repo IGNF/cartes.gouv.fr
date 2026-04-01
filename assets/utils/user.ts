@@ -31,7 +31,10 @@ export function bootstrapUser(): void {
     try {
         const raw = (document.getElementById("user") as HTMLDivElement | null)?.dataset?.user ?? null;
         if (raw) {
-            cartesUser = JSON.parse(raw) as CartesUser;
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === "object") {
+                cartesUser = parsed as CartesUser;
+            }
         }
     } catch {
         // ne rien faire, cartesUser restera à null
