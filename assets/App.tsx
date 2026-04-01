@@ -31,7 +31,10 @@ const App: FC = () => {
                 maxAge,
                 dehydrateOptions: {
                     // ne pas persister (localstorage) les données utilisateur : elles sont rechargées depuis le serveur à chaque chargement de page
-                    shouldDehydrateQuery: (query) => defaultShouldDehydrateQuery(query) && query.queryKey[0] !== "user",
+                    shouldDehydrateQuery: (query) => {
+                        const isQueryUserMe = query.queryKey.length === 2 && query.queryKey[0] === "user" && query.queryKey[1] === "me";
+                        return defaultShouldDehydrateQuery(query) && !isQueryUserMe;
+                    },
                 },
             }}
         >
