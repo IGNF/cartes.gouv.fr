@@ -3182,7 +3182,7 @@ export interface AccessDetailResponseDto {
      */
     update: string;
     /** Information sur la permission */
-    permission: PermissionResponseDto;
+    permission?: PermissionResponseDto;
     /** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
     offering: OfferingStandardListResponseDto;
     /**

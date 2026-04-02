@@ -291,13 +291,15 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                 return (
                                                     <div key={type} className={fr.cx("fr-mb-5v")}>
                                                         {typeIndex >= 1 ? <hr /> : null}
-                                                        <div className={fr.cx("fr-col-12", "fr-col-lg-10")}>
-                                                            <UserKeyLink
-                                                                permissionId={services[0].permission._id}
-                                                                offeringId={services[0].offering._id}
-                                                                hash={accessKey.type_infos && (accessKey.type_infos as HashInfoDto).hash}
-                                                            />
-                                                        </div>
+                                                        {services[0].permission && (
+                                                            <div className={fr.cx("fr-col-12", "fr-col-lg-10")}>
+                                                                <UserKeyLink
+                                                                    permissionId={services[0].permission._id}
+                                                                    offeringId={services[0].offering._id}
+                                                                    hash={accessKey.type_infos && (accessKey.type_infos as HashInfoDto).hash}
+                                                                />
+                                                            </div>
+                                                        )}
                                                         <div className={fr.cx("fr-mb-1v")}>{t("available_services")}</div>
                                                         <ul>
                                                             {services.map((service) => (
