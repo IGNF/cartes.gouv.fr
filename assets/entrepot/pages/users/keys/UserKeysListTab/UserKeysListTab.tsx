@@ -242,6 +242,16 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                         </div>
 
                                         <div className={`frx-flex-end-sm frx-col-sm-auto ${fr.cx("fr-mb-6v", "fr-mr-1w")}`}>
+                                            <Button
+                                                title={tCommon("modify")}
+                                                className={fr.cx("fr-ml-2w")}
+                                                priority="primary"
+                                                iconId="fr-icon-edit-line"
+                                                size="small"
+                                                onClick={() => {
+                                                    routes.user_key_edit({ keyId: accessKey._id }).push();
+                                                }}
+                                            />
                                             {accessKey.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.HASH &&
                                                 (accessKey.type_infos as HashInfoDto)?.hash !== undefined && (
                                                     <Button
@@ -264,16 +274,6 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                         }}
                                                     />
                                                 )}
-                                            <Button
-                                                title={tCommon("modify")}
-                                                className={fr.cx("fr-ml-2w")}
-                                                priority="primary"
-                                                iconId="fr-icon-edit-line"
-                                                size="small"
-                                                onClick={() => {
-                                                    routes.user_key_edit({ keyId: accessKey._id }).push();
-                                                }}
-                                            />
                                             <Button
                                                 title={tCommon("delete")}
                                                 className={fr.cx("fr-ml-2w")}
