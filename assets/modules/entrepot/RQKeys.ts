@@ -83,6 +83,7 @@ const RQKeys = {
 
     user_me: (): string[] => ["user", "me"],
     my_keys: (): string[] => ["user", "me", "keys"],
+    my_keys_with_accesses: (): string[] => ["user", "me", "keys", "accesses"],
     my_key: (keyId: string): string[] => ["user", "me", "keys", keyId],
     my_permissions: (): string[] => ["user", "me", "permissions"],
     get_permission: (permissionId: string): string[] => ["user", "me", "permissions", permissionId],

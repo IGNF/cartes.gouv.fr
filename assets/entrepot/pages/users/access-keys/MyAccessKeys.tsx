@@ -33,7 +33,7 @@ const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
 
     // Les cles d'acces
     const { data: keys, isLoading: isLoadingKeys } = useQuery<UserKeyDetailedWithAccessesResponseDto[]>({
-        queryKey: RQKeys.my_keys(),
+        queryKey: RQKeys.my_keys_with_accesses(),
         queryFn: ({ signal }) => api.user.getMyKeysDetailedWithAccesses({ signal }),
         staleTime: 30000,
     });
