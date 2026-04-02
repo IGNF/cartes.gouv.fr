@@ -65,8 +65,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
         },
     });
 
-    const { copy } = useCopyToClipboard();
-    const [copiedText, setCopiedText] = useState<string | null>(null);
+    const { copy, copiedText } = useCopyToClipboard();
     const [showFilters, setShowFilters] = useState(false);
     const [sortValue, setSortValue] = useState("");
     const [fluxValue, setFluxValue] = useState("");
@@ -268,8 +267,6 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                             const hash = (accessKey.type_infos as HashInfoDto)?.hash;
                                                             if (hash) {
                                                                 copy(hash);
-                                                                setCopiedText(hash);
-                                                                setTimeout(() => setCopiedText(null), 5000);
                                                             }
                                                         }}
                                                     />
@@ -325,13 +322,13 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                                             className={fr.cx("fr-ml-1w")}
                                                                             priority="tertiary"
                                                                             iconId={
-                                                                                copiedText === service.offering._id ? "fr-icon-check-line" : "ri-file-copy-line"
+                                                                                copiedText === service.offering.layer_name
+                                                                                    ? "fr-icon-check-line"
+                                                                                    : "ri-file-copy-line"
                                                                             }
                                                                             size="small"
                                                                             onClick={() => {
                                                                                 copy(service.offering.layer_name);
-                                                                                setCopiedText(service.offering._id);
-                                                                                setTimeout(() => setCopiedText(null), 5000);
                                                                             }}
                                                                         />
                                                                     </li>

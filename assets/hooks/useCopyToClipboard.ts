@@ -2,15 +2,15 @@ import { copyToClipboard } from "@/utils";
 import { useEffect, useRef, useState } from "react";
 
 export function useCopyToClipboard() {
-    const [copied, setCopied] = useState(false);
+    const [copiedText, setCopiedText] = useState<string | null>(null);
     const timeout = useRef<NodeJS.Timeout>();
 
     async function copy(text: string) {
         try {
             await copyToClipboard(text);
-            setCopied(true);
+            setCopiedText(text);
             clearTimeout(timeout.current);
-            timeout.current = setTimeout(() => setCopied(false), 5000);
+            timeout.current = setTimeout(() => setCopiedText(null), 5000);
         } catch (error) {
             console.error(error);
         }
@@ -20,5 +20,9 @@ export function useCopyToClipboard() {
         return () => clearTimeout(timeout.current);
     }, []);
 
-    return { copied, copy };
+    return {
+        copiedText,
+        copied: Boolean(copiedText),
+        copy,
+    };
 }
