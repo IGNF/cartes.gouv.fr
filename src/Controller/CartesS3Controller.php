@@ -30,7 +30,7 @@ class CartesS3Controller extends AbstractController
     )]
     public function getContent(string $path, Request $request): Response
     {
-        if (!$this->s3Storage->fileExists($path)) {
+        if (empty($path) || !$this->s3Storage->fileExists($path)) {
             return new Response(null, Response::HTTP_NOT_FOUND);
         }
 
@@ -44,6 +44,9 @@ class CartesS3Controller extends AbstractController
         $response->setEtag($etag);
         $response->setLastModified($lastModified);
         $response->setPublic();
+        $response->setMaxAge(3600);
+        $response->setSharedMaxAge(3600);
+        $response->headers->addCacheControlDirective('must-revalidate');
 
         if ($response->isNotModified($request)) {
             return $response; // 304
