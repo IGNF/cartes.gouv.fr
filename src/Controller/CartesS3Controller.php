@@ -4,9 +4,9 @@ namespace App\Controller;
 
 use League\Flysystem\FilesystemOperator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Attribute\Cache;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -28,30 +28,34 @@ class CartesS3Controller extends AbstractController
         requirements: ['path' => '.+'],
         defaults: ['path' => '']
     )]
-    #[Cache(public: true, maxage: 3600, mustRevalidate: true)]
-    public function getContent(string $path): Response
+    public function getContent(string $path, Request $request): Response
     {
-        if (empty($path) || !$this->s3Storage->has($path) || !$this->s3Storage->fileExists($path)) {
+        if (empty($path) || !$this->s3Storage->fileExists($path)) {
             return new Response(null, Response::HTTP_NOT_FOUND);
         }
 
-        // $cacheKey = str_replace('/', '-', $path);
+        $lastModifiedTs = $this->s3Storage->lastModified($path);
+        $fileSize = $this->s3Storage->fileSize($path);
 
-        // $content = $this->cache->get($cacheKey, function (ItemInterface $item) use ($path) {
-        //     $item->expiresAfter(3600);
+        $lastModified = new \DateTimeImmutable('@'.$lastModifiedTs);
+        $etag = md5($lastModifiedTs.'/'.$fileSize);
 
-        //     $content = $this->s3Storage->read($path);
+        $response = new StreamedResponse();
+        $response->setEtag($etag);
+        $response->setLastModified($lastModified);
+        $response->setPublic();
+        $response->setMaxAge(3600);
+        $response->setSharedMaxAge(3600);
+        $response->headers->addCacheControlDirective('must-revalidate');
 
-        //     return $content;
-        // });
-
-        // $response = new Response($content);
+        if ($response->isNotModified($request)) {
+            return $response; // 304
+        }
 
         $stream = $this->s3Storage->readStream($path);
 
-        $response = new StreamedResponse();
         $response->headers->set('Content-Type', ''.$this->s3Storage->mimeType($path));
-        $response->headers->set('Content-Length', ''.$this->s3Storage->fileSize($path));
+        $response->headers->set('Content-Length', ''.$fileSize);
         $response->setCallback(function () use ($stream) {
             if (0 !== ftell($stream)) {
                 rewind($stream);
