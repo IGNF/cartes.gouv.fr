@@ -17,9 +17,7 @@ const { i18n } = declareComponentKeys<
     | "user_agent"
     | "referer"
     | "no_permission_warning"
-    | "hash"
-    | "unavailable"
-    | "hash_value_copied"
+    | "hint_copy_key_hash"
     | "available_services"
     | "no_services_status"
     | "no_services_hint"
@@ -53,9 +51,7 @@ export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"
     user_agent: "User agent",
     referer: "Referer",
     no_permission_warning: "Vous n'avez aucune permission, il n'est pas possible d’ajouter une clé",
-    hash: "Hash",
-    unavailable: "Indisponible",
-    hash_value_copied: "Valeur du hash copiée",
+    hint_copy_key_hash: "Copier la clé hash dans le presse papier",
     available_services: "Services disponibles",
     no_services_status: "Indisponible",
     no_services_hint:
@@ -85,9 +81,7 @@ export const UserKeysListTabEnTranslations: Translations<"en">["UserKeysListTab"
     user_agent: "User agent",
     referer: "Referer",
     no_permission_warning: "You have no permissions, it is not possible to add a key",
-    hash: "Hash",
-    unavailable: "Unavailable",
-    hash_value_copied: "Hash value copied",
+    hint_copy_key_hash: "Copy the hash key to the clipboard",
     available_services: "Available services",
     no_services_status: "Unavailable",
     no_services_hint:
