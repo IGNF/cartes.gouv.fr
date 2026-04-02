@@ -7,15 +7,15 @@ import Main from "@/components/Layout/Main";
 import api from "@/entrepot/api";
 import { useApiEspaceCoStore } from "@/espaceco/stores/ApiEspaceCoStore";
 import { useSandboxDatastorePrefetchQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import accountSvgUrl from "@/img/pictograms/account.svg?no-inline";
 import contributorSvgUrl from "@/img/pictograms/contributor.svg?no-inline";
 import keyManagerSvgUrl from "@/img/pictograms/key-manager.svg?no-inline";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg?no-inline";
 import { routes } from "@/router/router";
-import { useAuthStore } from "@/stores/AuthStore";
 
 export default function Dashboard() {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     const isApiEspaceCoDefined = useApiEspaceCoStore((state) => state.isUrlDefined);
 

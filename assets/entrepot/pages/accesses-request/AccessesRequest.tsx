@@ -13,6 +13,7 @@ import { useStyles } from "tss-react";
 import * as yup from "yup";
 
 import { catalogueUrl } from "@/env";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import { CswMetadata } from "../../../@types/app";
 import Main from "../../../components/Layout/Main";
 import LoadingText from "../../../components/Utils/LoadingText";
@@ -20,7 +21,6 @@ import Wait from "../../../components/Utils/Wait";
 import { getTranslation, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
-import { useAuthStore } from "../../../stores/AuthStore";
 import api from "../../api";
 
 const { t } = getTranslation("AccessesRequest");
@@ -44,7 +44,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
     const { t } = useTranslation({ AccessesRequest });
     const { t: tCommon } = useTranslation("Common");
 
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     const metadataQuery = useQuery<CswMetadata, CartesApiException>({
         queryKey: RQKeys.accesses_request(fileIdentifier),

@@ -5,14 +5,17 @@ import { FC, memo } from "react";
 import SymfonyRouting from "../../modules/Routing";
 import { useAuthStore } from "../../stores/AuthStore";
 import { groups, useRoute } from "@/router/router";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 
 const SessionExpiredAlert: FC = () => {
     const sessionExpired = useAuthStore((state) => state.sessionExpired);
+    const { data: user } = useUserQuery();
     const route = useRoute();
 
     return (
         !groups.public.has(route) &&
-        sessionExpired && (
+        sessionExpired &&
+        user && (
             <div className={fr.cx("fr-mb-4v")}>
                 <Alert
                     severity="error"

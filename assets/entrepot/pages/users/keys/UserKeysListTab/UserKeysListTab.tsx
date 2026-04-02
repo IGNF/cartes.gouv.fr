@@ -5,6 +5,13 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 
+import useUserQuery from "@/hooks/queries/useUserQuery";
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { externalLink } from "@/router/externalUrls";
+import Select from "@codegouvfr/react-dsfr/Select";
+import { TagProps } from "@codegouvfr/react-dsfr/Tag";
+import TagsGroup from "@codegouvfr/react-dsfr/TagsGroup";
+import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import type { UserKeyDetailedWithAccessesResponseDto } from "../../../../../@types/app";
 import { type HashInfoDto, type PermissionWithOfferingsResponseDto, type UserKeyResponseDto } from "../../../../../@types/entrepot";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../../components/Utils/ConfirmDialog";
@@ -15,16 +22,9 @@ import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import UserKeyLink from "./UserKeyLink";
-import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
-import TagsGroup from "@codegouvfr/react-dsfr/TagsGroup";
-import { TagProps } from "@codegouvfr/react-dsfr/Tag";
-import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 
 import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg?no-inline";
 import padlock from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg?no-inline";
-import Select from "@codegouvfr/react-dsfr/Select";
-import { useAuthStore } from "@/stores/AuthStore";
-import { externalLink } from "@/router/externalUrls";
 
 type UserKeysListTabProps = {
     keys: UserKeyDetailedWithAccessesResponseDto[] | undefined;
@@ -35,7 +35,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UserKeysListTab");
 
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useUserQuery();
 
     const [currentKey, setCurrentKey] = useState<string | undefined>(undefined);
 

@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 import { routes } from "@/router/router";
 import api from "../entrepot/api";
 import { CartesApiException } from "../modules/jsonFetch";
-import { useAuthStore } from "../stores/AuthStore";
 import { useSandboxDatastoreQuery } from "./queries/useSandboxDatastoreQuery";
 import useUserQuery from "./queries/useUserQuery";
 
@@ -15,14 +14,13 @@ type DatastoreSelectionInfo = {
     is_sandbox?: boolean;
 };
 const useDatastoreSelection = () => {
-    const user = useAuthStore((state) => state.user);
+    const userQuery = useUserQuery();
+    const { data: user } = userQuery;
 
     const communitiesMember = user?.communities_member ?? [];
 
     const sandboxDatastoreQuery = useSandboxDatastoreQuery();
     const { data: sandboxDatastore } = sandboxDatastoreQuery;
-
-    const userQuery = useUserQuery();
 
     const { mutate: addUserToSandbox } = useMutation<undefined, CartesApiException>({
         mutationFn: () => {
