@@ -13,7 +13,12 @@ import { TagProps } from "@codegouvfr/react-dsfr/Tag";
 import TagsGroup from "@codegouvfr/react-dsfr/TagsGroup";
 import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import type { UserKeyDetailedWithAccessesResponseDto } from "../../../../../@types/app";
-import { type HashInfoDto, type PermissionWithOfferingsResponseDto, type UserKeyResponseDto } from "../../../../../@types/entrepot";
+import {
+    UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum,
+    type HashInfoDto,
+    type PermissionWithOfferingsResponseDto,
+    type UserKeyResponseDto,
+} from "../../../../../@types/entrepot";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
@@ -237,9 +242,31 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                         </div>
 
                                         <div className={`frx-flex-end-sm frx-col-sm-auto ${fr.cx("fr-mb-6v", "fr-mr-1w")}`}>
+                                            {accessKey.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.HASH &&
+                                                (accessKey.type_infos as HashInfoDto)?.hash !== undefined && (
+                                                    <Button
+                                                        title={t("hint_copy_key_hash")}
+                                                        className={fr.cx("fr-ml-2w")}
+                                                        priority="secondary"
+                                                        iconId={
+                                                            copiedText === (accessKey.type_infos as HashInfoDto)?.hash
+                                                                ? "fr-icon-check-line"
+                                                                : "ri-file-copy-line"
+                                                        }
+                                                        size="small"
+                                                        onClick={() => {
+                                                            const hash = (accessKey.type_infos as HashInfoDto)?.hash;
+                                                            if (hash) {
+                                                                copy(hash);
+                                                                setCopiedText(hash);
+                                                                setTimeout(() => setCopiedText(null), 5000);
+                                                            }
+                                                        }}
+                                                    />
+                                                )}
                                             <Button
                                                 title={tCommon("modify")}
-                                                className={fr.cx("fr-ml-1w")}
+                                                className={fr.cx("fr-ml-2w")}
                                                 priority="primary"
                                                 iconId="fr-icon-edit-line"
                                                 size="small"
