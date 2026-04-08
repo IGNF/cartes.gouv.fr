@@ -11,14 +11,15 @@ import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
 import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
+import { useDatastore } from "@/contexts/datastore";
 import { ConfigurationTypeEnum, EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { filterGeometricRelations } from "../../../../helpers";
-import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
+import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -111,6 +112,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     const editMode = useMemo(() => !!offeringId, [offeringId]);
 
     const queryClient = useQueryClient();
+    const { datastore } = useDatastore();
 
     const createServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
@@ -225,16 +227,17 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
             existingLayerNamesQuery.data,
             editMode,
-            offeringQuery.data?.configuration.layer_name
+            offeringQuery.data?.configuration.layer_name,
+            datastore
         );
         schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
         schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
         return schemas;
-    }, [editMode, existingLayerNamesQuery.data, offeringQuery.data?.configuration.layer_name, t]);
+    }, [editMode, existingLayerNamesQuery.data, offeringQuery.data?.configuration.layer_name, datastore, t]);
 
     const defaultValues: WfsServiceFormValuesType = useMemo(
-        () => getWfsServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data),
-        [editMode, vectorDbQuery.data, offeringQuery.data, metadataQuery?.data]
+        () => getWfsServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data, datastore),
+        [editMode, vectorDbQuery.data, offeringQuery.data, metadataQuery?.data, datastore]
     );
 
     const tables: StoredDataRelation[] = useMemo(() => {

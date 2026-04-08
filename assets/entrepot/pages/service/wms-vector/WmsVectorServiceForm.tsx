@@ -11,6 +11,7 @@ import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
 import { StyleFormProvider } from "@/contexts/StyleFormContext";
+import { useDatastore } from "@/contexts/datastore";
 import { useTableStyles } from "@/hooks/useTableStyles";
 import { encodeKey, encodeKeys } from "@/utils";
 import {
@@ -127,6 +128,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     const editMode = useMemo(() => !!offeringId, [offeringId]);
 
     const queryClient = useQueryClient();
+    const { datastore } = useDatastore();
 
     const createServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
@@ -246,7 +248,8 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
         existingLayerNamesQuery.data,
         editMode,
-        offeringQuery.data?.configuration.layer_name
+        offeringQuery.data?.configuration.layer_name,
+        datastore
     );
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
@@ -260,8 +263,8 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     } = useTableStyles(editMode, datastoreId, staticFilesQuery.data);
 
     const defaultValues: WmsVectorServiceFormValuesType = useMemo(
-        () => getWmsVectorServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data, encodeKeys(styles ?? {})),
-        [editMode, offeringQuery.data, vectorDbQuery.data, metadataQuery.data, styles]
+        () => getWmsVectorServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data, encodeKeys(styles ?? {}), datastore),
+        [editMode, offeringQuery.data, vectorDbQuery.data, metadataQuery.data, styles, datastore]
     );
 
     const form = useForm<WmsVectorServiceFormValuesType>({

@@ -3,7 +3,6 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
-use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\ZoomLevels;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
@@ -138,8 +137,6 @@ class ServiceController extends AbstractController implements ApiControllerInter
 
             $existingLayerNames = array_values(array_unique(array_merge([], $configLayerNames, $offeringLayerNames)));
 
-            $existingLayerNames = array_map(fn ($layerName) => str_ireplace(Sandbox::LAYERNAME_PREFIX, '', $layerName), $existingLayerNames);
-
             return $this->json($existingLayerNames);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -167,7 +164,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
      * @param array<mixed>  $typeInfos
      * @param ?array<mixed> $oldConfiguration
      */
-    protected function getConfigRequestBody(string $datastoreId, string $type, CommonDTO $dto, array $typeInfos, ?array $oldConfiguration = null): array
+    protected function getConfigRequestBody(string $type, CommonDTO $dto, array $typeInfos, ?array $oldConfiguration = null): array
     {
         $body = [
             'name' => $dto->service_name,
@@ -178,11 +175,6 @@ class ServiceController extends AbstractController implements ApiControllerInter
         // seulement pour la création d'une nouvelle publication
         if (null === $oldConfiguration) {
             $body['layer_name'] = $dto->technical_name;
-
-            // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
-            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $body['layer_name'] = Sandbox::LAYERNAME_PREFIX.$body['layer_name'];
-            }
         }
 
         if (!empty($dto->attribution_text) && !empty($dto->attribution_url)) {

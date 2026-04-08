@@ -11,6 +11,7 @@ import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import frequencyCodes from "../../../../data/maintenance_frequency.json";
 import { getTranslation } from "../../../../i18n/i18n";
 import { getInspireKeywords, getThematicCategories, regex } from "../../../../utils";
+import { useDatastore } from "@/contexts/datastore";
 
 const keywords = getInspireKeywords();
 const thematicCategories = getThematicCategories();
@@ -24,6 +25,8 @@ type DescriptionProps = {
 const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = getTranslation("MetadatasForm");
+
+    const { datastore } = useDatastore();
 
     const {
         register,
@@ -97,7 +100,17 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
             />
             <Input
                 label={t("metadata.description_form.technical_name")}
-                hintText={t("metadata.description_form.hint_technical_name")}
+                hintText={
+                    <>
+                        {t("metadata.description_form.hint_technical_name")}
+                        {datastore?.configuration_layer_name_prefix && (
+                            <>
+                                <br />
+                                {t("metadata.field.hint.prefix_mention", { prefix: datastore.configuration_layer_name_prefix })}
+                            </>
+                        )}
+                    </>
+                }
                 state={errors.technical_name ? "error" : "default"}
                 stateRelatedMessage={errors?.technical_name?.message?.toString()}
                 nativeInputProps={{
@@ -127,7 +140,17 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
 
             <Input
                 label={t("metadata.description_form.identifier")}
-                hintText={t("metadata.description_form.hint_identifier")}
+                hintText={
+                    <>
+                        {t("metadata.description_form.hint_identifier")}
+                        {datastore?.metadata_file_identifier_prefix && (
+                            <>
+                                <br />
+                                {t("metadata.field.hint.prefix_mention", { prefix: datastore.metadata_file_identifier_prefix })}
+                            </>
+                        )}
+                    </>
+                }
                 state={errors.identifier ? "error" : "default"}
                 stateRelatedMessage={errors?.identifier?.message?.toString()}
                 nativeInputProps={{

@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 
 import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
+import { useDatastore } from "@/contexts/datastore";
 import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidRaster, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
@@ -53,6 +54,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
     const [currentStep, setCurrentStep] = useState(STEPS.METADATA_UPLOAD);
 
     const queryClient = useQueryClient();
+    const { datastore } = useDatastore();
 
     const createServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
@@ -119,14 +121,15 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
     schemas[STEPS.METADATA_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
         existingLayerNamesQuery.data,
         editMode,
-        offeringQuery.data?.configuration.layer_name
+        offeringQuery.data?.configuration.layer_name,
+        datastore
     );
     schemas[STEPS.METADATA_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
     const defaultValues: ServiceFormValuesBaseType = useMemo(
-        () => getPyramidRasterWmsRasterServiceFormDefaultValues(offeringQuery.data, editMode, pyramidQuery.data, metadataQuery.data),
-        [editMode, offeringQuery.data, pyramidQuery.data, metadataQuery.data]
+        () => getPyramidRasterWmsRasterServiceFormDefaultValues(offeringQuery.data, editMode, pyramidQuery.data, metadataQuery.data, datastore),
+        [editMode, offeringQuery.data, pyramidQuery.data, metadataQuery.data, datastore]
     );
 
     const form = useForm<ServiceFormValuesBaseType>({

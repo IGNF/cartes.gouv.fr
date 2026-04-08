@@ -63,7 +63,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
             // création de requête pour la config
             $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
-            $configRequestBody = $this->getConfigRequestBody($datastoreId, ConfigurationTypes::WMSVECTOR, $dto, $typeInfos);
+            $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody);
             $configuration = $offering['configuration'];
@@ -107,7 +107,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
             // création de requête pour la config
             $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
-            $configRequestBody = $this->getConfigRequestBody($datastoreId, ConfigurationTypes::WMSVECTOR, $dto, $typeInfos, $oldConfiguration);
+            $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos, $oldConfiguration);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody, $oldOffering);
 

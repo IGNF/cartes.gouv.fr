@@ -8,9 +8,6 @@ use Symfony\Component\HttpClient\HttpOptions;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-/**
- * // NOTE : ne pas utiliser car la variable d'environnement `geonetwork_url` a été supprimée, parce qu'en production la route `geonetwork/srv/api/records/$fileIdentifier/formatters/xml` n'est pas disponible.
- */
 class GeonetworkApiService
 {
     private HttpClientInterface $geonetworkClient;
@@ -51,7 +48,10 @@ class GeonetworkApiService
 
         // $url = "geonetwork/srv/api/records/$fileIdentifier/formatters/xml";
         $url = '/csw';
-        if (str_starts_with($fileIdentifier, 'sandbox')) {
+
+        // NOTE : si le fileIdentifier commence par "sandbox", on considère que la requête doit être redirigée vers l'instance sandbox de geonetwork, qui est séparée de l'instance de production et a une URL différente
+        // strtolower pour éviter les problèmes de casse dans le fileIdentifier. Jusqu'à présent côté backend on le mettait en minuscule. Mais désormais ça sera la valeur telle qu'elle est fournie par l'API. Donc il y aura un mélange de majuscules et minuscules
+        if (str_starts_with(strtolower($fileIdentifier), 'sandbox')) {
             $url = '/sandbox/csw';
         }
 

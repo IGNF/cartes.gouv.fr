@@ -1,5 +1,6 @@
 import * as yup from "yup";
 
+import { Datastore } from "@/@types/app";
 import { getTranslation } from "../../../../i18n/i18n";
 import { regex } from "../../../../utils";
 import validations from "../../../../validations";
@@ -19,7 +20,7 @@ export class CommonSchemasValidation {
         });
     }
 
-    getMDDescriptionSchema(existingLayerNames: string[] = [], editMode: boolean = false, oldTechnicalName?: string) {
+    getMDDescriptionSchema(existingLayerNames: string[] = [], editMode: boolean = false, oldTechnicalName?: string, datastore?: Datastore) {
         return yup
             .object({
                 technical_name: yup
@@ -40,6 +41,16 @@ export class CommonSchemasValidation {
 
                             return !existingLayerNames?.includes(technicalName);
                         },
+                    })
+                    .test({
+                        name: "has-prefix",
+                        message: tValidMD("metadatas.technical_name_prefix_error"),
+                        test: (technicalName) => {
+                            if (editMode === true) return true; // en mode édition, on ne fait pas de validation sur le préfixe pour permettre de conserver le même nom technique même si le préfixe a été ajouté après la création de l'offering
+                            // le comportement est différent de file identifier parce qu'on permet de modifier le file identifier même en mode édition, mais pas le technical name. Donc en mode édition, on considère que le préfixe est optionnel pour le technical name
+                            if (!datastore?.configuration_layer_name_prefix) return true; // si pas de préfixe défini, on ne fait pas de validation
+                            return technicalName.startsWith(datastore?.configuration_layer_name_prefix + ".");
+                        },
                     }),
                 public_name: yup
                     .string()
@@ -53,7 +64,15 @@ export class CommonSchemasValidation {
                 identifier: yup
                     .string()
                     .matches(regex.file_identifier, tValidMD("metadatas.identifier_regex"))
-                    .required(tValidMD("metadatas.identifier_error")),
+                    .required(tValidMD("metadatas.identifier_error"))
+                    .test({
+                        name: "has-prefix",
+                        message: tValidMD("metadatas.identifier_prefix_error"),
+                        test: (identifier) => {
+                            if (!datastore?.metadata_file_identifier_prefix) return true; // si pas de préfixe défini, on ne fait pas de validation
+                            return identifier.startsWith(datastore?.metadata_file_identifier_prefix + ".");
+                        },
+                    }),
                 category: yup.array(yup.string()).min(1, tValidMD("metadatas.category_error")).required(tValidMD("metadatas.category_error")),
                 keywords: yup.array(yup.string()),
                 free_keywords: yup.array(yup.string()),
