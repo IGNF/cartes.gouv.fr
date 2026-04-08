@@ -36,7 +36,7 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                         })}
                     >
                         <span className={fr.cx("fr-icon-database-line", "fr-icon--md")} />
-                        <h1 className={fr.cx("fr-text--xl", "fr-m-0")}>Mes données</h1>
+                        <h1 className={fr.cx("fr-text--xl", "fr-m-0")}>Mes entrepôts</h1>
                     </div>
                     <p
                         className={cx(
