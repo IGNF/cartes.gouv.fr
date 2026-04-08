@@ -46,10 +46,31 @@ export class CommonSchemasValidation {
                         name: "has-prefix",
                         message: tValidMD("metadatas.technical_name_prefix_error"),
                         test: (technicalName) => {
+                            if (!technicalName) return true;
                             if (editMode === true) return true; // en mode édition, on ne fait pas de validation sur le préfixe pour permettre de conserver le même nom technique même si le préfixe a été ajouté après la création de l'offering
                             // le comportement est différent de file identifier parce qu'on permet de modifier le file identifier même en mode édition, mais pas le technical name. Donc en mode édition, on considère que le préfixe est optionnel pour le technical name
-                            if (!datastore?.configuration_layer_name_prefix) return true; // si pas de préfixe défini, on ne fait pas de validation
-                            return technicalName.startsWith(datastore?.configuration_layer_name_prefix + ".");
+                            const prefix = datastore?.configuration_layer_name_prefix;
+                            if (!prefix) return true; // si pas de préfixe défini, on ne fait pas de validation
+                            if (typeof technicalName !== "string") return false;
+
+                            const expectedPrefix = prefix + ".";
+                            return technicalName.startsWith(expectedPrefix);
+                        },
+                    })
+                    .test({
+                        name: "not-prefix-only",
+                        message: tValidMD("metadatas.technical_name_not_prefix_only_error"),
+                        test: (technicalName) => {
+                            if (!technicalName) return true;
+                            if (editMode === true) return true;
+
+                            const prefix = datastore?.configuration_layer_name_prefix;
+                            if (!prefix) return true;
+                            if (typeof technicalName !== "string") return false;
+
+                            const expectedPrefix = prefix + ".";
+                            if (!technicalName.startsWith(expectedPrefix)) return true;
+                            return technicalName.length > expectedPrefix.length;
                         },
                     }),
                 public_name: yup
@@ -69,8 +90,27 @@ export class CommonSchemasValidation {
                         name: "has-prefix",
                         message: tValidMD("metadatas.identifier_prefix_error"),
                         test: (identifier) => {
-                            if (!datastore?.metadata_file_identifier_prefix) return true; // si pas de préfixe défini, on ne fait pas de validation
-                            return identifier.startsWith(datastore?.metadata_file_identifier_prefix + ".");
+                            if (!identifier) return true;
+                            const prefix = datastore?.metadata_file_identifier_prefix;
+                            if (!prefix) return true; // si pas de préfixe défini, on ne fait pas de validation
+                            if (typeof identifier !== "string") return false;
+
+                            const expectedPrefix = prefix + ".";
+                            return identifier.startsWith(expectedPrefix);
+                        },
+                    })
+                    .test({
+                        name: "not-prefix-only",
+                        message: tValidMD("metadatas.identifier_not_prefix_only_error"),
+                        test: (identifier) => {
+                            if (!identifier) return true;
+                            const prefix = datastore?.metadata_file_identifier_prefix;
+                            if (!prefix) return true;
+                            if (typeof identifier !== "string") return false;
+
+                            const expectedPrefix = prefix + ".";
+                            if (!identifier.startsWith(expectedPrefix)) return true;
+                            return identifier.length > expectedPrefix.length;
                         },
                     }),
                 category: yup.array(yup.string()).min(1, tValidMD("metadatas.category_error")).required(tValidMD("metadatas.category_error")),
