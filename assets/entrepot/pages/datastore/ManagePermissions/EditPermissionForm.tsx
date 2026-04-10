@@ -41,7 +41,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
     /* Liste des offerings */
     const offeringsQuery = useQuery({
         queryKey: RQKeys.datastore_offering_list(datastoreId),
-        queryFn: ({ signal }) => api.service.getOfferings(datastoreId, { signal }),
+        queryFn: ({ signal }) => api.service.getOfferings(datastoreId, {}, { signal }),
         staleTime: 30000,
     });
 

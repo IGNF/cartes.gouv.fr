@@ -60,7 +60,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
         data,
     } = useQuery({
         queryKey: RQKeys.datastore_offering_list(datastoreId),
-        queryFn: ({ signal }) => api.service.getOfferings(datastoreId, { signal }),
+        queryFn: ({ signal }) => api.service.getOfferings(datastoreId, {}, { signal }),
         staleTime: 30000,
     });
 
