@@ -1,9 +1,9 @@
 import { Offering, StoredData, StoredDataReport } from "../../@types/app";
 import { ProcessingExecutionStoredDataDto } from "../../@types/entrepot";
-import SymfonyRouting from "../../modules/Routing";
+import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 
-const getList = async <T = StoredData[]>(datastoreId: string, query: object = {}, otherOptions: RequestInit = {}) => {
+const getList = async <T = StoredData[]>(datastoreId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_stored_data_get_list", { datastoreId, ...query });
     const res = await apiFetch(url, {
         ...otherOptions,
@@ -15,7 +15,7 @@ const getList = async <T = StoredData[]>(datastoreId: string, query: object = {}
     };
 };
 
-const getAll = async <T = StoredData[]>(datastoreId: string, query: object = {}, otherOptions: RequestInit = {}) => {
+const getAll = async <T = StoredData[]>(datastoreId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_stored_data_get_list", { datastoreId, all: true, ...query });
     return jsonFetch<T>(url, {
         ...otherOptions,

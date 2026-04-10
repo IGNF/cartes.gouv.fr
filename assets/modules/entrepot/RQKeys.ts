@@ -1,4 +1,5 @@
 import { ConfigurationTypeEnum, OfferingTypeEnum } from "../../@types/app";
+import { type QueryParams } from "../Routing";
 
 /**
  * Factory pour créer des query keys pour react-query
@@ -11,7 +12,7 @@ const RQKeys = {
     datastore_permission_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "permissions", "offering", offeringId],
     datastore_permission: (datastoreId: string, permissionId: string): string[] => ["datastore", datastoreId, "permission", permissionId],
 
-    datastore_upload_list: (datastoreId: string, queryParams?: object): string[] => {
+    datastore_upload_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "upload"];
         if (queryParams) keys.push(JSON.stringify(queryParams));
         return keys;
@@ -21,7 +22,7 @@ const RQKeys = {
     datastore_upload_file_tree: (datastoreId: string, uploadId: string = "undefined"): string[] => ["datastore", datastoreId, "upload", uploadId, "file_tree"],
     datastore_upload_report: (datastoreId: string, uploadId: string): string[] => ["datastore", datastoreId, "upload", uploadId, "report"],
 
-    datastore_stored_data_list: (datastoreId: string, queryParams?: object): string[] => {
+    datastore_stored_data_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "stored_data"];
         if (queryParams) keys.push(JSON.stringify(queryParams));
         return keys;
@@ -30,7 +31,7 @@ const RQKeys = {
     datastore_stored_data_uses: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId, "uses"],
     datastore_stored_data_report: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId, "report"],
 
-    datastore_processing_execution_list: (datastoreId: string, queryParams?: object): string[] => {
+    datastore_processing_execution_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "processing", "executions"];
         if (queryParams) keys.push(JSON.stringify(queryParams));
         return keys;
@@ -41,7 +42,7 @@ const RQKeys = {
     datastore_datasheet_metadata: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName, "metadata"],
     datastore_datasheet_service_list: (datastoreId: string, datasheetName: string) => ["datastore", datastoreId, "datasheet", datasheetName, "services"],
 
-    datastore_offering_list: (datastoreId: string, queryParams?: object): string[] => {
+    datastore_offering_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "offering"];
         if (queryParams) keys.push(JSON.stringify(queryParams));
         return keys;
@@ -57,7 +58,7 @@ const RQKeys = {
 
     datastore_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "offering", offeringId],
 
-    datastore_annexe_list: (datastoreId: string, queryParams?: object): string[] => {
+    datastore_annexe_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "annexe"];
         if (queryParams) keys.push(JSON.stringify(queryParams));
         return keys;
@@ -67,7 +68,7 @@ const RQKeys = {
     datastore_metadata_list: (datastoreId: string): string[] => ["datastore", datastoreId, "metadata"],
     datastore_metadata_by_id: (datastoreId: string, metadataId: string): string[] => ["datastore", datastoreId, "metadata", metadataId],
 
-    datastore_statics_list: (datastoreId: string, query?: unknown): string[] => {
+    datastore_statics_list: (datastoreId: string, query?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "statics"];
         if (query) keys.push(JSON.stringify(query));
         return keys;

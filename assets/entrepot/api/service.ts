@@ -1,6 +1,6 @@
 import type { OfferingStandardListResponseDto } from "@/@types/entrepot";
 import { jsonFetch } from "@/modules/jsonFetch";
-import SymfonyRouting, { QueryParams } from "@/modules/Routing";
+import SymfonyRouting, { type QueryParams } from "@/modules/Routing";
 import { ConfigurationTypeEnum, OfferingTypeEnum, type Service } from "../../@types/app";
 
 const getService = (datastoreId: string, offeringId: string, otherOptions: RequestInit = {}) => {
