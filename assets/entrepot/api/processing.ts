@@ -1,9 +1,9 @@
 import { ProcessingExecution } from "@/@types/app";
 import { ProcessingListResponseDto } from "@/@types/entrepot";
 import { jsonFetch } from "@/modules/jsonFetch";
-import SymfonyRouting from "@/modules/Routing";
+import SymfonyRouting, { type QueryParams } from "@/modules/Routing";
 
-const getList = (datastoreId: string, queryParams: object = {}, otherOptions: RequestInit = {}) => {
+const getList = (datastoreId: string, queryParams: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_processing_get_list", { datastoreId, ...queryParams });
     return jsonFetch<ProcessingListResponseDto[]>(url, {
         ...otherOptions,
@@ -11,7 +11,7 @@ const getList = (datastoreId: string, queryParams: object = {}, otherOptions: Re
 };
 
 // exécutions de traitements
-const getExecutionList = (datastoreId: string, queryParams: object = {}, otherOptions: RequestInit = {}) => {
+const getExecutionList = (datastoreId: string, queryParams: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_processing_execution_get_list", { datastoreId, ...queryParams });
     return jsonFetch<ProcessingExecution[]>(url, {
         ...otherOptions,

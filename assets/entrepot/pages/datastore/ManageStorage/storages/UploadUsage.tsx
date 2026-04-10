@@ -7,6 +7,7 @@ import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CartesApiException } from "@/modules/jsonFetch";
+import { type QueryParams } from "@/modules/Routing";
 import { Datastore, Upload } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -25,12 +26,13 @@ const confirmDialogModal = createModal({
     isOpenedByDefault: false,
 });
 
-async function fetchUploadList(datastoreId: string, queryParams: object = {}, signal?: AbortSignal) {
+async function fetchUploadList(datastoreId: string, queryParams: QueryParams = {}, signal?: AbortSignal) {
     const res = await api.upload.getList(datastoreId, queryParams, { signal });
+    const limit = typeof queryParams["limit"] === "number" ? queryParams["limit"] : 10;
 
     return {
         items: res.data,
-        contentRange: decodeContentRange(res.headers.get("content-range") ?? "", queryParams?.["limit"] ?? 10),
+        contentRange: decodeContentRange(res.headers.get("content-range") ?? "", limit),
     };
 }
 

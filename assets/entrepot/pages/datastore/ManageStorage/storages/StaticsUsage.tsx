@@ -7,6 +7,7 @@ import { FC, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CartesApiException } from "@/modules/jsonFetch";
+import { type QueryParams } from "@/modules/Routing";
 import { routes, useRoutePaginationParams } from "@/router/router";
 import type { Datastore, StaticFile } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
@@ -28,12 +29,13 @@ type StaticsUsageProps = {
     datastore: Datastore;
 };
 
-async function fetchStaticsList(datastoreId: string, queryParams: object = {}, signal?: AbortSignal) {
+async function fetchStaticsList(datastoreId: string, queryParams: QueryParams = {}, signal?: AbortSignal) {
     const res = await api.statics.getList(datastoreId, queryParams, { signal });
+    const limit = typeof queryParams["limit"] === "number" ? queryParams["limit"] : 10;
 
     return {
         items: res.data,
-        contentRange: decodeContentRange(res.headers.get("content-range") ?? "", queryParams?.["limit"] ?? 10),
+        contentRange: decodeContentRange(res.headers.get("content-range") ?? "", limit),
     };
 }
 

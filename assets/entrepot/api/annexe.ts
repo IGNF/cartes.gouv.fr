@@ -1,9 +1,9 @@
 import { AnnexStandardListResponseDto } from "@/@types/entrepot";
 import { Annexe, DatasheetThumbnailAnnexe } from "../../@types/app";
-import SymfonyRouting from "../../modules/Routing";
+import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 
-const getList = async (datastoreId: string, query: object = {}, otherOptions: RequestInit = {}) => {
+const getList = async (datastoreId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_get_list", { datastoreId, ...query });
     const res = await apiFetch(url, {
         ...otherOptions,

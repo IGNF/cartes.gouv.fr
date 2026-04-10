@@ -1,8 +1,8 @@
 import { StaticFile } from "@/@types/app";
-import SymfonyRouting from "../../modules/Routing";
+import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 
-const getList = async (datastoreId: string, queryParams: object = {}, otherOptions: RequestInit = {}) => {
+const getList = async (datastoreId: string, queryParams: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_statics_get_list", { datastoreId, ...queryParams });
     const res = await apiFetch(url, {
         ...otherOptions,
@@ -14,7 +14,7 @@ const getList = async (datastoreId: string, queryParams: object = {}, otherOptio
     };
 };
 
-const getAll = (datastoreId: string, queryParams: object = {}, otherOptions: RequestInit = {}) => {
+const getAll = (datastoreId: string, queryParams: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_statics_get_list", { datastoreId, ...queryParams, all: true });
     return jsonFetch<StaticFile[]>(url, {
         method: "GET",

@@ -4,11 +4,12 @@ import { StoredData } from "@/@types/app";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
+import { type QueryParams } from "@/modules/Routing";
 import { delta } from "@/utils";
 
 export default function useStoredDataListQuery(
     datastoreId: string,
-    queryParams: object = {},
+    queryParams: QueryParams = {},
     otherOptions?: Partial<UndefinedInitialDataOptions<StoredData[], CartesApiException>>
 ) {
     return useQuery<StoredData[], CartesApiException>({

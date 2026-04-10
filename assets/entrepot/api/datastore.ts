@@ -1,5 +1,5 @@
 import type { Datastore, DatastoreEndpoint, DatastorePermission } from "../../@types/app";
-import SymfonyRouting from "../../modules/Routing";
+import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 
 const get = (datastoreId: string, otherOptions: RequestInit = {}) => {
@@ -30,7 +30,7 @@ const getPermission = (datastoreId: string, permissionId: string, otherOptions: 
     });
 };
 
-const getPermissions = (datastoreId: string, query: object, otherOptions: RequestInit = {}) => {
+const getPermissions = (datastoreId: string, query: QueryParams, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_permissions", { datastoreId, ...query });
     return jsonFetch<DatastorePermission[]>(url, {
         ...otherOptions,

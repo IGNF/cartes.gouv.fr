@@ -1,9 +1,9 @@
-import SymfonyRouting from "../../modules/Routing";
+import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 import { UploadReport } from "../../@types/app";
 import { Upload, UploadTree } from "../../@types/app";
 
-const getList = async (datastoreId: string, query: object = {}, otherOptions: RequestInit = {}) => {
+const getList = async (datastoreId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", { datastoreId, ...query });
     const res = await apiFetch(url, {
         ...otherOptions,
@@ -15,7 +15,7 @@ const getList = async (datastoreId: string, query: object = {}, otherOptions: Re
     };
 };
 
-const getAll = async (datastoreId: string, query: object = {}, otherOptions: RequestInit = {}) => {
+const getAll = async (datastoreId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", { datastoreId, all: true, ...query });
     return jsonFetch<Upload[]>(url, {
         ...otherOptions,
