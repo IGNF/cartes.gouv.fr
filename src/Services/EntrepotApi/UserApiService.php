@@ -101,4 +101,12 @@ final class UserApiService
     {
         return $this->api->delete("users/me/communities/$communityId");
     }
+
+    /**
+     * @param array<string,mixed> $query
+     */
+    public function getStats(array $query): PaginatedPromise
+    {
+        return $this->api->requestAll('users/me/stats', $query);
+    }
 }
