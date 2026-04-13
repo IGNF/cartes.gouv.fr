@@ -18,6 +18,7 @@ use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
@@ -82,6 +83,19 @@ class ServiceController extends AbstractController implements ApiControllerInter
             $offering = $this->cartesServiceApiService->getService($datastoreId, $offeringId);
 
             return $this->json($offering);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{offeringId}/stats', name: 'get_service_stats', methods: ['GET'], requirements: ['offeringId' => Requirement::UUID_V4])]
+    public function getServiceStats(string $datastoreId, string $offeringId, Request $request): JsonResponse
+    {
+        try {
+            $query = $request->query->all();
+            $stats = $this->configurationApiService->getOfferingStats($datastoreId, $offeringId, $query)->resolve();
+
+            return $this->json($stats);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
