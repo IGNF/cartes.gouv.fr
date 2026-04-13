@@ -6,14 +6,15 @@ export function formatStats(stats: HitStatisticsDto): Stats {
     return {
         total: {
             ...stats.total,
-            begin_date: new Date(stats.total.begin_date),
-            end_date: new Date(stats.total.end_date),
+            begin_date: stats.total?.begin_date ? new Date(stats.total.begin_date) : undefined,
+            end_date: stats.total?.end_date ? new Date(stats.total.end_date) : undefined,
         },
-        details: stats.details.map((detail) => ({
-            ...detail,
-            begin_date: new Date(detail.begin_date),
-            end_date: new Date(detail.end_date),
-        })),
+        details:
+            stats.details?.map((detail) => ({
+                ...detail,
+                begin_date: detail.begin_date ? new Date(detail.begin_date) : undefined,
+                end_date: detail.end_date ? new Date(detail.end_date) : undefined,
+            })) ?? [],
     };
 }
 
@@ -31,10 +32,12 @@ export function formatBarChartData(
     startDate?: Date,
     endDate?: Date
 ): IBarChartData {
-    const dataEntries: [number, number][] = data.details.map((detail) => {
-        const date = getDate(detail.begin_date, aggregation);
-        return [date, detail[type]];
-    });
+    const dataEntries: [number, number][] = data.details
+        .map((detail) => {
+            const date = detail.begin_date ? getDate(detail.begin_date, aggregation) : undefined;
+            return [date, detail[type]];
+        })
+        .filter(([date, detail]) => date !== undefined && detail !== undefined) as [number, number][];
     const dataMap = new Map(dataEntries);
 
     const startTime = startDate ? startDate.getTime() : dataEntries.at(0)?.[0];
