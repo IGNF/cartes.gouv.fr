@@ -55,6 +55,8 @@ const privateRoutes = {
         },
         (p) => `${appRoot}/demande-acces/${p.fileIdentifier}`
     ),
+
+    stats: defineRoute(`${appRoot}/tableau-de-bord/stats`),
 };
 
 const communityRoute = defineRoute(
@@ -281,6 +283,7 @@ const datastoreRoutes = {
         },
         (p) => `/service/${p.offeringId}/style/${p.styleTechnicalName}/modification`
     ),
+    datastore_endpoint_stats: datastoreRoute.extend(`/endpoint/stats`),
 };
 
 const configRoutes = {

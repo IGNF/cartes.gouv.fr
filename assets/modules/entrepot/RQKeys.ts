@@ -8,6 +8,11 @@ const RQKeys = {
     datastore_list: (): string[] => ["datastore"],
     datastore: (datastoreId: string): string[] => ["datastore", datastoreId],
     datastore_endpoints: (datastoreId: string): string[] => ["datastore", datastoreId, "endpoints"],
+    datastore_endpoint_stats: (datastoreId: string, endpointId: string, queryParams?: object): string[] => {
+        const keys = ["datastore", datastoreId, "endpoints", endpointId, "stats"];
+        if (queryParams) keys.push(JSON.stringify(queryParams));
+        return keys;
+    },
     datastore_permissions: (datastoreId: string): string[] => ["datastore", datastoreId, "permissions"],
     datastore_permission_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "permissions", "offering", offeringId],
     datastore_permission: (datastoreId: string, permissionId: string): string[] => ["datastore", datastoreId, "permission", permissionId],
