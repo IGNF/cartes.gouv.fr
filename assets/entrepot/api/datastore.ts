@@ -1,3 +1,4 @@
+import { HitStatisticsDto } from "@/@types/stats";
 import type { Datastore, DatastoreEndpoint, DatastorePermission } from "../../@types/app";
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
@@ -72,6 +73,13 @@ const removePermission = (datastoreId: string, permissionId: string) => {
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
+const getEndpointStats = (datastoreId: string, endpointId: string, query: object = {}, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_endpoint_stats", { datastoreId, endpointId, ...query });
+    return jsonFetch<HitStatisticsDto>(url, {
+        ...otherOptions,
+    });
+};
+
 const datastore = {
     get,
     getSandbox,
@@ -81,6 +89,7 @@ const datastore = {
     addPermission,
     updatePermission,
     removePermission,
+    getEndpointStats,
 };
 
 export default datastore;
