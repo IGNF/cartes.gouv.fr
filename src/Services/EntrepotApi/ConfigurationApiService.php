@@ -158,6 +158,14 @@ final class ConfigurationApiService
         return $this->api->get("datastores/$datastoreId/offerings/$offeringId");
     }
 
+    /**
+     * @param array<string,mixed> $query
+     */
+    public function getOfferingStats(string $datastoreId, string $offeringId, array $query): PaginatedPromise
+    {
+        return $this->api->requestAll("datastores/$datastoreId/offerings/$offeringId/stats", $query);
+    }
+
     public function addOffering(string $datastoreId, string $configurationId, string $endpointId, bool $open = true): ResponsePromise
     {
         $body = [
