@@ -50,7 +50,16 @@ const DatePicker = (props: DatePickerProps) => {
                             ...datePickerProps.slotProps,
                             field: { ...datePickerProps.slotProps?.field, clearable: true, onClear: () => onChange?.(undefined) },
                         }}
-                        sx={{ width: "100%" }}
+                        sx={{
+                            width: "100%",
+                            ".MuiPickersInputBase-root": {
+                                paddingX: fr.spacing("4v"),
+                                backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+                            },
+                            ".MuiPickersSectionList-root": {
+                                paddingY: fr.spacing("2v"),
+                            },
+                        }}
                         timezone={"UTC"}
                         value={value}
                         minDate={minDate}

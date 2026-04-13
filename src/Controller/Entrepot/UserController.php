@@ -13,6 +13,7 @@ use App\Services\EntrepotApi\UserApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -199,6 +200,20 @@ class UserController extends AbstractController implements ApiControllerInterfac
             $this->userApiService->leaveCommunity($communityId)->await();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/me/stats', name: 'me_stats', methods: ['GET'])]
+    public function getMyStats(Request $request): JsonResponse
+    {
+        try {
+            $query = $request->query->all();
+
+            $stats = $this->userApiService->getStats($query)->resolve();
+
+            return $this->json($stats);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
