@@ -119,8 +119,14 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
-        if (null === $this->tokenManager->getToken()) {
+        $token = $this->tokenManager->getToken();
+        if (null === $token) {
+            $this->logger->debug('{class}: No token found in session during refreshUser', ['class' => self::class]);
             throw new AuthenticationExpiredException('No token in session');
+        }
+        if ($token->hasExpired()) {
+            $this->logger->debug('{class}: Token expired during refreshUser', ['class' => self::class]);
+            throw new AuthenticationExpiredException('Token expired');
         }
 
         return $user;
