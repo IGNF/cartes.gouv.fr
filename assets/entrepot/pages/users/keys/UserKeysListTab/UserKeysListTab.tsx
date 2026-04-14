@@ -291,7 +291,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                 return (
                                                     <div key={type} className={fr.cx("fr-mb-5v")}>
                                                         {typeIndex >= 1 ? <hr /> : null}
-                                                        {services[0].permission && (
+                                                        {services[0].permission ? (
                                                             <div className={fr.cx("fr-col-12", "fr-col-lg-10")}>
                                                                 <UserKeyLink
                                                                     permissionId={services[0].permission._id}
@@ -299,6 +299,8 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                                     hash={accessKey.type_infos && (accessKey.type_infos as HashInfoDto).hash}
                                                                 />
                                                             </div>
+                                                        ) : (
+                                                            <div className={fr.cx("fr-label", "fr-py-2v")}>{services[0].offering.type}</div>
                                                         )}
                                                         <div className={fr.cx("fr-mb-1v")}>{t("available_services")}</div>
                                                         <ul>
