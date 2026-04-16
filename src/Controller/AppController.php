@@ -26,4 +26,14 @@ class AppController extends AbstractController
             'app_root' => $appRoot,
         ]);
     }
+
+    #[Route(
+        '/tableau-de-bord/health',
+        name: 'cartesgouvfr_app_health',
+        options: ['expose' => true]
+    )]
+    public function health(): Response
+    {
+        return new Response('OK', Response::HTTP_OK);
+    }
 }
