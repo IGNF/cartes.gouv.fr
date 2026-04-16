@@ -34,6 +34,11 @@ export const buildStatsConfig = (datastoreList: DatastoreInfo[]): Record<string,
     const keyOptions = (): Promise<SelectOption[]> => api.user.getMyKeys().then((keys) => keys.map((k) => ({ value: k._id, label: k.name })));
 
     return {
+        user_me: {
+            label: "Utilisateur (moi)",
+            apiRoute: "cartesgouvfr_api_user_me_stats",
+            params: [],
+        },
         datastore_endpoint: {
             label: "Endpoint de datastore",
             apiRoute: "cartesgouvfr_api_datastore_get_endpoint_stats",
@@ -59,11 +64,6 @@ export const buildStatsConfig = (datastoreList: DatastoreInfo[]): Record<string,
                 { key: "datastoreId", label: "Entrepôt", fetchOptions: datastoreOptions },
                 { key: "permissionId", label: "Permission", dependsOn: ["datastoreId"], fetchOptions: permissionOptions },
             ],
-        },
-        user_me: {
-            label: "Utilisateur (moi)",
-            apiRoute: "cartesgouvfr_api_user_me_stats",
-            params: [],
         },
         user_key: {
             label: "Clé d'utilisateur",
