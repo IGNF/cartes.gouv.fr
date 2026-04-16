@@ -51,12 +51,10 @@ when@prod:
             main_stdout:
                 type: stream
                 path: php://stdout
-                formatter: monolog.formatter.json
             errors_stderr:
                 type: stream
                 path: php://stderr
                 level: error
-                formatter: monolog.formatter.json
             mailer:
                 type: rotating_file
                 path: "%kernel.logs_dir%/mailer.log"
@@ -69,4 +67,3 @@ when@prod:
                 type: stream
                 channels: [deprecation]
                 path: php://stderr
-                formatter: monolog.formatter.json
