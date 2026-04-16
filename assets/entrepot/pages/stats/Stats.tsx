@@ -129,8 +129,10 @@ export default function Stats() {
                 <p className={fr.cx("fr-mt-2w")}>{currentConfig.disabledReason ?? "Ce type d'entité n'est pas encore disponible."}</p>
             ) : statsQuery.isLoading ? (
                 <LoadingText className={fr.cx("fr-ml-2w")} withSpinnerIcon as="p" />
-            ) : (
+            ) : statsQuery.data !== undefined ? (
                 <StatsBarChart stats={statsQuery.data} startDate={startDate} endDate={endDate} />
+            ) : (
+                "Pas de données"
             )}
         </Main>
     );
