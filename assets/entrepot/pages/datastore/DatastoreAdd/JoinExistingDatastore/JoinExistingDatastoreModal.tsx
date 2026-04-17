@@ -170,6 +170,35 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
         },
     });
 
+    function renderTextWithLinks(text: string) {
+        const urlRegex = /([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#\.]?[\w-]+)*\/?/gm;
+        const nodes: React.ReactNode[] = [];
+        let lastIndex = 0;
+
+        for (const match of text.matchAll(urlRegex)) {
+            const url = match[0];
+            const index = match.index ?? 0;
+
+            if (index > lastIndex) {
+                nodes.push(text.slice(lastIndex, index));
+            }
+
+            nodes.push(
+                <a key={index} href={url} target="_blank" rel="noopener noreferrer">
+                    {url}
+                </a>
+            );
+
+            lastIndex = index + url.length;
+        }
+
+        if (lastIndex < text.length) {
+            nodes.push(text.slice(lastIndex));
+        }
+
+        return nodes;
+    }
+
     return (
         <>
             {createPortal(
@@ -214,12 +243,12 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
                             {selectedCommunity?.contact}
                         </div>
 
-                        {selectedCommunity?.description && <p className={fr.cx("fr-m-0")}>{selectedCommunity?.description}</p>}
+                        {selectedCommunity?.description && <p className={fr.cx("fr-m-0")}>{renderTextWithLinks(selectedCommunity?.description)}</p>}
 
                         {schema && (
                             <div className={fr.cx("fr-grid-row")}>
                                 <div className={fr.cx("fr-col")}>
-                                    {schema?.["description"] && <p>{schema["description"]}</p>}
+                                    {schema?.["description"] && <p>{renderTextWithLinks(schema["description"])}</p>}
 
                                     {schema?.["fields"] &&
                                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
