@@ -8,16 +8,19 @@ when@dev:
             - mailer
 
         handlers:
+            # Journal principal de dev dans un fichier rotatif.
             main:
                 type: rotating_file
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
                 channels: ["!event"]
+            # Affiche les logs lors de l'exécution des commandes console.
             console:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine", "!console"]
 
+            # Journal dedié aux messages du canal mailer en dev.
             mailer:
                 type: rotating_file
                 path: "%kernel.logs_dir%/mailer.log"
@@ -26,12 +29,14 @@ when@dev:
 when@test:
     monolog:
         handlers:
+            # Tamponne les logs et n'écrit que si une erreur survient.
             main:
                 type: fingers_crossed
                 action_level: error
                 handler: nested
                 excluded_http_codes: [404, 405]
                 channels: ["!event"]
+            # Destination de sortie du tampon de test vers un fichier.
             nested:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
@@ -40,30 +45,45 @@ when@test:
 when@prod:
     monolog:
         channels:
+            - deprecation
             - mailer
 
         handlers:
-            main:
+            # Filtre les niveaux notice à warning vers stdout (hors canaux dédiés).
+            stdout_notice_warning:
                 type: filter
-                handler: main_stdout
-                min_level: info
+                handler: stdout_stream
+                min_level: notice
                 max_level: warning
-            main_stdout:
+                channels: ["!deprecation", "!mailer"]
+
+            # Écrit les logs opérationnels sur stdout pour Kubernetes.
+            stdout_stream:
                 type: stream
                 path: php://stdout
-            errors_stderr:
+                channels: ["!deprecation", "!mailer"]
+
+            # Écrit les erreurs et niveaux supérieurs sur stderr.
+            stderr_error_plus:
                 type: stream
                 path: php://stderr
                 level: error
+                channels: ["!deprecation", "!mailer"]
+
+            # Isole les deprécations sur stderr via leur canal dédié.
+            deprecation:
+                type: stream
+                path: php://stderr
+                channels: [deprecation]
+
+            # Conserve les logs mailer dans un fichier rotatif specifique.
             mailer:
                 type: rotating_file
                 path: "%kernel.logs_dir%/mailer.log"
-                channels: mailer
+                channels: [mailer]
+
+            # Gère l'affichage des logs pour les commandes console en prod.
             console:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine"]
-            deprecation:
-                type: stream
-                channels: [deprecation]
-                path: php://stderr
