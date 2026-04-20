@@ -29,6 +29,8 @@ export const externalUrls = {
     terms_of_service: appRoot + "/cgu",
     legal_notice: appRoot + "/mentions-legales",
     sitemap: appRoot + "/plan-du-site",
+    newsletterSubscription: appRoot + "/lettre-d-information",
+    community_geopf_cartesgouvfr_expertises_territoires: "https://www.expertises-territoires.fr/jcms/pl1_557493/fr/communaute-geoplateforme-et-cartes-gouv",
     login: SymfonyRouting.generate("cartesgouvfr_security_login"),
     logout: SymfonyRouting.generate("cartesgouvfr_security_logout"),
 } as const;
