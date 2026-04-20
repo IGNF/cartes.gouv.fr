@@ -9,6 +9,7 @@ import { useTranslation } from "../../i18n/i18n";
 import SnackbarMessage from "../Utils/SnackbarMessage";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
+import NewsletterBanner from "./NewsletterBanner";
 
 const HiddenElements: FC = () => {
     const { t } = useTranslation("Common");
@@ -44,6 +45,7 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems }
             <HiddenElementsMemoized />
             <AppHeader navItems={navItems} />
             {children}
+            <NewsletterBanner />
             <AppFooter />
             <SnackbarMessage />
         </>
