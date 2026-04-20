@@ -28,6 +28,9 @@ import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
+import EmptyDatastore from "./EmptyDatastore/EmptyDatastore";
+import { emptyDatastoreModal } from "./EmptyDatastore/emptyDatastoreModal";
+import TestSSE from "./EmptyDatastore/TestSSE";
 
 type CommunityInfoFormType = {
     name: string;
@@ -202,6 +205,10 @@ export default function CommunityInfo() {
                 >
                     <strong className={fr.cx("fr-text--xl", "fr-m-0")}>{t("section_title")}</strong>
 
+                    <Button priority="tertiary no outline" nativeButtonProps={emptyDatastoreModal.buttonProps}>
+                        {"Vider l'entrepôt"}
+                    </Button>
+
                     {isSupervisor ? (
                         <Button priority="tertiary no outline" nativeButtonProps={deleteCommunityModal.buttonProps}>
                             {t("delete_community")}
@@ -299,6 +306,9 @@ export default function CommunityInfo() {
                     </div>
                 </Wait>
             )}
+
+            <EmptyDatastore />
+            <TestSSE />
 
             {/* quitter la commu */}
             {createPortal(
