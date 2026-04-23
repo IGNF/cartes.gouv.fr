@@ -105,7 +105,7 @@ export default function DeleteCommunity() {
 
     const { connect: connectStream, disconnect: disconnectStream } = useEventSource<DatastoreCleanupStreamEvents>({
         url: api.datastore.getCleanupStreamUrl(datastore._id),
-        enabled: false,
+        autoConnect: false,
         handlers: {
             started: (payload) => {
                 setState("cleanup_progress");

@@ -109,17 +109,17 @@ final class ConfigurationApiService
     /**
      * Récupère toutes les offerings associées à la configuration fournie.
      *
-     * @param array<mixed>|null $query
+     * @param array<mixed> $query
      */
-    public function getConfigurationOfferings(string $datastoreId, string $configurationId, ?array $query = []): PaginatedPromise
+    public function getConfigurationOfferings(string $datastoreId, string $configurationId, array $query = []): PaginatedPromise
     {
         return $this->api->requestAll("datastores/$datastoreId/configurations/$configurationId/offerings", $query);
     }
 
     /**
-     * @param array<mixed>|null $query
+     * @param array<mixed> $query
      */
-    public function getOfferingsList(string $datastoreId, ?array $query = []): PaginatedResponse
+    public function getOfferingsList(string $datastoreId, array $query = []): PaginatedResponse
     {
         return $this->api->get("datastores/$datastoreId/offerings", $query)->arrayWithHeaders();
     }

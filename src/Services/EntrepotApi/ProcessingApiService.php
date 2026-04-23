@@ -56,9 +56,9 @@ final class ProcessingApiService
     }
 
     /**
-     * @param array<mixed>|null $query
+     * @param array<mixed> $query
      */
-    public function getExecutionList(string $datastoreId, ?array $query = []): PaginatedResponse
+    public function getExecutionList(string $datastoreId, array $query = []): PaginatedResponse
     {
         return $this->api->get("datastores/$datastoreId/processings/executions", $query)->arrayWithHeaders();
     }

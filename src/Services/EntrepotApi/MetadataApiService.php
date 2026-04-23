@@ -27,9 +27,9 @@ final class MetadataApiService
     }
 
     /**
-     * @param array<mixed>|null $query
+     * @param array<mixed> $query
      */
-    public function getList(string $datastoreId, ?array $query = []): PaginatedResponse
+    public function getList(string $datastoreId, array $query = []): PaginatedResponse
     {
         return $this->api->get("datastores/$datastoreId/metadata", $query)->arrayWithHeaders();
     }

@@ -24,7 +24,7 @@ const getNamedEventNames = <TEvents extends EventSourceEventMap>(handlers: Event
 };
 
 const useEventSource = <TEvents extends EventSourceEventMap>(options: UseEventSourceOptions<TEvents>): UseEventSourceResult => {
-    const { url, enabled = false, withCredentials = false, handlers = {}, onError } = options;
+    const { url, autoConnect = false, withCredentials = false, handlers = {}, onError } = options;
 
     const [status, setStatus] = useState<EventSourceStatus>("idle");
     const [error, setError] = useState<EventSourceError | null>(null);
@@ -146,11 +146,7 @@ const useEventSource = <TEvents extends EventSourceEventMap>(options: UseEventSo
     }, [closeSource]);
 
     useEffect(() => {
-        if (!enabled) {
-            if (eventSourceRef.current) {
-                disconnect();
-            }
-
+        if (!autoConnect) {
             return;
         }
 
@@ -159,7 +155,7 @@ const useEventSource = <TEvents extends EventSourceEventMap>(options: UseEventSo
         return () => {
             closeSource();
         };
-    }, [closeSource, connect, disconnect, enabled]);
+    }, [closeSource, connect, autoConnect]);
 
     useEffect(() => {
         return () => {

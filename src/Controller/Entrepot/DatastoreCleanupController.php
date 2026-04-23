@@ -22,16 +22,16 @@ use Symfony\Component\Routing\Attribute\Route;
 class DatastoreCleanupController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private DatastoreCleanupWorkflow $datastoreDeletionWorkflow,
+        private DatastoreCleanupWorkflow $datastoreCleanupWorkflow,
         private readonly LoggerInterface $logger,
     ) {
     }
 
-    #[Route('/', name: 'get_content', methods: ['GET'], condition: 'request.isXmlHttpRequest()')]
+    #[Route('/content', name: 'get_content', methods: ['GET'], condition: 'request.isXmlHttpRequest()')]
     public function getContentToBeDeleted(string $datastoreId): JsonResponse
     {
         try {
-            $counts = $this->datastoreDeletionWorkflow->count($datastoreId);
+            $counts = $this->datastoreCleanupWorkflow->count($datastoreId);
 
             return $this->json([
                 'entities' => $counts,
@@ -41,7 +41,7 @@ class DatastoreCleanupController extends AbstractController implements ApiContro
         }
     }
 
-    #[Route('/', name: 'delete_content_stream', methods: ['GET'])]
+    #[Route('/delete-stream', name: 'delete_content_stream', methods: ['GET'])]
     public function deleteContentStream(string $datastoreId): StreamedResponse
     {
         ini_set('zlib.output_compression', '0');
@@ -57,13 +57,13 @@ class DatastoreCleanupController extends AbstractController implements ApiContro
                 flush();
             };
 
-            $counts = $this->datastoreDeletionWorkflow->count($datastoreId);
+            $counts = $this->datastoreCleanupWorkflow->count($datastoreId);
             $emit('started', [
                 'entities' => $counts,
             ]);
 
             try {
-                $counts = $this->datastoreDeletionWorkflow->deleteSequentially(
+                $counts = $this->datastoreCleanupWorkflow->deleteSequentially(
                     $datastoreId,
                     $emit,
                     static fn (): bool => (bool) connection_aborted(),

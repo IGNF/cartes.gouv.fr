@@ -19,7 +19,7 @@ export type EventSourceEventHandlers<TEvents extends EventSourceEventMap> = {
 
 export type UseEventSourceOptions<TEvents extends EventSourceEventMap> = {
     url?: string;
-    enabled?: boolean;
+    autoConnect?: boolean;
     withCredentials?: boolean;
     handlers?: EventSourceEventHandlers<TEvents>;
     onError?: (error: EventSourceError) => void;

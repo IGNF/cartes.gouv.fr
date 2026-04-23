@@ -225,7 +225,7 @@ class DatastoreCleanupWorkflow
 
             case self::ENTITY_CONFIGURATIONS:
                 if (ConfigurationStatuses::UNPUBLISHED === $item['status']) {
-                    $this->configurationApiService->remove($datastoreId, $item['_id']);
+                    $this->configurationApiService->remove($datastoreId, $item['_id'])->await();
 
                     return true;
                 }
