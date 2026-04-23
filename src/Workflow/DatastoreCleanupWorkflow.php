@@ -167,10 +167,6 @@ class DatastoreCleanupWorkflow
         $page = 1;
 
         while (true) {
-            if ($shouldStop()) {
-                return;
-            }
-
             $list = $this->getEntityListPage($datastoreId, $entityType, $page, self::BATCH_SIZE, $processingStatus);
             if ([] === $list->content) {
                 return;
@@ -191,7 +187,6 @@ class DatastoreCleanupWorkflow
                         $datastoreId,
                         $entityType,
                         $item,
-                        // $processingStatus
                     );
                 } catch (\Throwable $exception) {
                     throw new \RuntimeException(sprintf("Echec de suppression de %s (%s) de l'entrepôt %s", $entityType, $id, $datastoreId), 0, $exception);
@@ -202,8 +197,6 @@ class DatastoreCleanupWorkflow
                     $emitProgress('progress', ['entities' => $counts]);
                 }
             }
-
-            ++$page;
         }
     }
 

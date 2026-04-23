@@ -1,6 +1,6 @@
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 
-export const datastoreCleanupModal = createModal({
-    id: "empty-datastore-modal",
+export const deleteCommunityModal = createModal({
+    id: "delete-community-modal",
     isOpenedByDefault: false,
 });

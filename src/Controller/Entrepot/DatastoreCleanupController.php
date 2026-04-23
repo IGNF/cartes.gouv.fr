@@ -70,18 +70,6 @@ class DatastoreCleanupController extends AbstractController implements ApiContro
                     $counts
                 );
 
-                // $i = 5;
-                // while (--$i > 0) {
-                //     if (!connection_aborted()) {
-                //         $emit('progress', ['entities' => [
-                //             ...$counts,
-                //             'dummy' => $i,
-                //         ]]);
-                //     }
-
-                //     sleep(2);
-                // }
-
                 if (!connection_aborted()) {
                     $emit('done', [
                         'entities' => $counts,

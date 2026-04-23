@@ -72,9 +72,9 @@ const removePermission = (datastoreId: string, permissionId: string) => {
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
-const cleanupGetContent = (datastoreId: string) => {
+const cleanupGetContent = (datastoreId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_cleanup_get_content", { datastoreId: datastoreId });
-    return jsonFetch<DatastoreCleanupContentResponse>(url);
+    return jsonFetch<DatastoreCleanupContentResponse>(url, otherOptions);
 };
 
 const getCleanupStreamUrl = (datastoreId: string) => {
