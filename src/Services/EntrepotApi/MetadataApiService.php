@@ -4,6 +4,7 @@ namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
 use App\ApiClient\PaginatedPromise;
+use App\ApiClient\PaginatedResponse;
 use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -12,7 +13,7 @@ final class MetadataApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        private readonly ApiClient $api,
+        public readonly ApiClient $api,
         private readonly Filesystem $filesystem,
     ) {
     }
@@ -23,6 +24,14 @@ final class MetadataApiService
     public function getAll(string $datastoreId, array $query = []): PaginatedPromise
     {
         return $this->api->requestAll("datastores/$datastoreId/metadata", $query);
+    }
+
+    /**
+     * @param array<mixed>|null $query
+     */
+    public function getList(string $datastoreId, ?array $query = []): PaginatedResponse
+    {
+        return $this->api->get("datastores/$datastoreId/metadata", $query)->arrayWithHeaders();
     }
 
     public function get(string $datastoreId, string $metadataId): ResponsePromise

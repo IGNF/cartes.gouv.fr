@@ -75,6 +75,8 @@ const RQKeys = {
     },
     datastore_statics_download: (datastoreId: string, fileId: string): string[] => ["datastore", datastoreId, "statics", fileId, "download"],
 
+    datastore_cleanup_content: (datastoreId: string): string[] => ["datastore", datastoreId, "cleanup", "content"],
+
     community: (communityId: string): string[] => ["community", communityId],
     community_members: (communityId: string): string[] => ["community", communityId, "members"],
 

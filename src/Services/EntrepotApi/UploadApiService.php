@@ -20,7 +20,7 @@ final class UploadApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        private readonly ApiClient $api,
+        public readonly ApiClient $api,
         private readonly ParameterBagInterface $parameters,
         private readonly Filesystem $filesystem,
         private readonly ZipUploadPolicy $zipUploadPolicy,
