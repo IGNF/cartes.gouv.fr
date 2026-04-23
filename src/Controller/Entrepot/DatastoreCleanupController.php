@@ -63,7 +63,7 @@ class DatastoreCleanupController extends AbstractController implements ApiContro
             ]);
 
             try {
-                $counts = $this->datastoreCleanupWorkflow->deleteSequentially(
+                $result = $this->datastoreCleanupWorkflow->deleteSequentially(
                     $datastoreId,
                     $emit,
                     static fn (): bool => (bool) connection_aborted(),
@@ -72,7 +72,8 @@ class DatastoreCleanupController extends AbstractController implements ApiContro
 
                 if (!connection_aborted()) {
                     $emit('done', [
-                        'entities' => $counts,
+                        'entities' => $result['counts'],
+                        'failedItems' => $result['failedItems'],
                     ]);
                 }
             } catch (\Throwable $exception) {

@@ -97,19 +97,20 @@ class DatastoreCleanupWorkflow
      * @param callable(): bool                                            $shouldStop
      * @param array<string,int>                                           $counts
      *
-     * @return array<string,int>
+     * @return array{counts: array<string,int>, failedItems: list<array{type: string, id: string}>}
      */
     public function deleteSequentially(string $datastoreId, callable $emitProgress, callable $shouldStop, ?array $counts = null): array
     {
         $counts ??= $this->count($datastoreId);
+        $failedItems = [];
 
         if ($shouldStop()) {
-            return $counts;
+            return ['counts' => $counts, 'failedItems' => $failedItems];
         }
 
         foreach ($this->getEntityTypes() as $entityType) {
             if ($shouldStop()) {
-                return $counts;
+                return ['counts' => $counts, 'failedItems' => $failedItems];
             }
 
             $emitProgress('progress', ['entities' => $counts]);
@@ -120,6 +121,7 @@ class DatastoreCleanupWorkflow
                         $datastoreId,
                         $entityType,
                         $counts,
+                        $failedItems,
                         $emitProgress,
                         $shouldStop,
                         $status
@@ -129,10 +131,10 @@ class DatastoreCleanupWorkflow
                 continue;
             }
 
-            $this->iterateEntityTypeSequentially($datastoreId, $entityType, $counts, $emitProgress, $shouldStop);
+            $this->iterateEntityTypeSequentially($datastoreId, $entityType, $counts, $failedItems, $emitProgress, $shouldStop);
         }
 
-        return $counts;
+        return ['counts' => $counts, 'failedItems' => $failedItems];
     }
 
     /**
@@ -154,23 +156,27 @@ class DatastoreCleanupWorkflow
 
     /**
      * @param array<string, int>                                          $counts
+     * @param list<array{type: string, id: string}>                       $failedItems
      * @param callable(string, array{entities: array<string, int>}): void $emitProgress
      */
     private function iterateEntityTypeSequentially(
         string $datastoreId,
         string $entityType,
         array &$counts,
+        array &$failedItems,
         callable $emitProgress,
         callable $shouldStop,
         ?string $processingStatus = null,
     ): void {
-        $page = 1;
+        $failedIds = [];
 
         while (true) {
-            $list = $this->getEntityListPage($datastoreId, $entityType, $page, self::BATCH_SIZE, $processingStatus);
+            $list = $this->getEntityListPage($datastoreId, $entityType, 1, self::BATCH_SIZE, $processingStatus);
             if ([] === $list->content) {
                 return;
             }
+
+            $progress = false;
 
             foreach ($list->content as $item) {
                 if ($shouldStop()) {
@@ -178,24 +184,31 @@ class DatastoreCleanupWorkflow
                 }
 
                 $id = (string) ($item['_id'] ?? '');
-                if ('' === $id) {
+                if ('' === $id || in_array($id, $failedIds, true)) {
                     continue;
                 }
 
                 try {
-                    $deleted = $this->deleteOneSequentially(
-                        $datastoreId,
-                        $entityType,
-                        $item,
-                    );
+                    $deleted = $this->deleteOneSequentially($datastoreId, $entityType, $item);
+                    if (!$deleted) {
+                        $deleted = $this->deleteOneSequentially($datastoreId, $entityType, $item);
+                    }
                 } catch (\Throwable $exception) {
                     throw new \RuntimeException(sprintf("Echec de suppression de %s (%s) de l'entrepôt %s", $entityType, $id, $datastoreId), 0, $exception);
                 }
 
                 if (true === $deleted) {
+                    $progress = true;
                     $counts[$entityType] = max(0, ($counts[$entityType] ?? 0) - 1);
                     $emitProgress('progress', ['entities' => $counts]);
+                } else {
+                    $failedIds[] = $id;
+                    $failedItems[] = ['type' => $entityType, 'id' => $id];
                 }
+            }
+
+            if (!$progress) {
+                return;
             }
         }
     }

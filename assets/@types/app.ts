@@ -455,3 +455,8 @@ export type DatastoreCleanupContentResponse = {
 };
 
 export type DatastoreCleanupEntitiesCount = Record<string, number>;
+
+export type FailedCleanupItem = {
+    type: string;
+    id: string;
+};

@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { DatastoreCleanupEntitiesCount } from "@/@types/app";
+import { DatastoreCleanupEntitiesCount, FailedCleanupItem } from "@/@types/app";
 import LoadingText from "@/components/Utils/LoadingText";
 import Progress from "@/components/Utils/Progress";
 import { useCommunity } from "@/contexts/community";
@@ -21,11 +21,12 @@ type DeleteCommunityState = "loading" | "confirm" | "connecting" | "cleanup_prog
 type DatastoreCleanupProgress = Record<string, { initialCount: number; currentCount: number }>;
 
 type DatastoreCleanupStreamPayload = { entities?: DatastoreCleanupEntitiesCount };
+type DatastoreCleanupStreamDonePayload = DatastoreCleanupStreamPayload & { failedItems?: FailedCleanupItem[] };
 type DatastoreCleanupStreamFailedPayload = DatastoreCleanupStreamPayload & { message?: string };
 type DatastoreCleanupStreamEvents = {
     started: DatastoreCleanupStreamPayload;
     progress: DatastoreCleanupStreamPayload;
-    done: DatastoreCleanupStreamPayload;
+    done: DatastoreCleanupStreamDonePayload;
     failed: DatastoreCleanupStreamFailedPayload;
 };
 
@@ -93,7 +94,8 @@ export default function DeleteCommunity() {
     const isActive = state === "connecting" || state === "cleanup_progress" || state === "deleting";
 
     const deleteCommunityMutation = useMutation({
-        mutationFn: () => api.contact.requestDatastoreDeletion({ datastoreId: datastore._id, communityId: community._id }),
+        mutationFn: (failedItems: FailedCleanupItem[]) =>
+            api.contact.requestDatastoreDeletion({ datastoreId: datastore._id, communityId: community._id, failedItems }),
         onSuccess: () => {
             setState("mail_sent");
         },
@@ -119,7 +121,7 @@ export default function DeleteCommunity() {
                 updateCleanupProgress(payload.entities ?? {});
                 disconnectStream();
                 setState("deleting");
-                deleteCommunityMutation.mutate();
+                deleteCommunityMutation.mutate(payload.failedItems ?? []);
             },
             failed: (payload) => {
                 updateCleanupProgress(payload.entities ?? {});
@@ -148,7 +150,7 @@ export default function DeleteCommunity() {
             connectStream();
         } else {
             setState("deleting");
-            deleteCommunityMutation.mutate();
+            deleteCommunityMutation.mutate([]);
         }
     }
 
