@@ -101,7 +101,7 @@ export default function DeleteCommunity() {
         },
         onError: (err: Error) => {
             setState("error");
-            setDeletionError(err.message ?? "La suppression de l'entrepôt a échoué.");
+            setDeletionError(err.message ?? "La suppression de l’entrepôt a échoué.");
         },
     });
 
@@ -182,7 +182,7 @@ export default function DeleteCommunity() {
         setState(isCleanupContentLoading ? "loading" : "confirm");
     }
 
-    const confirmButtonLabel = hasContent ? "Vider et supprimer" : "Supprimer l'entrepôt";
+    const confirmButtonLabel = hasContent ? "Vider et supprimer" : "Supprimer l’entrepôt";
     const isLoading = state === "loading";
 
     return createPortal(
@@ -202,7 +202,7 @@ export default function DeleteCommunity() {
             </deleteCommunityModal.Component>
         ) : (
             <deleteCommunityModal.Component
-                title={"Demander la suppression de l'entrepôt"}
+                title={"Demander la suppression de l’entrepôt"}
                 concealingBackdrop={false}
                 buttons={[
                     {
@@ -220,7 +220,7 @@ export default function DeleteCommunity() {
                           },
                 ]}
             >
-                {isCleanupContentError && <Alert severity="error" title="Impossible de récupérer le contenu de l'entrepôt." closable />}
+                {isCleanupContentError && <Alert severity="error" title="Impossible de récupérer le contenu de l’entrepôt." closable />}
 
                 {streamError && <Alert severity="error" title={streamError} closable />}
 
@@ -251,8 +251,8 @@ export default function DeleteCommunity() {
                                     <>
                                         <Alert
                                             severity="warning"
-                                            title="L'entrepôt contient des données"
-                                            description="Le contenu doit être supprimé avant de pouvoir supprimer l'entrepôt. Cette action est irréversible."
+                                            title="L’entrepôt contient des données"
+                                            description="Le contenu doit être supprimé avant de pouvoir supprimer l’entrepôt. Cette action est irréversible."
                                             small
                                             className={fr.cx("fr-mb-2v")}
                                         />
@@ -269,7 +269,7 @@ export default function DeleteCommunity() {
                                         </ul>
                                     </>
                                 ) : (
-                                    <p className={fr.cx("fr-m-0")}>Êtes-vous sûr.e de vouloir supprimer cet entrepôt ?</p>
+                                    <p className={fr.cx("fr-m-0")}>Êtes-vous sûr·e de vouloir supprimer cet entrepôt ?</p>
                                 )}
                             </>
                         )}

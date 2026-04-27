@@ -44,7 +44,7 @@ export const CommunityInfoFrTranslations: Translations<"fr">["CommunityInfo"] = 
     "form.submit.label.saved": "Enregistré",
     leave_community: "Quitter l'entrepôt",
     "leave_modal.title": "Quitter l'entrepôt",
-    "leave_modal.body": ({ datastoreName }) => `Êtes-vous sûr.e de vouloir quitter l’entrepôt ${datastoreName} ?`,
+    "leave_modal.body": ({ datastoreName }) => `Êtes-vous sûr·e de vouloir quitter l’entrepôt ${datastoreName} ?`,
     "leave_community.in_progress": "Demande en cours",
     delete_community: "Supprimer l’entrepôt",
 };
