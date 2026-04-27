@@ -16,7 +16,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { routes } from "@/router/router";
 import { deleteCommunityModal } from "./deleteCommunityModal";
 
-type DeleteCommunityState = "loading" | "confirm" | "connecting" | "cleanup_progress" | "deleting" | "error" | "mail_sent";
+type DeleteCommunityState = "disclaimer" | "loading" | "confirm" | "connecting" | "cleanup_progress" | "deleting" | "error" | "mail_sent";
 
 type DatastoreCleanupProgress = Record<string, { initialCount: number; currentCount: number }>;
 
@@ -48,7 +48,7 @@ export default function DeleteCommunity() {
     const queryClient = useQueryClient();
     const isOpenModal = useIsModalOpen(deleteCommunityModal);
 
-    const [state, setState] = useState<DeleteCommunityState>("loading");
+    const [state, setState] = useState<DeleteCommunityState>("disclaimer");
     const [streamError, setStreamError] = useState<string | null>(null);
     const [deletionError, setDeletionError] = useState<string | null>(null);
     const [cleanupProgress, setCleanupProgress] = useState<DatastoreCleanupProgress>({});
@@ -157,7 +157,7 @@ export default function DeleteCommunity() {
     useEffect(() => {
         if (!isOpenModal) {
             disconnectStream();
-            setState("loading");
+            setState("disclaimer");
             setStreamError(null);
             setDeletionError(null);
             setCleanupProgress({});
@@ -165,7 +165,7 @@ export default function DeleteCommunity() {
             return;
         }
 
-        setState("loading");
+        setState("disclaimer");
         setStreamError(null);
         setDeletionError(null);
         setCleanupProgress({});
@@ -178,8 +178,12 @@ export default function DeleteCommunity() {
         };
     }, [disconnectStream]);
 
+    function proceedFromDisclaimer(): void {
+        setState(isCleanupContentLoading ? "loading" : "confirm");
+    }
+
     const confirmButtonLabel = hasContent ? "Vider et supprimer" : "Supprimer l'entrepôt";
-    const isLoading = isCleanupContentLoading || state === "loading";
+    const isLoading = state === "loading";
 
     return createPortal(
         state === "mail_sent" ? (
@@ -206,12 +210,14 @@ export default function DeleteCommunity() {
                         priority: "secondary",
                         onClick: disconnectStream,
                     },
-                    {
-                        children: isActive ? "Suppression en cours..." : confirmButtonLabel,
-                        onClick: startDeletion,
-                        disabled: isActive || isLoading,
-                        doClosesModal: false,
-                    },
+                    state === "disclaimer"
+                        ? { children: "Continuer", onClick: proceedFromDisclaimer, doClosesModal: false }
+                        : {
+                              children: isActive ? "Suppression en cours..." : confirmButtonLabel,
+                              onClick: startDeletion,
+                              disabled: isActive || isLoading,
+                              doClosesModal: false,
+                          },
                 ]}
             >
                 {isCleanupContentError && <Alert severity="error" title="Impossible de récupérer le contenu de l'entrepôt." closable />}
@@ -220,8 +226,23 @@ export default function DeleteCommunity() {
 
                 {deletionError && <Alert severity="error" title={deletionError} closable />}
 
+                {state === "disclaimer" && (
+                    <>
+                        <p>Si vous supprimez votre entrepôt :</p>
+                        <ul>
+                            <li>L’ensemble des données et des fichiers seront supprimés ;</li>
+                            <li>Les données publiées ne seront plus visibles et accessibles dans les services de cartes.gouv.fr ;</li>
+                            <li>Il vous appartient de prévenir les membres de la suppression de l’entrepôt.</li>
+                        </ul>
+                        <p>
+                            À savoir : les opérateurs de cartes.gouv.fr ne peuvent être tenus pour responsables des conséquences de la suppression d’un entrepôt
+                            par son administrateur ou de tout utilisateur en ayant les droits.
+                        </p>
+                    </>
+                )}
+
                 {isLoading ? (
-                    <LoadingText message="Récupération du contenu de l'entrepôt..." as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
+                    <LoadingText message="Récupération du contenu de l’entrepôt..." as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
                 ) : (
                     <>
                         {state === "confirm" && (
