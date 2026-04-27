@@ -1,4 +1,4 @@
-import type { Datastore, DatastoreEndpoint, DatastorePermission } from "../../@types/app";
+import type { Datastore, DatastoreCleanupContentResponse, DatastoreEndpoint, DatastorePermission } from "../../@types/app";
 import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 
@@ -72,6 +72,15 @@ const removePermission = (datastoreId: string, permissionId: string) => {
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
+const cleanupGetContent = (datastoreId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_cleanup_get_content", { datastoreId: datastoreId });
+    return jsonFetch<DatastoreCleanupContentResponse>(url, otherOptions);
+};
+
+const getCleanupStreamUrl = (datastoreId: string) => {
+    return SymfonyRouting.generate("cartesgouvfr_api_datastore_cleanup_delete_content_stream", { datastoreId: datastoreId });
+};
+
 const datastore = {
     get,
     getSandbox,
@@ -81,6 +90,8 @@ const datastore = {
     addPermission,
     updatePermission,
     removePermission,
+    cleanupGetContent,
+    getCleanupStreamUrl,
 };
 
 export default datastore;

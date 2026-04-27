@@ -449,3 +449,14 @@ export type SummaryLink = SummaryProps["links"][number];
 
 export const arrUserCategories = ["Individual", "Professional"] as const;
 export type UserCategory = (typeof arrUserCategories)[number];
+
+export type DatastoreCleanupContentResponse = {
+    entities: DatastoreCleanupEntitiesCount;
+};
+
+export type DatastoreCleanupEntitiesCount = Record<string, number>;
+
+export type FailedCleanupItem = {
+    type: string;
+    id: string;
+};

@@ -4,6 +4,7 @@ namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
 use App\ApiClient\PaginatedPromise;
+use App\ApiClient\PaginatedResponse;
 use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -11,7 +12,7 @@ final class ProcessingApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        private readonly ApiClient $api,
+        public readonly ApiClient $api,
     ) {
     }
 
@@ -52,6 +53,14 @@ final class ProcessingApiService
     public function getAllExecutions(string $datastoreId, array $query = []): PaginatedPromise
     {
         return $this->api->requestAll("datastores/$datastoreId/processings/executions", $query);
+    }
+
+    /**
+     * @param array<mixed> $query
+     */
+    public function getExecutionList(string $datastoreId, array $query = []): PaginatedResponse
+    {
+        return $this->api->get("datastores/$datastoreId/processings/executions", $query)->arrayWithHeaders();
     }
 
     /**

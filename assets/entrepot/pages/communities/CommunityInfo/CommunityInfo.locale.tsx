@@ -22,10 +22,6 @@ export const { i18n } = declareComponentKeys<
     | { K: "leave_modal.body"; P: { datastoreName?: string }; R: string | undefined }
     | "leave_community.in_progress"
     | "delete_community"
-    | "delete_community.modal.title"
-    | { K: "delete_community.modal.body"; R: JSX.Element }
-    | "delete_community.modal.confirm"
-    | "delete_community.in_progress"
 >()("CommunityInfo");
 export type I18n = typeof i18n;
 
@@ -48,26 +44,9 @@ export const CommunityInfoFrTranslations: Translations<"fr">["CommunityInfo"] = 
     "form.submit.label.saved": "Enregistré",
     leave_community: "Quitter l'entrepôt",
     "leave_modal.title": "Quitter l'entrepôt",
-    "leave_modal.body": ({ datastoreName }) => `Êtes-vous sûr.e de vouloir quitter l’entrepôt ${datastoreName} ?`,
+    "leave_modal.body": ({ datastoreName }) => `Êtes-vous sûr·e de vouloir quitter l’entrepôt ${datastoreName} ?`,
     "leave_community.in_progress": "Demande en cours",
-    delete_community: "Supprimer l'entrepôt",
-    "delete_community.modal.title": "Demander la suppression de l'entrepôt",
-    "delete_community.modal.body": (
-        <>
-            <p>Si vous supprimez votre entrepôt :</p>
-            <ul>
-                <li>L’ensemble des données et des fichiers seront supprimés ;</li>
-                <li>Les données publiées ne seront plus visibles et accessibles dans les services de cartes.gouv.fr ;</li>
-                <li>Il vous appartient de prévenir les membres de la suppression de l’entrepôt.</li>
-            </ul>
-            <p>
-                À savoir : les opérateurs de cartes.gouv.fr ne peuvent être tenus pour responsables des conséquences de la suppression d’un entrepôt par son
-                administrateur ou de tout utilisateur en ayant les droits.
-            </p>
-        </>
-    ),
-    "delete_community.modal.confirm": "Demander la suppression",
-    "delete_community.in_progress": "Envoi de la demande en cours",
+    delete_community: "Supprimer l’entrepôt",
 };
 
 export const CommunityInfoEnTranslations: Translations<"en">["CommunityInfo"] = {
@@ -91,8 +70,4 @@ export const CommunityInfoEnTranslations: Translations<"en">["CommunityInfo"] = 
     "leave_modal.body": undefined,
     "leave_community.in_progress": undefined,
     delete_community: undefined,
-    "delete_community.modal.title": undefined,
-    "delete_community.modal.body": undefined,
-    "delete_community.modal.confirm": undefined,
-    "delete_community.in_progress": undefined,
 };

@@ -16,5 +16,15 @@
             <strong>{{ 'datastore_deletion_request.email_support.datastore_id'|trans }}</strong> {{ datastore_id }}<br />
             <strong>{{ 'datastore_deletion_request.email_support.community_id'|trans }}</strong> {{ community_id }}
         </p>
+        {% if data.failedItems is defined and (data.failedItems|length) > 0 %}
+            <p>
+                <strong>Éléments non supprimés lors du nettoyage automatique :</strong>
+            </p>
+            <ul>
+                {% for item in data.failedItems %}
+                    <li>{{ item.type }} - {{ item.id }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </div>
 {% endblock %}

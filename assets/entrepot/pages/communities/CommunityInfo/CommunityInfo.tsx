@@ -28,6 +28,8 @@ import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
+import DeleteCommunity from "./DeleteCommunity/DeleteCommunity";
+import { deleteCommunityModal } from "./DeleteCommunity/deleteCommunityModal";
 
 type CommunityInfoFormType = {
     name: string;
@@ -60,11 +62,6 @@ const schema: yup.ObjectSchema<CommunityInfoFormType> = yup.object({
 
 const leaveCommunityModal = createModal({
     id: "community-leave-modal",
-    isOpenedByDefault: false,
-});
-
-const deleteCommunityModal = createModal({
-    id: "community-delete-modal",
     isOpenedByDefault: false,
 });
 
@@ -176,15 +173,6 @@ export default function CommunityInfo() {
         },
     });
 
-    const deleteCommunityMutation = useMutation({
-        mutationFn: () => {
-            return api.contact.requestDatastoreDeletion({ datastoreId: community.datastore?._id, communityId: community._id });
-        },
-        onSuccess: () => {
-            routes.datastore_selection().push();
-        },
-    });
-
     return (
         <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastore._id}>
             <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} />
@@ -216,7 +204,6 @@ export default function CommunityInfo() {
 
             {communityModifyMutation.error && <Alert title={communityModifyMutation.error.message} closable severity="error" />}
             {leaveCommunityMutation.error && <Alert title={leaveCommunityMutation.error.message} closable severity="error" />}
-            {deleteCommunityMutation.error && <Alert title={deleteCommunityMutation.error.message} closable severity="error" />}
 
             {/* modification des infos de la commu */}
             <div className={fr.cx("fr-grid-row")}>
@@ -300,6 +287,8 @@ export default function CommunityInfo() {
                 </Wait>
             )}
 
+            <DeleteCommunity />
+
             {/* quitter la commu */}
             {createPortal(
                 <leaveCommunityModal.Component
@@ -329,41 +318,6 @@ export default function CommunityInfo() {
                             </div>
                             <div className={fr.cx("fr-col-10")}>
                                 <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("leave_community.in_progress")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
-
-            {/* supprimer la commu */}
-            {createPortal(
-                <deleteCommunityModal.Component
-                    title={t("delete_community.modal.title")}
-                    buttons={[
-                        {
-                            children: tCommon("cancel"),
-                            priority: "secondary",
-                        },
-                        {
-                            children: t("delete_community.modal.confirm"),
-                            onClick: () => deleteCommunityMutation.mutate(),
-                        },
-                    ]}
-                >
-                    {t("delete_community.modal.body")}
-                </deleteCommunityModal.Component>,
-                document.body
-            )}
-
-            {deleteCommunityMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("delete_community.in_progress")}</h6>
                             </div>
                         </div>
                     </div>

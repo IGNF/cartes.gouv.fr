@@ -4,7 +4,9 @@ namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
 use App\ApiClient\PaginatedPromise;
+use App\ApiClient\PaginatedResponse;
 use App\ApiClient\ResponsePromise;
+use App\Utils;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class ConfigurationApiService
@@ -20,11 +22,19 @@ final class ConfigurationApiService
      */
     public function getAll(string $datastoreId, $query = []): PaginatedPromise
     {
-        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
-            $query['fields'] = implode(',', $query['fields']);
-        }
+        $query = Utils::normalize_query($query ?? []);
 
         return $this->api->requestAll("datastores/$datastoreId/configurations", $query);
+    }
+
+    /**
+     * @param array<mixed>|null $query
+     */
+    public function getList(string $datastoreId, ?array $query = []): PaginatedResponse
+    {
+        $query = Utils::normalize_query($query ?? []);
+
+        return $this->api->get("datastores/$datastoreId/configurations", $query)->arrayWithHeaders();
     }
 
     /**
@@ -98,10 +108,20 @@ final class ConfigurationApiService
 
     /**
      * Récupère toutes les offerings associées à la configuration fournie.
+     *
+     * @param array<mixed> $query
      */
-    public function getConfigurationOfferings(string $datastoreId, string $configurationId): PaginatedPromise
+    public function getConfigurationOfferings(string $datastoreId, string $configurationId, array $query = []): PaginatedPromise
     {
-        return $this->api->requestAll("datastores/$datastoreId/configurations/$configurationId/offerings");
+        return $this->api->requestAll("datastores/$datastoreId/configurations/$configurationId/offerings", $query);
+    }
+
+    /**
+     * @param array<mixed> $query
+     */
+    public function getOfferingsList(string $datastoreId, array $query = []): PaginatedResponse
+    {
+        return $this->api->get("datastores/$datastoreId/offerings", $query)->arrayWithHeaders();
     }
 
     /**

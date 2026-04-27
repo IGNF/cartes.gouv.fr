@@ -27,6 +27,16 @@
             <strong>{{ 'mailer.user_id'|trans }} :</strong> {{ app.user.id }}<br />
             <strong>{{ 'mailer.date'|trans }} :</strong> {{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}
         </p>
+        {% if data.failedItems is defined and (data.failedItems|length) > 0 %}
+            <p>
+                <strong>Éléments non supprimés lors du nettoyage automatique :</strong>
+            </p>
+            <ul>
+                {% for item in data.failedItems %}
+                    <li>{{ item.type }} - {{ item.id }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         <hr />
     </div>
 {% endblock %}
