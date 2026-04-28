@@ -171,12 +171,12 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
     });
 
     function renderTextWithLinks(text: string) {
-        const urlRegex = /([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#\.]?[\w-]+)*\/?/gm;
+        const urlRegex = /https?:\/\/[^\s]+/g;
         const nodes: React.ReactNode[] = [];
         let lastIndex = 0;
 
         for (const match of text.matchAll(urlRegex)) {
-            const url = match[0];
+            const url = match[0].replace(/[)\].]*$/, "");
             const index = match.index ?? 0;
 
             if (index > lastIndex) {
