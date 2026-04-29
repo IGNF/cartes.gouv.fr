@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import DataVisualization from "@codegouvfr/react-dsfr/picto/DataVisualization";
 import System from "@codegouvfr/react-dsfr/picto/System";
 import Tile from "@codegouvfr/react-dsfr/Tile";
 
@@ -106,6 +107,18 @@ export default function Dashboard() {
                         />
                     </div>
                 )}
+
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Tile
+                        linkProps={routes.stats().link}
+                        title={"Mes statistiques de consommation"}
+                        pictogram={<DataVisualization />}
+                        orientation="vertical"
+                        classes={{
+                            img: fr.cx("fr-mb-0"),
+                        }}
+                    />
+                </div>
             </div>
         </Main>
     );
