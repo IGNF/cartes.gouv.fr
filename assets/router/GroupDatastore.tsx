@@ -27,8 +27,6 @@ const PyramidRasterWmtsServiceForm = lazy(() => import("../entrepot/pages/servic
 const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceView"));
 const StyleAddModifyForm = lazy(() => import("@/entrepot/pages/service/view/Style/StyleAddModifyForm"));
 
-const EndpointStats = lazy(() => import("../entrepot/pages/stats/EndpointStats"));
-
 interface IGroupDatastoreProps {
     route: Route<typeof groups.datastore>;
 }
@@ -206,11 +204,6 @@ function GroupDatastore(props: IGroupDatastoreProps) {
                             styleTechnicalName={route.params.styleTechnicalName}
                         />
                     ),
-                };
-
-            case "datastore_endpoint_stats":
-                return {
-                    render: <EndpointStats datastoreId={route.params.datastoreId} />,
                 };
         }
     }, [route]);
