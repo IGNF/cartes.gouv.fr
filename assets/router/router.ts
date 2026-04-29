@@ -283,7 +283,6 @@ const datastoreRoutes = {
         },
         (p) => `/service/${p.offeringId}/style/${p.styleTechnicalName}/modification`
     ),
-    datastore_endpoint_stats: datastoreRoute.extend(`/endpoint/stats`),
 };
 
 const configRoutes = {
