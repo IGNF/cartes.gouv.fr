@@ -2,6 +2,7 @@ import Select from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
+import { delta } from "@/utils";
 import type { ParamDef } from "./statsConfig";
 
 interface DynamicParamSelectorProps {
@@ -20,10 +21,11 @@ export default function DynamicParamSelector({ param, resolvedDeps, value, onCha
     const depsReady = !param.dependsOn || param.dependsOn.every((dep) => !!resolvedDeps[dep]);
 
     const { data: options = [], isLoading } = useQuery({
-        queryKey: ["stats_param_options", param.key, relevantDeps],
-        queryFn: () => param.fetchOptions(relevantDeps),
+        queryKey: param.queryKey(relevantDeps),
+        queryFn: ({ signal }) => param.queryFn(relevantDeps, { signal }),
+        select: param.toOptions,
         enabled: depsReady,
-        staleTime: 5 * 60 * 1000,
+        staleTime: delta.hours(1),
         refetchOnWindowFocus: false,
     });
 
