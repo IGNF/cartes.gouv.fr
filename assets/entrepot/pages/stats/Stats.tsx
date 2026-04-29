@@ -81,7 +81,12 @@ export default function Stats() {
     }));
 
     return (
-        <Main title="Statistiques">
+        <Main
+            title="Statistiques"
+            classes={{
+                container: fr.cx("fr-container", "fr-mb-4v"),
+            }}
+        >
             <h1>Statistiques</h1>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
@@ -109,40 +114,44 @@ export default function Stats() {
                 ))}
             </div>
 
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                    <DatePicker
-                        label="Début"
-                        value={startDate}
-                        onChange={(value) => setStartDate(value)}
-                        state={!startDate ? "error" : "default"}
-                        stateRelatedMessage={!startDate ? "Veuillez sélectionner une date" : ""}
-                        disableFuture
-                    />
-                </div>
-                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                    <DatePicker
-                        label="Fin"
-                        value={endDate}
-                        onChange={(value) => setEndDate(value)}
-                        state={!endDate ? "error" : "default"}
-                        stateRelatedMessage={!endDate ? "Veuillez sélectionner une date" : ""}
-                        disableFuture
-                    />
-                </div>
-            </div>
+            {allParamsResolved && (
+                <>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                            <DatePicker
+                                label="Début"
+                                value={startDate}
+                                onChange={(value) => setStartDate(value)}
+                                state={!startDate ? "error" : "default"}
+                                stateRelatedMessage={!startDate ? "Veuillez sélectionner une date" : ""}
+                                disableFuture
+                            />
+                        </div>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                            <DatePicker
+                                label="Fin"
+                                value={endDate}
+                                onChange={(value) => setEndDate(value)}
+                                state={!endDate ? "error" : "default"}
+                                stateRelatedMessage={!endDate ? "Veuillez sélectionner une date" : ""}
+                                disableFuture
+                            />
+                        </div>
+                    </div>
 
-            <div className={fr.cx("fr-py-4v")}>
-                {currentConfig.disabled ? (
-                    <p>{currentConfig.disabledReason ?? "Ce type d'entité n'est pas encore disponible."}</p>
-                ) : statsQuery.isLoading ? (
-                    <LoadingText withSpinnerIcon as="p" />
-                ) : statsQuery.data !== undefined ? (
-                    <StatsBarChart stats={statsQuery.data} startDate={startDate} endDate={endDate} />
-                ) : (
-                    <p>Pas de données</p>
-                )}
-            </div>
+                    <div className={fr.cx("fr-py-3v")}>
+                        {currentConfig.disabled ? (
+                            <p className={fr.cx("fr-m-0")}>{currentConfig.disabledReason ?? "Ce type d'entité n'est pas encore disponible."}</p>
+                        ) : statsQuery.isLoading ? (
+                            <LoadingText withSpinnerIcon as="p" />
+                        ) : statsQuery.data !== undefined ? (
+                            <StatsBarChart stats={statsQuery.data} startDate={startDate} endDate={endDate} />
+                        ) : (
+                            <p className={fr.cx("fr-m-0")}>Pas de données</p>
+                        )}
+                    </div>
+                </>
+            )}
         </Main>
     );
 }
