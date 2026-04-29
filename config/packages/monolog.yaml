@@ -4,9 +4,6 @@ monolog:
 
 when@dev:
     monolog:
-        channels:
-            - mailer
-
         handlers:
             # Journal principal de dev dans un fichier rotatif.
             main:
@@ -19,12 +16,6 @@ when@dev:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine", "!console"]
-
-            # Journal dedié aux messages du canal mailer en dev.
-            mailer:
-                type: rotating_file
-                path: "%kernel.logs_dir%/mailer.log"
-                channels: mailer
 
 when@test:
     monolog:
@@ -46,7 +37,6 @@ when@prod:
     monolog:
         channels:
             - deprecation
-            - mailer
 
         handlers:
             # Filtre les niveaux notice à warning vers stdout (hors canaux dédiés).
@@ -55,32 +45,26 @@ when@prod:
                 handler: stdout_stream
                 min_level: notice
                 max_level: warning
-                channels: ["!deprecation", "!mailer"]
+                channels: ["!deprecation"]
 
             # Écrit les logs opérationnels sur stdout pour Kubernetes.
             stdout_stream:
                 type: stream
                 path: php://stdout
-                channels: ["!deprecation", "!mailer"]
+                channels: ["!deprecation"]
 
             # Écrit les erreurs et niveaux supérieurs sur stderr.
             stderr_error_plus:
                 type: stream
                 path: php://stderr
                 level: error
-                channels: ["!deprecation", "!mailer"]
+                channels: ["!deprecation"]
 
             # Isole les deprécations sur stderr via leur canal dédié.
             deprecation:
                 type: stream
                 path: php://stderr
                 channels: [deprecation]
-
-            # Conserve les logs mailer dans un fichier rotatif specifique.
-            mailer:
-                type: rotating_file
-                path: "%kernel.logs_dir%/mailer.log"
-                channels: [mailer]
 
             # Gère l'affichage des logs pour les commandes console en prod.
             console:
