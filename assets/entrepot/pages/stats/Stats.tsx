@@ -7,12 +7,11 @@ import { HitStatisticsDto } from "@/@types/stats";
 import DatePicker from "@/components/Input/DatePicker";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
-import useDatastoreSelection from "@/hooks/useDatastoreSelection";
 import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
 import DynamicParamSelector from "./DynamicParamSelector";
 import StatsBarChart from "./StatsBarChart";
-import { buildStatsConfig } from "./statsConfig";
+import { statsConfig } from "./statsConfig";
 
 function dateStripTime(date: Date) {
     const d = new Date(date);
@@ -21,9 +20,7 @@ function dateStripTime(date: Date) {
 }
 
 export default function Stats() {
-    const { datastoreList } = useDatastoreSelection();
-
-    const config = useMemo(() => buildStatsConfig(datastoreList), [datastoreList]);
+    const config = statsConfig;
     const entityTypeKeys = Object.keys(config);
 
     const [entityTypeKey, setEntityTypeKey] = useState(entityTypeKeys[0]);
@@ -87,53 +84,65 @@ export default function Stats() {
         <Main title="Statistiques">
             <h1>Statistiques</h1>
 
-            <Select
-                label="Type d'entité"
-                options={entityTypeOptions.filter((option) => !option.disabled)}
-                nativeSelectProps={{
-                    value: entityTypeKey,
-                    onChange: (e) => handleEntityTypeChange(e.currentTarget.value),
-                }}
-            />
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Select
+                        label="Type d'entité"
+                        options={entityTypeOptions.filter((option) => !option.disabled)}
+                        nativeSelectProps={{
+                            value: entityTypeKey,
+                            onChange: (e) => handleEntityTypeChange(e.currentTarget.value),
+                        }}
+                    />
+                </div>
 
-            {currentConfig.params.map((param) => (
-                <DynamicParamSelector
-                    key={param.key}
-                    param={param}
-                    resolvedDeps={resolvedParams}
-                    value={resolvedParams[param.key]}
-                    onChange={handleParamChange}
-                />
-            ))}
-
-            <div style={{ display: "flex", gap: fr.spacing("4v") }}>
-                <DatePicker
-                    label="Début"
-                    value={startDate}
-                    onChange={(value) => setStartDate(value)}
-                    state={!startDate ? "error" : "default"}
-                    stateRelatedMessage={!startDate ? "Veuillez sélectionner une date" : ""}
-                    disableFuture
-                />
-                <DatePicker
-                    label="Fin"
-                    value={endDate}
-                    onChange={(value) => setEndDate(value)}
-                    state={!endDate ? "error" : "default"}
-                    stateRelatedMessage={!endDate ? "Veuillez sélectionner une date" : ""}
-                    disableFuture
-                />
+                {currentConfig.params.map((param) => (
+                    <div className={fr.cx("fr-col-12", "fr-col-md-4")} key={param.key}>
+                        <DynamicParamSelector
+                            key={param.key}
+                            param={param}
+                            resolvedDeps={resolvedParams}
+                            value={resolvedParams[param.key]}
+                            onChange={handleParamChange}
+                        />
+                    </div>
+                ))}
             </div>
 
-            {currentConfig.disabled ? (
-                <p className={fr.cx("fr-mt-2w")}>{currentConfig.disabledReason ?? "Ce type d'entité n'est pas encore disponible."}</p>
-            ) : statsQuery.isLoading ? (
-                <LoadingText className={fr.cx("fr-ml-2w")} withSpinnerIcon as="p" />
-            ) : statsQuery.data !== undefined ? (
-                <StatsBarChart stats={statsQuery.data} startDate={startDate} endDate={endDate} />
-            ) : (
-                "Pas de données"
-            )}
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <DatePicker
+                        label="Début"
+                        value={startDate}
+                        onChange={(value) => setStartDate(value)}
+                        state={!startDate ? "error" : "default"}
+                        stateRelatedMessage={!startDate ? "Veuillez sélectionner une date" : ""}
+                        disableFuture
+                    />
+                </div>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <DatePicker
+                        label="Fin"
+                        value={endDate}
+                        onChange={(value) => setEndDate(value)}
+                        state={!endDate ? "error" : "default"}
+                        stateRelatedMessage={!endDate ? "Veuillez sélectionner une date" : ""}
+                        disableFuture
+                    />
+                </div>
+            </div>
+
+            <div className={fr.cx("fr-py-4v")}>
+                {currentConfig.disabled ? (
+                    <p>{currentConfig.disabledReason ?? "Ce type d'entité n'est pas encore disponible."}</p>
+                ) : statsQuery.isLoading ? (
+                    <LoadingText withSpinnerIcon as="p" />
+                ) : statsQuery.data !== undefined ? (
+                    <StatsBarChart stats={statsQuery.data} startDate={startDate} endDate={endDate} />
+                ) : (
+                    <p>Pas de données</p>
+                )}
+            </div>
         </Main>
     );
 }
