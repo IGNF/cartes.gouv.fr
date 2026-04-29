@@ -16,7 +16,7 @@ export default function StatsBarChart(props: StatsBarChartProps) {
     const chartProps: IUseBarChartOptions = { aggregation: StatsAggregation.DAY, data: stats, type: StatsType.DATA_TRANSFERT, startDate, endDate };
 
     if (!stats.total?.begin_date) {
-        return <div>Aucune donnée trouvée</div>;
+        return <p className={fr.cx("fr-m-0")}>Aucune donnée trouvée</p>;
     }
 
     return (
