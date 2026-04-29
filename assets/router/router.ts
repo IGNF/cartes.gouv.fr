@@ -56,7 +56,7 @@ const privateRoutes = {
         (p) => `${appRoot}/demande-acces/${p.fileIdentifier}`
     ),
 
-    stats: defineRoute(`${appRoot}/tableau-de-bord/stats`),
+    stats: defineRoute(`${appRoot}/tableau-de-bord/statistiques-de-consommation`),
 };
 
 const communityRoute = defineRoute(
