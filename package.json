@@ -69,7 +69,7 @@
         "lint-staged": "^16.0.0",
         "markdown-it": "^14.1.0",
         "ol": "^10.0.0",
-        "postcss": "^8.5.1",
+        "postcss": "^8.5.12",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-dsfr-tiptap": "^2.0.0",
