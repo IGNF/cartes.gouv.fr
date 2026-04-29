@@ -82,7 +82,7 @@ const getCleanupStreamUrl = (datastoreId: string) => {
     return SymfonyRouting.generate("cartesgouvfr_api_datastore_cleanup_delete_content_stream", { datastoreId: datastoreId });
 };
 
-const getEndpointStats = (datastoreId: string, endpointId: string, query: object = {}, otherOptions: RequestInit = {}) => {
+const getEndpointStats = (datastoreId: string, endpointId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_endpoint_stats", { datastoreId, endpointId, ...query });
     return jsonFetch<HitStatisticsDto>(url, {
         ...otherOptions,
