@@ -25,7 +25,7 @@ class ContactController extends AbstractController
     public function __construct(
         private UserApiService $userApiService,
         private MailerService $mailerService,
-        private LoggerInterface $mailerLogger,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -79,9 +79,9 @@ class ContactController extends AbstractController
                 $supportMailParams['userId'] = $userApi['_id'];
             }
 
-            $this->mailerLogger->info('User ({userEmail}) : {message}', [
-                'userEmail' => $userEmail,
-                'message' => $message,
+            $this->logger->info('contact.request', [
+                'endpoint' => 'contact_us',
+                'is_authenticated' => $user instanceof User,
             ]);
 
             // envoi du mail à l'adresse du support
@@ -142,8 +142,9 @@ class ContactController extends AbstractController
 
             $userEmail = $user->getEmail();
 
-            $this->mailerLogger->info("User ({userEmail}) : Demande de création d'un entrepôt", [
-                'userEmail' => $userEmail,
+            $this->logger->info('datastore.creation.request', [
+                'endpoint' => 'datastore_create_request',
+                'is_authenticated' => $user instanceof User,
             ]);
 
             // Envoi du mail à l'adresse du support
@@ -190,10 +191,9 @@ class ContactController extends AbstractController
                 $mailParams['other_info'] = $data['other_info'];
             }
 
-            $this->mailerLogger->info(sprintf('User (%s) : Demande pour rejoindre %s', $userEmail, $data['community']['name']), [
-                'userEmail' => $userEmail,
-                'community' => $data['community'],
-                'other_info' => $data['other_info'] ?? null,
+            $this->logger->info('community.join.request', [
+                'endpoint' => 'join_community',
+                'is_authenticated' => $user instanceof User,
             ]);
 
             // Envoi du mail à l'adresse de contact de la communauté
@@ -254,8 +254,11 @@ class ContactController extends AbstractController
                 $mailParams['message'] = $data['message'];
             }
 
-            $context = array_merge(['userEmail' => $userEmail], $mailParams);
-            $this->mailerLogger->info('User ({userEmail}) : Demande d\'accès à des services de diffusion de données dont l\'accès est restreint', $context);
+            $this->logger->info('access.restricted.request', [
+                'endpoint' => 'accesses_request',
+                'is_authenticated' => $user instanceof User,
+                'layer_count' => count($data['layers'] ?? []),
+            ]);
 
             // Envoi du mail à l'adresse de contact des données
             $this->mailerService->sendMail(
@@ -306,8 +309,9 @@ class ContactController extends AbstractController
                 'community_id' => $datastore['community']['_id'],
             ];
 
-            $this->mailerLogger->info(sprintf("User (%s) : Demande de suppression de l'entrepôt %s", $userEmail, $datastore['name']), [
-                'userEmail' => $userEmail,
+            $this->logger->info('datastore.deletion.request', [
+                'endpoint' => 'datastore_deletion_request',
+                'is_authenticated' => $user instanceof User,
             ]);
 
             // Envoi du mail à l'adresse du support

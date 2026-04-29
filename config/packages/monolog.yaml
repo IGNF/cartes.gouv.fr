@@ -4,34 +4,30 @@ monolog:
 
 when@dev:
     monolog:
-        channels:
-            - mailer
-
         handlers:
+            # Journal principal de dev dans un fichier rotatif.
             main:
                 type: rotating_file
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
                 channels: ["!event"]
+            # Affiche les logs lors de l'exécution des commandes console.
             console:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine", "!console"]
 
-            mailer:
-                type: rotating_file
-                path: "%kernel.logs_dir%/mailer.log"
-                channels: mailer
-
 when@test:
     monolog:
         handlers:
+            # Tamponne les logs et n'écrit que si une erreur survient.
             main:
                 type: fingers_crossed
                 action_level: error
                 handler: nested
                 excluded_http_codes: [404, 405]
                 channels: ["!event"]
+            # Destination de sortie du tampon de test vers un fichier.
             nested:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
@@ -40,28 +36,38 @@ when@test:
 when@prod:
     monolog:
         channels:
-            - mailer
+            - deprecation
 
         handlers:
-            main:
+            # Filtre les niveaux notice à warning vers stdout (hors canaux dédiés).
+            stdout_notice_warning:
+                type: filter
+                handler: stdout_stream
+                min_level: notice
+                max_level: warning
+                channels: ["!deprecation"]
+
+            # Écrit les logs opérationnels sur stdout pour Kubernetes.
+            stdout_stream:
                 type: stream
                 path: php://stdout
-                level: info
-                formatter: monolog.formatter.logstash
-            mailer:
-                type: rotating_file
-                path: "%kernel.logs_dir%/mailer.log"
-                channels: mailer
-            nested:
+                channels: ["!deprecation"]
+
+            # Écrit les erreurs et niveaux supérieurs sur stderr.
+            stderr_error_plus:
                 type: stream
                 path: php://stderr
                 level: error
-                formatter: monolog.formatter.json
+                channels: ["!deprecation"]
+
+            # Isole les deprécations sur stderr via leur canal dédié.
+            deprecation:
+                type: stream
+                path: php://stderr
+                channels: [deprecation]
+
+            # Gère l'affichage des logs pour les commandes console en prod.
             console:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine"]
-            deprecation:
-                type: stream
-                channels: [deprecation]
-                path: php://stderr

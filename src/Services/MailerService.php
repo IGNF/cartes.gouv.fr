@@ -40,10 +40,16 @@ class MailerService
         try {
             $this->mailer->send($email);
         } catch (TransportExceptionInterface $ex) {
-            $this->logger->error('Sending mail failed, email address: {email_address}, email subject: {subject}', [
-                'subject' => $subject,
-                'email_address' => $to,
-                'debug' => $ex->getDebug(),
+            // On conserve uniquement le domaine pour diagnostiquer des incidents par fournisseur,
+            // sans exposer l'adresse email complète du destinataire.
+            $recipientDomain = substr(strrchr($to, '@') ?: '', 1) ?: 'unknown';
+
+            // Le hash du sujet permet de corréler des échecs similaires sans stocker le sujet en clair.
+            $this->logger->error('mail.transport.failure', [
+                'template' => $templateName,
+                'subject_hash' => hash('sha256', $subject),
+                'recipient_domain' => $recipientDomain,
+                'error_code' => $ex->getCode(),
             ]);
             throw $ex;
         }

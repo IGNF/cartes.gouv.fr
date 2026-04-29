@@ -145,6 +145,7 @@ COPY .docker/apache-security.conf /etc/apache2/conf-enabled/security.conf
 COPY .docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 
 RUN a2enmod rewrite remoteip
+RUN a2disconf other-vhosts-access-log
 
 #----------------------------------------------------------------------
 # Installer l'application pour production
