@@ -2,6 +2,8 @@ import { CartesUser } from "@/@types/app";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 
+export type StatsScope = "datastore" | "user";
+
 export type SelectOption = { value: string; label: string };
 
 export type ParamDef = {
@@ -19,8 +21,11 @@ export type StatsEntityConfig = {
     label: string;
     apiRoute: string;
     params: ParamDef[];
-    disabled?: boolean;
-    disabledReason?: string;
+};
+
+export type StatsScopeConfig = {
+    label: string;
+    entities: Record<string, StatsEntityConfig>;
 };
 
 // Helper : inférence de type à l'écriture, efface le générique dans ParamDef
@@ -73,42 +78,35 @@ const permissionIdParam = p({
     toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })),
 });
 
-const keyIdParam = p({
-    key: "keyId",
-    label: "Clé",
-    queryKey: () => RQKeys.my_keys(),
-    queryFn: (_, options) => api.user.getMyKeys(options),
-    toOptions: (keys) => keys.map((k) => ({ value: k._id, label: k.name })),
-});
-
-export const statsConfig: Record<string, StatsEntityConfig> = {
-    user_me: {
-        label: "Utilisateur (moi)",
-        apiRoute: "cartesgouvfr_api_user_me_stats",
-        params: [],
+export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
+    user: {
+        label: "Utilisateur",
+        entities: {
+            me: {
+                label: "Utilisateur (moi)",
+                apiRoute: "cartesgouvfr_api_user_me_stats",
+                params: [],
+            },
+        },
     },
-    datastore_endpoint: {
-        label: "Endpoint de datastore",
-        apiRoute: "cartesgouvfr_api_datastore_get_endpoint_stats",
-        params: [datastoreIdParam, endpointIdParam],
-    },
-    datastore_offering: {
-        label: "Offre de datastore",
-        apiRoute: "cartesgouvfr_api_service_get_service_stats",
-        params: [datastoreIdParam, offeringIdParam],
-    },
-    datastore_permission: {
-        label: "Permission de datastore",
-        apiRoute: "cartesgouvfr_api_datastore_get_permission_stats",
-        disabled: true,
-        disabledReason: "Route backend non disponible",
-        params: [datastoreIdParam, permissionIdParam],
-    },
-    user_key: {
-        label: "Clé d'utilisateur",
-        apiRoute: "cartesgouvfr_api_user_key_stats",
-        disabled: true,
-        disabledReason: "Route backend non disponible",
-        params: [keyIdParam],
+    datastore: {
+        label: "Entrepôt",
+        entities: {
+            endpoint: {
+                label: "Points de publication",
+                apiRoute: "cartesgouvfr_api_datastore_get_endpoint_stats",
+                params: [datastoreIdParam, endpointIdParam],
+            },
+            offering: {
+                label: "Services",
+                apiRoute: "cartesgouvfr_api_service_get_service_stats",
+                params: [datastoreIdParam, offeringIdParam],
+            },
+            permission: {
+                label: "Permissions",
+                apiRoute: "cartesgouvfr_api_datastore_get_permission_stats",
+                params: [datastoreIdParam, permissionIdParam],
+            },
+        },
     },
 };
