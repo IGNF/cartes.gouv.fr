@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 
 import { HitStatisticsDto } from "@/@types/stats";
-import DatePicker from "@/components/Input/DatePicker";
+import DateRangePicker from "@/components/Input/DateRangePicker";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
 import { jsonFetch } from "@/modules/jsonFetch";
@@ -13,9 +13,12 @@ import DynamicParamSelector from "./DynamicParamSelector";
 import StatsBarChart from "./StatsBarChart";
 import { statsConfig } from "./statsConfig";
 
-function dateStripTime(date: Date) {
-    const d = new Date(date);
+function initDate(offsetMonths = 0): Date {
+    const d = new Date();
     d.setHours(0, 0, 0, 0);
+    if (offsetMonths) {
+        d.setMonth(d.getMonth() - offsetMonths);
+    }
     return d;
 }
 
@@ -26,12 +29,8 @@ export default function Stats() {
     const [entityTypeKey, setEntityTypeKey] = useState(entityTypeKeys[0]);
     const [resolvedParams, setResolvedParams] = useState<Record<string, string>>({});
 
-    const [startDate, setStartDate] = useState<Date | undefined>(() => {
-        const d = new Date();
-        d.setDate(d.getDate() - 90);
-        return dateStripTime(d);
-    });
-    const [endDate, setEndDate] = useState<Date | undefined>(() => dateStripTime(new Date()));
+    const [startDate, setStartDate] = useState<Date | undefined>(() => initDate(3));
+    const [endDate, setEndDate] = useState<Date | undefined>(() => initDate());
 
     const currentConfig = config[entityTypeKey];
 
@@ -116,28 +115,14 @@ export default function Stats() {
 
             {allParamsResolved && (
                 <>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                            <DatePicker
-                                label="Début"
-                                value={startDate}
-                                onChange={(value) => setStartDate(value)}
-                                state={!startDate ? "error" : "default"}
-                                stateRelatedMessage={!startDate ? "Veuillez sélectionner une date" : ""}
-                                disableFuture
-                            />
-                        </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                            <DatePicker
-                                label="Fin"
-                                value={endDate}
-                                onChange={(value) => setEndDate(value)}
-                                state={!endDate ? "error" : "default"}
-                                stateRelatedMessage={!endDate ? "Veuillez sélectionner une date" : ""}
-                                disableFuture
-                            />
-                        </div>
-                    </div>
+                    <DateRangePicker
+                        startDate={startDate}
+                        endDate={endDate}
+                        onChange={(start, end) => {
+                            setStartDate(start);
+                            setEndDate(end);
+                        }}
+                    />
 
                     <div className={fr.cx("fr-py-3v")}>
                         {currentConfig.disabled ? (
