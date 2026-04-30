@@ -2,15 +2,18 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Tile from "@codegouvfr/react-dsfr/Tile";
 
 import Main from "@/components/Layout/Main";
+import { useTranslation } from "@/i18n";
 import { routes } from "@/router/router";
 import { statsConfig, StatsScope } from "./statsConfig";
 
 export default function StatsIndex() {
+    const { t } = useTranslation("Stats");
+
     const scopes = Object.entries(statsConfig) as [StatsScope, (typeof statsConfig)[StatsScope]][];
 
     return (
         <Main title="Statistiques">
-            <h1>Statistiques</h1>
+            <h1>{t("scope_selection_title")}</h1>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
                 {scopes.map(([scope, { label }]) => (
