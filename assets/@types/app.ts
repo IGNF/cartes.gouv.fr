@@ -26,6 +26,7 @@ import {
     OAuth2InfoDto,
     OfferingStandardDetailResponseDto,
     PermissionStandardListResponseDto,
+    PermissionWithOfferingsResponseDto,
     ProcessingExecutionOutputStoredDataDto,
     ProcessingExecutionStandardDetailResponseDto,
     StaticFileStandardDetailResponseDto,
@@ -360,6 +361,7 @@ export type UserRightsResponseDto = {
 };
 
 export type DatastorePermission = PermissionStandardListResponseDto;
+export type CommunityPermission = PermissionWithOfferingsResponseDto;
 
 export type UserKeyWithAccessesResponseDto = UserKeyResponseDto & { accesses: AccessDetailResponseDto[] };
 export type UserKeyDetailedWithAccessesResponseDto = UserKeyDetailsResponseDtoUserKeyInfoDto & { accesses: AccessDetailResponseDto[] };
