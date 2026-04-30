@@ -1,8 +1,9 @@
 import { CartesUser } from "@/@types/app";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 
-export type StatsScope = "datastore" | "user";
+export type StatsScope = "datastore" | "user" | "community";
 
 export type SelectOption = { value: string; label: string };
 
@@ -51,6 +52,17 @@ const datastoreIdParam = p({
             .map((cm) => ({ value: cm.community!.datastore, label: cm.community!.name })),
 });
 
+const communityIdParam = p({
+    key: "communityId",
+    label: "Communauté",
+    queryKey: () => RQKeys.user_me(),
+    queryFn: (_, options) => api.user.getMe(options),
+    toOptions: (user: CartesUser | null) =>
+        (user?.communities_member ?? [])
+            .filter((cm) => cm.community !== undefined && cm.rights?.includes(CommunityMemberDtoRightsEnum.COMMUNITY))
+            .map((cm) => ({ value: cm.community!._id, label: cm.community!.name })),
+});
+
 const endpointIdParam = p({
     key: "endpointId",
     label: "Endpoint",
@@ -69,7 +81,7 @@ const offeringIdParam = p({
     toOptions: (offerings) => offerings.map((o) => ({ value: o._id, label: o.layer_name })),
 });
 
-const permissionIdParam = p({
+const datastorePermissionIdParam = p({
     key: "permissionId",
     label: "Permission",
     dependsOn: ["datastoreId"],
@@ -78,17 +90,16 @@ const permissionIdParam = p({
     toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })),
 });
 
+const communityPermissionIdParam = p({
+    key: "permissionId",
+    label: "Permission",
+    dependsOn: ["communityId"],
+    queryKey: ({ communityId }) => RQKeys.community_permissions(communityId),
+    queryFn: ({ communityId }, options) => api.community.getPermissions(communityId, {}, options),
+    toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })),
+});
+
 export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
-    user: {
-        label: "Utilisateur",
-        entities: {
-            me: {
-                label: "Utilisateur (moi)",
-                apiRoute: "cartesgouvfr_api_user_me_stats",
-                params: [],
-            },
-        },
-    },
     datastore: {
         label: "Entrepôt",
         entities: {
@@ -105,7 +116,32 @@ export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
             permission: {
                 label: "Permissions",
                 apiRoute: "cartesgouvfr_api_datastore_get_permission_stats",
-                params: [datastoreIdParam, permissionIdParam],
+                params: [datastoreIdParam, datastorePermissionIdParam],
+            },
+        },
+    },
+    community: {
+        label: "Communauté",
+        entities: {
+            community: {
+                label: "Communautés",
+                apiRoute: "cartesgouvfr_api_community_get_stats",
+                params: [communityIdParam],
+            },
+            permission: {
+                label: "Permissions",
+                apiRoute: "cartesgouvfr_api_community_get_permission_stats",
+                params: [communityIdParam, communityPermissionIdParam],
+            },
+        },
+    },
+    user: {
+        label: "Moi-même",
+        entities: {
+            me: {
+                label: "Moi-même",
+                apiRoute: "cartesgouvfr_api_user_me_stats",
+                params: [],
             },
         },
     },

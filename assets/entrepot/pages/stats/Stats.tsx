@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { HitStatisticsDto } from "@/@types/stats";
 import DateRangePicker from "@/components/Input/DateRangePicker";
 import Main from "@/components/Layout/Main";
-import LoadingText from "@/components/Utils/LoadingText";
+import Skeleton from "@/components/Utils/Skeleton";
 import { useTranslation } from "@/i18n";
 import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
@@ -28,6 +28,7 @@ export default function Stats() {
     const { params } = useRoute();
     const scope = params?.["scope"] as StatsScope;
 
+    const { t } = useTranslation("Stats");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const scopeConfig = statsConfig[scope];
@@ -92,7 +93,7 @@ export default function Stats() {
 
     return (
         <Main
-            title="Statistiques"
+            title={t("scope_title", { scope: scope })}
             classes={{
                 container: fr.cx("fr-container", "fr-mb-4v"),
             }}
@@ -111,7 +112,7 @@ export default function Stats() {
                 currentPageLabel: scopeConfig?.label ?? "",
             }}
         >
-            <h1>Statistiques</h1>
+            <h1>{t("scope_title", { scope: scope })}</h1>
 
             {!currentConfig ? (
                 <p className={fr.cx("fr-m-0")}>Aucune statistique disponible pour ce périmètre.</p>
@@ -157,7 +158,7 @@ export default function Stats() {
 
                             <div className={fr.cx("fr-py-3v")}>
                                 {statsQuery.isLoading ? (
-                                    <LoadingText withSpinnerIcon as="p" />
+                                    <Skeleton count={1} rectangleHeight={400} />
                                 ) : statsQuery.data !== undefined ? (
                                     <StatsBarChart stats={statsQuery.data} startDate={startDate} endDate={endDate} />
                                 ) : (
