@@ -11,9 +11,10 @@ interface DateRangePickerProps {
     onChange: (start: Date | undefined, end: Date | undefined) => void;
 }
 
-type Shortcut = "3m" | "6m" | "1an" | "custom";
+type Shortcut = "1m" | "3m" | "6m" | "1an" | "custom";
 
 const SHORTCUTS = [
+    { key: "1m", label: "1 mois" },
     { key: "3m", label: "3 mois" },
     { key: "6m", label: "6 mois" },
     { key: "1an", label: "1 an" },
@@ -33,13 +34,15 @@ function stripTime(date: Date): Date {
 }
 
 const DateRangePicker = ({ startDate, endDate, onChange }: DateRangePickerProps) => {
-    const [selectedShortcut, setSelectedShortcut] = useState<Shortcut>("3m");
+    const [selectedShortcut, setSelectedShortcut] = useState<Shortcut>("1m");
 
     const handleShortcut = (shortcut: Exclude<Shortcut, "custom">) => {
         const today = stripTime(new Date());
         const start = new Date(today);
 
-        if (shortcut === "3m") {
+        if (shortcut === "1m") {
+            start.setMonth(start.getMonth() - 1);
+        } else if (shortcut === "3m") {
             start.setMonth(start.getMonth() - 3);
         } else if (shortcut === "6m") {
             start.setMonth(start.getMonth() - 6);
