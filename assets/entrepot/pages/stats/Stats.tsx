@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Select from "@codegouvfr/react-dsfr/SelectNext";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 
@@ -26,9 +27,12 @@ export default function Stats() {
     const [entityTypeKey, setEntityTypeKey] = useState(entityTypeKeys[0]);
     const [resolvedParams, setResolvedParams] = useState<Record<string, string>>({});
 
+    type Shortcut = "3m" | "6m" | "1an";
+    const [selectedShortcut, setSelectedShortcut] = useState<Shortcut | null>(null);
+
     const [startDate, setStartDate] = useState<Date | undefined>(() => {
         const d = new Date();
-        d.setDate(d.getDate() - 90);
+        d.setMonth(0, 1);
         return dateStripTime(d);
     });
     const [endDate, setEndDate] = useState<Date | undefined>(() => dateStripTime(new Date()));
@@ -51,6 +55,40 @@ export default function Stats() {
         },
         [currentConfig]
     );
+
+    const handleShortcut = (shortcut: Shortcut) => {
+        const today = dateStripTime(new Date());
+        const start = new Date(today);
+        if (shortcut === "3m") start.setMonth(start.getMonth() - 3);
+        else if (shortcut === "6m") start.setMonth(start.getMonth() - 6);
+        else start.setFullYear(start.getFullYear() - 1);
+        setStartDate(start);
+        setEndDate(today);
+        setSelectedShortcut(shortcut);
+    };
+
+    const handleStartDateChange = (value: Date | undefined) => {
+        setSelectedShortcut(null);
+        if (!value) {
+            setStartDate(undefined);
+            return;
+        }
+        const d = dateStripTime(value);
+        setStartDate(endDate && d > endDate ? endDate : d);
+    };
+
+    const handleEndDateChange = (value: Date | undefined) => {
+        setSelectedShortcut(null);
+        if (!value) {
+            setEndDate(undefined);
+            return;
+        }
+        const today = dateStripTime(new Date());
+        let d = dateStripTime(value);
+        if (d > today) d = today;
+        if (startDate && d < startDate) d = startDate;
+        setEndDate(d);
+    };
 
     const allParamsResolved = currentConfig.params.every((p) => !!resolvedParams[p.key]);
 
@@ -116,12 +154,12 @@ export default function Stats() {
 
             {allParamsResolved && (
                 <>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--middle")}>
                         <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                             <DatePicker
                                 label="Début"
                                 value={startDate}
-                                onChange={(value) => setStartDate(value)}
+                                onChange={handleStartDateChange}
                                 state={!startDate ? "error" : "default"}
                                 stateRelatedMessage={!startDate ? "Veuillez sélectionner une date" : ""}
                                 disableFuture
@@ -131,11 +169,31 @@ export default function Stats() {
                             <DatePicker
                                 label="Fin"
                                 value={endDate}
-                                onChange={(value) => setEndDate(value)}
+                                onChange={handleEndDateChange}
                                 state={!endDate ? "error" : "default"}
                                 stateRelatedMessage={!endDate ? "Veuillez sélectionner une date" : ""}
                                 disableFuture
                             />
+                        </div>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                            {(
+                                [
+                                    { key: "3m", label: "3 mois" },
+                                    { key: "6m", label: "6 mois" },
+                                    { key: "1an", label: "1 an" },
+                                ] as { key: Shortcut; label: string }[]
+                            ).map(({ key, label }) => (
+                                <Tag
+                                    key={key}
+                                    nativeButtonProps={{
+                                        onClick: () => handleShortcut(key),
+                                    }}
+                                    className={fr.cx("fr-mr-1v")}
+                                    pressed={selectedShortcut === key}
+                                >
+                                    {label}
+                                </Tag>
+                            ))}
                         </div>
                     </div>
 
