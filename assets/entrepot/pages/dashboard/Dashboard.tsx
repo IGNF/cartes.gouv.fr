@@ -123,7 +123,7 @@ export default function Dashboard() {
 
                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                     <Tile
-                        linkProps={routes.stats().link}
+                        linkProps={routes.stats_scope_selection().link}
                         title={"Mes statistiques de consommation"}
                         pictogram={<DataVisualization />}
                         orientation="vertical"

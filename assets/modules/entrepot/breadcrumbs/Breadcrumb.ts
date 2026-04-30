@@ -54,7 +54,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
         case "datastore_create_request":
         case "join_community":
         case "accesses_request":
-        case "stats":
+        case "stats_scope_selection":
             return { ...publishProps, currentPageLabel: t(route.name) };
 
         case "user_key_add":
