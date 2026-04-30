@@ -16,19 +16,9 @@ export interface HitStatisticsDto {
 }
 // generated
 
-export interface StatsRequestDto {
-    start?: string;
-    end?: string;
-    details?: boolean;
-    page?: number;
-    limit?: number;
-}
-
 export interface StatsHits extends Omit<HitsDto, "begin_date" | "end_date"> {
     begin_date?: Date;
     end_date?: Date;
-    // data_transfer?: number;
-    // hits?: number;
 }
 
 export interface Stats {
@@ -44,15 +34,4 @@ export interface IBarChartData {
 export enum StatsType {
     DATA_TRANSFERT = "data_transfer",
     HITS = "hits",
-}
-
-export enum StatsAggregation {
-    DAY = 24 * 60 * 60 * 1000, // 1 day
-    MINUTES = 5 * 60 * 1000, // 5 minutes
-}
-
-export enum StatsDataRange {
-    MONTH = "month",
-    DAY = "day",
-    PAGINATED = "paginated",
 }

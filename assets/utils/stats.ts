@@ -1,6 +1,8 @@
-import { HitStatisticsDto, IBarChartData, Stats, StatsAggregation, StatsType } from "@/@types/stats";
+import { HitStatisticsDto, IBarChartData, Stats, StatsType } from "@/@types/stats";
+import { delta } from "./delta";
+import { formatDate } from "./format";
 
-import { formatDate, formatDateTime } from "./format";
+const DAY_MS = delta.hours(24);
 
 export function formatStats(stats: HitStatisticsDto): Stats {
     return {
@@ -18,23 +20,14 @@ export function formatStats(stats: HitStatisticsDto): Stats {
     };
 }
 
-export function getDate(date: Date, aggregation = StatsAggregation.DAY): number {
-    if (aggregation === StatsAggregation.DAY) {
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-    }
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), Math.floor(date.getMinutes() / 5) * 5).getTime();
+export function getDate(date: Date): number {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-export function formatBarChartData(
-    data: Stats,
-    type = StatsType.DATA_TRANSFERT,
-    aggregation = StatsAggregation.DAY,
-    startDate?: Date,
-    endDate?: Date
-): IBarChartData {
+export function formatBarChartData(data: Stats, type = StatsType.DATA_TRANSFERT, startDate?: Date, endDate?: Date): IBarChartData {
     const dataEntries: [number, number][] = data.details
         .map((detail) => {
-            const date = detail.begin_date ? getDate(detail.begin_date, aggregation) : undefined;
+            const date = detail.begin_date ? getDate(detail.begin_date) : undefined;
             return [date, detail[type]];
         })
         .filter(([date, detail]) => date !== undefined && detail !== undefined) as [number, number][];
@@ -46,9 +39,9 @@ export function formatBarChartData(
         return { x: [[]], y: [[]] };
     }
 
-    const range = (endTime - startTime) / aggregation + (endDate ? 0 : 1);
-    const dates = Array.from({ length: range }, (_, i) => new Date(startTime + i * aggregation));
-    const x = dates.map((date) => (aggregation === StatsAggregation.DAY ? formatDate(date) : formatDateTime(date)));
+    const range = (endTime - startTime) / DAY_MS + (endDate ? 0 : 1);
+    const dates = Array.from({ length: range }, (_, i) => new Date(startTime + i * DAY_MS));
+    const x = dates.map((date) => formatDate(date));
     const y = dates.map((date) => dataMap.get(date.getTime()) ?? 0);
 
     return { x: [x], y: [y] };

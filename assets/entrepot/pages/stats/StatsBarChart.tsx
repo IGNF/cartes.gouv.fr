@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import { HitStatisticsDto, StatsAggregation, StatsType } from "@/@types/stats";
+import { HitStatisticsDto, StatsType } from "@/@types/stats";
 import { IUseBarChartOptions } from "@/hooks/useBarChart";
 import Chart from "@/pages/Chart";
 import { niceBytes } from "@/utils";
@@ -13,7 +13,7 @@ interface StatsBarChartProps {
 export default function StatsBarChart(props: StatsBarChartProps) {
     const { stats, startDate, endDate } = props;
 
-    const chartProps: IUseBarChartOptions = { aggregation: StatsAggregation.DAY, data: stats, type: StatsType.DATA_TRANSFERT, startDate, endDate };
+    const chartProps: IUseBarChartOptions = { data: stats, type: StatsType.DATA_TRANSFERT, startDate, endDate };
 
     if (!stats.total?.begin_date) {
         return <p className={fr.cx("fr-m-0")}>Aucune donnée trouvée</p>;
@@ -22,18 +22,18 @@ export default function StatsBarChart(props: StatsBarChartProps) {
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
             <div className={fr.cx("fr-col")}>
-                <ul className={fr.cx("fr-raw-list")}>
+                <ul className={fr.cx("fr-raw-list", "fr-mb-4v")}>
                     <li>
                         <strong>Volume de données transférées</strong> :{" "}
                         {stats.total?.data_transfer ? niceBytes(stats.total?.data_transfer.toString()) : "inconnu"}
                     </li>
                     <li>
-                        <strong>Nombre de hits</strong> : {stats.total?.hits}
+                        <strong>Nombre d’appels</strong> : {stats.total?.hits}
                     </li>
                 </ul>
 
                 <Chart {...chartProps} type={StatsType.DATA_TRANSFERT} name={["Volume de données transférées"]} />
-                <Chart {...chartProps} type={StatsType.HITS} name={["Nombre de hits"]} color={["blue-cumulus"]} />
+                <Chart {...chartProps} type={StatsType.HITS} name={["Nombre d’appels"]} color={["blue-cumulus"]} />
             </div>
         </div>
     );
