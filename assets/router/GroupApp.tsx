@@ -22,6 +22,7 @@ const Dashboard = lazy(() => import("../entrepot/pages/dashboard/Dashboard"));
 const DatastoreSelection = lazy(() => import("../entrepot/pages/datastore/DatastoreSelection/DatastoreSelection"));
 
 const Test = lazy(() => import("../pages/Test"));
+const StatsIndex = lazy(() => import("../entrepot/pages/stats/StatsIndex"));
 const Stats = lazy(() => import("../entrepot/pages/stats/Stats"));
 interface IGroupAppProps {
     route: Route<typeof routes>;
@@ -75,7 +76,7 @@ function GroupApp(props: IGroupAppProps) {
             case "test":
                 return { render: <Test /> };
             case "stats":
-                return { render: <Stats /> };
+                return { render: <StatsIndex /> };
         }
     }, [route]);
 
