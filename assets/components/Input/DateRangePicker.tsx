@@ -34,7 +34,7 @@ function stripTime(date: Date): Date {
 }
 
 const DateRangePicker = ({ startDate, endDate, onChange }: DateRangePickerProps) => {
-    const [selectedShortcut, setSelectedShortcut] = useState<Shortcut>("1m");
+    const [selectedShortcut, setSelectedShortcut] = useState<Shortcut>("3m");
 
     const handleShortcut = (shortcut: Exclude<Shortcut, "custom">) => {
         const today = stripTime(new Date());
@@ -87,7 +87,13 @@ const DateRangePicker = ({ startDate, endDate, onChange }: DateRangePickerProps)
                         SHORTCUTS.map(({ key, label }) => ({
                             children: label,
                             nativeButtonProps: {
-                                onClick: () => (key === "custom" ? setSelectedShortcut("custom") : handleShortcut(key)),
+                                onClick: () => {
+                                    if (key === "custom") {
+                                        setSelectedShortcut("custom");
+                                    } else {
+                                        handleShortcut(key);
+                                    }
+                                },
                             },
                             pressed: selectedShortcut === key,
                         })) as unknown as [TagProps, ...TagProps[]]
