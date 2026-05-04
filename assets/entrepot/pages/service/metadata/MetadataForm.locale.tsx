@@ -139,7 +139,7 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
             {"Exemple : 25 000 si les données sont faites pour un affichage à l’échelle d’une carte topographique."}
         </>
     ),
-    "metadata.field.hint.prefix_mention": ({ prefix }) => `Il doit commencer par le préfixe « ${prefix}. » défini dans les métadonnées du datastore.`,
+    "metadata.field.hint.prefix_mention": ({ prefix }) => `Il doit commencer par le préfixe « ${prefix}. » défini dans la configuration de l'entrepôt.`,
 };
 
 export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = {
@@ -203,5 +203,5 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "metadata.additionnal_infos_form.hint_encoding": "[TODO] Codification utilisée dans la ressource pour restituer les caractères",
     "metadata.additionnal_infos_form.spatial_resolution": "Spatial resolution (optional)",
     "metadata.additionnal_infos_form.hint_spatial_resolution": undefined,
-    "metadata.field.hint.prefix_mention": ({ prefix }) => `It must start with the prefix "${prefix}." defined in the datastore metadata.`,
+    "metadata.field.hint.prefix_mention": ({ prefix }) => `It must start with the prefix "${prefix}." defined in the datastore configuration.`,
 };
