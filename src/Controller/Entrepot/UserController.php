@@ -72,9 +72,10 @@ class UserController extends AbstractController implements ApiControllerInterfac
     }
 
     #[Route('/me/permissions', name: 'permissions', methods: ['GET'])]
-    public function getUserPermissions(): JsonResponse
+    public function getUserPermissions(Request $request): JsonResponse
     {
-        $permissions = $this->userApiService->getMyPermissions()->resolve();
+        $query = $request->query->all();
+        $permissions = $this->userApiService->getMyPermissions($query)->resolve();
 
         return $this->json($permissions);
     }
@@ -85,6 +86,15 @@ class UserController extends AbstractController implements ApiControllerInterfac
         $permission = $this->userApiService->getPermission($permissionId)->array();
 
         return $this->json($permission);
+    }
+
+    #[Route('/me/permissions/{permissionId}/stats', name: 'permission_stats', methods: ['GET'])]
+    public function getPermissionStats(string $permissionId, Request $request): JsonResponse
+    {
+        $query = $request->query->all();
+        $stats = $this->userApiService->getPermissionStats($permissionId, $query)->resolve();
+
+        return $this->json($stats);
     }
 
     #[Route('/add_key', name: 'add_key', methods: ['POST'])]
@@ -180,6 +190,24 @@ class UserController extends AbstractController implements ApiControllerInterfac
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
+    }
+
+    #[Route('/me/keys/{keyId}/stats', name: 'key_stats', methods: ['GET'])]
+    public function getKeyStats(string $keyId, Request $request): JsonResponse
+    {
+        $query = $request->query->all();
+        $stats = $this->userApiService->getKeyStats($keyId, $query)->resolve();
+
+        return $this->json($stats);
+    }
+
+    #[Route('/me/keys/{keyId}/accesses/{accessId}/stats', name: 'key_access_stats', methods: ['GET'])]
+    public function getAccessStats(string $keyId, string $accessId, Request $request): JsonResponse
+    {
+        $query = $request->query->all();
+        $stats = $this->userApiService->getAccessStats($keyId, $accessId, $query)->resolve();
+
+        return $this->json($stats);
     }
 
     #[Route('/me/add_to_sandbox', name: 'add_to_sandbox', methods: ['PUT'])]

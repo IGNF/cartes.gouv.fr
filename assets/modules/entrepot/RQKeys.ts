@@ -94,7 +94,11 @@ const RQKeys = {
     my_keys: (): string[] => ["user", "me", "keys"],
     my_keys_with_accesses: (): string[] => ["user", "me", "keys", "accesses"],
     my_key: (keyId: string): string[] => ["user", "me", "keys", keyId],
-    my_permissions: (): string[] => ["user", "me", "permissions"],
+    my_permissions: (query?: QueryParams): string[] => {
+        const keys = ["user", "me", "permissions"];
+        if (query) keys.push(JSON.stringify(query));
+        return keys;
+    },
     get_permission: (permissionId: string): string[] => ["user", "me", "permissions", permissionId],
     my_documents: (query?: unknown): string[] => ["user", "me", "documents", JSON.stringify(query)],
     my_document: (documentId: string): string[] => ["user", "me", "documents", documentId],
