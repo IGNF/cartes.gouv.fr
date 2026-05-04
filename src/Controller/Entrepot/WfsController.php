@@ -48,7 +48,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         try {
             // création de requête pour la config
             $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
-            $configRequestBody = $this->getConfigRequestBody($datastoreId, ConfigurationTypes::WFS, $dto, $typeInfos);
+            $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody);
 
@@ -76,7 +76,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
             // création de requête pour la config
             $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
-            $configRequestBody = $this->getConfigRequestBody($datastoreId, ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
+            $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody, $oldOffering);
 

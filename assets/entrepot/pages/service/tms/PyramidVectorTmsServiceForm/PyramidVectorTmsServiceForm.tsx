@@ -9,13 +9,14 @@ import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
+import { useDatastore } from "@/contexts/datastore";
 import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidVector, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
-import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
+import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
@@ -55,6 +56,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     const [currentStep, setCurrentStep] = useState(STEPS.METADATA_UPLOAD);
 
     const queryClient = useQueryClient();
+    const { datastore } = useDatastore();
 
     const createServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
@@ -136,14 +138,15 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     schemas[STEPS.METADATA_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
         existingLayerNamesQuery.data,
         editMode,
-        offeringQuery.data?.configuration.layer_name
+        offeringQuery.data?.configuration.layer_name,
+        datastore
     );
     schemas[STEPS.METADATA_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
     const defaultValues: PyramidVectorTmsServiceFormValuesType = useMemo(
-        () => getPyramidVectorTmsServiceFormDefaultValues(offeringQuery.data, editMode, pyramidQuery.data, metadataQuery.data),
-        [editMode, offeringQuery.data, pyramidQuery.data, metadataQuery.data]
+        () => getPyramidVectorTmsServiceFormDefaultValues(offeringQuery.data, editMode, pyramidQuery.data, metadataQuery.data, datastore),
+        [editMode, offeringQuery.data, pyramidQuery.data, metadataQuery.data, datastore]
     );
 
     const form = useForm<PyramidVectorTmsServiceFormValuesType>({

@@ -5,11 +5,15 @@ const { i18n } = declareComponentKeys<
     | "metadatas.technical_name_error"
     | "metadatas.technical_name_regex"
     | "metadatas.technical_name_unicity_error"
+    | "metadatas.technical_name_prefix_error"
+    | "metadatas.technical_name_not_prefix_only_error"
     | "metadatas.public_name_error"
     | "metadatas.service_name_error"
     | "metadatas.description_error"
     | "metadatas.identifier_error"
     | "metadatas.identifier_regex"
+    | "metadatas.identifier_prefix_error"
+    | "metadatas.identifier_not_prefix_only_error"
     | "metadatas.category_error"
     | "metadatas.email_contact_required_error"
     | "metadatas.email_contact_error"
@@ -35,11 +39,15 @@ export const ValidationMetadatasFrTranslations: Translations<"fr">["ValidationMe
     "metadatas.technical_name_regex":
         "Le nom technique doit commencer par une lettre ou un underscore et ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)",
     "metadatas.technical_name_unicity_error": "Ce nom technique existe déjà",
+    "metadatas.technical_name_prefix_error": "Le nom technique doit commencer par le préfixe défini dans la configuration de l’entrepôt",
+    "metadatas.technical_name_not_prefix_only_error": "Le nom technique doit contenir au moins un caractère après le préfixe de l’entrepôt.",
     "metadatas.public_name_error": "L’intitulé (nom public) est obligatoire",
     "metadatas.service_name_error": "Le titre du service est obligatoire",
     "metadatas.description_error": "Un résumé est obligatoire",
     "metadatas.identifier_error": "L’identificateur est obligatoire",
     "metadatas.identifier_regex": "L’identificateur ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)",
+    "metadatas.identifier_prefix_error": "L'identificateur de ressource unique doit commencer par le préfixe défini dans la configuration de l’entrepôt",
+    "metadatas.identifier_not_prefix_only_error": "L'identificateur de ressource unique doit contenir au moins un caractère après le préfixe du datastore",
     "metadatas.category_error": "La catégorie thématique est obligatoire",
     "metadatas.email_contact_required_error": "l’adresse électronique de contact est obligatoire",
     "metadatas.email_contact_error": "l’adresse électronique de contact n'est pas correcte",
@@ -63,11 +71,15 @@ export const ValidationMetadatasEnTranslations: Translations<"en">["ValidationMe
     "metadatas.technical_name_regex":
         "Technical name must start with a letter or an underscore and must contain only letters, numbers, hyphens (-), underscores (_), or dots (.)",
     "metadatas.technical_name_unicity_error": "This technical name already exists",
+    "metadatas.technical_name_prefix_error": "Technical name must start with the prefix defined in the datastore metadata",
+    "metadatas.technical_name_not_prefix_only_error": "Technical name must contain at least one character after the datastore prefix",
     "metadatas.public_name_error": "Title (public name) is required",
     "metadatas.service_name_error": undefined,
     "metadatas.description_error": "A summary is required",
     "metadatas.identifier_error": "Identifier is required",
     "metadatas.identifier_regex": "Identifier must contain only letters, numbers, hyphens (-), underscores (_), or dots (.)",
+    "metadatas.identifier_prefix_error": "Identifier must start with the prefix defined in the datastore metadata",
+    "metadatas.identifier_not_prefix_only_error": "Identifier must contain at least one character after the datastore prefix",
     "metadatas.category_error": "Thematic category is required",
     "metadatas.email_contact_required_error": "Contact email is required",
     "metadatas.email_contact_error": "Contact email is not correct",

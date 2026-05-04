@@ -10,7 +10,6 @@ use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\PermissionTypes;
-use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Dto\Services\CommonDTO;
 use App\Entity\CswMetadata\CswMetadata;
@@ -372,9 +371,6 @@ class CartesServiceApiService
 
         // Création ou mise à jour de metadata
         $formData = json_decode(json_encode($dto), true);
-        if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-            $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
-        }
         $apiMetadata = $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
         // Synchronisation des autres services de la même fiche de données
