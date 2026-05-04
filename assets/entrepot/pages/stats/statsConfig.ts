@@ -99,6 +99,35 @@ const communityPermissionIdParam = p({
     toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })),
 });
 
+const userPermissionQuery = {
+    personal: true,
+    community: false,
+};
+const userPermissionIdParam = p({
+    key: "permissionId",
+    label: "Permission",
+    queryKey: () => RQKeys.my_permissions(userPermissionQuery),
+    queryFn: (_, options) => api.user.getMyPermissions(userPermissionQuery, options),
+    toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })),
+});
+
+const userKeyIdParam = p({
+    key: "keyId",
+    label: "Clé",
+    queryKey: () => RQKeys.my_keys(),
+    queryFn: (_, options) => api.user.getMyKeys(options),
+    toOptions: (keys) => keys.map((key) => ({ value: key._id, label: key.name })),
+});
+
+const userKeyAccessIdParam = p({
+    key: "accessId",
+    label: "Accès",
+    dependsOn: ["keyId"],
+    queryKey: ({ keyId }) => RQKeys.my_key(keyId),
+    queryFn: ({ keyId }, options) => api.user.getMyKeyDetailedWithAccesses(keyId, options),
+    toOptions: (key) => (key.accesses ?? []).map((access) => ({ value: access._id, label: access.offering.layer_name })),
+});
+
 export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
     datastore: {
         label: "Entrepôt",
@@ -142,6 +171,21 @@ export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
                 label: "Moi-même",
                 apiRoute: "cartesgouvfr_api_user_me_stats",
                 params: [],
+            },
+            permission: {
+                label: "Permissions",
+                apiRoute: "cartesgouvfr_api_user_permission_stats",
+                params: [userPermissionIdParam],
+            },
+            key: {
+                label: "Clés",
+                apiRoute: "cartesgouvfr_api_user_key_stats",
+                params: [userKeyIdParam],
+            },
+            key_access: {
+                label: "Accès de clé",
+                apiRoute: "cartesgouvfr_api_user_key_access_stats",
+                params: [userKeyIdParam, userKeyAccessIdParam],
             },
         },
     },

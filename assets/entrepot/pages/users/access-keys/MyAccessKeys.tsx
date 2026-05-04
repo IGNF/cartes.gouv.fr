@@ -41,7 +41,7 @@ const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
     // Les permissions
     const { data: permissions, isLoading: isLoadingPermissions } = useQuery<PermissionWithOfferingsDetailsResponseDto[]>({
         queryKey: RQKeys.my_permissions(),
-        queryFn: ({ signal }) => api.user.getMyPermissions({ signal }),
+        queryFn: ({ signal }) => api.user.getMyPermissions({}, { signal }),
         staleTime: 30000,
     });
 
