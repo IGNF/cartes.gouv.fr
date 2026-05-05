@@ -120,6 +120,14 @@ final class DatastoreApiService
     /**
      * @param array<string,mixed> $query
      */
+    public function getPermissionStats(string $datastoreId, string $permissionId, array $query = []): PaginatedPromise
+    {
+        return $this->api->requestAll("datastores/$datastoreId/permissions/$permissionId/stats", $query);
+    }
+
+    /**
+     * @param array<string,mixed> $query
+     */
     public function getEndpointStats(string $datastoreId, string $endpointId, array $query = []): PaginatedPromise
     {
         return $this->api->requestAll("datastores/$datastoreId/endpoints/$endpointId/stats", $query);

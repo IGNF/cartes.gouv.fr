@@ -145,6 +145,20 @@ class DatastoreController extends AbstractController implements ApiControllerInt
         }
     }
 
+    #[Route('/{datastoreId}/permissions/{permissionId}/stats', name: 'get_permission_stats', methods: ['GET'])]
+    public function getPermissionStats(string $datastoreId, string $permissionId, Request $request): JsonResponse
+    {
+        try {
+            $query = $request->query->all();
+
+            $stats = $this->datastoreApiService->getPermissionStats($datastoreId, $permissionId, $query)->resolve();
+
+            return $this->json($stats);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
     #[Route('/{datastoreId}/endpoints/{endpointId}/stats', name: 'get_endpoint_stats', methods: ['GET'])]
     public function getEndpointStats(string $datastoreId, string $endpointId, Request $request): JsonResponse
     {
