@@ -24,7 +24,7 @@ export function getDate(date: Date): number {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-export function formatBarChartData(data: Stats, type = StatsType.DATA_TRANSFERT, startDate?: Date, endDate?: Date): IBarChartData {
+export function formatBarChartData(data: Stats, type = StatsType.DATA_TRANSFER, startDate?: Date, endDate?: Date): IBarChartData {
     const dataEntries: [number, number][] = data.details
         .map((detail) => {
             const date = detail.begin_date ? getDate(detail.begin_date) : undefined;

@@ -159,6 +159,8 @@ export default function Stats() {
                             <div className={fr.cx("fr-py-3v")}>
                                 {statsQuery.isLoading ? (
                                     <Skeleton count={1} rectangleHeight={400} />
+                                ) : statsQuery.isError ? (
+                                    <p className={fr.cx("fr-m-0")}>{t("error_loading")}</p>
                                 ) : statsQuery.data !== undefined ? (
                                     <StatsBarChart stats={statsQuery.data} startDate={startDate} endDate={endDate} />
                                 ) : (
