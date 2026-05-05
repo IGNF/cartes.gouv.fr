@@ -32,6 +32,6 @@ export interface IBarChartData {
 }
 
 export enum StatsType {
-    DATA_TRANSFERT = "data_transfer",
+    DATA_TRANSFER = "data_transfer",
     HITS = "hits",
 }
