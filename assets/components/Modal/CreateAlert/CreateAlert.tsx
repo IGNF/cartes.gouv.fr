@@ -90,6 +90,7 @@ const CreateAlert: FC<CreateAlertProps> = (props) => {
                     onClick: addAlert,
                 },
             ]}
+            concealingBackdrop={false}
         >
             <FormProvider {...methods}>
                 <form onSubmit={addAlert}>
