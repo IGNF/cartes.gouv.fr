@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
+import { queryClient } from "@/modules/queryClient";
 import SymfonyRouting from "@/modules/Routing";
 import { externalLink, externalUrls } from "@/router/externalUrls";
 import { routes } from "@/router/router";
@@ -143,6 +144,16 @@ export function HeaderMenuUser() {
                 iconId: "fr-icon-logout-box-r-line",
                 linkProps: {
                     href: SymfonyRouting.generate("cartesgouvfr_security_logout"),
+                    onClick: async (e) => {
+                        e.preventDefault();
+
+                        await queryClient.cancelQueries();
+                        queryClient.invalidateQueries();
+                        queryClient.clear();
+                        localStorage.removeItem("REACT_QUERY_OFFLINE_CACHE");
+
+                        window.location.href = SymfonyRouting.generate("cartesgouvfr_security_logout");
+                    },
                 },
             }}
         />
