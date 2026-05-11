@@ -3,6 +3,10 @@
     height: 1.25rem;
 }
 
+.MuiAutocomplete-inputRoot {
+    padding: 0.25rem !important;
+}
+
 .MuiAutocomplete-popper {
     z-index: 999999 !important;
 }

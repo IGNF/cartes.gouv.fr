@@ -1,10 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
+import { TagProps } from "@codegouvfr/react-dsfr/Tag";
+import TagsGroup, { TagsGroupProps } from "@codegouvfr/react-dsfr/TagsGroup";
 import { Autocomplete, AutocompleteProps, CreateFilterOptionsConfig, TextField, createFilterOptions } from "@mui/material";
 import { CSSProperties, ReactNode, useId } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import "../../../assets/sass/components/autocomplete.scss";
+// import "../../../assets/sass/components/autocomplete.scss";
 
 interface AutocompleteSelectNewProps<T> extends Partial<AutocompleteProps<T, boolean, boolean, boolean>> {
     id?: string;
@@ -60,7 +62,35 @@ const AutocompleteSelectNew = <T,>(props: AutocompleteSelectNewProps<T>) => {
                     filterOptions={createFilterOptions({ ...defaultProps.searchFilter, ...searchFilter })}
                     options={Array.isArray(restProps.options) ? restProps.options : []}
                     renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} />}
-                    style={customStyle}
+                    renderValue={(value, getItemProps) => {
+                        return (
+                            <TagsGroup
+                                tags={
+                                    (Array.isArray(value) ? value : [value]).map((tag, index) => {
+                                        const { onDelete } = getItemProps({ index });
+
+                                        return {
+                                            children: <>{tag ?? ""}</>,
+                                            dismissible: true,
+                                            as: "button",
+                                            nativeButtonProps: {
+                                                onClick: () => onDelete?.({ index }),
+                                                className: fr.cx("fr-m-1v", "fr-my-2v"),
+                                                // className: fr.cx("fr-m-0"),
+                                            },
+                                            // className: fr.cx("fr-m-0"),
+                                        } satisfies TagProps;
+                                    }) as unknown as TagsGroupProps["tags"]
+                                }
+                            />
+                        );
+                    }}
+                    classes={{
+                        // inputRoot: (Array.isArray(value) ? value.length > 0 : value) ? fr.cx("fr-py-0") : undefined,
+                        inputRoot: fr.cx("fr-py-0"),
+                        input: fr.cx("fr-py-3v"),
+                    }}
+                    // style={customStyle}
                 />
 
                 {state !== "default" && (

@@ -16,6 +16,12 @@ import contributorSvgUrl from "@/img/pictograms/contributor.svg?no-inline";
 import keyManagerSvgUrl from "@/img/pictograms/key-manager.svg?no-inline";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg?no-inline";
 
+import AutocompleteSelectNew from "@/components/Input/AutocompleteSelectNew";
+import { useState } from "react";
+import { getInspireKeywords } from "@/utils";
+
+const keywords = getInspireKeywords();
+
 export default function Dashboard() {
     const { data: user } = useUserQuery();
 
@@ -39,10 +45,62 @@ export default function Dashboard() {
 
     useSandboxDatastorePrefetchQuery();
 
+    const [selectedKeywords, setSelectedKeywords] = useState<string | (string | null)[] | null>([]);
+    console.log("selectedKeywords", selectedKeywords);
+
     return (
         <Main noticeProps={noticeProps} title={"Tableau de bord"}>
             <h1 className={fr.cx("fr-mt-4v")}>Tableau de bord</h1>
             <p className={fr.cx("fr-text--xl")}>Bienvenue {user?.first_name ?? user?.user_name}</p>
+
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
+                <div className={fr.cx("fr-col-12")}>
+                    <AutocompleteSelectNew
+                        label="test"
+                        options={keywords}
+                        value={selectedKeywords}
+                        onChange={(_, value) => setSelectedKeywords(value)}
+                        multiple={true}
+                        freeSolo={true}
+                        // renderValue={(value, getItemProps) => {
+                        //     return (
+                        //         <TagsGroup
+                        //             tags={(Array.isArray(value) ? value : [value]).map((tag, index) => {
+                        //                 const { onDelete } = getItemProps({ index });
+
+                        //                 return {
+                        //                     children: tag ?? "",
+                        //                     dismissible: true,
+                        //                     as: "button",
+                        //                     nativeButtonProps: {
+                        //                         onClick: () => onDelete?.({ index }),
+                        //                     },
+                        //                 };
+                        //             })}
+                        //         />
+                        //     );
+                        // }}
+                        // renderValue={(value, getItemProps) =>
+                        //     (Array.isArray(value) ? value : [value]).map((tag, index) => {
+                        //         const { onDelete } = getItemProps({ index });
+
+                        //         return (
+                        //             <Tag
+                        //                 key={index}
+                        //                 dismissible
+                        //                 as="button"
+                        //                 nativeButtonProps={{
+                        //                     onClick: () => onDelete?.({ index }),
+                        //                 }}
+                        //             >
+                        //                 {tag}
+                        //             </Tag>
+                        //         );
+                        //     })
+                        // }
+                    />
+                </div>
+            </div>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
