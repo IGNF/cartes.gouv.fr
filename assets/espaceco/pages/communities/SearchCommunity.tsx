@@ -1,15 +1,13 @@
-import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { CommunityListFilter } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
+import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import api from "../../api";
-import { fr } from "@codegouvfr/react-dsfr";
 
 type SearchCommunityProps = {
     filter: CommunityListFilter;
@@ -30,27 +28,21 @@ const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange, label, pl
     });
 
     return (
-        <div>
-            <div className={fr.cx("fr-mb-2v")}>
-                <label>{label ? label : t("default_label")}</label>
-            </div>
-            <MuiDsfrThemeProvider>
-                <Autocomplete
-                    loading={searchQuery.isLoading}
-                    loadingText={t("loading")}
-                    noOptionsText={t("no_options")}
-                    getOptionLabel={(option) => option.name}
-                    options={searchQuery.data || []}
-                    filterOptions={(x) => x}
-                    renderInput={(params) => (
-                        <TextField {...params} variant={"filled"} size={"small"} label={placeholder ? placeholder : t("default_placeholder")} />
-                    )}
-                    isOptionEqualToValue={(option, v) => option.id === v.id}
-                    onInputChange={(_, v) => setSearch(v)}
-                    onChange={(_, v) => onChange(v)}
-                />
-            </MuiDsfrThemeProvider>
-        </div>
+        <AutocompleteSelect
+            label={label ? label : t("default_label")}
+            loading={searchQuery.isLoading}
+            loadingText={t("loading")}
+            noOptionsText={t("no_options")}
+            getOptionLabel={(option) => option.name}
+            options={searchQuery.data || []}
+            filterOptions={(x) => x}
+            renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} label={placeholder ? placeholder : t("default_placeholder")} />}
+            isOptionEqualToValue={(option, v) => option.id === v.id}
+            onInputChange={(_, v) => setSearch(v)}
+            onChange={(_, selectedValue) => onChange(selectedValue)}
+            multiple={false}
+            freeSolo={false}
+        />
     );
 };
 

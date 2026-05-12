@@ -14,7 +14,7 @@ import { symToStr } from "tsafe/symToStr";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
-import AutocompleteSelectNew from "@/components/Input/AutocompleteSelectNew";
+import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import Main from "@/components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -348,7 +348,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         control={control}
                         name="producer"
                         render={({ field, fieldState: { error } }) => (
-                            <AutocompleteSelectNew
+                            <AutocompleteSelect
                                 label={t("producer")}
                                 hintText={t("producer_hint")}
                                 options={organizations?.map((org) => org.name.trim()).sort() ?? []}
