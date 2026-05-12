@@ -119,18 +119,17 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ /*storedData, datastoreId,*/ 
                 render={({ field }) => {
                     return (
                         <AutocompleteSelect
+                            {...field}
                             label={t("metadata.additionnal_infos_form.language")}
                             hintText={t("metadata.additionnal_infos_form.hint_language")}
                             state={errors.language ? "error" : "default"}
                             stateRelatedMessage={errors?.language?.message?.toString()}
                             freeSolo={false}
-                            value={field.value}
                             getOptionLabel={(option) => (option as LanguageType).language ?? ""}
                             isOptionEqualToValue={(option, value) => option.code === value.code}
                             options={languagesOptions}
                             searchFilter={{ limit: 5 }}
                             onChange={(_, value) => field.onChange(value)}
-                            controllerField={field}
                             multiple={false}
                         />
                     );

@@ -59,14 +59,13 @@ const LayerRefTools: FC<LayerRefToolsProps> = ({ layer }) => {
                                         name={`layer_tools.${layer.id}.ref_tools.${t}.layers`}
                                         render={({ field }) => (
                                             <AutocompleteSelect
+                                                {...field}
                                                 label={""}
                                                 hintText={tLayer("num_layers", { num: refTools[t].layers.length })}
                                                 options={Object.values(refLayers[t]).map((layer) => layer)}
                                                 getOptionLabel={(option) => (option as AutocompleteOption).name}
                                                 isOptionEqualToValue={(option, v) => option.id === v.id}
-                                                value={field.value}
                                                 onChange={(_, value) => field.onChange(value)}
-                                                controllerField={field}
                                             />
                                         )}
                                     />

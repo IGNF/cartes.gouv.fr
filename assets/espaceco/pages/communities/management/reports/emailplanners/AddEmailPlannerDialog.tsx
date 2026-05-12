@@ -111,27 +111,21 @@ const AddEmailPlannerDialog: FC<AddEmailPlannerDialogProps> = ({ themes, statuse
                                 <Controller
                                     control={control}
                                     name="recipients"
-                                    render={({ field: { value, onChange } }) => (
+                                    render={({ field }) => (
                                         <AutocompleteSelect
+                                            {...field}
                                             label={""}
                                             state={errors.recipients ? "error" : "default"}
                                             stateRelatedMessage={errors.recipients?.message?.toString()}
                                             freeSolo={true}
+                                            multiple={true}
                                             options={BasicRecipientsArray}
-                                            isOptionEqualToValue={(option, value) => {
-                                                return option === value;
-                                            }}
+                                            isOptionEqualToValue={(option, value) => option === value}
                                             searchFilter={{ limit: 10 }}
                                             onChange={(_, value) => {
-                                                if (value && Array.isArray(value)) {
-                                                    value = value.filter((v) => {
-                                                        if (BasicRecipientsArray.includes(v)) return true;
-                                                        return isEmail(v);
-                                                    });
-                                                    onChange(value);
-                                                }
+                                                const arr = Array.isArray(value) ? value : [];
+                                                field.onChange(arr.filter((v) => BasicRecipientsArray.includes(v) || isEmail(v)));
                                             }}
-                                            value={value}
                                         />
                                     )}
                                 />

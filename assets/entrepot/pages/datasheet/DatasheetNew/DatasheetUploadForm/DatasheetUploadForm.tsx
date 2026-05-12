@@ -349,6 +349,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         name="producer"
                         render={({ field, fieldState: { error } }) => (
                             <AutocompleteSelect
+                                {...field}
                                 label={t("producer")}
                                 hintText={t("producer_hint")}
                                 options={organizations?.map((org) => org.name.trim()).sort() ?? []}
@@ -360,10 +361,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                                 searchFilter={{
                                     limit: undefined,
                                 }}
-                                value={field.value}
                                 onChange={(_, value) => field.onChange(value)}
                                 onInputChange={(_, value) => field.onChange(value)}
-                                onBlur={field.onBlur}
                             />
                         )}
                     />

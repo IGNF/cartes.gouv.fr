@@ -3,19 +3,17 @@ import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { TagProps } from "@codegouvfr/react-dsfr/Tag";
 import TagsGroup, { TagsGroupProps } from "@codegouvfr/react-dsfr/TagsGroup";
 import { Autocomplete, AutocompleteProps, CreateFilterOptionsConfig, TextField, createFilterOptions } from "@mui/material";
-import { FocusEvent, ReactNode, SyntheticEvent, useId } from "react";
-import { ControllerRenderProps } from "react-hook-form";
+import { ReactNode, useId } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { useStyles } from "tss-react/mui";
 
-interface AutocompleteSelectExtraProps {
+interface AutocompleteSelectExtraProps<T> {
     id?: string;
     label: ReactNode;
     hintText?: ReactNode;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
-    searchFilter?: CreateFilterOptionsConfig<unknown>;
-    controllerField?: ControllerRenderProps;
+    searchFilter?: CreateFilterOptionsConfig<T>;
 }
 
 type AutocompleteSelectProps<
@@ -23,21 +21,13 @@ type AutocompleteSelectProps<
     M extends boolean | undefined = true,
     D extends boolean | undefined = false,
     F extends boolean | undefined = false,
-> = AutocompleteSelectExtraProps & Partial<AutocompleteProps<T, M, D, F>>;
+> = AutocompleteSelectExtraProps<T> & Omit<AutocompleteProps<T, M, D, F>, "renderInput">;
 
-const defaultProps = {
-    searchFilter: {
-        ignoreAccents: true,
-        ignoreCase: true,
-        limit: 10,
-    },
-    freeSolo: false,
-    multiple: true,
-    autoComplete: true,
-    disablePortal: true,
-    forcePopupIcon: true,
-    options: [],
-} as const;
+const defaultSearchFilter = {
+    ignoreAccents: true,
+    ignoreCase: true,
+    limit: 10,
+};
 
 const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends boolean | undefined = false, F extends boolean | undefined = false>(
     props: AutocompleteSelectProps<T, M, D, F>
@@ -48,34 +38,22 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
         hintText,
         state = "default",
         stateRelatedMessage,
-        searchFilter,
-        controllerField,
+        searchFilter = defaultSearchFilter,
         options,
         multiple,
-        freeSolo,
-        autoComplete = defaultProps.autoComplete,
-        disablePortal = defaultProps.disablePortal,
-        forcePopupIcon = defaultProps.forcePopupIcon,
-        defaultValue,
+        autoComplete = true,
+        disablePortal = true,
         getOptionLabel,
-        isOptionEqualToValue,
-        value,
-        onChange,
-        onBlur,
         classes,
         renderValue,
         filterOptions,
         ...restProps
     } = props;
 
-    const resolvedOptions = (options ?? (defaultProps.options as unknown)) as T[];
-    const resolvedMultiple = (multiple ?? defaultProps.multiple) as M;
-    const resolvedFreeSolo = (freeSolo ?? defaultProps.freeSolo) as F;
+    const generatedId = useId();
+    const inputId = id ?? `${symToStr({ AutocompleteSelect })}-${generatedId}`;
 
-    const inputId = (function useClosure() {
-        const _id = useId();
-        return id ?? `${symToStr({ AutocompleteSelect })}-${_id}`;
-    })();
+    const { css, cx } = useStyles();
 
     const messageId = `${inputId}-msg`;
     const hasStateMessage = state !== "default" && Boolean(stateRelatedMessage);
@@ -98,20 +76,6 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
         return String(option);
     };
 
-    const componentDefaultValue = resolvedMultiple ? [] : null;
-
-    const handleChange = (event: SyntheticEvent, nextValue: unknown, reason: string, details?: unknown) => {
-        onChange?.(event, nextValue as never, reason as never, details as never);
-        if (controllerField !== undefined && onChange === undefined) {
-            controllerField.onChange(nextValue);
-        }
-    };
-
-    const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
-        onBlur?.(event);
-        controllerField?.onBlur();
-    };
-
     const defaultRenderValue: NonNullable<AutocompleteProps<T, true, D, F>["renderValue"]> = (selectedValue, getItemProps) => {
         return (
             <TagsGroup
@@ -122,7 +86,7 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
                             const { onDelete, className, disabled, tabIndex } = getItemProps({ index });
 
                             return {
-                                children: <>{resolveOptionLabel(tag as OptionLike)}</>,
+                                children: resolveOptionLabel(tag as OptionLike),
                                 dismissible: true,
                                 as: "button",
                                 nativeButtonProps: {
@@ -139,9 +103,7 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
         );
     };
 
-    const { css, cx } = useStyles();
-
-    const resolvedRenderValue = (resolvedMultiple ? (renderValue ?? (defaultRenderValue as unknown as typeof renderValue)) : renderValue) as AutocompleteProps<
+    const resolvedRenderValue = (multiple ? (renderValue ?? (defaultRenderValue as unknown as typeof renderValue)) : renderValue) as AutocompleteProps<
         T,
         M,
         D,
@@ -150,32 +112,22 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
 
     return (
         <MuiDsfrThemeProvider>
-            <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error")}>
+            <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error", state === "success" && "fr-input-group--valid")}>
                 <label className={fr.cx("fr-label")} htmlFor={inputId}>
                     {label}
                     {hintText && <span className="fr-hint-text">{hintText}</span>}
                 </label>
                 <Autocomplete
-                    {...controllerField}
                     {...restProps}
                     id={inputId}
                     aria-describedby={hasStateMessage ? messageId : undefined}
                     autoComplete={autoComplete}
-                    freeSolo={resolvedFreeSolo}
-                    multiple={resolvedMultiple}
-                    filterSelectedOptions={resolvedMultiple}
+                    multiple={multiple}
+                    filterSelectedOptions={multiple}
                     disablePortal={disablePortal}
-                    forcePopupIcon={forcePopupIcon}
-                    filterOptions={
-                        filterOptions ?? createFilterOptions({ ...defaultProps.searchFilter, ...(searchFilter as CreateFilterOptionsConfig<T> | undefined) })
-                    }
-                    options={resolvedOptions}
-                    defaultValue={(defaultValue ?? componentDefaultValue) as never}
-                    value={(value ?? controllerField?.value) as never}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
+                    filterOptions={filterOptions ?? createFilterOptions({ ...defaultSearchFilter, ...searchFilter })}
+                    options={options}
                     getOptionLabel={resolveOptionLabel as never}
-                    isOptionEqualToValue={isOptionEqualToValue}
                     renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} error={state === "error"} />}
                     renderValue={resolvedRenderValue}
                     classes={{
@@ -197,19 +149,7 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
                 />
 
                 {hasStateMessage && (
-                    <p
-                        id={messageId}
-                        className={fr.cx(
-                            (() => {
-                                switch (state) {
-                                    case "error":
-                                        return "fr-error-text";
-                                    case "success":
-                                        return "fr-valid-text";
-                                }
-                            })()
-                        )}
-                    >
+                    <p id={messageId} className={fr.cx(state === "error" ? "fr-error-text" : "fr-valid-text")}>
                         {stateRelatedMessage}
                     </p>
                 )}

@@ -298,13 +298,12 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
                             name="keywords"
                             render={({ field }) => (
                                 <AutocompleteSelect
+                                    {...field}
                                     label={tmc("desc.keywords")}
-                                    // hintText={t("")}
                                     options={Object.values(categories).sort()}
                                     searchFilter={{ limit: 40 }}
                                     state={errors.keywords ? "error" : "default"}
                                     stateRelatedMessage={errors?.keywords?.message?.toString()}
-                                    value={field.value}
                                     onChange={(_, value) => field.onChange(value)}
                                 />
                             )}

@@ -121,6 +121,7 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                                     render={({ field }) => {
                                         return (
                                             <AutocompleteSelect
+                                                {...field}
                                                 label={t("tables_info_form.keywords.label")}
                                                 hintText={t("tables_info_form.keywords.hint")}
                                                 options={keywords}
@@ -130,8 +131,6 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                                                 state={errors.table_infos?.[table.name]?.["keywords"] ? "error" : "default"}
                                                 stateRelatedMessage={errors.table_infos?.[table.name]?.["keywords"]?.message?.toString()}
                                                 onChange={(_, value) => field.onChange(value)}
-                                                controllerField={field}
-                                                defaultValue={getFormValues(`table_infos.${table.name}.keywords`) ?? []}
                                             />
                                         );
                                     }}

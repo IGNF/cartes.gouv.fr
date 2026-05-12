@@ -57,12 +57,8 @@ const SearchUsers: FC<SearchUsersProps> = ({ label, hintText, value, state, stat
             }}
             onInputChange={(_, inputValue) => setSearch(inputValue)}
             onChange={(_, selectedValue) => {
-                if (selectedValue && Array.isArray(selectedValue)) {
-                    const filteredValue = selectedValue.filter((selectedItem) => {
-                        return isUser(selectedItem) || isEmail(selectedItem);
-                    });
-                    onChange(filteredValue);
-                }
+                const arr = Array.isArray(selectedValue) ? selectedValue : [];
+                onChange(arr.filter((item) => isUser(item) || isEmail(item)));
             }}
         />
     );
