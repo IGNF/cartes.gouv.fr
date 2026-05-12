@@ -110,6 +110,7 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
                         options={themes}
                         searchFilter={{ limit: 10 }}
                         onChange={(_, value) => field.onChange(value)}
+                        multiple={true}
                     />
                 )}
             />
@@ -136,6 +137,7 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
                                 const selected = value as StatusAutocompleteOption[];
                                 field.onChange(selected.map((s) => s.status));
                             }}
+                            multiple={true}
                         />
                     )}
                 />

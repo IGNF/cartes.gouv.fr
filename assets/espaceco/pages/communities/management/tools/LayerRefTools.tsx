@@ -66,6 +66,7 @@ const LayerRefTools: FC<LayerRefToolsProps> = ({ layer }) => {
                                                 getOptionLabel={(option) => (option as AutocompleteOption).name}
                                                 isOptionEqualToValue={(option, v) => option.id === v.id}
                                                 onChange={(_, value) => field.onChange(value)}
+                                                multiple={true}
                                             />
                                         )}
                                     />

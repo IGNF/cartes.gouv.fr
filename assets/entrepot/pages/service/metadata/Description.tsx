@@ -171,6 +171,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         state={errors.category ? "error" : "default"}
                         stateRelatedMessage={errors?.category?.message?.toString()}
                         onChange={(_, value) => field.onChange(value)}
+                        multiple={true}
                     />
                 )}
             />
@@ -186,6 +187,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         state={errors.keywords ? "error" : "default"}
                         stateRelatedMessage={errors?.keywords?.message?.toString()}
                         onChange={(_, value) => field.onChange(value)}
+                        multiple={true}
                     />
                 )}
             />
@@ -199,6 +201,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         hintText={t("metadata.description_form.hint_free_keywords")}
                         options={[]}
                         freeSolo={true}
+                        multiple={true}
                         state={errors.free_keywords ? "error" : "default"}
                         stateRelatedMessage={errors?.free_keywords?.message?.toString()}
                         onChange={(_, value) => field.onChange(value)}

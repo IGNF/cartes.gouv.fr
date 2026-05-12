@@ -305,6 +305,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
                                     state={errors.keywords ? "error" : "default"}
                                     stateRelatedMessage={errors?.keywords?.message?.toString()}
                                     onChange={(_, value) => field.onChange(value)}
+                                    multiple={true}
                                 />
                             )}
                         />
