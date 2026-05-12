@@ -3,7 +3,7 @@ import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { TagProps } from "@codegouvfr/react-dsfr/Tag";
 import TagsGroup, { TagsGroupProps } from "@codegouvfr/react-dsfr/TagsGroup";
 import { Autocomplete, AutocompleteProps, CreateFilterOptionsConfig, TextField, createFilterOptions } from "@mui/material";
-import { ReactNode, useId } from "react";
+import { ForwardedRef, ReactElement, ReactNode, RefAttributes, forwardRef, useId } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { useStyles } from "tss-react/mui";
 
@@ -23,15 +23,15 @@ type AutocompleteSelectProps<
     F extends boolean | undefined = false,
 > = AutocompleteSelectExtraProps<T> & Omit<AutocompleteProps<T, M, D, F>, "renderInput">;
 
+type AutocompleteSelectBaseProps = AutocompleteSelectProps<unknown, boolean | undefined, boolean | undefined, boolean | undefined>;
+
 const defaultSearchFilter = {
     ignoreAccents: true,
     ignoreCase: true,
     limit: 10,
 };
 
-const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends boolean | undefined = false, F extends boolean | undefined = false>(
-    props: AutocompleteSelectProps<T, M, D, F>
-) => {
+function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: ForwardedRef<HTMLInputElement>) {
     const {
         id,
         label,
@@ -58,7 +58,7 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
     const messageId = `${inputId}-msg`;
     const hasStateMessage = state !== "default" && Boolean(stateRelatedMessage);
 
-    type OptionLike = Parameters<NonNullable<AutocompleteProps<T, M, D, F>["getOptionLabel"]>>[0];
+    type OptionLike = Parameters<NonNullable<AutocompleteSelectBaseProps["getOptionLabel"]>>[0];
 
     const resolveOptionLabel = (option: OptionLike): string => {
         if (option === null || option === undefined) {
@@ -76,7 +76,10 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
         return String(option);
     };
 
-    const defaultRenderValue: NonNullable<AutocompleteProps<T, true, D, F>["renderValue"]> = (selectedValue, getItemProps) => {
+    const defaultRenderValue: NonNullable<AutocompleteProps<unknown, true, boolean | undefined, boolean | undefined>["renderValue"]> = (
+        selectedValue,
+        getItemProps
+    ) => {
         return (
             <TagsGroup
                 tags={
@@ -103,12 +106,9 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
         );
     };
 
-    const resolvedRenderValue = (multiple ? (renderValue ?? (defaultRenderValue as unknown as typeof renderValue)) : renderValue) as AutocompleteProps<
-        T,
-        M,
-        D,
-        F
-    >["renderValue"];
+    const resolvedRenderValue = (multiple ? (renderValue ?? (defaultRenderValue as unknown as typeof renderValue)) : renderValue) as
+        | AutocompleteSelectBaseProps["renderValue"]
+        | undefined;
 
     return (
         <MuiDsfrThemeProvider>
@@ -128,7 +128,7 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
                     filterOptions={filterOptions ?? createFilterOptions({ ...defaultSearchFilter, ...searchFilter })}
                     options={options}
                     getOptionLabel={resolveOptionLabel as never}
-                    renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} error={state === "error"} />}
+                    renderInput={(params) => <TextField {...params} inputRef={ref} variant={"filled"} size={"small"} error={state === "error"} />}
                     renderValue={resolvedRenderValue}
                     classes={{
                         inputRoot: cx(
@@ -156,6 +156,16 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
             </div>
         </MuiDsfrThemeProvider>
     );
-};
+}
+
+type AutocompleteSelectComponent = <T, M extends boolean | undefined = true, D extends boolean | undefined = false, F extends boolean | undefined = false>(
+    props: AutocompleteSelectProps<T, M, D, F> & RefAttributes<HTMLInputElement>
+) => ReactElement | null;
+
+const AutocompleteSelectForwardRef = forwardRef(AutocompleteSelectInner);
+
+AutocompleteSelectForwardRef.displayName = symToStr({ AutocompleteSelectInner });
+
+const AutocompleteSelect = AutocompleteSelectForwardRef as AutocompleteSelectComponent;
 
 export default AutocompleteSelect;
