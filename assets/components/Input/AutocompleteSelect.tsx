@@ -126,6 +126,7 @@ const AutocompleteSelect = <T, M extends boolean | undefined = true, D extends b
                                 dismissible: true,
                                 as: "button",
                                 nativeButtonProps: {
+                                    type: "button",
                                     onClick: (event) => onDelete?.(event),
                                     className: [className, "fr-m-1v fr-my-2v"].filter(Boolean).join(" "),
                                     disabled,

@@ -4,7 +4,6 @@ import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import { useTranslation } from "@/i18n/i18n";
 import RQKeys from "@/modules/espaceco/RQKeys";
 import { fr } from "@codegouvfr/react-dsfr";
-import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
@@ -34,6 +33,7 @@ const SearchDatabases: FC<SearchDatabasesProps> = ({ label, filter, onChange }) 
         <div className={fr.cx("fr-col-12")}>
             <AutocompleteSelect
                 label={label ? label : t("search.default_label")}
+                hintText={t("search.default_placeholder")}
                 blurOnSelect={true}
                 clearOnBlur={true}
                 loading={searchQuery.isLoading}
@@ -42,7 +42,6 @@ const SearchDatabases: FC<SearchDatabasesProps> = ({ label, filter, onChange }) 
                 getOptionLabel={(option) => `${option.title}`}
                 options={searchQuery.data ?? []}
                 filterOptions={(availableOptions: PartialDatabase[]) => availableOptions.filter((option) => !filter.includes(option.id))}
-                renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} label={t("search.default_placeholder")} />}
                 isOptionEqualToValue={(option, selectedValue) => option.id === selectedValue.id}
                 onInputChange={(_, inputValue) => {
                     setSearch(inputValue);
