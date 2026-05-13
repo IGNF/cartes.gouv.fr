@@ -29,7 +29,7 @@ const defaultSearchFilter = {
     ignoreAccents: true,
     ignoreCase: true,
     limit: 10,
-};
+} satisfies CreateFilterOptionsConfig<unknown>;
 
 function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: ForwardedRef<HTMLInputElement>) {
     const {

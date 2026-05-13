@@ -366,7 +366,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                                     limit: undefined,
                                 }}
                                 onChange={(_, value) => field.onChange(value)}
-                                onInputChange={(_, value) => field.onChange(value)}
                             />
                         )}
                     />

@@ -172,6 +172,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         stateRelatedMessage={errors?.category?.message?.toString()}
                         onChange={(_, value) => field.onChange(value)}
                         multiple={true}
+                        clearOnBlur={false}
                     />
                 )}
             />
@@ -188,6 +189,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         stateRelatedMessage={errors?.keywords?.message?.toString()}
                         onChange={(_, value) => field.onChange(value)}
                         multiple={true}
+                        clearOnBlur={false}
                     />
                 )}
             />
