@@ -277,6 +277,10 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         enabled: !fileUploadInProgress,
     });
 
+    const organizationsOptions = useMemo(() => {
+        return organizations?.map((org) => org.name.trim()).sort() ?? [];
+    }, [organizations]);
+
     return (
         <Main title={t("title", { datasheetName })}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
@@ -352,7 +356,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                                 {...field}
                                 label={t("producer")}
                                 hintText={t("producer_hint")}
-                                options={organizations?.map((org) => org.name.trim()).sort() ?? []}
+                                options={organizationsOptions}
                                 state={error ? "error" : "default"}
                                 stateRelatedMessage={error?.message?.toString()}
                                 multiple={false}
