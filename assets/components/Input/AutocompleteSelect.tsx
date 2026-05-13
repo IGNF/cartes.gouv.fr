@@ -143,6 +143,9 @@ function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: Forwar
                         endAdornment: fr.cx("fr-mr-1v"),
                         popper: css({
                             zIndex: "999999 !important",
+                            ["& .MuiAutocomplete-option"]: {
+                                padding: "8px 16px !important",
+                            },
                         }),
                         ...classes,
                     }}
