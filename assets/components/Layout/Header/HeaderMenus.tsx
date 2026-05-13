@@ -142,18 +142,15 @@ export function HeaderMenuUser() {
             actionButtonProps={{
                 children: "Se déconnecter",
                 iconId: "fr-icon-logout-box-r-line",
-                linkProps: {
-                    href: SymfonyRouting.generate("cartesgouvfr_security_logout"),
-                    onClick: async (e) => {
-                        e.preventDefault();
+                onClick: async (e) => {
+                    e.preventDefault();
 
-                        await queryClient.cancelQueries();
-                        queryClient.invalidateQueries();
-                        queryClient.clear();
-                        localStorage.removeItem("REACT_QUERY_OFFLINE_CACHE");
+                    await queryClient.cancelQueries();
+                    queryClient.invalidateQueries();
+                    queryClient.clear();
+                    localStorage.removeItem("REACT_QUERY_OFFLINE_CACHE");
 
-                        window.location.href = SymfonyRouting.generate("cartesgouvfr_security_logout");
-                    },
+                    window.location.href = SymfonyRouting.generate("cartesgouvfr_security_logout");
                 },
             }}
         />
