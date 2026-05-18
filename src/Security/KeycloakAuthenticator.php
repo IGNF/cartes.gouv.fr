@@ -25,6 +25,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public const LOGIN_CHECK_ROUTE = 'cartesgouvfr_security_login_check';
     public const SUCCESS_ROUTE = 'cartesgouvfr_app';
     public const HOME_ROUTE = 'cartesgouvfr_app';
+    public const SILENT_CALLBACK_ROUTE = 'cartesgouvfr_security_login_silent_callback';
     private const API_ROUTE_PREFIX = 'cartesgouvfr_api_';
     private const REQUEST_ATTR_STATE = '_login_state';
 
@@ -83,9 +84,14 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     {
         $statePayload = $request->attributes->get(self::REQUEST_ATTR_STATE, []);
 
+        $silent = $statePayload['silent'] ?? null;
         $app = $statePayload['app'] ?? null;
         $sessionExpired = $statePayload['session_expired'] ?? null;
         $referer = $statePayload['referer'] ?? null;
+
+        if ('1' === (string) $silent) {
+            return new RedirectResponse($this->router->generate(self::SILENT_CALLBACK_ROUTE));
+        }
 
         if (!is_null($app) && 'entree-carto' === $app) {
             return $this->handleEntreeCartoLogin(true);
@@ -114,6 +120,11 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
         $this->logger->info(self::class, [$message]);
+
+        $statePayload = $request->attributes->get(self::REQUEST_ATTR_STATE, []);
+        if ('1' === (string) ($statePayload['silent'] ?? null)) {
+            return new RedirectResponse($this->router->generate(self::SILENT_CALLBACK_ROUTE, ['status' => 'error']));
+        }
 
         if ($this->isApiRequest($request)) {
             return $this->getUnauthorizedApiResponse($message);

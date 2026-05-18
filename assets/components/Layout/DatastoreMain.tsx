@@ -12,7 +12,6 @@ import useBreadcrumb from "@/hooks/useBreadcrumb";
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
 import { routes } from "@/router/router";
 import LoadingText from "../Utils/LoadingText";
-import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import Main, { type MainProps } from "./Main";
 
 export type DatastoreMainProps = PropsWithChildren<
@@ -68,7 +67,6 @@ export default function DatastoreMain(props: DatastoreMainProps) {
                     <div className={cx(fr.cx("fr-col-12", "fr-col-md-9"), classes.content, propsClasses?.content)}>
                         {/* // "fr-px-5w" */}
                         {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
-                        <SessionExpiredAlert />
                         {children}
                     </div>
                 </div>

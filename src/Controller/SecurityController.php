@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -34,16 +35,40 @@ class SecurityController extends AbstractController
             'referer' => $request->headers->get('referer'),
             'app' => $request->query->get('app'),
             'session_expired' => $request->query->get('session_expired'),
+            'silent' => $request->query->get('silent'),
         ]);
 
         $client = $clientRegistry->getClient('keycloak');
 
-        return $client->redirect(['openid', 'profile', 'email'], ['state' => $state]);
+        $extraOptions = ['state' => $state];
+        if ($request->query->has('prompt')) {
+            $extraOptions['prompt'] = $request->query->get('prompt');
+        }
+
+        return $client->redirect(['openid', 'profile', 'email'], $extraOptions);
     }
 
     #[Route('/login/check', name: 'login_check', methods: ['GET'])]
     public function loginCheck(): void
     {
+    }
+
+    #[Route('/login/silent-callback', name: 'login_silent_callback', methods: ['GET'])]
+    public function silentCallback(Request $request): Response
+    {
+        $status = in_array($request->query->get('status'), ['ok', 'error'], true)
+            ? $request->query->get('status')
+            : 'ok';
+
+        $payload = json_encode(['type' => 'cgfr_silent_reauth', 'status' => $status]);
+
+        return new Response(
+            '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>'
+            .'<script>window.parent.postMessage('.$payload.', location.origin);window.close();</script>'
+            .'</body></html>',
+            Response::HTTP_OK,
+            ['Content-Type' => 'text/html; charset=utf-8']
+        );
     }
 
     #[Route('/logout', name: 'logout', methods: ['GET'], options: ['expose' => true])]
