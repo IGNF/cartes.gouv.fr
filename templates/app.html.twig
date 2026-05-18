@@ -9,9 +9,7 @@
         {% if config is defined and config.technical_name is defined and config.technical_name is not empty %}data-config-technical-name="{{ config.technical_name }}"{% endif %}
     ></div>
 
-    {% if app.user is defined and app.user is not null %}
-        <div id="user" data-user="{{ app.user|serialize('json') }}"></div>
-    {% endif %}
+    <div id="user" data-user="{{ app.user|serialize('json') }}"></div>
 
     <noscript>
         <p>JavaScript semble être désactivé sur votre navigateur, ce qui est nécessaire pour le bon fonctionnement de ce site. Veuillez activer JavaScript sur votre navigateur.</p>
