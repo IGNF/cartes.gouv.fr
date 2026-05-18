@@ -44,9 +44,9 @@ class KeycloakUserProvider implements UserProviderInterface
         /** @var KeycloakClient */
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 
-        $accessToken = $this->tokenManager->getToken();
+        $accessToken = $this->tokenManager->getAccessToken();
         if (null == $accessToken) {
-            $this->logger->debug('{class}: No token found in session', ['class' => self::class]);
+            $this->logger->debug('{class}: No token found', ['class' => self::class]);
             throw new TokenNotFoundException();
         }
 
@@ -119,10 +119,10 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
-        $token = $this->tokenManager->getToken();
+        $token = $this->tokenManager->getAccessToken();
         if (null === $token) {
-            $this->logger->debug('{class}: No token found in session during refreshUser', ['class' => self::class]);
-            throw new AuthenticationExpiredException('No token in session');
+            $this->logger->debug('{class}: No token found during refreshUser', ['class' => self::class]);
+            throw new AuthenticationExpiredException('No token found');
         }
         if ($token->hasExpired()) {
             $this->logger->debug('{class}: Token expired during refreshUser', ['class' => self::class]);

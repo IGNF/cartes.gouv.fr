@@ -47,6 +47,6 @@ final class AuthenticatedHttpClient implements HttpClientInterface
 
     private function getKeycloakToken(): AccessToken
     {
-        return $this->tokenManager->getToken() ?? throw new AuthenticationExpiredException();
+        return $this->tokenManager->getAccessToken() ?? throw new AuthenticationExpiredException();
     }
 }

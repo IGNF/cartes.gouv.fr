@@ -1,4 +1,4 @@
-import { useAuthStore } from "../stores/AuthStore";
+import { attemptSilentReauth } from "./silentReauth";
 
 /** doit avoir la même structure que l'erreur renvoyée par CartesApiExceptionSubscriber de Symfony */
 export type CartesApiException = {
@@ -13,7 +13,8 @@ export async function apiFetch(
     config: Omit<RequestInit, "body"> = {},
     body: FormData | object | null = null,
     isFileUpload: boolean = false,
-    isXMLHttpRequest: boolean = true
+    isXMLHttpRequest: boolean = true,
+    _retried: boolean = false
 ): Promise<Response> {
     return new Promise((resolve, reject) => {
         (async function () {
@@ -45,12 +46,17 @@ export async function apiFetch(
                 const response = await fetch(request);
 
                 if (response.ok) {
-                    useAuthStore.getState().setSessionExpired(false);
                     resolve(response);
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    if (hasSessionExpired(data)) {
-                        useAuthStore.getState().setSessionExpired(true);
+                    if (!_retried && hasSessionExpired(data)) {
+                        const renewed = await attemptSilentReauth();
+                        if (renewed) {
+                            apiFetch(url, config, body, isFileUpload, isXMLHttpRequest, true).then(resolve, reject);
+                        } else {
+                            window.location.assign("/login?session_expired=1");
+                        }
+                        return;
                     }
                     reject(data);
                 }
