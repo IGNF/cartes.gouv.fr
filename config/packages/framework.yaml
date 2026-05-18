@@ -5,19 +5,6 @@ framework:
     http_method_override: false
     handle_all_throwables: true
 
-    # Enables session support. Note that the session will ONLY be started if you read or write from it.
-    # Remove or comment this section to explicitly disable session support.
-    session:
-        enabled: true
-        handler_id: "session.handler.native_file"
-        save_path: "%kernel.project_dir%/var/sessions/%kernel.environment%"
-        cookie_secure: true
-        cookie_samesite: lax
-        cookie_lifetime: 86400
-        cookie_httponly: true
-        name: __Host-PHPSESSID
-        storage_factory_id: session.storage.factory.native
-
     trusted_proxies: "127.0.0.1,REMOTE_ADDR"
     trusted_headers: ["x-forwarded-for", "x-forwarded-host", "x-forwarded-proto", "x-forwarded-port", "x-forwarded-prefix"]
 
@@ -53,5 +40,3 @@ framework:
 when@test:
     framework:
         test: true
-        session:
-            storage_factory_id: session.storage.factory.mock_file

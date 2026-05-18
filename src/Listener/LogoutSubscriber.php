@@ -28,10 +28,8 @@ class LogoutSubscriber implements EventSubscriberInterface
 
     public function onLogout(LogoutEvent $event): void
     {
-        $idToken = $this->tokenManager->getToken()?->getValues()['id_token'] ?? null;
-
-        $session = $event->getRequest()->getSession();
-        $session->invalidate();
+        $idToken = $this->tokenManager->getIdToken();
+        $this->tokenManager->clearAccessToken();
 
         $redirectUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -44,11 +42,10 @@ class LogoutSubscriber implements EventSubscriberInterface
             $redirectUrl .= 'decouvrir';
         }
 
-        // comportement si mode test
-        if ('test' === $this->parameters->get('app_env')) {
+        if ('test' === $this->parameters->get('app_env') || null === $idToken) {
             $response = new RedirectResponse($redirectUrl);
         } else {
-            /** @var Keycloak */
+            /** @var Keycloak $keycloak */
             $keycloak = $this->clientRegistry->getClient('keycloak')->getOAuth2Provider();
 
             $response = new RedirectResponse($keycloak->getLogoutUrl([

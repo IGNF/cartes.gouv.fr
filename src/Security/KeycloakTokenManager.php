@@ -2,69 +2,79 @@
 
 namespace App\Security;
 
+use App\Security\Cookie\AuthCookieCipher;
+use App\Security\Cookie\AuthCookieResponseListener;
 use League\OAuth2\Client\Token\AccessToken;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 final class KeycloakTokenManager
 {
-    private const SESSION_KEY = 'keycloak_token';
-    private const REQUEST_ATTR = '_keycloak_token';
+    private const REQUEST_ATTR_TOKEN = '_keycloak_token_cache';
 
-    public function __construct(private RequestStack $requestStack)
-    {
+    public function __construct(
+        private RequestStack $requestStack,
+        private AuthCookieCipher $cipher,
+    ) {
     }
 
-    /**
-     * Retourne le token, en utilisant le cache de l'attribut de requête si disponible.
-     * Au premier appel : lit depuis la session, prime le cache, puis libère
-     * immédiatement le verrou fichier de session via save().
-     */
-    public function getToken(): ?AccessToken
+    public function getAccessToken(): ?AccessToken
     {
         $request = $this->requestStack->getCurrentRequest();
-
         if (null === $request) {
             return null;
         }
 
-        if ($request->attributes->has(self::REQUEST_ATTR)) {
-            return $request->attributes->get(self::REQUEST_ATTR);
+        if ($request->attributes->has(self::REQUEST_ATTR_TOKEN)) {
+            return $request->attributes->get(self::REQUEST_ATTR_TOKEN);
         }
 
-        if (!$request->hasSession()) {
+        $cookieValue = $request->cookies->get(AuthCookieResponseListener::COOKIE_NAME);
+        if (null === $cookieValue) {
             return null;
         }
 
-        $session = $request->getSession();
+        $plain = $this->cipher->decrypt($cookieValue);
+        if (null === $plain) {
+            return null;
+        }
 
-        /** @var ?AccessToken */
-        $token = $session->get(self::SESSION_KEY);
+        $token = unserialize($plain, ['allowed_classes' => [AccessToken::class]]);
+        if (!$token instanceof AccessToken) {
+            return null;
+        }
 
-        $request->attributes->set(self::REQUEST_ATTR, $token);
-        $session->save();
+        $request->attributes->set(self::REQUEST_ATTR_TOKEN, $token);
 
         return $token;
     }
 
-    /**
-     * Persiste un token en session ET met à jour le cache de l'attribut
-     * de requête pour que la requête courante le voie immédiatement.
-     * N'appelle PAS save() — on laisse le SessionListener (ou un save explicite ailleurs)
-     * gérer la sauvegarde en fin de requête, afin de ne pas manipuler le verrou de session ici.
-     */
-    public function setToken(AccessToken $token): void
+    public function getIdToken(): ?string
+    {
+        return $this->getAccessToken()?->getValues()['id_token'] ?? null;
+    }
+
+    public function setAccessToken(AccessToken $token): void
     {
         $request = $this->requestStack->getCurrentRequest();
-
         if (null === $request) {
             throw new \RuntimeException('Impossible de persister le token Keycloak : aucune requête HTTP en cours.');
         }
 
-        if (!$request->hasSession()) {
-            throw new \RuntimeException('Impossible de persister le token Keycloak : aucune session disponible pour la requête courante.');
+        $request->attributes->set(self::REQUEST_ATTR_TOKEN, $token);
+        $request->attributes->set(AuthCookieResponseListener::REQUEST_ATTR_INTENT, $token);
+    }
+
+    public function clearAccessToken(): void
+    {
+        $request = $this->requestStack->getCurrentRequest();
+        if (null === $request) {
+            return;
         }
 
-        $request->getSession()->set(self::SESSION_KEY, $token);
-        $request->attributes->set(self::REQUEST_ATTR, $token);
+        $request->attributes->remove(self::REQUEST_ATTR_TOKEN);
+        $request->attributes->set(
+            AuthCookieResponseListener::REQUEST_ATTR_INTENT,
+            AuthCookieResponseListener::INTENT_CLEAR
+        );
     }
 }
