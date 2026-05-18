@@ -33,9 +33,12 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/me', name: 'me', methods: ['GET'])]
     public function getCurrentUser(): JsonResponse
     {
-        /** @var User */
         $user = $this->getUser();
+        if (null === $user) {
+            return $this->json(null);
+        }
 
+        assert($user instanceof User);
         $user->updateFromApiInfo($this->userApiService->getMe()->array());
 
         return $this->json($user);
