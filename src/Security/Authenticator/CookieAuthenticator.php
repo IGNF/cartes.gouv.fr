@@ -29,14 +29,21 @@ final class CookieAuthenticator extends AbstractAuthenticator
     ) {
     }
 
+    /**
+     * //
+     * {@inheritDoc}
+     */
     public function supports(Request $request): bool
     {
         return $request->cookies->has(AuthCookieResponseListener::COOKIE_NAME)
             && self::LOGIN_CHECK_ROUTE !== $request->attributes->get('_route');
     }
 
-    /** @SuppressWarnings(UnusedFormalParameter) */
-    public function authenticate(Request $_request): Passport
+    /**
+     * //
+     * {@inheritDoc}
+     */
+    public function authenticate(Request $request): Passport
     {
         $token = $this->tokenManager->getAccessToken();
 
@@ -47,8 +54,11 @@ final class CookieAuthenticator extends AbstractAuthenticator
         return new SelfValidatingPassport(new UserBadge($token->getToken()));
     }
 
-    /** @SuppressWarnings(UnusedFormalParameter) */
-    public function onAuthenticationSuccess(Request $_request, TokenInterface $_token, string $_firewallName): ?Response
+    /**
+     * //
+     * {@inheritDoc}
+     */
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         return null;
     }
