@@ -37,8 +37,11 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     ) {
     }
 
-    /** @SuppressWarnings(UnusedFormalParameter) */
-    public function start(Request $request, ?AuthenticationException $_authException = null): Response
+    /**
+     * //
+     * {@inheritDoc}
+     */
+    public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
         if ($this->isApiRequest($request)) {
             return $this->getUnauthorizedApiResponse();
@@ -47,11 +50,19 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE), Response::HTTP_TEMPORARY_REDIRECT);
     }
 
+    /**
+     * //
+     * {@inheritDoc}
+     */
     public function supports(Request $request): ?bool
     {
         return self::LOGIN_CHECK_ROUTE === $request->attributes->get('_route');
     }
 
+    /**
+     * //
+     * {@inheritDoc}
+     */
     public function authenticate(Request $request): Passport
     {
         $stateBlob = $request->query->get('state', '');
@@ -78,8 +89,11 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         return new SelfValidatingPassport(new UserBadge($accessToken->getToken()));
     }
 
-    /** @SuppressWarnings(UnusedFormalParameter) */
-    public function onAuthenticationSuccess(Request $request, TokenInterface $_token, string $_firewallName): ?Response
+    /**
+     * //
+     * {@inheritDoc}
+     */
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         $statePayload = $request->attributes->get(self::REQUEST_ATTR_STATE, []);
 
@@ -110,6 +124,10 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         return new RedirectResponse($redirectUrl);
     }
 
+    /**
+     * //
+     * {@inheritDoc}
+     */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
