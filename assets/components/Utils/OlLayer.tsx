@@ -24,6 +24,8 @@ export default function OlLayer({ layer, style }: OlLayerProps) {
         map.addLayer(layer);
 
         return () => {
+            // @ts-expect-error : propriété directe écrite par LayerSwitcher (hors typings)
+            delete layer.gpLayerId;
             map.removeLayer(layer);
         };
     }, [map, layer]);

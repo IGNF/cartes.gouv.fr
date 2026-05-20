@@ -1,25 +1,18 @@
 import { createContext, useContext, type PropsWithChildren } from "react";
 import type Map from "ol/Map";
 
-export type MapContextValue = {
-    map?: Map;
-};
+type MapContextValue = { map: Map | undefined };
 
-const defaultValue: MapContextValue = { map: undefined };
+const MapContext = createContext<MapContextValue | null>(null);
 
-export const MapContext = createContext<MapContextValue>(defaultValue);
-
-export function MapProvider(props: PropsWithChildren<{ map?: Map }>) {
-    const { map, children } = props;
+export function MapProvider({ map, children }: PropsWithChildren<{ map?: Map }>) {
     return <MapContext.Provider value={{ map }}>{children}</MapContext.Provider>;
 }
 
-export function useMapContext() {
-    const context = useContext(MapContext);
-    if (!context) {
+export function useMapContext(): MapContextValue {
+    const ctx = useContext(MapContext);
+    if (ctx === null) {
         throw new Error("useMapContext must be used within a MapProvider");
     }
-    return context;
+    return ctx;
 }
-
-export default MapContext;

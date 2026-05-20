@@ -17,7 +17,6 @@ import useOlMap from "../../hooks/useOlMap";
 import MapViewLogger from "./MapViewLogger";
 import OlBackgroundLayer from "./OlBackgroundLayer";
 import OlControl from "./OlControl";
-import OlControlFactory from "./OlControlFactory";
 import OlLayer from "./OlLayer";
 import TempButtonControl from "./TempButtonControl";
 import TempDragRotateInteraction from "./TempDragRotateInteraction";
@@ -30,6 +29,7 @@ import "../../sass/components/geopf-ext-ol-custom.scss";
 import "../../sass/components/map-view.scss";
 
 export interface RMapProps {
+    /** TODO: utilisé pour activer GetFeatureInfo selon le type d'offering (cf. bloc commenté ci-dessous). */
     type: OfferingTypeEnum;
     bbox?: BoundingBox;
     currentStyle?: CartesStyle | GeostylerStyles;
@@ -43,7 +43,9 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
     //     );
     // }, [initial.type]);
 
-    const layerSwitcherControl = useMemo(
+    const zoomControl = useMemo(() => new GeoportalZoom({ position: "top-left" }), []);
+    const attribution = useMemo(() => new Attribution({ collapsible: true, collapsed: true }), []);
+    const layerSwitcher = useMemo(
         () =>
             new LayerSwitcher({
                 options: {
@@ -55,13 +57,26 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
             }),
         []
     );
+    const scaleLine = useMemo(() => new ScaleLine(), []);
+    const searchEngine = useMemo(
+        () =>
+            new SearchEngine({
+                collapsed: false,
+                apiKey: "essentiels",
+                zoomTo: "auto",
+                displayButtonAdvancedSearch: true,
+                displayButtonGeolocate: true,
+            }),
+        []
+    );
 
     const { map, targetRef } = useOlMap({
-        view: {
+        initialView: {
             projection: olDefaults.projection,
             center: fromLonLat(olDefaults.center),
             zoom: olDefaults.zoom,
         },
+        defaultControls: false,
     });
 
     useBboxFit(map, bbox);
@@ -76,23 +91,15 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
                 </>
             )}
 
-            <OlControlFactory factory={() => new GeoportalZoom({ position: "top-left" })} />
-            <OlControlFactory factory={() => new Attribution({ collapsible: true, collapsed: true })} />
-            <OlControl control={layerSwitcherControl} />
-            <OlControlFactory factory={() => new ScaleLine()} />
-            <OlControlFactory
-                factory={() =>
-                    new SearchEngine({
-                        collapsed: false,
-                        apiKey: "essentiels",
-                        zoomTo: "auto",
-                    })
-                }
-            />
+            <OlControl control={zoomControl} />
+            <OlControl control={attribution} />
+            <OlControl control={layerSwitcher} />
+            <OlControl control={scaleLine} />
+            <OlControl control={searchEngine} />
             <OlBackgroundLayer />
 
             {layers.map((layer, i) => {
-                const key = (layer.get && (layer.get("id") ?? layer.get("name") ?? layer.get("title"))) ?? i;
+                const key = layer.get("name") ?? layer.get("title") ?? i;
                 return <OlLayer key={String(key)} layer={layer} style={currentStyle} />;
             })}
 

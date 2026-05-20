@@ -39,13 +39,10 @@ function OlBackgroundLayer() {
 
         const currentLayer = layer.current;
 
-        // Toujours à la position 0
-        const layers = map.getLayers();
-        const currentIndex = layers.getArray().indexOf(currentLayer);
-        if (currentIndex !== -1) {
-            layers.removeAt(currentIndex);
-        }
-        layers.insertAt(0, currentLayer);
+        // Insère le fond à l'index 0 au mount. Le maintien de cette position dépend du fait que
+        // tous les autres layers sont ajoutés via addLayer (append) — si un futur composant
+        // utilise insertAt(0, …) ou setZIndex, revisiter.
+        map.getLayers().insertAt(0, currentLayer);
 
         return () => {
             map.removeLayer(currentLayer);

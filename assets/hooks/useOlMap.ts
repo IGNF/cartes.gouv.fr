@@ -1,32 +1,38 @@
-import Collection from "ol/Collection";
 import Map from "ol/Map";
 import { unByKey } from "ol/Observable";
 import View, { type ViewOptions } from "ol/View";
-import type Control from "ol/control/Control";
-import { defaults as defaultInteractions } from "ol/interaction";
-import type Interaction from "ol/interaction/Interaction";
+import { defaults as olDefaultControls } from "ol/control";
+import { defaults as olDefaultInteractions } from "ol/interaction";
 import { useEffect, useRef, useState } from "react";
 
 export interface UseOlMapOptions {
-    view?: ViewOptions;
-    interactions?: Interaction[] | Collection<Interaction> | undefined;
-    controls?: Control[] | Collection<Control> | undefined;
+    /** Options de la vue initiale — snapshot au montage, les changements ultérieurs sont ignorés. */
+    initialView?: ViewOptions;
+    /** Installe les contrôles par défaut d'OL (Zoom, Rotate, Attribution) à la création. Défaut : true. */
+    defaultControls?: boolean;
+    /** Installe les interactions par défaut d'OL (DragPan, MouseWheelZoom, etc.) à la création. Défaut : true. */
+    defaultInteractions?: boolean;
 }
 
 export function useOlMap(options: UseOlMapOptions = {}) {
-    const { controls, interactions, view } = options;
+    const { initialView, defaultControls = true, defaultInteractions = true } = options;
     const targetRef = useRef<HTMLDivElement>(null);
+    /**
+     * mapRef — accès synchrone à l'instance (création, effets, callbacks OL).
+     * mapState — copie déclenche un re-render pour que <MapProvider> propage la carte aux enfants.
+     */
     const mapRef = useRef<Map>();
     const [mapState, setMapState] = useState<Map | undefined>(undefined);
     const resizeObserver = useRef<ResizeObserver>();
 
-    // Créer l'instance de la carte une seule fois
+    // Crée l'instance une seule fois — initialView, defaultControls et defaultInteractions
+    // sont des snapshots : les valeurs au premier rendu sont capturées, les suivantes ignorées.
     useEffect(() => {
         if (!mapRef.current) {
             mapRef.current = new Map({
-                view: new View(view ?? {}),
-                interactions: interactions ?? defaultInteractions(),
-                controls: controls,
+                view: new View(initialView ?? {}),
+                controls: defaultControls ? olDefaultControls() : [],
+                interactions: defaultInteractions ? olDefaultInteractions() : [],
             });
             setMapState(mapRef.current);
 
@@ -52,7 +58,8 @@ export function useOlMap(options: UseOlMapOptions = {}) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Attacher à l'élément et configurer le resize observer
+    // Attache la carte à l'élément DOM et observe ses redimensionnements.
+    // Dépend de [] : l'élément cible ne change pas (même ref), resizeObserver est géré manuellement.
     useEffect(() => {
         const map = mapRef.current;
         const el = targetRef.current;
