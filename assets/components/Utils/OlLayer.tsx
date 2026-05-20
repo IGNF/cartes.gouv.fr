@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import type { CartesStyle, GeostylerStyles } from "@/@types/app";
 import { useMapContext } from "@/contexts/MapContext";
 import StyleHelper from "@/modules/Style/StyleHelper";
+import { cleanLayerSwitcherListeners } from "@/utils/geopf-ol-ext";
 
 type OlLayerProps = {
     layer: BaseLayer;
@@ -21,12 +22,12 @@ export default function OlLayer({ layer, style }: OlLayerProps) {
     useEffect(() => {
         if (!map) return;
 
+        cleanLayerSwitcherListeners(layer);
         map.addLayer(layer);
 
         return () => {
-            // @ts-expect-error : propriété directe écrite par LayerSwitcher (hors typings)
-            delete layer.gpLayerId;
             map.removeLayer(layer);
+            cleanLayerSwitcherListeners(layer);
         };
     }, [map, layer]);
 
