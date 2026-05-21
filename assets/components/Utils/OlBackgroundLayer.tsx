@@ -1,6 +1,6 @@
 import TileLayer from "ol/layer/Tile";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
 import useCapabilities from "@/hooks/useCapabilities";
 import olDefaults from "../../data/ol-defaults.json";
@@ -11,22 +11,31 @@ const layerId = olDefaults.default_background_layer;
 export default function OlBackgroundLayer() {
     const { data: capabilities } = useCapabilities();
 
-    const layer = useMemo(() => new TileLayer({ properties: { title: null, description: null } }), []);
-
-    useEffect(() => {
-        if (!capabilities) return;
+    // Couche construite en une fois avec toutes ses propriétés finales.
+    // Tant que capabilities n'est pas disponible, on ne rend rien : on évite ainsi d'attacher
+    // au LayerSwitcher une couche avec `title=null` qui ferait afficher le `gpLayerId` (0)
+    // comme libellé, jusqu'à un éventuel `propertychange` ultérieur — chemin qui ne se déclenche
+    // pas de façon fiable selon le scénario de HMR sur ServiceView (cf. plan).
+    const layer = useMemo(() => {
+        if (!capabilities) return null;
 
         const wmtsOptions = optionsFromCapabilities(capabilities, { layer: layerId });
-        if (!wmtsOptions) return;
+        if (!wmtsOptions) return null;
 
         const layersArr = capabilities?.Contents?.Layer;
         const capLayer = Array.isArray(layersArr) ? layersArr.find((l) => l.Identifier === layerId) : undefined;
 
-        layer.setSource(new WMTS(wmtsOptions));
-        layer.set("name", capLayer?.Identifier ?? layerId);
-        layer.set("title", capLayer?.Title ?? layerId);
-        layer.set("description", capLayer?.Abstract ?? layerId);
-    }, [capabilities, layer]);
+        return new TileLayer({
+            source: new WMTS(wmtsOptions),
+            properties: {
+                name: capLayer?.Identifier ?? layerId,
+                title: capLayer?.Title ?? layerId,
+                description: capLayer?.Abstract ?? layerId,
+            },
+        });
+    }, [capabilities]);
+
+    if (!layer) return null;
 
     // zIndex=1 + index=0 transmis à OlLayer : double contournement #460.
     // - zIndex=1 (réappliqué après cleanLayerSwitcherListeners qui reset à 0) évite que
