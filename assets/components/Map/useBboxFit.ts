@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import Map from "ol/Map";
 import { createOrUpdate } from "ol/extent";
 import { transformExtent } from "ol/proj";
-import type { BoundingBox } from "../@types/entrepot";
+import type { BoundingBox } from "../../@types/entrepot";
 
 /**
  * Fit la carte à l'étendue fournie (en EPSG:4326 par défaut).

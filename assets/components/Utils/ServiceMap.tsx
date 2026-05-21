@@ -8,18 +8,15 @@ import BaseLayer from "ol/layer/Base";
 import { fromLonLat } from "ol/proj";
 import { FC, useMemo } from "react";
 
-import type { CartesStyle, GeostylerStyles, OfferingTypeEnum } from "../../@types/app";
-import { BoundingBox } from "../../@types/entrepot";
-import { MapProvider } from "../../contexts/MapContext";
+import type { CartesStyle, GeostylerStyles, OfferingTypeEnum } from "@/@types/app";
+import { BoundingBox } from "@/@types/entrepot";
+import OlBackgroundLayer from "@/components/Map/OlBackgroundLayer";
+import OlControl from "@/components/Map/OlControl";
+import OlLayer from "@/components/Map/OlLayer";
+import { OlMapProvider } from "@/components/Map/OlMapContext";
+import useBboxFit from "@/components/Map/useBboxFit";
+import useOlMap from "@/components/Map/useOlMap";
 import olDefaults from "../../data/ol-defaults.json";
-import useBboxFit from "../../hooks/useBboxFit";
-import useOlMap from "../../hooks/useOlMap";
-import MapViewLogger from "./MapViewLogger";
-import OlBackgroundLayer from "./OlBackgroundLayer";
-import OlControl from "./OlControl";
-import OlLayer from "./OlLayer";
-import TempButtonControl from "./TempButtonControl";
-import TempDragRotateInteraction from "./TempDragRotateInteraction";
 
 import "ol/ol.css";
 
@@ -28,7 +25,7 @@ import "geopf-extensions-openlayers/css/Dsfr.css";
 import "../../sass/components/geopf-ext-ol-custom.scss";
 import "../../sass/components/map-view.scss";
 
-export interface RMapProps {
+export interface ServiceMapProps {
     /** TODO: utilisé pour activer GetFeatureInfo selon le type d'offering (cf. bloc commenté ci-dessous). */
     type: OfferingTypeEnum;
     bbox?: BoundingBox;
@@ -36,7 +33,7 @@ export interface RMapProps {
     layers: BaseLayer[];
 }
 
-const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
+const ServiceMap: FC<ServiceMapProps> = ({ layers, currentStyle, bbox }) => {
     // const gfinfo = useMemo(() => {
     //     return [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
     //         initial.type
@@ -82,15 +79,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
     useBboxFit(map, bbox);
 
     return (
-        <MapProvider map={map}>
-            {import.meta.env.MODE === "development" && (
-                <>
-                    <MapViewLogger />
-                    <TempButtonControl />
-                    <TempDragRotateInteraction />
-                </>
-            )}
-
+        <OlMapProvider map={map}>
             <OlControl control={zoomControl} />
             <OlControl control={attribution} />
             <OlControl control={layerSwitcher} />
@@ -104,8 +93,8 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
             })}
 
             <div className={"map-view"} ref={targetRef} />
-        </MapProvider>
+        </OlMapProvider>
     );
 };
 
-export default RMap;
+export default ServiceMap;

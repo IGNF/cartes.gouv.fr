@@ -1,14 +1,14 @@
 import type Control from "ol/control/Control";
 import { useEffect } from "react";
 
-import { useMapContext } from "@/contexts/MapContext";
+import { useOlMapContext } from "./OlMapContext";
 
 type OlControlProps = {
     control?: Control | null;
 };
 
 export default function OlControl({ control }: OlControlProps) {
-    const { map } = useMapContext();
+    const { map } = useOlMapContext();
 
     useEffect(() => {
         if (!map || !control) return;

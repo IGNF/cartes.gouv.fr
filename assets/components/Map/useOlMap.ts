@@ -19,7 +19,7 @@ export function useOlMap(options: UseOlMapOptions = {}) {
     const targetRef = useRef<HTMLDivElement>(null);
     /**
      * mapRef — accès synchrone à l'instance (création, effets, callbacks OL).
-     * mapState — copie déclenche un re-render pour que <MapProvider> propage la carte aux enfants.
+     * mapState — copie déclenche un re-render pour que <OlMapProvider> propage la carte aux enfants.
      */
     const mapRef = useRef<Map>();
     const [mapState, setMapState] = useState<Map | undefined>(undefined);

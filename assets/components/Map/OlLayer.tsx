@@ -2,9 +2,9 @@ import BaseLayer from "ol/layer/Base";
 import { useEffect } from "react";
 
 import type { CartesStyle, GeostylerStyles } from "@/@types/app";
-import { useMapContext } from "@/contexts/MapContext";
 import StyleHelper from "@/modules/Style/StyleHelper";
 import { cleanLayerSwitcherListeners } from "@/utils/geopf-ol-ext";
+import { useOlMapContext } from "./OlMapContext";
 
 type OlLayerProps = {
     layer: BaseLayer;
@@ -30,7 +30,7 @@ type OlLayerProps = {
  * - Applique le style fourni au mount et à chaque changement de celui-ci.
  */
 export default function OlLayer({ layer, style, index, zIndex }: OlLayerProps) {
-    const { map } = useMapContext();
+    const { map } = useOlMapContext();
 
     useEffect(() => {
         if (!map) return;

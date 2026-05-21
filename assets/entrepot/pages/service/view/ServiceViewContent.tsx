@@ -3,7 +3,7 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useEffect, useState } from "react";
 
 import { CartesStyle, OfferingTypeEnum, StoredDataTypeEnum } from "@/@types/app";
-import RMap from "@/components/Utils/RMap";
+import ServiceMap from "@/components/Utils/ServiceMap";
 import useServiceQuery from "@/hooks/queries/useServiceQuery";
 import getWebService from "@/modules/WebServices/WebServices";
 import BaseLayer from "ol/layer/Base";
@@ -58,7 +58,7 @@ function ServiceViewContent(props: ServiceViewContent) {
             </div>
             <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                 {service !== undefined && "bbox" in service.configuration.type_infos && service.configuration.type_infos.bbox !== undefined && (
-                    <RMap layers={olLayers} currentStyle={currentStyle} type={service?.type} bbox={service.configuration.type_infos.bbox} />
+                    <ServiceMap layers={olLayers} currentStyle={currentStyle} type={service?.type} bbox={service.configuration.type_infos.bbox} />
                 )}
             </div>
         </div>
