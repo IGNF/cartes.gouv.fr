@@ -7,6 +7,7 @@ import SymfonyRouting from "@/modules/Routing";
 import { externalLink, externalUrls } from "@/router/externalUrls";
 import { routes } from "@/router/router";
 import HeaderMenu from "./HeaderMenu";
+import "../../../sass/components/buttons.scss";
 
 export function HeaderMenuHelp() {
     return (
@@ -25,6 +26,11 @@ export function HeaderMenuHelp() {
                     iconId: "fr-icon-book-2-line",
                     children: "Guide d’utilisation",
                     linkProps: externalLink("helpProducerGuide", "Guide d’utilisation"),
+                },
+                {
+                    iconId: "fr-icon-rfid-line",
+                    children: "Niveau de service",
+                    linkProps: externalLink("service_status", "Niveau de service"),
                 },
                 {
                     iconId: "fr-icon-mail-line",
@@ -74,6 +80,7 @@ export function HeaderMenuServices() {
             ]}
             actionButtonProps={{
                 children: "Découvrir cartes.gouv.fr",
+                className: "frx-btn-discover",
                 linkProps: externalLink("discover_cartesgouvfr", "Découvrir cartes.gouv"),
             }}
         />

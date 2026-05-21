@@ -31,7 +31,7 @@ function getNewAlert() {
         id: crypto.randomUUID(),
         title: "",
         description: "",
-        link: { url: "/niveau-de-service", label: "En savoir plus" },
+        link: { url: "/aide/fr/niveau-de-service", label: "En savoir plus" },
         severity: "info" as const,
         details: "",
         date: new Date(),
