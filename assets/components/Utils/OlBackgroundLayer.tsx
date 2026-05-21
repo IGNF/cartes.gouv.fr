@@ -28,9 +28,11 @@ export default function OlBackgroundLayer() {
         layer.set("description", capLayer?.Abstract ?? layerId);
     }, [capabilities, layer]);
 
-    // zIndex=1 transmis à OlLayer : contournement #460. cleanLayerSwitcherListeners reset le
-    // zIndex à 0 à chaque attach ; sans ce zIndex>0 réappliqué juste avant addLayer,
-    // LayerSwitcher bumperait le fond via _lastZIndex++ et le placerait au-dessus au HMR.
-    // Les couches utilisateurs sortent à zIndex 2, 3, 4… → fond toujours en dessous.
-    return <OlLayer layer={layer} zIndex={1} />;
+    // zIndex=1 + index=0 transmis à OlLayer : double contournement #460.
+    // - zIndex=1 (réappliqué après cleanLayerSwitcherListeners qui reset à 0) évite que
+    //   LS.addLayer prenne la branche _lastZIndex++ et bumpe le fond au-dessus.
+    // - index=0 garantit la position en tête de Collection, tie-breaker indispensable car
+    //   LS.removeLayer décale les couches utilisateurs vers le bas (zIndex=1 chez la 1re),
+    //   créant systématiquement une égalité avec le fond au remount HMR.
+    return <OlLayer layer={layer} index={0} zIndex={1} />;
 }
