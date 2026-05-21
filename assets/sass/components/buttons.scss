@@ -44,6 +44,11 @@
     }
 }
 
+.fr-header__tools-links .fr-btn.frx-btn-discover {
+    background-color: var(--background-action-high-blue-france);
+    color: var(--text-inverted-blue-france);
+}
+
 @media (min-width: 576px) {
     .frx-btns-group--right-sm {
         display: flex;

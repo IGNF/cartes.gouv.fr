@@ -23,7 +23,7 @@ export const externalUrls = {
     offers: appRoot + "/offres",
     join_cartesgouvfr_community: appRoot + "/nous-rejoindre",
     news_list: appRoot + "/actualites",
-    service_status: appRoot + "/niveau-de-service",
+    service_status: appRoot + "/aide/fr/niveau-de-service",
     personal_data: appRoot + "/donnees-personnelles",
     accessibility: appRoot + "/accessibilite",
     terms_of_service: appRoot + "/cgu",
