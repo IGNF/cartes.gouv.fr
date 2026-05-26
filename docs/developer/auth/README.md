@@ -112,13 +112,13 @@ Si l'utilisateur est déjà anonyme (cookie absent), `getIdToken()` retourne `nu
 
 Le `state` remplace le stockage de contexte en session PHP. C'est un blob `base64url(json).base64url(hmac)` signé avec HKDF-SHA256 (`cgfr.login-state.v1`), valable **5 minutes**.
 
-| Clé               | Contenu                                                                                                               |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `referer`         | URL de la page depuis laquelle le login a été déclenché, pour y rediriger après succès                                |
-| `app`             | Identifiant de la sous-application (`entree-carto`, `guichet-collaboratif`…) pour un redirect personnalisé post-login |
-| `session_expired` | `"1"` si le login a été déclenché par une expiration de session, pour afficher un message approprié                   |
-| `nonce`           | 16 octets aléatoires en hex — unicité du state, protection contre le rejeu                                            |
-| `exp`             | Timestamp d'expiration Unix (+5 min) — le state ne peut pas être réutilisé indéfiniment                               |
+| Clé               | Contenu                                                                                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `referer`         | URL de la page depuis laquelle le login a été déclenché, pour y rediriger après succès                                                                                                                            |
+| `app`             | Identifiant de la sous-application (`entree-carto`, `guichet-collaboratif`…) pour un redirect personnalisé post-login                                                                                             |
+| `session_expired` | `"1"` si le login a été déclenché par une expiration de session, pour afficher un message approprié                                                                                                               |
+| `nonce`           | 16 octets aléatoires en hex — entropie pour que chaque state ait une signature HMAC distincte. Il n'y a pas de nonce serveur à usage unique (design stateless) ; la fenêtre de rejeu est bornée par `exp` (5 min) |
+| `exp`             | Timestamp d'expiration Unix (+5 min) — le state ne peut pas être réutilisé indéfiniment                                                                                                                           |
 
 La vérification HMAC avec `hash_equals` protège contre les forgeries. La clé `use_state: false` dans `knpu_oauth2_client.yaml` désactive la gestion native du state par le bundle : on gère entièrement le nôtre.
 

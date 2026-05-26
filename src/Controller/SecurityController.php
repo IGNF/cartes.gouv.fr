@@ -30,8 +30,17 @@ class SecurityController extends AbstractController
             return $this->redirect($this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL).'connexion-desactivee');
         }
 
+        $referer = $request->headers->get('referer');
+        $safeReferer = null;
+        if (is_string($referer) && \strlen($referer) <= 2048) {
+            $refererHost = parse_url($referer, PHP_URL_HOST);
+            if (is_string($refererHost) && $refererHost === $request->getHost()) {
+                $safeReferer = $referer;
+            }
+        }
+
         $state = $loginStateSerializer->encode([
-            'referer' => $request->headers->get('referer'),
+            'referer' => $safeReferer,
             'app' => $request->query->get('app'),
             'session_expired' => $request->query->get('session_expired'),
         ]);
