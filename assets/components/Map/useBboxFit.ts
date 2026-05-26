@@ -22,5 +22,3 @@ export function useBboxFit(map: Map | undefined, bbox?: BoundingBox, sourceCrs: 
         }
     }, [map, bbox, sourceCrs, targetCrs]);
 }
-
-export default useBboxFit;

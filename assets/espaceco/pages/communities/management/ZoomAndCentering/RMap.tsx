@@ -18,7 +18,7 @@ import OlControl from "@/components/Map/OlControl";
 import OlInteraction from "@/components/Map/OlInteraction";
 import OlLayer from "@/components/Map/OlLayer";
 import { OlMapProvider } from "@/components/Map/OlMapContext";
-import useOlMap from "@/components/Map/useOlMap";
+import { useOlMap } from "@/components/Map/useOlMap";
 import olDefaults from "../../../../../data/ol-defaults.json";
 import punaise from "../../../../../img/punaise.png";
 import DisplayCenterControl from "../../../../../ol/controls/DisplayCenterControl";
