@@ -61,8 +61,6 @@ const ServiceMap: FC<ServiceMapProps> = ({ layers, currentStyle, bbox }) => {
                 collapsed: false,
                 apiKey: "essentiels",
                 zoomTo: "auto",
-                displayButtonAdvancedSearch: true,
-                displayButtonGeolocate: true,
             }),
         []
     );
