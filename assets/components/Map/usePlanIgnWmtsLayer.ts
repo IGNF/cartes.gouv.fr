@@ -16,7 +16,7 @@ export default function usePlanIgnWmtsLayer(): TileLayer | null {
         const wmtsOptions = optionsFromCapabilities(capabilities, { layer: layerId });
         if (!wmtsOptions) return null;
 
-        const layersArr = capabilities?.Contents?.Layer;
+        const layersArr = capabilities.Contents?.Layer;
         const capLayer = Array.isArray(layersArr) ? layersArr.find((l) => l.Identifier === layerId) : undefined;
 
         return new TileLayer({

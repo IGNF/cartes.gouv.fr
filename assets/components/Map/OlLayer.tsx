@@ -28,6 +28,7 @@ type OlLayerProps = {
  * Attache de manière déclarative une couche OpenLayers à la carte courante.
  * - Ajoute la couche fournie au mount (quand la carte est disponible) et retire exactement cette couche en unMount.
  * - Applique le style fourni au mount et à chaque changement de celui-ci.
+ * - La prop `layer` doit être une référence stable (mémoïsée) : un changement d'instance déclenche un remove+add.
  */
 export default function OlLayer({ layer, style, index, zIndex }: OlLayerProps) {
     const { map } = useOlMapContext();

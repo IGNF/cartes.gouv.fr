@@ -3,5 +3,5 @@ export { default as OlControl } from "./OlControl";
 export { default as OlInteraction } from "./OlInteraction";
 export { default as usePlanIgnWmtsLayer } from "./usePlanIgnWmtsLayer";
 export { OlMapProvider, useOlMapContext } from "./OlMapContext";
-export { default as useOlMap } from "./useOlMap";
-export { default as useBboxFit } from "./useBboxFit";
+export { useOlMap } from "./useOlMap";
+export { useBboxFit } from "./useBboxFit";
