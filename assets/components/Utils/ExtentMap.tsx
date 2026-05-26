@@ -12,7 +12,7 @@ import VectorSource from "ol/source/Vector";
 import { FC, useEffect, useMemo } from "react";
 
 import type { BoundingBox, JsonNode } from "../../@types/entrepot";
-import OlBackgroundLayer from "@/components/Map/OlBackgroundLayer";
+import usePlanIgnWmtsLayer from "@/components/Map/usePlanIgnWmtsLayer";
 import OlControl from "@/components/Map/OlControl";
 import OlLayer from "@/components/Map/OlLayer";
 import { OlMapProvider } from "@/components/Map/OlMapContext";
@@ -103,6 +103,8 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
     // Fit via BoundingBox lon/lat quand bbox est fournie
     useBboxFit(map, bbox);
 
+    const planIgnLayer = usePlanIgnWmtsLayer();
+
     // Fit sur l'extent vectoriel (EPSG:3857) quand extents est utilisé à la place de bbox
     useEffect(() => {
         if (!map || !extentLayerExtent || bbox !== undefined || extentValid !== true) return;
@@ -119,7 +121,7 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
             <OlControl control={layerSwitcher} />
             <OlControl control={scaleLine} />
             <OlControl control={searchEngine} />
-            <OlBackgroundLayer />
+            {planIgnLayer && <OlLayer layer={planIgnLayer} index={0} zIndex={1} />}
             {extentLayer && <OlLayer layer={extentLayer} />}
             <div className="map-view" ref={targetRef} />
         </OlMapProvider>

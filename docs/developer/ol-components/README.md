@@ -2,7 +2,7 @@
 
 Ce module fournit une intégration déclarative React ↔ OpenLayers. Tous les fichiers vivent dans `assets/components/map/` et sont exportés via le barrel `index.ts`.
 
-Le module est **bas niveau et sans logique métier** : il expose les primitives (`OlLayer`, `OlControl`, `OlInteraction`, `OlBackgroundLayer`, `OlMapProvider`, `useOlMap`). La configuration métier (contrôles IGN, types de service, BBox) est la responsabilité des composants consommateurs — par exemple `ServiceMap` dans `components/Utils/ServiceMap.tsx`.
+Le module est **bas niveau et sans logique métier** : il expose les primitives (`OlLayer`, `OlControl`, `OlInteraction`, `OlMapProvider`, `useOlMap`) et le hook `usePlanIgnWmtsLayer` pour la couche fond IGN. La configuration métier (contrôles IGN, types de service, BBox) est la responsabilité des composants consommateurs — par exemple `ServiceMap` dans `components/Utils/ServiceMap.tsx`.
 
 ## Principe
 
@@ -12,8 +12,7 @@ Le module est **bas niveau et sans logique métier** : il expose les primitives 
 useOlMap() → OlMapProvider
                ├─ OlControl       ← ajoute/retire un ol/control/Control
                ├─ OlLayer         ← ajoute/retire une ol/layer/Base
-               ├─ OlInteraction   ← ajoute/retire un ol/interaction/Interaction
-               └─ OlBackgroundLayer  ← couche WMTS Géoplateforme (fond de plan IGN)
+               └─ OlInteraction   ← ajoute/retire un ol/interaction/Interaction
 ```
 
 ## `ServiceMap` — composant métier entrepôt
@@ -72,14 +71,6 @@ const drag = useMemo(() => new DragRotateAndZoom(), []);
 <OlInteraction interaction={drag} />;
 ```
 
-### `OlBackgroundLayer`
-
-Fond de plan WMTS IGN (couche configurée dans `data/ol-defaults.json`). S'attache automatiquement à la carte courante avec `index=0` et `zIndex=1` (contournement #460).
-
-```tsx
-<OlBackgroundLayer />
-```
-
 ## Hooks
 
 ### `useOlMap(options?)`
@@ -114,6 +105,28 @@ Fit la vue à une `BoundingBox` (EPSG:4326 par défaut).
 ```ts
 import { useBboxFit } from "@/components/map";
 useBboxFit(map, service.bbox);
+```
+
+### `usePlanIgnWmtsLayer()`
+
+Construit et mémoïse la couche WMTS Plan IGN (configurée dans `data/ol-defaults.json`). Retourne `TileLayer | null` (null tant que les capabilities WMTS ne sont pas chargées). Le consommateur choisit comment l'attacher via `<OlLayer>`.
+
+```tsx
+import usePlanIgnWmtsLayer from "@/components/map/usePlanIgnWmtsLayer";
+
+const planIgnLayer = usePlanIgnWmtsLayer();
+// ...
+{
+    planIgnLayer && <OlLayer layer={planIgnLayer} />;
+}
+```
+
+**Avec `LayerSwitcher` (contournement #460)** : passer `index={0} zIndex={1}` pour que le fond reste en bas malgré le réordonnancement automatique du `LayerSwitcher` :
+
+```tsx
+{
+    planIgnLayer && <OlLayer layer={planIgnLayer} index={0} zIndex={1} />;
+}
 ```
 
 ## Exemples d'extensibilité

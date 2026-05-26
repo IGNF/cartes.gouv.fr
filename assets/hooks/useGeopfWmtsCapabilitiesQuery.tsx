@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
+
 import { Capabilities } from "../@types/ol";
 
-const useCapabilities = (key: string = "cartes") => {
+const useGeopfWmtsCapabilitiesQuery = (key: string = "cartes") => {
     return useQuery<Capabilities>({
         queryKey: ["gpp_get_cap", key],
         queryFn: async () => {
@@ -24,4 +25,4 @@ const useCapabilities = (key: string = "cartes") => {
     });
 };
 
-export default useCapabilities;
+export default useGeopfWmtsCapabilitiesQuery;

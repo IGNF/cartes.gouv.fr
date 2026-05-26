@@ -1,23 +1,25 @@
 import { Feature, MapEvent } from "ol";
-import { defaults as defaultControls, ScaleLine } from "ol/control";
+import { ScaleLine } from "ol/control";
 import { Coordinate } from "ol/coordinate";
 import Point from "ol/geom/Point";
 import { DragPan, MouseWheelZoom } from "ol/interaction";
-import BaseLayer from "ol/layer/Base";
-import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
-import Map from "ol/Map";
+import { unByKey } from "ol/Observable";
 import { fromLonLat, toLonLat } from "ol/proj";
 import VectorSource from "ol/source/Vector";
-import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import Icon from "ol/style/Icon";
 import Style from "ol/style/Style";
-import View from "ol/View";
-import { CSSProperties, FC, useCallback, useEffect, useMemo, useRef } from "react";
+import { CSSProperties, FC, useEffect, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { ZoomAndCenteringFormType } from "../../../../../@types/app_espaceco";
+
+import type { ZoomAndCenteringFormType } from "../../../../../@types/app_espaceco";
+import usePlanIgnWmtsLayer from "@/components/Map/usePlanIgnWmtsLayer";
+import OlControl from "@/components/Map/OlControl";
+import OlInteraction from "@/components/Map/OlInteraction";
+import OlLayer from "@/components/Map/OlLayer";
+import { OlMapProvider } from "@/components/Map/OlMapContext";
+import useOlMap from "@/components/Map/useOlMap";
 import olDefaults from "../../../../../data/ol-defaults.json";
-import useCapabilities from "../../../../../hooks/useCapabilities";
 import punaise from "../../../../../img/punaise.png";
 import DisplayCenterControl from "../../../../../ol/controls/DisplayCenterControl";
 import drawExtent from "../../../../../ol/drawextent";
@@ -33,12 +35,6 @@ type RMapProps = {
 };
 
 const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
-    const mapTargetRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<Map>();
-
-    // Création de la couche openlayers de fond (bg layer)
-    const { data: capabilities } = useCapabilities();
-
     const { watch, getValues: getFormValues } = form;
 
     const position = watch("position");
@@ -48,64 +44,74 @@ const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
     const minZoom = watch("minZoom");
     const maxZoom = watch("maxZoom");
 
-    const renderExtent = useCallback((e: MapEvent) => drawExtent(e, extent ?? []), [extent]);
+    const { map, targetRef } = useOlMap({
+        initialView: {
+            projection: olDefaults.projection,
+            center: fromLonLat(getFormValues("position")),
+            zoom: getFormValues("zoom"),
+            minZoom,
+            maxZoom,
+        },
+        defaultControls: true,
+        defaultInteractions: false,
+    });
 
-    // Création de la carte une fois bg layer créée
+    const scaleLine = useMemo(() => new ScaleLine(), []);
+    const displayCenter = useMemo(() => new DisplayCenterControl({}), []);
+    const dragPan = useMemo(() => new DragPan(), []);
+    const mouseWheelZoom = useMemo(() => new MouseWheelZoom({ useAnchor: false }), []);
+
+    const planIgnLayer = usePlanIgnWmtsLayer();
+
+    // Couche vecteur punaise — créée une seule fois, géométrie mise à jour par effet
+    const punaiseFeature = useMemo(() => new Feature<Point>(), []);
+    const punaiseLayer = useMemo(
+        () =>
+            new VectorLayer({
+                source: new VectorSource({ features: [punaiseFeature] }),
+                style: new Style({
+                    image: new Icon({
+                        src: punaise,
+                        anchor: [0.5, 0],
+                        anchorOrigin: "bottom-left",
+                    }),
+                }),
+            }),
+        [punaiseFeature]
+    );
+
     useEffect(() => {
-        if (!capabilities) return;
+        punaiseFeature.setGeometry(new Point(position3857));
+    }, [punaiseFeature, position3857]);
 
-        const feature = new Feature(new Point(position3857));
+    // Propagation de minZoom / maxZoom à la vue
+    useEffect(() => {
+        if (!map) return;
+        const view = map.getView();
+        view.setMinZoom(minZoom);
+        view.setMaxZoom(maxZoom);
+    }, [map, minZoom, maxZoom]);
 
-        // layer punaise
-        const source = new VectorSource();
-        source.addFeatures([feature]);
-        const layer = new VectorLayer({
-            source: source,
-            style: new Style({
-                image: new Icon({
-                    src: punaise,
-                    // ancrage de la punaise (non centrée)
-                    anchor: [0.5, 0],
-                    anchorOrigin: "bottom-left",
-                }),
-            }),
-        });
-
-        const layers: BaseLayer[] = [];
-
-        const wmtsOptions = optionsFromCapabilities(capabilities, {
-            layer: olDefaults.default_background_layer,
-        });
-        if (wmtsOptions) {
-            const bkgLayer = new TileLayer({
-                source: new WMTS(wmtsOptions),
-            });
-            layers.push(bkgLayer);
+    // Recentrage de la vue sur changement externe de position (ex. : composant Search)
+    // Garde anti-boucle : ne setCenter que si le centre actuel s'écarte de plus d'1 unité
+    useEffect(() => {
+        if (!map) return;
+        const view = map.getView();
+        const currentCenter = view.getCenter();
+        if (!currentCenter) return;
+        if (Math.abs(currentCenter[0] - position3857[0]) > 1 && Math.abs(currentCenter[1] - position3857[1]) > 1) {
+            view.setCenter(position3857);
         }
-        layers.push(layer);
+    }, [map, position3857]);
 
-        mapRef.current = new Map({
-            target: mapTargetRef.current as HTMLElement,
-            layers: layers,
-            controls: defaultControls().extend([new ScaleLine(), new DisplayCenterControl({})]),
-            interactions: [
-                new DragPan(),
-                new MouseWheelZoom({
-                    useAnchor: false,
-                }),
-            ],
-            view: new View({
-                center: position3857,
-                zoom: getFormValues("zoom"),
-                minZoom: minZoom,
-                maxZoom: maxZoom,
-            }),
-        });
+    // Listeners moveend et postrender
+    useEffect(() => {
+        if (!map) return;
 
-        mapRef.current.on("moveend", (e) => {
-            const map = e.map;
-            const centerView = map.getView().getCenter() as Coordinate;
-            const z = map.getView().getZoom() as number;
+        const moveKey = map.on("moveend", (e) => {
+            const view = e.map.getView();
+            const centerView = view.getCenter() as Coordinate;
+            const z = view.getZoom() as number;
 
             if (z !== getFormValues("zoom")) {
                 onZoomChanged(Math.round(z));
@@ -116,12 +122,25 @@ const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
             }
         });
 
-        mapRef.current.on("postrender", (e) => renderExtent(e));
+        const renderKey = map.on("postrender", (e) => drawExtent(e as MapEvent, extent ?? []));
 
-        return () => mapRef.current?.setTarget(undefined);
-    }, [capabilities, position3857, minZoom, maxZoom, getFormValues, onPositionChanged, onZoomChanged, renderExtent]);
+        return () => {
+            unByKey(moveKey);
+            unByKey(renderKey);
+        };
+    }, [map, position3857, extent, getFormValues, onPositionChanged, onZoomChanged]);
 
-    return <div ref={mapTargetRef} style={mapStyle} />;
+    return (
+        <OlMapProvider map={map}>
+            <OlControl control={scaleLine} />
+            <OlControl control={displayCenter} />
+            <OlInteraction interaction={dragPan} />
+            <OlInteraction interaction={mouseWheelZoom} />
+            {planIgnLayer && <OlLayer layer={planIgnLayer} />}
+            <OlLayer layer={punaiseLayer} />
+            <div ref={targetRef} style={mapStyle} />
+        </OlMapProvider>
+    );
 };
 
 export default RMap;

@@ -5,8 +5,9 @@ import { ScaleLine } from "ol/control";
 import { fromLonLat } from "ol/proj";
 import { FC, memo, ReactNode, useEffect, useMemo } from "react";
 
-import OlBackgroundLayer from "@/components/Map/OlBackgroundLayer";
 import OlControl from "@/components/Map/OlControl";
+import OlLayer from "@/components/Map/OlLayer";
+import usePlanIgnWmtsLayer from "@/components/Map/usePlanIgnWmtsLayer";
 import { OlMapProvider } from "@/components/Map/OlMapContext";
 import useOlMap from "@/components/Map/useOlMap";
 import olDefaults from "../../data/ol-defaults.json";
@@ -34,6 +35,8 @@ const MiniZoomMap: FC<MiniZoomMapProps> = ({ zoomLevel, center, className }) => 
         defaultInteractions: false,
     });
 
+    const planIgnLayer = usePlanIgnWmtsLayer();
+
     useEffect(() => {
         if (!map) return;
         map.getView().setZoom(zoomLevel);
@@ -43,7 +46,7 @@ const MiniZoomMap: FC<MiniZoomMapProps> = ({ zoomLevel, center, className }) => 
     return (
         <OlMapProvider map={map}>
             <OlControl control={scaleLine} />
-            <OlBackgroundLayer />
+            {planIgnLayer && <OlLayer layer={planIgnLayer} />}
             <div ref={targetRef} className={className} />
         </OlMapProvider>
     );

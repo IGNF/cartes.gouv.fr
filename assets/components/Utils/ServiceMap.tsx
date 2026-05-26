@@ -10,7 +10,7 @@ import { FC, useMemo } from "react";
 
 import type { CartesStyle, GeostylerStyles, OfferingTypeEnum } from "@/@types/app";
 import { BoundingBox } from "@/@types/entrepot";
-import OlBackgroundLayer from "@/components/Map/OlBackgroundLayer";
+import usePlanIgnWmtsLayer from "@/components/Map/usePlanIgnWmtsLayer";
 import OlControl from "@/components/Map/OlControl";
 import OlLayer from "@/components/Map/OlLayer";
 import { OlMapProvider } from "@/components/Map/OlMapContext";
@@ -76,6 +76,8 @@ const ServiceMap: FC<ServiceMapProps> = ({ layers, currentStyle, bbox }) => {
 
     useBboxFit(map, bbox);
 
+    const planIgnLayer = usePlanIgnWmtsLayer();
+
     return (
         <OlMapProvider map={map}>
             <OlControl control={zoomControl} />
@@ -83,7 +85,7 @@ const ServiceMap: FC<ServiceMapProps> = ({ layers, currentStyle, bbox }) => {
             <OlControl control={layerSwitcher} />
             <OlControl control={scaleLine} />
             <OlControl control={searchEngine} />
-            <OlBackgroundLayer />
+            {planIgnLayer && <OlLayer layer={planIgnLayer} index={0} zIndex={1} />}
 
             {layers.map((layer, i) => {
                 const key = layer.get("name") ?? layer.get("title") ?? i;
