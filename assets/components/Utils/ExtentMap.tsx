@@ -16,8 +16,8 @@ import usePlanIgnWmtsLayer from "@/components/Map/usePlanIgnWmtsLayer";
 import OlControl from "@/components/Map/OlControl";
 import OlLayer from "@/components/Map/OlLayer";
 import { OlMapProvider } from "@/components/Map/OlMapContext";
-import useBboxFit from "@/components/Map/useBboxFit";
-import useOlMap from "@/components/Map/useOlMap";
+import { useBboxFit } from "@/components/Map/useBboxFit";
+import { useOlMap } from "@/components/Map/useOlMap";
 import olDefaults from "../../data/ol-defaults.json";
 
 import "ol/ol.css";

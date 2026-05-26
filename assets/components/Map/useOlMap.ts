@@ -17,6 +17,10 @@ export interface UseOlMapOptions {
 export function useOlMap(options: UseOlMapOptions = {}) {
     const { initialView, defaultControls = true, defaultInteractions = true } = options;
     const targetRef = useRef<HTMLDivElement>(null);
+    // Snapshots au montage — les changements ultérieurs de ces options sont ignorés.
+    const initialViewRef = useRef(initialView);
+    const defaultControlsRef = useRef(defaultControls);
+    const defaultInteractionsRef = useRef(defaultInteractions);
     /**
      * mapRef — accès synchrone à l'instance (création, effets, callbacks OL).
      * mapState — copie déclenche un re-render pour que <OlMapProvider> propage la carte aux enfants.
@@ -25,14 +29,12 @@ export function useOlMap(options: UseOlMapOptions = {}) {
     const [mapState, setMapState] = useState<Map | undefined>(undefined);
     const resizeObserver = useRef<ResizeObserver>();
 
-    // Crée l'instance une seule fois — initialView, defaultControls et defaultInteractions
-    // sont des snapshots : les valeurs au premier rendu sont capturées, les suivantes ignorées.
     useEffect(() => {
         if (!mapRef.current) {
             mapRef.current = new Map({
-                view: new View(initialView ?? {}),
-                controls: defaultControls ? olDefaultControls() : [],
-                interactions: defaultInteractions ? olDefaultInteractions() : [],
+                view: new View(initialViewRef.current ?? {}),
+                controls: defaultControlsRef.current ? olDefaultControls() : [],
+                interactions: defaultInteractionsRef.current ? olDefaultInteractions() : [],
             });
             setMapState(mapRef.current);
 
@@ -54,8 +56,6 @@ export function useOlMap(options: UseOlMapOptions = {}) {
                 unByKey(key2);
             };
         }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Attache la carte à l'élément DOM et observe ses redimensionnements.
@@ -81,10 +81,10 @@ export function useOlMap(options: UseOlMapOptions = {}) {
                 resizeObserver.current = undefined;
             }
             map.setTarget(undefined);
+            map.dispose();
+            mapRef.current = undefined;
         };
     }, []);
 
     return { map: mapState, targetRef } as const;
 }
-
-export default useOlMap;
