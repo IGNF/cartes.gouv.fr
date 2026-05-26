@@ -35,8 +35,18 @@ final class CookieAuthenticator extends AbstractAuthenticator
      */
     public function supports(Request $request): bool
     {
-        return $request->cookies->has(AuthCookieResponseListener::COOKIE_NAME)
-            && self::LOGIN_CHECK_ROUTE !== $request->attributes->get('_route');
+        if (self::LOGIN_CHECK_ROUTE === $request->attributes->get('_route')) {
+            return false;
+        }
+
+        if ($request->cookies->has(AuthCookieResponseListener::COOKIE_NAME)) {
+            return true;
+        }
+
+        // Sans cookie, s'activer quand même sur les routes API pour pouvoir renvoyer le 401 JSON attendu.
+        $route = $request->attributes->get('_route');
+
+        return is_string($route) && str_starts_with($route, self::API_ROUTE_PREFIX);
     }
 
     /**
