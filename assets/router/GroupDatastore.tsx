@@ -13,6 +13,7 @@ const DatasheetList = lazy(() => import("../entrepot/pages/datasheet/DatasheetLi
 const DatasheetUploadForm = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm"));
 const DatasheetUploadIntegrationPage = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationPage"));
 const DatasheetView = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView"));
+const DatasheetViewNext = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetViewNext"));
 const StoredDataDetails = lazy(() => import("../entrepot/pages/data_details/StoredDataDetails"));
 const UploadDetails = lazy(() => import("../entrepot/pages/data_details/UploadDetails"));
 const WfsServiceForm = lazy(() => import("../entrepot/pages/service/wfs/WfsServiceForm"));
@@ -71,6 +72,16 @@ function GroupDatastore(props: IGroupDatastoreProps) {
             case "datastore_datasheet_view":
                 return {
                     render: <DatasheetView datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />,
+                };
+            case "datastore_datasheet_view_next":
+                return {
+                    render: (
+                        <DatasheetViewNext
+                            datastoreId={route.params.datastoreId}
+                            datasheetName={route.params.datasheetName}
+                            activeTab={route.params.activeTab}
+                        />
+                    ),
                 };
             case "datastore_stored_data_details":
                 return {
