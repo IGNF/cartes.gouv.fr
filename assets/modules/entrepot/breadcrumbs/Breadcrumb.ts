@@ -138,6 +138,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
             return { ...breadcrumbProps, currentPageLabel: t("datastore_datasheet_upload_integration") };
         }
         case "datastore_datasheet_view":
+        case "datastore_datasheet_view_next":
             return { ...datastoreBaseProps, currentPageLabel: route.params.datasheetName };
         case "datastore_stored_data_details": {
             const breadcrumbProps: BreadcrumbProps = {
