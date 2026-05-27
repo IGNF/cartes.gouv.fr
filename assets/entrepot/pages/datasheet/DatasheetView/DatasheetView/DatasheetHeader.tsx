@@ -9,13 +9,14 @@ import placeholder1x1 from "@/img/placeholder.1x1.png";
 
 type DatasheetHeaderProps = {
     name: string;
+    thumbnailUrl?: string;
     catalogLink?: string;
     published?: boolean;
     loading?: boolean;
 };
 
 export default function DatasheetHeader(props: DatasheetHeaderProps) {
-    const { name, catalogLink, published = false, loading = false } = props;
+    const { name, thumbnailUrl, catalogLink, published = false, loading = false } = props;
 
     const { classes } = useStyles();
 
@@ -26,7 +27,7 @@ export default function DatasheetHeader(props: DatasheetHeaderProps) {
     return (
         <div className={classes.header}>
             <div className={classes.identity}>
-                <img src={placeholder1x1} alt="" className={classes.thumbnail} />
+                <img src={thumbnailUrl ?? placeholder1x1} alt="" className={classes.thumbnail} />
 
                 <div className={classes.heading}>
                     <h1 className={fr.cx("fr-h4", "fr-m-0")}>{name}</h1>
@@ -43,7 +44,9 @@ export default function DatasheetHeader(props: DatasheetHeaderProps) {
                 </div>
             </div>
             <div className={classes.actions}>
-                <Badge severity={published ? "success" : undefined}>{published ? "Publié" : "Non publié"}</Badge>
+                <Badge severity={published ? "success" : undefined} noIcon>
+                    {published ? "Publié" : "Non publié"}
+                </Badge>
                 <MenuList
                     menuOpenButtonProps={{
                         iconId: "ri-more-2-line",

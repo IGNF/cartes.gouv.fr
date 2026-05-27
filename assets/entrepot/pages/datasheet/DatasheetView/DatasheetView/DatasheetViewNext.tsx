@@ -37,7 +37,7 @@ export default function DatasheetViewNext(props: DatasheetViewProps) {
         retry: false,
         // enabled: !datasheetDeleteMutation.isPending,
     });
-    // const datasheet = datasheetQuery.data;
+    const datasheet = datasheetQuery.data;
 
     const metadataQuery = useQuery<Metadata, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),
@@ -54,7 +54,13 @@ export default function DatasheetViewNext(props: DatasheetViewProps) {
 
     return (
         <Main title={`Données ${datasheetName}`}>
-            <DatasheetHeader name={datasheetName} catalogLink={catalogueDatasheetUrl} published={isPublished} loading={datasheetQuery.isLoading} />
+            <DatasheetHeader
+                name={datasheetName}
+                thumbnailUrl={datasheet?.thumbnail?.url}
+                catalogLink={catalogueDatasheetUrl}
+                published={isPublished}
+                loading={datasheetQuery.isLoading}
+            />
         </Main>
     );
 }
