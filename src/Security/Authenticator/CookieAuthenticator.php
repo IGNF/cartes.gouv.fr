@@ -75,7 +75,9 @@ final class CookieAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
-        $this->tokenManager->clearAccessToken();
+        if ($request->cookies->has(AuthCookieResponseListener::COOKIE_NAME)) {
+            $this->tokenManager->clearAccessToken();
+        }
 
         $route = $request->attributes->get('_route');
         if (is_string($route) && str_starts_with($route, self::API_ROUTE_PREFIX)) {

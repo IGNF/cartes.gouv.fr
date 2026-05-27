@@ -43,15 +43,19 @@ final class AuthCookieResponseListener implements EventSubscriberInterface
         }
 
         if ($intent instanceof AccessToken) {
-            $response->headers->setCookie(
-                Cookie::create(self::COOKIE_NAME)
-                    ->withValue($this->cipher->encrypt(serialize($intent)))
-                    ->withHttpOnly(true)
-                    ->withSecure(true)
-                    ->withSameSite(Cookie::SAMESITE_LAX)
-                    ->withPath('/')
-                    ->withExpires($intent->getExpires() ?? 0)
-            );
+            $cookie = Cookie::create(self::COOKIE_NAME)
+                ->withValue($this->cipher->encrypt(serialize($intent)))
+                ->withHttpOnly(true)
+                ->withSecure(true)
+                ->withSameSite(Cookie::SAMESITE_LAX)
+                ->withPath('/');
+
+            $expires = $intent->getExpires();
+            if (null !== $expires) {
+                $cookie = $cookie->withExpires($expires);
+            }
+
+            $response->headers->setCookie($cookie);
         }
     }
 }
