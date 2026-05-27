@@ -140,6 +140,13 @@ const datastoreRoutes = {
         },
         (p) => `/donnees/${p.datasheetName}`
     ),
+    datastore_datasheet_view_next: datastoreRoute.extend(
+        {
+            datasheetName: param.path.string,
+            activeTab: param.query.optional.string.default("description"),
+        },
+        (p) => `/donnees/${p.datasheetName}/next`
+    ),
     datastore_stored_data_details: datastoreRoute.extend(
         {
             storedDataId: param.path.string,
