@@ -1,16 +1,13 @@
 import { DatabaseResponseDTO } from "@/@types/espaceco";
 import api from "@/espaceco/api";
+import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import { useTranslation } from "@/i18n/i18n";
 import RQKeys from "@/modules/espaceco/RQKeys";
 import { fr } from "@codegouvfr/react-dsfr";
-import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { PartialDatabase } from "@/@types/app_espaceco";
-import "../../../../../sass/components/autocomplete.scss";
 
 export type SearchDatabasesProps = {
     label?: ReactNode;
@@ -33,32 +30,30 @@ const SearchDatabases: FC<SearchDatabasesProps> = ({ label, filter, onChange }) 
     });
 
     return (
-        <div className={fr.cx("fr-input-group", "fr-col-12")}>
-            <label className={fr.cx("fr-mb-2v", "fr-label")}>{label ? label : t("search.default_label")}</label>
-            <MuiDsfrThemeProvider>
-                <Autocomplete
-                    disablePortal={true}
-                    size={"small"}
-                    blurOnSelect={true}
-                    clearOnBlur={true}
-                    loading={searchQuery.isLoading}
-                    loadingText={tSearch("loading")}
-                    noOptionsText={tSearch("no_results")}
-                    getOptionLabel={(option) => `${option.title}`}
-                    options={searchQuery.data ?? []}
-                    filterOptions={(options: PartialDatabase[]) => options.filter((option) => !filter.includes(option.id))}
-                    renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} label={t("search.default_placeholder")} />}
-                    isOptionEqualToValue={(option, v) => option.id === v.id}
-                    onInputChange={(_, v) => {
-                        setSearch(v);
-                    }}
-                    onChange={(_, v) => {
-                        onChange(v);
-                        setValue(null);
-                    }}
-                    value={value}
-                />
-            </MuiDsfrThemeProvider>
+        <div className={fr.cx("fr-col-12")}>
+            <AutocompleteSelect
+                label={label ? label : t("search.default_label")}
+                hintText={t("search.default_placeholder")}
+                blurOnSelect={true}
+                clearOnBlur={true}
+                loading={searchQuery.isLoading}
+                loadingText={tSearch("loading")}
+                noOptionsText={tSearch("no_results")}
+                getOptionLabel={(option) => `${option.title}`}
+                options={searchQuery.data ?? []}
+                filterOptions={(availableOptions: PartialDatabase[]) => availableOptions.filter((option) => !filter.includes(option.id))}
+                isOptionEqualToValue={(option, selectedValue) => option.id === selectedValue.id}
+                onInputChange={(_, inputValue) => {
+                    setSearch(inputValue);
+                }}
+                onChange={(_, selectedValue) => {
+                    onChange(selectedValue);
+                    setValue(null);
+                }}
+                value={value}
+                multiple={false}
+                freeSolo={false}
+            />
         </div>
     );
 };

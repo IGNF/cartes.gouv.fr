@@ -1,12 +1,9 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
 import { Coordinate } from "ol/coordinate";
 import { FC, ReactNode } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { SearchResult } from "../../../../../@types/app_espaceco";
+import AutocompleteSelect from "../../../../../components/Input/AutocompleteSelect";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import { jsonFetch } from "../../../../../modules/jsonFetch";
@@ -35,28 +32,28 @@ const Search: FC<SearchProps> = ({ label, hintText, filter, onChange }) => {
     });
 
     return (
-        <div>
-            <label className={fr.cx("fr-label")}>
-                {label}
-                {hintText && <span className={"fr-hint-text"}>{hintText}</span>}
-            </label>
-            <MuiDsfrThemeProvider>
-                <Autocomplete
-                    loading={searchQuery.isLoading}
-                    loadingText={t("loading")}
-                    noOptionsText={t("no_results")}
-                    getOptionLabel={(option) => option.fulltext}
-                    options={searchQuery.data?.results ?? []}
-                    filterOptions={(x) => x}
-                    renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} />}
-                    isOptionEqualToValue={(option, v) => option.fulltext === v.fulltext}
-                    onInputChange={(_, v) => setText(v)}
-                    onChange={(_, v) => {
-                        if (v) onChange([v.x, v.y]);
-                    }}
-                />
-            </MuiDsfrThemeProvider>
-        </div>
+        <AutocompleteSelect
+            label={label}
+            hintText={hintText}
+            loading={searchQuery.isLoading}
+            loadingText={t("loading")}
+            noOptionsText={t("no_results")}
+            getOptionLabel={(option) => option.fulltext}
+            options={searchQuery.data?.results ?? []}
+            filterOptions={(x) => x}
+            isOptionEqualToValue={(option, selectedValue) => option.fulltext === selectedValue.fulltext}
+            onInputChange={(_, inputValue) => setText(inputValue)}
+            onChange={(_, selectedValue) => {
+                if (selectedValue) {
+                    onChange([selectedValue.x, selectedValue.y]);
+                    return;
+                }
+
+                onChange(null);
+            }}
+            multiple={false}
+            freeSolo={false}
+        />
     );
 };
 

@@ -162,6 +162,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                 name="category" /* themes */
                 render={({ field }) => (
                     <AutocompleteSelect
+                        {...field}
                         label={t("metadata.description_form.category")}
                         hintText={t("metadata.description_form.hint_category")}
                         options={thematicCategories.map((c) => c.code)}
@@ -169,9 +170,9 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         searchFilter={{ limit: 40 }}
                         state={errors.category ? "error" : "default"}
                         stateRelatedMessage={errors?.category?.message?.toString()}
-                        value={field.value}
                         onChange={(_, value) => field.onChange(value)}
-                        controllerField={field}
+                        multiple={true}
+                        clearOnBlur={false}
                     />
                 )}
             />
@@ -180,14 +181,15 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                 name="keywords"
                 render={({ field }) => (
                     <AutocompleteSelect
+                        {...field}
                         label={t("metadata.description_form.keywords")}
                         hintText={t("metadata.description_form.hint_keywords")}
                         options={keywords}
                         state={errors.keywords ? "error" : "default"}
                         stateRelatedMessage={errors?.keywords?.message?.toString()}
-                        value={field.value}
                         onChange={(_, value) => field.onChange(value)}
-                        controllerField={field}
+                        multiple={true}
+                        clearOnBlur={false}
                     />
                 )}
             />
@@ -196,15 +198,15 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                 name="free_keywords"
                 render={({ field }) => (
                     <AutocompleteSelect
+                        {...field}
                         label={t("metadata.description_form.free_keywords")}
                         hintText={t("metadata.description_form.hint_free_keywords")}
                         options={[]}
                         freeSolo={true}
+                        multiple={true}
                         state={errors.free_keywords ? "error" : "default"}
                         stateRelatedMessage={errors?.free_keywords?.message?.toString()}
-                        value={field.value}
                         onChange={(_, value) => field.onChange(value)}
-                        controllerField={field}
                     />
                 )}
             />

@@ -101,46 +101,45 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
             <Controller
                 control={control}
                 name="themes"
-                render={({ field }) => {
-                    return (
-                        <AutocompleteSelect
-                            label={t("dialog.themes")}
-                            state={errors.themes ? "error" : "default"}
-                            stateRelatedMessage={errors.themes?.message?.toString()}
-                            options={themes}
-                            searchFilter={{ limit: 10 }}
-                            onChange={(_, value) => field.onChange(value)}
-                            value={field.value}
-                        />
-                    );
-                }}
+                render={({ field }) => (
+                    <AutocompleteSelect
+                        {...field}
+                        label={t("dialog.themes")}
+                        state={errors.themes ? "error" : "default"}
+                        stateRelatedMessage={errors.themes?.message?.toString()}
+                        options={themes}
+                        searchFilter={{ limit: 10 }}
+                        onChange={(_, value) => field.onChange(value)}
+                        multiple={true}
+                    />
+                )}
             />
             {event === "georem_status_changed" && (
                 <Controller
                     control={control}
                     name={"statuses"}
-                    render={({ field }) => {
-                        return (
-                            <AutocompleteSelect
-                                label={t("dialog.status")}
-                                state={errors.statuses ? "error" : "default"}
-                                stateRelatedMessage={errors.statuses?.message?.toString()}
-                                options={options}
-                                getOptionLabel={(option) => (option as StatusAutocompleteOption).title}
-                                isOptionEqualToValue={(option, value) => {
-                                    const optionStatus = (option as StatusAutocompleteOption).status;
-                                    const valueStatus = (value as StatusAutocompleteOption).status;
-                                    return optionStatus === valueStatus;
-                                }}
-                                searchFilter={{ limit: 10 }}
-                                onChange={(_, value) => {
-                                    const selected = value as StatusAutocompleteOption[];
-                                    field.onChange(selected.map((s) => s.status));
-                                }}
-                                value={getValue(field.value)}
-                            />
-                        );
-                    }}
+                    render={({ field }) => (
+                        <AutocompleteSelect
+                            {...field}
+                            label={t("dialog.status")}
+                            state={errors.statuses ? "error" : "default"}
+                            stateRelatedMessage={errors.statuses?.message?.toString()}
+                            options={options}
+                            getOptionLabel={(option) => (option as StatusAutocompleteOption).title}
+                            isOptionEqualToValue={(option, value) => {
+                                const optionStatus = (option as StatusAutocompleteOption).status;
+                                const valueStatus = (value as StatusAutocompleteOption).status;
+                                return optionStatus === valueStatus;
+                            }}
+                            searchFilter={{ limit: 10 }}
+                            value={getValue(field.value)}
+                            onChange={(_, value) => {
+                                const selected = value as StatusAutocompleteOption[];
+                                field.onChange(selected.map((s) => s.status));
+                            }}
+                            multiple={true}
+                        />
+                    )}
                 />
             )}
             <Input
@@ -182,27 +181,21 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
             <Controller
                 control={control}
                 name="recipients"
-                render={({ field: { value, onChange } }) => (
+                render={({ field }) => (
                     <AutocompleteSelect
+                        {...field}
                         label={""}
                         state={errors.recipients ? "error" : "default"}
                         stateRelatedMessage={errors.recipients?.message?.toString()}
                         freeSolo={true}
+                        multiple={true}
                         options={BasicRecipientsArray}
-                        isOptionEqualToValue={(option, value) => {
-                            return option === value;
-                        }}
+                        isOptionEqualToValue={(option, value) => option === value}
                         searchFilter={{ limit: 10 }}
                         onChange={(_, value) => {
-                            if (value && Array.isArray(value)) {
-                                value = value.filter((v) => {
-                                    if (BasicRecipientsArray.includes(v)) return true;
-                                    return isEmail(v);
-                                });
-                                onChange(value);
-                            }
+                            const arr = Array.isArray(value) ? value : [];
+                            field.onChange(arr.filter((v) => BasicRecipientsArray.includes(v) || isEmail(v)));
                         }}
-                        value={value}
                     />
                 )}
             />
