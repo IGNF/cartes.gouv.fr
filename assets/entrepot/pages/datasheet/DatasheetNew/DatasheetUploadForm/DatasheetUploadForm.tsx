@@ -361,6 +361,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                                 stateRelatedMessage={error?.message?.toString()}
                                 multiple={false}
                                 freeSolo={true}
+                                autoSelect={true}
                                 getOptionLabel={(option) => option.toString()}
                                 searchFilter={{
                                     limit: undefined,

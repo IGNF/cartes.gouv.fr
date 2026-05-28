@@ -182,8 +182,8 @@ type AutocompleteSelectComponent = <T, M extends boolean | undefined = true, D e
 
 const AutocompleteSelectForwardRef = forwardRef(AutocompleteSelectInner);
 
-AutocompleteSelectForwardRef.displayName = symToStr({ AutocompleteSelectInner });
-
 const AutocompleteSelect = AutocompleteSelectForwardRef as AutocompleteSelectComponent;
+
+AutocompleteSelectForwardRef.displayName = symToStr({ AutocompleteSelect });
 
 export default AutocompleteSelect;
