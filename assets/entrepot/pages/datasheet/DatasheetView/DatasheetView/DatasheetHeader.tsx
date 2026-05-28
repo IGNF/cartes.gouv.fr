@@ -70,6 +70,7 @@ const useStyles = tss.withName({ DatasheetHeader }).create({
         alignItems: "flex-start",
         justifyContent: "space-between",
         gap: "1.5rem",
+        margin: "1.5rem 0",
     },
     identity: {
         display: "flex",
