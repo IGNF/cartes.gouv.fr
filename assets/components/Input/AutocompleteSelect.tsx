@@ -1,9 +1,16 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import { TagProps } from "@codegouvfr/react-dsfr/Tag";
 import TagsGroup, { TagsGroupProps } from "@codegouvfr/react-dsfr/TagsGroup";
-import { Autocomplete, AutocompleteProps, CreateFilterOptionsConfig, TextField, createFilterOptions } from "@mui/material";
-import { ForwardedRef, ReactElement, ReactNode, RefAttributes, forwardRef, useId } from "react";
+import {
+    Autocomplete,
+    AutocompleteChangeDetails,
+    AutocompleteChangeReason,
+    AutocompleteProps,
+    CreateFilterOptionsConfig,
+    TextField,
+    createFilterOptions,
+} from "@mui/material";
+import { ForwardedRef, ReactElement, ReactNode, RefAttributes, SyntheticEvent, forwardRef, useId } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { useStyles } from "tss-react/mui";
 
@@ -41,12 +48,18 @@ function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: Forwar
         searchFilter = defaultSearchFilter,
         options,
         multiple,
+        value,
+        onChange,
         autoComplete = true,
         disablePortal = true,
         getOptionLabel,
+        isOptionEqualToValue,
         classes,
         renderValue,
         filterOptions,
+        popupIcon = <span className={fr.cx("fr-icon-arrow-down-s-line", "fr-icon--sm")} />,
+        clearIcon = null,
+        forcePopupIcon = true,
         ...restProps
     } = props;
 
@@ -76,39 +89,15 @@ function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: Forwar
         return String(option);
     };
 
-    const defaultRenderValue: NonNullable<AutocompleteProps<unknown, true, boolean | undefined, boolean | undefined>["renderValue"]> = (
-        selectedValue,
-        getItemProps
-    ) => {
-        return (
-            <TagsGroup
-                tags={
-                    (Array.isArray(selectedValue) ? selectedValue : [selectedValue])
-                        .filter((item) => item !== null && item !== undefined)
-                        .map((tag, index) => {
-                            const { onDelete, className, disabled, tabIndex } = getItemProps({ index });
-
-                            return {
-                                children: resolveOptionLabel(tag as OptionLike),
-                                dismissible: true,
-                                as: "button",
-                                nativeButtonProps: {
-                                    type: "button",
-                                    onClick: (event) => onDelete?.(event),
-                                    className: [className, "fr-m-1v fr-my-2v"].filter(Boolean).join(" "),
-                                    disabled,
-                                    tabIndex,
-                                },
-                            } satisfies TagProps;
-                        }) as unknown as TagsGroupProps["tags"]
-                }
-            />
-        );
+    const handleRemoveTag = (tagToRemove: OptionLike, event: SyntheticEvent) => {
+        const currentValue = Array.isArray(value) ? value : [];
+        const newValue = currentValue.filter((v) => (isOptionEqualToValue ? !isOptionEqualToValue(v as never, tagToRemove as never) : v !== tagToRemove));
+        onChange?.(event, newValue as never, "removeOption" as AutocompleteChangeReason, { option: tagToRemove } as AutocompleteChangeDetails<unknown>);
     };
 
-    const resolvedRenderValue = (multiple ? (renderValue ?? (defaultRenderValue as unknown as typeof renderValue)) : renderValue) as
-        | AutocompleteSelectBaseProps["renderValue"]
-        | undefined;
+    const multipleSelectedTags = multiple && Array.isArray(value) && value.length > 0 ? value : null;
+
+    const resolvedRenderValue = (multiple ? (renderValue ?? (() => null)) : renderValue) as AutocompleteSelectBaseProps["renderValue"] | undefined;
 
     return (
         <MuiDsfrThemeProvider>
@@ -117,9 +106,29 @@ function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: Forwar
                     {label}
                     {hintText && <span className="fr-hint-text">{hintText}</span>}
                 </label>
+                {multipleSelectedTags && (
+                    <TagsGroup
+                        tags={
+                            multipleSelectedTags
+                                .filter((item) => item !== null && item !== undefined)
+                                .map((tag) => ({
+                                    children: resolveOptionLabel(tag as OptionLike),
+                                    dismissible: true,
+                                    as: "button",
+                                    nativeButtonProps: {
+                                        type: "button",
+                                        onClick: (event) => handleRemoveTag(tag as OptionLike, event),
+                                        className: fr.cx("fr-m-1v", "fr-my-2v"),
+                                    },
+                                })) as unknown as TagsGroupProps["tags"]
+                        }
+                    />
+                )}
                 <Autocomplete
                     {...restProps}
                     id={inputId}
+                    value={value}
+                    onChange={onChange}
                     aria-describedby={hasStateMessage ? messageId : undefined}
                     autoComplete={autoComplete}
                     multiple={multiple}
@@ -130,6 +139,9 @@ function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: Forwar
                     getOptionLabel={resolveOptionLabel as never}
                     renderInput={(params) => <TextField {...params} inputRef={ref} variant={"filled"} size={"small"} error={state === "error"} />}
                     renderValue={resolvedRenderValue}
+                    popupIcon={popupIcon}
+                    clearIcon={clearIcon}
+                    forcePopupIcon={forcePopupIcon}
                     classes={{
                         inputRoot: cx(
                             fr.cx("fr-py-0", "fr-pl-3v"),
@@ -146,6 +158,9 @@ function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: Forwar
                             ["& .MuiAutocomplete-option"]: {
                                 padding: "8px 16px !important",
                             },
+                        }),
+                        popupIndicator: css({
+                            transform: "none",
                         }),
                         ...classes,
                     }}
