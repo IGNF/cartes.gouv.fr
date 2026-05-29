@@ -84,6 +84,7 @@ export default function DescriptionSection({ isEditMode = false }: DescriptionSe
                     <AutocompleteSelect
                         label={t("field.inspireKeywords")}
                         options={inspireKeywords}
+                        searchFilter={{ limit: undefined }}
                         state={error ? "error" : "default"}
                         stateRelatedMessage={error?.message}
                         value={field.value ?? []}
@@ -108,6 +109,8 @@ export default function DescriptionSection({ isEditMode = false }: DescriptionSe
                         onBlur={field.onBlur}
                         multiple
                         freeSolo
+                        popupIcon={null}
+                        forcePopupIcon={false}
                     />
                 )}
             />
