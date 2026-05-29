@@ -102,9 +102,10 @@ export default function MyComponent(props: PropsWithChildren<MyComponentProps>) 
 
 ### Styling
 
-- Prefer DSFR classes/utilities first (the `fr` object from `@codegouvfr/react-dsfr`).
-- New styles should favor CSS/CSS modules and inline styles for dynamic values.
-- Keep SCSS for legacy areas already using it.
+- Prefer DSFR utility classes first via **`fr.cx(...)`** (the `fr` object from `@codegouvfr/react-dsfr`) for spacing, layout, typography, and color.
+- For component-scoped custom CSS, use **`tss-react`** (`tss.create`); it supports runtime-dynamic values too.
+- Keep SCSS for legacy areas already using it; do not extend it to new components.
+- Reserve inline `style={{}}` only when DSFR utilities and tss-react can't cover the case (e.g. a value only known at render time).
 - Keep component-specific styles near the component.
 
 ### State & i18n
@@ -121,6 +122,10 @@ export default function MyComponent(props: PropsWithChildren<MyComponentProps>) 
 - ESLint source of truth: `eslint.config.ts`.
 - TypeScript source of truth: `tsconfig*.json`.
 - TS aliases: `@/*` maps to `assets/*`.
+
+### Autres
+
+- Apostrophe : dans les textes visibles par l'utilisateur, toujours utiliser le caractère `’` (`U+2019`)
 
 ## Backend Conventions (PHP/Symfony)
 

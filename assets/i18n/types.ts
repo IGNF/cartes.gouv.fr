@@ -85,6 +85,8 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/CommunityList.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
     | import("../components/Input/KeyValueList.locale").I18n
-    | import("../components/Utils/Geostyler/UploadStyleFile.locale").I18n;
+    | import("../components/Utils/Geostyler/UploadStyleFile.locale").I18n
+    | import("../entrepot/pages/datasheet/forms/sections.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetCreate/DatasheetCreateNext.locale").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;

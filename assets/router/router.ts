@@ -133,6 +133,7 @@ const datastoreRoutes = {
         },
         () => "/donnees/integration"
     ),
+    datastore_datasheet_create_next: datastoreRoute.extend("/donnees/creer"),
     datastore_datasheet_view: datastoreRoute.extend(
         {
             datasheetName: param.path.string,
