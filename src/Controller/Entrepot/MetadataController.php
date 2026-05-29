@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 
@@ -29,6 +30,20 @@ class MetadataController extends AbstractController implements ApiControllerInte
         private MetadataApiService $metadataApiService,
         private CswMetadataHelper $cswMetadataHelper,
     ) {
+    }
+
+    #[Route('', name: 'check_file_identifier_availability', methods: ['HEAD'])]
+    public function checkFileIdentifierAvailability(
+        string $datastoreId,
+        #[MapQueryParameter('file_identifier')] string $fileIdentifier,
+    ): Response {
+        try {
+            $response = $this->metadataApiService->checkFileIdentifierExists($datastoreId, $fileIdentifier)->getResponse();
+
+            return new Response(null, $response->getStatusCode());
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
