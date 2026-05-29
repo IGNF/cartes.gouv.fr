@@ -1,3 +1,4 @@
+import { AddressFieldsFrTranslations } from "@/components/Input/AddressFields.locale";
 import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
 import { DatasheetSectionsFrTranslations } from "@/entrepot/pages/datasheet/forms/sections.locale";
 import { DatasheetCreateNextFrTranslations } from "@/entrepot/pages/datasheet/DatasheetCreate/DatasheetCreateNext.locale";
@@ -137,6 +138,7 @@ export const translations: Translations<"fr"> = {
     AddMembersDialog: AddMembersDialogFrTranslations,
     ManageGridsDialog: ManageGridsDialogFrTranslations,
     alerts: AlertsFrTranslations,
+    AddressFields: AddressFieldsFrTranslations,
     KeyValueList: KeyValueListFrTranslations,
     Stats: StatsFrTranslations,
     DatasheetSections: DatasheetSectionsFrTranslations,
