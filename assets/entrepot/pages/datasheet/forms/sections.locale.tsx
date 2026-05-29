@@ -17,8 +17,8 @@ const { i18n } = declareComponentKeys<
     | "field.themes"
     | "field.inspireKeywords"
     | "field.additionalKeywords"
-    | "field.uniqueId"
-    | "field.uniqueId.hint"
+    | "field.fileIdentifier"
+    | "field.fileIdentifier.hint"
     // Champs producteur / contact (partagés)
     | "field.organizationName"
     | "field.organizationName.hint"
@@ -73,12 +73,12 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.name": "Nom de la fiche de données",
     "field.description": "Description",
     "field.thumbnail": "Vignette (optionnel)",
-    "field.thumbnail.hint": "Taille maximale : 2 Mo. Formats supportés : jpg, jpeg et svg.",
+    "field.thumbnail.hint": "Taille maximale : 2 Mo. Formats supportés : jpg, jpeg et png.",
     "field.themes": "Thématiques",
     "field.inspireKeywords": "Mots-clés INSPIRE (optionnel)",
     "field.additionalKeywords": "Mots-clés additionnels (optionnel)",
-    "field.uniqueId": "Identifiant unique",
-    "field.uniqueId.hint": "Format attendu : sans caractères spéciaux et sans espaces. Exemple : IGN_BD-ORTHO",
+    "field.fileIdentifier": "Identifiant unique",
+    "field.fileIdentifier.hint": "Format attendu : sans caractères spéciaux et sans espaces. Exemple : IGN_BD-ORTHO",
 
     "field.organizationName": "Nom de l'organisme",
     "field.organizationName.hint": "Utilisez l'auto-complétion ou saisissez directement un nom",
@@ -136,8 +136,8 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "field.themes": "Themes",
     "field.inspireKeywords": "INSPIRE keywords (optional)",
     "field.additionalKeywords": "Additional keywords (optional)",
-    "field.uniqueId": "Unique identifier",
-    "field.uniqueId.hint": "Expected format: no special characters and no spaces. Example: IGN_BD-ORTHO",
+    "field.fileIdentifier": "Unique identifier",
+    "field.fileIdentifier.hint": "Expected format: no special characters and no spaces. Example: IGN_BD-ORTHO",
 
     "field.organizationName": "Organization name",
     "field.organizationName.hint": "Use auto-completion or type a name directly",
