@@ -81,7 +81,10 @@ export function HeaderMenuServices() {
             actionButtonProps={{
                 children: "Découvrir cartes.gouv.fr",
                 className: "frx-btn-discover",
-                linkProps: externalLink("discover_cartesgouvfr", "Découvrir cartes.gouv"),
+                linkProps: {
+                    href: externalUrls.discover_cartesgouvfr,
+                    title: "Découvrir cartes.gouv",
+                },
             }}
         />
     );
