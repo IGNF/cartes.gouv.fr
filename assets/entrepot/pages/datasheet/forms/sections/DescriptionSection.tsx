@@ -11,7 +11,11 @@ import { MetadataFormValues } from "../metadataSchema";
 const thematicCategories = getThematicCategories();
 const inspireKeywords = getInspireKeywords();
 
-export default function DescriptionSection() {
+type DescriptionSectionProps = {
+    isEditMode?: boolean;
+};
+
+export default function DescriptionSection({ isEditMode = false }: DescriptionSectionProps) {
     const { t } = useTranslation("DatasheetSections");
     const {
         register,
@@ -21,21 +25,23 @@ export default function DescriptionSection() {
 
     return (
         <div>
-            <ImageFieldUpload name="thumbnail" label={t("field.thumbnail")} hintText={t("field.thumbnail.hint")} accept=".jpg, .jpeg, .svg" />
+            <ImageFieldUpload name="thumbnail" label={t("field.thumbnail")} hintText={t("field.thumbnail.hint")} accept=".jpg, .jpeg, .png" />
 
             <Input
                 label={t("field.name")}
                 state={errors.name ? "error" : "default"}
                 stateRelatedMessage={errors.name?.message}
-                nativeInputProps={{ ...register("name") }}
+                nativeInputProps={{ ...register("name"), disabled: isEditMode }}
             />
 
             <Input
-                label={t("field.uniqueId")}
-                hintText={t("field.uniqueId.hint")}
-                state={errors.uniqueId ? "error" : "default"}
-                stateRelatedMessage={errors.uniqueId?.message}
-                nativeInputProps={{ ...register("uniqueId") }}
+                label={t("field.fileIdentifier")}
+                hintText={t("field.fileIdentifier.hint")}
+                state={errors.fileIdentifier ? "error" : "info"}
+                stateRelatedMessage={
+                    errors.fileIdentifier?.message ?? "Cet identifiant unique est associé à votre donnée et s’affichera dans l’URL de votre fiche de donnée. "
+                }
+                nativeInputProps={{ ...register("fileIdentifier") }}
             />
 
             <Controller

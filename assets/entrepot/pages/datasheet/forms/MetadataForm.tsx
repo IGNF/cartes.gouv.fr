@@ -1,34 +1,65 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
+import { useDatastore } from "@/contexts/datastore";
+import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n/i18n";
+import RQKeys from "@/modules/entrepot/RQKeys";
+import { delta } from "@/utils";
+import { useStyles } from "tss-react";
+import MetadataSection from "./MetadataSection";
+import { MetadataFormValues, buildMetadataSchema, defaultMetadataValues } from "./metadataSchema";
 import DateSection from "./sections/DateSection";
 import DescriptionSection from "./sections/DescriptionSection";
 import LicenseSection from "./sections/LicenseSection";
 import MetadataInfoSection from "./sections/MetadataInfoSection";
 import ProducerSection from "./sections/ProducerSection";
 import SpatialCoverageSection from "./sections/SpatialCoverageSection";
-import MetadataSection from "./MetadataSection";
-import { MetadataFormValues, defaultMetadataValues, masterSchema } from "./metadataSchema";
-import { useStyles } from "tss-react";
 
 type ActionsRenderProps = { isSubmitting: boolean };
 
 type MetadataFormProps = {
+    mode?: "create" | "edit";
     defaultValues?: Partial<MetadataFormValues>;
     onSubmit: (values: MetadataFormValues) => Promise<void> | void;
     renderTopActions?: (state: ActionsRenderProps) => React.ReactNode;
     renderBottomActions?: (state: ActionsRenderProps) => React.ReactNode;
 };
 
-export default function MetadataForm({ defaultValues = defaultMetadataValues, onSubmit, renderTopActions, renderBottomActions }: MetadataFormProps) {
+export default function MetadataForm({
+    mode = "create",
+    defaultValues = defaultMetadataValues,
+    onSubmit,
+    renderTopActions,
+    renderBottomActions,
+}: MetadataFormProps) {
     const { t } = useTranslation("DatasheetSections");
+    const { datastore } = useDatastore();
+
+    const datasheetListQuery = useQuery({
+        queryKey: RQKeys.datastore_datasheet_list(datastore._id),
+        queryFn: ({ signal }) => api.datasheet.getList(datastore._id, { signal }),
+        refetchInterval: delta.seconds(30),
+    });
+
+    const schema = useMemo(
+        () =>
+            buildMetadataSchema({
+                existingDatasheetNames: datasheetListQuery.data?.map((d) => d.name) ?? [],
+                isEditMode: mode === "edit",
+                checkFileIdentifier: (fileIdentifier) => api.metadata.checkFileIdentifierAvailability(datastore._id, fileIdentifier),
+            }),
+        [datasheetListQuery.data, mode, datastore._id]
+    );
 
     const form = useForm<MetadataFormValues>({
-        resolver: yupResolver(masterSchema) as never,
+        resolver: yupResolver(schema) as never,
         defaultValues,
-        // mode: "onBlur",
+        mode: "onSubmit",
+        reValidateMode: "onBlur",
     });
 
     const {
@@ -73,7 +104,7 @@ export default function MetadataForm({ defaultValues = defaultMetadataValues, on
                             )}
                         >
                             <MetadataSection title={t("section.description")}>
-                                <DescriptionSection />
+                                <DescriptionSection isEditMode={mode === "edit"} />
                             </MetadataSection>
                             <MetadataSection title={t("section.producer")}>
                                 <ProducerSection />

@@ -38,8 +38,7 @@ export default function ProducerSection() {
                     ["& > section:not(:last-child)"]: {
                         borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
                     },
-
-                    ["& > section:first-child"]: {
+                    ["& > section:first-of-type"]: {
                         paddingTop: "0 !important",
                     },
                 })}
