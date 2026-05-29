@@ -102,7 +102,7 @@ React Query is persisted to localStorage (24h TTL). `@/*` aliases map to `assets
 - Use strict equality (`===`). Unused vars/params prefixed with `_unused`. No `console.log` in commits.
 - Use `useQuery`/`useMutation` for server state. Use `useState` or Context for UI state.
 - Forms: React Hook Form + Yup resolver. `Controller` for complex inputs.
-- Styling: DSFR classes first (`fr` from `@codegouvfr/react-dsfr`), then CSS modules / inline styles for dynamic values.
+- Styling: DSFR utility classes first via **`fr.cx(...)`** (from `@codegouvfr/react-dsfr`). For component-scoped custom CSS, use **`tss-react`** (`tss.create`) which supports runtime-dynamic values too (computed colors, JS-sized dimensions).
 - Translation files end with `.locale.ts` or `.locale.tsx`. Support French and English.
 
 ### PHP/Symfony
@@ -141,3 +141,7 @@ foreach (\\\$time->getEvents() as \\\$name => \\\$event) {
 ```
 
 Autres collectors utiles : `http_client`, `db`, `logger`, `request`, `security`, `exception`.
+
+## Autres
+
+- Apostrophe : dans les textes visibles par l'utilisateur, toujours utiliser le caractère `’` (`U+2019`)
