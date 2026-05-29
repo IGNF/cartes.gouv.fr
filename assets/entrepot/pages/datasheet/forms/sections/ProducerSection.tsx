@@ -1,15 +1,16 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
+import Select from "@codegouvfr/react-dsfr/SelectNext";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import { useStyles } from "tss-react";
 
+import AddressFields from "@/components/Input/AddressFields";
 import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import ImageFieldUpload from "@/components/Input/ImageFieldUpload";
 import { useTranslation } from "@/i18n/i18n";
 import { MetadataFormValues } from "../metadataSchema";
-import Tag from "@codegouvfr/react-dsfr/Tag";
-import Select from "@codegouvfr/react-dsfr/SelectNext";
 
 const emptyProducer = { organizationName: "", organizationEmail: "", role: "contact" };
 
@@ -138,21 +139,29 @@ export default function ProducerSection() {
                                 nativeInputProps={{ ...register(`producers.${index}.organizationEmail`) }}
                             />
 
-                            <p className={fr.cx("fr-label", "fr-mt-2w")}>{t("field.address")}</p>
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                                <div className={fr.cx("fr-col-12", "fr-col-md-3", "fr-col-lg-2")}>
-                                    <Input label={t("field.address.number")} nativeInputProps={{ ...register(`producers.${index}.addressNumber`) }} />
-                                </div>
-                                <div className={fr.cx("fr-col-12", "fr-col-md-9", "fr-col-lg-4")}>
-                                    <Input label={t("field.address.street")} nativeInputProps={{ ...register(`producers.${index}.addressStreet`) }} />
-                                </div>
-                                <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-col-lg-2")}>
-                                    <Input label={t("field.address.postalCode")} nativeInputProps={{ ...register(`producers.${index}.addressPostalCode`) }} />
-                                </div>
-                                <div className={fr.cx("fr-col-12", "fr-col-md-8", "fr-col-lg-4")}>
-                                    <Input label={t("field.address.city")} nativeInputProps={{ ...register(`producers.${index}.addressCity`) }} />
-                                </div>
-                            </div>
+                            <AddressFields
+                                legend={t("field.address")}
+                                numberInputProps={{
+                                    state: fieldErrors?.addressNumber ? "error" : "default",
+                                    stateRelatedMessage: fieldErrors?.addressNumber?.message,
+                                    nativeInputProps: register(`producers.${index}.addressNumber`),
+                                }}
+                                streetInputProps={{
+                                    state: fieldErrors?.addressStreet ? "error" : "default",
+                                    stateRelatedMessage: fieldErrors?.addressStreet?.message,
+                                    nativeInputProps: register(`producers.${index}.addressStreet`),
+                                }}
+                                postalCodeInputProps={{
+                                    state: fieldErrors?.addressPostalCode ? "error" : "default",
+                                    stateRelatedMessage: fieldErrors?.addressPostalCode?.message,
+                                    nativeInputProps: register(`producers.${index}.addressPostalCode`),
+                                }}
+                                cityInputProps={{
+                                    state: fieldErrors?.addressCity ? "error" : "default",
+                                    stateRelatedMessage: fieldErrors?.addressCity?.message,
+                                    nativeInputProps: register(`producers.${index}.addressCity`),
+                                }}
+                            />
                         </section>
                     );
                 })}
