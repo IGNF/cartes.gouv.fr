@@ -28,10 +28,6 @@ const { i18n } = declareComponentKeys<
     | "field.logo"
     | "field.logo.hint"
     | "field.address"
-    | "field.address.number"
-    | "field.address.street"
-    | "field.address.postalCode"
-    | "field.address.city"
     | "producer.add"
     | "producer.remove"
     | "producer.card.title"
@@ -88,10 +84,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.logo": "Logo (optionnel)",
     "field.logo.hint": "Taille maximale : 2 Mo. Formats supportés : jpg, jpeg et svg.",
     "field.address": "Adresse postale (optionnel)",
-    "field.address.number": "Numéro",
-    "field.address.street": "Voie",
-    "field.address.postalCode": "Code Postal",
-    "field.address.city": "Ville",
+
     "producer.add": "Ajouter un producteur",
     "producer.remove": "Supprimer",
     "producer.card.title": "Producteur",
@@ -147,10 +140,7 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "field.logo": "Logo (optional)",
     "field.logo.hint": "Max size: 2 MB. Supported formats: jpg, jpeg and svg.",
     "field.address": "Postal address (optional)",
-    "field.address.number": "Number",
-    "field.address.street": "Street",
-    "field.address.postalCode": "Postal code",
-    "field.address.city": "City",
+
     "producer.add": "Add a producer",
     "producer.remove": "Remove",
     "producer.card.title": "Producer",
