@@ -3,7 +3,7 @@ import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import { useHead } from "@unhead/react";
 import { ReactNode, memo } from "react";
-import { tss } from "tss-react";
+import { useStyles } from "tss-react";
 
 import useBreadcrumb from "@/hooks/useBreadcrumb";
 import SessionExpiredAlert from "../../Utils/SessionExpiredAlert";
@@ -12,7 +12,6 @@ import { MainProps } from "../Main";
 export type DatasheetMainProps = MainProps & {
     header: ReactNode;
     content: ReactNode;
-    classes?: Partial<MainProps["classes"] & Record<"header", string>>;
 };
 
 function DatasheetMain(props: DatasheetMainProps) {
@@ -24,21 +23,34 @@ function DatasheetMain(props: DatasheetMainProps) {
     });
     const breadcrumbProps = useBreadcrumb(customBreadcrumbProps);
 
-    const { classes, cx } = useStyles();
+    const { css } = useStyles();
 
     return (
-        <main id="main" role="main" className={classes.main}>
+        <main id="main" role="main">
+            {/* doit être le premier élément atteignable après le lien d'évitement (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/bandeau-d-information-importante */}
             {noticeProps && <Notice isClosable {...noticeProps} />}
 
-            <div className={cx(fr.cx("fr-container--fluid"))}>
-                <div className={cx(fr.cx("fr-container"), classes.header)}>
-                    {breadcrumbProps && <Breadcrumb className={classes.breadcrumb} {...breadcrumbProps} />}
-                    <hr />
+            <div className={fr.cx("fr-container--fluid")}>
+                <div className={fr.cx("fr-container")}>
+                    {breadcrumbProps && (
+                        <Breadcrumb
+                            {...breadcrumbProps}
+                            classes={{
+                                root: css({
+                                    margin: "0",
+                                    marginBottom: fr.spacing("10v"),
+                                    padding: "1.5rem 0",
+                                    borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+                                }),
+                            }}
+                        />
+                    )}
 
                     <SessionExpiredAlert />
 
                     {header}
                 </div>
+
                 {content}
             </div>
         </main>
@@ -46,16 +58,3 @@ function DatasheetMain(props: DatasheetMainProps) {
 }
 
 export default memo(DatasheetMain);
-
-const useStyles = tss.withName({ DatasheetMain }).create({
-    main: {
-        backgroundColor: fr.colors.decisions.background.alt.grey.default,
-    },
-    header: {
-        backgroundColor: fr.colors.decisions.background.default.grey.default,
-    },
-    breadcrumb: {
-        marginTop: "0",
-        paddingTop: "1rem",
-    },
-});
