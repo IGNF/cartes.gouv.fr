@@ -84,6 +84,7 @@ export type ComponentKey =
     | import("../entrepot/pages/config/Alerts.locale").I18n
     | import("../espaceco/pages/communities/CommunityList.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
+    | import("../components/Input/AddressFields.locale").I18n
     | import("../components/Input/KeyValueList.locale").I18n
     | import("../components/Utils/Geostyler/UploadStyleFile.locale").I18n
     | import("../entrepot/pages/datasheet/forms/sections.locale").I18n
