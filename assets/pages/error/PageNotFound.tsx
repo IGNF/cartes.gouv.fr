@@ -10,7 +10,7 @@ import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.sv
 import technicalErrorSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/technical-error.svg?no-inline";
 
 const PageNotFound: FC = () => {
-    useSeoMeta({ robots: "noindex" });
+    useSeoMeta({ robots: "noindex" }, { tagPriority: "high" });
 
     return (
         <Main title="Page non trouvée">

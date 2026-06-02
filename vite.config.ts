@@ -1,4 +1,5 @@
 import react from "@vitejs/plugin-react";
+import { Unhead } from "@unhead/react/vite";
 import autoprefixer from "autoprefixer";
 import { execSync } from "child_process";
 import { join, resolve } from "path";
@@ -43,6 +44,7 @@ export default defineConfig(({ mode }) => {
                 enforce: "pre",
             },
             react(),
+            Unhead(),
             symfonyPlugin({
                 viteDevServerHostname: "localhost",
                 refresh: true,

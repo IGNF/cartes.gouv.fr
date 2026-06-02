@@ -38,7 +38,7 @@ export interface AppLayoutProps {
 }
 
 const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems }) => {
-    useSeoMeta({ robots: "index,follow" });
+    useSeoMeta({ robots: "index,follow" }, { tagPriority: "low" });
 
     return (
         <>
