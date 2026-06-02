@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { declareComponentKeys } from "i18nifty";
 import type { Translations } from "../../../../i18n/types";
 import { UserKeyInfoDtoTypeEnum } from "../../../../@types/app";

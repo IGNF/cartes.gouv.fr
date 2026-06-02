@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useMemo } from "react";
+import { createContext, ReactNode, use, useMemo } from "react";
 import { Datastore } from "../@types/app";
 
 export interface IDatastoreContext {
@@ -7,14 +7,14 @@ export interface IDatastoreContext {
     status: "error" | "success" | "pending";
 }
 
-export const datastoreContext = createContext<IDatastoreContext>({
+export const DatastoreContext = createContext<IDatastoreContext>({
     datastore: undefined,
     isFetching: false,
     status: "pending",
 });
 
 export function useDatastore() {
-    const datastore = useContext(datastoreContext);
+    const datastore = use(DatastoreContext);
     if (!datastore || !datastore.datastore) {
         throw new Error("useDatastore must be used within a DatastoreProvider");
     }
@@ -31,5 +31,5 @@ interface IDatastoreProviderProps {
 export function DatastoreProvider(props: IDatastoreProviderProps) {
     const { children, datastore, isFetching, status } = props;
     const context = useMemo(() => ({ datastore, isFetching, status }), [datastore, isFetching, status]);
-    return <datastoreContext.Provider value={context}>{children}</datastoreContext.Provider>;
+    return <DatastoreContext value={context}>{children}</DatastoreContext>;
 }

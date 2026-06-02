@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { declareComponentKeys } from "i18nifty";
 import { StoredDataTypeEnum, UploadTypeEnum } from "../../../../@types/app";
 import { Translations } from "../../../../i18n/types";

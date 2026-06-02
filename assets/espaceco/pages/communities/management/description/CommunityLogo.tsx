@@ -11,7 +11,7 @@ import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, RefObject, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { useHover } from "usehooks-ts";
@@ -90,8 +90,8 @@ const CommunityLogo: FC = () => {
 
     // Boite modale, gestion de l'image
     const [modalImageUrl, setModalImageUrl] = useState<string>("");
-    const logoDivRef = useRef(null);
-    const logoIsHovered = useHover(logoDivRef);
+    const logoDivRef = useRef<HTMLDivElement>(null);
+    const logoIsHovered = useHover(logoDivRef as RefObject<HTMLDivElement>);
 
     const queryClient = useQueryClient();
 

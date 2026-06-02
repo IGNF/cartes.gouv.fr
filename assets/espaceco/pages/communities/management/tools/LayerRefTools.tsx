@@ -13,11 +13,6 @@ type LayerRefToolsProps = {
     layer: ICommunityLayer;
 };
 
-type AutocompleteOption = {
-    name: string;
-    id: string;
-};
-
 const LayerRefTools: FC<LayerRefToolsProps> = ({ layer }) => {
     const { t: tLayer } = useTranslation("LayerTools");
 
@@ -63,7 +58,7 @@ const LayerRefTools: FC<LayerRefToolsProps> = ({ layer }) => {
                                                 label={""}
                                                 hintText={tLayer("num_layers", { num: refTools[t].layers.length })}
                                                 options={Object.values(refLayers[t]).map((layer) => layer)}
-                                                getOptionLabel={(option) => (option as AutocompleteOption).name}
+                                                getOptionLabel={(option) => option.name}
                                                 isOptionEqualToValue={(option, v) => option.id === v.id}
                                                 onChange={(_, value) => field.onChange(value)}
                                                 multiple={true}

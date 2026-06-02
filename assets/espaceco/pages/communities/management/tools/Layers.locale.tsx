@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { LayerGeometryType } from "@/@types/app_espaceco";
 import { LayerTools, RefLayerTools } from "@/@types/espaceco";
 import { declareComponentKeys } from "@/i18n/i18n";

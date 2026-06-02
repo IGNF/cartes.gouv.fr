@@ -35,10 +35,10 @@ const ZoomRange: FC<ZoomRangeProps> = (props) => {
     const { label, hintText, min, max, disableSlider, values, onChange, small = false, center = olDefaults.center } = props;
 
     // References sur les deux cartes
-    const leftMapRef = useRef<Map>();
+    const leftMapRef = useRef<Map | undefined>(undefined);
     const leftMapTargetRef = useRef<HTMLDivElement>(null);
 
-    const rightMapRef = useRef<Map>();
+    const rightMapRef = useRef<Map | undefined>(undefined);
     const rightMapTargetRef = useRef<HTMLDivElement>(null);
 
     const getBgLayer = useCallback(() => {

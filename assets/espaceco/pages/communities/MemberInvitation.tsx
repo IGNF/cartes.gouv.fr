@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert, { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";

@@ -125,7 +125,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ /*storedData, datastoreId,*/ 
                             state={errors.language ? "error" : "default"}
                             stateRelatedMessage={errors?.language?.message?.toString()}
                             freeSolo={false}
-                            getOptionLabel={(option) => (option as LanguageType).language ?? ""}
+                            getOptionLabel={(option) => option.language ?? ""}
                             isOptionEqualToValue={(option, value) => option.code === value.code}
                             options={languagesOptions}
                             searchFilter={{ limit: 5 }}

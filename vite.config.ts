@@ -65,6 +65,7 @@ export default defineConfig(({ mode }) => {
         build: {
             emptyOutDir: true,
             outDir: resolve(join(__dirname, "public", "build")),
+            cssMinify: "esbuild",
             rollupOptions: {
                 input: {
                     main: resolve(join(__dirname, "./assets", "main.tsx")),

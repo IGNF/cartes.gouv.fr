@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext } from "react";
+import { createContext, PropsWithChildren, use } from "react";
 
 export interface IDragContext {
     dragIndex: number;
@@ -6,14 +6,14 @@ export interface IDragContext {
     startDrag: (event: MouseEvent, index: number) => void;
 }
 
-const dragContext = createContext<IDragContext | null>(null);
+const DragContext = createContext<IDragContext | null>(null);
 
 export function DragProvider({ children, value }: PropsWithChildren<{ value: IDragContext }>) {
-    return <dragContext.Provider value={value}>{children}</dragContext.Provider>;
+    return <DragContext value={value}>{children}</DragContext>;
 }
 
 export function useDragContext() {
-    const context = useContext(dragContext);
+    const context = use(DragContext);
     if (!context) {
         throw new Error("useDragContext must be used within a DragProvider");
     }
