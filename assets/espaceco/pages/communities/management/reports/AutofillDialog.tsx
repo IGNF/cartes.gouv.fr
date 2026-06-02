@@ -95,7 +95,9 @@ const AutofillDialog: FC<AutofillDialogProps> = ({ theme, onRecord }) => {
                 f.push(key);
                 setUsed(f);
             }
-            valueRef.current.value = "";
+            if (valueRef.current) {
+                valueRef.current.value = "";
+            }
         }
     };
 

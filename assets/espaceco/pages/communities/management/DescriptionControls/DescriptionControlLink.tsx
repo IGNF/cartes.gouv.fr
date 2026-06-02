@@ -12,8 +12,8 @@ function DescriptionLinkDialog() {
     const { t } = useTranslation("ManageCommunity");
     const { isOpened, modal, onClose } = useDialog();
     const [selectedTabId, setSelectedTabId] = useState("documents");
-    const documentsFormRef = useRef<DocumentsLinkFormRef>();
-    const externalFormRef = useRef<ExternalLinkFormRef>();
+    const documentsFormRef = useRef<DocumentsLinkFormRef | undefined>(undefined);
+    const externalFormRef = useRef<ExternalLinkFormRef | undefined>(undefined);
     const editor = useEditor();
     const { documents } = useDocuments();
 

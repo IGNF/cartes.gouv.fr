@@ -46,7 +46,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
     // }, [initial.type]);
 
     const mapTargetRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<Map>();
+    const mapRef = useRef<Map | undefined>(undefined);
     const layerSwitcherControl = useRef(
         new LayerSwitcher({
             options: {

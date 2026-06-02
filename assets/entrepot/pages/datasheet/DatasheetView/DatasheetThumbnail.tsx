@@ -7,7 +7,7 @@ import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, RefObject, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { useHover } from "usehooks-ts";
@@ -78,8 +78,8 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
 
     // Boite modale, gestion de l'image
     const [modalImageUrl, setModalImageUrl] = useState<string>("");
-    const thumbnailDivRef = useRef(null);
-    const thumbnailIsHovered = useHover(thumbnailDivRef);
+    const thumbnailDivRef = useRef<HTMLDivElement>(null);
+    const thumbnailIsHovered = useHover(thumbnailDivRef as RefObject<HTMLDivElement>);
 
     // Ajout/modification de la vignette
     const addThumbnailMutation = useMutation<DatasheetThumbnailAnnexe, CartesApiException>({

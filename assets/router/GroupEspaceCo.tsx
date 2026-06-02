@@ -1,4 +1,4 @@
-import { lazy, useMemo } from "react";
+import { JSX, lazy, useMemo } from "react";
 import { Route } from "type-route";
 
 import AppLayout from "@/components/Layout/AppLayout";

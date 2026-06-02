@@ -37,8 +37,8 @@
         "@tiptap/extension-youtube": "^3.7.2",
         "@tiptap/markdown": "^3.7.2",
         "@types/node": "^24.0",
-        "@types/react": "^18.2.15",
-        "@types/react-dom": "^18.2.7",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
         "@unhead/react": "3.0.0-beta.6",
         "@vitejs/plugin-react": "^6.0.0",
         "autoprefixer": "^10.0.0",
@@ -71,8 +71,8 @@
         "markdown-it": "^14.1.0",
         "ol": "^10.0.0",
         "postcss": "^8.5.12",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
         "react-dsfr-tiptap": "^2.0.0",
         "react-error-boundary": "^6.0.0",
         "react-hook-form": "^7.45.1",
@@ -124,5 +124,11 @@
         "*.twig": [
             "vendor/bin/twig-cs-fixer lint --fix"
         ]
+    },
+    "overrides": {
+        "react-dsfr-tiptap": {
+            "react": "$react",
+            "react-dom": "$react-dom"
+        }
     }
 }

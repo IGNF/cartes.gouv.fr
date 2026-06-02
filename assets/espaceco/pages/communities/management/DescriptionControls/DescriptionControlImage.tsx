@@ -13,8 +13,8 @@ function DescriptionImageDialog() {
     const { t } = useTranslation("ManageCommunity");
     const { isOpened, modal, onClose } = useDialog();
     const [selectedTabId, setSelectedTabId] = useState("documents");
-    const documentsFormRef = useRef<DocumentsImageFormRef>();
-    const externalFormRef = useRef<ExternalImageFormRef>();
+    const documentsFormRef = useRef<DocumentsImageFormRef | undefined>(undefined);
+    const externalFormRef = useRef<ExternalImageFormRef | undefined>(undefined);
     const editor = useEditor();
     const { documents } = useDocuments();
     const images = useMemo(

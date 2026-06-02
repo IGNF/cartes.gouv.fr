@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { ManageCommunityActiveTabEnum } from "@/@types/app_espaceco";
 import { declareComponentKeys } from "../../../i18n/i18n";
 import { Translations } from "../../../i18n/types";

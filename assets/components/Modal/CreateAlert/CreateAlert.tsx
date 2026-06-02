@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FC, useEffect } from "react";
+import { FC, JSX, useEffect } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";

@@ -34,7 +34,7 @@ type RMapProps = {
 
 const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<Map>();
+    const mapRef = useRef<Map | undefined>(undefined);
 
     // Création de la couche openlayers de fond (bg layer)
     const { data: capabilities } = useCapabilities();

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 export function useCopyToClipboard() {
     const [copiedText, setCopiedText] = useState<string | null>(null);
-    const timeout = useRef<NodeJS.Timeout>();
+    const timeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     async function copy(text: string) {
         try {

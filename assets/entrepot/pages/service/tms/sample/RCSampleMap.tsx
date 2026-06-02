@@ -32,7 +32,7 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
     const { t } = useTranslation("PyramidVectorGenerateForm");
 
     const mapTargetRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<SampleMap>();
+    const mapRef = useRef<SampleMap | undefined>(undefined);
 
     const { data: capabilities } = useCapabilities();
     const { getValues: getFormValues } = form;

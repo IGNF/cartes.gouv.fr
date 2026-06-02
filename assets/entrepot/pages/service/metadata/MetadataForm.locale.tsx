@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { JSX, ReactNode } from "react";
 
 import { declareComponentKeys } from "../../../../i18n/i18n";
 import { Translations } from "../../../../i18n/types";

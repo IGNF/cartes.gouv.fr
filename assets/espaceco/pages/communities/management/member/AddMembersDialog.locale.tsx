@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { fr } from "@codegouvfr/react-dsfr";
 import { declareComponentKeys } from "../../../../../i18n/i18n";
 import { Translations } from "../../../../../i18n/types";

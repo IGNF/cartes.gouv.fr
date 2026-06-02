@@ -32,7 +32,7 @@ type ExtentMapProps = {
 };
 
 const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
-    const mapRef = useRef<Map>();
+    const mapRef = useRef<Map | undefined>(undefined);
     const mapTargetRef = useRef<HTMLDivElement>(null);
 
     const { data: capabilities } = useCapabilities();
