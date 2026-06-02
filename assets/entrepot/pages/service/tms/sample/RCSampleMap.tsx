@@ -9,7 +9,7 @@ import { fromLonLat } from "ol/proj";
 import { FC, useEffect, useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-import useCapabilities from "../../../../../hooks/useCapabilities";
+import useGeopfWmtsCapabilitiesQuery from "../../../../../hooks/useGeopfWmtsCapabilitiesQuery";
 import { useTranslation } from "../../../../../i18n";
 import { ChangeExtentEvent } from "./CustomEvents";
 import SampleMap, { EXTENT_CHANGED_EVENT } from "./SampleMap";
@@ -34,7 +34,7 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<SampleMap>();
 
-    const { data: capabilities } = useCapabilities();
+    const { data: capabilities } = useGeopfWmtsCapabilitiesQuery();
     const { getValues: getFormValues } = form;
 
     useEffect(() => {
@@ -46,7 +46,7 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
                 new ScaleLine(),
                 new SearchEngine({
                     collapsed: false,
-                    displayAdvancedSearch: false,
+                    displayButtonAdvancedSearch: false,
                     displayMarker: false,
                     apiKey: "essentiels",
                     zoomTo: "auto",

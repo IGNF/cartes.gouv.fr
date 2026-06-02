@@ -12,6 +12,7 @@
 
 - [ApiClient (requêtes HTTP, parallélisme, pagination)](./api-client/README.md)
 - [File Uploader](./file-uploader/README.md)
+- [Module React-OpenLayers (OlMap, OlLayer, OlControl…)](./ol-components/README.md)
 - Explication des workflows :
     - [Workflow d'intégration d'un upload vecteur](./workflows/upload-integration-vector/README.md)
 - [Authentification](./auth/README.md)

@@ -2,14 +2,14 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { Options, optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useMemo, useState } from "react";
-import useCapabilities from "../../../../hooks/useCapabilities";
+import useGeopfWmtsCapabilitiesQuery from "../../../../hooks/useGeopfWmtsCapabilitiesQuery";
 import { useTranslation } from "../../../../i18n/i18n";
 
 const baseMaps = ["GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2", "GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1", "ORTHOIMAGERY.ORTHOPHOTOS", "CADASTRALPARCELS.PARCELS"];
 
 const Layers: FC = () => {
     const { t } = useTranslation("ManageCommunity");
-    const { data: capabilities } = useCapabilities();
+    const { data: capabilities } = useGeopfWmtsCapabilitiesQuery();
 
     /* const cbBaseMapsOptions = useMemo<ReactNode[]>(() => {
         if (!capabilities) return [];

@@ -54,7 +54,7 @@
         "eslint-plugin-react-refresh": "^0.5.0",
         "eslint-plugin-tss-unused-classes": "^1.0.3",
         "events": "^3.3.0",
-        "geopf-extensions-openlayers": "^1.0.0-beta.0",
+        "geopf-extensions-openlayers": "1.0.0-beta.5",
         "geostyler": "^18.1.2",
         "geostyler-mapbox-parser": "^6.1.1",
         "geostyler-openlayers-parser": "^5.1.2",

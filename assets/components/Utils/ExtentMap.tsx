@@ -2,22 +2,23 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import LayerSwitcher from "geopf-extensions-openlayers/src/packages/Controls/LayerSwitcher/LayerSwitcher";
 import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
 import GeoportalZoom from "geopf-extensions-openlayers/src/packages/Controls/Zoom/GeoportalZoom";
-import { Feature, View } from "ol";
-import Map from "ol/Map";
+import { Feature } from "ol";
 import { ScaleLine } from "ol/control";
 import GeoJSON from "ol/format/GeoJSON";
 import { fromExtent } from "ol/geom/Polygon";
-import { defaults as defaultInteractions } from "ol/interaction";
-import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import { fromLonLat, transformExtent } from "ol/proj";
 import VectorSource from "ol/source/Vector";
-import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
-import { FC, useEffect, useMemo, useRef } from "react";
+import { FC, useEffect, useMemo } from "react";
 
 import type { BoundingBox, JsonNode } from "../../@types/entrepot";
+import usePlanIgnWmtsLayer from "@/components/Map/usePlanIgnWmtsLayer";
+import OlControl from "@/components/Map/OlControl";
+import OlLayer from "@/components/Map/OlLayer";
+import { OlMapProvider } from "@/components/Map/OlMapContext";
+import { useBboxFit } from "@/components/Map/useBboxFit";
+import { useOlMap } from "@/components/Map/useOlMap";
 import olDefaults from "../../data/ol-defaults.json";
-import useCapabilities from "../../hooks/useCapabilities";
 
 import "ol/ol.css";
 
@@ -32,26 +33,19 @@ type ExtentMapProps = {
 };
 
 const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
-    const mapRef = useRef<Map>();
-    const mapTargetRef = useRef<HTMLDivElement>(null);
-
-    const { data: capabilities } = useCapabilities();
-
     const extentLayer = useMemo(() => {
         if (bbox !== undefined) {
             const feature = new Feature(fromExtent(transformExtent([bbox.west, bbox.south, bbox.east, bbox.north], "EPSG:4326", "EPSG:3857")));
-
-            return new VectorLayer({
-                source: new VectorSource({
-                    features: [feature],
-                }),
+            const layer = new VectorLayer({
+                source: new VectorSource({ features: [feature] }),
             });
+            layer.set("title", "Emprise");
+            return layer;
         }
 
         if (!extents) return;
 
         const _extents = Array.isArray(extents) ? extents : [extents];
-
         const extentFeatures = _extents
             .map((ext) =>
                 new GeoJSON({
@@ -61,96 +55,77 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
             )
             .flat();
 
-        const extentSource = new VectorSource({
-            features: extentFeatures,
+        const layer = new VectorLayer({
+            source: new VectorSource({ features: extentFeatures }),
         });
-
-        return new VectorLayer({
-            source: extentSource,
-        });
+        layer.set("title", "Emprise");
+        return layer;
     }, [bbox, extents]);
 
     const extentLayerSource = extentLayer?.getSource();
     const extentLayerExtent = extentLayerSource?.getExtent();
     const extentValid = extentLayerExtent?.every((c) => isFinite(c));
 
-    const bgLayer = useMemo(() => {
-        if (!capabilities) return;
-
-        const wmtsOptions = optionsFromCapabilities(capabilities, {
-            layer: olDefaults.default_background_layer,
-        });
-
-        if (!wmtsOptions) return;
-
-        const bgLayer = new TileLayer();
-        bgLayer.setSource(new WMTS(wmtsOptions));
-
-        return bgLayer;
-    }, [capabilities]);
-
-    useEffect(() => {
-        if (!bgLayer || !extentLayer) return;
-
-        const layerSwitcher = new LayerSwitcher({
-            layers: [
-                {
-                    layer: bgLayer,
-                    config: {
-                        title: "Plan IGN v2",
-                    },
+    const zoomControl = useMemo(() => new GeoportalZoom({ position: "top-left" }), []);
+    const layerSwitcher = useMemo(
+        () =>
+            new LayerSwitcher({
+                options: {
+                    position: "top-right",
+                    collapsed: true,
+                    panel: true,
+                    counter: true,
                 },
-                {
-                    layer: extentLayer,
-                    config: {
-                        title: "Emprise",
-                    },
-                },
-            ],
-            options: {
-                position: "top-right",
-                collapsed: true,
-                panel: true,
-                counter: true,
-            },
-        });
-
-        const controls = [
-            layerSwitcher,
+            }),
+        []
+    );
+    const scaleLine = useMemo(() => new ScaleLine(), []);
+    const searchEngine = useMemo(
+        () =>
             new SearchEngine({
                 collapsed: false,
-                displayAdvancedSearch: false,
+                displayButtonAdvancedSearch: false,
                 apiKey: "essentiels",
                 zoomTo: "auto",
             }),
-            new ScaleLine(),
-            new GeoportalZoom({ position: "top-left" }),
-        ];
+        []
+    );
 
-        mapRef.current = new Map({
-            target: mapTargetRef.current as HTMLElement,
-            layers: [bgLayer, extentLayer],
-            interactions: defaultInteractions(),
-            controls: controls,
-            view: new View({
-                projection: olDefaults.projection,
-                center: fromLonLat(olDefaults.center),
-                zoom: olDefaults.zoom,
-            }),
-        });
+    const { map, targetRef } = useOlMap({
+        initialView: {
+            projection: olDefaults.projection,
+            center: fromLonLat(olDefaults.center),
+            zoom: olDefaults.zoom,
+        },
+        defaultControls: false,
+    });
 
-        if (extentLayerExtent && extentValid === true) {
-            mapRef.current.getView().fit(extentLayerExtent);
-        }
+    // Fit via BoundingBox lon/lat quand bbox est fournie
+    useBboxFit(map, bbox);
 
-        return () => mapRef.current?.setTarget(undefined);
-    }, [bgLayer, extentLayer, extentLayerExtent, extentValid]);
+    const planIgnLayer = usePlanIgnWmtsLayer();
+
+    // Fit sur l'extent vectoriel (EPSG:3857) quand extents est utilisé à la place de bbox
+    useEffect(() => {
+        if (!map || !extentLayerExtent || bbox !== undefined || extentValid !== true) return;
+        map.getView().fit(extentLayerExtent);
+    }, [map, extentLayerExtent, bbox, extentValid]);
 
     if (extentValid === false) {
         return <Alert title="Emprise invalide" description="L'emprise de la donnée est invalide" severity="warning" />;
     }
 
-    return <div ref={mapTargetRef} className="map-view" />;
+    return (
+        <OlMapProvider map={map}>
+            <OlControl control={zoomControl} />
+            <OlControl control={layerSwitcher} />
+            <OlControl control={scaleLine} />
+            <OlControl control={searchEngine} />
+            {planIgnLayer && <OlLayer layer={planIgnLayer} index={0} zIndex={1} />}
+            {extentLayer && <OlLayer layer={extentLayer} />}
+            <div className="map-view" ref={targetRef} />
+        </OlMapProvider>
+    );
 };
 
 export default ExtentMap;
