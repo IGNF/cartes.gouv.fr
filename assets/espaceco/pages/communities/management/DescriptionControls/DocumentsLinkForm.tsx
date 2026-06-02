@@ -4,7 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { getThumbnailFromFileName } from "@/espaceco/esco_utils";
-import { forwardRef, useEffect, useImperativeHandle } from "react";
+import { RefObject, useEffect, useImperativeHandle } from "react";
 import { DocumentDTO } from "@/@types/espaceco";
 import { useTranslation } from "@/i18n";
 
@@ -23,11 +23,11 @@ export interface DocumentsLinkFormRef {
 interface IDocumentsLinkFormProps {
     documents: DocumentDTO[];
     isOpened?: boolean;
+    ref?: RefObject<DocumentsLinkFormRef | undefined>;
 }
 
-function DocumentsLinkForm(props: IDocumentsLinkFormProps, ref) {
+function DocumentsLinkForm({ documents, isOpened, ref }: IDocumentsLinkFormProps) {
     const { t } = useTranslation("ManageCommunity");
-    const { documents, isOpened } = props;
     const editor = useEditor();
 
     const {
@@ -95,4 +95,4 @@ function DocumentsLinkForm(props: IDocumentsLinkFormProps, ref) {
     );
 }
 
-export default forwardRef(DocumentsLinkForm);
+export default DocumentsLinkForm;

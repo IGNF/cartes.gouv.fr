@@ -62,7 +62,7 @@ const GeostylerEditor: FC<GeostylerEditorProps> = (props) => {
     const [view, setView] = useState<ViewMode>("table");
 
     return (
-        <GeoStylerContext.Provider value={ctx}>
+        <GeoStylerContext value={ctx}>
             <DsfrAntdConfig>
                 <SegmentedControl
                     legend={"Editeur de style"}
@@ -109,7 +109,7 @@ const GeostylerEditor: FC<GeostylerEditorProps> = (props) => {
                     </div>
                 ) : null}
             </DsfrAntdConfig>
-        </GeoStylerContext.Provider>
+        </GeoStylerContext>
     );
 };
 

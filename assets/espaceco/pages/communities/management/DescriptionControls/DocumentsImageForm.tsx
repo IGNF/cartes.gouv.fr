@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { forwardRef, useEffect, useImperativeHandle } from "react";
+import { RefObject, useEffect, useImperativeHandle } from "react";
 import { DocumentDTO } from "@/@types/espaceco";
 import { useTranslation } from "@/i18n";
 
@@ -26,11 +26,11 @@ export interface DocumentControlImage extends DocumentDTO {
 interface IDocumentsImageFormProps {
     isOpened?: boolean;
     images: DocumentControlImage[];
+    ref?: RefObject<DocumentsImageFormRef | undefined>;
 }
 
-function DocumentsImageForm(props: IDocumentsImageFormProps, ref) {
+function DocumentsImageForm({ isOpened, images, ref }: IDocumentsImageFormProps) {
     const { t } = useTranslation("ManageCommunity");
-    const { isOpened, images } = props;
     const editor = useEditor();
 
     const {
@@ -88,4 +88,4 @@ function DocumentsImageForm(props: IDocumentsImageFormProps, ref) {
     );
 }
 
-export default forwardRef(DocumentsImageForm);
+export default DocumentsImageForm;

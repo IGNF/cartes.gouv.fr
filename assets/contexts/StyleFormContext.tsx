@@ -1,4 +1,4 @@
-import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from "react";
+import { createContext, Dispatch, PropsWithChildren, SetStateAction, use, useEffect, useState } from "react";
 
 import { OfferingTypeEnum, Service, StyleFormatEnum } from "@/@types/app";
 
@@ -21,7 +21,7 @@ export interface StyleFormContext {
 export const StyleFormContext = createContext<StyleFormContext | null>(null);
 
 export function useStyleForm() {
-    const context = useContext(StyleFormContext);
+    const context = use(StyleFormContext);
     if (!context) {
         throw new Error("useStyleForm must be used within a StyleFormProvider");
     }
@@ -71,7 +71,7 @@ export function StyleFormProvider(props: PropsWithChildren<StyleFormProviderProp
     };
 
     return (
-        <StyleFormContext.Provider
+        <StyleFormContext
             value={{
                 editMode,
                 isTms,
@@ -87,6 +87,6 @@ export function StyleFormProvider(props: PropsWithChildren<StyleFormProviderProp
             }}
         >
             {children}
-        </StyleFormContext.Provider>
+        </StyleFormContext>
     );
 }

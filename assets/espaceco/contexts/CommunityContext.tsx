@@ -3,7 +3,7 @@ import { CommunityResponseDTO } from "@/@types/espaceco";
 import RQKeys from "@/modules/espaceco/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, use, useState } from "react";
 import api from "../api";
 import { COMMUNITY_FORM_STEPS } from "../pages/communities/FormSteps";
 
@@ -95,7 +95,7 @@ export const CommunityProvider = ({ children, communityId, mode }: { children: R
     };
 
     return (
-        <CommunityContext.Provider
+        <CommunityContext
             value={{
                 mode,
                 currentStep,
@@ -111,13 +111,13 @@ export const CommunityProvider = ({ children, communityId, mode }: { children: R
             }}
         >
             {children}
-        </CommunityContext.Provider>
+        </CommunityContext>
     );
 };
 
 // Custom hook for consuming context
 export const useCommunityContext = () => {
-    const context = useContext(CommunityContext);
+    const context = use(CommunityContext);
     if (!context) {
         throw new Error("useCommunityContext must be used within a CommunityProvider");
     }

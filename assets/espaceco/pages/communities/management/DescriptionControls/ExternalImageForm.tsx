@@ -1,5 +1,5 @@
 import { useEditor } from "react-dsfr-tiptap";
-import { forwardRef, useEffect, useImperativeHandle } from "react";
+import { RefObject, useEffect, useImperativeHandle } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@codegouvfr/react-dsfr/Input.js";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -28,11 +28,11 @@ export interface ExternalImageFormRef {
 
 interface ICustomImageFormProps {
     isOpened?: boolean;
+    ref?: RefObject<ExternalImageFormRef | undefined>;
 }
 
-function ExternalImageForm(props: ICustomImageFormProps, ref) {
+function ExternalImageForm({ isOpened, ref }: ICustomImageFormProps) {
     const { t } = useTranslation("ManageCommunity");
-    const { isOpened } = props;
     const editor = useEditor();
 
     const {
@@ -101,4 +101,4 @@ function ExternalImageForm(props: ICustomImageFormProps, ref) {
     );
 }
 
-export default forwardRef(ExternalImageForm);
+export default ExternalImageForm;

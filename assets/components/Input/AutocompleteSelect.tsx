@@ -10,7 +10,7 @@ import {
     TextField,
     createFilterOptions,
 } from "@mui/material";
-import { ForwardedRef, ReactElement, ReactNode, RefAttributes, SyntheticEvent, forwardRef, useId } from "react";
+import { ReactNode, Ref, SyntheticEvent, useId } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { useStyles } from "tss-react/mui";
 
@@ -38,8 +38,11 @@ const defaultSearchFilter = {
     limit: 10,
 } satisfies CreateFilterOptionsConfig<unknown>;
 
-function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: ForwardedRef<HTMLInputElement>) {
+function AutocompleteSelect<T, M extends boolean | undefined = true, D extends boolean | undefined = false, F extends boolean | undefined = false>(
+    props: AutocompleteSelectProps<T, M, D, F> & { ref?: Ref<HTMLInputElement> }
+) {
     const {
+        ref,
         id,
         label,
         hintText,
@@ -61,7 +64,10 @@ function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: Forwar
         clearIcon = null,
         forcePopupIcon = true,
         ...restProps
-    } = props;
+        // Cast nécessaire : les types conditionnels MUI (M, D, F sur AutocompleteProps) sont incompatibles avec
+        // un JSX concret à `multiple` variable. On les efface ici en faveur du type base (unknown), tout en
+        // gardant le générique public pour que l'inférence de T bénéficie aux sites d'appel.
+    } = props as AutocompleteSelectBaseProps & { ref?: Ref<HTMLInputElement> };
 
     const generatedId = useId();
     const inputId = id ?? `${symToStr({ AutocompleteSelect })}-${generatedId}`;
@@ -117,7 +123,7 @@ function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: Forwar
                                     as: "button",
                                     nativeButtonProps: {
                                         type: "button",
-                                        onClick: (event) => handleRemoveTag(tag as OptionLike, event),
+                                        onClick: (event: SyntheticEvent) => handleRemoveTag(tag as OptionLike, event),
                                         className: fr.cx("fr-m-1v", "fr-my-2v"),
                                     },
                                 })) as unknown as TagsGroupProps["tags"]
@@ -176,14 +182,6 @@ function AutocompleteSelectInner(props: AutocompleteSelectBaseProps, ref: Forwar
     );
 }
 
-type AutocompleteSelectComponent = <T, M extends boolean | undefined = true, D extends boolean | undefined = false, F extends boolean | undefined = false>(
-    props: AutocompleteSelectProps<T, M, D, F> & RefAttributes<HTMLInputElement>
-) => ReactElement | null;
-
-const AutocompleteSelectForwardRef = forwardRef(AutocompleteSelectInner);
-
-const AutocompleteSelect = AutocompleteSelectForwardRef as AutocompleteSelectComponent;
-
-AutocompleteSelectForwardRef.displayName = symToStr({ AutocompleteSelect });
+AutocompleteSelect.displayName = symToStr({ AutocompleteSelect });
 
 export default AutocompleteSelect;

@@ -1,5 +1,5 @@
 import { getSelectedText, useEditor } from "react-dsfr-tiptap";
-import { forwardRef, useEffect, useImperativeHandle } from "react";
+import { RefObject, useEffect, useImperativeHandle } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@codegouvfr/react-dsfr/Input.js";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -27,11 +27,11 @@ export interface ExternalLinkFormRef {
 
 interface ICustomLinkFormProps {
     isOpened?: boolean;
+    ref?: RefObject<ExternalLinkFormRef | undefined>;
 }
 
-function ExternalLinkForm(props: ICustomLinkFormProps, ref) {
+function ExternalLinkForm({ isOpened, ref }: ICustomLinkFormProps) {
     const { t } = useTranslation("ManageCommunity");
-    const { isOpened } = props;
     const editor = useEditor();
 
     const {
@@ -99,4 +99,4 @@ function ExternalLinkForm(props: ICustomLinkFormProps, ref) {
     );
 }
 
-export default forwardRef(ExternalLinkForm);
+export default ExternalLinkForm;
