@@ -45,4 +45,28 @@ final class CommunityApiService
     {
         return $this->api->delete("communities/$communityId/users/$userId");
     }
+
+    /**
+     * @param array<string,mixed> $query
+     */
+    public function getPermissions(string $communityId, array $query = []): PaginatedPromise
+    {
+        return $this->api->requestAll("communities/$communityId/permissions", $query);
+    }
+
+    /**
+     * @param array<string,mixed> $query
+     */
+    public function getPermissionStats(string $communityId, string $permissionId, array $query = []): PaginatedPromise
+    {
+        return $this->api->requestAll("communities/$communityId/permissions/{$permissionId}/stats", $query);
+    }
+
+    /**
+     * @param array<string,mixed> $query
+     */
+    public function getStats(string $communityId, array $query = []): PaginatedPromise
+    {
+        return $this->api->requestAll("communities/$communityId/stats", $query);
+    }
 }

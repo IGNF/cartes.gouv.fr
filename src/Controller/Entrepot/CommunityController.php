@@ -147,6 +147,47 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
+    #[Route('/permissions', name: 'get_permissions', methods: ['GET'])]
+    public function getPermissions(string $communityId, Request $request): JsonResponse
+    {
+        try {
+            $query = $request->query->all();
+            $permissions = $this->communityApiService->getPermissions($communityId, $query)->resolve();
+
+            return $this->json($permissions);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/permissions/{permissionId}/stats', name: 'get_permission_stats', methods: ['GET'])]
+    public function getPermissionStats(string $communityId, string $permissionId, Request $request): JsonResponse
+    {
+        try {
+            $query = $request->query->all();
+
+            $stats = $this->communityApiService->getPermissionStats($communityId, $permissionId, $query)->resolve();
+
+            return $this->json($stats);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/stats', name: 'get_stats', methods: ['GET'])]
+    public function getStats(string $communityId, Request $request): JsonResponse
+    {
+        try {
+            $query = $request->query->all();
+
+            $stats = $this->communityApiService->getStats($communityId, $query)->resolve();
+
+            return $this->json($stats);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
     /**
      * Verifie que les droits sont corrects.
      *

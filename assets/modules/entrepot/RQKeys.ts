@@ -8,6 +8,11 @@ const RQKeys = {
     datastore_list: (): string[] => ["datastore"],
     datastore: (datastoreId: string): string[] => ["datastore", datastoreId],
     datastore_endpoints: (datastoreId: string): string[] => ["datastore", datastoreId, "endpoints"],
+    datastore_endpoint_stats: (datastoreId: string, endpointId: string, queryParams?: object): string[] => {
+        const keys = ["datastore", datastoreId, "endpoints", endpointId, "stats"];
+        if (queryParams) keys.push(JSON.stringify(queryParams));
+        return keys;
+    },
     datastore_permissions: (datastoreId: string): string[] => ["datastore", datastoreId, "permissions"],
     datastore_permission_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "permissions", "offering", offeringId],
     datastore_permission: (datastoreId: string, permissionId: string): string[] => ["datastore", datastoreId, "permission", permissionId],
@@ -79,6 +84,7 @@ const RQKeys = {
 
     community: (communityId: string): string[] => ["community", communityId],
     community_members: (communityId: string): string[] => ["community", communityId, "members"],
+    community_permissions: (communityId: string): string[] => ["community", communityId, "permissions"],
 
     catalogs_communities: (): string[] => ["catalogs", "communities"],
     catalogs_communities_join_schema: (techName: string): string[] => ["catalogs", "communities", techName, "schema"],
@@ -88,7 +94,11 @@ const RQKeys = {
     my_keys: (): string[] => ["user", "me", "keys"],
     my_keys_with_accesses: (): string[] => ["user", "me", "keys", "accesses"],
     my_key: (keyId: string): string[] => ["user", "me", "keys", keyId],
-    my_permissions: (): string[] => ["user", "me", "permissions"],
+    my_permissions: (query?: QueryParams): string[] => {
+        const keys = ["user", "me", "permissions"];
+        if (query) keys.push(JSON.stringify(query));
+        return keys;
+    },
     get_permission: (permissionId: string): string[] => ["user", "me", "permissions", permissionId],
     my_documents: (query?: unknown): string[] => ["user", "me", "documents", JSON.stringify(query)],
     my_document: (documentId: string): string[] => ["user", "me", "documents", documentId],
