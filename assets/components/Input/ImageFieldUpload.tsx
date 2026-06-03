@@ -2,9 +2,9 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { useEffect, useRef, useState } from "react";
+import { useHover } from "@mantine/hooks";
+import { useEffect, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { useHover } from "usehooks-ts";
 import { tss } from "tss-react";
 
 import placeholder1x1 from "../../img/placeholder.1x1.png";
@@ -57,8 +57,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
     } = useFormContext();
 
     const [previewUrl, setPreviewUrl] = useState<string>(existingUrl ?? "");
-    const wrapperRef = useRef<HTMLDivElement>(null);
-    const isHovered = useHover(wrapperRef);
+    const { hovered: isHovered, ref: wrapperRef } = useHover<HTMLDivElement>();
 
     const errorMsg = (errors[name] as { message?: string } | undefined)?.message;
 
