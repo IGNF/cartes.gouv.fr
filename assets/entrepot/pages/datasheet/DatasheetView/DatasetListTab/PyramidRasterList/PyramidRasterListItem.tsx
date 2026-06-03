@@ -4,7 +4,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useQuery } from "@tanstack/react-query";
 import { FC, memo, ReactNode, useMemo, useRef } from "react";
-import { useToggle } from "usehooks-ts";
+import { useToggle } from "@mantine/hooks";
 
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
 import {
@@ -57,7 +57,7 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
     const { t } = useTranslation("PyramidRasterList");
     const { t: tCommon } = useTranslation("Common");
 
-    const [showDescription, toggleShowDescription] = useToggle(false);
+    const [showDescription, toggleShowDescription] = useToggle();
 
     const confirmRemovePyramidModal = useMemo(
         () =>
@@ -170,7 +170,7 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
                 ]}
                 name={pyramid.name}
                 showDescription={showDescription}
-                toggleShowDescription={toggleShowDescription}
+                toggleShowDescription={() => toggleShowDescription()}
             >
                 <PyramidStoredDataDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />
             </ListItem>

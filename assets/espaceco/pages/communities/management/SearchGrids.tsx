@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode, useState } from "react";
-import { useDebounceValue } from "usehooks-ts";
+import { useDebouncedState } from "@mantine/hooks";
 import { GetResponse, SearchGridFilters } from "../../../../@types/app_espaceco";
 import { GridDTO } from "../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
@@ -21,7 +21,7 @@ export type SearchGridsProps = {
 const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, disableClearable, filters, state, stateRelatedMessage, onChange }) => {
     const { t } = useTranslation("Search");
 
-    const [search, setSearch] = useDebounceValue("", 500);
+    const [search, setSearch] = useDebouncedState("", 500);
     const [value, setValue] = useState<GridDTO | null>(null);
 
     const searchQuery = useQuery<GetResponse<GridDTO>>({

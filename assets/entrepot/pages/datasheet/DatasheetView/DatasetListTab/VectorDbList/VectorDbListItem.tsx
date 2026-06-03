@@ -1,13 +1,13 @@
-import { JSX } from "react";
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { useToggle } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { FC, Fragment, ReactNode, memo, useCallback, useMemo, useState } from "react";
+import { FC, Fragment, JSX, ReactNode, memo, useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
@@ -17,7 +17,6 @@ import useCommunityRights from "@/hooks/useCommunityRights";
 import { DatasheetStoredDataItem, DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
 import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
-import useToggle from "../../../../../../hooks/useToggle";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import { ComponentKey } from "../../../../../../i18n/types";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
@@ -107,7 +106,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
     const [technicalNameError, setTechnicalNameError] = useState<string>();
 
     // description de vectordb
-    const [showDescription, toggleShowDescription] = useToggle(false);
+    const [showDescription, toggleShowDescription] = useToggle();
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
         queryKey: RQKeys.datastore_endpoints(datastoreId),
@@ -245,7 +244,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                 ]}
                 name={vectorDb.name}
                 showDescription={showDescription}
-                toggleShowDescription={toggleShowDescription}
+                toggleShowDescription={() => toggleShowDescription()}
             >
                 <VectorDbDesc dataUsesQuery={dataUsesQuery} />
             </ListItem>

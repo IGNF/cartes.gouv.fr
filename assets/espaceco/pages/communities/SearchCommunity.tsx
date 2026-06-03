@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
-import { useDebounceValue } from "usehooks-ts";
+import { useDebouncedState } from "@mantine/hooks";
 import { CommunityListFilter } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
@@ -17,7 +17,7 @@ type SearchCommunityProps = {
 const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange, label }) => {
     const { t } = useTranslation("SearchCommunity");
 
-    const [search, setSearch] = useDebounceValue("", 500);
+    const [search, setSearch] = useDebouncedState("", 500);
 
     const searchQuery = useQuery<CommunityResponseDTO[]>({
         queryKey: RQKeys.searchCommunities(search, filter),

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Coordinate } from "ol/coordinate";
 import { FC, ReactNode } from "react";
-import { useDebounceValue } from "usehooks-ts";
+import { useDebouncedState } from "@mantine/hooks";
 import { SearchResult } from "../../../../../@types/app_espaceco";
 import AutocompleteSelect from "../../../../../components/Input/AutocompleteSelect";
 import { useTranslation } from "../../../../../i18n/i18n";
@@ -20,7 +20,7 @@ const autocompleteUrl = "https://data.geopf.fr/geocodage/completion";
 const Search: FC<SearchProps> = ({ label, hintText, filter, onChange }) => {
     const { t } = useTranslation("Search");
 
-    const [text, setText] = useDebounceValue("", 500);
+    const [text, setText] = useDebouncedState("", 500);
 
     const searchQuery = useQuery<SearchResult>({
         queryKey: RQKeys.searchAddress(text, filter),

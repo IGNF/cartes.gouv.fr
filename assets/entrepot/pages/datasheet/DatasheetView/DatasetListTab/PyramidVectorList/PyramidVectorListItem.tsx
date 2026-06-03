@@ -2,8 +2,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
+import { useToggle } from "@mantine/hooks";
 import { FC, memo, useMemo } from "react";
-import { useToggle } from "usehooks-ts";
 
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
 import { DatasheetStoredDataItem, PyramidVector, StoredDataStatusEnum } from "../../../../../../@types/app";
@@ -28,7 +28,7 @@ const { t: tCommon } = getTranslation("Common");
 const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, datastoreId, pyramid }) => {
     const { t } = useTranslation("PyramidVectorList");
 
-    const [showDescription, toggleShowDescription] = useToggle(false);
+    const [showDescription, toggleShowDescription] = useToggle();
 
     const confirmRemovePyramidModal = useMemo(
         () =>
@@ -80,7 +80,7 @@ const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, 
                 ]}
                 name={pyramid.name}
                 showDescription={showDescription}
-                toggleShowDescription={toggleShowDescription}
+                toggleShowDescription={() => toggleShowDescription()}
             >
                 <PyramidStoredDataDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />
             </ListItem>
