@@ -170,7 +170,7 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
                 ]}
                 name={pyramid.name}
                 showDescription={showDescription}
-                toggleShowDescription={toggleShowDescription}
+                toggleShowDescription={() => toggleShowDescription()}
             >
                 <PyramidStoredDataDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />
             </ListItem>

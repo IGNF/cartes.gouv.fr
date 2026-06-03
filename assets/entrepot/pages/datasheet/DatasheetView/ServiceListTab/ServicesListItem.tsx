@@ -2,13 +2,15 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { useToggle } from "@mantine/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
-import { useToggle } from "@mantine/hooks";
 
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
+import useCommunityRights from "@/hooks/useCommunityRights";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
@@ -20,8 +22,6 @@ import { offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
 import ListItem from "../ListItem";
 import ServiceDesc from "./ServiceDesc";
-import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
 
 type ServicesListItemProps = {
     service: Service;
@@ -187,7 +187,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                 open={service.open}
                 showDescription={showDescription}
                 showLock
-                toggleShowDescription={toggleShowDescription}
+                toggleShowDescription={() => toggleShowDescription()}
                 type={offeringTypeDisplayName(service.type)}
             >
                 <ServiceDesc datastoreId={datastoreId} service={service} />
