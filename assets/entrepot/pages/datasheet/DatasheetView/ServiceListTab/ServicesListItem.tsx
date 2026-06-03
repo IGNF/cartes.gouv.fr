@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
-import { useToggle } from "usehooks-ts";
+import { useToggle } from "@mantine/hooks";
 
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import { CartesApiException } from "@/modules/jsonFetch";
@@ -59,7 +59,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
         },
     });
 
-    const [showDescription, toggleShowDescription] = useToggle(false);
+    const [showDescription, toggleShowDescription] = useToggle();
 
     const { userRights, isSupervisor } = useCommunityRights();
 

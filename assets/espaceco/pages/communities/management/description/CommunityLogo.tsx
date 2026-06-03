@@ -11,10 +11,10 @@ import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { FC, RefObject, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, memo, useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
-import { useHover } from "usehooks-ts";
+import { useHover } from "@mantine/hooks";
 import * as yup from "yup";
 import { CommunityResponseDTO } from "../../../../../@types/espaceco";
 import { ComponentKey } from "../../../../../i18n/types";
@@ -90,8 +90,7 @@ const CommunityLogo: FC = () => {
 
     // Boite modale, gestion de l'image
     const [modalImageUrl, setModalImageUrl] = useState<string>("");
-    const logoDivRef = useRef<HTMLDivElement>(null);
-    const logoIsHovered = useHover(logoDivRef as RefObject<HTMLDivElement>);
+    const { hovered: logoIsHovered, ref: logoDivRef } = useHover<HTMLDivElement>();
 
     const queryClient = useQueryClient();
 

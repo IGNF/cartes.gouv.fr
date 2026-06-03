@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode, useMemo } from "react";
-import { useDebounceValue } from "usehooks-ts";
+import { useDebouncedState } from "@mantine/hooks";
 import { isUser } from "../../../../../@types/app_espaceco";
 import { UserDTO } from "../../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../../components/Input/AutocompleteSelect";
@@ -21,7 +21,7 @@ export type SearchUsersProps = {
 const SearchUsers: FC<SearchUsersProps> = ({ label, hintText, value, state, stateRelatedMessage, onChange }) => {
     const { t } = useTranslation("Search");
 
-    const [search, setSearch] = useDebounceValue("", 500);
+    const [search, setSearch] = useDebouncedState("", 500);
 
     const searchQuery = useQuery<UserDTO[]>({
         queryKey: RQKeys.searchUsers(search),

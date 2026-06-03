@@ -10,7 +10,7 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { FC, FormEvent, useState } from "react";
-import { useDebounceCallback } from "usehooks-ts";
+import { useDebouncedCallback } from "@mantine/hooks";
 
 import { DocumentDetailsResponseDto } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
@@ -23,7 +23,7 @@ import { niceBytes } from "@/utils";
 
 const MyDocuments: FC = () => {
     const [filter, setFilter] = useState<object>({});
-    const debouncedSetFilter = useDebounceCallback(setFilter, 500);
+    const debouncedSetFilter = useDebouncedCallback(setFilter, 500);
 
     const documentsQuery = useInfiniteQuery<DocumentDetailsResponseDto[], CartesApiException>({
         queryKey: RQKeys.my_documents(filter),

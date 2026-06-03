@@ -17,7 +17,7 @@ import useCommunityRights from "@/hooks/useCommunityRights";
 import { DatasheetStoredDataItem, DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
 import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
-import useToggle from "../../../../../../hooks/useToggle";
+import { useToggle } from "@mantine/hooks";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import { ComponentKey } from "../../../../../../i18n/types";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
@@ -107,7 +107,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
     const [technicalNameError, setTechnicalNameError] = useState<string>();
 
     // description de vectordb
-    const [showDescription, toggleShowDescription] = useToggle(false);
+    const [showDescription, toggleShowDescription] = useToggle();
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
         queryKey: RQKeys.datastore_endpoints(datastoreId),

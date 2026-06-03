@@ -5,7 +5,7 @@ import { FC, useMemo } from "react";
 
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import useUserMe from "../../hooks/useUserMe";
-import useToggle from "../../../hooks/useToggle";
+import { useToggle } from "@mantine/hooks";
 import { useTranslation } from "../../../i18n/i18n";
 import placeholder1x1 from "../../../img/placeholder.1x1.png";
 import { appRoot, routes } from "../../../router/router";
@@ -22,7 +22,7 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
     const { t: tCommon } = useTranslation("Common");
     const { data: me } = useUserMe();
 
-    const [showDescription, toggleShowDescription] = useToggle(false);
+    const [showDescription, toggleShowDescription] = useToggle();
     const modifyButtonProps = useMemo(() => {
         return community.active
             ? { link: routes.espaceco_manage_community({ communityId: community.id }).link, title: tCommon("modify") }
@@ -64,7 +64,7 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
                             title={t("show_details")}
                             className={fr.cx("fr-mr-2v")}
                             priority="secondary"
-                            onClick={toggleShowDescription}
+                            onClick={() => toggleShowDescription()}
                         />
                         <img
                             src={community.logo_url ? community.logo_url : placeholder1x1}

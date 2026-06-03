@@ -8,7 +8,7 @@ import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 import { tss } from "tss-react";
-import { useToggle } from "usehooks-ts";
+import { useToggle } from "@mantine/hooks";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
@@ -66,7 +66,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const page = params["page"] ? parseInt(params["page"]) : 1;
     const limit = params["limit"] ? parseInt(params["limit"]) : 10;
 
-    const [showFilters, toggleShowFilters] = useToggle(false);
+    const [showFilters, toggleShowFilters] = useToggle();
 
     // filtre et tri
     const { search, searchedItems } = useSearch(datasheetList ?? []);
@@ -152,7 +152,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 renderInput={(props) => <input {...props} disabled={isLoading} />}
                                 defaultValue={search}
                             />
-                            <Button priority="secondary" iconId="fr-icon-equalizer-line" onClick={toggleShowFilters}>
+                            <Button priority="secondary" iconId="fr-icon-equalizer-line" onClick={() => toggleShowFilters()}>
                                 Filtres
                             </Button>
                         </div>

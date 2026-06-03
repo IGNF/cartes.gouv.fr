@@ -6,7 +6,7 @@ import RQKeys from "@/modules/espaceco/RQKeys";
 import { fr } from "@codegouvfr/react-dsfr";
 import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode, useState } from "react";
-import { useDebounceValue } from "usehooks-ts";
+import { useDebouncedState } from "@mantine/hooks";
 import { PartialDatabase } from "@/@types/app_espaceco";
 
 export type SearchDatabasesProps = {
@@ -19,7 +19,7 @@ const SearchDatabases: FC<SearchDatabasesProps> = ({ label, filter, onChange }) 
     const { t: tSearch } = useTranslation("Search");
     const { t } = useTranslation("Databases");
 
-    const [search, setSearch] = useDebounceValue("", 500);
+    const [search, setSearch] = useDebouncedState("", 500);
     const [value, setValue] = useState<PartialDatabase | null>(null);
 
     const searchQuery = useQuery<DatabaseResponseDTO[]>({
