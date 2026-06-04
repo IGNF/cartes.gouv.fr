@@ -53,7 +53,7 @@ const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
                     ["Undo", "Redo"],
                 ]}
                 extensions={[
-                    StarterKit,
+                    StarterKit.configure({ link: false, underline: false }),
                     Image,
                     Link,
                     Placeholder.configure({
