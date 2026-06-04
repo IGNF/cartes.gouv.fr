@@ -25,18 +25,18 @@
         "@tanstack/react-query": "^5.90.3",
         "@tanstack/react-query-devtools": "^5.90.2",
         "@tanstack/react-query-persist-client": "^5.90.5",
-        "@tiptap/extension-color": "^3.7.2",
-        "@tiptap/extension-highlight": "^3.7.2",
-        "@tiptap/extension-image": "^3.7.2",
-        "@tiptap/extension-link": "^3.7.2",
-        "@tiptap/extension-placeholder": "^3.7.2",
-        "@tiptap/extension-subscript": "^3.7.2",
-        "@tiptap/extension-superscript": "^3.7.2",
-        "@tiptap/extension-text-align": "^3.7.2",
-        "@tiptap/extension-text-style": "^3.7.2",
-        "@tiptap/extension-underline": "^3.7.2",
-        "@tiptap/extension-youtube": "^3.7.2",
-        "@tiptap/markdown": "^3.7.2",
+        "@tiptap/extension-color": "^3.25.0",
+        "@tiptap/extension-highlight": "^3.25.0",
+        "@tiptap/extension-image": "^3.25.0",
+        "@tiptap/extension-link": "^3.25.0",
+        "@tiptap/extension-placeholder": "^3.25.0",
+        "@tiptap/extension-subscript": "^3.25.0",
+        "@tiptap/extension-superscript": "^3.25.0",
+        "@tiptap/extension-text-align": "^3.25.0",
+        "@tiptap/extension-text-style": "^3.25.0",
+        "@tiptap/extension-underline": "^3.25.0",
+        "@tiptap/extension-youtube": "^3.25.0",
+        "@tiptap/markdown": "^3.25.0",
         "@types/node": "^24.0",
         "@types/react": "^19",
         "@types/react-dom": "^19",
@@ -74,7 +74,7 @@
         "postcss": "^8.5.12",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
-        "react-dsfr-tiptap": "^2.0.0",
+        "react-dsfr-tiptap": "^2.2.0",
         "react-error-boundary": "^6.0.0",
         "react-hook-form": "^7.45.1",
         "sass-embedded": "^1.83.4",
@@ -124,11 +124,5 @@
         "*.twig": [
             "vendor/bin/twig-cs-fixer lint --fix"
         ]
-    },
-    "overrides": {
-        "react-dsfr-tiptap": {
-            "react": "$react",
-            "react-dom": "$react-dom"
-        }
     }
 }
