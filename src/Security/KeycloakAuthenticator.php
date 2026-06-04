@@ -75,7 +75,6 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         }
 
         $request->attributes->set(self::REQUEST_ATTR_STATE, $statePayload);
-
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 
         try {
@@ -116,7 +115,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         }
 
         if (!is_null($sessionExpired) && 1 === intval($sessionExpired)) {
-            $redirectUrl = $this->router->generate(self::HOME_ROUTE, [], RouterInterface::ABSOLUTE_URL).'decouvrir?session_expired_login_success=1';
+            $redirectUrl = $this->router->generate(self::HOME_ROUTE, [], RouterInterface::ABSOLUTE_URL).'/publier-une-donnee?session_expired_login_success=1';
         } else {
             $redirectUrl = $referer ?? $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
             $redirectUrl = str_replace('authentication_failed=1', '', $redirectUrl);
@@ -143,9 +142,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
             return $this->getUnauthorizedApiResponse($message);
         }
 
-        return new RedirectResponse($this->router->generate(self::HOME_ROUTE, [
-            'authentication_failed' => true,
-        ]).'/decouvrir');
+        return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?authentication_failed=1');
     }
 
     private function isApiRequest(Request $request): bool

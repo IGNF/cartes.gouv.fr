@@ -39,7 +39,7 @@ class LogoutSubscriber implements EventSubscriberInterface
         } elseif (!is_null($app) && 'guichet-collaboratif' === $app) {
             $redirectUrl .= 'guichet-collaboratif/logout?success=1';
         } else {
-            $redirectUrl .= 'decouvrir';
+            $redirectUrl .= 'publier-une-donnee';
         }
 
         if ('test' === $this->parameters->get('app_env') || null === $idToken) {
