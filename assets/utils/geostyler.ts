@@ -2,7 +2,7 @@ import MapboxStyleParser from "geostyler-mapbox-parser";
 import OlStyleParser from "geostyler-openlayers-parser";
 import QGISStyleParser from "geostyler-qgis-parser";
 import SldStyleParser from "geostyler-sld-parser";
-import { StyleParser } from "geostyler-style";
+import { Style as GsStyle, StyleParser } from "geostyler-style";
 
 import { CartesStyle, GeostylerStyles, StyleFormatEnum } from "@/@types/app";
 
@@ -60,4 +60,30 @@ export function getParserForExtension(extension: string | undefined): StyleParse
 
 export function getParsersForExtensions(fileExtensions: string[] = ["sld"]): StyleParser[] {
     return fileExtensions.map((ext) => getParserForExtension(ext));
+}
+
+export function propertyNamesToLowerCase(sldContent: string) {
+    return sldContent.replace(/<(ogc:)?PropertyName>(.*?)<\/(ogc:)?PropertyName>/g, (_, p1, p2) => {
+        return `<${p1 ?? ""}PropertyName>${p2.toLowerCase()}</${p1 ?? ""}PropertyName>`;
+    });
+}
+
+export function getDefaultStyle(currentTable: string): GsStyle {
+    return {
+        name: currentTable,
+        rules: [
+            {
+                name: `rule_${Math.floor(Math.random() * 10000)
+                    .toString()
+                    .padStart(4, "0")}`,
+                symbolizers: [
+                    {
+                        kind: "Mark",
+                        wellKnownName: "circle",
+                        color: "#0E1058",
+                    },
+                ],
+            },
+        ],
+    };
 }
