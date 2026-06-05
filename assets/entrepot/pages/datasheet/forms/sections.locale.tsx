@@ -1,6 +1,8 @@
 import { declareComponentKeys } from "@/i18n";
 import { type Translations } from "@/i18n/types";
 
+import { type ProducerRole } from "./metadataSchema";
+
 const { i18n } = declareComponentKeys<
     // Titres de sections
     | "section.description"
@@ -31,6 +33,9 @@ const { i18n } = declareComponentKeys<
     | "producer.add"
     | "producer.remove"
     | "producer.card.title"
+    | { K: "producer.role"; P: { role: ProducerRole }; R: string }
+    | "producer.role.placeholder"
+    | "producer.custodianHint"
     // Section date
     | "field.creationDate"
     | "field.creationDate.hint"
@@ -88,6 +93,19 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "producer.add": "Ajouter un producteur",
     "producer.remove": "Supprimer",
     "producer.card.title": "Producteur",
+    "producer.role": ({ role }) => {
+        const labels: Record<ProducerRole, string> = {
+            pointOfContact: "Contact",
+            custodian: "Gestionnaire",
+            author: "Auteur",
+            owner: "Propriétaire",
+            resourceProvider: "Fournisseur",
+        };
+        return labels[role];
+    },
+    "producer.role.placeholder": "Sélectionnez un rôle",
+    "producer.custodianHint":
+        "Ce contact sera également utilisé comme gestionnaire de la donnée, sauf si vous ajoutez un producteur ayant le rôle « Gestionnaire ».",
 
     "field.creationDate": "Date de création",
     "field.creationDate.hint": "Format attendu : JJ/MM/AAAA",
@@ -144,6 +162,18 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "producer.add": "Add a producer",
     "producer.remove": "Remove",
     "producer.card.title": "Producer",
+    "producer.role": ({ role }) => {
+        const labels: Record<ProducerRole, string> = {
+            pointOfContact: "Contact",
+            custodian: "Custodian",
+            author: "Author",
+            owner: "Owner",
+            resourceProvider: "Resource provider",
+        };
+        return labels[role];
+    },
+    "producer.role.placeholder": "Select a role",
+    "producer.custodianHint": "This contact will also be used as the data custodian, unless you add a producer with the « Custodian » role.",
 
     "field.creationDate": "Creation date",
     "field.creationDate.hint": "Expected format: DD/MM/YYYY",
