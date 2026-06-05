@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import territories from "geopf-extensions-openlayers/src/packages/Controls/Territories/Territories.json";
 
 import { MetadataHierarchyLevel } from "@/@types/app";
 import { LanguageType, regex } from "@/utils";
@@ -32,6 +33,8 @@ export type LicenseFormValues = {
     conditionType: string;
     constraintType: string;
 };
+
+export type Territory = (typeof territories)[number];
 
 // ---------------------------------------------------------------------------
 // Schéma Yup principal — toutes les sections de la fiche de données
@@ -115,7 +118,7 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
             .required("La fréquence de mise à jour est obligatoire"),
 
         // Section emprise spatiale
-        territories: yup.array(yup.string().defined()).min(1, "Sélectionnez au moins un territoire").required(),
+        territories: yup.array(yup.mixed<Territory>().defined()).min(1, "Sélectionnez au moins un territoire").required(),
 
         // Section licences
         licenses: yup
