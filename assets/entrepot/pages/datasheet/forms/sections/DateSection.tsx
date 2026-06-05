@@ -1,11 +1,9 @@
-import Select from "@codegouvfr/react-dsfr/Select";
+import Select from "@codegouvfr/react-dsfr/SelectNext";
 import { Controller, useFormContext } from "react-hook-form";
 
-import { useTranslation } from "@/i18n/i18n";
 import DatePicker from "@/components/Input/DatePicker";
-
-import frequencyCodes from "@/data/maintenance_frequency.json";
-import { MetadataFormValues } from "../metadataSchema";
+import { useTranslation } from "@/i18n/i18n";
+import { MetadataFormValues, UPDATE_FREQUENCIES } from "../metadataSchema";
 
 export default function DateSection() {
     const { t } = useTranslation("DatasheetSections");
@@ -34,19 +32,15 @@ export default function DateSection() {
 
             <Select
                 label={t("field.updateFrequency")}
+                placeholder={t("field.updateFrequency.placeholder")}
+                options={UPDATE_FREQUENCIES.map((code) => ({
+                    value: code,
+                    label: t("field.updateFrequency.option", { code }),
+                }))}
                 state={errors.updateFrequency ? "error" : "default"}
                 stateRelatedMessage={errors.updateFrequency?.message}
                 nativeSelectProps={{ ...register("updateFrequency") }}
-            >
-                <option value="" disabled>
-                    —
-                </option>
-                {Object.entries(frequencyCodes).map(([key, label]) => (
-                    <option key={key} value={key}>
-                        {label}
-                    </option>
-                ))}
-            </Select>
+            />
         </div>
     );
 }
