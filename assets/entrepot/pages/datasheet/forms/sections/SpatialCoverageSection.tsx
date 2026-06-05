@@ -1,3 +1,5 @@
+import { fr } from "@codegouvfr/react-dsfr";
+import territories from "geopf-extensions-openlayers/src/packages/Controls/Territories/Territories.json";
 import { Controller, useFormContext } from "react-hook-form";
 
 import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
@@ -20,13 +22,16 @@ export default function SpatialCoverageSection() {
                     <AutocompleteSelect
                         label={t("field.territories")}
                         hintText={t("field.territories.hint")}
-                        options={[]}
-                        freeSolo
+                        options={territories}
+                        getOptionLabel={(option) => option.title}
+                        getOptionKey={(option) => option.id}
+                        multiple={true}
                         state={error ? "error" : "default"}
-                        stateRelatedMessage={error?.message ?? (errors.territories as { message?: string } | undefined)?.message}
+                        stateRelatedMessage={error?.message ?? errors.territories?.message}
                         value={field.value ?? []}
                         onChange={(_, value) => field.onChange(value)}
                         onBlur={field.onBlur}
+                        popupIcon={<span className={fr.cx("fr-icon-search-line", "fr-icon--sm")} />}
                     />
                 )}
             />
