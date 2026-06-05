@@ -10,6 +10,24 @@ import { LanguageType, regex } from "@/utils";
 export const PRODUCER_ROLES = ["pointOfContact", "custodian", "author", "owner", "resourceProvider"] as const;
 export type ProducerRole = (typeof PRODUCER_ROLES)[number];
 
+// NOTE : « quaterly » est la graphie historique du vocabulaire frequency_code (cf. maintenance_frequency.json et l'API Entrepôt).
+// Ne pas corriger ici sans corriger simultanément le fichier JSON et le mapping API.
+export const UPDATE_FREQUENCIES = [
+    "continual",
+    "daily",
+    "weekly",
+    "fortnightly",
+    "monthly",
+    "quaterly",
+    "biannually",
+    "annually",
+    "asNeeded",
+    "irregular",
+    "notPlanned",
+    "unknown",
+] as const;
+export type UpdateFrequency = (typeof UPDATE_FREQUENCIES)[number];
+
 export type LicenseFormValues = {
     conditionType: string;
     constraintType: string;
@@ -87,8 +105,14 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
             .required(),
 
         // Section date
+        // Note : publication_date (= date de création de la fiche) et revision_date (= date de modification des
+        // métadonnées ou d'un service) ne sont pas saisies ici ; elles seront remplies automatiquement lors du
+        // mapping de soumission (TODO API dans DatasheetCreateNext / DatasheetViewNext).
         creationDate: yup.date().typeError("Format de date invalide (JJ/MM/AAAA)").required("La date de création est obligatoire"),
-        updateFrequency: yup.string().required("La fréquence de mise à jour est obligatoire"),
+        updateFrequency: yup
+            .mixed<UpdateFrequency>()
+            .oneOf([...UPDATE_FREQUENCIES], "La fréquence de mise à jour est obligatoire")
+            .required("La fréquence de mise à jour est obligatoire"),
 
         // Section emprise spatiale
         territories: yup.array(yup.string().defined()).min(1, "Sélectionnez au moins un territoire").required(),
@@ -137,7 +161,7 @@ export const defaultMetadataValues: Partial<MetadataFormValues> = {
     additionalKeywords: [],
     fileIdentifier: "",
     producers: [{ organizationName: "", organizationEmail: "", role: "pointOfContact" }],
-    updateFrequency: "",
+    updateFrequency: undefined,
     territories: [],
     licenses: [],
     resourceGenealogy: "",
