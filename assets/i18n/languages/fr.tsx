@@ -1,4 +1,5 @@
 import { AddressFieldsFrTranslations } from "@/components/Input/AddressFields.locale";
+import { AutocompleteSelectFrTranslations } from "@/components/Input/AutocompleteSelect.locale";
 import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
 import { DatasheetSectionsFrTranslations } from "@/entrepot/pages/datasheet/forms/sections.locale";
 import { DatasheetCreateNextFrTranslations } from "@/entrepot/pages/datasheet/DatasheetCreate/DatasheetCreateNext.locale";
@@ -138,6 +139,7 @@ export const translations: Translations<"fr"> = {
     ManageGridsDialog: ManageGridsDialogFrTranslations,
     alerts: AlertsFrTranslations,
     AddressFields: AddressFieldsFrTranslations,
+    AutocompleteSelect: AutocompleteSelectFrTranslations,
     KeyValueList: KeyValueListFrTranslations,
     DatasheetSections: DatasheetSectionsFrTranslations,
     DatasheetCreateNext: DatasheetCreateNextFrTranslations,
