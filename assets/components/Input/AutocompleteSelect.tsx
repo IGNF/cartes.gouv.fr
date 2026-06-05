@@ -37,7 +37,6 @@ type AutocompleteSelectBaseProps = AutocompleteSelectProps<unknown, boolean | un
 const defaultSearchFilter = {
     ignoreAccents: true,
     ignoreCase: true,
-    limit: 20,
 } satisfies CreateFilterOptionsConfig<unknown>;
 
 function AutocompleteSelect<T, M extends boolean | undefined = true, D extends boolean | undefined = false, F extends boolean | undefined = false>(
@@ -63,7 +62,6 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
         classes,
         renderValue,
         filterOptions,
-
         popupIcon = <span className={fr.cx("fr-icon-arrow-down-s-line", "fr-icon--sm")} />,
         clearIcon = null,
         forcePopupIcon = true,
