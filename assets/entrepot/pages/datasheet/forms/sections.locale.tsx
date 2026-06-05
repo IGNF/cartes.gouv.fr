@@ -1,7 +1,7 @@
 import { declareComponentKeys } from "@/i18n";
 import { type Translations } from "@/i18n/types";
 
-import { type ProducerRole } from "./metadataSchema";
+import { type ProducerRole, type UpdateFrequency } from "./metadataSchema";
 
 const { i18n } = declareComponentKeys<
     // Titres de sections
@@ -40,6 +40,8 @@ const { i18n } = declareComponentKeys<
     | "field.creationDate"
     | "field.creationDate.hint"
     | "field.updateFrequency"
+    | { K: "field.updateFrequency.option"; P: { code: UpdateFrequency }; R: string }
+    | "field.updateFrequency.placeholder"
     // Section emprise spatiale
     | "field.territories"
     | "field.territories.hint"
@@ -110,6 +112,24 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.creationDate": "Date de création",
     "field.creationDate.hint": "Format attendu : JJ/MM/AAAA",
     "field.updateFrequency": "Fréquence de mise à jour",
+    "field.updateFrequency.option": ({ code }) => {
+        const labels: Record<UpdateFrequency, string> = {
+            continual: "En continu",
+            daily: "Journalière",
+            weekly: "Hebdomadaire",
+            fortnightly: "Bimensuelle",
+            monthly: "Mensuelle",
+            quaterly: "Trimestrielle",
+            biannually: "Biannuelle",
+            annually: "Annuelle",
+            asNeeded: "En fonction du besoin",
+            irregular: "Irrégulière",
+            notPlanned: "Non planifiée",
+            unknown: "Inconnue",
+        };
+        return labels[code];
+    },
+    "field.updateFrequency.placeholder": "Sélectionnez une fréquence",
 
     "field.territories": "Territoires concernés",
     "field.territories.hint": "Saisissez au moins 3 caractères",
@@ -178,6 +198,24 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "field.creationDate": "Creation date",
     "field.creationDate.hint": "Expected format: DD/MM/YYYY",
     "field.updateFrequency": "Update frequency",
+    "field.updateFrequency.option": ({ code }) => {
+        const labels: Record<UpdateFrequency, string> = {
+            continual: "Continual",
+            daily: "Daily",
+            weekly: "Weekly",
+            fortnightly: "Fortnightly",
+            monthly: "Monthly",
+            quaterly: "Quarterly",
+            biannually: "Biannually",
+            annually: "Annually",
+            asNeeded: "As needed",
+            irregular: "Irregular",
+            notPlanned: "Not planned",
+            unknown: "Unknown",
+        };
+        return labels[code];
+    },
+    "field.updateFrequency.placeholder": "Select a frequency",
 
     "field.territories": "Concerned territories",
     "field.territories.hint": "Type at least 3 characters",
