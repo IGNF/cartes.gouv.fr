@@ -20,42 +20,43 @@ export default function DatasheetCreateNext(props: DatasheetCreateNextProps) {
         <DatasheetMain
             title={t("title")}
             header={
-                <>
+                <div className={fr.cx("fr-container")}>
                     <h1>{t("title")}</h1>
                     <p className={fr.cx("fr-info-text", "fr-mb-1v")}>
                         Avant de créer une fiche de données, assurez-vous que votre donnée n’a pas déjà été publiée par un autre producteur.
                     </p>
                     <p className={fr.cx("fr-text--xs")}>{tCommon("mandatory_fields")}</p>
-                </>
+                </div>
             }
             content={
-                <div>
-                    <MetadataForm
-                        defaultValues={defaultMetadataValues}
-                        onSubmit={async (_values) => {
-                            /* TODO : appel API backend (POST) une fois le contrat défini */
-                        }}
-                        renderBottomActions={({ isSubmitting }) => (
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-my-4w")}>
-                                <ButtonsGroup
-                                    inlineLayoutWhen="always"
-                                    buttons={[
-                                        {
-                                            priority: "secondary",
-                                            linkProps: routes.datasheet_list({ datastoreId }).link,
-                                            children: t("cancel"),
-                                        },
-                                        {
-                                            type: "submit",
-                                            disabled: isSubmitting,
-                                            children: t("submit"),
-                                        },
-                                    ]}
-                                />
-                            </div>
-                        )}
-                    />
-                </div>
+                <MetadataForm
+                    defaultValues={defaultMetadataValues}
+                    onSubmit={async (_values) => {
+                        /* TODO : appel API backend (POST) une fois le contrat défini.
+                         * Appliquer withCustodianFallback(_values.producers) avant l'envoi
+                         * pour garantir la présence du gestionnaire dans les métadonnées ISO 19115.
+                         */
+                    }}
+                    renderBottomActions={({ isSubmitting }) => (
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-my-4w")}>
+                            <ButtonsGroup
+                                inlineLayoutWhen="always"
+                                buttons={[
+                                    {
+                                        priority: "secondary",
+                                        linkProps: routes.datasheet_list({ datastoreId }).link,
+                                        children: t("cancel"),
+                                    },
+                                    {
+                                        type: "submit",
+                                        disabled: isSubmitting,
+                                        children: t("submit"),
+                                    },
+                                ]}
+                            />
+                        </div>
+                    )}
+                />
             }
         />
     );
