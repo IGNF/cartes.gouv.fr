@@ -7,15 +7,8 @@ import { LanguageType, regex } from "@/utils";
 // Types intermédiaires pour les champs composés
 // ---------------------------------------------------------------------------
 
-export type ProducerFormValues = {
-    organizationName: string;
-    organizationEmail: string;
-    logoFile?: FileList;
-    addressNumber?: string;
-    addressStreet?: string;
-    addressPostalCode?: string;
-    addressCity?: string;
-};
+export const PRODUCER_ROLES = ["pointOfContact", "custodian", "author", "owner", "resourceProvider"] as const;
+export type ProducerRole = (typeof PRODUCER_ROLES)[number];
 
 export type LicenseFormValues = {
     conditionType: string;
@@ -73,7 +66,12 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
                         .string()
                         .email("Format d'adresse électronique invalide")
                         .required("L'adresse électronique de l'organisme est obligatoire"),
-                    role: yup.string().required("Le rôle du producteur est obligatoire"),
+                    // Rôle ISO 19115. L'index 0 est verrouillé sur "pointOfContact" côté UI ;
+                    // un rôle vide ("") échoue le oneOf → validation "rôle obligatoire" pour les autres cartes.
+                    role: yup
+                        .mixed<ProducerRole>()
+                        .oneOf([...PRODUCER_ROLES], "Le rôle du producteur est obligatoire")
+                        .required("Le rôle du producteur est obligatoire"),
                     logoFile: yup.mixed<FileList>().optional(),
                     addressNumber: yup.string().optional(),
                     addressStreet: yup.string().optional(),
@@ -82,6 +80,10 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
                 })
             )
             .min(1, "Au moins un producteur est requis")
+            // Invariant structurel : la 1ère carte est verrouillée sur "pointOfContact" côté UI.
+            // Ce test protège contre des defaultValues/reset incohérents (ex. métadonnées chargées
+            // en mode édition non normalisées via normalizeProducers).
+            .test("first-is-point-of-contact", "Le premier producteur doit être le contact", (producers) => producers?.[0]?.role === "pointOfContact")
             .required(),
 
         // Section date
@@ -116,6 +118,9 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
 
 export type MetadataFormValues = yup.InferType<ReturnType<typeof buildMetadataSchema>>;
 
+// Ligne du tableau "producers", dérivée du schéma Yup (source de vérité unique)
+export type ProducerFormValues = MetadataFormValues["producers"][number];
+
 // ---------------------------------------------------------------------------
 // Dictionnaire des champs par section
 // ---------------------------------------------------------------------------
@@ -131,7 +136,7 @@ export const defaultMetadataValues: Partial<MetadataFormValues> = {
     inspireKeywords: [],
     additionalKeywords: [],
     fileIdentifier: "",
-    producers: [{ organizationName: "", organizationEmail: "", role: "contact" }],
+    producers: [{ organizationName: "", organizationEmail: "", role: "pointOfContact" }],
     updateFrequency: "",
     territories: [],
     licenses: [],
@@ -139,3 +144,47 @@ export const defaultMetadataValues: Partial<MetadataFormValues> = {
     hierarchyLevel: MetadataHierarchyLevel.Dataset,
     charset: "utf8",
 };
+
+// ---------------------------------------------------------------------------
+// Helpers de mapping pour la soumission
+// ---------------------------------------------------------------------------
+
+/**
+ * Applique la règle métier du gestionnaire (custodian) au moment de la soumission.
+ *
+ * Le rôle "custodian" est obligatoire dans les métadonnées ISO 19115 finales.
+ * Si l'utilisateur n'a déclaré aucun producteur ayant ce rôle, le contact
+ * (pointOfContact, toujours présent en index 0) est dupliqué en tant que gestionnaire.
+ * La liste d'entrée n'est pas mutée.
+ *
+ * @param producers Lignes du formulaire (l'index 0 est garanti "pointOfContact" côté UI).
+ * @returns La liste des producteurs, complétée d'un gestionnaire dérivé du contact si nécessaire.
+ */
+export function withCustodianFallback(producers: ProducerFormValues[]): ProducerFormValues[] {
+    if (producers.some((p) => p.role === "custodian")) return producers;
+    const pointOfContact = producers.find((p) => p.role === "pointOfContact");
+    if (!pointOfContact) return producers; // défensif : ne devrait pas arriver (index 0 verrouillé)
+    return [...producers, { ...pointOfContact, role: "custodian" }];
+}
+
+/**
+ * Normalise la liste des producteurs pour satisfaire l'invariant du formulaire :
+ * le pointOfContact doit être en index 0 (carte verrouillée côté UI, ProducerSection).
+ *
+ * - Si un pointOfContact existe ailleurs dans la liste, il est déplacé en tête.
+ * - S'il n'en existe aucun (ex. métadonnées legacy sans rôle), une ligne contact
+ *   vide est insérée en tête pour que l'utilisateur la complète.
+ * Ne mute pas la liste d'entrée.
+ *
+ * À utiliser lors du mapping métadonnées API → valeurs du formulaire (mode édition),
+ * avant de passer les données en defaultValues à MetadataForm.
+ */
+export function normalizeProducers(producers: ProducerFormValues[]): ProducerFormValues[] {
+    const contactIndex = producers.findIndex((p) => p.role === "pointOfContact");
+    if (contactIndex === 0) return producers;
+    if (contactIndex > 0) {
+        return [producers[contactIndex], ...producers.filter((_, i) => i !== contactIndex)];
+    }
+    // Aucun pointOfContact trouvé : insérer une ligne vide en tête
+    return [{ organizationName: "", organizationEmail: "", role: "pointOfContact" }, ...producers];
+}

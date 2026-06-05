@@ -3,16 +3,47 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/SelectNext";
 import Tag from "@codegouvfr/react-dsfr/Tag";
-import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { Controller, useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { useStyles } from "tss-react";
 
 import AddressFields from "@/components/Input/AddressFields";
 import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import ImageFieldUpload from "@/components/Input/ImageFieldUpload";
+import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n/i18n";
-import { MetadataFormValues } from "../metadataSchema";
+import RQKeys from "@/modules/entrepot/RQKeys";
+import { delta } from "@/utils";
+import { MetadataFormValues, PRODUCER_ROLES, type ProducerRole } from "../metadataSchema";
 
-const emptyProducer = { organizationName: "", organizationEmail: "", role: "contact" };
+// Rôles sélectionnables pour les cartes additionnelles (index >= 1) — pointOfContact est réservé à la 1ère carte.
+const SELECTABLE_ROLES = PRODUCER_ROLES.filter((role) => role !== "pointOfContact") as ProducerRole[];
+
+// Nouveau producteur : rôle vide pour forcer un choix (validation .oneOf pour les index >= 1).
+const emptyProducer = { organizationName: "", organizationEmail: "", role: "" as ProducerRole };
+
+// ---------------------------------------------------------------------------
+// Sous-composant : tag de rôle en direct (useWatch pour ne pas utiliser le snapshot figé de useFieldArray)
+// ---------------------------------------------------------------------------
+
+interface ProducerRoleTagProps {
+    index: number;
+}
+
+function ProducerRoleTag({ index }: ProducerRoleTagProps) {
+    const { t } = useTranslation("DatasheetSections");
+    const { control } = useFormContext<Partial<MetadataFormValues>>();
+    const role = useWatch({ control, name: `producers.${index}.role` }) as ProducerRole | undefined;
+
+    // Rôle non encore choisi → pas de tag
+    if (!role) return null;
+    return <Tag small>{t("producer.role", { role })}</Tag>;
+}
+
+// ---------------------------------------------------------------------------
+// Composant principal
+// ---------------------------------------------------------------------------
 
 export default function ProducerSection() {
     const { t } = useTranslation("DatasheetSections");
@@ -25,6 +56,17 @@ export default function ProducerSection() {
     const { fields, append, remove } = useFieldArray({ control, name: "producers" });
 
     const { css, cx } = useStyles();
+
+    const { data: organizations } = useQuery({
+        queryKey: RQKeys.catalogs_organizations(),
+        queryFn: ({ signal }) => api.catalogs.getAllOrganizations({ signal }),
+        staleTime: delta.hours(10),
+    });
+
+    const organizationsOptions = useMemo(() => {
+        if (!organizations) return [];
+        return organizations.map((org) => org.name.trim()).toSorted();
+    }, [organizations]);
 
     return (
         <>
@@ -46,13 +88,12 @@ export default function ProducerSection() {
             >
                 {fields.map((field, index) => {
                     const fieldErrors = errors.producers?.[index];
+                    // La 1ère carte est toujours le contact (pointOfContact) — verrouillée, non supprimable.
+                    const isContact = index === 0;
 
                     return (
-                        <section
-                            key={field.id}
-                            // className={fr.cx("fr-p-3w", "fr-mb-3w")}
-                            // style={{ border: `1px solid ${fr.colors.decisions.border.default.grey.default}` }}
-                        >
+                        <section key={field.id}>
+                            {/* En-tête de carte : mention + tag de rôle + bouton supprimer */}
                             <div
                                 className={css({
                                     display: "flex",
@@ -78,11 +119,14 @@ export default function ProducerSection() {
                                             })
                                         )}
                                     >
-                                        {t("producer.card.title")} {index + 1}
+                                        {/* Figma : « Producteur » sans numéro pour la 1ère carte, « Producteur N » pour les suivantes */}
+                                        {isContact ? t("producer.card.title") : `${t("producer.card.title")} ${index + 1}`}
                                     </p>
-                                    {field.role && <Tag small>{field.role}</Tag>} {/* mettre à jour avec la valeur choisie */}
+                                    {/* Carte contact : tag statique ; autres cartes : tag live via useWatch */}
+                                    {isContact ? <Tag small>{t("producer.role", { role: "pointOfContact" })}</Tag> : <ProducerRoleTag index={index} />}
                                 </div>
-                                {fields.length > 1 && (
+                                {/* Bouton supprimer : uniquement sur les cartes additionnelles */}
+                                {!isContact && (
                                     <Button
                                         iconId="fr-icon-delete-line"
                                         priority="tertiary no outline"
@@ -95,6 +139,10 @@ export default function ProducerSection() {
                                 )}
                             </div>
 
+                            {/* Hint custodian : uniquement sur la carte contact (index 0) */}
+                            {isContact && <p className={fr.cx("fr-hint-text", "fr-mb-3v")}>{t("producer.custodianHint")}</p>}
+
+                            {/* Nom de l'organisme (auto-complétion ou saisie libre) */}
                             <Controller
                                 control={control}
                                 name={`producers.${index}.organizationName`}
@@ -102,7 +150,10 @@ export default function ProducerSection() {
                                     <AutocompleteSelect
                                         label={t("field.organizationName")}
                                         hintText={t("field.organizationName.hint")}
-                                        options={[]}
+                                        options={organizationsOptions}
+                                        searchFilter={{
+                                            limit: undefined,
+                                        }}
                                         freeSolo
                                         multiple={false}
                                         state={error ? "error" : "default"}
@@ -114,15 +165,22 @@ export default function ProducerSection() {
                                 )}
                             />
 
-                            <Select
-                                label={t("field.producerRole")}
-                                options={["contact", "producteur principal", "producteur secondaire", "autre"].map((role) => ({ value: role, label: role }))}
-                                nativeSelectProps={{
-                                    ...register(`producers.${index}.role`),
-                                }}
-                                state={fieldErrors?.role ? "error" : "default"}
-                                stateRelatedMessage={fieldErrors?.role?.message}
-                            />
+                            {/* Select de rôle : uniquement pour les cartes additionnelles (index >= 1) */}
+                            {!isContact && (
+                                <Select
+                                    label={t("field.producerRole")}
+                                    placeholder={t("producer.role.placeholder")}
+                                    options={SELECTABLE_ROLES.map((role) => ({
+                                        value: role,
+                                        label: t("producer.role", { role }),
+                                    }))}
+                                    nativeSelectProps={{
+                                        ...register(`producers.${index}.role`),
+                                    }}
+                                    state={fieldErrors?.role ? "error" : "default"}
+                                    stateRelatedMessage={fieldErrors?.role?.message}
+                                />
+                            )}
 
                             <ImageFieldUpload
                                 name={`producers.${index}.logoFile`}
