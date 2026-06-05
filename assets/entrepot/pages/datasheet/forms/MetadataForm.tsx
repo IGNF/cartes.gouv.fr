@@ -67,6 +67,7 @@ export default function MetadataForm({
         handleSubmit,
         formState: { isSubmitting },
         control,
+        getValues,
     } = form;
 
     const submit = handleSubmit(async (values) => {
@@ -88,7 +89,15 @@ export default function MetadataForm({
                 )}
             >
                 <FormProvider {...form}>
-                    <form onSubmit={submit} noValidate>
+                    <form
+                        onSubmit={(f) => {
+                            // TODO: remove this log when feature is complete
+                            console.log(getValues());
+
+                            submit(f);
+                        }}
+                        noValidate
+                    >
                         <div
                             className={cx(
                                 fr.cx("fr-grid-row", "fr-grid-row--gutters"),
