@@ -1,7 +1,15 @@
 import { declareComponentKeys } from "@/i18n";
 import { type Translations } from "@/i18n/types";
 
-import { type ProducerRole, type UpdateFrequency } from "./metadataSchema";
+import {
+    type ClassificationCode,
+    type ConstraintType,
+    type PublicAccessLimitation,
+    type RestrictionCode,
+    type SubConstraintType,
+    type ProducerRole,
+    type UpdateFrequency,
+} from "./metadataSchema";
 
 const { i18n } = declareComponentKeys<
     // Titres de sections
@@ -45,12 +53,34 @@ const { i18n } = declareComponentKeys<
     // Section emprise spatiale
     | "field.territories"
     | "field.territories.hint"
-    // Section licences
-    | "field.conditionType"
-    | "field.constraintType"
+    // Section licences / conditions d'utilisation
     | "license.add"
+    | "license.addOpenLicense"
     | "license.remove"
     | "license.card.title"
+    | { K: "license.conditionType"; P: { type: ConstraintType }; R: string }
+    | "license.conditionType.placeholder"
+    | "license.constraint.add"
+    | "license.constraint.remove"
+    | "license.constraint.fold"
+    | "license.constraint.unfold"
+    | "license.constraint.card.title"
+    | { K: "license.subConstraintType"; P: { type: SubConstraintType }; R: string }
+    | "license.subConstraintType.placeholder"
+    | "field.conditionType"
+    | "field.constraintType"
+    | "field.constraintValue"
+    | "field.constraintUrl"
+    | "field.constraintUrl.hint"
+    | "field.constraintDescription"
+    | "field.constraintDescription.hint"
+    | "field.constraintRestriction"
+    | { K: "license.restrictionCode"; P: { code: RestrictionCode }; R: string }
+    | "license.restrictionCode.placeholder"
+    | { K: "license.limitationCode"; P: { code: PublicAccessLimitation }; R: string }
+    | "license.limitationCode.placeholder"
+    | { K: "license.classificationCode"; P: { code: ClassificationCode }; R: string }
+    | "license.classificationCode.placeholder"
     // Section informations sur les métadonnées
     | "field.resourceGenealogy"
     | "field.resourceGenealogy.hint"
@@ -134,11 +164,84 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.territories": "Territoires concernés",
     "field.territories.hint": "Saisissez au moins 3 caractères",
 
-    "field.conditionType": "Type de condition",
-    "field.constraintType": "Type de contrainte",
     "license.add": "Ajouter une condition",
+    "license.addOpenLicense": "Ajouter une licence ouverte",
     "license.remove": "Supprimer",
     "license.card.title": "Condition",
+    "license.conditionType": ({ type }) => {
+        const labels: Record<ConstraintType, string> = {
+            legal: "Conditions légales",
+            security: "Contraintes de sécurité",
+            other: "Autres contraintes",
+        };
+        return labels[type];
+    },
+    "license.conditionType.placeholder": "Sélectionnez un type de condition",
+    "license.constraint.add": "Ajouter une contrainte",
+    "license.constraint.remove": "Supprimer",
+    "license.constraint.fold": "Replier",
+    "license.constraint.unfold": "Déplier",
+    "license.constraint.card.title": "Contrainte",
+    "license.subConstraintType": ({ type }) => {
+        const labels: Record<SubConstraintType, string> = {
+            useConstraints: "Contrainte d'usage",
+            accessConstraints: "Contrainte d'accès",
+            useLimitation: "Limite d'usage",
+            otherConstraints: "Autre contrainte",
+            classification: "Classification",
+        };
+        return labels[type];
+    },
+    "license.subConstraintType.placeholder": "Sélectionnez un type de contrainte",
+    "field.conditionType": "Type de condition",
+    "field.constraintType": "Type de contrainte",
+    "field.constraintValue": "Valeur",
+    "field.constraintUrl": "URL (optionnel)",
+    "field.constraintUrl.hint": "Lien vers la licence ou les conditions complètes",
+    "field.constraintDescription": "Description",
+    "field.constraintDescription.hint": "Décrivez les conditions d'utilisation",
+    "field.constraintRestriction": "Restriction",
+    "license.restrictionCode": ({ code }) => {
+        const labels: Record<RestrictionCode, string> = {
+            copyright: "Droit d'auteur",
+            patent: "Brevet",
+            patentPending: "Brevet en cours",
+            trademark: "Marque déposée",
+            license: "Licence",
+            intellectualPropertyRights: "Droits de propriété intellectuelle",
+            restricted: "Restreint",
+            otherRestrictions: "Autres contraintes",
+        };
+        return labels[code];
+    },
+    "license.restrictionCode.placeholder": "Sélectionnez une valeur",
+    "license.limitationCode": ({ code }) => {
+        const labels: Record<PublicAccessLimitation, string> = {
+            noLimitations: "Pas de contraintes prévues selon la loi.",
+            conditionsUnknown: "Conditions inconnues",
+            INSPIRE_Directive_Article13_1a: "Article 13(1)(a) – Confidentialité des travaux des autorités publiques",
+            INSPIRE_Directive_Article13_1b: "Article 13(1)(b) – Relations internationales, sécurité publique ou défense nationale",
+            INSPIRE_Directive_Article13_1c: "Article 13(1)(c) – Bonne marche de la justice",
+            INSPIRE_Directive_Article13_1d: "Article 13(1)(d) – Confidentialité des informations commerciales ou industrielles",
+            INSPIRE_Directive_Article13_1e: "Article 13(1)(e) – Droits de propriété intellectuelle",
+            INSPIRE_Directive_Article13_1f: "Article 13(1)(f) – Confidentialité des données à caractère personnel",
+            INSPIRE_Directive_Article13_1g: "Article 13(1)(g) – Intérêts ou protection du fournisseur volontaire d'informations",
+            INSPIRE_Directive_Article13_1h: "Article 13(1)(h) – Protection de l'environnement",
+        };
+        return labels[code];
+    },
+    "license.limitationCode.placeholder": "Sélectionnez une limitation",
+    "license.classificationCode": ({ code }) => {
+        const labels: Record<ClassificationCode, string> = {
+            unclassified: "Non classifié",
+            restricted: "Diffusion restreinte",
+            confidential: "Confidentiel",
+            secret: "Secret",
+            topSecret: "Très secret",
+        };
+        return labels[code];
+    },
+    "license.classificationCode.placeholder": "Sélectionnez une classification",
 
     "field.resourceGenealogy": "Généalogie de la ressource (optionnel)",
     "field.resourceGenealogy.hint":
@@ -220,11 +323,84 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "field.territories": "Concerned territories",
     "field.territories.hint": "Type at least 3 characters",
 
-    "field.conditionType": "Condition type",
-    "field.constraintType": "Constraint type",
     "license.add": "Add a condition",
+    "license.addOpenLicense": "Add an open license",
     "license.remove": "Remove",
     "license.card.title": "Condition",
+    "license.conditionType": ({ type }) => {
+        const labels: Record<ConstraintType, string> = {
+            legal: "Legal conditions",
+            security: "Security constraints",
+            other: "Other constraints",
+        };
+        return labels[type];
+    },
+    "license.conditionType.placeholder": "Select a condition type",
+    "license.constraint.add": "Add a constraint",
+    "license.constraint.remove": "Remove",
+    "license.constraint.fold": "Fold",
+    "license.constraint.unfold": "Unfold",
+    "license.constraint.card.title": "Constraint",
+    "license.subConstraintType": ({ type }) => {
+        const labels: Record<SubConstraintType, string> = {
+            useConstraints: "Use constraint",
+            accessConstraints: "Access constraint",
+            useLimitation: "Use limitation",
+            otherConstraints: "Other constraint",
+            classification: "Classification",
+        };
+        return labels[type];
+    },
+    "license.subConstraintType.placeholder": "Select a constraint type",
+    "field.conditionType": "Condition type",
+    "field.constraintType": "Constraint type",
+    "field.constraintValue": "Value",
+    "field.constraintUrl": "URL (optional)",
+    "field.constraintUrl.hint": "Link to the licence or full conditions",
+    "field.constraintDescription": "Description",
+    "field.constraintDescription.hint": "Describe the terms of use",
+    "field.constraintRestriction": "Restriction",
+    "license.restrictionCode": ({ code }) => {
+        const labels: Record<RestrictionCode, string> = {
+            copyright: "Copyright",
+            patent: "Patent",
+            patentPending: "Patent pending",
+            trademark: "Trademark",
+            license: "License",
+            intellectualPropertyRights: "Intellectual property rights",
+            restricted: "Restricted",
+            otherRestrictions: "Other constraints",
+        };
+        return labels[code];
+    },
+    "license.restrictionCode.placeholder": "Select a value",
+    "license.limitationCode": ({ code }) => {
+        const labels: Record<PublicAccessLimitation, string> = {
+            noLimitations: "No constraints required by law.",
+            conditionsUnknown: "Conditions unknown",
+            INSPIRE_Directive_Article13_1a: "Article 13(1)(a) – Confidentiality of proceedings of public authorities",
+            INSPIRE_Directive_Article13_1b: "Article 13(1)(b) – International relations, public security or national defence",
+            INSPIRE_Directive_Article13_1c: "Article 13(1)(c) – Course of justice",
+            INSPIRE_Directive_Article13_1d: "Article 13(1)(d) – Confidentiality of commercial or industrial information",
+            INSPIRE_Directive_Article13_1e: "Article 13(1)(e) – Intellectual property rights",
+            INSPIRE_Directive_Article13_1f: "Article 13(1)(f) – Confidentiality of personal data",
+            INSPIRE_Directive_Article13_1g: "Article 13(1)(g) – Interests or protection of voluntary information suppliers",
+            INSPIRE_Directive_Article13_1h: "Article 13(1)(h) – Protection of the environment",
+        };
+        return labels[code];
+    },
+    "license.limitationCode.placeholder": "Select a limitation",
+    "license.classificationCode": ({ code }) => {
+        const labels: Record<ClassificationCode, string> = {
+            unclassified: "Unclassified",
+            restricted: "Restricted",
+            confidential: "Confidential",
+            secret: "Secret",
+            topSecret: "Top secret",
+        };
+        return labels[code];
+    },
+    "license.classificationCode.placeholder": "Select a classification",
 
     "field.resourceGenealogy": "Resource genealogy (optional)",
     "field.resourceGenealogy.hint": "Describes the source data, methods and protocols used to produce your dataset.",
