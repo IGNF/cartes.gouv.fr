@@ -11,6 +11,53 @@ import { LanguageType, regex } from "@/utils";
 export const PRODUCER_ROLES = ["pointOfContact", "custodian", "author", "owner", "resourceProvider"] as const;
 export type ProducerRole = (typeof PRODUCER_ROLES)[number];
 
+// ---------------------------------------------------------------------------
+// Vocabulaires ISO 19139 pour la section licences / conditions d'utilisation
+// ---------------------------------------------------------------------------
+
+/** Type de condition (encart) - MD_LegalConstraints / MD_SecurityConstraints / MD_Constraints */
+export const CONSTRAINT_TYPES = ["legal", "security", "other"] as const;
+export type ConstraintType = (typeof CONSTRAINT_TYPES)[number];
+
+/** Sous-types de contrainte (sous-encart) */
+export const SUB_CONSTRAINT_TYPES = ["useConstraints", "accessConstraints", "useLimitation", "classification", "otherConstraints"] as const;
+export type SubConstraintType = (typeof SUB_CONSTRAINT_TYPES)[number];
+
+/** Valeurs MD_RestrictionCode (useConstraints, accessConstraints) */
+export const RESTRICTION_CODES = [
+    "copyright",
+    "patent",
+    "patentPending",
+    "trademark",
+    "license",
+    "intellectualPropertyRights",
+    "restricted",
+    "otherRestrictions",
+] as const;
+export type RestrictionCode = (typeof RESTRICTION_CODES)[number];
+
+/**
+ * Codelist INSPIRE LimitationsOnPublicAccess (otherConstraints) -
+ * "noLimitations" et "conditionsUnknown" sont ajoutés par l'IGN hors INSPIRE.
+ */
+export const PUBLIC_ACCESS_LIMITATIONS = [
+    "noLimitations",
+    "conditionsUnknown",
+    "INSPIRE_Directive_Article13_1a",
+    "INSPIRE_Directive_Article13_1b",
+    "INSPIRE_Directive_Article13_1c",
+    "INSPIRE_Directive_Article13_1d",
+    "INSPIRE_Directive_Article13_1e",
+    "INSPIRE_Directive_Article13_1f",
+    "INSPIRE_Directive_Article13_1g",
+    "INSPIRE_Directive_Article13_1h",
+] as const;
+export type PublicAccessLimitation = (typeof PUBLIC_ACCESS_LIMITATIONS)[number];
+
+/** Valeurs MD_ClassificationCode (classification) */
+export const CLASSIFICATION_CODES = ["unclassified", "restricted", "confidential", "secret", "topSecret"] as const;
+export type ClassificationCode = (typeof CLASSIFICATION_CODES)[number];
+
 // NOTE : « quaterly » est la graphie historique du vocabulaire frequency_code (cf. maintenance_frequency.json et l'API Entrepôt).
 // Ne pas corriger ici sans corriger simultanément le fichier JSON et le mapping API.
 export const UPDATE_FREQUENCIES = [
@@ -29,15 +76,10 @@ export const UPDATE_FREQUENCIES = [
 ] as const;
 export type UpdateFrequency = (typeof UPDATE_FREQUENCIES)[number];
 
-export type LicenseFormValues = {
-    conditionType: string;
-    constraintType: string;
-};
-
 export type Territory = (typeof territories)[number];
 
 // ---------------------------------------------------------------------------
-// Schéma Yup principal — toutes les sections de la fiche de données
+// Schéma Yup principal - toutes les sections de la fiche de données
 // ---------------------------------------------------------------------------
 
 type MasterSchemaDeps = {
@@ -120,12 +162,65 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
         // Section emprise spatiale
         territories: yup.array(yup.mixed<Territory>().defined()).min(1, "Sélectionnez au moins un territoire").required(),
 
-        // Section licences
-        licenses: yup
+        // Section licences / conditions d'utilisation (ISO 19139 resourceConstraints)
+        // Chaque entrée = une condition (encart), contenant des sous-contraintes (sous-encarts).
+        // Le mapping vers le XML de soumission est TODO (hors périmètre de cette branche).
+        resourceConstraints: yup
             .array(
                 yup.object({
-                    conditionType: yup.string().required("Le type de condition est obligatoire"),
-                    constraintType: yup.string().required("Le type de contrainte est obligatoire"),
+                    type: yup
+                        .mixed<ConstraintType>()
+                        .oneOf([...CONSTRAINT_TYPES], "Le type de condition est obligatoire")
+                        .required("Le type de condition est obligatoire"),
+                    constraints: yup
+                        .array(
+                            yup.object({
+                                type: yup
+                                    .mixed<SubConstraintType>()
+                                    .oneOf([...SUB_CONSTRAINT_TYPES], "Le type de contrainte est obligatoire")
+                                    .required("Le type de contrainte est obligatoire"),
+                                // locked : sous-encart compagnon auto-ajouté (non supprimable, type verrouillé côté UI)
+                                locked: yup.boolean().required().default(false),
+                                // useConstraints / accessConstraints → MD_RestrictionCode
+                                restrictionCode: yup.string().when("type", {
+                                    is: (t: SubConstraintType) => t === "useConstraints" || t === "accessConstraints",
+                                    then: (s) =>
+                                        s
+                                            .oneOf([...RESTRICTION_CODES], "La valeur de la contrainte est obligatoire")
+                                            .required("La valeur de la contrainte est obligatoire"),
+                                    otherwise: (s) => s.optional(),
+                                }),
+                                // otherConstraints → LimitationsOnPublicAccess
+                                limitationCode: yup.string().when("type", {
+                                    is: "otherConstraints",
+                                    then: (s) =>
+                                        s
+                                            .oneOf([...PUBLIC_ACCESS_LIMITATIONS], "La limitation d'accès est obligatoire")
+                                            .required("La limitation d'accès est obligatoire"),
+                                    otherwise: (s) => s.optional(),
+                                }),
+                                // classification → MD_ClassificationCode
+                                classificationCode: yup.string().when("type", {
+                                    is: "classification",
+                                    then: (s) =>
+                                        s.oneOf([...CLASSIFICATION_CODES], "La classification est obligatoire").required("La classification est obligatoire"),
+                                    otherwise: (s) => s.optional(),
+                                }),
+                                // useLimitation : URL optionnelle + description obligatoire
+                                url: yup.string().when("type", {
+                                    is: "useLimitation",
+                                    then: (s) => s.url("L'URL n'est pas valide").optional(),
+                                    otherwise: (s) => s.optional(),
+                                }),
+                                description: yup.string().when("type", {
+                                    is: "useLimitation",
+                                    then: (s) => s.required("La description est obligatoire"),
+                                    otherwise: (s) => s.optional(),
+                                }),
+                            })
+                        )
+                        .min(1, "Au moins une contrainte est requise")
+                        .required(),
                 })
             )
             .optional()
@@ -148,6 +243,10 @@ export type MetadataFormValues = yup.InferType<ReturnType<typeof buildMetadataSc
 // Ligne du tableau "producers", dérivée du schéma Yup (source de vérité unique)
 export type ProducerFormValues = MetadataFormValues["producers"][number];
 
+// Types dérivés pour la section licences (source de vérité unique : schéma Yup)
+export type ResourceConstraintFormValues = NonNullable<MetadataFormValues["resourceConstraints"]>[number];
+export type SubConstraintFormValues = ResourceConstraintFormValues["constraints"][number];
+
 // ---------------------------------------------------------------------------
 // Dictionnaire des champs par section
 // ---------------------------------------------------------------------------
@@ -166,11 +265,86 @@ export const defaultMetadataValues: Partial<MetadataFormValues> = {
     producers: [{ organizationName: "", organizationEmail: "", role: "pointOfContact" }],
     updateFrequency: undefined,
     territories: [],
-    licenses: [],
+    resourceConstraints: [],
     resourceGenealogy: "",
     hierarchyLevel: MetadataHierarchyLevel.Dataset,
     charset: "utf8",
 };
+
+// ---------------------------------------------------------------------------
+// Fabriques de valeurs par défaut pour la section licences
+// ---------------------------------------------------------------------------
+
+/** URL de référence de la Licence Ouverte Etalab - sert aussi à la détection dans l'UI. */
+export const OPEN_LICENSE_URL = "https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf";
+
+/**
+ * Sous-contrainte "limite d'usage" verrouillée (compagnon auto-ajouté, non supprimable).
+ * Utilisée comme compagnon de useConstraints/accessConstraints quand la valeur n'est pas
+ * « otherRestrictions », et comme seul sous-encart des conditions « autre ».
+ */
+export function makeLockedUseLimitation(overrides?: Partial<SubConstraintFormValues>): SubConstraintFormValues {
+    return { type: "useLimitation", locked: true, description: "", ...overrides };
+}
+
+/**
+ * Sous-contrainte "autre contrainte" verrouillée (compagnon auto-ajouté quand la valeur
+ * useConstraints/accessConstraints est « otherRestrictions »).
+ */
+export function makeLockedOtherConstraints(): SubConstraintFormValues {
+    return { type: "otherConstraints", locked: true, limitationCode: "" };
+}
+
+/** Sous-contraintes par défaut pour une condition légale (2 sous-encarts). */
+export function makeLegalDefaults(): SubConstraintFormValues[] {
+    return [{ type: "useConstraints", locked: false, restrictionCode: "license" }, makeLockedUseLimitation()];
+}
+
+/** Sous-contraintes par défaut pour une condition de sécurité (2 sous-encarts). */
+export function makeSecurityDefaults(): SubConstraintFormValues[] {
+    return [{ type: "classification", locked: true, classificationCode: "" }, makeLockedUseLimitation()];
+}
+
+/** Sous-contrainte par défaut pour une condition « autre » (1 sous-encart). */
+export function makeOtherDefaults(): SubConstraintFormValues[] {
+    return [makeLockedUseLimitation()];
+}
+
+/**
+ * Retourne les sous-contraintes par défaut selon le type de condition.
+ * Utilisé lors du changement de type d'une condition (réinitialise le tableau).
+ */
+export function makeDefaultConstraints(conditionType: ConstraintType): SubConstraintFormValues[] {
+    switch (conditionType) {
+        case "legal":
+            return makeLegalDefaults();
+        case "security":
+            return makeSecurityDefaults();
+        case "other":
+            return makeOtherDefaults();
+    }
+}
+
+/**
+ * Condition préremplie « Licence Ouverte / Open License (Etalab) ».
+ * Ajoute une condition légale avec accès libre (noLimitations) et useLimitation pointant
+ * vers la licence Etalab. Le bouton « Ajouter une licence ouverte » est désactivé dès
+ * qu'une condition contenant cette URL est déjà présente.
+ */
+export function makeOpenLicenseCondition(): ResourceConstraintFormValues {
+    return {
+        type: "legal",
+        constraints: [
+            { type: "accessConstraints", locked: false, restrictionCode: "otherRestrictions" },
+            makeLockedOtherConstraints(),
+            { type: "useConstraints", locked: false, restrictionCode: "license" },
+            makeLockedUseLimitation({
+                url: OPEN_LICENSE_URL,
+                description: "Licence Ouverte / Open License (compatible ODC-BY, CC-BY 2.0)",
+            }),
+        ],
+    };
+}
 
 // ---------------------------------------------------------------------------
 // Helpers de mapping pour la soumission
