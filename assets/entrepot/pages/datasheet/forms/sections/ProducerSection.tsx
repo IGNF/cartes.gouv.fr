@@ -17,7 +17,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { delta } from "@/utils";
 import { MetadataFormValues, PRODUCER_ROLES, type ProducerRole } from "../metadataSchema";
 
-// Rôles sélectionnables pour les cartes additionnelles (index >= 1) — pointOfContact est réservé à la 1ère carte.
+// Rôles sélectionnables pour les cartes additionnelles (index >= 1) - pointOfContact est réservé à la 1ère carte.
 const SELECTABLE_ROLES = PRODUCER_ROLES.filter((role) => role !== "pointOfContact") as ProducerRole[];
 
 // Nouveau producteur : rôle vide pour forcer un choix (validation .oneOf pour les index >= 1).
@@ -88,7 +88,7 @@ export default function ProducerSection() {
             >
                 {fields.map((field, index) => {
                     const fieldErrors = errors.producers?.[index];
-                    // La 1ère carte est toujours le contact (pointOfContact) — verrouillée, non supprimable.
+                    // La 1ère carte est toujours le contact (pointOfContact) - verrouillée, non supprimable.
                     const isContact = index === 0;
 
                     return (
