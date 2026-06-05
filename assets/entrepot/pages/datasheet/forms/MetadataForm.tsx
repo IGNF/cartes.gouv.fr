@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { DevTool } from "@hookform/devtools";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -65,6 +66,7 @@ export default function MetadataForm({
     const {
         handleSubmit,
         formState: { isSubmitting },
+        control,
     } = form;
 
     const submit = handleSubmit(async (values) => {
@@ -126,6 +128,7 @@ export default function MetadataForm({
                         {renderBottomActions?.({ isSubmitting })}
                     </form>
                 </FormProvider>
+                <DevTool control={control} />
             </div>
         </>
     );

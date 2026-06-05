@@ -14,6 +14,8 @@ import { ReactNode, Ref, SyntheticEvent, useId } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { useStyles } from "tss-react/mui";
 
+import { useTranslation } from "@/i18n/i18n";
+
 interface AutocompleteSelectExtraProps<T> {
     id?: string;
     label: ReactNode;
@@ -35,7 +37,7 @@ type AutocompleteSelectBaseProps = AutocompleteSelectProps<unknown, boolean | un
 const defaultSearchFilter = {
     ignoreAccents: true,
     ignoreCase: true,
-    limit: 10,
+    limit: 20,
 } satisfies CreateFilterOptionsConfig<unknown>;
 
 function AutocompleteSelect<T, M extends boolean | undefined = true, D extends boolean | undefined = false, F extends boolean | undefined = false>(
@@ -48,7 +50,8 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
         hintText,
         state = "default",
         stateRelatedMessage,
-        searchFilter = defaultSearchFilter,
+        searchFilter,
+        noOptionsText,
         options,
         multiple,
         value,
@@ -60,6 +63,7 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
         classes,
         renderValue,
         filterOptions,
+
         popupIcon = <span className={fr.cx("fr-icon-arrow-down-s-line", "fr-icon--sm")} />,
         clearIcon = null,
         forcePopupIcon = true,
@@ -69,6 +73,7 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
         // gardant le générique public pour que l'inférence de T bénéficie aux sites d'appel.
     } = props as AutocompleteSelectBaseProps & { ref?: Ref<HTMLInputElement> };
 
+    const { t } = useTranslation("AutocompleteSelect");
     const generatedId = useId();
     const inputId = id ?? `${symToStr({ AutocompleteSelect })}-${generatedId}`;
 
@@ -97,7 +102,7 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
 
     const handleRemoveTag = (tagToRemove: OptionLike, event: SyntheticEvent) => {
         const currentValue = Array.isArray(value) ? value : [];
-        const newValue = currentValue.filter((v) => (isOptionEqualToValue ? !isOptionEqualToValue(v as never, tagToRemove as never) : v !== tagToRemove));
+        const newValue = currentValue.filter((v) => (isOptionEqualToValue ? !isOptionEqualToValue(v, tagToRemove) : v !== tagToRemove));
         onChange?.(event, newValue as never, "removeOption" as AutocompleteChangeReason, { option: tagToRemove } as AutocompleteChangeDetails<unknown>);
     };
 
@@ -145,12 +150,15 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
                     getOptionLabel={resolveOptionLabel as never}
                     renderInput={(params) => <TextField {...params} inputRef={ref} variant={"filled"} size={"small"} error={state === "error"} />}
                     renderValue={resolvedRenderValue}
+                    noOptionsText={noOptionsText ?? t("no_options")}
                     popupIcon={popupIcon}
                     clearIcon={clearIcon}
                     forcePopupIcon={forcePopupIcon}
                     classes={{
                         inputRoot: cx(
-                            fr.cx("fr-py-0", "fr-pl-3v"),
+                            fr.cx("fr-py-0", "fr-pl-3v", {
+                                "fr-mt-2v": !multipleSelectedTags,
+                            }),
                             css({
                                 // style d'un input dsfr
                                 borderRadius: "0.25rem 0.25rem 0 0",
