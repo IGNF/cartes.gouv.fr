@@ -15,7 +15,7 @@ interface ConditionTypeTagProps {
 export default function ConditionTypeTag({ conditionIndex }: ConditionTypeTagProps) {
     const { t } = useTranslation("DatasheetSections");
     const { control } = useFormContext<Partial<MetadataFormValues>>();
-    const type = useWatch({ control, name: `resourceConstraints.${conditionIndex}.type` }) as ConstraintType | undefined;
+    const type = useWatch({ control, name: `resource_constraints.${conditionIndex}.type` }) as ConstraintType | undefined;
     if (!type) return null;
     return <Tag small>{t("license.conditionType", { type })}</Tag>;
 }

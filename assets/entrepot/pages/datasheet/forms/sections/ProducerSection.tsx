@@ -21,7 +21,7 @@ import { MetadataFormValues, PRODUCER_ROLES, type ProducerRole } from "../metada
 const SELECTABLE_ROLES = PRODUCER_ROLES.filter((role) => role !== "pointOfContact") as ProducerRole[];
 
 // Nouveau producteur : rôle vide pour forcer un choix (validation .oneOf pour les index >= 1).
-const emptyProducer = { organizationName: "", organizationEmail: "", role: "" as ProducerRole };
+const emptyProducer = { organization_name: "", organization_email: "", role: "" as ProducerRole };
 
 // ---------------------------------------------------------------------------
 // Sous-composant : tag de rôle en direct (useWatch pour ne pas utiliser le snapshot figé de useFieldArray)
@@ -145,7 +145,7 @@ export default function ProducerSection() {
                             {/* Nom de l'organisme (auto-complétion ou saisie libre) */}
                             <Controller
                                 control={control}
-                                name={`producers.${index}.organizationName`}
+                                name={`producers.${index}.organization_name`}
                                 render={({ field: f, fieldState: { error } }) => (
                                     <AutocompleteSelect
                                         label={t("field.organizationName")}
@@ -183,7 +183,7 @@ export default function ProducerSection() {
                             )}
 
                             <ImageFieldUpload
-                                name={`producers.${index}.logoFile`}
+                                name={`producers.${index}.logo_file`}
                                 label={t("field.logo")}
                                 hintText={t("field.logo.hint")}
                                 accept=".jpg, .jpeg, .svg"
@@ -192,32 +192,32 @@ export default function ProducerSection() {
                             <Input
                                 label={t("field.organizationEmail")}
                                 hintText={t("field.organizationEmail.hint")}
-                                state={fieldErrors?.organizationEmail ? "error" : "default"}
-                                stateRelatedMessage={fieldErrors?.organizationEmail?.message}
-                                nativeInputProps={{ ...register(`producers.${index}.organizationEmail`) }}
+                                state={fieldErrors?.organization_email ? "error" : "default"}
+                                stateRelatedMessage={fieldErrors?.organization_email?.message}
+                                nativeInputProps={{ ...register(`producers.${index}.organization_email`) }}
                             />
 
                             <AddressFields
                                 legend={t("field.address")}
                                 numberInputProps={{
-                                    state: fieldErrors?.addressNumber ? "error" : "default",
-                                    stateRelatedMessage: fieldErrors?.addressNumber?.message,
-                                    nativeInputProps: register(`producers.${index}.addressNumber`),
+                                    state: fieldErrors?.address_number ? "error" : "default",
+                                    stateRelatedMessage: fieldErrors?.address_number?.message,
+                                    nativeInputProps: register(`producers.${index}.address_number`),
                                 }}
                                 streetInputProps={{
-                                    state: fieldErrors?.addressStreet ? "error" : "default",
-                                    stateRelatedMessage: fieldErrors?.addressStreet?.message,
-                                    nativeInputProps: register(`producers.${index}.addressStreet`),
+                                    state: fieldErrors?.address_street ? "error" : "default",
+                                    stateRelatedMessage: fieldErrors?.address_street?.message,
+                                    nativeInputProps: register(`producers.${index}.address_street`),
                                 }}
                                 postalCodeInputProps={{
-                                    state: fieldErrors?.addressPostalCode ? "error" : "default",
-                                    stateRelatedMessage: fieldErrors?.addressPostalCode?.message,
-                                    nativeInputProps: register(`producers.${index}.addressPostalCode`),
+                                    state: fieldErrors?.address_postal_code ? "error" : "default",
+                                    stateRelatedMessage: fieldErrors?.address_postal_code?.message,
+                                    nativeInputProps: register(`producers.${index}.address_postal_code`),
                                 }}
                                 cityInputProps={{
-                                    state: fieldErrors?.addressCity ? "error" : "default",
-                                    stateRelatedMessage: fieldErrors?.addressCity?.message,
-                                    nativeInputProps: register(`producers.${index}.addressCity`),
+                                    state: fieldErrors?.address_city ? "error" : "default",
+                                    stateRelatedMessage: fieldErrors?.address_city?.message,
+                                    nativeInputProps: register(`producers.${index}.address_city`),
                                 }}
                             />
                         </section>
