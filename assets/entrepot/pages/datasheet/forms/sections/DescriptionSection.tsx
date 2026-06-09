@@ -37,23 +37,24 @@ export default function DescriptionSection({ isEditMode = false }: DescriptionSe
             <Input
                 label={t("field.fileIdentifier")}
                 hintText={t("field.fileIdentifier.hint")}
-                state={errors.fileIdentifier ? "error" : "info"}
+                state={errors.file_identifier ? "error" : "info"}
                 stateRelatedMessage={
-                    errors.fileIdentifier?.message ?? "Cet identifiant unique est associé à votre donnée et s’affichera dans l’URL de votre fiche de donnée. "
+                    errors.file_identifier?.message ?? "Cet identifiant unique est associé à votre donnée et s'affichera dans l'URL de votre fiche de donnée. "
                 }
-                nativeInputProps={{ ...register("fileIdentifier") }}
+                nativeInputProps={{ ...register("file_identifier") }}
             />
 
             <Controller
                 control={control}
                 name="description"
-                render={({ field: { value, onChange } }) => (
+                render={({ field: { value, onChange, onBlur } }) => (
                     <MarkdownEditor
                         label={t("field.description")}
                         state={errors.description ? "error" : "default"}
                         stateRelatedMessage={errors.description?.message}
                         value={value ?? ""}
                         onChange={onChange}
+                        onBlur={onBlur}
                     />
                 )}
             />
@@ -79,7 +80,7 @@ export default function DescriptionSection({ isEditMode = false }: DescriptionSe
 
             <Controller
                 control={control}
-                name="inspireKeywords"
+                name="keywords_inspire"
                 render={({ field, fieldState: { error } }) => (
                     <AutocompleteSelect
                         label={t("field.inspireKeywords")}
@@ -97,7 +98,7 @@ export default function DescriptionSection({ isEditMode = false }: DescriptionSe
 
             <Controller
                 control={control}
-                name="additionalKeywords"
+                name="keywords_additional"
                 render={({ field, fieldState: { error } }) => (
                     <AutocompleteSelect
                         label={t("field.additionalKeywords")}
