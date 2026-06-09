@@ -46,16 +46,16 @@ export default function ConditionCard({ conditionIndex, onRemoveCondition }: Con
     // useFieldArray imbriqué : doit vivre dans ce composant enfant (règle react-hook-form)
     const { fields, append, remove, update, insert } = useFieldArray({
         control,
-        name: `resourceConstraints.${conditionIndex}.constraints`,
+        name: `resource_constraints.${conditionIndex}.constraints`,
     });
 
     // Type de condition courant (pour les règles métier de chirurgie)
     const conditionType = useWatch({
         control,
-        name: `resourceConstraints.${conditionIndex}.type`,
+        name: `resource_constraints.${conditionIndex}.type`,
     }) as ConstraintType | undefined;
 
-    const conditionErrors = errors.resourceConstraints?.[conditionIndex];
+    const conditionErrors = errors.resource_constraints?.[conditionIndex];
 
     // ----- Handlers de chirurgie sur les sous-contraintes -----
 
@@ -74,7 +74,7 @@ export default function ConditionCard({ conditionIndex, onRemoveCondition }: Con
         if (wasUseOrAccess && !isUseOrAccess) {
             // Le sous-encart précédent avait un compagnon à constraintIndex+1 : le supprimer.
             // On lit le compagnon via getValues (pas le snapshot figé) pour vérifier le locked.
-            const companion = getValues(`resourceConstraints.${conditionIndex}.constraints.${constraintIndex + 1}` as const);
+            const companion = getValues(`resource_constraints.${conditionIndex}.constraints.${constraintIndex + 1}` as const);
             if (companion?.locked) {
                 remove(constraintIndex + 1);
             }
@@ -86,7 +86,7 @@ export default function ConditionCard({ conditionIndex, onRemoveCondition }: Con
     }
 
     /**
-     * Changement de valeur (restrictionCode) pour useConstraints ou accessConstraints.
+     * Changement de valeur (restriction_code) pour useConstraints ou accessConstraints.
      * Règle INSPIRE : si la valeur passe à « otherRestrictions », le compagnon useLimitation
      * devient otherConstraints ; si elle quitte « otherRestrictions », le compagnon
      * otherConstraints redevient useLimitation.
@@ -94,7 +94,7 @@ export default function ConditionCard({ conditionIndex, onRemoveCondition }: Con
      * On lit le compagnon via getValues pour éviter le snapshot figé.
      */
     function handleRestrictionCodeChange(constraintIndex: number, newCode: RestrictionCode) {
-        const companion = getValues(`resourceConstraints.${conditionIndex}.constraints.${constraintIndex + 1}` as const);
+        const companion = getValues(`resource_constraints.${conditionIndex}.constraints.${constraintIndex + 1}` as const);
         if (!companion?.locked) return; // pas de compagnon géré → rien à faire
 
         if (newCode === "otherRestrictions" && companion.type !== "otherConstraints") {
@@ -113,10 +113,10 @@ export default function ConditionCard({ conditionIndex, onRemoveCondition }: Con
      * On lit type et compagnon via getValues pour éviter le snapshot figé.
      */
     function handleRemoveSubConstraint(constraintIndex: number) {
-        const current = getValues(`resourceConstraints.${conditionIndex}.constraints.${constraintIndex}` as const);
+        const current = getValues(`resource_constraints.${conditionIndex}.constraints.${constraintIndex}` as const);
         const currentType = current?.type as SubConstraintType | undefined;
         const isUseOrAccess = currentType === "useConstraints" || currentType === "accessConstraints";
-        const companion = getValues(`resourceConstraints.${conditionIndex}.constraints.${constraintIndex + 1}` as const);
+        const companion = getValues(`resource_constraints.${conditionIndex}.constraints.${constraintIndex + 1}` as const);
         if (isUseOrAccess && companion?.locked) {
             remove([constraintIndex, constraintIndex + 1]);
         } else {
@@ -129,7 +129,7 @@ export default function ConditionCard({ conditionIndex, onRemoveCondition }: Con
         if (conditionType === "legal") {
             // Paire : useConstraints(license) + compagnon useLimitation
             append([
-                { type: "useConstraints", locked: false, restrictionCode: "license" } as SubConstraintFormValues & { id: string },
+                { type: "useConstraints", locked: false, restriction_code: "license" } as SubConstraintFormValues & { id: string },
                 makeLockedUseLimitation() as SubConstraintFormValues & { id: string },
             ]);
         } else {
@@ -200,7 +200,7 @@ export default function ConditionCard({ conditionIndex, onRemoveCondition }: Con
                 <>
                     {/* Select type de condition - pattern register (ProducerSection) */}
                     {(() => {
-                        const condTypeReg = register(`resourceConstraints.${conditionIndex}.type`);
+                        const condTypeReg = register(`resource_constraints.${conditionIndex}.type`);
                         return (
                             <Select
                                 label={t("field.conditionType")}
