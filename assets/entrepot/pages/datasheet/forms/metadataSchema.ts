@@ -1,7 +1,7 @@
 import * as yup from "yup";
 import territories from "geopf-extensions-openlayers/src/packages/Controls/Territories/Territories.json";
 
-import { MetadataHierarchyLevel } from "@/@types/app";
+import { MetadataHierarchyLevel, type Metadata } from "@/@types/app";
 import { LanguageType, regex } from "@/utils";
 
 // ---------------------------------------------------------------------------
@@ -79,6 +79,17 @@ export type UpdateFrequency = (typeof UPDATE_FREQUENCIES)[number];
 export type Territory = (typeof territories)[number];
 
 // ---------------------------------------------------------------------------
+// Helpers partagés
+// ---------------------------------------------------------------------------
+
+/**
+ * Chaîne de caractères trimée sur les deux extrémités.
+ * Utiliser à la place de `yup.string()` pour tous les champs texte du formulaire :
+ * trim + required = interdit les chaînes vides ou ne contenant que des espaces.
+ */
+const stringTrimmed = () => yup.string().transform((v: unknown) => (typeof v === "string" ? v.trim() : v));
+
+// ---------------------------------------------------------------------------
 // Schéma Yup principal - toutes les sections de la fiche de données
 // ---------------------------------------------------------------------------
 
@@ -91,24 +102,21 @@ type MasterSchemaDeps = {
 export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkFileIdentifier }: MasterSchemaDeps) =>
     yup.object({
         // Section description
-        name: yup
-            .string()
+        name: stringTrimmed()
             .required("Le nom de la fiche de données est obligatoire")
             .max(99, "Le nom ne peut pas dépasser 99 caractères")
             .matches(regex.datasheet_name, "Le nom contient des caractères non autorisés")
-            .transform((v) => v?.trim())
             .test("is-unique", "Une fiche de données portant ce nom existe déjà", (value) => {
                 if (isEditMode) return true;
                 if (!value) return true;
                 return !existingDatasheetNames.includes(value);
             }),
-        description: yup.string().required("La description est obligatoire"),
+        description: stringTrimmed().required("La description est obligatoire"),
         thumbnail: yup.mixed<FileList>().optional(),
         themes: yup.array(yup.string().defined()).min(1, "Sélectionnez au moins une thématique").required("Sélectionnez au moins une thématique"),
-        inspireKeywords: yup.array(yup.string().defined()).optional(),
-        additionalKeywords: yup.array(yup.string().defined()).optional(),
-        fileIdentifier: yup
-            .string()
+        keywords_inspire: yup.array(yup.string().defined()).optional(),
+        keywords_additional: yup.array(yup.string().defined()).optional(),
+        file_identifier: stringTrimmed()
             .required("L'identifiant de fichier est obligatoire")
             .matches(regex.file_identifier, "L'identifiant de fichier contient des caractères non autorisés")
             .test("is-file-identifier-unique", "Cet identifiant unique est déjà utilisé", async (value) => {
@@ -124,9 +132,8 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
         producers: yup
             .array(
                 yup.object({
-                    organizationName: yup.string().required("Le nom de l'organisme est obligatoire"),
-                    organizationEmail: yup
-                        .string()
+                    organization_name: stringTrimmed().required("Le nom de l'organisme est obligatoire"),
+                    organization_email: stringTrimmed()
                         .email("Format d'adresse électronique invalide")
                         .required("L'adresse électronique de l'organisme est obligatoire"),
                     // Rôle ISO 19115. L'index 0 est verrouillé sur "pointOfContact" côté UI ;
@@ -135,11 +142,12 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
                         .mixed<ProducerRole>()
                         .oneOf([...PRODUCER_ROLES], "Le rôle du producteur est obligatoire")
                         .required("Le rôle du producteur est obligatoire"),
-                    logoFile: yup.mixed<FileList>().optional(),
-                    addressNumber: yup.string().optional(),
-                    addressStreet: yup.string().optional(),
-                    addressPostalCode: yup.string().optional(),
-                    addressCity: yup.string().optional(),
+                    logo_file: yup.mixed<FileList>().optional(),
+                    address_number: stringTrimmed().optional(),
+                    address_street: stringTrimmed().optional(),
+                    // Code postal : chiffres uniquement (optionnel, libellé "(optionnel)")
+                    address_postal_code: stringTrimmed().optional().matches(/^\d*$/, "Le code postal ne doit contenir que des chiffres"),
+                    address_city: stringTrimmed().optional(),
                 })
             )
             .min(1, "Au moins un producteur est requis")
@@ -153,8 +161,8 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
         // Note : publication_date (= date de création de la fiche) et revision_date (= date de modification des
         // métadonnées ou d'un service) ne sont pas saisies ici ; elles seront remplies automatiquement lors du
         // mapping de soumission (TODO API dans DatasheetCreateNext / DatasheetViewNext).
-        creationDate: yup.date().typeError("Format de date invalide (JJ/MM/AAAA)").required("La date de création est obligatoire"),
-        updateFrequency: yup
+        date_creation: yup.date().typeError("Format de date invalide (JJ/MM/AAAA)").required("La date de création est obligatoire"),
+        update_frequency: yup
             .mixed<UpdateFrequency>()
             .oneOf([...UPDATE_FREQUENCIES], "La fréquence de mise à jour est obligatoire")
             .required("La fréquence de mise à jour est obligatoire"),
@@ -162,10 +170,11 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
         // Section emprise spatiale
         territories: yup.array(yup.mixed<Territory>().defined()).min(1, "Sélectionnez au moins un territoire").required(),
 
-        // Section licences / conditions d'utilisation (ISO 19139 resourceConstraints)
+        // Section licences / conditions d'utilisation (ISO 19139 resource_constraints)
         // Chaque entrée = une condition (encart), contenant des sous-contraintes (sous-encarts).
         // Le mapping vers le XML de soumission est TODO (hors périmètre de cette branche).
-        resourceConstraints: yup
+        // Au moins une condition requise.
+        resource_constraints: yup
             .array(
                 yup.object({
                     type: yup
@@ -182,7 +191,7 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
                                 // locked : sous-encart compagnon auto-ajouté (non supprimable, type verrouillé côté UI)
                                 locked: yup.boolean().required().default(false),
                                 // useConstraints / accessConstraints → MD_RestrictionCode
-                                restrictionCode: yup.string().when("type", {
+                                restriction_code: yup.string().when("type", {
                                     is: (t: SubConstraintType) => t === "useConstraints" || t === "accessConstraints",
                                     then: (s) =>
                                         s
@@ -191,7 +200,7 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
                                     otherwise: (s) => s.optional(),
                                 }),
                                 // otherConstraints → LimitationsOnPublicAccess
-                                limitationCode: yup.string().when("type", {
+                                limitation_code: yup.string().when("type", {
                                     is: "otherConstraints",
                                     then: (s) =>
                                         s
@@ -200,7 +209,7 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
                                     otherwise: (s) => s.optional(),
                                 }),
                                 // classification → MD_ClassificationCode
-                                classificationCode: yup.string().when("type", {
+                                classification_code: yup.string().when("type", {
                                     is: "classification",
                                     then: (s) =>
                                         s.oneOf([...CLASSIFICATION_CODES], "La classification est obligatoire").required("La classification est obligatoire"),
@@ -223,19 +232,19 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
                         .required(),
                 })
             )
-            .optional()
-            .default([]),
+            .min(1, "Ajoutez au moins une condition de licence")
+            .required("Ajoutez au moins une condition de licence"),
 
         // Section informations sur les métadonnées
-        resourceGenealogy: yup.string().optional(),
-        hierarchyLevel: yup.mixed<MetadataHierarchyLevel>().oneOf(Object.values(MetadataHierarchyLevel)).required("Le type de données est obligatoire"),
+        resource_genealogy: stringTrimmed().optional(),
+        hierarchy_level: yup.mixed<MetadataHierarchyLevel>().oneOf(Object.values(MetadataHierarchyLevel)).required("Le type de données est obligatoire"),
         language: yup
             .object({
-                language: yup.string().defined(),
-                code: yup.string().defined(),
+                language: stringTrimmed().defined(),
+                code: stringTrimmed().defined(),
             })
             .required("La langue est obligatoire") as yup.ObjectSchema<LanguageType>,
-        charset: yup.string().required("Le jeu de caractères est obligatoire"),
+        charset: stringTrimmed().required("Le jeu de caractères est obligatoire"),
     });
 
 export type MetadataFormValues = yup.InferType<ReturnType<typeof buildMetadataSchema>>;
@@ -244,7 +253,7 @@ export type MetadataFormValues = yup.InferType<ReturnType<typeof buildMetadataSc
 export type ProducerFormValues = MetadataFormValues["producers"][number];
 
 // Types dérivés pour la section licences (source de vérité unique : schéma Yup)
-export type ResourceConstraintFormValues = NonNullable<MetadataFormValues["resourceConstraints"]>[number];
+export type ResourceConstraintFormValues = NonNullable<MetadataFormValues["resource_constraints"]>[number];
 export type SubConstraintFormValues = ResourceConstraintFormValues["constraints"][number];
 
 // ---------------------------------------------------------------------------
@@ -259,16 +268,17 @@ export const defaultMetadataValues: Partial<MetadataFormValues> = {
     name: "",
     description: "",
     themes: [],
-    inspireKeywords: [],
-    additionalKeywords: [],
-    fileIdentifier: "",
-    producers: [{ organizationName: "", organizationEmail: "", role: "pointOfContact" }],
-    updateFrequency: undefined,
+    keywords_inspire: [],
+    keywords_additional: [],
+    file_identifier: "",
+    producers: [{ organization_name: "", organization_email: "", role: "pointOfContact" }],
+    update_frequency: undefined,
     territories: [],
-    resourceConstraints: [],
-    resourceGenealogy: "",
-    hierarchyLevel: MetadataHierarchyLevel.Dataset,
+    resource_genealogy: "",
+    hierarchy_level: MetadataHierarchyLevel.Dataset,
     charset: "utf8",
+    date_creation: new Date(),
+    language: { code: "fre", language: "français" },
 };
 
 // ---------------------------------------------------------------------------
@@ -292,17 +302,17 @@ export function makeLockedUseLimitation(overrides?: Partial<SubConstraintFormVal
  * useConstraints/accessConstraints est « otherRestrictions »).
  */
 export function makeLockedOtherConstraints(): SubConstraintFormValues {
-    return { type: "otherConstraints", locked: true, limitationCode: "" };
+    return { type: "otherConstraints", locked: true, limitation_code: "noLimitations" };
 }
 
 /** Sous-contraintes par défaut pour une condition légale (2 sous-encarts). */
 export function makeLegalDefaults(): SubConstraintFormValues[] {
-    return [{ type: "useConstraints", locked: false, restrictionCode: "license" }, makeLockedUseLimitation()];
+    return [{ type: "useConstraints", locked: false, restriction_code: "license" }, makeLockedUseLimitation()];
 }
 
 /** Sous-contraintes par défaut pour une condition de sécurité (2 sous-encarts). */
 export function makeSecurityDefaults(): SubConstraintFormValues[] {
-    return [{ type: "classification", locked: true, classificationCode: "" }, makeLockedUseLimitation()];
+    return [{ type: "classification", locked: true, classification_code: "" }, makeLockedUseLimitation()];
 }
 
 /** Sous-contrainte par défaut pour une condition « autre » (1 sous-encart). */
@@ -335,9 +345,9 @@ export function makeOpenLicenseCondition(): ResourceConstraintFormValues {
     return {
         type: "legal",
         constraints: [
-            { type: "accessConstraints", locked: false, restrictionCode: "otherRestrictions" },
+            { type: "accessConstraints", locked: false, restriction_code: "otherRestrictions" },
             makeLockedOtherConstraints(),
-            { type: "useConstraints", locked: false, restrictionCode: "license" },
+            { type: "useConstraints", locked: false, restriction_code: "license" },
             makeLockedUseLimitation({
                 url: OPEN_LICENSE_URL,
                 description: "Licence Ouverte / Open License (compatible ODC-BY, CC-BY 2.0)",
@@ -368,6 +378,165 @@ export function withCustodianFallback(producers: ProducerFormValues[]): Producer
     return [...producers, { ...pointOfContact, role: "custodian" }];
 }
 
+// ---------------------------------------------------------------------------
+// Types et helpers pour la soumission au backend
+// ---------------------------------------------------------------------------
+
+/**
+ * Payload JSON envoyé au backend (champs de fichier exclus — envoyés séparément via annexes).
+ * Correspond au DatasheetMetadataDTO PHP.
+ */
+export type MetadataPayload = {
+    name: string;
+    description: string;
+    themes: string[];
+    keywords_inspire: string[];
+    keywords_additional: string[];
+    file_identifier: string;
+    producers: Array<{
+        organization_name: string;
+        organization_email: string;
+        role: string;
+        address_number?: string | null;
+        address_street?: string | null;
+        address_postal_code?: string | null;
+        address_city?: string | null;
+    }>;
+    date_creation: string;
+    update_frequency: string;
+    territories: string[];
+    resource_constraints: Array<{
+        type: string;
+        constraints: Array<{
+            type: string;
+            locked: boolean;
+            restriction_code?: string | null;
+            limitation_code?: string | null;
+            classification_code?: string | null;
+            url?: string | null;
+            description?: string | null;
+        }>;
+    }>;
+    resource_genealogy?: string | null;
+    hierarchy_level: string;
+    language: { code: string; language: string };
+    charset: string;
+};
+
+/**
+ * Construit le payload JSON à envoyer au backend à partir des valeurs du formulaire.
+ * - Applique `withCustodianFallback` pour garantir la présence du gestionnaire ISO 19115.
+ * - Exclut les champs de fichiers (thumbnail, logo_file) — envoyés séparément via annexes.
+ * - Formate `date_creation` (Date → ISO YYYY-MM-DD).
+ * - Mappe `territories` (objets Territory) → tableau d'identifiants.
+ */
+export function buildMetadataPayload(values: MetadataFormValues): MetadataPayload {
+    const producers = withCustodianFallback(values.producers).map(
+        ({ organization_name, organization_email, role, address_number, address_street, address_postal_code, address_city }) => ({
+            organization_name,
+            organization_email,
+            role,
+            address_number: address_number ?? null,
+            address_street: address_street ?? null,
+            address_postal_code: address_postal_code ?? null,
+            address_city: address_city ?? null,
+        })
+    );
+
+    const date_creation =
+        values.date_creation instanceof Date ? values.date_creation.toISOString().slice(0, 10) : ((values.date_creation as string | undefined) ?? "");
+
+    const territories = (values.territories ?? []).map((t) =>
+        typeof t === "object" && t !== null && "id" in t ? String((t as { id: unknown }).id) : String(t)
+    );
+
+    const resource_constraints = (values.resource_constraints ?? []).map((condition) => ({
+        type: condition.type,
+        constraints: condition.constraints.map(({ type, locked, restriction_code, limitation_code, classification_code, url, description }) => ({
+            type,
+            locked,
+            restriction_code: restriction_code ?? null,
+            limitation_code: limitation_code ?? null,
+            classification_code: classification_code ?? null,
+            url: url ?? null,
+            description: description ?? null,
+        })),
+    }));
+
+    return {
+        name: values.name,
+        description: values.description,
+        themes: values.themes,
+        keywords_inspire: values.keywords_inspire ?? [],
+        keywords_additional: values.keywords_additional ?? [],
+        file_identifier: values.file_identifier,
+        producers,
+        date_creation,
+        update_frequency: values.update_frequency ?? "",
+        territories,
+        resource_constraints,
+        resource_genealogy: values.resource_genealogy ?? null,
+        hierarchy_level: values.hierarchy_level,
+        language: { code: values.language.code, language: values.language.language },
+        charset: values.charset,
+    };
+}
+
+/**
+ * Convertit une métadonnée renvoyée par l'API (`api.metadata.getByDatasheetName`) en valeurs
+ * initiales du formulaire pour le mode édition.
+ *
+ * Les champs nouveaux (issus du nouveau design) absents des métadonnées existantes
+ * utilisent les valeurs par défaut de `defaultMetadataValues` (migration incrémentale).
+ */
+export function mapMetadataToFormValues(apiMetadata: Metadata | undefined): Partial<MetadataFormValues> {
+    if (!apiMetadata?.csw_metadata) return defaultMetadataValues;
+
+    const csw = apiMetadata.csw_metadata;
+
+    // Reconstruction d'un producteur de base depuis les champs plats de CswMetadata
+    const contactProducer: ProducerFormValues = {
+        organization_name: csw.organisation_name ?? "",
+        organization_email: csw.contact_email ?? csw.organisation_email ?? "",
+        role: "pointOfContact",
+    };
+
+    const producers = normalizeProducers([contactProducer]);
+
+    // date_creation : CswMetadata.creation_date est une chaîne ISO → on recrée une Date
+    let date_creation: Date | undefined;
+    if (csw.creation_date) {
+        const d = new Date(csw.creation_date);
+        date_creation = isNaN(d.getTime()) ? undefined : d;
+    }
+
+    // Langue : on cherche l'objet LanguageType correspondant au code stocké
+    let language: { code: string; language: string } | undefined;
+    if (csw.language) {
+        language = csw.language;
+    }
+
+    return {
+        ...defaultMetadataValues,
+        name: apiMetadata.tags?.datasheet_name ?? "",
+        description: csw.abstract ?? "",
+        file_identifier: apiMetadata.file_identifier ?? "",
+        themes: csw.topic_categories ?? [],
+        keywords_inspire: csw.inspire_keywords ?? [],
+        keywords_additional: csw.free_keywords ?? [],
+        producers,
+        date_creation,
+        update_frequency: (csw.frequency_code as UpdateFrequency | undefined) ?? undefined,
+        resource_genealogy: csw.resource_genealogy ?? "",
+        hierarchy_level: (csw.hierarchy_level as MetadataHierarchyLevel | undefined) ?? MetadataHierarchyLevel.Dataset,
+        language: language ?? undefined,
+        charset: defaultMetadataValues.charset,
+        // territories et resource_constraints ne sont pas stockés dans CswMetadata → défauts
+    };
+}
+
+// ---------------------------------------------------------------------------
+
 /**
  * Normalise la liste des producteurs pour satisfaire l'invariant du formulaire :
  * le pointOfContact doit être en index 0 (carte verrouillée côté UI, ProducerSection).
@@ -387,5 +556,5 @@ export function normalizeProducers(producers: ProducerFormValues[]): ProducerFor
         return [producers[contactIndex], ...producers.filter((_, i) => i !== contactIndex)];
     }
     // Aucun pointOfContact trouvé : insérer une ligne vide en tête
-    return [{ organizationName: "", organizationEmail: "", role: "pointOfContact" }, ...producers];
+    return [{ organization_name: "", organization_email: "", role: "pointOfContact" }, ...producers];
 }

@@ -17,15 +17,15 @@ export default function DateSection() {
         <div>
             <Controller
                 control={control}
-                name="creationDate"
+                name="date_creation"
                 render={({ field: { value, onChange } }) => (
                     <DatePicker
                         label={t("field.creationDate")}
                         hintText={t("field.creationDate.hint")}
                         value={value instanceof Date ? value : undefined}
                         onChange={onChange}
-                        state={errors.creationDate ? "error" : "default"}
-                        stateRelatedMessage={errors.creationDate?.message}
+                        state={errors.date_creation ? "error" : "default"}
+                        stateRelatedMessage={errors.date_creation?.message}
                     />
                 )}
             />
@@ -37,9 +37,9 @@ export default function DateSection() {
                     value: code,
                     label: t("field.updateFrequency.option", { code }),
                 }))}
-                state={errors.updateFrequency ? "error" : "default"}
-                stateRelatedMessage={errors.updateFrequency?.message}
-                nativeSelectProps={{ ...register("updateFrequency") }}
+                state={errors.update_frequency ? "error" : "default"}
+                stateRelatedMessage={errors.update_frequency?.message}
+                nativeSelectProps={{ ...register("update_frequency") }}
             />
         </div>
     );
