@@ -13,15 +13,18 @@ import ConditionCard from "./license/ConditionCard";
 
 export default function LicenseSection() {
     const { t } = useTranslation("DatasheetSections");
-    const { control } = useFormContext<Partial<MetadataFormValues>>();
+    const {
+        control,
+        formState: { errors },
+    } = useFormContext<Partial<MetadataFormValues>>();
 
     const { css } = useStyles();
 
-    const { fields, append, remove } = useFieldArray({ control, name: "resourceConstraints" });
+    const { fields, append, remove } = useFieldArray({ control, name: "resource_constraints" });
 
     // Détection de la licence ouverte Etalab pour désactiver le bouton dédié
-    const resourceConstraints = useWatch({ control, name: "resourceConstraints" }) as ResourceConstraintFormValues[] | undefined;
-    const hasOpenLicense = (resourceConstraints ?? []).some((condition) =>
+    const resource_constraints = useWatch({ control, name: "resource_constraints" }) as ResourceConstraintFormValues[] | undefined;
+    const hasOpenLicense = (resource_constraints ?? []).some((condition) =>
         condition.constraints?.some((c) => c.type === "useLimitation" && c.url === OPEN_LICENSE_URL)
     );
 
@@ -55,6 +58,13 @@ export default function LicenseSection() {
                 {fields.map((field, conditionIndex) => (
                     <ConditionCard key={field.id} conditionIndex={conditionIndex} onRemoveCondition={(i) => remove(i)} />
                 ))}
+                {errors.resource_constraints && (
+                    <p className={fr.cx("fr-error-text", "fr-my-4v")}>
+                        {Array.isArray(errors.resource_constraints)
+                            ? "Veuillez corriger les erreurs dans les conditions de licence."
+                            : errors.resource_constraints.message}
+                    </p>
+                )}
             </div>
 
             {/* Boutons d'ajout en bas de section */}

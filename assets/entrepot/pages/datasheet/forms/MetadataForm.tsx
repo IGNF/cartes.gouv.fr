@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
+import { applyApiValidationErrors } from "@/modules/setApiFormErrors";
+
 import { useDatastore } from "@/contexts/datastore";
 import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n/i18n";
@@ -67,11 +69,19 @@ export default function MetadataForm({
         handleSubmit,
         formState: { isSubmitting },
         control,
-        getValues,
+        setError,
     } = form;
 
     const submit = handleSubmit(async (values) => {
-        await onSubmit(values);
+        try {
+            await onSubmit(values);
+        } catch (e) {
+            // Applique les erreurs de validation backend sur les champs correspondants.
+            // L'erreur reste dans le state du composant consommateur (useMutation) pour
+            // l'affichage dans l'alerte globale — on ne la reswallowe pas.
+            applyApiValidationErrors(e, setError);
+            throw e;
+        }
     });
 
     const { css, cx } = useStyles();
@@ -89,15 +99,7 @@ export default function MetadataForm({
                 )}
             >
                 <FormProvider {...form}>
-                    <form
-                        onSubmit={(f) => {
-                            // TODO: remove this log when feature is complete
-                            console.log(getValues());
-
-                            submit(f);
-                        }}
-                        noValidate
-                    >
+                    <form onSubmit={submit} noValidate>
                         <div
                             className={cx(
                                 fr.cx("fr-grid-row", "fr-grid-row--gutters"),
