@@ -53,8 +53,8 @@ export default function SubConstraintCard({
 
     const [collapsed, toggleCollapsed] = useToggle();
 
-    const constraintErrors = errors.resourceConstraints?.[conditionIndex]?.constraints?.[constraintIndex];
-    const fieldName = `resourceConstraints.${conditionIndex}.constraints.${constraintIndex}` as const;
+    const constraintErrors = errors.resource_constraints?.[conditionIndex]?.constraints?.[constraintIndex];
+    const fieldName = `resource_constraints.${conditionIndex}.constraints.${constraintIndex}` as const;
 
     // Type live de la contrainte - le snapshot useFieldArray (field.type) ne se rafraîchit
     // qu'après une opération de tableau ; useWatch garantit la valeur courante du registre.
@@ -178,7 +178,7 @@ export default function SubConstraintCard({
                     {/* useConstraints / accessConstraints → Select MD_RestrictionCode */}
                     {(liveType === "useConstraints" || liveType === "accessConstraints") &&
                         (() => {
-                            const codeReg = register(`${fieldName}.restrictionCode`);
+                            const codeReg = register(`${fieldName}.restriction_code`);
                             return (
                                 <Select
                                     label={t("field.constraintValue")}
@@ -195,8 +195,8 @@ export default function SubConstraintCard({
                                             onRestrictionCodeChange(constraintIndex, newCode);
                                         },
                                     }}
-                                    state={constraintErrors?.restrictionCode ? "error" : "default"}
-                                    stateRelatedMessage={constraintErrors?.restrictionCode?.message}
+                                    state={constraintErrors?.restriction_code ? "error" : "default"}
+                                    stateRelatedMessage={constraintErrors?.restriction_code?.message}
                                 />
                             );
                         })()}
@@ -210,9 +210,9 @@ export default function SubConstraintCard({
                                 value: code,
                                 label: t("license.limitationCode", { code }),
                             }))}
-                            nativeSelectProps={{ ...register(`${fieldName}.limitationCode`) }}
-                            state={constraintErrors?.limitationCode ? "error" : "default"}
-                            stateRelatedMessage={constraintErrors?.limitationCode?.message}
+                            nativeSelectProps={{ ...register(`${fieldName}.limitation_code`) }}
+                            state={constraintErrors?.limitation_code ? "error" : "default"}
+                            stateRelatedMessage={constraintErrors?.limitation_code?.message}
                         />
                     )}
 
@@ -225,9 +225,9 @@ export default function SubConstraintCard({
                                 value: code,
                                 label: t("license.classificationCode", { code }),
                             }))}
-                            nativeSelectProps={{ ...register(`${fieldName}.classificationCode`) }}
-                            state={constraintErrors?.classificationCode ? "error" : "default"}
-                            stateRelatedMessage={constraintErrors?.classificationCode?.message}
+                            nativeSelectProps={{ ...register(`${fieldName}.classification_code`) }}
+                            state={constraintErrors?.classification_code ? "error" : "default"}
+                            stateRelatedMessage={constraintErrors?.classification_code?.message}
                         />
                     )}
 
