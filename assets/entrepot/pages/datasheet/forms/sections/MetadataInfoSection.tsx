@@ -25,12 +25,12 @@ export default function MetadataInfoSection() {
         <div>
             <Controller
                 control={control}
-                name="resourceGenealogy"
+                name="resource_genealogy"
                 render={({ field: { value, onChange } }) => (
                     <MarkdownEditor
                         label={t("field.resourceGenealogy")}
-                        state={errors.resourceGenealogy ? "error" : "info"}
-                        stateRelatedMessage={errors.resourceGenealogy?.message ?? t("field.resourceGenealogy.info")}
+                        state={errors.resource_genealogy ? "error" : "info"}
+                        stateRelatedMessage={errors.resource_genealogy?.message ?? t("field.resourceGenealogy.info")}
                         value={value ?? ""}
                         onChange={onChange}
                     />
@@ -39,7 +39,7 @@ export default function MetadataInfoSection() {
 
             <Controller
                 control={control}
-                name="hierarchyLevel"
+                name="hierarchy_level"
                 render={({ field: { value, onChange }, fieldState: { error } }) => (
                     <RadioButtons
                         legend={t("field.hierarchyLevel")}

@@ -1,19 +1,22 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useMemo } from "react";
 
 import { DatasheetDetailed, Metadata } from "@/@types/app";
 import DatasheetMain from "@/components/Layout/Datasheet/DatasheetMain";
 import TertiaryNavigation from "@/components/Layout/TertiaryNavigation";
 import LoadingText from "@/components/Utils/LoadingText";
+import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
+import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import useCatalogueDatasheetUrl from "@/hooks/useCatalogueDatasheetUrl";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
 import { useStyles } from "tss-react";
-import { defaultMetadataValues } from "../../forms/metadataSchema";
+import { MetadataFormValues, MetadataPayload, buildMetadataPayload, mapMetadataToFormValues } from "../../forms/metadataSchema";
 import DatasheetHeader from "./DatasheetHeader";
 
 const MetadataForm = lazy(() => import("../../forms/MetadataForm"));
@@ -49,6 +52,8 @@ type DatasheetViewProps = {
 export default function DatasheetViewNext(props: DatasheetViewProps) {
     const { datastoreId, datasheetName, activeTab = DatasheetViewActiveTabEnum.Description } = props;
 
+    const queryClient = useQueryClient();
+
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
@@ -70,6 +75,37 @@ export default function DatasheetViewNext(props: DatasheetViewProps) {
         () => metadataQuery.data?.endpoints?.length !== undefined && metadataQuery.data?.endpoints?.length > 0,
         [metadataQuery.data?.endpoints?.length]
     );
+
+    const editMutation = useMutation<MetadataPayload, CartesApiException, MetadataFormValues>({
+        mutationFn: async (values) => {
+            const payload = buildMetadataPayload(values);
+
+            // Étape 1 : mise à jour des métadonnées JSON (validation backend via MapRequestPayload)
+            const result = await api.datasheet.editMetadata(datastoreId, datasheetName, payload);
+
+            // Étape 2 : mise à jour de la vignette si une nouvelle est fournie
+            if (values.thumbnail?.[0]) {
+                const formData = new FormData();
+                formData.append("datasheetName", datasheetName);
+                formData.append("file", values.thumbnail[0]);
+                await api.annexe.addThumbnail(datastoreId, formData);
+            }
+
+            // TODO: Étape 3 (future) : mise à jour des logos producteur via api.annexe.add
+            //       Aucun endpoint Entrepôt n'existe encore pour les logos organismes.
+
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
+            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+        },
+    });
+
+    // Valeurs initiales du formulaire d'édition, calculées à partir de la métadonnée API.
+    // Le hook `mapMetadataToFormValues` gère la migration incrémentale : les champs nouveaux
+    // absent des métadonnées existantes utilisent les valeurs par défaut.
+    const editDefaultValues = useMemo(() => mapMetadataToFormValues(metadataQuery.data), [metadataQuery.data]);
 
     const { css, cx } = useStyles();
 
@@ -110,19 +146,32 @@ export default function DatasheetViewNext(props: DatasheetViewProps) {
                                 switch (activeTab) {
                                     case DatasheetViewActiveTabEnum.Description:
                                         return (
-                                            <MetadataForm
-                                                defaultValues={defaultMetadataValues}
-                                                onSubmit={async (_values) => {
-                                                    // TODO : appel API backend (PATCH) une fois le contrat défini
-                                                }}
-                                                renderTopActions={({ isSubmitting }) => (
-                                                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mb-4w")}>
-                                                        <Button priority="secondary" type="submit" disabled={isSubmitting}>
-                                                            Enregistrer
-                                                        </Button>
-                                                    </div>
+                                            <>
+                                                {editMutation.isError && (
+                                                    <Alert
+                                                        className={fr.cx("fr-mb-2w")}
+                                                        severity="error"
+                                                        title="Erreur lors de la sauvegarde"
+                                                        description={<ServiceFormErrors message={editMutation.error.message} />}
+                                                        closable={false}
+                                                    />
                                                 )}
-                                            />
+                                                <MetadataForm
+                                                    mode="edit"
+                                                    defaultValues={editDefaultValues}
+                                                    onSubmit={async (values) => {
+                                                        await editMutation.mutateAsync(values);
+                                                    }}
+                                                    renderTopActions={({ isSubmitting }) => (
+                                                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mb-4w")}>
+                                                            <Button priority="secondary" type="submit" disabled={isSubmitting}>
+                                                                Enregistrer
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                />
+                                                {editMutation.isPending && <Wait />}
+                                            </>
                                         );
                                 }
                             })()}

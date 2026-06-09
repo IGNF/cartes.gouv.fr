@@ -20,13 +20,14 @@ type MarkdownEditorProps = {
     hintText?: string;
     value: string;
     onChange: (values: string) => void;
+    onBlur?: () => void;
     state?: InputProps["state"];
     stateRelatedMessage?: string;
     placeholder?: string;
 };
 
 const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
-    const { className, label, hintText, value, state, stateRelatedMessage, placeholder = "", onChange } = props;
+    const { className, label, hintText, value, state, stateRelatedMessage, placeholder = "", onChange, onBlur } = props;
     const { isDark } = useIsDark();
 
     return (
@@ -64,6 +65,7 @@ const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
                     Markdown,
                 ]}
                 onContentUpdate={onChange}
+                onBlur={onBlur}
             />
             <div className={fr.cx("fr-messages-group")} aria-live="polite">
                 {state !== "default" && (
