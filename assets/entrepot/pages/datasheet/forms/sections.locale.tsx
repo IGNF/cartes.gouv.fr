@@ -83,7 +83,7 @@ const { i18n } = declareComponentKeys<
     | "license.classificationCode.placeholder"
     // Section informations sur les métadonnées
     | "field.resourceGenealogy"
-    | "field.resourceGenealogy.hint"
+    | "field.resourceGenealogy.info"
     | "field.hierarchyLevel"
     | "field.hierarchyLevel.dataset"
     | "field.hierarchyLevel.series"
@@ -91,6 +91,7 @@ const { i18n } = declareComponentKeys<
     | "field.hierarchyLevel.series.hint"
     | "field.language"
     | "field.charset"
+    | "field.charset.info"
 >()("DatasheetSections");
 
 export type I18n = typeof i18n;
@@ -244,7 +245,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "license.classificationCode.placeholder": "Sélectionnez une classification",
 
     "field.resourceGenealogy": "Généalogie de la ressource (optionnel)",
-    "field.resourceGenealogy.hint":
+    "field.resourceGenealogy.info":
         "La généalogie de la donnée correspond à la description des données sources, méthodes et protocoles qui ont servi à la production de votre donnée.",
     "field.hierarchyLevel": "Type de données",
     "field.hierarchyLevel.dataset": "Jeu de données",
@@ -253,6 +254,8 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.hierarchyLevel.series.hint": "Regroupement de jeux de données décrits appartenant à un même sujet, thématique, programme ou politique publique.",
     "field.language": "Langue de la donnée et ses métadonnées",
     "field.charset": "Jeu de caractères de la donnée et ses métadonnées",
+    "field.charset.info":
+        "Le jeu de caractères de la donnée restitue les caractères spécifiques d'une langue, comme les accents ou les caractères spéciaux. Le format UTF-8 est couramment utilisé pour le français.",
 };
 
 export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSections"] = {
@@ -403,7 +406,7 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "license.classificationCode.placeholder": "Select a classification",
 
     "field.resourceGenealogy": "Resource genealogy (optional)",
-    "field.resourceGenealogy.hint": "Describes the source data, methods and protocols used to produce your dataset.",
+    "field.resourceGenealogy.info": "Describes the source data, methods and protocols used to produce your dataset.",
     "field.hierarchyLevel": "Data type",
     "field.hierarchyLevel.dataset": "Dataset",
     "field.hierarchyLevel.series": "Data collection",
@@ -411,4 +414,6 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "field.hierarchyLevel.series.hint": "Grouping of datasets belonging to the same subject, theme, programme or public policy.",
     "field.language": "Language of the data and its metadata",
     "field.charset": "Character set of the data and its metadata",
+    "field.charset.info":
+        "The character set of the data reproduces the specific characters of a language, such as accents or special characters. The UTF-8 format is commonly used for French.",
 };

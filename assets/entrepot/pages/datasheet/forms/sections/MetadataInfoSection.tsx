@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Select from "@codegouvfr/react-dsfr/SelectNext";
 import { Controller, useFormContext } from "react-hook-form";
@@ -28,9 +29,8 @@ export default function MetadataInfoSection() {
                 render={({ field: { value, onChange } }) => (
                     <MarkdownEditor
                         label={t("field.resourceGenealogy")}
-                        hintText={t("field.resourceGenealogy.hint")}
-                        state={errors.resourceGenealogy ? "error" : "default"}
-                        stateRelatedMessage={errors.resourceGenealogy?.message}
+                        state={errors.resourceGenealogy ? "error" : "info"}
+                        stateRelatedMessage={errors.resourceGenealogy?.message ?? t("field.resourceGenealogy.info")}
                         value={value ?? ""}
                         onChange={onChange}
                     />
@@ -90,16 +90,20 @@ export default function MetadataInfoSection() {
                 )}
             />
 
-            <Select
-                label={t("field.charset")}
-                state={errors.charset ? "error" : "default"}
-                stateRelatedMessage={errors.charset?.message}
-                nativeSelectProps={{ ...register("charset") }}
-                options={Object.entries(charsets as Record<string, string>).map(([key, label]) => ({
-                    value: key,
-                    label: label,
-                }))}
-            />
+            <div>
+                <Select
+                    label={t("field.charset")}
+                    state={errors.charset ? "error" : "default"}
+                    // stateRelatedMessage={errors.charset?.message ?? t("field.charset.info")}
+                    nativeSelectProps={{ ...register("charset") }}
+                    options={Object.keys(charsets).map((charset) => ({
+                        value: charset,
+                        label: charset,
+                    }))}
+                    className={fr.cx("fr-mb-0")}
+                />
+                <p className={fr.cx("fr-info-text", "fr-mt-4v")}>{t("field.charset.info")}</p>
+            </div>
         </div>
     );
 }
