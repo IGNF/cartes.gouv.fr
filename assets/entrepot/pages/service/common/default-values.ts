@@ -31,28 +31,24 @@ const getEndpointSuffix = (endpointType: EndpointTypeEnum | string) => {
 const getMetadataFormDefaultValues = (metadata?: Metadata, datastore?: Datastore): MetadataFormValuesType => {
     const defaultValues: MetadataFormValuesType = {
         language: metadata?.csw_metadata?.language ? metadata?.csw_metadata?.language : DEFAULT_LANGUAGE,
-        creation_date: metadata?.csw_metadata?.creation_date,
+        creation_date: metadata?.csw_metadata?.date_creation,
         resource_genealogy: metadata?.csw_metadata?.resource_genealogy ?? "",
         hierarchy_level: metadata?.csw_metadata?.hierarchy_level ?? MetadataHierarchyLevel.Dataset,
-        email_contact: metadata?.csw_metadata?.contact_email,
-        organization: metadata?.csw_metadata?.organisation_name,
-        organization_email: metadata?.csw_metadata?.organisation_email,
-        category: metadata?.csw_metadata?.topic_categories ?? [],
-        // category: (metadata?.csw_metadata?.topic_categories ?? []).map((cat) => {
-        //     const thematicCategory = thematicCategories.find((c) => c.code === cat || c.text === cat);
-        //     return thematicCategory?.code ?? cat;
-        // }),
-        keywords: metadata?.csw_metadata?.inspire_keywords ?? [],
-        free_keywords: metadata?.csw_metadata?.free_keywords ?? [],
-        public_name: metadata?.csw_metadata?.title,
-        description: metadata?.csw_metadata?.abstract,
+        email_contact: metadata?.csw_metadata?.producers?.[0]?.organization_email,
+        organization: metadata?.csw_metadata?.producers?.[0]?.organization_name,
+        organization_email: metadata?.csw_metadata?.producers?.[0]?.organization_email,
+        category: metadata?.csw_metadata?.themes ?? [],
+        keywords: metadata?.csw_metadata?.keywords_inspire ?? [],
+        free_keywords: metadata?.csw_metadata?.keywords_additional ?? [],
+        public_name: metadata?.csw_metadata?.name,
+        description: metadata?.csw_metadata?.description,
         identifier:
             metadata?.csw_metadata?.file_identifier ??
             metadata?.file_identifier ??
             (datastore?.metadata_file_identifier_prefix ? datastore.metadata_file_identifier_prefix + "." : undefined),
         charset: metadata?.csw_metadata?.charset ?? DEFAULT_CHARSET,
         resolution: metadata?.csw_metadata?.resolution ?? "",
-        frequency_code: metadata?.csw_metadata?.frequency_code ?? "unknown",
+        frequency_code: metadata?.csw_metadata?.update_frequency ?? "unknown",
     };
 
     // NOTE : migration des anciennes valeurs de l'identifiant (préfixe en minuscule) vers la valeur telle qu'elle fournie par l'API sans transformation
@@ -135,7 +131,7 @@ export const getWfsServiceFormDefaultValues = (
             selected_tables: [],
             table_infos: {},
             technical_name: suggestServiceTechnicalName(storedDataName, EndpointTypeEnum.WFS, datastore?.configuration_layer_name_prefix),
-            service_name: metadata?.csw_metadata?.title ?? storedDataName,
+            service_name: metadata?.csw_metadata?.name ?? storedDataName,
             creation_date: now,
             resource_genealogy: "",
             allow_view_data: false,
@@ -184,7 +180,7 @@ export const getWmsVectorServiceFormDefaultValues = (
         defValues = {
             selected_tables: [],
             technical_name: suggestServiceTechnicalName(storedDataName, EndpointTypeEnum.WMSVECTOR, datastore?.configuration_layer_name_prefix),
-            service_name: metadata?.csw_metadata?.title ?? storedDataName,
+            service_name: metadata?.csw_metadata?.name ?? storedDataName,
             creation_date: now,
             resource_genealogy: "",
             allow_view_data: false,
@@ -228,7 +224,7 @@ export const getPyramidVectorTmsServiceFormDefaultValues = (
         // valeurs par défaut lors de la création de nouveaux config et offering
         defValues = {
             technical_name: suggestServiceTechnicalName(storedDataName, "tms", datastore?.configuration_layer_name_prefix),
-            service_name: metadata?.csw_metadata?.title ?? storedDataName,
+            service_name: metadata?.csw_metadata?.name ?? storedDataName,
             creation_date: now,
             resource_genealogy: "",
             allow_view_data: false,
