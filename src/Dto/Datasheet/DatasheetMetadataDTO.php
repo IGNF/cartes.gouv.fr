@@ -29,7 +29,7 @@ class DatasheetMetadataDTO
      * @param string[]               $keywords_inspire
      * @param string[]               $keywords_additional
      * @param ProducerDTO[]          $producers
-     * @param string[]               $territories
+     * @param array<array<mixed>>    $territories
      * @param ResourceConditionDTO[] $resource_constraints
      */
     public function __construct(
