@@ -7,13 +7,13 @@
         <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="{{ language.code }}">{{ language.language }}</gmd:LanguageCode>
     </gmd:language>
     <gmd:characterSet>
-        <gmd:MD_CharacterSetCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_CharacterSetCode" codeListValue="{{ charset }}">{{ charset }}</gmd:MD_CharacterSetCode>
+        <gmd:MD_CharacterSetCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="{{ charset }}"/>
     </gmd:characterSet>
     <gmd:hierarchyLevel>
-        <gmd:MD_ScopeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_ScopeCode" codeListValue="{{ hierarchy_level }}">{{ hierarchy_level }}</gmd:MD_ScopeCode>
+        <gmd:MD_ScopeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode" codeListValue="{{ hierarchy_level }}">{{ hierarchy_level }}</gmd:MD_ScopeCode>
     </gmd:hierarchyLevel>
 
-    {# généalogie de la ressource #}
+    {# Libellé du niveau hiérarchique #}
     {% set hierarchy_level_name = '' %}
     {% if hierarchy_level == 'dataset' %}
         {% set hierarchy_level_name = 'Jeu de données' %}
@@ -25,25 +25,108 @@
         <gco:CharacterString>{{ hierarchy_level_name }}</gco:CharacterString>
     </gmd:hierarchyLevelName>
 
-    {% if title is defined or abstract is defined or organisation_name is defined or organisation_email is defined or thematic_categories is defined or resolution is defined or creation_date is defined %}
+    {# Contact métadonnée = premier producteur (pointOfContact) #}
+    {% if producers is defined and producers|length %}
+        {% set contact = producers[0] %}
+        <gmd:contact>
+            <gmd:CI_ResponsibleParty>
+                <gmd:organisationName>
+                    <gco:CharacterString>{{ contact.organization_name }}</gco:CharacterString>
+                </gmd:organisationName>
+                <gmd:contactInfo>
+                    <gmd:CI_Contact>
+                        <gmd:address>
+                            <gmd:CI_Address>
+                                {% if contact.address_number is not empty %}
+                                    <gmd:deliveryPoint>
+                                        <gco:CharacterString>{{ contact.address_number }}</gco:CharacterString>
+                                    </gmd:deliveryPoint>
+                                {% endif %}
+                                {% if contact.address_city is not empty %}
+                                    <gmd:city>
+                                        <gco:CharacterString>{{ contact.address_city }}</gco:CharacterString>
+                                    </gmd:city>
+                                {% endif %}
+                                {% if contact.address_postal_code is not empty %}
+                                    <gmd:postalCode>
+                                        <gco:CharacterString>{{ contact.address_postal_code }}</gco:CharacterString>
+                                    </gmd:postalCode>
+                                {% endif %}
+                                <gmd:electronicMailAddress>
+                                    <gco:CharacterString>{{ contact.organization_email }}</gco:CharacterString>
+                                </gmd:electronicMailAddress>
+                            </gmd:CI_Address>
+                        </gmd:address>
+                    </gmd:CI_Contact>
+                </gmd:contactInfo>
+                <gmd:role>
+                    <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact"/>
+                </gmd:role>
+            </gmd:CI_ResponsibleParty>
+        </gmd:contact>
+    {% endif %}
+
+    {% if update_date is defined %}
+        <gmd:dateStamp>
+            <gco:DateTime>{{ update_date }}</gco:DateTime>
+        </gmd:dateStamp>
+    {% endif %}
+
+    {# Standard de métadonnées (boilerplate INSPIRE — laisser par défaut) #}
+    <gmd:metadataStandardName>
+        <gco:CharacterString>ISO 19115</gco:CharacterString>
+    </gmd:metadataStandardName>
+    <gmd:metadataStandardVersion>
+        <gco:CharacterString>2003 Cor.1:2006</gco:CharacterString>
+    </gmd:metadataStandardVersion>
+
+    {% if name is defined or description is defined or producers is defined or themes is defined or resolution is defined or date_creation is defined %}
         <gmd:identificationInfo>
             <gmd:MD_DataIdentification>
-                {% if title is defined %}
+
+                {# ====== Citation ====== #}
+                {% if name is defined %}
                     <gmd:citation>
                         <gmd:CI_Citation>
                             <gmd:title>
                                 {# intitulé #}
-                                <gco:CharacterString>{{ title }}</gco:CharacterString>
+                                <gco:CharacterString>{{ name }}</gco:CharacterString>
                             </gmd:title>
 
-                            {% if creation_date is defined %}
+                            {% if date_creation is defined and date_creation is not empty %}
                                 <gmd:date>
                                     <gmd:CI_Date>
                                         <gmd:date>
-                                            <gco:Date>{{ creation_date }}</gco:Date>
+                                            <gco:Date>{{ date_creation }}</gco:Date>
                                         </gmd:date>
                                         <gmd:dateType>
-                                            <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
+                                            <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation"/>
+                                        </gmd:dateType>
+                                    </gmd:CI_Date>
+                                </gmd:date>
+                            {% endif %}
+
+                            {% if publication_date is defined and publication_date is not empty %}
+                                <gmd:date>
+                                    <gmd:CI_Date>
+                                        <gmd:date>
+                                            <gco:Date>{{ publication_date }}</gco:Date>
+                                        </gmd:date>
+                                        <gmd:dateType>
+                                            <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication"/>
+                                        </gmd:dateType>
+                                    </gmd:CI_Date>
+                                </gmd:date>
+                            {% endif %}
+
+                            {% if revision_date is defined and revision_date is not empty %}
+                                <gmd:date>
+                                    <gmd:CI_Date>
+                                        <gmd:date>
+                                            <gco:Date>{{ revision_date }}</gco:Date>
+                                        </gmd:date>
+                                        <gmd:dateType>
+                                            <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision"/>
                                         </gmd:dateType>
                                     </gmd:CI_Date>
                                 </gmd:date>
@@ -52,90 +135,77 @@
                     </gmd:citation>
                 {% endif %}
 
-                {% if abstract is defined %}
+                {# ====== Résumé ====== #}
+                {% if description is defined %}
                     <gmd:abstract>
                         {# résumé #}
-                        <gco:CharacterString>{{ abstract }}</gco:CharacterString>
+                        <gco:CharacterString>{{ description }}</gco:CharacterString>
                     </gmd:abstract>
                 {% endif %}
 
-                {% if organisation_email is defined or organisation_name is defined %}
-                    {# email de contact sur les métadonnées #}
-                    <gmd:pointOfContact>
-                        <gmd:CI_ResponsibleParty>
-                            {% if organisation_name is defined %}
+                {# ====== Producteurs / contacts de la ressource ====== #}
+                {# (un gmd:pointOfContact par producteur) #}
+                {% if producers is defined and producers|length %}
+                    {% set roleLabels = {
+                        pointOfContact: 'Point de contact',
+                        custodian: 'Gestionnaire',
+                        author: 'Auteur',
+                        owner: 'Propriétaire',
+                        resourceProvider: 'Fournisseur de la ressource',
+                    } %}
+                    {% for producer in producers %}
+                        <gmd:pointOfContact>
+                            <gmd:CI_ResponsibleParty>
                                 <gmd:organisationName>
-                                    <gco:CharacterString>{{ organisation_name }}</gco:CharacterString>
+                                    <gco:CharacterString>{{ producer.organization_name }}</gco:CharacterString>
                                 </gmd:organisationName>
-                            {% endif %}
-
-                            <gmd:contactInfo>
-                                <gmd:CI_Contact>
-                                    <gmd:address>
-                                        <gmd:CI_Address>
-                                            <gmd:electronicMailAddress>
-                                                <gco:CharacterString>{{ organisation_email }}</gco:CharacterString>
-                                            </gmd:electronicMailAddress>
-                                        </gmd:CI_Address>
-                                    </gmd:address>
-                                </gmd:CI_Contact>
-                            </gmd:contactInfo>
-                        </gmd:CI_ResponsibleParty>
-                    </gmd:pointOfContact>
-                {% endif %}
-
-                {% if inspire_keywords|length %}
-                    <gmd:descriptiveKeywords>
-                        <gmd:MD_Keywords>
-                            {%- for item in inspire_keywords -%}
-                                <gmd:keyword>
-                                    <gco:CharacterString>{{ item }}</gco:CharacterString>
-                                </gmd:keyword>
-                            {%- endfor -%}
-                            <gmd:thesaurusName>
-                                <gmd:CI_Citation>
-                                    <gmd:title>
-                                        <gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
-                                    </gmd:title>
-                                    <gmd:date>
-                                        <gmd:CI_Date>
-                                            <gmd:date>
-                                                <gco:Date>2008-06-01</gco:Date>
-                                            </gmd:date>
-                                            <gmd:dateType>
-                                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
-                                            </gmd:dateType>
-                                        </gmd:CI_Date>
-                                    </gmd:date>
-                                </gmd:CI_Citation>
-                            </gmd:thesaurusName>
-                        </gmd:MD_Keywords>
-                    </gmd:descriptiveKeywords>
-                {% endif %}
-
-                {% if free_keywords|length %}
-                    <gmd:descriptiveKeywords>
-                        <gmd:MD_Keywords>
-                            {%- for item in free_keywords -%}
-                                <gmd:keyword>
-                                    <gco:CharacterString>{{ item }}</gco:CharacterString>
-                                </gmd:keyword>
-                            {%- endfor -%}
-                            <gmd:type>
-                                <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
-                            </gmd:type>
-                        </gmd:MD_Keywords>
-                    </gmd:descriptiveKeywords>
-                {% endif %}
-
-                {% if topic_categories|length %}
-                    {% for topic in topic_categories %}
-                        <gmd:topicCategory>
-                            <gmd:MD_TopicCategoryCode>{{ topic }}</gmd:MD_TopicCategoryCode>
-                        </gmd:topicCategory>
+                                <gmd:contactInfo>
+                                    <gmd:CI_Contact>
+                                        <gmd:address>
+                                            <gmd:CI_Address>
+                                                {% if producer.address_number is not empty %}
+                                                    <gmd:deliveryPoint>
+                                                        <gco:CharacterString>{{ producer.address_number }}</gco:CharacterString>
+                                                    </gmd:deliveryPoint>
+                                                {% endif %}
+                                                {% if producer.address_city is not empty %}
+                                                    <gmd:city>
+                                                        <gco:CharacterString>{{ producer.address_city }}</gco:CharacterString>
+                                                    </gmd:city>
+                                                {% endif %}
+                                                {% if producer.address_postal_code is not empty %}
+                                                    <gmd:postalCode>
+                                                        <gco:CharacterString>{{ producer.address_postal_code }}</gco:CharacterString>
+                                                    </gmd:postalCode>
+                                                {% endif %}
+                                                <gmd:electronicMailAddress>
+                                                    <gco:CharacterString>{{ producer.organization_email }}</gco:CharacterString>
+                                                </gmd:electronicMailAddress>
+                                            </gmd:CI_Address>
+                                        </gmd:address>
+                                    </gmd:CI_Contact>
+                                </gmd:contactInfo>
+                                <gmd:role>
+                                    <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="{{ producer.role }}">{{ roleLabels[producer.role] ?? producer.role }}</gmd:CI_RoleCode>
+                                </gmd:role>
+                            </gmd:CI_ResponsibleParty>
+                        </gmd:pointOfContact>
                     {% endfor %}
                 {% endif %}
 
+                {# ====== Fréquence de mise à jour ====== #}
+                {% if update_frequency is defined and update_frequency is not empty %}
+                    <gmd:resourceMaintenance>
+                        <gmd:MD_MaintenanceInformation>
+                            <gmd:maintenanceAndUpdateFrequency>
+                                <gmd:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{ update_frequency }}"/>
+                            </gmd:maintenanceAndUpdateFrequency>
+                        </gmd:MD_MaintenanceInformation>
+                    </gmd:resourceMaintenance>
+                {% endif %}
+
+                {# ====== Vignette ====== #}
+                {# miniature de la couche, stockée en annexe #}
                 {% if thumbnail_url %}
                     <gmd:graphicOverview>
                         <gmd:MD_BrowseGraphic>
@@ -152,16 +222,122 @@
                     </gmd:graphicOverview>
                 {% endif %}
 
-                {% if frequency_code %}
-                    <gmd:resourceMaintenance>
-                        <gmd:MD_MaintenanceInformation>
-                            <gmd:maintenanceAndUpdateFrequency>
-                                <gmd:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{ frequency_code }}" />
-                            </gmd:maintenanceAndUpdateFrequency>
-                        </gmd:MD_MaintenanceInformation>
-                    </gmd:resourceMaintenance>
+                {# ====== Mots-clés INSPIRE ====== #}
+                {# Thèmes INSPIRE (thesaurus GEMET - INSPIRE themes, version 1.0) #}
+                {% if keywords_inspire is defined and keywords_inspire|length %}
+                    <gmd:descriptiveKeywords>
+                        <gmd:MD_Keywords>
+                            {%- for item in keywords_inspire -%}
+                                <gmd:keyword>
+                                    <gco:CharacterString>{{ item }}</gco:CharacterString>
+                                </gmd:keyword>
+                            {%- endfor -%}
+                            <gmd:thesaurusName>
+                                <gmd:CI_Citation>
+                                    <gmd:title>
+                                        <gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
+                                    </gmd:title>
+                                    <gmd:date>
+                                        <gmd:CI_Date>
+                                            <gmd:date>
+                                                <gco:Date>2008-06-01</gco:Date>
+                                            </gmd:date>
+                                            <gmd:dateType>
+                                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication"/>
+                                            </gmd:dateType>
+                                        </gmd:CI_Date>
+                                    </gmd:date>
+                                </gmd:CI_Citation>
+                            </gmd:thesaurusName>
+                        </gmd:MD_Keywords>
+                    </gmd:descriptiveKeywords>
                 {% endif %}
 
+                {# Mots-clés libres additionnels (sans thésaurus) #}
+                {% if keywords_additional is defined and keywords_additional|length %}
+                    <gmd:descriptiveKeywords>
+                        <gmd:MD_Keywords>
+                            {%- for item in keywords_additional -%}
+                                <gmd:keyword>
+                                    <gco:CharacterString>{{ item }}</gco:CharacterString>
+                                </gmd:keyword>
+                            {%- endfor -%}
+                            <gmd:type>
+                                <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme"/>
+                            </gmd:type>
+                        </gmd:MD_Keywords>
+                    </gmd:descriptiveKeywords>
+                {% endif %}
+
+                {# ====== Contraintes de ressource (licences) ====== #}
+                {% if resource_constraints is defined and resource_constraints|length %}
+                    {% for condition in resource_constraints %}
+                        <gmd:resourceConstraints>
+                            {% if condition.type == 'legal' %}
+                                <gmd:MD_LegalConstraints>
+                            {% elseif condition.type == 'security' %}
+                                <gmd:MD_SecurityConstraints>
+                            {% else %}
+                                <gmd:MD_Constraints>
+                            {% endif %}
+
+                            {% for sub in condition.constraints %}
+                                {% if sub.type == 'useConstraints' %}
+                                    <gmd:useConstraints>
+                                        <gmd:MD_RestrictionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode" codeListValue="{{ sub.restriction_code }}">{{ sub.restriction_code }}</gmd:MD_RestrictionCode>
+                                    </gmd:useConstraints>
+                                {% elseif sub.type == 'accessConstraints' %}
+                                    <gmd:accessConstraints>
+                                        <gmd:MD_RestrictionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode" codeListValue="{{ sub.restriction_code }}">{{ sub.restriction_code }}</gmd:MD_RestrictionCode>
+                                    </gmd:accessConstraints>
+                                {% elseif sub.type == 'otherConstraints' %}
+                                    {# Limitation d'accès public INSPIRE article 13 via gmx:Anchor #}
+                                    {% if sub.limitation_code starts with 'INSPIRE_Directive_Article13' %}
+                                        <gmd:otherConstraints>
+                                            <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/{{ sub.limitation_code }}">{{ sub.limitation_code }}</gmx:Anchor>
+                                        </gmd:otherConstraints>
+                                    {% elseif sub.limitation_code == 'noLimitations' %}
+                                        <gmd:otherConstraints>
+                                            <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations">Aucune limitation</gmx:Anchor>
+                                        </gmd:otherConstraints>
+                                    {% elseif sub.limitation_code == 'conditionsUnknown' %}
+                                        <gmd:otherConstraints>
+                                            <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/conditionsUnknown">Conditions inconnues</gmx:Anchor>
+                                        </gmd:otherConstraints>
+                                    {% elseif sub.limitation_code is not empty %}
+                                        <gmd:otherConstraints>
+                                            <gco:CharacterString>{{ sub.limitation_code }}</gco:CharacterString>
+                                        </gmd:otherConstraints>
+                                    {% endif %}
+                                {% elseif sub.type == 'useLimitation' %}
+                                    <gmd:useLimitation>
+                                        <gco:CharacterString>{{ sub.description }}</gco:CharacterString>
+                                    </gmd:useLimitation>
+                                {% elseif sub.type == 'classification' %}
+                                    <gmd:classification>
+                                        <gmd:MD_ClassificationCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ClassificationCode" codeListValue="{{ sub.classification_code }}">{{ sub.classification_code }}</gmd:MD_ClassificationCode>
+                                    </gmd:classification>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if condition.type == 'legal' %}
+                                </gmd:MD_LegalConstraints>
+                            {% elseif condition.type == 'security' %}
+                                </gmd:MD_SecurityConstraints>
+                            {% else %}
+                                </gmd:MD_Constraints>
+                            {% endif %}
+                        </gmd:resourceConstraints>
+                    {% endfor %}
+                {% endif %}
+
+                {# ====== Type de représentation spatiale ====== #}
+                {# vector | grid | textTable | tin #}
+                <gmd:spatialRepresentationType>
+                    <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector"/>
+                </gmd:spatialRepresentationType>
+
+                {# ====== Résolution spatiale ====== #}
                 {% if resolution %}
                     <gmd:spatialResolution>
                         <gmd:MD_Resolution>
@@ -176,64 +352,134 @@
                     </gmd:spatialResolution>
                 {% endif %}
 
-                {% if bbox %}
-                    <gmd:extent>
-                        <gmd:EX_Extent>
-                            <gmd:geographicElement>
-                                <gmd:EX_GeographicBoundingBox>
-                                    <gmd:westBoundLongitude>
-                                        <gco:Decimal>{{ bbox.west }}</gco:Decimal>
-                                    </gmd:westBoundLongitude>
-                                    <gmd:eastBoundLongitude>
-                                        <gco:Decimal>{{ bbox.east }}</gco:Decimal>
-                                    </gmd:eastBoundLongitude>
-                                    <gmd:southBoundLatitude>
-                                        <gco:Decimal>{{ bbox.south }}</gco:Decimal>
-                                    </gmd:southBoundLatitude>
-                                    <gmd:northBoundLatitude>
-                                        <gco:Decimal>{{ bbox.north }}</gco:Decimal>
-                                    </gmd:northBoundLatitude>
-                                </gmd:EX_GeographicBoundingBox>
-                            </gmd:geographicElement>
-                        </gmd:EX_Extent>
-                    </gmd:extent>
+                {# ====== Langue de la ressource ====== #}
+                <gmd:language>
+                    <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="{{ language.code }}">{{ language.language }}</gmd:LanguageCode>
+                </gmd:language>
+
+                {# ====== Thématiques ISO 19115 (topicCategory) ====== #}
+                {% if themes is defined and themes|length %}
+                    {% for topic in themes %}
+                        <gmd:topicCategory>
+                            <gmd:MD_TopicCategoryCode>{{ topic }}</gmd:MD_TopicCategoryCode>
+                        </gmd:topicCategory>
+                    {% endfor %}
                 {% endif %}
 
-                <gmd:spatialRepresentationType>
-                    <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" />
-                </gmd:spatialRepresentationType>
+                {# ====== Emprises (une par territoire) ====== #}
+                {# Chaque territoire porte sa propre bbox et son code ISO 3166 alpha-3. #}
+                {# Format Territories.json : bbox = [minLon, minLat, maxLon, maxLat] #}
+                {% if territories is defined and territories|length %}
+                    {% for territory in territories %}
+                        {% if territory.bbox|length == 4 %}
+                            <gmd:extent>
+                                <gmd:EX_Extent>
+                                    <gmd:description>
+                                        <gco:CharacterString>{{ territory.title }}</gco:CharacterString>
+                                    </gmd:description>
+                                    <gmd:geographicElement>
+                                        {# coordonnées en WGS84 #}
+                                        <gmd:EX_GeographicBoundingBox>
+                                            <gmd:westBoundLongitude>
+                                                <gco:Decimal>{{ territory.bbox[0] }}</gco:Decimal>
+                                            </gmd:westBoundLongitude>
+                                            <gmd:eastBoundLongitude>
+                                                <gco:Decimal>{{ territory.bbox[2] }}</gco:Decimal>
+                                            </gmd:eastBoundLongitude>
+                                            <gmd:southBoundLatitude>
+                                                <gco:Decimal>{{ territory.bbox[1] }}</gco:Decimal>
+                                            </gmd:southBoundLatitude>
+                                            <gmd:northBoundLatitude>
+                                                <gco:Decimal>{{ territory.bbox[3] }}</gco:Decimal>
+                                            </gmd:northBoundLatitude>
+                                        </gmd:EX_GeographicBoundingBox>
+                                    </gmd:geographicElement>
+                                    <gmd:geographicElement>
+                                        {# identifiant ISO 3166 alpha-3 du territoire #}
+                                        <gmd:EX_GeographicDescription>
+                                            <gmd:geographicIdentifier>
+                                                <gmd:MD_Identifier>
+                                                    <gmd:authority>
+                                                        <gmd:CI_Citation>
+                                                            <gmd:title>
+                                                                <gco:CharacterString>ISO 3166 alpha 3</gco:CharacterString>
+                                                            </gmd:title>
+                                                            <gmd:date>
+                                                                <gmd:CI_Date>
+                                                                    <gmd:date>
+                                                                        <gco:Date>1974</gco:Date>
+                                                                    </gmd:date>
+                                                                    <gmd:dateType>
+                                                                        <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication"/>
+                                                                    </gmd:dateType>
+                                                                </gmd:CI_Date>
+                                                            </gmd:date>
+                                                        </gmd:CI_Citation>
+                                                    </gmd:authority>
+                                                    <gmd:code>
+                                                        <gco:CharacterString>{{ territory.id }}</gco:CharacterString>
+                                                    </gmd:code>
+                                                </gmd:MD_Identifier>
+                                            </gmd:geographicIdentifier>
+                                        </gmd:EX_GeographicDescription>
+                                    </gmd:geographicElement>
+                                </gmd:EX_Extent>
+                            </gmd:extent>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
             </gmd:MD_DataIdentification>
         </gmd:identificationInfo>
     {% endif %}
 
-    {% if contact_email is defined %}
-        {# responsable de la ressource #}
-        <gmd:contact>
-            <gmd:CI_ResponsibleParty>
-                <gmd:contactInfo>
-                    <gmd:CI_Contact>
-                        <gmd:address>
-                            <gmd:CI_Address>
-                                <gmd:electronicMailAddress>
-                                    <gco:CharacterString>{{ contact_email }}</gco:CharacterString>
-                                </gmd:electronicMailAddress>
-                            </gmd:CI_Address>
-                        </gmd:address>
-                    </gmd:CI_Contact>
-                </gmd:contactInfo>
-            </gmd:CI_ResponsibleParty>
-        </gmd:contact>
-    {% endif %}
-
-    {% if update_date is defined %}
-        <gmd:dateStamp>
-            <gco:DateTime>{{ update_date }}</gco:DateTime>
-        </gmd:dateStamp>
-    {% endif %}
-
-    {% if resource_genealogy is defined %}
+    {% if resource_genealogy is defined and resource_genealogy is not empty %}
         <gmd:dataQualityInfo>
             <gmd:DQ_DataQuality>
+                {# gmd:scope est obligatoire dans DQ_DataQuality (ISO 19139) #}
+                <gmd:scope>
+                    <gmd:DQ_Scope>
+                        <gmd:level>
+                            <gmd:MD_ScopeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode" codeListValue="{{ hierarchy_level }}"/>
+                        </gmd:level>
+                    </gmd:DQ_Scope>
+                </gmd:scope>
+                {# Référence de conformité INSPIRE (boilerplate — laisser par défaut) #}
+                <gmd:report>
+                    <gmd:DQ_DomainConsistency>
+                        <gmd:nameOfMeasure>
+                            <gco:CharacterString>Value domain conformance</gco:CharacterString>
+                        </gmd:nameOfMeasure>
+                        <gmd:result>
+                            <gmd:DQ_ConformanceResult>
+                                <gmd:specification>
+                                    <gmd:CI_Citation>
+                                        <gmd:title>
+                                            <gco:CharacterString>Commission Regulation (EU) No 1089/2010 of 23 November 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards interoperability of spatial data sets and services</gco:CharacterString>
+                                        </gmd:title>
+                                        <gmd:date>
+                                            <gmd:CI_Date>
+                                                <gmd:date>
+                                                    <gco:Date>2010-12-08</gco:Date>
+                                                </gmd:date>
+                                                <gmd:dateType>
+                                                    <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication"/>
+                                                </gmd:dateType>
+                                            </gmd:CI_Date>
+                                        </gmd:date>
+                                    </gmd:CI_Citation>
+                                </gmd:specification>
+                                <gmd:explanation>
+                                    <gco:CharacterString>Dataset is conformant to the Inspire data specification.</gco:CharacterString>
+                                </gmd:explanation>
+                                <gmd:pass>
+                                    <gco:Boolean>true</gco:Boolean>
+                                </gmd:pass>
+                            </gmd:DQ_ConformanceResult>
+                        </gmd:result>
+                    </gmd:DQ_DomainConsistency>
+                </gmd:report>
+                {# Généalogie de la donnée #}
                 <gmd:lineage>
                     <gmd:LI_Lineage>
                         <gmd:statement>
@@ -251,9 +497,9 @@
                 <gmd:transferOptions>
                     <gmd:MD_DigitalTransferOptions>
                         {# https://cnig.gouv.fr/IMG/pdf/guide_recherche_inspire.pdf #}
-                        {# Le champ linkage précise l’adresse du service, le champ « protocol » précise de quel type de service il s’agit (OGC:WMS, OGC:WFS, OGC:WMTS, OGC:CSW) et le champ « name » contient le nom de la couche. #}
+                        {# Le champ linkage précise l'adresse du service, le champ « protocol » précise de quel type de service il s'agit (OGC:WMS, OGC:WFS, OGC:WMTS, OGC:CSW) et le champ « name » contient le nom de la couche. #}
                         {% for layer in layers %}
-                            <gmd:onLine type="offering" offeringId="{{ layer.offering_id }}" offeringOpen="{{ layer.open }}">
+                            <gmd:onLine type="offering">
                                 <gmd:CI_OnlineResource>
                                     <gmd:linkage>
                                         <gmd:URL>{{ layer.gmd_online_resource_url }}</gmd:URL>
@@ -261,13 +507,15 @@
                                     <gmd:protocol>
                                         <gco:CharacterString>{{ layer.gmd_online_resource_protocol }}</gco:CharacterString>
                                     </gmd:protocol>
-                                    <gmd:name>
-                                        <gco:CharacterString>{{ layer.name }}</gco:CharacterString>
-                                    </gmd:name>
                                     {% if layer.open == false %}
                                         <gmd:applicationProfile>
                                             <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceType/other">other</gmx:Anchor>
                                         </gmd:applicationProfile>
+                                    {% endif %}
+                                    <gmd:name>
+                                        <gco:CharacterString>{{ layer.name }}</gco:CharacterString>
+                                    </gmd:name>
+                                    {% if layer.open == false %}
                                         <gmd:description>
                                             <gmx:Anchor xlink:href="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode_restricted">{{ layer.name }} - Accès restreint</gmx:Anchor>
                                         </gmd:description>

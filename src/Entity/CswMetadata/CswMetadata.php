@@ -2,8 +2,16 @@
 
 namespace App\Entity\CswMetadata;
 
+use App\Dto\Datasheet\LanguageDTO;
+use App\Dto\Datasheet\ProducerDTO;
+use App\Dto\Datasheet\ResourceConditionDTO;
+use App\Dto\Datasheet\TerritoryDTO;
+
 /**
  * Classe représentant une métadonnée du catalogue GeoNetwork.
+ *
+ * Vocabulaire unifié avec DatasheetMetadataDTO : les noms de propriétés sont identiques
+ * à ceux du DTO de création ; le name-converter camelCase→snake_case produit le wire JSON attendu.
  *
  * @see https://en.wikipedia.org/wiki/GeoNetwork_opensource
  * @see https://en.wikipedia.org/wiki/Catalogue_Service_for_the_Web
@@ -12,34 +20,43 @@ class CswMetadata
 {
     public ?string $fileIdentifier;
     public ?CswHierarchyLevel $hierarchyLevel;
-    public ?CswLanguage $language;
+
+    /** Langue de la ressource (réutilise LanguageDTO, ex-CswLanguage). */
+    public ?LanguageDTO $language;
+
     public ?string $charset;
-    public ?string $title;
-    public ?string $abstract;
-    public ?string $creationDate;
+    public ?string $name;
+    public ?string $description;
+    public ?string $dateCreation;
+
+    /** Horodatage de la métadonnée (gmd:dateStamp), mis à jour par l'API Entrepôt. */
     public ?string $updateDate;
+
     public ?string $resourceGenealogy;
 
     /** @var array<string> */
-    public ?array $inspireKeywords;
+    public ?array $keywordsInspire;
 
     /** @var array<string> */
-    public ?array $freeKeywords;
+    public ?array $keywordsAdditional;
 
     /** @var array<string> */
-    public ?array $topicCategories;
+    public ?array $themes;
 
-    public ?string $contactEmail;
-    public ?string $organisationName;
-    public ?string $organisationEmail;
+    /** @var ProducerDTO[] */
+    public ?array $producers;
 
+    /** @var ResourceConditionDTO[] */
+    public ?array $resourceConstraints;
+
+    /** @var TerritoryDTO[] */
+    public ?array $territories;
+
+    /** Résolution spatiale (passthrough fromXml — non alimenté par le nouveau formulaire). */
     public ?string $resolution;
 
     /** @var array<CswMetadataLayer> */
     public ?array $layers;
-
-    /** @var ?array<string,float> */
-    public ?array $bbox;
 
     /** @var array<CswStyleFile> */
     public ?array $styleFiles;
@@ -51,24 +68,42 @@ class CswMetadata
     public ?array $documents;
 
     public ?string $thumbnailUrl;
-    public ?string $frequencyCode;
+
+    /** Fréquence de mise à jour (MD_MaintenanceFrequencyCode). */
+    public ?string $updateFrequency;
+
+    /**
+     * Date de publication de la ressource sur cartes.gouv.fr (CI_DateTypeCode="publication").
+     * Posée une seule fois à la création, préservée à chaque mise à jour.
+     */
+    public ?string $publicationDate;
+
+    /**
+     * Date de révision de la ressource (CI_DateTypeCode="revision").
+     * Mise à jour automatiquement à chaque modification (métadonnée ou service).
+     */
+    public ?string $revisionDate;
 
     public function __construct()
     {
         $this->hierarchyLevel = CswHierarchyLevel::Series;
-        $this->language = CswLanguage::default();
+        $this->language = new LanguageDTO('fre', 'français');
         $this->charset = 'utf8';
         $this->thumbnailUrl = null;
         $this->resolution = null;
-        $this->frequencyCode = 'unknown';
+        $this->updateFrequency = 'unknown';
         $this->resourceGenealogy = '';
         $this->updateDate = '';
+        $this->publicationDate = null;
+        $this->revisionDate = null;
 
-        $this->topicCategories = [];
-        $this->inspireKeywords = [];
-        $this->freeKeywords = [];
+        $this->themes = [];
+        $this->keywordsInspire = [];
+        $this->keywordsAdditional = [];
+        $this->producers = [];
+        $this->resourceConstraints = [];
+        $this->territories = [];
         $this->layers = [];
-        $this->bbox = null;
         $this->styleFiles = [];
         $this->capabilitiesFiles = [];
         $this->documents = [];
@@ -77,6 +112,8 @@ class CswMetadata
     public function __clone()
     {
         $this->hierarchyLevel = CswHierarchyLevel::tryFrom($this->hierarchyLevel->value);
-        $this->language = new CswLanguage($this->language->code, $this->language->language);
+        if (null !== $this->language) {
+            $this->language = new LanguageDTO($this->language->code, $this->language->language);
+        }
     }
 }
