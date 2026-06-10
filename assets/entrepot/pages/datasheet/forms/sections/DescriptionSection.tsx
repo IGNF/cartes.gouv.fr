@@ -31,7 +31,8 @@ export default function DescriptionSection({ isEditMode = false }: DescriptionSe
                 label={t("field.name")}
                 state={errors.name ? "error" : "default"}
                 stateRelatedMessage={errors.name?.message}
-                nativeInputProps={{ ...register("name"), disabled: isEditMode }}
+                nativeInputProps={{ ...register("name") }}
+                disabled={isEditMode}
             />
 
             <Input
@@ -41,7 +42,10 @@ export default function DescriptionSection({ isEditMode = false }: DescriptionSe
                 stateRelatedMessage={
                     errors.file_identifier?.message ?? "Cet identifiant unique est associé à votre donnée et s'affichera dans l'URL de votre fiche de donnée. "
                 }
-                nativeInputProps={{ ...register("file_identifier") }}
+                nativeInputProps={{
+                    ...register("file_identifier"),
+                }}
+                disabled={isEditMode}
             />
 
             <Controller

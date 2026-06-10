@@ -1,16 +1,16 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { DevTool } from "@hookform/devtools";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { applyApiValidationErrors } from "@/modules/setApiFormErrors";
-
 import { useDatastore } from "@/contexts/datastore";
 import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
+import { applyApiValidationErrors } from "@/modules/setApiFormErrors";
 import { delta } from "@/utils";
 import { useStyles } from "tss-react";
 import MetadataSection from "./MetadataSection";
@@ -46,6 +46,7 @@ export default function MetadataForm({
         queryKey: RQKeys.datastore_datasheet_list(datastore._id),
         queryFn: ({ signal }) => api.datasheet.getList(datastore._id, { signal }),
         refetchInterval: delta.seconds(30),
+        enabled: mode === "create",
     });
 
     const schema = useMemo(
@@ -70,6 +71,7 @@ export default function MetadataForm({
         formState: { isSubmitting },
         control,
         setError,
+        reset,
     } = form;
 
     const submit = handleSubmit(async (values) => {
@@ -88,18 +90,43 @@ export default function MetadataForm({
 
     return (
         <>
-            {renderTopActions?.({ isSubmitting })}
-
-            <div
-                className={cx(
-                    fr.cx("fr-container"),
-                    css({
-                        backgroundColor: fr.colors.decisions.background.default.grey.default,
-                    })
-                )}
+            <Button
+                onClick={() => {
+                    reset({
+                        name: "test-design-2026",
+                        file_identifier: "SANDBOX.test-design-2026",
+                        description: "test-design-2026-description",
+                        themes: ["Agriculture"],
+                        keywords_inspire: ["Objet hydrographique"],
+                        keywords_additional: ["foo", "bar"],
+                        producers: [
+                            {
+                                organization_name: "INSTITUT NATIONAL DE L'INFORMATION GEOGRAPHIQUE ET FORESTIERE (IGN)",
+                                organization_email: "ign@ign.fr",
+                                role: "pointOfContact",
+                            },
+                        ],
+                        update_frequency: "annually",
+                        charset: "utf8",
+                        resource_genealogy: "test-design-2026-resource-genealogy",
+                    });
+                }}
             >
-                <FormProvider {...form}>
-                    <form onSubmit={submit} noValidate>
+                Test données
+            </Button>
+
+            <FormProvider {...form}>
+                <form onSubmit={submit} noValidate>
+                    {renderTopActions?.({ isSubmitting })}
+
+                    <div
+                        className={cx(
+                            fr.cx("fr-container"),
+                            css({
+                                backgroundColor: fr.colors.decisions.background.default.grey.default,
+                            })
+                        )}
+                    >
                         <div
                             className={cx(
                                 fr.cx("fr-grid-row", "fr-grid-row--gutters"),
@@ -136,11 +163,11 @@ export default function MetadataForm({
                             </MetadataSection>
                         </div>
 
-                        {renderBottomActions?.({ isSubmitting })}
-                    </form>
-                </FormProvider>
-                <DevTool control={control} />
-            </div>
+                        <div className={fr.cx("fr-container")}>{renderBottomActions?.({ isSubmitting })}</div>
+                    </div>
+                </form>
+            </FormProvider>
+            <DevTool control={control} />
         </>
     );
 }
