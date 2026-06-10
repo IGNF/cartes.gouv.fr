@@ -13,6 +13,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { routes } from "@/router/router";
 import MetadataForm from "../forms/MetadataForm";
 import { MetadataFormValues, MetadataPayload, buildMetadataPayload, defaultMetadataValues } from "../forms/metadataSchema";
+import LoadingIcon from "@/components/Utils/LoadingIcon";
 
 type DatasheetCreateNextProps = {
     datastoreId: string;
@@ -103,7 +104,20 @@ export default function DatasheetCreateNext(props: DatasheetCreateNextProps) {
                             </div>
                         )}
                     />
-                    {createMutation.isPending && <Wait />}
+                    {createMutation.isPending && (
+                        <Wait>
+                            <div className={fr.cx("fr-container")}>
+                                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                                    <div className={fr.cx("fr-col-2")}>
+                                        <LoadingIcon />
+                                    </div>
+                                    <div className={fr.cx("fr-col-10")}>
+                                        <h6 className={fr.cx("fr-h6", "fr-m-0")}>{tCommon("adding")}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </Wait>
+                    )}
                 </>
             }
         />

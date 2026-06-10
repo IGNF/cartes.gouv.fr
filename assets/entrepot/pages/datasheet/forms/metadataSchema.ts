@@ -120,6 +120,7 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
             .required("L'identifiant de fichier est obligatoire")
             .matches(regex.file_identifier, "L'identifiant de fichier contient des caractères non autorisés")
             .test("is-file-identifier-unique", "Cet identifiant unique est déjà utilisé", async (value) => {
+                if (isEditMode) return true;
                 if (!value) return true;
                 try {
                     return await checkFileIdentifier(value);
@@ -404,7 +405,7 @@ export type MetadataPayload = {
     }>;
     date_creation: string;
     update_frequency: string;
-    territories: string[];
+    territories: Array<{ id: string; title: string; bbox: number[] }>;
     resource_constraints: Array<{
         type: string;
         constraints: Array<{
@@ -446,9 +447,16 @@ export function buildMetadataPayload(values: MetadataFormValues): MetadataPayloa
     const date_creation =
         values.date_creation instanceof Date ? values.date_creation.toISOString().slice(0, 10) : ((values.date_creation as string | undefined) ?? "");
 
-    const territories = (values.territories ?? []).map((t) =>
-        typeof t === "object" && t !== null && "id" in t ? String((t as { id: unknown }).id) : String(t)
-    );
+    const territories = (values.territories ?? [])
+        .filter((t) => typeof t === "object" && t !== null && "id" in t)
+        .map((t) => {
+            const territory = t as { id: string | number; title?: string; bbox?: number[] };
+            return {
+                id: String(territory.id),
+                title: territory.title ?? String(territory.id),
+                bbox: Array.isArray(territory.bbox) ? territory.bbox : [],
+            };
+        });
 
     const resource_constraints = (values.resource_constraints ?? []).map((condition) => ({
         type: condition.type,
@@ -494,23 +502,28 @@ export function mapMetadataToFormValues(apiMetadata: Metadata | undefined): Part
 
     const csw = apiMetadata.csw_metadata;
 
-    // Reconstruction d'un producteur de base depuis les champs plats de CswMetadata
-    const contactProducer: ProducerFormValues = {
-        organization_name: csw.organisation_name ?? "",
-        organization_email: csw.contact_email ?? csw.organisation_email ?? "",
-        role: "pointOfContact",
-    };
+    // Producteurs : lecture directe depuis le tableau unifié
+    // On force le cast du role (string) vers ProducerRole — les valeurs proviennent du XML qu'on a nous-mêmes écrit.
+    const producers = normalizeProducers(
+        (csw.producers ?? []).map((p) => ({
+            organization_name: p.organization_name,
+            organization_email: p.organization_email,
+            role: (PRODUCER_ROLES.includes(p.role as ProducerRole) ? p.role : "pointOfContact") as ProducerRole,
+            address_number: p.address_number ?? undefined,
+            address_street: p.address_street ?? undefined,
+            address_postal_code: p.address_postal_code ?? undefined,
+            address_city: p.address_city ?? undefined,
+        }))
+    );
 
-    const producers = normalizeProducers([contactProducer]);
-
-    // date_creation : CswMetadata.creation_date est une chaîne ISO → on recrée une Date
+    // date_creation : chaîne ISO → Date
     let date_creation: Date | undefined;
-    if (csw.creation_date) {
-        const d = new Date(csw.creation_date);
+    if (csw.date_creation) {
+        const d = new Date(csw.date_creation);
         date_creation = isNaN(d.getTime()) ? undefined : d;
     }
 
-    // Langue : on cherche l'objet LanguageType correspondant au code stocké
+    // Langue
     let language: { code: string; language: string } | undefined;
     if (csw.language) {
         language = csw.language;
@@ -518,20 +531,36 @@ export function mapMetadataToFormValues(apiMetadata: Metadata | undefined): Part
 
     return {
         ...defaultMetadataValues,
-        name: apiMetadata.tags?.datasheet_name ?? "",
-        description: csw.abstract ?? "",
+        name: csw.name ?? apiMetadata.tags?.datasheet_name ?? "",
+        description: csw.description ?? "",
         file_identifier: apiMetadata.file_identifier ?? "",
-        themes: csw.topic_categories ?? [],
-        keywords_inspire: csw.inspire_keywords ?? [],
-        keywords_additional: csw.free_keywords ?? [],
+        themes: csw.themes ?? [],
+        keywords_inspire: csw.keywords_inspire ?? [],
+        keywords_additional: csw.keywords_additional ?? [],
         producers,
         date_creation,
-        update_frequency: (csw.frequency_code as UpdateFrequency | undefined) ?? undefined,
+        update_frequency: (csw.update_frequency as UpdateFrequency | undefined) ?? undefined,
         resource_genealogy: csw.resource_genealogy ?? "",
         hierarchy_level: (csw.hierarchy_level as MetadataHierarchyLevel | undefined) ?? MetadataHierarchyLevel.Dataset,
         language: language ?? undefined,
-        charset: defaultMetadataValues.charset,
-        // territories et resource_constraints ne sont pas stockés dans CswMetadata → défauts
+        charset: csw.charset ?? defaultMetadataValues.charset,
+        // territories : reconstruits depuis csw.territories ; on ne dispose que de id/title/bbox,
+        // les champs optionnels supplémentaires de Territory (description, zoom, etc.) sont absents
+        // mais ne sont pas utilisés par le formulaire — on caste explicitement.
+        territories: (csw.territories ?? []).map((t) => ({ id: t.id, title: t.title, bbox: t.bbox }) as unknown as Territory),
+        // resource_constraints : reconstruits depuis csw.resource_constraints
+        resource_constraints: (csw.resource_constraints ?? []).map((condition) => ({
+            type: (CONSTRAINT_TYPES.includes(condition.type as ConstraintType) ? condition.type : "other") as ConstraintType,
+            constraints: condition.constraints.map((sub) => ({
+                type: (SUB_CONSTRAINT_TYPES.includes(sub.type as SubConstraintType) ? sub.type : "useLimitation") as SubConstraintType,
+                locked: sub.locked ?? false,
+                restriction_code: sub.restriction_code ?? undefined,
+                limitation_code: sub.limitation_code ?? undefined,
+                classification_code: sub.classification_code ?? undefined,
+                url: sub.url ?? undefined,
+                description: sub.description ?? undefined,
+            })),
+        })),
     };
 }
 

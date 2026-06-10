@@ -31,6 +31,7 @@ export default function SpatialCoverageSection() {
                         value={field.value ?? []}
                         onChange={(_, value) => field.onChange(value)}
                         onBlur={field.onBlur}
+                        ref={field.ref}
                         popupIcon={<span className={fr.cx("fr-icon-search-line", "fr-icon--sm")} />}
                     />
                 )}
