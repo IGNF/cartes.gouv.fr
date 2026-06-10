@@ -10,6 +10,7 @@ use App\Dto\Datasheet\DatasheetMetadataDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
+use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\CartesStoredDataApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -40,6 +41,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         private CartesServiceApiService $cartesServiceApiService,
         private MetadataApiService $metadataApiService,
         private CartesStoredDataApiService $cartesStoredDataApiService,
+        private CartesMetadataApiService $cartesMetadataApiService,
     ) {
     }
 
@@ -101,29 +103,26 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         return $this->json($datasheetList);
     }
 
-    /**
-     * @SuppressWarnings(UnusedFormalParameter)
-     */
     #[Route('', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, #[MapRequestPayload] DatasheetMetadataDTO $dto): JsonResponse
     {
-        // TODO: utiliser $datastoreId pour publier via MetadataApiService (génération XML ISO 19139).
         // TODO: la vignette est envoyée séparément via cartesgouvfr_api_annexe_thumbnail_add — voir front.
         // TODO: les logos producteur n'ont pas encore d'endpoint Entrepôt (champ optionnel, hors périmètre).
-        // Pour l'instant : validation uniquement (assurée par MapRequestPayload), on renvoie le DTO validé.
-        return $this->json($dto, Response::HTTP_OK);
+        $datasheetName = $dto->name;
+        $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
+        $apiMetadata = $this->cartesMetadataApiService->createOrUpdateFromDto($datastoreId, $datasheetName, $services, $dto);
+
+        return $this->json($apiMetadata, Response::HTTP_CREATED);
     }
 
-    /**
-     * @SuppressWarnings(UnusedFormalParameter)
-     */
     #[Route('/{datasheetName}', name: 'edit', methods: ['PUT'])]
     public function edit(string $datastoreId, string $datasheetName, #[MapRequestPayload] DatasheetMetadataDTO $dto): JsonResponse
     {
-        // TODO: utiliser $datastoreId + $datasheetName pour récupérer et mettre à jour
-        //       la métadonnée existante via MetadataApiService (régénération XML ISO 19139).
         // TODO: la vignette est gérée séparément via l'endpoint annexe — voir front.
-        return $this->json($dto, Response::HTTP_OK);
+        $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
+        $apiMetadata = $this->cartesMetadataApiService->createOrUpdateFromDto($datastoreId, $datasheetName, $services, $dto);
+
+        return $this->json($apiMetadata, Response::HTTP_OK);
     }
 
     #[Route('/{datasheetName}', name: 'get', methods: ['GET'])]
