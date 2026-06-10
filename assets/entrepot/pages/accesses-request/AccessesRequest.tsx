@@ -84,7 +84,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
     const onSubmit = (formData: object) => {
         const data = {
             file_identifier: fileIdentifier,
-            email_contact: metadataQuery.data?.contact_email,
+            email_contact: metadataQuery.data?.producers?.[0]?.organization_email,
             layers: privateLayers.filter((layer) => formData["layers"].includes(layer.name)),
             myself: formData["beneficiaries"].includes(MYSELF),
             beneficiaries: myCommunities.filter((c) => formData["beneficiaries"].includes(c?._id)),
@@ -130,11 +130,11 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                         >
                             <div>
                                 <strong>{t("data_details.producer")}</strong>
-                                {metadataQuery.data?.organisation_name}
+                                {metadataQuery.data?.producers?.[0]?.organization_name}
                             </div>
                             <div>
                                 <strong>{t("data_details.contact_email")}</strong>
-                                {metadataQuery.data?.contact_email}
+                                {metadataQuery.data?.producers?.[0]?.organization_email}
                             </div>
                             <div>
                                 <strong>{t("data_details.subject")}</strong>
@@ -142,7 +142,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                             </div>
                             <div>
                                 <strong>{t("data_details.data_name")}</strong>
-                                {metadataQuery.data?.title}
+                                {metadataQuery.data?.name}
                             </div>
                         </div>
                         <hr className={fr.cx("fr-mt-10v", "fr-pb-10v")} />

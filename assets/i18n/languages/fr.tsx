@@ -1,4 +1,8 @@
+import { AddressFieldsFrTranslations } from "@/components/Input/AddressFields.locale";
+import { AutocompleteSelectFrTranslations } from "@/components/Input/AutocompleteSelect.locale";
 import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
+import { DatasheetSectionsFrTranslations } from "@/entrepot/pages/datasheet/forms/sections.locale";
+import { DatasheetCreateNextFrTranslations } from "@/entrepot/pages/datasheet/DatasheetCreate/DatasheetCreateNext.locale";
 import { CommunityInfoFrTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { StoredDataDeleteConfirmDialogFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { DatastoreAddFrTranslations } from "@/entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale";
@@ -134,5 +138,9 @@ export const translations: Translations<"fr"> = {
     AddMembersDialog: AddMembersDialogFrTranslations,
     ManageGridsDialog: ManageGridsDialogFrTranslations,
     alerts: AlertsFrTranslations,
+    AddressFields: AddressFieldsFrTranslations,
+    AutocompleteSelect: AutocompleteSelectFrTranslations,
     KeyValueList: KeyValueListFrTranslations,
+    DatasheetSections: DatasheetSectionsFrTranslations,
+    DatasheetCreateNext: DatasheetCreateNextFrTranslations,
 };
