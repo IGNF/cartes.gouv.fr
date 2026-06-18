@@ -39,3 +39,5 @@ yarn-error.log
 /node_modules/
 /public/build/
 ###< pentatrion/vite-bundle ###
+
+/.serena
