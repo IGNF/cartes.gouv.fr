@@ -20,6 +20,9 @@ import { MetadataFormValues, PRODUCER_ROLES, type ProducerRole } from "../metada
 // Rôles sélectionnables pour les cartes additionnelles (index >= 1) - pointOfContact est réservé à la 1ère carte.
 const SELECTABLE_ROLES = PRODUCER_ROLES.filter((role) => role !== "pointOfContact") as ProducerRole[];
 
+/** Formats acceptés pour le logo producteur */
+const LOGO_ACCEPT = ["jpg", "jpeg", "png", "svg"] as const;
+
 // Nouveau producteur : rôle vide pour forcer un choix (validation .oneOf pour les index >= 1).
 const emptyProducer = { organization_name: "", organization_email: "", role: "" as ProducerRole };
 
@@ -186,7 +189,8 @@ export default function ProducerSection() {
                                 name={`producers.${index}.logo_file`}
                                 label={t("field.logo")}
                                 hintText={t("field.logo.hint")}
-                                accept=".jpg, .jpeg, .svg"
+                                modalTitle={t("field.logo.modalTitle")}
+                                accept={[...LOGO_ACCEPT]}
                             />
 
                             <Input
