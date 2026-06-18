@@ -11,11 +11,16 @@ import { MetadataFormValues } from "../metadataSchema";
 const thematicCategories = getThematicCategories();
 const inspireKeywords = getInspireKeywords();
 
+/** Formats acceptés pour la vignette */
+const THUMBNAIL_ACCEPT = ["jpg", "jpeg", "png", "svg"] as const;
+
 type DescriptionSectionProps = {
     isEditMode?: boolean;
+    /** URL de la vignette déjà enregistrée (mode édition) */
+    existingThumbnailUrl?: string;
 };
 
-export default function DescriptionSection({ isEditMode = false }: DescriptionSectionProps) {
+export default function DescriptionSection({ isEditMode = false, existingThumbnailUrl }: DescriptionSectionProps) {
     const { t } = useTranslation("DatasheetSections");
     const {
         register,
@@ -25,7 +30,14 @@ export default function DescriptionSection({ isEditMode = false }: DescriptionSe
 
     return (
         <div>
-            <ImageFieldUpload name="thumbnail" label={t("field.thumbnail")} hintText={t("field.thumbnail.hint")} accept=".jpg, .jpeg, .png" />
+            <ImageFieldUpload
+                name="thumbnail"
+                label={t("field.thumbnail")}
+                hintText={t("field.thumbnail.hint")}
+                modalTitle={t("field.thumbnail.modalTitle")}
+                accept={[...THUMBNAIL_ACCEPT]}
+                existingUrl={existingThumbnailUrl}
+            />
 
             <Input
                 label={t("field.name")}
