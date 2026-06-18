@@ -40,7 +40,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
                     cartes.gouv.fr <SiteBadge />
                 </>
             }
-            serviceTagline="Le service public des cartes et données du territoire"
+            serviceTagline="Notre territoire commun"
             quickAccessItems={[
                 <HeaderMenuHelp key="header-menu-help" />,
                 <HeaderMenuServices key="header-menu-services" />,
