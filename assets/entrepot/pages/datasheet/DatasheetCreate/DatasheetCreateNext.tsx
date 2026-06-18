@@ -35,10 +35,10 @@ export default function DatasheetCreateNext(props: DatasheetCreateNextProps) {
             console.debug(result);
 
             // Étape 2 : upload de la vignette si fournie (endpoint annexe existant)
-            if (values.thumbnail?.[0]) {
+            if (values.thumbnail instanceof File) {
                 const formData = new FormData();
                 formData.append("datasheetName", values.name);
-                formData.append("file", values.thumbnail[0]);
+                formData.append("file", values.thumbnail);
                 await api.annexe.addThumbnail(datastoreId, formData);
             }
 

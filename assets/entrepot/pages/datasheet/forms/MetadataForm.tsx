@@ -5,6 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { useStyles } from "tss-react";
 
 import { useDatastore } from "@/contexts/datastore";
 import api from "@/entrepot/api";
@@ -12,7 +13,6 @@ import { useTranslation } from "@/i18n/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { applyApiValidationErrors } from "@/modules/setApiFormErrors";
 import { delta } from "@/utils";
-import { useStyles } from "tss-react";
 import MetadataSection from "./MetadataSection";
 import { MetadataFormValues, buildMetadataSchema, defaultMetadataValues } from "./metadataSchema";
 import DateSection from "./sections/DateSection";
@@ -30,6 +30,8 @@ type MetadataFormProps = {
     onSubmit: (values: MetadataFormValues) => Promise<void> | void;
     renderTopActions?: (state: ActionsRenderProps) => React.ReactNode;
     renderBottomActions?: (state: ActionsRenderProps) => React.ReactNode;
+    /** URL de la vignette existante (mode édition), transmise à DescriptionSection pour l'aperçu */
+    existingThumbnailUrl?: string;
 };
 
 export default function MetadataForm({
@@ -38,6 +40,7 @@ export default function MetadataForm({
     onSubmit,
     renderTopActions,
     renderBottomActions,
+    existingThumbnailUrl,
 }: MetadataFormProps) {
     const { t } = useTranslation("DatasheetSections");
     const { datastore } = useDatastore();
@@ -144,7 +147,7 @@ export default function MetadataForm({
                             )}
                         >
                             <MetadataSection title={t("section.description")}>
-                                <DescriptionSection isEditMode={mode === "edit"} />
+                                <DescriptionSection isEditMode={mode === "edit"} existingThumbnailUrl={existingThumbnailUrl} />
                             </MetadataSection>
                             <MetadataSection title={t("section.producer")}>
                                 <ProducerSection />

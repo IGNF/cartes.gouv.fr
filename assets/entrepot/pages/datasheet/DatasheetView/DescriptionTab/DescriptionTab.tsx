@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { Metadata } from "@/@types/app";
+import { DatasheetDetailed, Metadata } from "@/@types/app";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import LoadingText from "@/components/Utils/LoadingText";
 import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
@@ -35,6 +35,17 @@ export default function DescriptionTab({ datastoreId, datasheetName }: Descripti
         retry: false,
     });
 
+    // Récupération de la fiche pour accéder à l'annexe vignette (URL + id nécessaire pour la suppression).
+    // La query est dédupliquée avec celle du composant parent (même clé, staleTime identique).
+    const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
+        queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
+        staleTime: 60000,
+        retry: false,
+    });
+
+    const existingThumbnail = datasheetQuery.data?.thumbnail;
+
     // Mise à jour des métadonnées (formulaire d'édition).
     const editMutation = useMutation<MetadataPayload, CartesApiException, MetadataFormValues>({
         mutationFn: async (values) => {
@@ -43,12 +54,16 @@ export default function DescriptionTab({ datastoreId, datasheetName }: Descripti
             // Étape 1 : mise à jour des métadonnées JSON (validation backend via MapRequestPayload)
             const result = await api.datasheet.editMetadata(datastoreId, datasheetName, payload);
 
-            // Étape 2 : mise à jour de la vignette si une nouvelle est fournie
-            if (values.thumbnail?.[0]) {
+            // Étape 2 : mise à jour de la vignette selon l'action de l'utilisateur
+            if (values.thumbnail instanceof File) {
+                // Nouveau fichier recadré → envoi vers l'API
                 const formData = new FormData();
                 formData.append("datasheetName", datasheetName);
-                formData.append("file", values.thumbnail[0]);
+                formData.append("file", values.thumbnail);
                 await api.annexe.addThumbnail(datastoreId, formData);
+            } else if (values.thumbnail === null && existingThumbnail?._id) {
+                // null = l'utilisateur a supprimé la vignette existante
+                await api.annexe.removeThumbnail(datastoreId, datasheetName, existingThumbnail._id);
             }
 
             // TODO: Étape 3 (future) : mise à jour des logos producteur via api.annexe.add
@@ -89,6 +104,7 @@ export default function DescriptionTab({ datastoreId, datasheetName }: Descripti
             <MetadataForm
                 mode="edit"
                 defaultValues={editDefaultValues}
+                existingThumbnailUrl={existingThumbnail?.url}
                 onSubmit={async (values) => {
                     await editMutation.mutateAsync(values);
                 }}

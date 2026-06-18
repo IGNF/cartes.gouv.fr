@@ -24,6 +24,7 @@ const { i18n } = declareComponentKeys<
     | "field.description"
     | "field.thumbnail"
     | "field.thumbnail.hint"
+    | "field.thumbnail.modalTitle"
     | "field.themes"
     | "field.inspireKeywords"
     | "field.additionalKeywords"
@@ -37,6 +38,7 @@ const { i18n } = declareComponentKeys<
     | "field.producerRole"
     | "field.logo"
     | "field.logo.hint"
+    | "field.logo.modalTitle"
     | "field.address"
     | "producer.add"
     | "producer.remove"
@@ -107,7 +109,8 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.name": "Nom de la fiche de données",
     "field.description": "Description",
     "field.thumbnail": "Vignette (optionnel)",
-    "field.thumbnail.hint": "Taille maximale : 2 Mo. Formats supportés : jpg, jpeg et png.",
+    "field.thumbnail.hint": "Taille maximale : 2 Mo. Formats supportés : jpg, jpeg, png et svg.",
+    "field.thumbnail.modalTitle": "Ajouter une vignette",
     "field.themes": "Thématiques",
     "field.inspireKeywords": "Mots-clés INSPIRE (optionnel)",
     "field.additionalKeywords": "Mots-clés additionnels (optionnel)",
@@ -121,6 +124,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.producerRole": "Rôle",
     "field.logo": "Logo (optionnel)",
     "field.logo.hint": "Taille maximale : 2 Mo. Formats supportés : jpg, jpeg et svg.",
+    "field.logo.modalTitle": "Ajouter un logo",
     "field.address": "Adresse postale (optionnel)",
 
     "producer.add": "Ajouter un producteur",
@@ -269,7 +273,8 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "field.name": "Dataset name",
     "field.description": "Description",
     "field.thumbnail": "Thumbnail (optional)",
-    "field.thumbnail.hint": "Max size: 2 MB. Supported formats: jpg, jpeg and svg.",
+    "field.thumbnail.hint": "Max size: 2 MB. Supported formats: jpg, jpeg, png and svg.",
+    "field.thumbnail.modalTitle": "Add a thumbnail",
     "field.themes": "Themes",
     "field.inspireKeywords": "INSPIRE keywords (optional)",
     "field.additionalKeywords": "Additional keywords (optional)",
@@ -283,6 +288,7 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "field.producerRole": "Role",
     "field.logo": "Logo (optional)",
     "field.logo.hint": "Max size: 2 MB. Supported formats: jpg, jpeg and svg.",
+    "field.logo.modalTitle": "Add a logo",
     "field.address": "Postal address (optional)",
 
     "producer.add": "Add a producer",
