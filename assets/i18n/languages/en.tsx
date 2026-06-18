@@ -1,6 +1,7 @@
 import { AddressFieldsEnTranslations } from "@/components/Input/AddressFields.locale";
 import { AutocompleteSelectEnTranslations } from "@/components/Input/AutocompleteSelect.locale";
 import { KeyValueListEnTranslations } from "@/components/Input/KeyValueList.locale";
+import { ImageCropModalEnTranslations } from "@/components/Input/ImageCropModal/ImageCropModal.locale";
 import { DatasheetSectionsEnTranslations } from "@/entrepot/pages/datasheet/forms/sections.locale";
 import { DatasheetCreateNextEnTranslations } from "@/entrepot/pages/datasheet/DatasheetCreate/DatasheetCreateNext.locale";
 import { CommunityInfoEnTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
@@ -141,6 +142,7 @@ export const translations: Translations<"en"> = {
     AddressFields: AddressFieldsEnTranslations,
     AutocompleteSelect: AutocompleteSelectEnTranslations,
     KeyValueList: KeyValueListEnTranslations,
+    ImageCropModal: ImageCropModalEnTranslations,
     DatasheetSections: DatasheetSectionsEnTranslations,
     DatasheetCreateNext: DatasheetCreateNextEnTranslations,
 };

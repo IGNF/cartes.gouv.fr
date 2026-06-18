@@ -87,6 +87,7 @@ export type ComponentKey =
     | import("../components/Input/AddressFields.locale").I18n
     | import("../components/Input/AutocompleteSelect.locale").I18n
     | import("../components/Input/KeyValueList.locale").I18n
+    | import("../components/Input/ImageCropModal/ImageCropModal.locale").I18n
     | import("../components/Utils/Geostyler/UploadStyleFile.locale").I18n
     | import("../entrepot/pages/datasheet/forms/sections.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetCreate/DatasheetCreateNext.locale").I18n;
