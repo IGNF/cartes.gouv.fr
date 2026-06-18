@@ -186,7 +186,8 @@ export default function ProducerSection() {
                                 name={`producers.${index}.logo_file`}
                                 label={t("field.logo")}
                                 hintText={t("field.logo.hint")}
-                                accept=".jpg, .jpeg, .svg"
+                                modalTitle={t("field.logo.modalTitle")}
+                                accept={["jpg", "jpeg", "svg"]}
                             />
 
                             <Input

@@ -112,7 +112,11 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
                 return !existingDatasheetNames.includes(value);
             }),
         description: stringTrimmed().required("La description est obligatoire"),
-        thumbnail: yup.mixed<FileList>().optional(),
+        // File recadré produit par la modale ImageCropModal (validation taille/format faite dans la modale)
+        thumbnail: yup
+            .mixed<File>()
+            .optional()
+            .test("is-file", "Fichier invalide", (value) => value === undefined || value instanceof File),
         themes: yup.array(yup.string().defined()).min(1, "Sélectionnez au moins une thématique").required("Sélectionnez au moins une thématique"),
         keywords_inspire: yup.array(yup.string().defined()).optional(),
         keywords_additional: yup.array(yup.string().defined()).optional(),
@@ -143,7 +147,11 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
                         .mixed<ProducerRole>()
                         .oneOf([...PRODUCER_ROLES], "Le rôle du producteur est obligatoire")
                         .required("Le rôle du producteur est obligatoire"),
-                    logo_file: yup.mixed<FileList>().optional(),
+                    // File recadré produit par la modale ImageCropModal (validation taille/format faite dans la modale)
+                    logo_file: yup
+                        .mixed<File>()
+                        .optional()
+                        .test("is-file", "Fichier invalide", (value) => value === undefined || value instanceof File),
                     address_number: stringTrimmed().optional(),
                     address_street: stringTrimmed().optional(),
                     // Code postal : chiffres uniquement (optionnel, libellé "(optionnel)")

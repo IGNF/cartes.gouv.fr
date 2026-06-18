@@ -25,7 +25,13 @@ export default function DescriptionSection({ isEditMode = false }: DescriptionSe
 
     return (
         <div>
-            <ImageFieldUpload name="thumbnail" label={t("field.thumbnail")} hintText={t("field.thumbnail.hint")} accept=".jpg, .jpeg, .png" />
+            <ImageFieldUpload
+                name="thumbnail"
+                label={t("field.thumbnail")}
+                hintText={t("field.thumbnail.hint")}
+                modalTitle={t("field.thumbnail.modalTitle")}
+                accept={["jpg", "jpeg", "png"]}
+            />
 
             <Input
                 label={t("field.name")}

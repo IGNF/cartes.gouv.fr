@@ -143,6 +143,7 @@ export default function MetadataForm({
                                 })
                             )}
                         >
+                            {/* <Range label="label" step={1} min={1} max={10} hideMinMax /> */}
                             <MetadataSection title={t("section.description")}>
                                 <DescriptionSection isEditMode={mode === "edit"} />
                             </MetadataSection>

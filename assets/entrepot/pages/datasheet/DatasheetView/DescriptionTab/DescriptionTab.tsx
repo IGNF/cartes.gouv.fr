@@ -44,10 +44,10 @@ export default function DescriptionTab({ datastoreId, datasheetName }: Descripti
             const result = await api.datasheet.editMetadata(datastoreId, datasheetName, payload);
 
             // Étape 2 : mise à jour de la vignette si une nouvelle est fournie
-            if (values.thumbnail?.[0]) {
+            if (values.thumbnail instanceof File) {
                 const formData = new FormData();
                 formData.append("datasheetName", datasheetName);
-                formData.append("file", values.thumbnail[0]);
+                formData.append("file", values.thumbnail);
                 await api.annexe.addThumbnail(datastoreId, formData);
             }
 

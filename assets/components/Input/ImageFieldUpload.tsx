@@ -1,21 +1,29 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useHover } from "@mantine/hooks";
-import { useEffect, useState } from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { tss } from "tss-react";
+
+import { acceptToInputAttribute, type ImageSize } from "@/utils";
+import ImageCropModal, { useImageCropModal } from "./ImageCropModal/ImageCropModal";
 
 import placeholder1x1 from "../../img/placeholder.1x1.png";
 
 interface ImageFieldUploadProps {
-    /** Nom du champ dans le formulaire parent */
+    /** Nom du champ dans le formulaire parent ; la valeur du champ est le File recadré */
     name: string;
     label: string;
     hintText?: string;
-    /** Formats acceptés, ex : ".png, .jpg, .jpeg" */
-    accept?: string;
+    /** Titre de la modale de recadrage, ex : « Ajouter une vignette » */
+    modalTitle: string;
+    /** Extensions acceptées, sans point (ex : ["jpg", "jpeg", "png"]) */
+    accept?: string[];
+    /** Ratio largeur/hauteur du recadrage */
+    aspect?: number;
+    maxFileSizeMo?: number;
+    minResolution?: ImageSize;
     /** URL d'une image déjà enregistrée (mode édition) */
     existingUrl?: string;
 }
@@ -48,44 +56,68 @@ const useStyles = tss.withName({ ImageFieldUpload }).create({
 });
 
 export default function ImageFieldUpload(props: ImageFieldUploadProps) {
-    const { name, label, hintText, accept = ".png, .jpg, .jpeg", existingUrl } = props;
-    const { classes } = useStyles();
+    const { name, label, hintText, modalTitle, accept = ["jpg", "jpeg", "png"], aspect = 1, maxFileSizeMo = 2, minResolution, existingUrl } = props;
+    const { classes, cx } = useStyles();
 
-    const {
-        control,
-        formState: { errors },
-    } = useFormContext();
+    const { control } = useFormContext();
+    const value = useWatch({ control, name }) as File | undefined;
 
-    const [previewUrl, setPreviewUrl] = useState<string>(existingUrl ?? "");
+    const cropModal = useImageCropModal();
+    /** Image envoyée à la modale (le fichier original plein format, jamais le recadrage) */
+    const [pendingImage, setPendingImage] = useState<File | string>();
+    /** Fichier original conservé pour ré-éditer le recadrage sans perte de qualité */
+    const originalFileRef = useRef<File | undefined>(undefined);
+    /** L'image déjà enregistrée (existingUrl) a été supprimée par l'utilisateur */
+    const [isExistingDeleted, setIsExistingDeleted] = useState(false);
+
     const { hovered: isHovered, ref: wrapperRef } = useHover<HTMLDivElement>();
 
-    const errorMsg = (errors[name] as { message?: string } | undefined)?.message;
+    // aperçu du File recadré via URL objet (révoquée au remplacement / démontage)
+    const [objectUrl, setObjectUrl] = useState<string>();
+    useEffect(() => {
+        if (value instanceof File) {
+            const url = URL.createObjectURL(value);
+            setObjectUrl(url);
+            return () => {
+                URL.revokeObjectURL(url);
+                setObjectUrl(undefined);
+            };
+        }
+    }, [value]);
+
+    const previewUrl = value instanceof File ? objectUrl : isExistingDeleted ? undefined : existingUrl;
+    const showPreview = Boolean(previewUrl);
+
+    const handleFilePicked = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        // l'input natif ne garde pas le fichier brut : la valeur du formulaire est le fichier recadré produit par la modale
+        e.target.value = "";
+        if (file) {
+            originalFileRef.current = file;
+            setPendingImage(file);
+            cropModal.open();
+        }
+    };
+
+    const handleEdit = () => {
+        setPendingImage(originalFileRef.current ?? value ?? (isExistingDeleted ? undefined : existingUrl));
+        cropModal.open();
+    };
 
     return (
-        <div className={fr.cx("fr-input-group", !!errorMsg && "fr-input-group--error")}>
-            <label className={fr.cx("fr-label")}>
-                {label}
-                {hintText && <span className={fr.cx("fr-hint-text")}>{hintText}</span>}
-            </label>
+        <Controller
+            control={control}
+            name={name}
+            render={({ field: { onChange }, fieldState: { error } }) => {
+                const errorMsg = error?.message;
 
-            <Controller
-                control={control}
-                name={name}
-                render={({ field: { onChange, value } }) => {
-                    const file: File | undefined = (value as FileList | undefined)?.[0];
+                return (
+                    <div className={fr.cx("fr-input-group", !!errorMsg && "fr-input-group--error")}>
+                        <label className={fr.cx("fr-label")}>
+                            {label}
+                            {hintText && <span className={fr.cx("fr-hint-text")}>{hintText}</span>}
+                        </label>
 
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    useEffect(() => {
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = () => setPreviewUrl(reader.result as string);
-                            reader.readAsDataURL(file);
-                        }
-                    }, [file]);
-
-                    const showPreview = Boolean(previewUrl);
-
-                    return (
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-1w")}>
                             {/* Aperçu */}
                             <div className="fr-col-auto">
@@ -93,7 +125,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                                     <img
                                         src={showPreview ? previewUrl : placeholder1x1}
                                         alt=""
-                                        className={cx(classes.img, isHovered && showPreview ? classes.imgTransparent : "")}
+                                        className={cx(classes.img, isHovered && showPreview && classes.imgTransparent)}
                                     />
                                     {isHovered && showPreview && (
                                         <div className={classes.hoverOverlay}>
@@ -103,9 +135,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                                                 title="Modifier l'image"
                                                 size="small"
                                                 type="button"
-                                                onClick={() => {
-                                                    /* déclenché par le label Upload ci-dessous */
-                                                }}
+                                                onClick={handleEdit}
                                             />
                                             <Button
                                                 iconId="fr-icon-delete-line"
@@ -115,7 +145,9 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                                                 type="button"
                                                 onClick={() => {
                                                     onChange(undefined);
-                                                    setPreviewUrl("");
+                                                    originalFileRef.current = undefined;
+                                                    setPendingImage(undefined);
+                                                    setIsExistingDeleted(true);
                                                 }}
                                             />
                                         </div>
@@ -123,7 +155,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                                 </div>
                             </div>
 
-                            {/* Champ de sélection */}
+                            {/* Champ de sélection : la modale de recadrage prend le relais dès qu'un fichier est choisi */}
                             {!showPreview && (
                                 <div className={fr.cx("fr-col")}>
                                     <Upload
@@ -131,19 +163,33 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                                         state={errorMsg ? "error" : "default"}
                                         stateRelatedMessage={errorMsg}
                                         nativeInputProps={{
-                                            accept,
-                                            onChange: (e) => onChange(e.target.files),
+                                            accept: acceptToInputAttribute(accept),
+                                            onChange: handleFilePicked,
                                         }}
                                         className={fr.cx("fr-input-group")}
                                     />
                                 </div>
                             )}
                         </div>
-                    );
-                }}
-            />
 
-            {errorMsg && <p className={fr.cx("fr-error-text")}>{errorMsg}</p>}
-        </div>
+                        {errorMsg && <p className={fr.cx("fr-error-text")}>{errorMsg}</p>}
+
+                        <ImageCropModal
+                            modal={cropModal}
+                            title={modalTitle}
+                            aspect={aspect}
+                            accept={accept}
+                            maxFileSizeMo={maxFileSizeMo}
+                            minResolution={minResolution}
+                            initialImage={pendingImage}
+                            onSave={(file) => {
+                                onChange(file);
+                                setIsExistingDeleted(false);
+                            }}
+                        />
+                    </div>
+                );
+            }}
+        />
     );
 }

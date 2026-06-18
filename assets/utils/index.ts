@@ -8,6 +8,8 @@ export * from "./offering";
 export * from "./types";
 export * from "./user";
 export * from "./image";
+export * from "./imageCrop";
+export * from "./imageFileValidation";
 export * from "./form";
 export * from "./delta";
 
