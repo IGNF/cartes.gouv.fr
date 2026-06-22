@@ -142,6 +142,7 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
                     autoComplete={autoComplete}
                     multiple={multiple}
                     filterSelectedOptions={multiple}
+                    isOptionEqualToValue={isOptionEqualToValue}
                     disablePortal={disablePortal}
                     filterOptions={filterOptions ?? createFilterOptions({ ...defaultSearchFilter, ...searchFilter })}
                     options={options}
