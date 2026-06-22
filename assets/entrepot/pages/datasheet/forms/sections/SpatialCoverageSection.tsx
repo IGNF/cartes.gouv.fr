@@ -1,10 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import territories from "geopf-extensions-openlayers/src/packages/Controls/Territories/Territories.json";
 import { Controller, useFormContext } from "react-hook-form";
 
-import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
+import AsyncAutocompleteSelect from "@/components/Input/AsyncAutocompleteSelect";
+import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n/i18n";
-import { MetadataFormValues } from "../metadataSchema";
+import RQKeys from "@/modules/entrepot/RQKeys";
+import { type Territory, MetadataFormValues } from "../metadataSchema";
 
 export default function SpatialCoverageSection() {
     const { t } = useTranslation("DatasheetSections");
@@ -19,12 +20,14 @@ export default function SpatialCoverageSection() {
                 control={control}
                 name="territories"
                 render={({ field, fieldState: { error } }) => (
-                    <AutocompleteSelect
+                    <AsyncAutocompleteSelect<Territory, true>
                         label={t("field.territories")}
                         hintText={t("field.territories.hint")}
-                        options={territories}
+                        queryKey={(s) => RQKeys.search_territories(s)}
+                        queryFn={(s, signal) => api.geocoding.searchAdminUnits(s, signal)}
                         getOptionLabel={(option) => option.title}
                         getOptionKey={(option) => option.id}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
                         multiple={true}
                         state={error ? "error" : "default"}
                         stateRelatedMessage={error?.message ?? errors.territories?.message}
