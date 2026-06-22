@@ -98,6 +98,8 @@ const RQKeys = {
     alerts: (): string[] => ["alerts"],
 
     search_territories: (search: string): string[] => ["geocoding", "territories", search],
+
+    search_addresses: (search: string): string[] => ["geocoding", "addresses", search],
 };
 
 export default RQKeys;
