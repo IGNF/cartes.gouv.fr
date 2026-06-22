@@ -1,5 +1,4 @@
 import * as yup from "yup";
-import territories from "geopf-extensions-openlayers/src/packages/Controls/Territories/Territories.json";
 
 import { MetadataHierarchyLevel, type Metadata } from "@/@types/app";
 import { LanguageType, regex } from "@/utils";
@@ -76,7 +75,8 @@ export const UPDATE_FREQUENCIES = [
 ] as const;
 export type UpdateFrequency = (typeof UPDATE_FREQUENCIES)[number];
 
-export type Territory = (typeof territories)[number];
+/** Territoire sélectionné dans le formulaire fiche de données (unité administrative géocodée) */
+export type Territory = { id: string; title: string; bbox: number[] };
 
 // ---------------------------------------------------------------------------
 // Helpers partagés
@@ -556,10 +556,8 @@ export function mapMetadataToFormValues(apiMetadata: Metadata | undefined): Part
         hierarchy_level: (csw.hierarchy_level as MetadataHierarchyLevel | undefined) ?? MetadataHierarchyLevel.Dataset,
         language: language ?? undefined,
         charset: csw.charset ?? defaultMetadataValues.charset,
-        // territories : reconstruits depuis csw.territories ; on ne dispose que de id/title/bbox,
-        // les champs optionnels supplémentaires de Territory (description, zoom, etc.) sont absents
-        // mais ne sont pas utilisés par le formulaire — on caste explicitement.
-        territories: (csw.territories ?? []).map((t) => ({ id: t.id, title: t.title, bbox: t.bbox }) as unknown as Territory),
+        // territories : reconstruits depuis csw.territories (id/title/bbox — même forme que Territory)
+        territories: (csw.territories ?? []).map((t) => ({ id: t.id, title: t.title, bbox: t.bbox })),
         // resource_constraints : reconstruits depuis csw.resource_constraints
         resource_constraints: (csw.resource_constraints ?? []).map((condition) => ({
             type: (CONSTRAINT_TYPES.includes(condition.type as ConstraintType) ? condition.type : "other") as ConstraintType,
