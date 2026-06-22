@@ -20,24 +20,18 @@ export const defaultNavItems = (): MainNavigationProps.Item[] => {
                 },
                 {
                     linkProps: {
-                        href: externalUrls.present_service_catalogue,
-                    },
-                    text: "Rechercher une donnée",
-                },
-                {
-                    linkProps: {
                         href: externalUrls.present_service_publish,
                     },
                     text: "Publier une donnée",
                 },
+                {
+                    linkProps: {
+                        href: externalUrls.present_service_catalogue,
+                    },
+                    text: "Rechercher une donnée",
+                },
             ],
             text: "Services",
-        },
-        {
-            text: "Offres",
-            linkProps: {
-                href: externalUrls.offers,
-            },
         },
         {
             text: "Actualités",
@@ -46,16 +40,10 @@ export const defaultNavItems = (): MainNavigationProps.Item[] => {
             },
         },
         {
-            text: "Communautés",
             linkProps: {
-                href: externalUrls.join_cartesgouvfr_community,
+                href: externalUrls.roadmap,
             },
-        },
-        {
-            linkProps: {
-                href: externalUrls.service_status,
-            },
-            text: "Niveau de service",
+            text: "Évolutions",
         },
     ];
 
