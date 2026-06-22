@@ -9,9 +9,11 @@ import { Controller, useFieldArray, useFormContext, useWatch } from "react-hook-
 import { useStyles } from "tss-react";
 
 import AddressFields from "@/components/Input/AddressFields";
+import AsyncAutocompleteSelect from "@/components/Input/AsyncAutocompleteSelect";
 import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import ImageFieldUpload from "@/components/Input/ImageFieldUpload";
 import api from "@/entrepot/api";
+import type { GeocodingAddress } from "@/entrepot/api/geocoding";
 import { useTranslation } from "@/i18n/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { delta } from "@/utils";
@@ -53,6 +55,7 @@ export default function ProducerSection() {
     const {
         register,
         control,
+        setValue,
         formState: { errors },
     } = useFormContext<Partial<MetadataFormValues>>();
 
@@ -200,6 +203,47 @@ export default function ProducerSection() {
                                 stateRelatedMessage={fieldErrors?.organization_email?.message}
                                 nativeInputProps={{ ...register(`producers.${index}.organization_email`) }}
                             />
+
+                            <div
+                                className={css({
+                                    backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+                                    padding: fr.spacing("3w"),
+                                    borderRadius: fr.spacing("1v"),
+                                    marginBottom: fr.spacing("3w"),
+                                })}
+                            >
+                                <AsyncAutocompleteSelect<GeocodingAddress, false, false, true>
+                                    label={
+                                        <span
+                                            className={cx(
+                                                fr.cx("fr-icon-search-line", "fr-icon--sm"),
+                                                css({ display: "flex", alignItems: "center", gap: fr.spacing("1w") })
+                                            )}
+                                        >
+                                            {t("field.addressSearch")}
+                                        </span>
+                                    }
+                                    hintText={t("field.addressSearch.hint")}
+                                    freeSolo
+                                    queryKey={(s) => RQKeys.search_addresses(s)}
+                                    queryFn={(s, signal) => api.geocoding.searchAddresses(s, signal)}
+                                    getOptionLabel={(option) => (typeof option === "string" ? option : option.label)}
+                                    isOptionEqualToValue={(option, value) =>
+                                        typeof option !== "string" && typeof value !== "string" && option.label === value.label
+                                    }
+                                    onChange={(_, value) => {
+                                        // freeSolo : MUI renvoie une string (texte libre) ou null → on ne pré-remplit rien
+                                        if (!value || typeof value === "string") return;
+                                        // Option sélectionnée → remplir les 4 champs d'adresse scopés par index
+                                        const opts = { shouldValidate: true, shouldDirty: true } as const;
+                                        setValue(`producers.${index}.address_number`, value.number, opts);
+                                        setValue(`producers.${index}.address_street`, value.street, opts);
+                                        setValue(`producers.${index}.address_postal_code`, value.postalCode, opts);
+                                        setValue(`producers.${index}.address_city`, value.city, opts);
+                                    }}
+                                    popupIcon={<span className={fr.cx("fr-icon-search-line", "fr-icon--sm")} />}
+                                />
+                            </div>
 
                             <AddressFields
                                 legend={t("field.address")}

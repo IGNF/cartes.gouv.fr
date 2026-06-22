@@ -40,6 +40,8 @@ const { i18n } = declareComponentKeys<
     | "field.logo.hint"
     | "field.logo.modalTitle"
     | "field.address"
+    | "field.addressSearch"
+    | "field.addressSearch.hint"
     | "producer.add"
     | "producer.remove"
     | "producer.card.title"
@@ -126,6 +128,8 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.logo.hint": "Taille maximale : 2 Mo. Formats supportés : jpg, jpeg et svg.",
     "field.logo.modalTitle": "Ajouter un logo",
     "field.address": "Adresse postale (optionnel)",
+    "field.addressSearch": "Rechercher une adresse",
+    "field.addressSearch.hint": "Sélectionnez une adresse pour remplir automatiquement les champs ci-dessous.",
 
     "producer.add": "Ajouter un producteur",
     "producer.remove": "Supprimer",
@@ -290,6 +294,8 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "field.logo.hint": "Max size: 2 MB. Supported formats: jpg, jpeg and svg.",
     "field.logo.modalTitle": "Add a logo",
     "field.address": "Postal address (optional)",
+    "field.addressSearch": "Search for an address",
+    "field.addressSearch.hint": "Select an address to automatically fill the fields below.",
 
     "producer.add": "Add a producer",
     "producer.remove": "Remove",

@@ -7,14 +7,30 @@ type GeocodingExtrafields = {
     cleabs?: string;
 };
 
-/** Propriétés d'un feature POI administratif retourné par /geocodage/search */
+/**
+ * Propriétés d'un feature retourné par /geocodage/search.
+ * Les champs POI (toponym, citycode, extrafields, truegeometry) sont présents avec index=poi.
+ * Les champs BAN (label, housenumber, street, name, postcode, city) sont présents avec index=address.
+ */
 type GeocodingFeatureProperties = {
+    // --- POI administratif (index=poi) ---
     name?: string;
     toponym?: string;
     citycode?: string[];
     extrafields?: GeocodingExtrafields;
     /** Géométrie polygonale sérialisée en JSON (chaîne), présente si returntruegeometry=true */
     truegeometry?: string;
+    // --- Base Adresse Nationale (index=address) ---
+    /** Libellé complet de l'adresse, ex. « 6 Rue de la Paix 75002 Paris » */
+    label?: string;
+    /** Numéro de voirie, ex. « 6 » */
+    housenumber?: string;
+    /** Nom de la voie seule, ex. « Rue de la Paix » */
+    street?: string;
+    /** Nom complet incluant le numéro (présent quand housenumber est absent) */
+    postcode?: string;
+    /** Commune */
+    city?: string;
 };
 
 type GeocodingFeature = {
@@ -23,6 +39,20 @@ type GeocodingFeature = {
 
 type GeocodingResponse = {
     features: GeocodingFeature[];
+};
+
+/** Adresse BAN retournée par searchAddresses, déjà décomposée en champs formulaire */
+export type GeocodingAddress = {
+    /** Libellé complet affiché dans la liste de suggestions */
+    label: string;
+    /** Numéro de voirie (peut être vide) */
+    number: string;
+    /** Nom de la voie */
+    street: string;
+    /** Code postal */
+    postalCode: string;
+    /** Commune */
+    city: string;
 };
 
 const BASE_URL = "https://data.geopf.fr/geocodage/search";
@@ -62,8 +92,44 @@ const searchAdminUnits = async (search: string, signal: AbortSignal): Promise<Cs
     });
 };
 
+/**
+ * Recherche des adresses précises (à la plaque de rue) via la Base Adresse Nationale (BAN)
+ * intégrée à l'API de géocodage Géoplateforme.
+ *
+ * On utilise le même endpoint /geocodage/search qu'en mode POI (index=poi) plutôt que
+ * /geocodage/completion, afin de rester cohérent avec searchAdminUnits et de bénéficier
+ * de la même structure de réponse GeoJSON.
+ */
+const searchAddresses = async (search: string, signal: AbortSignal): Promise<GeocodingAddress[]> => {
+    const params = new URLSearchParams({
+        q: search,
+        index: "address",
+        autocomplete: "1",
+        limit: "10",
+    });
+
+    const response = await jsonFetch<GeocodingResponse>(`${BASE_URL}?${params.toString()}`, { signal }, undefined, false, false);
+
+    return response.features.map((feature): GeocodingAddress => {
+        const p = feature.properties;
+
+        // Pour les résultats de type « adresse », housenumber + street couvrent le cas nominal.
+        // Pour les résultats de type « voie » (sans housenumber), name contient déjà « n° + voie ».
+        const street = p.street ?? p.name ?? "";
+
+        return {
+            label: p.label ?? street,
+            number: p.housenumber ?? "",
+            street,
+            postalCode: p.postcode ?? "",
+            city: p.city ?? "",
+        };
+    });
+};
+
 const geocoding = {
     searchAdminUnits,
+    searchAddresses,
 };
 
 export default geocoding;
