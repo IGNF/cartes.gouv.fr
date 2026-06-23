@@ -159,7 +159,8 @@ class CartesMetadataApiService
 
         $newCswMetadata = $this->getNewCswMetadataFromDto($datastoreId, $datasheetName, $oldCswMetadata, $dto);
 
-        return $this->persistCswMetadata($datastoreId, $datasheetName, $apiMetadata, $oldCswMetadata, $newCswMetadata);
+        // La publication est gérée explicitement par l'utilisateur ; on ne publie pas automatiquement.
+        return $this->persistCswMetadata($datastoreId, $datasheetName, $apiMetadata, $oldCswMetadata, $newCswMetadata, publishIfUnpublished: false);
     }
 
     /**
@@ -183,7 +184,8 @@ class CartesMetadataApiService
 
         $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $oldCswMetadata, $formData);
 
-        return $this->persistCswMetadata($datastoreId, $datasheetName, $apiMetadata, $oldCswMetadata, $newCswMetadata);
+        // Chemin services (updateLayers, etc.) : la publication automatique est conservée.
+        return $this->persistCswMetadata($datastoreId, $datasheetName, $apiMetadata, $oldCswMetadata, $newCswMetadata, publishIfUnpublished: true);
     }
 
     /**
@@ -313,11 +315,40 @@ class CartesMetadataApiService
      * Persiste un CswMetadata déjà construit : sauvegarde fichier, add/replaceFile, tags, publication.
      * Gère également le changement de fileIdentifier (delete + recréation).
      *
-     * @param ?array<mixed> $oldApiMetadata
-     *
      * @return array<mixed> apiMetadata enrichi avec la clé csw_metadata
      */
-    private function persistCswMetadata(string $datastoreId, string $datasheetName, ?array $oldApiMetadata, ?CswMetadata $oldCswMetadata, CswMetadata $newCswMetadata): array
+    /**
+     * Publie la métadonnée d'une fiche dans le catalogue CSW du datastore.
+     * Utilisé par l'action explicite de l'utilisateur depuis l'interface.
+     */
+    public function publishMetadata(string $datastoreId, string $metadataId): void
+    {
+        $apiMetadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
+        $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
+        $this->metadataApiService->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id'])->await();
+    }
+
+    /**
+     * Dépublie la métadonnée d'une fiche du catalogue CSW du datastore.
+     * Utilisé par l'action explicite de l'utilisateur depuis l'interface.
+     */
+    public function unpublishMetadata(string $datastoreId, string $metadataId): void
+    {
+        $apiMetadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
+        $endpointId = $apiMetadata['endpoints'][0]['_id'] ?? null;
+        if (null !== $endpointId) {
+            $this->metadataApiService->unpublish($datastoreId, $apiMetadata['file_identifier'], $endpointId)->await();
+        }
+    }
+
+    /**
+     * @param array<mixed>|null $oldApiMetadata
+     * @param bool              $publishIfUnpublished Si true, publie la métadonnée si elle n'est pas encore publiée.
+     *                                                Si false, laisse la métadonnée dans son état de publication actuel.
+     *
+     * @return array<mixed>
+     */
+    private function persistCswMetadata(string $datastoreId, string $datasheetName, ?array $oldApiMetadata, ?CswMetadata $oldCswMetadata, CswMetadata $newCswMetadata, bool $publishIfUnpublished = true): array
     {
         $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
 
@@ -333,21 +364,28 @@ class CartesMetadataApiService
             $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ])->array();
-            $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            if ($publishIfUnpublished) {
+                $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            }
         } elseif ($oldCswMetadata?->fileIdentifier !== $newCswMetadata->fileIdentifier) {
             // Changement d'identifiant → suppression + recréation
-            $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            $wasPublished = count($oldApiMetadata['endpoints'] ?? []) > 0;
+            if ($wasPublished) {
+                $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            }
             $this->metadataApiService->delete($datastoreId, $oldApiMetadata['_id'])->await();
 
             $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
             $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], $oldApiMetadata['tags'])->array();
-            $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            if ($wasPublished || $publishIfUnpublished) {
+                $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            }
         } else {
             // Mise à jour simple
             $newApiMetadata = $this->metadataApiService->replaceFile($datastoreId, $oldApiMetadata['_id'], $newMetadataFilePath);
             $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], $oldApiMetadata['tags'])->array();
 
-            if (0 === count($newApiMetadata['endpoints'])) { // pas encore publiée
+            if ($publishIfUnpublished && 0 === count($newApiMetadata['endpoints'] ?? [])) {
                 $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
             }
         }
