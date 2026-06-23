@@ -141,7 +141,7 @@ class CswMetadataHelper
             $role = trim($xpath->evaluate('string(gmd:role/gmd:CI_RoleCode/@codeListValue)', $partyEl));
             $organizationName = trim($xpath->evaluate('string(gmd:organisationName/gco:CharacterString)', $partyEl));
             $organizationEmail = trim($xpath->evaluate('string(gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString)', $partyEl));
-            $addressNumber = trim($xpath->evaluate('string(gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:deliveryPoint/gco:CharacterString)', $partyEl));
+            $deliveryPoint = trim($xpath->evaluate('string(gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:deliveryPoint/gco:CharacterString)', $partyEl));
             $postalCode = trim($xpath->evaluate('string(gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:postalCode/gco:CharacterString)', $partyEl));
             $city = trim($xpath->evaluate('string(gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:city/gco:CharacterString)', $partyEl));
 
@@ -149,8 +149,7 @@ class CswMetadataHelper
                 organization_name: $organizationName,
                 organization_email: $organizationEmail,
                 role: $role ?: 'pointOfContact',
-                address_number: $addressNumber ?: null,
-                address_street: null,
+                address_number_and_streetname: $deliveryPoint ?: null,
                 address_postal_code: $postalCode ?: null,
                 address_city: $city ?: null,
             );
