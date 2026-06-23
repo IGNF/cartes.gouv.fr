@@ -156,8 +156,7 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
                         .nullable()
                         .optional()
                         .test("is-file", "Fichier invalide", (value) => value === undefined || value === null || value instanceof File),
-                    address_number: stringTrimmed().optional(),
-                    address_street: stringTrimmed().optional(),
+                    address_number_and_streetname: stringTrimmed().optional(),
                     // Code postal : chiffres uniquement (optionnel, libellé "(optionnel)")
                     address_postal_code: stringTrimmed().optional().matches(/^\d*$/, "Le code postal ne doit contenir que des chiffres"),
                     address_city: stringTrimmed().optional(),
@@ -410,8 +409,7 @@ export type MetadataPayload = {
         organization_name: string;
         organization_email: string;
         role: string;
-        address_number?: string | null;
-        address_street?: string | null;
+        address_number_and_streetname?: string | null;
         address_postal_code?: string | null;
         address_city?: string | null;
     }>;
@@ -445,12 +443,11 @@ export type MetadataPayload = {
  */
 export function buildMetadataPayload(values: MetadataFormValues): MetadataPayload {
     const producers = withCustodianFallback(values.producers).map(
-        ({ organization_name, organization_email, role, address_number, address_street, address_postal_code, address_city }) => ({
+        ({ organization_name, organization_email, role, address_number_and_streetname, address_postal_code, address_city }) => ({
             organization_name,
             organization_email,
             role,
-            address_number: address_number ?? null,
-            address_street: address_street ?? null,
+            address_number_and_streetname: address_number_and_streetname ?? null,
             address_postal_code: address_postal_code ?? null,
             address_city: address_city ?? null,
         })
@@ -521,8 +518,7 @@ export function mapMetadataToFormValues(apiMetadata: Metadata | undefined): Part
             organization_name: p.organization_name,
             organization_email: p.organization_email,
             role: (PRODUCER_ROLES.includes(p.role as ProducerRole) ? p.role : "pointOfContact") as ProducerRole,
-            address_number: p.address_number ?? undefined,
-            address_street: p.address_street ?? undefined,
+            address_number_and_streetname: p.address_number_and_streetname ?? undefined,
             address_postal_code: p.address_postal_code ?? undefined,
             address_city: p.address_city ?? undefined,
         }))

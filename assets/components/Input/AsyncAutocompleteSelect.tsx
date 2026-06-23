@@ -8,8 +8,9 @@ import { symToStr } from "tsafe/symToStr";
 import { useTranslation } from "@/i18n/i18n";
 import AutocompleteSelect from "./AutocompleteSelect";
 
-// Props gérées par le wrapper (ne doivent pas être passées par l'appelant)
-type WrapperOwnedProps = "options" | "loading" | "loadingText" | "noOptionsText" | "onInputChange" | "filterOptions";
+// Props gérées par le wrapper (ne doivent pas être passées par l'appelant).
+// onInputChange est relayé à l'appelant (utile pour les champs freeSolo contrôlés par RHF).
+type WrapperOwnedProps = "options" | "loading" | "loadingText" | "noOptionsText" | "filterOptions";
 
 // Props d'affichage issues de AutocompleteSelect
 interface AutocompleteSelectDisplayProps<T> {
@@ -98,6 +99,7 @@ function AsyncAutocompleteSelect<T, M extends boolean | undefined = false, D ext
         filterOptions,
         loadingText: loadingTextProp,
         noOptionsText: noOptionsTextProp,
+        onInputChange: consumerOnInputChange,
         ...rest
     } = props;
 
@@ -132,7 +134,15 @@ function AsyncAutocompleteSelect<T, M extends boolean | undefined = false, D ext
 
     // Refléter MUI sans condition — typing, clear et reset-sur-sélection passent tous par là.
     // C'est la source de vérité unique sur ce qui est affiché dans l'input.
-    const handleInputChange = (_: React.SyntheticEvent, value: string) => setInputValue(value);
+    // On transfère également l'événement à l'appelant pour permettre un champ freeSolo contrôlé (ex. RHF).
+    const handleInputChange = (
+        event: React.SyntheticEvent,
+        value: string,
+        reason: Parameters<NonNullable<AutocompleteProps<T, M, D, F>["onInputChange"]>>[2]
+    ) => {
+        setInputValue(value);
+        consumerOnInputChange?.(event, value, reason);
+    };
 
     return (
         <AutocompleteSelect<T, M, D, F>
