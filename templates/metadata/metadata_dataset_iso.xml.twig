@@ -37,9 +37,9 @@
                     <gmd:CI_Contact>
                         <gmd:address>
                             <gmd:CI_Address>
-                                {% if contact.address_number is not empty %}
+                                {% if contact.address_number_and_streetname is not empty %}
                                     <gmd:deliveryPoint>
-                                        <gco:CharacterString>{{ contact.address_number }}</gco:CharacterString>
+                                        <gco:CharacterString>{{ contact.address_number_and_streetname }}</gco:CharacterString>
                                     </gmd:deliveryPoint>
                                 {% endif %}
                                 {% if contact.address_city is not empty %}
@@ -163,9 +163,9 @@
                                     <gmd:CI_Contact>
                                         <gmd:address>
                                             <gmd:CI_Address>
-                                                {% if producer.address_number is not empty %}
+                                                {% if producer.address_number_and_streetname is not empty %}
                                                     <gmd:deliveryPoint>
-                                                        <gco:CharacterString>{{ producer.address_number }}</gco:CharacterString>
+                                                        <gco:CharacterString>{{ producer.address_number_and_streetname }}</gco:CharacterString>
                                                     </gmd:deliveryPoint>
                                                 {% endif %}
                                                 {% if producer.address_city is not empty %}

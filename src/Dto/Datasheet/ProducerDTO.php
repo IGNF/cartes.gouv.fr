@@ -27,11 +27,8 @@ class ProducerDTO
         #[Assert\Choice(choices: self::ROLES, message: 'Le rôle du producteur est invalide')]
         public readonly string $role = '',
 
-        #[SerializedName('address_number')]
-        public readonly ?string $address_number = null,
-
-        #[SerializedName('address_street')]
-        public readonly ?string $address_street = null,
+        #[SerializedName('address_number_and_streetname')]
+        public readonly ?string $address_number_and_streetname = null,
 
         #[SerializedName('address_postal_code')]
         public readonly ?string $address_postal_code = null,
