@@ -162,9 +162,11 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
                                 // style d'un input dsfr
                                 borderRadius: "0.25rem 0.25rem 0 0",
                                 boxShadow: "inset 0 -2px 0 0 var(--border-plain-grey)",
+                                // hauteur identique à .fr-input (1.5rem ligne + 0.5rem×2 padding = 2.5rem)
+                                height: fr.spacing("10v"),
                             })
                         ),
-                        input: fr.cx("fr-py-3v"),
+                        input: fr.cx("fr-py-0"),
                         endAdornment: fr.cx("fr-mr-1v"),
                         popper: css({
                             zIndex: "999999 !important",
