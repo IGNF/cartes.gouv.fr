@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { tss } from "tss-react";
 
 import LoadingText from "@/components/Utils/LoadingText";
@@ -13,10 +14,13 @@ type DatasheetHeaderProps = {
     catalogLink?: string;
     published?: boolean;
     loading?: boolean;
+    onPublish: () => void;
+    onUnpublish: () => void;
+    onDelete: () => void;
 };
 
 export default function DatasheetHeader(props: DatasheetHeaderProps) {
-    const { name, thumbnailUrl, catalogLink, published = false, loading = false } = props;
+    const { name, thumbnailUrl, catalogLink, published = false, loading = false, onPublish, onUnpublish, onDelete } = props;
 
     const { classes } = useStyles();
 
@@ -47,15 +51,25 @@ export default function DatasheetHeader(props: DatasheetHeaderProps) {
                 <Badge severity={published ? "success" : undefined} noIcon>
                     {published ? "Publié" : "Non publié"}
                 </Badge>
+                {!published && (
+                    <Button priority="primary" onClick={onPublish}>
+                        Publier
+                    </Button>
+                )}
                 <MenuList
                     menuOpenButtonProps={{
                         iconId: "ri-more-2-line",
                         priority: "tertiary no outline",
+                        title: "Autres actions",
                     }}
                     items={[
+                        published && {
+                            text: "Dépublier",
+                            onClick: onUnpublish,
+                        },
                         {
                             text: "Supprimer",
-                            onClick: () => undefined,
+                            onClick: onDelete,
                         },
                     ]}
                 />
@@ -105,5 +119,6 @@ const useStyles = tss.withName({ DatasheetHeader }).create({
         display: "flex",
         alignItems: "center",
         gap: "1rem",
+        flexShrink: 0,
     },
 });
