@@ -59,6 +59,16 @@ const remove = (datastoreId: string, metadataId: string) => {
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
+const publish = (datastoreId: string, metadataId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_publish", { datastoreId, metadataId });
+    return jsonFetch<null>(url, { method: "POST" });
+};
+
+const unpublish = (datastoreId: string, metadataId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_unpublish", { datastoreId, metadataId });
+    return jsonFetch<null>(url, { method: "DELETE" });
+};
+
 const metadata = {
     add,
     getById,
@@ -67,6 +77,8 @@ const metadata = {
     getFileContent,
     checkFileIdentifierAvailability,
     remove,
+    publish,
+    unpublish,
 };
 
 export default metadata;
