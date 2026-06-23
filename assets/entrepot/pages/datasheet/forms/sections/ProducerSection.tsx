@@ -61,7 +61,7 @@ export default function ProducerSection() {
 
     const { fields, append, remove } = useFieldArray({ control, name: "producers" });
 
-    const { css, cx } = useStyles();
+    const { css } = useStyles();
 
     const { data: organizations } = useQuery({
         queryKey: RQKeys.catalogs_organizations(),
@@ -117,14 +117,7 @@ export default function ProducerSection() {
                                         gap: fr.spacing("4v"),
                                     })}
                                 >
-                                    <p
-                                        className={cx(
-                                            fr.cx("fr-text--xs", "fr-m-0"),
-                                            css({
-                                                color: fr.colors.decisions.text.mention.grey.default,
-                                            })
-                                        )}
-                                    >
+                                    <p className={fr.cx("fr-text--xs", "fr-m-0")} style={{ color: fr.colors.decisions.text.mention.grey.default }}>
                                         {/* Figma : « Producteur » sans numéro pour la 1ère carte, « Producteur N » pour les suivantes */}
                                         {isContact ? t("producer.card.title") : `${t("producer.card.title")} ${index + 1}`}
                                     </p>
@@ -204,59 +197,47 @@ export default function ProducerSection() {
                                 nativeInputProps={{ ...register(`producers.${index}.organization_email`) }}
                             />
 
-                            <div
-                                className={css({
-                                    backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
-                                    padding: fr.spacing("3w"),
-                                    borderRadius: fr.spacing("1v"),
-                                    marginBottom: fr.spacing("3w"),
-                                })}
-                            >
-                                <AsyncAutocompleteSelect<GeocodingAddress, false, false, true>
-                                    label={
-                                        <span
-                                            className={cx(
-                                                fr.cx("fr-icon-search-line", "fr-icon--sm"),
-                                                css({ display: "flex", alignItems: "center", gap: fr.spacing("1w") })
-                                            )}
-                                        >
-                                            {t("field.addressSearch")}
-                                        </span>
-                                    }
-                                    hintText={t("field.addressSearch.hint")}
-                                    freeSolo
-                                    queryKey={(s) => RQKeys.search_addresses(s)}
-                                    queryFn={(s, signal) => api.geocoding.searchAddresses(s, signal)}
-                                    getOptionLabel={(option) => (typeof option === "string" ? option : option.label)}
-                                    isOptionEqualToValue={(option, value) =>
-                                        typeof option !== "string" && typeof value !== "string" && option.label === value.label
-                                    }
-                                    onChange={(_, value) => {
-                                        // freeSolo : MUI renvoie une string (texte libre) ou null → on ne pré-remplit rien
-                                        if (!value || typeof value === "string") return;
-                                        // Option sélectionnée → remplir les 4 champs d'adresse scopés par index
-                                        const opts = { shouldValidate: true, shouldDirty: true } as const;
-                                        setValue(`producers.${index}.address_number`, value.number, opts);
-                                        setValue(`producers.${index}.address_street`, value.street, opts);
-                                        setValue(`producers.${index}.address_postal_code`, value.postalCode, opts);
-                                        setValue(`producers.${index}.address_city`, value.city, opts);
-                                    }}
-                                    popupIcon={<span className={fr.cx("fr-icon-search-line", "fr-icon--sm")} />}
-                                />
-                            </div>
-
+                            {/* Adresse postale (optionnel) : champ numéro+voie en autocomplétion + code postal + ville */}
                             <AddressFields
                                 legend={t("field.address")}
-                                numberInputProps={{
-                                    state: fieldErrors?.address_number ? "error" : "default",
-                                    stateRelatedMessage: fieldErrors?.address_number?.message,
-                                    nativeInputProps: register(`producers.${index}.address_number`),
-                                }}
-                                streetInputProps={{
-                                    state: fieldErrors?.address_street ? "error" : "default",
-                                    stateRelatedMessage: fieldErrors?.address_street?.message,
-                                    nativeInputProps: register(`producers.${index}.address_street`),
-                                }}
+                                numberAndStreetnameSlot={
+                                    <Controller
+                                        control={control}
+                                        name={`producers.${index}.address_number_and_streetname`}
+                                        render={({ field: f, fieldState: { error } }) => (
+                                            <AsyncAutocompleteSelect<GeocodingAddress, false, false, true>
+                                                label={t("field.numberAndStreetname")}
+                                                freeSolo
+                                                queryKey={(s) => RQKeys.search_addresses(s)}
+                                                queryFn={(s, signal) => api.geocoding.searchAddresses(s, signal)}
+                                                inputValue={f.value ?? ""}
+                                                onInputChange={(_, value) => f.onChange(value)}
+                                                getOptionLabel={(option) =>
+                                                    typeof option === "string" ? option : [option.number, option.street].filter(Boolean).join(" ")
+                                                }
+                                                renderOption={(props, option) => (
+                                                    <li {...props} key={option.label}>
+                                                        {option.label}
+                                                    </li>
+                                                )}
+                                                isOptionEqualToValue={(option, value) =>
+                                                    typeof option !== "string" && typeof value !== "string" && option.label === value.label
+                                                }
+                                                onChange={(_, value) => {
+                                                    // freeSolo : MUI peut renvoyer une string (texte libre) ou null → pas d'auto-remplissage
+                                                    if (!value || typeof value === "string") return;
+                                                    // Option sélectionnée → remplir code postal et ville
+                                                    const opts = { shouldValidate: true, shouldDirty: true } as const;
+                                                    setValue(`producers.${index}.address_postal_code`, value.postalCode, opts);
+                                                    setValue(`producers.${index}.address_city`, value.city, opts);
+                                                }}
+                                                state={error ? "error" : "default"}
+                                                stateRelatedMessage={error?.message}
+                                                popupIcon={<span className={fr.cx("fr-icon-search-line", "fr-icon--sm")} />}
+                                            />
+                                        )}
+                                    />
+                                }
                                 postalCodeInputProps={{
                                     state: fieldErrors?.address_postal_code ? "error" : "default",
                                     stateRelatedMessage: fieldErrors?.address_postal_code?.message,

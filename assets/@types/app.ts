@@ -416,8 +416,7 @@ export type CswMetadataProducer = {
     organization_name: string;
     organization_email: string;
     role: string;
-    address_number?: string | null;
-    address_street?: string | null;
+    address_number_and_streetname?: string | null;
     address_postal_code?: string | null;
     address_city?: string | null;
 };
