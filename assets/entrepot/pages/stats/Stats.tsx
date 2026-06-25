@@ -31,7 +31,9 @@ export default function Stats() {
     const { t } = useTranslation("Stats");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
-    const scopeConfig = statsConfig[scope];
+    const rawScopeConfig = statsConfig[scope];
+    const scopeDisabled = rawScopeConfig?.disabled ?? false;
+    const scopeConfig = scopeDisabled ? undefined : rawScopeConfig;
     const entities = scopeConfig?.entities ?? {};
     const entityTypeKeys = Object.keys(entities);
 
@@ -42,7 +44,7 @@ export default function Stats() {
     const [endDate, setEndDate] = useState<Date | undefined>(() => initDate());
 
     useEffect(() => {
-        setEntityTypeKey(Object.keys(statsConfig[scope]?.entities ?? {})[0]);
+        setEntityTypeKey(Object.keys(statsConfig[scope]?.disabled ? {} : (statsConfig[scope]?.entities ?? {}))[0]);
         setResolvedParams({});
     }, [scope]);
 

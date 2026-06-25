@@ -9,7 +9,7 @@ import { statsConfig, StatsScope } from "./statsConfig";
 export default function StatsIndex() {
     const { t } = useTranslation("Stats");
 
-    const scopes = Object.entries(statsConfig) as [StatsScope, (typeof statsConfig)[StatsScope]][];
+    const scopes = (Object.entries(statsConfig) as [StatsScope, (typeof statsConfig)[StatsScope]][]).filter(([, config]) => !config.disabled);
 
     return (
         <Main title="Statistiques">
