@@ -39,7 +39,9 @@ export function formatBarChartData(data: Stats, type = StatsType.DATA_TRANSFER, 
         return { x: [[]], y: [[]] };
     }
 
-    const range = (endTime - startTime) / DAY_MS + (endDate ? 0 : 1);
+    const MAX_RANGE_DAYS = 366 * 20; // ~20 ans : large pour tout usage légitime
+    const rawRange = (endTime - startTime) / DAY_MS + (endDate ? 0 : 1);
+    const range = Math.min(Math.max(rawRange, 0), MAX_RANGE_DAYS);
     const dates = Array.from({ length: range }, (_, i) => new Date(startTime + i * DAY_MS));
     const x = dates.map((date) => formatDate(date));
     const y = dates.map((date) => dataMap.get(date.getTime()) ?? 0);
