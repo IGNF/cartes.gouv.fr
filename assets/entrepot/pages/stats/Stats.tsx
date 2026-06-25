@@ -24,6 +24,12 @@ function initDate(offsetMonths = 0): Date {
     return d;
 }
 
+function getActiveEntityKeys(scope: StatsScope): string[] {
+    const cfg = statsConfig[scope];
+    if (!cfg || cfg.disabled) return [];
+    return Object.keys(cfg.entities).filter((key) => !cfg.entities[key].disabled);
+}
+
 export default function Stats() {
     const { params } = useRoute();
     const scope = params?.["scope"] as StatsScope;
@@ -32,42 +38,47 @@ export default function Stats() {
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const rawScopeConfig = statsConfig[scope];
-    const scopeDisabled = rawScopeConfig?.disabled ?? false;
-    const scopeConfig = scopeDisabled ? undefined : rawScopeConfig;
+    const scopeConfig = rawScopeConfig?.disabled ? undefined : rawScopeConfig;
     const entities = scopeConfig?.entities ?? {};
-    const entityTypeKeys = Object.keys(entities);
+    const entityTypeKeys = Object.keys(entities).filter((key) => !entities[key].disabled);
 
-    const [entityTypeKey, setEntityTypeKey] = useState(() => entityTypeKeys[0]);
+    const scopeParam = scopeConfig?.param ?? null;
+
+    const [entityTypeKey, setEntityTypeKey] = useState(() => getActiveEntityKeys(scope)[0]);
     const [resolvedParams, setResolvedParams] = useState<Record<string, string>>({});
 
     const [startDate, setStartDate] = useState<Date | undefined>(() => initDate(3));
     const [endDate, setEndDate] = useState<Date | undefined>(() => initDate());
 
     useEffect(() => {
-        setEntityTypeKey(Object.keys(statsConfig[scope]?.disabled ? {} : (statsConfig[scope]?.entities ?? {}))[0]);
+        setEntityTypeKey(getActiveEntityKeys(scope)[0]);
         setResolvedParams({});
     }, [scope]);
 
     const currentConfig = entities[entityTypeKey];
 
+    // Combinaison du param de périmètre + params de l'entité pour la résolution et les resets
+    const allParams = useMemo(() => (scopeParam ? [scopeParam, ...(currentConfig?.params ?? [])] : (currentConfig?.params ?? [])), [scopeParam, currentConfig]);
+
     const handleEntityTypeChange = (key: string) => {
         setEntityTypeKey(key);
-        setResolvedParams({});
+        // Conserver uniquement le param de périmètre (ex. entrepôt déjà choisi) ; purger le reste
+        setResolvedParams((prev) => (scopeParam && prev[scopeParam.key] ? { [scopeParam.key]: prev[scopeParam.key] } : {}));
     };
 
     const handleParamChange = useCallback(
         (key: string, value: string) => {
             setResolvedParams((prev) => {
-                const keysToReset = currentConfig?.params.filter((p) => p.dependsOn?.includes(key)).map((p) => p.key) ?? [];
+                const keysToReset = allParams.filter((p) => p.dependsOn?.includes(key)).map((p) => p.key);
                 const next = { ...prev, [key]: value };
                 keysToReset.forEach((k) => delete next[k]);
                 return next;
             });
         },
-        [currentConfig]
+        [allParams]
     );
 
-    const allParamsResolved = !!currentConfig && currentConfig.params.every((p) => !!resolvedParams[p.key]);
+    const allParamsResolved = !!currentConfig && allParams.every((p) => !!resolvedParams[p.key]);
 
     const dateQuery = useMemo(
         () => ({
@@ -121,6 +132,17 @@ export default function Stats() {
             ) : (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                        {scopeParam && (
+                            <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                                <DynamicParamSelector
+                                    param={scopeParam}
+                                    resolvedDeps={resolvedParams}
+                                    value={resolvedParams[scopeParam.key]}
+                                    onChange={handleParamChange}
+                                />
+                            </div>
+                        )}
+
                         {entityTypeKeys.length > 1 && (
                             <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                                 <Select
@@ -137,7 +159,6 @@ export default function Stats() {
                         {currentConfig.params.map((param) => (
                             <div className={fr.cx("fr-col-12", "fr-col-md-4")} key={param.key}>
                                 <DynamicParamSelector
-                                    key={param.key}
                                     param={param}
                                     resolvedDeps={resolvedParams}
                                     value={resolvedParams[param.key]}

@@ -22,11 +22,13 @@ export type StatsEntityConfig = {
     label: string;
     apiRoute: string;
     params: ParamDef[];
+    disabled?: boolean;
 };
 
 export type StatsScopeConfig = {
     label: string;
-    disabled?: boolean; // désactive l'affichage du périmètre (réactivation à venir)
+    disabled?: boolean;
+    param?: ParamDef | null; // sélecteur de périmètre (Entrepôt/Communauté), affiché en premier ; null ou absent pour le périmètre user
     entities: Record<string, StatsEntityConfig>;
 };
 
@@ -132,42 +134,45 @@ const userKeyAccessIdParam = p({
 export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
     datastore: {
         label: "Entrepôt",
+        param: datastoreIdParam,
         entities: {
             endpoint: {
                 label: "Points de publication",
                 apiRoute: "cartesgouvfr_api_datastore_get_endpoint_stats",
-                params: [datastoreIdParam, endpointIdParam],
+                params: [endpointIdParam],
             },
             offering: {
                 label: "Services",
                 apiRoute: "cartesgouvfr_api_service_get_service_stats",
-                params: [datastoreIdParam, offeringIdParam],
+                params: [offeringIdParam],
             },
             permission: {
                 label: "Permissions",
                 apiRoute: "cartesgouvfr_api_datastore_get_permission_stats",
-                params: [datastoreIdParam, datastorePermissionIdParam],
+                params: [datastorePermissionIdParam],
             },
         },
     },
     community: {
         label: "Communauté",
         disabled: true, // statistiques de communauté désactivées temporairement (issue #1032)
+        param: communityIdParam,
         entities: {
             community: {
                 label: "Communautés",
                 apiRoute: "cartesgouvfr_api_community_get_stats",
-                params: [communityIdParam],
+                params: [],
             },
             permission: {
                 label: "Permissions",
                 apiRoute: "cartesgouvfr_api_community_get_permission_stats",
-                params: [communityIdParam, communityPermissionIdParam],
+                params: [communityPermissionIdParam],
             },
         },
     },
     user: {
         label: "Moi-même",
+        param: null,
         entities: {
             me: {
                 label: "Moi-même",
