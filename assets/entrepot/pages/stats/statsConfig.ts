@@ -26,6 +26,7 @@ export type StatsEntityConfig = {
 
 export type StatsScopeConfig = {
     label: string;
+    disabled?: boolean; // désactive l'affichage du périmètre (réactivation à venir)
     entities: Record<string, StatsEntityConfig>;
 };
 
@@ -151,6 +152,7 @@ export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
     },
     community: {
         label: "Communauté",
+        disabled: true, // statistiques de communauté désactivées temporairement (issue #1032)
         entities: {
             community: {
                 label: "Communautés",
