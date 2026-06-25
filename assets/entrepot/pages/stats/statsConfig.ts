@@ -1,4 +1,4 @@
-import { CartesUser } from "@/@types/app";
+import { CartesUser, EndpointTypeEnum } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -52,7 +52,8 @@ const datastoreIdParam = p({
     toOptions: (user: CartesUser | null) =>
         (user?.communities_member ?? [])
             .filter((cm) => cm.community?.datastore !== null && cm.community?.datastore !== undefined)
-            .map((cm) => ({ value: cm.community!.datastore, label: cm.community!.name })),
+            .map((cm) => ({ value: cm.community!.datastore, label: cm.community!.name }))
+            .sort((a, b) => a.label.localeCompare(b.label)),
 });
 
 const communityIdParam = p({
@@ -63,16 +64,22 @@ const communityIdParam = p({
     toOptions: (user: CartesUser | null) =>
         (user?.communities_member ?? [])
             .filter((cm) => cm.community !== undefined && cm.rights?.includes(CommunityMemberDtoRightsEnum.COMMUNITY))
-            .map((cm) => ({ value: cm.community!._id, label: cm.community!.name })),
+            .map((cm) => ({ value: cm.community!._id, label: cm.community!.name }))
+            .sort((a, b) => a.label.localeCompare(b.label)),
 });
 
+const supportedServiceTypes: EndpointTypeEnum[] = [EndpointTypeEnum.WFS, EndpointTypeEnum.WMSRASTER, EndpointTypeEnum.WMSVECTOR, EndpointTypeEnum.WMTSTMS];
 const endpointIdParam = p({
     key: "endpointId",
-    label: "Endpoint",
+    label: "Type de service",
     dependsOn: ["datastoreId"],
     queryKey: ({ datastoreId }) => RQKeys.datastore(datastoreId),
     queryFn: ({ datastoreId }, options) => api.datastore.get(datastoreId, options),
-    toOptions: (datastore) => (datastore.endpoints ?? []).map((ep) => ({ value: ep.endpoint._id, label: ep.endpoint.name })),
+    toOptions: (datastore) =>
+        (datastore.endpoints ?? [])
+            .filter((ep) => supportedServiceTypes.includes(ep.endpoint.type))
+            .sort((a, b) => a.endpoint.type.localeCompare(b.endpoint.type) || (a.endpoint.open === b.endpoint.open ? 0 : a.endpoint.open ? -1 : 1))
+            .map((ep) => ({ value: ep.endpoint._id, label: `${ep.endpoint.type} ${ep.endpoint.open ? "public" : "privé"}` })),
 });
 
 const offeringIdParam = p({
@@ -81,7 +88,7 @@ const offeringIdParam = p({
     dependsOn: ["datastoreId"],
     queryKey: ({ datastoreId }) => RQKeys.datastore_offering_list(datastoreId),
     queryFn: ({ datastoreId }, options) => api.service.getOfferings(datastoreId, {}, options),
-    toOptions: (offerings) => offerings.map((o) => ({ value: o._id, label: o.layer_name })),
+    toOptions: (offerings) => offerings.map((o) => ({ value: o._id, label: o.layer_name })).sort((a, b) => a.label.localeCompare(b.label)),
 });
 
 const datastorePermissionIdParam = p({
@@ -90,7 +97,7 @@ const datastorePermissionIdParam = p({
     dependsOn: ["datastoreId"],
     queryKey: ({ datastoreId }) => RQKeys.datastore_permissions(datastoreId),
     queryFn: ({ datastoreId }, options) => api.datastore.getPermissions(datastoreId, {}, options),
-    toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })),
+    toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })).sort((a, b) => a.label.localeCompare(b.label)),
 });
 
 const communityPermissionIdParam = p({
@@ -99,7 +106,7 @@ const communityPermissionIdParam = p({
     dependsOn: ["communityId"],
     queryKey: ({ communityId }) => RQKeys.community_permissions(communityId),
     queryFn: ({ communityId }, options) => api.community.getPermissions(communityId, {}, options),
-    toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })),
+    toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })).sort((a, b) => a.label.localeCompare(b.label)),
 });
 
 const userPermissionQuery = {
@@ -111,7 +118,7 @@ const userPermissionIdParam = p({
     label: "Permission",
     queryKey: () => RQKeys.my_permissions(userPermissionQuery),
     queryFn: (_, options) => api.user.getMyPermissions(userPermissionQuery, options),
-    toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })),
+    toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })).sort((a, b) => a.label.localeCompare(b.label)),
 });
 
 const userKeyIdParam = p({
@@ -119,7 +126,7 @@ const userKeyIdParam = p({
     label: "Clé",
     queryKey: () => RQKeys.my_keys(),
     queryFn: (_, options) => api.user.getMyKeys(options),
-    toOptions: (keys) => keys.map((key) => ({ value: key._id, label: key.name })),
+    toOptions: (keys) => keys.map((key) => ({ value: key._id, label: key.name })).sort((a, b) => a.label.localeCompare(b.label)),
 });
 
 const userKeyAccessIdParam = p({
@@ -128,7 +135,8 @@ const userKeyAccessIdParam = p({
     dependsOn: ["keyId"],
     queryKey: ({ keyId }) => RQKeys.my_key(keyId),
     queryFn: ({ keyId }, options) => api.user.getMyKeyDetailedWithAccesses(keyId, options),
-    toOptions: (key) => (key.accesses ?? []).map((access) => ({ value: access._id, label: access.offering.layer_name })),
+    toOptions: (key) =>
+        (key.accesses ?? []).map((access) => ({ value: access._id, label: access.offering.layer_name })).sort((a, b) => a.label.localeCompare(b.label)),
 });
 
 export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
@@ -137,7 +145,7 @@ export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
         param: datastoreIdParam,
         entities: {
             endpoint: {
-                label: "Points de publication",
+                label: "Type de service",
                 apiRoute: "cartesgouvfr_api_datastore_get_endpoint_stats",
                 params: [endpointIdParam],
             },
