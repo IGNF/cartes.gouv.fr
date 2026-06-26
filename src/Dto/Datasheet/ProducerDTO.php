@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class ProducerDTO
 {
     /** @var string[] */
-    public const ROLES = ['pointOfContact', 'custodian', 'author', 'owner', 'resourceProvider'];
+    public const ROLES = ['pointOfContact', 'contact', 'custodian', 'author', 'owner', 'resourceProvider'];
 
     public function __construct(
         #[SerializedName('organization_name')]
