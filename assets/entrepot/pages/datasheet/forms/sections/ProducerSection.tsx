@@ -19,9 +19,6 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { delta } from "@/utils";
 import { MetadataFormValues, PRODUCER_ROLES, type ProducerRole } from "../metadataSchema";
 
-// Rôles sélectionnables pour les cartes additionnelles (index >= 1) - pointOfContact est réservé à la 1ère carte.
-const SELECTABLE_ROLES = PRODUCER_ROLES.filter((role) => role !== "pointOfContact") as ProducerRole[];
-
 /** Formats acceptés pour le logo producteur */
 const LOGO_ACCEPT = ["jpg", "jpeg", "png", "svg"] as const;
 
@@ -60,6 +57,7 @@ export default function ProducerSection() {
     } = useFormContext<Partial<MetadataFormValues>>();
 
     const { fields, append, remove } = useFieldArray({ control, name: "producers" });
+    const allProducers = useWatch({ control, name: "producers" }) as Array<{ role?: string }> | undefined;
 
     const { css } = useStyles();
 
@@ -165,21 +163,40 @@ export default function ProducerSection() {
                             />
 
                             {/* Select de rôle : uniquement pour les cartes additionnelles (index >= 1) */}
-                            {!isContact && (
-                                <Select
-                                    label={t("field.producerRole")}
-                                    placeholder={t("producer.role.placeholder")}
-                                    options={SELECTABLE_ROLES.map((role) => ({
-                                        value: role,
-                                        label: t("producer.role", { role }),
-                                    }))}
-                                    nativeSelectProps={{
-                                        ...register(`producers.${index}.role`),
-                                    }}
-                                    state={fieldErrors?.role ? "error" : "default"}
-                                    stateRelatedMessage={fieldErrors?.role?.message}
-                                />
-                            )}
+                            {!isContact &&
+                                (() => {
+                                    // Rôles déjà pris par les autres cartes (hors carte courante)
+                                    const takenByOthers = new Set(
+                                        (allProducers ?? [])
+                                            .filter((_, i) => i !== index)
+                                            .map((p) => p?.role)
+                                            .filter(Boolean) as string[]
+                                    );
+                                    // Rôles proposés dans la liste déroulante de cette carte :
+                                    // - jamais pointOfContact (verrouillé sur la carte 0)
+                                    // - exclure les rôles pris par d'autres cartes, SAUF le rôle courant de cette carte (pour que
+                                    //   la valeur déjà sélectionnée reste visible dans le select)
+                                    const currentRole = allProducers?.[index]?.role ?? "";
+                                    const cardRoles = PRODUCER_ROLES.filter(
+                                        (r) => r !== "pointOfContact" && (!takenByOthers.has(r) || r === currentRole)
+                                    ) as ProducerRole[];
+
+                                    return (
+                                        <Select
+                                            label={t("field.producerRole")}
+                                            placeholder={t("producer.role.placeholder")}
+                                            options={cardRoles.map((role) => ({
+                                                value: role,
+                                                label: t("producer.role", { role }),
+                                            }))}
+                                            nativeSelectProps={{
+                                                ...register(`producers.${index}.role`),
+                                            }}
+                                            state={fieldErrors?.role ? "error" : "default"}
+                                            stateRelatedMessage={fieldErrors?.role?.message}
+                                        />
+                                    );
+                                })()}
 
                             <ImageFieldUpload
                                 name={`producers.${index}.logo_file`}
