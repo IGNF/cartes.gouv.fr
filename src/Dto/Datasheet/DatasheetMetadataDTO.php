@@ -119,8 +119,27 @@ class DatasheetMetadataDTO
 
         $first = $this->producers[0] ?? null;
         if (!($first instanceof ProducerDTO) || 'pointOfContact' !== $first->role) {
-            $context->buildViolation('Le premier producteur doit avoir le rôle "contact"')
+            $context->buildViolation('Le premier producteur doit avoir le rôle "pointOfContact"')
                 ->atPath('producers[0].role')
+                ->addViolation();
+        }
+    }
+
+    /**
+     * Vérifie que chaque rôle n'est attribué qu'à un seul producteur.
+     * Complète la validation côté frontend (filtrage dynamique dans ProducerSection).
+     */
+    #[Assert\Callback]
+    public function validateUniqueRoles(ExecutionContextInterface $context): void
+    {
+        $roles = array_map(
+            static fn (ProducerDTO $p) => $p->role,
+            $this->producers
+        );
+
+        if (count($roles) !== count(array_unique($roles))) {
+            $context->buildViolation('Chaque rôle ne peut être attribué qu\'à un seul producteur')
+                ->atPath('producers')
                 ->addViolation();
         }
     }
