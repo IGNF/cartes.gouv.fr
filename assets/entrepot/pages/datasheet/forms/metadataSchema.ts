@@ -7,7 +7,7 @@ import { LanguageType, regex } from "@/utils";
 // Types intermédiaires pour les champs composés
 // ---------------------------------------------------------------------------
 
-export const PRODUCER_ROLES = ["pointOfContact", "custodian", "author", "owner", "resourceProvider"] as const;
+export const PRODUCER_ROLES = ["pointOfContact", "contact", "custodian", "author", "owner", "resourceProvider"] as const;
 export type ProducerRole = (typeof PRODUCER_ROLES)[number];
 
 // ---------------------------------------------------------------------------
@@ -167,6 +167,10 @@ export const buildMetadataSchema = ({ existingDatasheetNames, isEditMode, checkF
             // Ce test protège contre des defaultValues/reset incohérents (ex. métadonnées chargées
             // en mode édition non normalisées via normalizeProducers).
             .test("first-is-point-of-contact", "Le premier producteur doit être le contact", (producers) => producers?.[0]?.role === "pointOfContact")
+            .test("unique-roles", "Chaque rôle ne peut être attribué qu’à un seul producteur", (producers) => {
+                const roles = (producers ?? []).map((p) => p?.role).filter(Boolean);
+                return roles.length === new Set(roles).size;
+            })
             .required(),
 
         // Section date
@@ -390,6 +394,24 @@ export function withCustodianFallback(producers: ProducerFormValues[]): Producer
     return [...producers, { ...pointOfContact, role: "custodian" }];
 }
 
+/**
+ * Applique la règle métier du contact des métadonnées (gmd:contact) au moment de la soumission.
+ *
+ * Le rôle "contact" est obligatoire dans les métadonnées ISO 19139 finales.
+ * Si l'utilisateur n'a déclaré aucun producteur ayant ce rôle, le contact
+ * (pointOfContact, toujours présent en index 0) est dupliqué en tant que contact des métadonnées.
+ * La liste d'entrée n'est pas mutée.
+ *
+ * @param producers Lignes du formulaire (l'index 0 est garanti "pointOfContact" côté UI).
+ * @returns La liste des producteurs, complétée d'un contact des métadonnées dérivé du contact si nécessaire.
+ */
+export function withContactFallback(producers: ProducerFormValues[]): ProducerFormValues[] {
+    if (producers.some((p) => p.role === "contact")) return producers;
+    const pointOfContact = producers.find((p) => p.role === "pointOfContact");
+    if (!pointOfContact) return producers; // défensif : ne devrait pas arriver (index 0 verrouillé)
+    return [...producers, { ...pointOfContact, role: "contact" }];
+}
+
 // ---------------------------------------------------------------------------
 // Types et helpers pour la soumission au backend
 // ---------------------------------------------------------------------------
@@ -437,12 +459,13 @@ export type MetadataPayload = {
 /**
  * Construit le payload JSON à envoyer au backend à partir des valeurs du formulaire.
  * - Applique `withCustodianFallback` pour garantir la présence du gestionnaire ISO 19115.
+ * - Applique `withContactFallback` pour garantir la présence du contact des métadonnées ISO 19139 (gmd:contact).
  * - Exclut les champs de fichiers (thumbnail, logo_file) — envoyés séparément via annexes.
  * - Formate `date_creation` (Date → ISO YYYY-MM-DD).
  * - Mappe `territories` (objets Territory) → tableau d'identifiants.
  */
 export function buildMetadataPayload(values: MetadataFormValues): MetadataPayload {
-    const producers = withCustodianFallback(values.producers).map(
+    const producers = withContactFallback(withCustodianFallback(values.producers)).map(
         ({ organization_name, organization_email, role, address_number_and_streetname, address_postal_code, address_city }) => ({
             organization_name,
             organization_email,
