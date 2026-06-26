@@ -193,24 +193,28 @@ const downloadAllImages = async (document) => {
     await withConcurrency(imgList, async (img) => {
         // src
         const newSrc = await downloadFile(img.src);
-        img.src = ARTICLES_S3_GATEWAY_PATH_ARTICLES + newSrc.replace(OUTPUT_DIR, "");
+        img.src = toGatewayUrl(newSrc);
 
         // srcset
         if (img.srcset && img.srcset.length > 0) {
+            // Chaque candidate srcset est de la forme "<url> <descriptor>" (ex. "/img.png 325w").
+            // On split d'abord sur ", " pour séparer les candidates, puis on trim et on split sur
+            // les espaces/retours à la ligne pour séparer l'URL du descriptor.
+            // L'URL est ensuite encodée via toGatewayUrl() pour éviter que les espaces dans les
+            // noms de fichiers cassent le parsing du srcset côté navigateur.
             const srcSet = img.srcset.split(", ");
 
             const newSrcSet = await withConcurrency(srcSet, async (src) => {
                 // split pour séparer l'URL et le descriptor, voir : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#srcset
-                const [originalImgPath, descriptor] = src.split(" ");
+                const [originalImgPath, descriptor] = src.trim().split(/\s+/);
 
                 const newSrc = await downloadFile(originalImgPath);
 
                 // reconstitution de l'URL
-                return ARTICLES_S3_GATEWAY_PATH_ARTICLES + newSrc.replace(OUTPUT_DIR, "") + (descriptor !== null ? " " + descriptor : "");
+                return toGatewayUrl(newSrc) + (descriptor ? " " + descriptor : "");
             });
 
-            const newSrcSetString = newSrcSet.join(", ");
-            img.srcset = newSrcSetString;
+            img.srcset = newSrcSet.join(", ");
         }
     });
 };
@@ -225,11 +229,23 @@ const downloadAllDownloadableFiles = async (document) => {
     await withConcurrency(downloadLinks, async (downLink) => {
         try {
             const newUrl = await downloadFile(downLink.href);
-            downLink.href = ARTICLES_S3_GATEWAY_PATH_ARTICLES + newUrl.replace(OUTPUT_DIR, "");
+            downLink.href = toGatewayUrl(newUrl);
         } catch (_) {
             downLink.removeAttribute("href");
         }
     });
+};
+
+/**
+ * Convertit un chemin de fichier local téléchargé en URL passerelle S3 correctement encodée.
+ * Indispensable car downloadFile() dé-encode les chemins (decodeURI) : sans ré-encodage,
+ * les espaces et virgules dans les noms de fichiers cassent le parsing du srcset.
+ * @param {string} localFilePath
+ */
+const toGatewayUrl = (localFilePath) => {
+    const relativePath = localFilePath.replace(OUTPUT_DIR, "");
+    const encoded = relativePath.split("/").map(encodeURIComponent).join("/");
+    return ARTICLES_S3_GATEWAY_PATH_ARTICLES + encoded;
 };
 
 /**
