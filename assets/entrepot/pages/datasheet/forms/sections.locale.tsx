@@ -135,6 +135,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "producer.role": ({ role }) => {
         const labels: Record<ProducerRole, string> = {
             pointOfContact: "Contact",
+            contact: "Contact des métadonnées",
             custodian: "Gestionnaire",
             author: "Auteur",
             owner: "Propriétaire",
@@ -144,7 +145,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     },
     "producer.role.placeholder": "Sélectionnez un rôle",
     "producer.custodianHint":
-        "Ce contact sera également utilisé comme gestionnaire de la donnée, sauf si vous ajoutez un producteur ayant le rôle « Gestionnaire ».",
+        "Ce contact sera également utilisé comme gestionnaire de la donnée et comme contact des métadonnées, sauf si vous ajoutez des producteurs dédiés avec ces rôles (« Gestionnaire » et « Contact des métadonnées »).",
 
     "field.creationDate": "Date de création",
     "field.creationDate.hint": "Format attendu : JJ/MM/AAAA",
@@ -300,6 +301,7 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "producer.role": ({ role }) => {
         const labels: Record<ProducerRole, string> = {
             pointOfContact: "Contact",
+            contact: "Metadata contact",
             custodian: "Custodian",
             author: "Author",
             owner: "Owner",
@@ -308,7 +310,8 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
         return labels[role];
     },
     "producer.role.placeholder": "Select a role",
-    "producer.custodianHint": "This contact will also be used as the data custodian, unless you add a producer with the « Custodian » role.",
+    "producer.custodianHint":
+        "This contact will also be used as the data custodian and as the metadata contact, unless you add dedicated producers with those roles (« Custodian » and « Metadata contact »).",
 
     "field.creationDate": "Creation date",
     "field.creationDate.hint": "Expected format: DD/MM/YYYY",

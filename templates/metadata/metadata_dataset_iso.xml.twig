@@ -25,35 +25,40 @@
         <gco:CharacterString>{{ hierarchy_level_name }}</gco:CharacterString>
     </gmd:hierarchyLevelName>
 
-    {# Contact métadonnée = premier producteur (pointOfContact) #}
+    {# Contact des métadonnées : producteur de rôle "contact", repli sur le premier producteur #}
     {% if producers is defined and producers|length %}
-        {% set contact = producers[0] %}
+        {% set metadata_contact = producers[0] %}
+        {% for p in producers %}
+            {% if p.role == 'contact' %}
+                {% set metadata_contact = p %}
+            {% endif %}
+        {% endfor %}
         <gmd:contact>
             <gmd:CI_ResponsibleParty>
                 <gmd:organisationName>
-                    <gco:CharacterString>{{ contact.organization_name }}</gco:CharacterString>
+                    <gco:CharacterString>{{ metadata_contact.organization_name }}</gco:CharacterString>
                 </gmd:organisationName>
                 <gmd:contactInfo>
                     <gmd:CI_Contact>
                         <gmd:address>
                             <gmd:CI_Address>
-                                {% if contact.address_number_and_streetname is not empty %}
+                                {% if metadata_contact.address_number_and_streetname is not empty %}
                                     <gmd:deliveryPoint>
-                                        <gco:CharacterString>{{ contact.address_number_and_streetname }}</gco:CharacterString>
+                                        <gco:CharacterString>{{ metadata_contact.address_number_and_streetname }}</gco:CharacterString>
                                     </gmd:deliveryPoint>
                                 {% endif %}
-                                {% if contact.address_city is not empty %}
+                                {% if metadata_contact.address_city is not empty %}
                                     <gmd:city>
-                                        <gco:CharacterString>{{ contact.address_city }}</gco:CharacterString>
+                                        <gco:CharacterString>{{ metadata_contact.address_city }}</gco:CharacterString>
                                     </gmd:city>
                                 {% endif %}
-                                {% if contact.address_postal_code is not empty %}
+                                {% if metadata_contact.address_postal_code is not empty %}
                                     <gmd:postalCode>
-                                        <gco:CharacterString>{{ contact.address_postal_code }}</gco:CharacterString>
+                                        <gco:CharacterString>{{ metadata_contact.address_postal_code }}</gco:CharacterString>
                                     </gmd:postalCode>
                                 {% endif %}
                                 <gmd:electronicMailAddress>
-                                    <gco:CharacterString>{{ contact.organization_email }}</gco:CharacterString>
+                                    <gco:CharacterString>{{ metadata_contact.organization_email }}</gco:CharacterString>
                                 </gmd:electronicMailAddress>
                             </gmd:CI_Address>
                         </gmd:address>
@@ -154,42 +159,44 @@
                         resourceProvider: 'Fournisseur de la ressource',
                     } %}
                     {% for producer in producers %}
-                        <gmd:pointOfContact>
-                            <gmd:CI_ResponsibleParty>
-                                <gmd:organisationName>
-                                    <gco:CharacterString>{{ producer.organization_name }}</gco:CharacterString>
-                                </gmd:organisationName>
-                                <gmd:contactInfo>
-                                    <gmd:CI_Contact>
-                                        <gmd:address>
-                                            <gmd:CI_Address>
-                                                {% if producer.address_number_and_streetname is not empty %}
-                                                    <gmd:deliveryPoint>
-                                                        <gco:CharacterString>{{ producer.address_number_and_streetname }}</gco:CharacterString>
-                                                    </gmd:deliveryPoint>
-                                                {% endif %}
-                                                {% if producer.address_city is not empty %}
-                                                    <gmd:city>
-                                                        <gco:CharacterString>{{ producer.address_city }}</gco:CharacterString>
-                                                    </gmd:city>
-                                                {% endif %}
-                                                {% if producer.address_postal_code is not empty %}
-                                                    <gmd:postalCode>
-                                                        <gco:CharacterString>{{ producer.address_postal_code }}</gco:CharacterString>
-                                                    </gmd:postalCode>
-                                                {% endif %}
-                                                <gmd:electronicMailAddress>
-                                                    <gco:CharacterString>{{ producer.organization_email }}</gco:CharacterString>
-                                                </gmd:electronicMailAddress>
-                                            </gmd:CI_Address>
-                                        </gmd:address>
-                                    </gmd:CI_Contact>
-                                </gmd:contactInfo>
-                                <gmd:role>
-                                    <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="{{ producer.role }}">{{ roleLabels[producer.role] ?? producer.role }}</gmd:CI_RoleCode>
-                                </gmd:role>
-                            </gmd:CI_ResponsibleParty>
-                        </gmd:pointOfContact>
+                        {% if producer.role != 'contact' %}
+                            <gmd:pointOfContact>
+                                <gmd:CI_ResponsibleParty>
+                                    <gmd:organisationName>
+                                        <gco:CharacterString>{{ producer.organization_name }}</gco:CharacterString>
+                                    </gmd:organisationName>
+                                    <gmd:contactInfo>
+                                        <gmd:CI_Contact>
+                                            <gmd:address>
+                                                <gmd:CI_Address>
+                                                    {% if producer.address_number_and_streetname is not empty %}
+                                                        <gmd:deliveryPoint>
+                                                            <gco:CharacterString>{{ producer.address_number_and_streetname }}</gco:CharacterString>
+                                                        </gmd:deliveryPoint>
+                                                    {% endif %}
+                                                    {% if producer.address_city is not empty %}
+                                                        <gmd:city>
+                                                            <gco:CharacterString>{{ producer.address_city }}</gco:CharacterString>
+                                                        </gmd:city>
+                                                    {% endif %}
+                                                    {% if producer.address_postal_code is not empty %}
+                                                        <gmd:postalCode>
+                                                            <gco:CharacterString>{{ producer.address_postal_code }}</gco:CharacterString>
+                                                        </gmd:postalCode>
+                                                    {% endif %}
+                                                    <gmd:electronicMailAddress>
+                                                        <gco:CharacterString>{{ producer.organization_email }}</gco:CharacterString>
+                                                    </gmd:electronicMailAddress>
+                                                </gmd:CI_Address>
+                                            </gmd:address>
+                                        </gmd:CI_Contact>
+                                    </gmd:contactInfo>
+                                    <gmd:role>
+                                        <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="{{ producer.role }}">{{ roleLabels[producer.role] ?? producer.role }}</gmd:CI_RoleCode>
+                                    </gmd:role>
+                                </gmd:CI_ResponsibleParty>
+                            </gmd:pointOfContact>
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
 
