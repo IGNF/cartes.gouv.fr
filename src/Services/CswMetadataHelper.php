@@ -156,6 +156,43 @@ class CswMetadataHelper
         }
         $cswMetadata->producers = $producers;
 
+        // --- Contact des métadonnées (gmd:contact racine) ---
+        // Lire le gmd:contact racine et le comparer au pointOfContact.
+        // Si différent, ajouter un ProducerDTO de rôle "contact" au tableau des producteurs.
+        /** @var ?\DOMElement $rootContactEl */
+        $rootContactEl = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty')->item(0);
+        if (null !== $rootContactEl) {
+            $rootOrgName = trim($xpath->evaluate('string(gmd:organisationName/gco:CharacterString)', $rootContactEl));
+            $rootOrgEmail = trim($xpath->evaluate('string(gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString)', $rootContactEl));
+            $rootDelivery = trim($xpath->evaluate('string(gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:deliveryPoint/gco:CharacterString)', $rootContactEl));
+            $rootPostal = trim($xpath->evaluate('string(gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:postalCode/gco:CharacterString)', $rootContactEl));
+            $rootCity = trim($xpath->evaluate('string(gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:city/gco:CharacterString)', $rootContactEl));
+
+            // Ne traiter que si le contact racine contient au moins un nom ou un e-mail
+            if ('' !== $rootOrgName || '' !== $rootOrgEmail) {
+                // Récupérer le pointOfContact (index 0) pour comparaison
+                $pointOfContact = $producers[0] ?? null;
+
+                $contactIsIdentical = null !== $pointOfContact
+                    && $rootOrgName === ($pointOfContact->organization_name ?? '')
+                    && $rootOrgEmail === ($pointOfContact->organization_email ?? '')
+                    && ($rootDelivery ?: null) === $pointOfContact->address_number_and_streetname
+                    && ($rootPostal ?: null) === $pointOfContact->address_postal_code
+                    && ($rootCity ?: null) === $pointOfContact->address_city;
+
+                if (!$contactIsIdentical) {
+                    $cswMetadata->producers[] = new ProducerDTO(
+                        organization_name: $rootOrgName,
+                        organization_email: $rootOrgEmail,
+                        role: 'contact',
+                        address_number_and_streetname: $rootDelivery ?: null,
+                        address_postal_code: $rootPostal ?: null,
+                        address_city: $rootCity ?: null,
+                    );
+                }
+            }
+        }
+
         // --- Contraintes (gmd:resourceConstraints) ---
         /** @var \DOMNodeList<\DOMElement> $constraintNodes */
         $constraintNodes = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints');
