@@ -7,12 +7,14 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
+use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\MetadataApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 
@@ -28,7 +30,22 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function __construct(
         private MetadataApiService $metadataApiService,
         private CswMetadataHelper $cswMetadataHelper,
+        private CartesMetadataApiService $cartesMetadataApiService,
     ) {
+    }
+
+    #[Route('', name: 'check_file_identifier_availability', methods: ['HEAD'])]
+    public function checkFileIdentifierAvailability(
+        string $datastoreId,
+        #[MapQueryParameter('file_identifier')] string $fileIdentifier,
+    ): Response {
+        try {
+            $response = $this->metadataApiService->checkFileIdentifierExists($datastoreId, $fileIdentifier)->getResponse();
+
+            return new Response(null, $response->getStatusCode());
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
@@ -156,16 +173,25 @@ class MetadataController extends AbstractController implements ApiControllerInte
         }
     }
 
+    #[Route('/{metadataId}/publish', name: 'publish', methods: ['POST'])]
+    public function publish(string $datastoreId, string $metadataId): JsonResponse
+    {
+        try {
+            $this->cartesMetadataApiService->publishMetadata($datastoreId, $metadataId);
+
+            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     #[Route('/{metadataId}/unpublish', name: 'unpublish', methods: ['DELETE'])]
     public function unpublish(string $datastoreId, string $metadataId): JsonResponse
     {
         try {
-            $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
-
-            $endpointId = $metadata['endpoints'][0]['_id'] ?? null;
-            if (null !== $endpointId) {
-                $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $endpointId)->await();
-            }
+            $this->cartesMetadataApiService->unpublishMetadata($datastoreId, $metadataId);
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {

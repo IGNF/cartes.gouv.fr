@@ -1,6 +1,6 @@
-import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
-import { jsonFetch } from "../../modules/jsonFetch";
 import { Metadata } from "../../@types/app";
+import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
+import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 
 const add = (datastoreId: string, body: object, queryParams: QueryParams = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_add", { datastoreId, ...queryParams });
@@ -44,8 +44,28 @@ const getFileContent = async (datastoreId: string, metadataId: string) => {
     return await response.text();
 };
 
+const checkFileIdentifierAvailability = async (datastoreId: string, fileIdentifier: string, signal?: AbortSignal) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_check_file_identifier_availability", { datastoreId, file_identifier: fileIdentifier });
+    try {
+        const response = await apiFetch(url, { method: "HEAD", signal });
+        return response.ok;
+    } catch {
+        return false;
+    }
+};
+
 const remove = (datastoreId: string, metadataId: string) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_delete", { datastoreId, metadataId });
+    return jsonFetch<null>(url, { method: "DELETE" });
+};
+
+const publish = (datastoreId: string, metadataId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_publish", { datastoreId, metadataId });
+    return jsonFetch<null>(url, { method: "POST" });
+};
+
+const unpublish = (datastoreId: string, metadataId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_unpublish", { datastoreId, metadataId });
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
@@ -55,7 +75,10 @@ const metadata = {
     getByDatasheetName,
     getList,
     getFileContent,
+    checkFileIdentifierAvailability,
     remove,
+    publish,
+    unpublish,
 };
 
 export default metadata;

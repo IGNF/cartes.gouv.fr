@@ -96,6 +96,10 @@ const RQKeys = {
     accesses_request: (fileIdentifier: string): string[] => ["accesses_request", fileIdentifier],
 
     alerts: (): string[] => ["alerts"],
+
+    search_territories: (search: string): string[] => ["geocoding", "territories", search],
+
+    search_addresses: (search: string): string[] => ["geocoding", "addresses", search],
 };
 
 export default RQKeys;
