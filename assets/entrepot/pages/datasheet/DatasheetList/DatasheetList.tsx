@@ -103,18 +103,32 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                             {(isSupervisor ||
                                 (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
                                     userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
-                                <Button
-                                    linkProps={
-                                        datasheetCreationImpossible
-                                            ? { href: undefined, "aria-hidden": true }
-                                            : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link
-                                    }
-                                    iconId="fr-icon-add-line"
-                                    iconPosition="right"
-                                    className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
-                                >
-                                    {t("create_datasheet")}
-                                </Button>
+                                <>
+                                    <Button
+                                        linkProps={
+                                            datasheetCreationImpossible
+                                                ? { href: undefined, "aria-hidden": true }
+                                                : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link
+                                        }
+                                        iconId="fr-icon-add-line"
+                                        iconPosition="right"
+                                        className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
+                                    >
+                                        {t("create_datasheet")}
+                                    </Button>
+                                    <Button
+                                        linkProps={
+                                            datasheetCreationImpossible
+                                                ? { href: undefined, "aria-hidden": true }
+                                                : routes.datastore_datasheet_create_next({ datastoreId: datastoreId }).link
+                                        }
+                                        iconId="fr-icon-add-line"
+                                        iconPosition="right"
+                                        className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
+                                    >
+                                        {t("create_datasheet")} next
+                                    </Button>
+                                </>
                             )}
                         </div>
                     </div>
