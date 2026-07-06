@@ -5,7 +5,7 @@ framework:
     http_method_override: false
     handle_all_throwables: true
 
-    trusted_proxies: "127.0.0.1,REMOTE_ADDR"
+    trusted_proxies: "%env(TRUSTED_PROXIES)%"
     trusted_headers: ["x-forwarded-for", "x-forwarded-host", "x-forwarded-proto", "x-forwarded-port", "x-forwarded-prefix"]
 
     ide: vscode
