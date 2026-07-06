@@ -1,103 +1,46 @@
-name: Docker build & publish
+name: Docker build, publish and scan
 
 on:
     push:
-        branches: ["*"]
+        branches: ["main"]
         # Publish semver tags as releases.
         tags: ["v*"]
     pull_request:
-        branches: ["*"]
 
 env:
     # Use docker.io for Docker Hub if empty
     REGISTRY: ghcr.io
     # github.repository as <account>/<repo>
     IMAGE_NAME: ${{ github.repository }}
-    BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+    IS_TAG: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
 jobs:
-    build:
+    docker-build-publish-scan:
         runs-on: ubuntu-latest
         permissions:
             contents: read
             packages: write
             security-events: write
         steps:
+            # Une référence d'image Docker exige un chemin en minuscules, or github.repository
+            # contient "IGNF/..." ; metadata-action normalise de son côté mais pas format() (image-ref Trivy)
+            - name: Lowercase image name
+              run: echo "IMAGE_NAME=${IMAGE_NAME,,}" >> "$GITHUB_ENV"
+
             - name: Checkout repository
-              uses: actions/checkout@v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
               with:
                   fetch-depth: 0
 
             # Workaround: https://github.com/docker/build-push-action/issues/461
             - name: Setup Docker buildx
-              uses: docker/setup-buildx-action@v3
+              uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
-            # Extract metadata (tags, labels) for Docker
-            # https://github.com/docker/metadata-action?tab=readme-ov-file#semver
-            - name: Extract Docker metadata
-              id: meta
-              uses: docker/metadata-action@v5
-              with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-                  tags: |
-                      type=ref,event=branch
-                      type=ref,event=pr
-                      type=semver,pattern={{version}}
-
-            # - name: Extract tag for trivy scan
-            #   id: trivy_tag
-            #   run: |
-            #       first_tag=$(echo '${{ steps.meta.outputs.tags }}' | tr ',' '\n' | grep -v ':latest' | head -n1)
-            #       echo "tag<<EOF" >> $GITHUB_OUTPUT
-            #       echo "${first_tag}" >> $GITHUB_OUTPUT
-            #       echo "EOF" >> $GITHUB_OUTPUT
-
-            # https://github.com/docker/build-push-action
-            - name: Build Docker image
-              id: build
-              uses: docker/build-push-action@v6
-              with:
-                  context: .
-                  file: .docker/Dockerfile
-                  pull: true
-                  push: false
-                  load: true
-                  target: prod
-                  tags: ${{ steps.meta.outputs.tags }}
-                  labels: ${{ steps.meta.outputs.labels }}
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
-
-            # - name: Run Trivy vulnerability scanner
-            #   uses: aquasecurity/trivy-action@v0.35.0
-            #   with:
-            #       image-ref: ${{ steps.trivy_tag.outputs.tag }}
-            #       format: "sarif"
-            #       output: "trivy-results.sarif"
-
-            # - name: Upload Trivy scan results to GitHub Security tab
-            #   uses: github/codeql-action/upload-sarif@v4
-            #   with:
-            #       sarif_file: "trivy-results.sarif"
-
-    push:
-        if: startsWith(github.event.ref, 'refs/tags/v')
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            packages: write
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
-
-            # Workaround: https://github.com/docker/build-push-action/issues/461
-            - name: Setup Docker buildx
-              uses: docker/setup-buildx-action@v3
-
-            # Login against a Docker registry (only if semver tag)
+            # Login nécessaire uniquement quand on pousse (tag semver)
             # https://github.com/docker/login-action
             - name: Log into registry ${{ env.REGISTRY }}
-              uses: docker/login-action@v3
+              if: env.IS_TAG == 'true'
+              uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
               with:
                   registry: ${{ env.REGISTRY }}
                   username: ${{ github.actor }}
@@ -107,7 +50,9 @@ jobs:
             # https://github.com/docker/metadata-action?tab=readme-ov-file#semver
             - name: Extract Docker metadata
               id: meta
-              uses: docker/metadata-action@v5
+              uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+              env:
+                  DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
               with:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
                   tags: |
@@ -117,18 +62,72 @@ jobs:
                       type=semver,pattern={{version}}
                       type=semver,pattern={{major}}.{{minor}}
 
-            - name: Build & Push image to github registry and generate SBOM
-              uses: docker/build-push-action@v6
+            # Build unique : push (avec SBOM + provenance) sur tag semver, sinon load local pour le scan
+            # https://github.com/docker/build-push-action
+            - name: Build Docker image (push to registry on semver tag only)
+              id: build
+              uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
               with:
                   context: .
                   file: .docker/Dockerfile
                   pull: true
-                  push: true
-                  load: false
-                  sbom: true
-                  provenance: mode=max
+                  push: ${{ env.IS_TAG == 'true' }}
+                  load: ${{ env.IS_TAG != 'true' }}
+                  sbom: ${{ env.IS_TAG == 'true' }}
+                  provenance: ${{ env.IS_TAG == 'true' && 'mode=max' || 'false' }}
                   target: prod
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
+                  # annotations uniquement quand on pousse : l'exporter docker (load) ne les supporte pas
+                  annotations: ${{ env.IS_TAG == 'true' && steps.meta.outputs.annotations || '' }}
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
+
+            # Scan informatif (ne bloque pas la CI). Sur tag : scan de l'image poussée par digest (même artefact);
+            # sinon : scan local par image ID (insensible aux tags multiples).
+            - name: Run Trivy vulnerability scanner
+              uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+              continue-on-error: true
+              with:
+                  image-ref: ${{ env.IS_TAG == 'true' && format('{0}/{1}@{2}', env.REGISTRY, env.IMAGE_NAME, steps.build.outputs.digest) || steps.build.outputs.imageid }}
+                  format: "sarif"
+                  output: "trivy-results.sarif"
+
+            - name: Upload Trivy scan results to GitHub Security tab
+              uses: github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a # v4.36.3
+              continue-on-error: true
+              with:
+                  sarif_file: "trivy-results.sarif"
+
+            # Résumé sur la page du run (complète le résumé de build auto de build-push-action v6)
+            - name: Write run summary
+              if: always()
+              env:
+                  IMAGE_ID: ${{ steps.build.outputs.imageid }}
+                  IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+              run: |
+                  # Lien Security filtré sur la ref exacte du run (PR, tag ou branche)
+                  if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+                      filter="pr:${PR_NUMBER}"
+                  elif [ "$IS_TAG" = "true" ]; then
+                      filter="ref:refs/tags/${GITHUB_REF_NAME}"
+                  else
+                      filter="branch:${GITHUB_REF_NAME}"
+                  fi
+                  query=$(jq -rn --arg q "is:open ${filter}" '$q|@uri')
+                  {
+                      echo "### Image Docker"
+                      echo ""
+                      echo "| | |"
+                      echo "|---|---|"
+                      echo "| Image ID | \`${IMAGE_ID:-—}\` |"
+                      echo "| Digest | \`${IMAGE_DIGEST:-—}\` |"
+                      echo "| Poussée sur ${REGISTRY} | $([ "$IS_TAG" = "true" ] && echo "oui" || echo "non (branche/PR)") |"
+                      if [ -f trivy-results.sarif ]; then
+                          count=$(jq '[.runs[].results[]] | length' trivy-results.sarif)
+                          echo "| Vulnérabilités (Trivy) | ${count} — [Security → Code scanning](https://github.com/${GITHUB_REPOSITORY}/security/code-scanning?query=${query}) |"
+                      else
+                          echo "| Vulnérabilités (Trivy) | scan non exécuté |"
+                      fi
+                  } >> "$GITHUB_STEP_SUMMARY"
