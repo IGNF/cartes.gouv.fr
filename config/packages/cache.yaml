@@ -16,4 +16,13 @@ framework:
 
         # Namespaced pools use the above "app" backend by default
         #pools:
-            #my.dedicated.cache: null
+        #my.dedicated.cache: null
+
+# En prod, cache applicatif en mémoire partagée (APCu) plutôt que sur disque :
+# permet un conteneur entièrement read-only (aucune écriture dans var/cache après
+# warmup). Entrées = petites réponses d'API à TTL court, recalculables et non
+# persistées entre redémarrages. En dev, pool filesystem par défaut conservé.
+when@prod:
+    framework:
+        cache:
+            app: cache.adapter.apcu
