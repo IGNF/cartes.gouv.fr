@@ -88,3 +88,27 @@ jobs:
               uses: github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a # v4.36.3
               with:
                   sarif_file: "trivy-results.sarif"
+
+            # Résumé sur la page du run (complète le résumé de build auto de build-push-action v6)
+            - name: Write run summary
+              if: always()
+              env:
+                  IS_TAG: ${{ startsWith(github.ref, 'refs/tags/v') }}
+                  IMAGE_ID: ${{ steps.build.outputs.imageid }}
+                  IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+              run: |
+                  {
+                      echo "### Image Docker"
+                      echo ""
+                      echo "| | |"
+                      echo "|---|---|"
+                      echo "| Image ID | \`${IMAGE_ID:-—}\` |"
+                      echo "| Digest | \`${IMAGE_DIGEST:-—}\` |"
+                      echo "| Poussée sur ${REGISTRY} | $([ "$IS_TAG" = "true" ] && echo "oui" || echo "non (branche/PR)") |"
+                      if [ -f trivy-results.sarif ]; then
+                          count=$(jq '[.runs[].results[]] | length' trivy-results.sarif)
+                          echo "| Vulnérabilités (Trivy) | ${count} — [Security → Code scanning](https://github.com/${GITHUB_REPOSITORY}/security/code-scanning) |"
+                      else
+                          echo "| Vulnérabilités (Trivy) | scan non exécuté |"
+                      fi
+                  } >> "$GITHUB_STEP_SUMMARY"
