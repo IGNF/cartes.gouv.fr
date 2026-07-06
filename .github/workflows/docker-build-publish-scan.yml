@@ -23,6 +23,11 @@ jobs:
             packages: write
             security-events: write
         steps:
+            # Une référence d'image Docker exige un chemin en minuscules, or github.repository
+            # contient "IGNF/..." ; metadata-action normalise de son côté mais pas format() (image-ref Trivy)
+            - name: Lowercase image name
+              run: echo "IMAGE_NAME=${IMAGE_NAME,,}" >> "$GITHUB_ENV"
+
             - name: Checkout repository
               uses: actions/checkout@v6
               with:
