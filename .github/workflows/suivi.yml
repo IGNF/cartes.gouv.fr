@@ -4,6 +4,9 @@ on:
     issues:
         types: [opened, labeled]
 
+# Le GITHUB_TOKEN n'est pas utilisé : l'action s'authentifie via ADD_TO_PROJECT_PAT
+permissions: {}
+
 jobs:
     add-to-project:
         name: Ajoute au projet
