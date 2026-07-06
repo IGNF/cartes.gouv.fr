@@ -1,4 +1,4 @@
-name: Docker build & publish
+name: Docker build, publish and scan
 
 on:
     push:
@@ -16,7 +16,7 @@ env:
     BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
-    build:
+    docker-build-publish-scan:
         runs-on: ubuntu-latest
         permissions:
             contents: read
