@@ -96,7 +96,17 @@ jobs:
                   IS_TAG: ${{ startsWith(github.ref, 'refs/tags/v') }}
                   IMAGE_ID: ${{ steps.build.outputs.imageid }}
                   IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
               run: |
+                  # Lien Security filtré sur la ref exacte du run (PR, tag ou branche)
+                  if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+                      filter="pr:${PR_NUMBER}"
+                  elif [ "$IS_TAG" = "true" ]; then
+                      filter="ref:refs/tags/${GITHUB_REF_NAME}"
+                  else
+                      filter="branch:${GITHUB_REF_NAME}"
+                  fi
+                  query=$(jq -rn --arg q "is:open ${filter}" '$q|@uri')
                   {
                       echo "### Image Docker"
                       echo ""
@@ -107,7 +117,7 @@ jobs:
                       echo "| Poussée sur ${REGISTRY} | $([ "$IS_TAG" = "true" ] && echo "oui" || echo "non (branche/PR)") |"
                       if [ -f trivy-results.sarif ]; then
                           count=$(jq '[.runs[].results[]] | length' trivy-results.sarif)
-                          echo "| Vulnérabilités (Trivy) | ${count} — [Security → Code scanning](https://github.com/${GITHUB_REPOSITORY}/security/code-scanning) |"
+                          echo "| Vulnérabilités (Trivy) | ${count} — [Security → Code scanning](https://github.com/${GITHUB_REPOSITORY}/security/code-scanning?query=${query}) |"
                       else
                           echo "| Vulnérabilités (Trivy) | scan non exécuté |"
                       fi
