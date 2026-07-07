@@ -93,6 +93,7 @@ RUN pkg_version=$(echo "${php_version}" | tr -d .) \
     php-zts-xsl \
     php-zts-zip \
     && ln -s /usr/bin/php-zts /usr/local/bin/php \
+    && rm -rf /var/lib/frankenphp/.local/share/caddy \
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #----------------------------------------------------------------------
