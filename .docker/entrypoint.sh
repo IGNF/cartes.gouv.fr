@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# L'image prod n'embarque que le vendor --no-dev : tout autre APP_ENV injecté
+# au runtime (env_file, env du pod) casserait le kernel — on le force ici
+export APP_ENV=prod APP_DEBUG=0
+
 # Sortir proprement si un signal d'arrêt arrive pendant le warmup
 # (bash PID 1 ignorerait SIGTERM par défaut et le serveur démarrerait quand même)
 stop=0
