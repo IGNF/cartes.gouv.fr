@@ -94,6 +94,8 @@ RUN pkg_version=$(echo "${php_version}" | tr -d .) \
     php-zts-zip \
     && ln -s /usr/bin/php-zts /usr/local/bin/php \
     && rm -rf /var/lib/frankenphp/.local/share/caddy \
+    && rm -f /usr/local/share/ca-certificates/*Caddy* \
+    && update-ca-certificates --fresh \
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #----------------------------------------------------------------------
