@@ -1,0 +1,12 @@
+# Faux positifs Trivy documentés (le format .trivyignore.yaml n'est pas
+# auto-détecté par l'action GitHub : voir --trivyignores dans
+# .github/workflows/docker-build-publish.yml)
+secrets:
+    # La règle sendgrid-api-token (regex SG.<chars>.<chars>) matche la liste des
+    # codes pays ISO 3166 embarquée par la lib "validator" (ex. la séquence
+    # SD.SE.SG.SH.SI, Singapour = SG) une fois minifiée par Vite. L'app n'utilise
+    # pas SendGrid ; scope volontairement limité au chunk validator-*.js pour ne
+    # pas masquer un vrai secret ailleurs (source, vendor, ou tout autre asset).
+    - id: sendgrid-api-token
+      paths:
+          - "**/public/build/assets/validator-*.js"
