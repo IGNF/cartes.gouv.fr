@@ -98,6 +98,8 @@ jobs:
               continue-on-error: true
               with:
                   sarif_file: "trivy-results.sarif"
+                  # Catégorie stable pour éviter les doublons d'alertes lors d'un renommage du job
+                  category: image-scan-trivy
 
             # Résumé sur la page du run (complète le résumé de build auto de build-push-action v6)
             - name: Write run summary
