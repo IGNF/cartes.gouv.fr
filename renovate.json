@@ -7,7 +7,7 @@
             "dependencyDashboardApproval": true
         },
         {
-            "description": "php_image est couplé à php_version/frankenphp_version (Dockerfile) : digest uniquement, bump de version manuel",
+            "description": "le tag de l'image php est piloté par php_version, couplé à frankenphp_version (Dockerfile) : digest uniquement, bump de version manuel",
             "matchDatasources": ["docker"],
             "matchPackageNames": ["docker.io/library/php"],
             "matchUpdateTypes": ["minor", "major"],
