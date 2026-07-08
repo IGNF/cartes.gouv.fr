@@ -1,6 +1,17 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+    "customManagers": [
+        {
+            "customType": "regex",
+            "description": "frankenphp (dépôt deb henderkes) : suit les builds de la version PHP extraite de frankenphp_version, le bump PHP reste manuel",
+            "managerFilePatterns": ["/\\.docker/Dockerfile$/"],
+            "matchStrings": ["ARG frankenphp_version=(?<currentValue>[\\d.]+\\+php(?<phpVersion>\\d+)-\\d+)"],
+            "depNameTemplate": "frankenphp",
+            "datasourceTemplate": "deb",
+            "registryUrlTemplate": "https://pkg.henderkes.com/api/packages/{{phpVersion}}/debian?suite=php-zts&components=main&binaryArch=amd64"
+        }
+    ],
     "packageRules": [
         {
             "matchUpdateTypes": ["major"],
