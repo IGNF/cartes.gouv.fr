@@ -18,6 +18,11 @@
             "dependencyDashboardApproval": true
         },
         {
+            "description": "Node : .nvmrc et les ARG node du Dockerfile dans une même PR",
+            "groupName": "node",
+            "matchPackageNames": ["node", "docker.io/library/node"]
+        },
+        {
             "description": "le tag de l'image php est piloté par php_version, couplé à frankenphp_version (Dockerfile) : digest uniquement, bump de version manuel",
             "matchDatasources": ["docker"],
             "matchPackageNames": ["docker.io/library/php"],
