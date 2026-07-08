@@ -5,7 +5,6 @@
 #----------------------------------------------------------------------
 ARG project_dir=/opt/cartesgouvfr-site
 
-ARG php_image=docker.io/library/php:8.2-cli@sha256:90db578653480744d7137d42e26055bc12c75099eab0cbb38bc8da79a94b1443
 ARG composer_image=docker.io/composer/composer:2-bin@sha256:cf313f79f608ebab80220796327f341ae663b9fa8065c73c6148c9b67f0b13b3
 # aligné sur .nvmrc
 ARG node_alpine_image=docker.io/library/node:24.14.0-alpine@sha256:7fddd9ddeae8196abf4a3ef2de34e11f7b1a722119f91f28ddf1e99dcafdf114
@@ -13,7 +12,8 @@ ARG node_alpine_image=docker.io/library/node:24.14.0-alpine@sha256:7fddd9ddeae81
 ARG node_slim_image=docker.io/library/node:24.14.0-slim@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8
 ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90
 
-# couplés entre eux et au tag de php_image (bump PHP = changer les trois)
+# php_version pilote le tag de l'image php (stage deps_php) et le dépôt deb ;
+# couplé à frankenphp_version (bump PHP = changer les deux)
 ARG php_version=8.2
 ARG frankenphp_version=1.12.4+php82-1
 
@@ -24,7 +24,7 @@ FROM ${node_slim_image} AS node_dist
 #----------------------------------------------------------------------
 # Installer les dépendances PHP dans une couche dédiée
 #----------------------------------------------------------------------
-FROM ${php_image} AS deps_php
+FROM docker.io/library/php:${php_version}-cli@sha256:90db578653480744d7137d42e26055bc12c75099eab0cbb38bc8da79a94b1443 AS deps_php
 COPY --from=composer_bin /composer /usr/bin/composer
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
