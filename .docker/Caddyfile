@@ -1,98 +1,99 @@
 # Configuration FrankenPHP / Caddy de cartes.gouv.fr
 {
-    frankenphp
-    # Worker mode (désactivé pour le moment)
-    # frankenphp {
-    #     worker /opt/cartesgouvfr-site/public/index.php
-    # }
-    # ajouter runtime/frankenphp-symfony aux dépendances composer
+	frankenphp {
+		# nombre de threads php maximum pour traiter des requêtes simultanées
+		num_threads {$FRANKENPHP_NUM_THREADS:4}
 
-    # TLS terminé par le reverse proxy amont
-    auto_https off
+		# Worker mode (désactivé pour le moment)
+		# worker /opt/cartesgouvfr-site/public/index.php
+		# ajouter runtime/frankenphp-symfony aux dépendances composer
+	}
 
-    # Conteneur immutable : pas de reload de config, l'endpoint d'admin est
-    # inutile - le désactiver supprime aussi l'écriture d'autosave.json
-    admin off
+	# TLS terminé par le reverse proxy amont
+	auto_https off
 
-    # Logs en texte brut ; level_format upper évite les codes couleur ANSI
-    log {
-        format console {
-            level_format upper
-        }
-    }
+	# Conteneur immutable : pas de reload de config, l'endpoint d'admin est inutile
+	admin off
 
-    # Laisser au plus 25 s aux requêtes en cours à l'arrêt (drain infini par défaut)
-    grace_period 25s
+	# Logs en texte brut ; level_format upper évite les codes couleur ANSI
+	log {
+		format console {
+			level_format upper
+		}
+	}
 
-    # respond (405 TRACE, 404 .ht*) doit passer avant les redirections
-    order respond before redir
+	# Laisser au plus 25 s aux requêtes en cours à l'arrêt (drain infini par défaut)
+	grace_period 25s
 
-    # La résolution X-Forwarded-For appartient à Symfony (TRUSTED_PROXIES)
+	# respond (405 TRACE, 404 .ht*) doit passer avant les redirections
+	order respond before redir
+
+	# La résolution X-Forwarded-For appartient à Symfony (TRUSTED_PROXIES)
 }
 
 :8000 {
-    root * /opt/cartesgouvfr-site/public
+	root * /opt/cartesgouvfr-site/public
 
-    encode zstd gzip
+	encode zstd gzip
 
-    header {
-        X-Content-Type-Options nosniff
-        X-Frame-Options SAMEORIGIN
-        Referrer-Policy strict-origin-when-cross-origin
-        -Server
-        -X-Powered-By
-    }
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+		-X-Powered-By
+	}
 
-    # Cache long pour les assets Vite (noms de fichiers hashés)
-    @build path /build/*
-    header @build Cache-Control "public, max-age=31536000, immutable"
+	# Cache long pour les assets Vite (noms de fichiers hashés)
+	@build path /build/*
+	header @build Cache-Control "public, max-age=31536000, immutable"
 
-    # Statiques à nom fixe : cache modéré avec revalidation (ETag/Last-Modified
-    # fournis par Caddy) ; le matcher `file` évite de cacher un fallback SPA 404
-    @static {
-        path /favicon/* /bundles/* /favicon.ico /robots.txt
-        file
-    }
-    header @static Cache-Control "public, max-age=86400, must-revalidate"
+	# Statiques à nom fixe : cache modéré avec revalidation (ETag/Last-Modified
+	# fournis par Caddy) ; le matcher `file` évite de cacher un fallback SPA 404
+	@static {
+		path /favicon/* /bundles/* /favicon.ico /robots.txt
+		file
+	}
+	header @static Cache-Control "public, max-age=86400, must-revalidate"
 
-    # Équivalent du TraceEnable Off d'Apache
-    @trace method TRACE
-    respond @trace 405
+	# Équivalent du TraceEnable Off d'Apache
+	@trace method TRACE
+	respond @trace 405
 
-    # Ne jamais servir les fichiers .ht* (public/.htaccess reste dans l'image pour
-    # XAMPP) : réécrire vers un chemin inexistant pour que la requête tombe dans le
-    # front controller - l'utilisateur voit la page 404 React, comme tout chemin inconnu
-    @hidden path */.ht*
-    rewrite @hidden /__fichier-cache__
+	# Ne jamais servir les fichiers .ht* (public/.htaccess reste dans l'image pour
+	# XAMPP) : réécrire vers un chemin inexistant pour que la requête tombe dans le
+	# front controller - l'utilisateur voit la page 404 React, comme tout chemin inconnu
+	@hidden path */.ht*
+	rewrite @hidden /__fichier-cache__
 
-    # Redirections héritées (ex-RedirectMatch du vhost Apache), query string préservée
-    redir / /explorer-les-cartes{?query} 301
-    @faq path /faq /faq/
-    redir @faq /aide/fr{?query} 301
-    @apropos path /a-propos /a-propos/
-    redir @apropos /decouvrir{?query} 301
-    @nousecrire path /nous-ecrire /nous-ecrire/
-    redir @nousecrire /aide/fr/nous-ecrire{?query} 301
-    @offre path /offre /offre/
-    redir @offre /offres{?query} 301
+	# Redirections héritées (ex-RedirectMatch du vhost Apache), query string préservée
+	redir / /explorer-les-cartes{?query} 301
+	@faq path /faq /faq/
+	redir @faq /aide/fr{?query} 301
+	@apropos path /a-propos /a-propos/
+	redir @apropos /decouvrir{?query} 301
+	@nousecrire path /nous-ecrire /nous-ecrire/
+	redir @nousecrire /aide/fr/nous-ecrire{?query} 301
+	@offre path /offre /offre/
+	redir @offre /offres{?query} 301
 
-    # Canonicalisation /index.php → URL propre (parité avec public/.htaccess)
-    @indexphp path_regexp idx ^/index\.php(?:/(.*))?$
-    redir @indexphp /{re.idx.1}{?query} 301
+	# Canonicalisation /index.php → URL propre (parité avec public/.htaccess)
+	@indexphp path_regexp idx ^/index\.php(?:/(.*))?$
+	redir @indexphp /{re.idx.1}{?query} 301
 
-    # Ne pas logger les probes de santé (équivalent du SetEnvIf dontlog)
-    @health path_regexp ^/tableau-de-bord/health/?$
-    log_skip @health
+	# Ne pas logger les probes de santé (équivalent du SetEnvIf dontlog)
+	@health path_regexp ^/tableau-de-bord/health/?$
+	log_skip @health
 
-    # Access log en texte brut (une ligne par requête, cf. logs runtime plus haut)
-    log {
-        output stdout
-        format console {
-            level_format upper
-        }
-    }
+	# Access log en texte brut (une ligne par requête, cf. logs runtime plus haut)
+	log {
+		output stdout
+		format console {
+			level_format upper
+		}
+	}
 
-    # Front controller Symfony : fichiers existants servis tels quels,
-    # tout le reste vers public/index.php
-    php_server
+	# Front controller Symfony : fichiers existants servis tels quels,
+	# tout le reste vers public/index.php
+	php_server
 }

@@ -22,6 +22,7 @@ services:
             - APP_ROOT_URL=https://cartesgouvfr-dev.docker.localhost
             - XDEBUG_MODE=debug
             - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003
+            - FRANKENPHP_NUM_THREADS=4
         working_dir: /opt/cartesgouvfr-site
         volumes:
             - .:/opt/cartesgouvfr-site
