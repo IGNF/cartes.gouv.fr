@@ -61,7 +61,7 @@
         "geostyler-mapbox-parser": "^6.1.1",
         "geostyler-openlayers-parser": "^5.1.2",
         "geostyler-qgis-parser": "^4.0.2",
-        "geostyler-sld-parser": "^8.0.0",
+        "geostyler-sld-parser": "^9.0.2",
         "globals": "^17.0.0",
         "https-proxy-agent": "^7.0.6",
         "husky": "^9.0.11",
@@ -95,6 +95,9 @@
         "vite-plugin-symfony": "^8.0",
         "yup": "^1.2.0",
         "zustand": "^5.0.0"
+    },
+    "overrides": {
+        "geostyler-style": "^12.0.0"
     },
     "scripts": {
         "dev": "vite",
