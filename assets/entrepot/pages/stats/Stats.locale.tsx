@@ -19,13 +19,13 @@ const { i18n } = declareComponentKeys<
 export type I18n = typeof i18n;
 
 export const StatsFrTranslations: Translations<"fr">["Stats"] = {
-    scope_selection_title: "Statistiques",
+    scope_selection_title: "Statistiques de consommation",
     scope_title: ({ scope }) => {
         switch (scope) {
             case "datastore":
-                return "Statistiques de l’entrepôt";
+                return "Statistiques par entrepôt";
             case "community":
-                return "Statistiques de la communauté";
+                return "Statistiques par communauté";
             case "user":
                 return "Mes statistiques";
             default:

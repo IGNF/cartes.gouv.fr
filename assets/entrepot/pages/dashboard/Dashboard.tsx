@@ -93,6 +93,24 @@ export default function Dashboard() {
                         }}
                     />
                 </div>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Tile
+                        linkProps={routes.stats_scope_selection().link}
+                        title={"Mes statistiques de consommation"}
+                        pictogram={<DataVisualization />}
+                        orientation="vertical"
+                        desc="Visualiser mes statistiques de consultation et de consommation"
+                        start={
+                            <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
+                                <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} />
+                                Publier
+                            </Badge>
+                        }
+                        classes={{
+                            img: fr.cx("fr-mb-0"),
+                        }}
+                    />
+                </div>
                 {isApiEspaceCoDefined() && (
                     <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                         <Tile
@@ -120,18 +138,6 @@ export default function Dashboard() {
                         />
                     </div>
                 )}
-
-                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                    <Tile
-                        linkProps={routes.stats_scope_selection().link}
-                        title={"Mes statistiques de consommation"}
-                        pictogram={<DataVisualization />}
-                        orientation="vertical"
-                        classes={{
-                            img: fr.cx("fr-mb-0"),
-                        }}
-                    />
-                </div>
             </div>
         </Main>
     );
