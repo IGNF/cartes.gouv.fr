@@ -27,6 +27,7 @@ export type StatsEntityConfig = {
 
 export type StatsScopeConfig = {
     label: string;
+    desc: string;
     disabled?: boolean;
     param?: ParamDef | null; // sélecteur de périmètre (Entrepôt/Communauté), affiché en premier ; null ou absent pour le périmètre user
     entities: Record<string, StatsEntityConfig>;
@@ -141,7 +142,8 @@ const userKeyAccessIdParam = p({
 
 export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
     datastore: {
-        label: "Entrepôt",
+        label: "Statistiques par entrepôt",
+        desc: "Statistiques de consommation de mes entrepôts",
         param: datastoreIdParam,
         entities: {
             endpoint: {
@@ -162,7 +164,8 @@ export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
         },
     },
     community: {
-        label: "Communauté",
+        label: "Statistiques par communauté",
+        desc: "Statistiques de consommation de mes communautés",
         disabled: true, // statistiques de communauté désactivées temporairement (issue #1032)
         param: communityIdParam,
         entities: {
@@ -180,6 +183,7 @@ export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
     },
     user: {
         label: "Moi-même",
+        desc: "Mes statistiques personnelles de consommation",
         param: null,
         entities: {
             me: {

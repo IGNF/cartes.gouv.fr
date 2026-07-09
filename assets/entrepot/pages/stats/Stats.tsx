@@ -127,73 +127,76 @@ export default function Stats() {
         >
             <h1>{t("scope_title", { scope: scope })}</h1>
 
-            {!currentConfig ? (
-                <p className={fr.cx("fr-m-0")}>Aucune statistique disponible pour ce périmètre.</p>
-            ) : (
-                <>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        {scopeParam && (
-                            <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                                <DynamicParamSelector
-                                    param={scopeParam}
-                                    resolvedDeps={resolvedParams}
-                                    value={resolvedParams[scopeParam.key]}
-                                    onChange={handleParamChange}
-                                />
-                            </div>
-                        )}
+            <div className={fr.cx("fr-mb-3w")}>
+                {!currentConfig ? (
+                    <p className={fr.cx("fr-m-0")}>Aucune statistique disponible pour ce périmètre.</p>
+                ) : (
+                    <>
+                        <p>Sélectionnez un de vos entrepôts pour accéder à des statistiques de consommation détaillées.</p>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                            {scopeParam && (
+                                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                                    <DynamicParamSelector
+                                        param={scopeParam}
+                                        resolvedDeps={resolvedParams}
+                                        value={resolvedParams[scopeParam.key]}
+                                        onChange={handleParamChange}
+                                    />
+                                </div>
+                            )}
 
-                        {entityTypeKeys.length > 1 && (
-                            <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                                <Select
-                                    label="Type d'entité"
-                                    options={entityTypeOptions}
-                                    nativeSelectProps={{
-                                        value: entityTypeKey,
-                                        onChange: (e) => handleEntityTypeChange(e.currentTarget.value),
+                            {entityTypeKeys.length > 1 && (
+                                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                                    <Select
+                                        label="Type d'entité"
+                                        options={entityTypeOptions}
+                                        nativeSelectProps={{
+                                            value: entityTypeKey,
+                                            onChange: (e) => handleEntityTypeChange(e.currentTarget.value),
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {currentConfig.params.map((param) => (
+                                <div className={fr.cx("fr-col-12", "fr-col-md-4")} key={param.key}>
+                                    <DynamicParamSelector
+                                        param={param}
+                                        resolvedDeps={resolvedParams}
+                                        value={resolvedParams[param.key]}
+                                        onChange={handleParamChange}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {allParamsResolved && (
+                            <>
+                                <DateRangePicker
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    onChange={(start, end) => {
+                                        setStartDate(start);
+                                        setEndDate(end);
                                     }}
                                 />
-                            </div>
+
+                                <div className={fr.cx("fr-py-3v")}>
+                                    {statsQuery.isLoading ? (
+                                        <Skeleton count={1} rectangleHeight={400} />
+                                    ) : statsQuery.isError ? (
+                                        <p className={fr.cx("fr-m-0")}>{t("error_loading")}</p>
+                                    ) : statsQuery.data !== undefined ? (
+                                        <StatsBarChart stats={statsQuery.data} startDate={startDate} endDate={endDate} />
+                                    ) : (
+                                        <p className={fr.cx("fr-m-0")}>Pas de données</p>
+                                    )}
+                                </div>
+                            </>
                         )}
-
-                        {currentConfig.params.map((param) => (
-                            <div className={fr.cx("fr-col-12", "fr-col-md-4")} key={param.key}>
-                                <DynamicParamSelector
-                                    param={param}
-                                    resolvedDeps={resolvedParams}
-                                    value={resolvedParams[param.key]}
-                                    onChange={handleParamChange}
-                                />
-                            </div>
-                        ))}
-                    </div>
-
-                    {allParamsResolved && (
-                        <>
-                            <DateRangePicker
-                                startDate={startDate}
-                                endDate={endDate}
-                                onChange={(start, end) => {
-                                    setStartDate(start);
-                                    setEndDate(end);
-                                }}
-                            />
-
-                            <div className={fr.cx("fr-py-3v")}>
-                                {statsQuery.isLoading ? (
-                                    <Skeleton count={1} rectangleHeight={400} />
-                                ) : statsQuery.isError ? (
-                                    <p className={fr.cx("fr-m-0")}>{t("error_loading")}</p>
-                                ) : statsQuery.data !== undefined ? (
-                                    <StatsBarChart stats={statsQuery.data} startDate={startDate} endDate={endDate} />
-                                ) : (
-                                    <p className={fr.cx("fr-m-0")}>Pas de données</p>
-                                )}
-                            </div>
-                        </>
-                    )}
-                </>
-            )}
+                    </>
+                )}
+            </div>
         </Main>
     );
 }
