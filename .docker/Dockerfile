@@ -26,9 +26,14 @@ FROM ${node_slim_image} AS node_dist
 #----------------------------------------------------------------------
 FROM docker.io/library/php:${php_version}-cli@sha256:90db578653480744d7137d42e26055bc12c75099eab0cbb38bc8da79a94b1443 AS deps_php
 COPY --from=composer_bin /composer /usr/bin/composer
+# apcu (https://pecl.php.net/package/APCu) : requis pour booter le kernel prod (cache.system en APCu) via bin/console ;
+# tarball via curl car le client PEAR ne sait pas traverser le proxy
+ARG apcu_version=5.1.28
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get -qq update && apt-get -qq install -y git unzip
+    apt-get -qq update && apt-get -qq install -y git unzip \
+    && curl -fsSL https://pecl.php.net/get/apcu-${apcu_version}.tgz -o /tmp/apcu.tgz \
+    && pecl install /tmp/apcu.tgz && docker-php-ext-enable apcu && rm /tmp/apcu.tgz
 
 ARG project_dir
 WORKDIR ${project_dir}
