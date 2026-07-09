@@ -2,6 +2,10 @@ networks:
     web_dev:
         external: true
 
+# Seul var/data est persistant (uploads, articles…)
+volumes:
+    app_var_data:
+
 services:
     app:
         image: ignf/cartes.gouv.fr:latest
@@ -21,6 +25,14 @@ services:
             - https_proxy=${HTTPS_PROXY}
             - APP_ENV=prod
             - APP_ROOT_URL=https://cartesgouvfr-prod.docker.localhost
+            - FRANKENPHP_NUM_THREADS=4
+        # Rootfs read-only : cache Symfony embarqué dans l'image, cache.app en APCu,
+        # logs sur stdout/stderr — seuls /tmp et var/data ont besoin d'être inscriptibles
+        read_only: true
+        tmpfs:
+            - /tmp
+        volumes:
+            - app_var_data:/opt/cartesgouvfr-site/var/data
         ports:
             - "9090:8000"
         networks:

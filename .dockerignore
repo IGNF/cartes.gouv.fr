@@ -1,3 +1,11 @@
+# Secrets
+/.env.local
+/.env.*.local
+/.env.local.php
+
+# NE PAS ignorer : .git (vite.config.ts lit git describe/rev-parse au build),
+# .env (défauts non secrets requis au build), tsconfig*.json (lus par Vite/esbuild)
+
 /.vscode
 /.history
 /.github
@@ -6,6 +14,27 @@
 /vendor/
 /node_modules/
 /docs
-/cypress**
+/cypress
+/cypress.config.*
+
+# Outillage dev / IDE / IA — inutile dans le contexte de build
+/.claude
+/.serena
+/.superpowers
+/.playwright-mcp
+/.devcontainer
+/.idea
+/.eslint-rules
+/.php-cs-fixer.cache
+/.php-cs-fixer.dist.php
+/.twig-cs-fixer.cache
+/.trivyignore.yaml
+/phpmd.xml
+/phpstan.neon
+/.prettierignore
+/.prettierrc
+/README.md
+/CONTRIBUTING.md
+/tests
 
 compose*.yml

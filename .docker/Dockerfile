@@ -1,151 +1,157 @@
-# syntax=docker/dockerfile:1-labs
+# syntax=docker/dockerfile:1-labs@sha256:7d49dad25a050e14338ba7028b0460243f9d911dedc160a8fe20c34738fef3af
+#----------------------------------------------------------------------
+# Images épinglées par digest (tag + digest maintenus par Renovate,
+# sauf php et frankenphp qui sont couplés entre eux)
+#----------------------------------------------------------------------
+ARG project_dir=/opt/cartesgouvfr-site
+
+ARG composer_image=docker.io/composer/composer:2-bin@sha256:cf313f79f608ebab80220796327f341ae663b9fa8065c73c6148c9b67f0b13b3
+# aligné sur .nvmrc
+ARG node_alpine_image=docker.io/library/node:24.14.0-alpine@sha256:7fddd9ddeae8196abf4a3ef2de34e11f7b1a722119f91f28ddf1e99dcafdf114
+# binaire node glibc pour la base Ubuntu
+ARG node_slim_image=docker.io/library/node:24.14.0-slim@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8
+ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90
+
+# php_version pilote le tag de l'image php (stage deps_php) et le dépôt deb ;
+# couplé à frankenphp_version (bump PHP = changer les deux)
+ARG php_version=8.2
+ARG frankenphp_version=1.12.4+php82-1
+
+# Stages alias : COPY --from n'interpole pas les ARG, contrairement à FROM
+FROM ${composer_image} AS composer_bin
+FROM ${node_slim_image} AS node_dist
+
 #----------------------------------------------------------------------
 # Installer les dépendances PHP dans une couche dédiée
 #----------------------------------------------------------------------
-ARG project_dir=/opt/cartesgouvfr-site
-ARG registry=docker.io
-ARG php_version=8.2
-FROM ${registry}/library/php:${php_version}-cli AS deps_php
-COPY --from=composer/composer:2-bin /composer /usr/bin/composer
-RUN apt-get -qq update && apt-get -qq install -y git unzip
+FROM docker.io/library/php:${php_version}-cli@sha256:90db578653480744d7137d42e26055bc12c75099eab0cbb38bc8da79a94b1443 AS deps_php
+COPY --from=composer_bin /composer /usr/bin/composer
+# apcu (https://pecl.php.net/package/APCu) : requis pour booter le kernel prod (cache.system en APCu) via bin/console ;
+# tarball via curl car le client PEAR ne sait pas traverser le proxy
+ARG apcu_version=5.1.28
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get -qq update && apt-get -qq install -y git unzip \
+    && curl -fsSL https://pecl.php.net/get/apcu-${apcu_version}.tgz -o /tmp/apcu.tgz \
+    && pecl install /tmp/apcu.tgz && docker-php-ext-enable apcu && rm /tmp/apcu.tgz
 
 ARG project_dir
-RUN mkdir -p ${project_dir}
 WORKDIR ${project_dir}
+ENV APP_ENV=prod \
+    COMPOSER_CACHE_DIR=/var/cache/composer
+
+# Couche dépendances composer mise en cache grâce aux fichiers composer.json, composer.lock et symfony.lock
+COPY composer.json composer.lock symfony.lock ./
+RUN --mount=type=cache,target=/var/cache/composer \
+    composer install --prefer-dist --no-dev --no-scripts --no-autoloader --no-progress
+
+# Copie du reste du projet pour générer l'autoloader et installer les assets
 COPY . .
-ENV APP_ENV=prod
-RUN APP_ENV=prod composer install --prefer-dist --no-dev --no-cache --optimize-autoloader --no-progress \
-    && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear \
+RUN composer dump-autoload --no-dev --optimize \
     && php bin/console assets:install \
     && composer symfony-routing-dump
 
 #----------------------------------------------------------------------
 # Installer les dépendances JavaScript/nodejs dans une couche dédiée
 #----------------------------------------------------------------------
-FROM ${registry}/library/node:24-alpine AS deps_nodejs_build
+FROM ${node_alpine_image} AS deps_nodejs_build
 ARG project_dir
-RUN mkdir -p ${project_dir}
 WORKDIR ${project_dir}
 
 RUN apk add --no-cache git
 
-COPY --from=deps_php ${project_dir} .
-RUN npm ci \
-    && npm run build \
-    && npm cache clean --force
+# Couche dépendances mise en cache grâce aux fichiers package.json et package-lock.json
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci
 
-FROM ${registry}/library/node:24-alpine AS deps_nodejs_runtime
+# Copie du reste du projet pour générer le build Vite (public/build)
+COPY .env vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
+COPY --exclude=index --exclude=logs --exclude=FETCH_HEAD --exclude=ORIG_HEAD .git .git
+COPY assets assets
+
+# Récupération des artefacts PHP consommés par le build Vite (cf. assets/modules/Routing.ts)
+COPY --from=deps_php ${project_dir}/vendor/friendsofsymfony/jsrouting-bundle/Resources/js vendor/friendsofsymfony/jsrouting-bundle/Resources/js
+COPY --from=deps_php ${project_dir}/var/cache/fosRoutes.json var/cache/fosRoutes.json
+RUN npm run build
+
+#----------------------------------------------------------------------
+# node_modules de production (runtime du scraper), indépendant des autres stages
+#----------------------------------------------------------------------
+FROM ${node_alpine_image} AS deps_nodejs_runtime
 ARG project_dir
-RUN mkdir -p ${project_dir}
 WORKDIR ${project_dir}
 
-COPY --from=deps_php ${project_dir} .
-RUN npm ci --omit=dev --ignore-scripts
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --ignore-scripts
 
 #----------------------------------------------------------------------
 # Créer l'image de base de l'application
 #----------------------------------------------------------------------
-FROM ${registry}/library/ubuntu:24.04 AS base_app
+FROM ${ubuntu_image} AS base_app
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=fr_FR.UTF-8
 
-#----------------------------------------------------------------------
-# Configurer "fr_FR.UTF-8" comme locale
-# en savoir plus : https://stackoverflow.com/a/41797247
-#----------------------------------------------------------------------
-RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends -y locales \
-    && sed -i -e 's/# en_US.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen \
-    && dpkg-reconfigure --frontend=noninteractive locales \
-    && update-locale LANG=fr_FR.UTF-8 \
-    && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Conserver les archives apt pour les mounts de cache BuildKit
+RUN rm -f /etc/apt/apt.conf.d/docker-clean \
+    && echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 #----------------------------------------------------------------------
-# Installer les outils communs
+# Locale fr_FR.UTF-8 (https://stackoverflow.com/a/41797247) + outils communs
 #----------------------------------------------------------------------
-RUN apt-get -qq update \
-    && apt-get -qq install --no-install-recommends -y \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get -qq update && apt-get -qq install --no-install-recommends -y \
+    locales \
+    ca-certificates \
     unzip zip \
     curl wget \
     rclone \
-    && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && sed -i -e 's/# en_US.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen \
+    && dpkg-reconfigure --frontend=noninteractive locales \
+    && update-locale LANG=fr_FR.UTF-8
 
 #------------------------------------------------------------------------
-# Configurer le dépôt APT de PHP : https://packages.sury.org/php/
+# Installer FrankenPHP et PHP (ZTS) depuis le dépôt deb officiel
+# en savoir plus : https://frankenphp.dev/ (section "deb Packages")
+# Le binaire frankenphp embarque déjà : curl, dom, mbstring, opcache,
+# openssl, simplexml, sodium, xml, zlib, etc.
 #------------------------------------------------------------------------
-RUN apt-get -qq update \
-    && apt-get -qq install --no-install-recommends -y gnupg2 software-properties-common \
-    && add-apt-repository -y ppa:ondrej/php \
-    && apt-get remove -y software-properties-common \
-    && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-#----------------------------------------------------------------------
-# Installer Apache, PHP et ses extensions
-#----------------------------------------------------------------------
-ARG php_version=8.2
-RUN apt-get -qq update \
+ARG php_version
+ARG frankenphp_version
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    pkg_version=$(echo "${php_version}" | tr -d .) \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL "https://pkg.henderkes.com/api/packages/${pkg_version}/debian/repository.key" -o "/etc/apt/keyrings/static-php${pkg_version}.asc" \
+    && echo "deb [signed-by=/etc/apt/keyrings/static-php${pkg_version}.asc] https://pkg.henderkes.com/api/packages/${pkg_version}/debian php-zts main" > "/etc/apt/sources.list.d/static-php${pkg_version}.list" \
+    && apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
-    apache2 php${php_version} libapache2-mod-php${php_version} \
-    php${php_version}-cli \
-    php${php_version}-opcache \
-    php${php_version}-xml \
-    php${php_version}-zip \
-    php${php_version}-curl \
-    php${php_version}-intl \
-    php${php_version}-xsl \
-    php${php_version}-sqlite3 \
-    ### APCu
-    php${php_version}-dev \
-    php-pear \
-    gcc make \
-    && pecl install apcu \
-    && echo "extension=apcu.so" > /etc/php/${php_version}/mods-available/apcu.ini \
-    && ln -s /etc/php/${php_version}/mods-available/apcu.ini /etc/php/${php_version}/apache2/conf.d/20-apcu.ini \
-    && ln -s /etc/php/${php_version}/mods-available/apcu.ini /etc/php/${php_version}/cli/conf.d/20-apcu.ini \
-    && apt-get -qq purge -y php-pear php${php_version}-dev gcc make \
-    ### APCu
-    && apt-get -qq autoremove -y \
-    && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-#------------------------------------------------------------------------
-# Ajout script helper pour démarrer apache
-# (cf. https://github.com/docker-library/php)
-#------------------------------------------------------------------------
-COPY .docker/apache2-foreground /usr/local/bin/apache2-foreground
-RUN chmod +x /usr/local/bin/apache2-foreground
-
-#------------------------------------------------------------------------
-# Créer les dossiers pour apache2
-# (cf. https://github.com/docker-library/php)
-#------------------------------------------------------------------------
-RUN mkdir -p /var/run/apache2 && chown -R www-data:www-data /var/run/apache2 \
-    && mkdir -p /var/lock/apache2 && chown -R www-data:www-data /var/lock/apache2 \
-    && mkdir -p /var/log/apache2 && chown -R www-data:www-data /var/log/apache2
-
-#------------------------------------------------------------------------
-# Rediriger les logs vers stdout / stderr
-# (cf. https://github.com/docker-library/php)
-#------------------------------------------------------------------------
-RUN ln -sfT /dev/stderr "/var/log/apache2/error.log" \
-    && ln -sfT /dev/stdout "/var/log/apache2/access.log" \
-    && ln -sfT /dev/stdout "/var/log/apache2/other_vhosts_access.log" \
-    && chown www-data:www-data /var/log/apache2/*.log
+    frankenphp=${frankenphp_version} \
+    php-zts-cli \
+    php-zts-apcu \
+    php-zts-intl \
+    php-zts-sqlite3 \
+    php-zts-xsl \
+    php-zts-zip \
+    && ln -s /usr/bin/php-zts /usr/local/bin/php \
+    && rm -rf /var/lib/frankenphp/.local/share/caddy \
+    && rm -f /usr/local/share/ca-certificates/*Caddy* \
+    && update-ca-certificates --fresh
 
 #----------------------------------------------------------------------
-# Configurer PHP
+# Configurer PHP et FrankenPHP (Caddy)
+# /etc/php-zts/conf.d est scanné par le CLI (php-zts) et par frankenphp
 #----------------------------------------------------------------------
-COPY .docker/php.ini /etc/php/${php_version}/apache2/conf.d/99-app.ini
-COPY .docker/php.ini /etc/php/${php_version}/cli/conf.d/99-app.ini
+COPY .docker/php.ini /etc/php-zts/conf.d/99-app.ini
+COPY .docker/Caddyfile /etc/frankenphp/Caddyfile
 
 #----------------------------------------------------------------------
-# Configurer apache
+# Répertoires d'état de Caddy sous /tmp : compatibles avec un rootfs
+# read-only (le chart k8s monte /tmp en emptyDir), créés au démarrage
 #----------------------------------------------------------------------
-COPY .docker/apache-ports.conf /etc/apache2/ports.conf
-COPY .docker/apache-security.conf /etc/apache2/conf-enabled/security.conf
-COPY .docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
-
-RUN a2enmod rewrite remoteip
-RUN a2disconf other-vhosts-access-log
+ENV XDG_CONFIG_HOME=/tmp/caddy-config \
+    XDG_DATA_HOME=/tmp/caddy-data
 
 #----------------------------------------------------------------------
 # Installer l'application pour production
@@ -153,69 +159,64 @@ RUN a2disconf other-vhosts-access-log
 FROM base_app AS prod
 ARG project_dir
 WORKDIR ${project_dir}
+
+# Copies du moins au plus volatile ; --link rebase les couches indépendamment
+# de base_app. nodejs requis au runtime pour bin/articles-scraper.mjs (cron)
+COPY --link --from=node_dist /usr/local/bin/node /usr/local/bin/node
+COPY --link --from=deps_nodejs_runtime ${project_dir}/node_modules node_modules
+COPY --link --from=deps_php ${project_dir}/vendor vendor
+COPY --link --from=deps_php ${project_dir}/public/bundles public/bundles
+COPY --link --from=deps_nodejs_build ${project_dir}/public/build public/build
 COPY --exclude=.git --exclude=var . .
-COPY --from=deps_php ${project_dir}/vendor vendor
-COPY --from=deps_php ${project_dir}/public/bundles public/bundles
-COPY --from=deps_nodejs_build ${project_dir}/public/build public/build
-COPY --from=deps_nodejs_runtime ${project_dir}/node_modules node_modules
-COPY --from=node:24-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=node:24-slim /usr/local/bin/node /usr/local/bin/node
-
-RUN mkdir -p ${project_dir}/var \
-    && chown -R www-data:www-data ${project_dir}/var/
-
-USER www-data
-
-VOLUME ${project_dir}/var
 
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
 
-# Vérifier que le fichier de cache de vite est généré (par le cache:clear dans application.sh), sinon le site n'a pas de style
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD test -s var/cache/prod/pentatrion_vite.cache.php || exit 1
+# L'image étant immutable, inutile de revalider les timestamps des fichiers PHP à chaque requête
+RUN echo "opcache.validate_timestamps=0" > /etc/php-zts/conf.d/99-opcache-prod.ini
+
+# Pré-générer le cache Symfony dans l'image, APRÈS la copie de public/build
+RUN mkdir -p var/data && chown -R www-data:www-data var
+USER www-data
+RUN php bin/console cache:clear
+
+# Rootfs read-only en k8s : seuls var/data (PVC), var/cache et var/log
+# (emptyDir) et /tmp doivent être inscriptibles ; l'entrypoint régénère
+# le cache quand le montage masque celui de l'image
+
+# --noproxy : ne jamais passer par un proxy sortant (HTTP_PROXY) pour joindre localhost
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD curl -fsS --noproxy "*" http://localhost:8000/tableau-de-bord/health || exit 1
 
 EXPOSE 8000
-CMD [ "/bin/bash", ".docker/application.sh" ]
+CMD [ "/bin/bash", ".docker/entrypoint.sh" ]
 
 #----------------------------------------------------------------------
 # Installer l'application pour développement
 #----------------------------------------------------------------------
 FROM base_app AS dev
 
-COPY --from=composer /usr/bin/composer /usr/bin/composer
+COPY --from=composer_bin /composer /usr/bin/composer
 
 ARG project_dir
 WORKDIR ${project_dir}
 VOLUME ${project_dir}
 
-RUN chmod -R 777 /var/run/apache2 /var/log/apache2
+# Installer xdebug (le paquet active zend_extension via 15-xdebug.ini)
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get -qq update && apt-get -qq install --no-install-recommends -y \
+    php-zts-xdebug \
+    git
 
-# Installer xdebug
-ARG php_version
-RUN apt-get -qq update && apt-get -qq install -y \
-    php${php_version}-dev \
-    php-pear \
-    php-xml \
-    zlib1g-dev \
-    git \
-    && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-COPY .docker/php-xdebug.ini /etc/php/${php_version}/apache2/conf.d/20-xdebug.ini
-RUN pear config-set php_ini /etc/php/${php_version}/cli/conf.d/99-app.ini \
-    && pecl install xdebug \
-    && echo "\nzend_extension=$(find /usr/lib/php/ -name xdebug.so)" >> /etc/php/${php_version}/apache2/conf.d/20-xdebug.ini
-
-COPY .docker/php.ini /etc/php/${php_version}/apache2/conf.d/99-app.ini
-COPY .docker/php.ini /etc/php/${php_version}/cli/conf.d/99-app.ini
+COPY .docker/php-xdebug.ini /etc/php-zts/conf.d/99-xdebug-app.ini
 
 #----------------------------------------------------------------------
-# Installation de nodejs depuis l'image officielle
-# https://github.com/nodejs/docker-node/blob/main/18/bullseye/Dockerfile
+# Installation de nodejs depuis l'image officielle (glibc requis, cf. prod)
 # https://stackoverflow.com/a/63108753
 #----------------------------------------------------------------------
-COPY --from=node:24-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=node:24-slim /usr/local/bin/node /usr/local/bin/node
+COPY --from=node_dist /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node_dist /usr/local/bin/node /usr/local/bin/node
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && npm i -g npm yarn pnpm
 
@@ -225,4 +226,4 @@ ENV COMPOSER_HOME="${project_dir}/var/composer"
 RUN mkdir -p "$COMPOSER_HOME"
 
 EXPOSE 8000
-CMD [ "/bin/bash", "apache2-foreground" ]
+CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile" ]
