@@ -85,11 +85,57 @@
 	@health path_regexp ^/tableau-de-bord/health/?$
 	log_skip @health
 
-	# Access log en texte brut (une ligne par requête, cf. logs runtime plus haut)
+	# Access log en texte brut ; filter supprime les champs et headers sans intérêt
+	# (blocklist : un nouveau header non listé réapparaîtra dans les logs).
+	# Conservés volontairement : Referer, User-Agent, X-Forwarded-For (parité avec
+	# l'ex-LogFormat Apache), X-Request-Id, host/method/uri/proto, status, size, duration.
 	log {
 		output stdout
-		format console {
-			level_format upper
+		format filter {
+			wrap console {
+				level_format upper
+			}
+			fields {
+				# champs hors headers
+				request>remote_port delete
+				bytes_read delete
+				user_id delete
+				resp_headers delete
+				# credentials (déjà REDACTED par Caddy, supprimés entièrement)
+				request>headers>Cookie delete
+				request>headers>Authorization delete
+				# négociation / cache
+				request>headers>Accept delete
+				request>headers>Accept-Encoding delete
+				request>headers>Accept-Language delete
+				request>headers>Cache-Control delete
+				request>headers>Pragma delete
+				request>headers>If-None-Match delete
+				request>headers>If-Modified-Since delete
+				request>headers>Connection delete
+				request>headers>Keep-Alive delete
+				request>headers>Priority delete
+				request>headers>Upgrade-Insecure-Requests delete
+				# fetch metadata / client hints / privacy
+				request>headers>Sec-Fetch-Site delete
+				request>headers>Sec-Fetch-Mode delete
+				request>headers>Sec-Fetch-Dest delete
+				request>headers>Sec-Fetch-User delete
+				request>headers>Sec-Ch-Ua delete
+				request>headers>Sec-Ch-Ua-Mobile delete
+				request>headers>Sec-Ch-Ua-Platform delete
+				request>headers>Sec-Gpc delete
+				request>headers>Dnt delete
+				# ajoutés par l'ingress (redondants : XFF suffit)
+				request>headers>X-Real-Ip delete
+				request>headers>X-Scheme delete
+				request>headers>X-Forwarded-Proto delete
+				request>headers>X-Forwarded-Host delete
+				request>headers>X-Forwarded-Port delete
+				request>headers>X-Forwarded-Scheme delete
+				# toujours "XMLHttpRequest" (injecté par jsonFetch)
+				request>headers>X-Requested-With delete
+			}
 		}
 	}
 
