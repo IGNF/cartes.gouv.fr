@@ -47,7 +47,7 @@ export default function Stats() {
     const [entityTypeKey, setEntityTypeKey] = useState(() => getActiveEntityKeys(scope)[0]);
     const [resolvedParams, setResolvedParams] = useState<Record<string, string>>({});
 
-    const [startDate, setStartDate] = useState<Date | undefined>(() => initDate(3));
+    const [startDate, setStartDate] = useState<Date | undefined>(() => initDate(1));
     const [endDate, setEndDate] = useState<Date | undefined>(() => initDate());
 
     useEffect(() => {
@@ -132,7 +132,7 @@ export default function Stats() {
                     <p className={fr.cx("fr-m-0")}>Aucune statistique disponible pour ce périmètre.</p>
                 ) : (
                     <>
-                        <p>Sélectionnez un de vos entrepôts pour accéder à des statistiques de consommation détaillées.</p>
+                        {scope === "datastore" && <p>Sélectionnez un de vos entrepôts pour accéder à des statistiques de consommation détaillées.</p>}
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             {scopeParam && (
                                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
