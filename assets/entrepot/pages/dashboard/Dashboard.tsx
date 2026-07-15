@@ -76,7 +76,7 @@ export default function Dashboard() {
                         title={"Mes statistiques de consommation"}
                         imageUrl={statsSvgUrl}
                         orientation="vertical"
-                        desc="Visualiser mes statistiques de consultation et de consommation"
+                        desc="Consulter les consommations de mes entrepôts et de mon activité personnelle"
                         classes={{
                             img: fr.cx("fr-mb-0"),
                         }}
