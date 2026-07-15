@@ -1,6 +1,5 @@
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { fr } from "@codegouvfr/react-dsfr";
-import DataVisualization from "@codegouvfr/react-dsfr/picto/DataVisualization";
 import System from "@codegouvfr/react-dsfr/picto/System";
 import Tile from "@codegouvfr/react-dsfr/Tile";
 
@@ -16,6 +15,7 @@ import accountSvgUrl from "@/img/pictograms/account.svg?no-inline";
 import contributorSvgUrl from "@/img/pictograms/contributor.svg?no-inline";
 import keyManagerSvgUrl from "@/img/pictograms/key-manager.svg?no-inline";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg?no-inline";
+import statsSvgUrl from "@/img/pictograms/stats.svg?no-inline";
 
 export default function Dashboard() {
     const { data: user } = useUserQuery();
@@ -64,12 +64,19 @@ export default function Dashboard() {
                         imageUrl={keyManagerSvgUrl}
                         title="Mes clés d’accès"
                         desc="Créer et consulter mes accès aux services restreints"
-                        start={
-                            <Badge className={fr.cx("fr-badge--brown-opera")} noIcon={true} as="span" small={true}>
-                                Clés d’accès
-                            </Badge>
-                        }
                         orientation="vertical"
+                        classes={{
+                            img: fr.cx("fr-mb-0"),
+                        }}
+                    />
+                </div>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Tile
+                        linkProps={routes.stats_scope_selection().link}
+                        title={"Mes statistiques de consommation"}
+                        imageUrl={statsSvgUrl}
+                        orientation="vertical"
+                        desc="Visualiser mes statistiques de consultation et de consommation"
                         classes={{
                             img: fr.cx("fr-mb-0"),
                         }}
@@ -88,24 +95,6 @@ export default function Dashboard() {
                             </Badge>
                         }
                         orientation="vertical"
-                        classes={{
-                            img: fr.cx("fr-mb-0"),
-                        }}
-                    />
-                </div>
-                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                    <Tile
-                        linkProps={routes.stats_scope_selection().link}
-                        title={"Mes statistiques de consommation"}
-                        pictogram={<DataVisualization />}
-                        orientation="vertical"
-                        desc="Visualiser mes statistiques de consultation et de consommation"
-                        start={
-                            <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
-                                <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} />
-                                Publier
-                            </Badge>
-                        }
                         classes={{
                             img: fr.cx("fr-mb-0"),
                         }}
