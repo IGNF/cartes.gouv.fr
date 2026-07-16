@@ -93,6 +93,7 @@ export default function MetadataForm({
 
     return (
         <>
+            {/* Debug */}
             <Button
                 onClick={() => {
                     reset({
