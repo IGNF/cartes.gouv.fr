@@ -37,11 +37,10 @@ const getByDatasheetName = (datastoreId: string, datasheetName: string, otherOpt
     });
 };
 
-const getFileContent = async (datastoreId: string, metadataId: string) => {
+const getFileContent = (datastoreId: string, metadataId: string) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_get_file_content", { datastoreId, metadataId });
 
-    const response = await fetch(url);
-    return await response.text();
+    return apiFetch(url);
 };
 
 const checkFileIdentifierAvailability = async (datastoreId: string, fileIdentifier: string, signal?: AbortSignal) => {

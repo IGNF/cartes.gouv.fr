@@ -101,6 +101,33 @@ export default function DescriptionTab({ datastoreId, datasheetName }: Descripti
                     closable={false}
                 />
             )}
+            {/* Debug */}
+            <span>Debug, à supprimer</span>
+            <Button
+                className={fr.cx("fr-mr-2v")}
+                onClick={() => {
+                    if (metadataQuery.data?._id !== undefined) {
+                        // Onglet ouvert de façon synchrone (sinon bloqué par l'anti-popup), rempli après le fetch
+                        const tab = window.open("about:blank", "_blank");
+                        api.metadata
+                            .getFileContent(datastoreId, metadataQuery.data._id)
+                            .then(async (content) => {
+                                const text = await content.text();
+                                const url = URL.createObjectURL(new Blob([text], { type: "application/xml" }));
+                                if (tab) {
+                                    tab.location.href = url;
+                                }
+                                setTimeout(() => URL.revokeObjectURL(url), 60000);
+                            })
+                            .catch((err) => {
+                                tab?.close();
+                                console.error("Erreur lors de la récupération du contenu XML :", err);
+                            });
+                    }
+                }}
+            >
+                Voir XML publié
+            </Button>
             <MetadataForm
                 mode="edit"
                 defaultValues={editDefaultValues}
