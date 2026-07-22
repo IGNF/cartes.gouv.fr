@@ -6,10 +6,13 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
+use App\Dto\Datasheet\DatasheetMetadataDTO;
+use App\Dto\Datasheet\LanguageDTO;
+use App\Dto\Datasheet\ProducerDTO;
+use App\Dto\Datasheet\TerritoryDTO;
 use App\Entity\CswMetadata\CswCapabilitiesFile;
 use App\Entity\CswMetadata\CswDocument;
 use App\Entity\CswMetadata\CswHierarchyLevel;
-use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Entity\CswMetadata\CswStyleFile;
@@ -93,6 +96,7 @@ class CartesMetadataApiService
         $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $datasheetName);
         $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
         $cswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $datasheetName);
+        $cswMetadata->revisionDate = (new \DateTimeImmutable())->format('Y-m-d');
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -114,6 +118,7 @@ class CartesMetadataApiService
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
+        $cswMetadata->revisionDate = (new \DateTimeImmutable())->format('Y-m-d');
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -130,13 +135,36 @@ class CartesMetadataApiService
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->documents = $this->getDatasheetDocuments($datastoreId, $datasheetName);
+        $cswMetadata->revisionDate = (new \DateTimeImmutable())->format('Y-m-d');
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
     }
 
     /**
-     * Crée ou met à jour la métadonnée liée à la fiche de données.
+     * Crée ou met à jour la métadonnée depuis le DTO du formulaire fiche de données.
+     *
+     * @return array<mixed> apiMetadata enrichi avec la clé csw_metadata
+     */
+    public function createOrUpdateFromDto(string $datastoreId, string $datasheetName, DatasheetMetadataDTO $dto): array
+    {
+        $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
+
+        if (null === $apiMetadata) {
+            $oldCswMetadata = null;
+        } else {
+            $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
+            $oldCswMetadata = $this->cswMetadataHelper->fromXml($oldMetadataFileXml);
+        }
+
+        $newCswMetadata = $this->getNewCswMetadataFromDto($datastoreId, $datasheetName, $oldCswMetadata, $dto);
+
+        // La publication est gérée explicitement par l'utilisateur ; on ne publie pas automatiquement.
+        return $this->persistCswMetadata($datastoreId, $datasheetName, $apiMetadata, $oldCswMetadata, $newCswMetadata, publishIfUnpublished: false);
+    }
+
+    /**
+     * Crée ou met à jour la métadonnée liée à la fiche de données (chemin legacy via formData array).
      *
      * @param array<mixed> $formData
      */
@@ -145,91 +173,70 @@ class CartesMetadataApiService
         $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
 
         if (null === $apiMetadata) {
-            // nouvelle métadonnée à créer
-
             if (null === $formData) { // n'est pas censé arriver
                 throw new AppException('formData doit être non null si création de la métadonnée', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-
-            return $this->createMetadata($datastoreId, $datasheetName, $formData);
+            $oldCswMetadata = null;
+        } else {
+            $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
+            $oldCswMetadata = $this->cswMetadataHelper->fromXml($oldMetadataFileXml);
         }
-        // une métadonnée existe déjà qu'on va mettre à jour
-
-        return $this->updateMetadata($datastoreId, $datasheetName, $apiMetadata, $formData);
-    }
-
-    /**
-     * @param array<mixed> $formData
-     */
-    private function createMetadata(string $datastoreId, string $datasheetName, array $formData): array
-    {
-        $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
-
-        $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, null, $formData);
-
-        // Ajout de l'etiquette si elle n'existe pas deja
-        $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
-        if (!is_null($thumbnailUrl)) {
-            $newCswMetadata->thumbnailUrl = $thumbnailUrl;
-        }
-
-        $newMetadataFilePath = $this->cswMetadataHelper->saveToFile($newCswMetadata);
-
-        $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
-        $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], [
-            CommonTags::DATASHEET_NAME => $datasheetName,
-        ])->array();
-
-        $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
-
-        $newApiMetadata['csw_metadata'] = $newCswMetadata;
-
-        return $newApiMetadata;
-    }
-
-    /**
-     * @param array<mixed> $oldApiMetadata
-     * @param array<mixed> $formData
-     */
-    private function updateMetadata(string $datastoreId, string $datasheetName, array $oldApiMetadata, ?array $formData = null): array
-    {
-        $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
-
-        $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $oldApiMetadata['_id'])->text();
-        $oldCswMetadata = $this->cswMetadataHelper->fromXml($oldMetadataFileXml);
 
         $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $oldCswMetadata, $formData);
 
-        // Mise a jour de l'etiquette
-        $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
-        if ($newCswMetadata->thumbnailUrl !== $thumbnailUrl) {
-            $newCswMetadata->thumbnailUrl = $thumbnailUrl;
-        }
-
-        $newMetadataFilePath = $this->cswMetadataHelper->saveToFile($newCswMetadata);
-
-        // suppression et recréation de métadonnées si changement de file_identifier
-        if ($oldCswMetadata->fileIdentifier !== $newCswMetadata->fileIdentifier) {
-            $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
-            $this->metadataApiService->delete($datastoreId, $oldApiMetadata['_id'])->await();
-
-            $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
-        } else {
-            $newApiMetadata = $this->metadataApiService->replaceFile($datastoreId, $oldApiMetadata['_id'], $newMetadataFilePath);
-        }
-        $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], $oldApiMetadata['tags'])->array();
-
-        if (0 === count($newApiMetadata['endpoints'])) { // la métadonnée n'est pas déjà publiée
-            $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
-        }
-
-        $newApiMetadata['csw_metadata'] = $newCswMetadata;
-
-        return $newApiMetadata;
+        // Chemin services (updateLayers, etc.) : la publication automatique est conservée.
+        return $this->persistCswMetadata($datastoreId, $datasheetName, $apiMetadata, $oldCswMetadata, $newCswMetadata, publishIfUnpublished: true);
     }
 
     /**
-     * Construit l'objet metadata du catalogue pour une création ou modification. Si création, $formData est obligatoire. Si modification, $oldCswMetadata est obligatoire mais $formData est optionnel.
+     * Construit CswMetadata depuis le DTO de formulaire validé (champ-à-champ).
+     */
+    private function getNewCswMetadataFromDto(string $datastoreId, string $datasheetName, ?CswMetadata $oldCswMetadata, DatasheetMetadataDTO $dto): CswMetadata
+    {
+        $newCswMetadata = null === $oldCswMetadata ? new CswMetadata() : clone $oldCswMetadata;
+
+        $today = (new \DateTimeImmutable())->format('Y-m-d');
+
+        $newCswMetadata->fileIdentifier = $dto->file_identifier;
+        $newCswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom($dto->hierarchy_level) ?? CswHierarchyLevel::Dataset;
+        $newCswMetadata->language = null !== $dto->language
+            ? new LanguageDTO($dto->language->code, $dto->language->language)
+            : new LanguageDTO('fre', 'français');
+        $newCswMetadata->charset = $dto->charset;
+        $newCswMetadata->name = $dto->name;
+        $newCswMetadata->description = $dto->description;
+        $newCswMetadata->dateCreation = $dto->date_creation;
+        $newCswMetadata->themes = $dto->themes;
+        $newCswMetadata->keywordsInspire = $dto->keywords_inspire;
+        $newCswMetadata->keywordsAdditional = $dto->keywords_additional;
+        $newCswMetadata->resourceGenealogy = $dto->resource_genealogy;
+        $newCswMetadata->updateFrequency = $dto->update_frequency;
+        $newCswMetadata->producers = $dto->producers;
+        $newCswMetadata->resourceConstraints = $dto->resource_constraints;
+
+        // Territoires : normalisation en TerritoryDTO à partir des données envoyées par le formulaire.
+        // MapRequestPayload désérialise territories[] en tableaux associatifs (pas en TerritoryDTO).
+        $newCswMetadata->territories = array_map(static fn (array $t): TerritoryDTO => new TerritoryDTO(
+            id: (string) ($t['id'] ?? ''),
+            title: (string) ($t['title'] ?? ''),
+            bbox: $t['bbox'] ?? [],
+        ), $dto->territories);
+
+        // Couches / fichiers (vides si aucun service publié, préservés si déjà en place)
+        $newCswMetadata->layers = $this->getMetadataLayers($datastoreId, $datasheetName);
+        $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
+        $newCswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $datasheetName);
+
+        // Dates automatiques
+        $newCswMetadata->publicationDate = null !== $oldCswMetadata ? ($oldCswMetadata->publicationDate ?? $today) : $today; // posée une fois à la création
+        $newCswMetadata->revisionDate = $today; // mise à jour à chaque modification
+
+        return $newCswMetadata;
+    }
+
+    /**
+     * Construit CswMetadata depuis le formData array (chemin legacy CommonDTO).
+     * Conserve la compatibilité jusqu'à la suppression de CommonDTO.
      *
      * @param ?array<mixed> $formData
      */
@@ -241,40 +248,151 @@ class CartesMetadataApiService
 
         $newCswMetadata = null === $oldCswMetadata ? new CswMetadata() : clone $oldCswMetadata;
 
+        $today = (new \DateTimeImmutable())->format('Y-m-d');
         $layers = $this->getMetadataLayers($datastoreId, $datasheetName);
-        $bbox = $this->getBbox($datastoreId, $datasheetName);
 
         if ($formData) {
-            $language = $formData['language'] ?
-                 new CswLanguage($formData['language']['code'], $formData['language']['language'])
-                 : CswLanguage::default();
+            $language = $formData['language']
+                ? new LanguageDTO($formData['language']['code'], $formData['language']['language'])
+                : new LanguageDTO('fre', 'français');
 
             $newCswMetadata->fileIdentifier = $formData['identifier'];
             $newCswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom('' === $formData['hierarchy_level'] ? 'dataset' : $formData['hierarchy_level']);
-
             $newCswMetadata->language = $language;
             $newCswMetadata->charset = $formData['charset'];
-            $newCswMetadata->title = $formData['public_name'];
-            $newCswMetadata->abstract = $formData['description'];
-            $newCswMetadata->creationDate = $formData['creation_date'];
-            $newCswMetadata->topicCategories = $formData['category'] ?? [];
-            $newCswMetadata->inspireKeywords = $formData['keywords'] ?? [];
-            $newCswMetadata->freeKeywords = $formData['free_keywords'] ?? [];
-            $newCswMetadata->contactEmail = $formData['email_contact'];
-            $newCswMetadata->organisationName = $formData['organization'];
-            $newCswMetadata->organisationEmail = $formData['organization_email'];
+            $newCswMetadata->name = $formData['public_name'];
+            $newCswMetadata->description = $formData['description'];
+            $newCswMetadata->dateCreation = $formData['creation_date'];
+            $newCswMetadata->themes = $formData['category'] ?? [];
+            $newCswMetadata->keywordsInspire = $formData['keywords'] ?? [];
+            $newCswMetadata->keywordsAdditional = $formData['free_keywords'] ?? [];
             $newCswMetadata->resourceGenealogy = $formData['resource_genealogy'];
             $newCswMetadata->resolution = $formData['resolution'] ?? null;
-            $newCswMetadata->frequencyCode = $formData['frequency_code'] ?? null;
-            $newCswMetadata->layers = $layers;
-            $newCswMetadata->bbox = $bbox;
-            $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
+            $newCswMetadata->updateFrequency = $formData['frequency_code'] ?? null;
 
-            // Doit-être calculé après la récupération des layers
+            // Encapsule l'unique organisation legacy dans un ProducerDTO pointOfContact
+            $newCswMetadata->producers = [
+                new ProducerDTO(
+                    organization_name: $formData['organization'] ?? '',
+                    organization_email: $formData['organization_email'] ?? '',
+                    role: 'pointOfContact',
+                ),
+            ];
+
+            // Chemin legacy : pas de territoires sélectionnés dans le formulaire, on crée un territoire
+            // synthétique « France » depuis la bbox calculée sur les stored_data.
+            if (empty($newCswMetadata->territories)) {
+                $legacyBbox = $this->getBbox($datastoreId, $datasheetName);
+                if (!empty($legacyBbox)) {
+                    $newCswMetadata->territories = [
+                        new TerritoryDTO(
+                            id: 'FXX',
+                            title: 'France',
+                            bbox: [
+                                $legacyBbox['west'],
+                                $legacyBbox['south'],
+                                $legacyBbox['east'],
+                                $legacyBbox['north'],
+                            ],
+                        ),
+                    ];
+                }
+            }
+
+            $newCswMetadata->layers = $layers;
+            $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
             $newCswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $datasheetName);
+
+            // Dates automatiques
+            $newCswMetadata->publicationDate = null !== $oldCswMetadata ? ($oldCswMetadata->publicationDate ?? $today) : $today;
+            $newCswMetadata->revisionDate = $today;
         }
 
         return $newCswMetadata;
+    }
+
+    /**
+     * Persiste un CswMetadata déjà construit : sauvegarde fichier, add/replaceFile, tags, publication.
+     * Gère également le changement de fileIdentifier (delete + recréation).
+     *
+     * @return array<mixed> apiMetadata enrichi avec la clé csw_metadata
+     */
+    /**
+     * Publie la métadonnée d'une fiche dans le catalogue CSW du datastore.
+     * Utilisé par l'action explicite de l'utilisateur depuis l'interface.
+     */
+    public function publishMetadata(string $datastoreId, string $metadataId): void
+    {
+        $apiMetadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
+        $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
+        $this->metadataApiService->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id'])->await();
+    }
+
+    /**
+     * Dépublie la métadonnée d'une fiche du catalogue CSW du datastore.
+     * Utilisé par l'action explicite de l'utilisateur depuis l'interface.
+     */
+    public function unpublishMetadata(string $datastoreId, string $metadataId): void
+    {
+        $apiMetadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
+        $endpointId = $apiMetadata['endpoints'][0]['_id'] ?? null;
+        if (null !== $endpointId) {
+            $this->metadataApiService->unpublish($datastoreId, $apiMetadata['file_identifier'], $endpointId)->await();
+        }
+    }
+
+    /**
+     * @param array<mixed>|null $oldApiMetadata
+     * @param bool              $publishIfUnpublished Si true, publie la métadonnée si elle n'est pas encore publiée.
+     *                                                Si false, laisse la métadonnée dans son état de publication actuel.
+     *
+     * @return array<mixed>
+     */
+    private function persistCswMetadata(string $datastoreId, string $datasheetName, ?array $oldApiMetadata, ?CswMetadata $oldCswMetadata, CswMetadata $newCswMetadata, bool $publishIfUnpublished = true): array
+    {
+        $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
+
+        // Vignette
+        $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
+        $newCswMetadata->thumbnailUrl = $thumbnailUrl;
+
+        $newMetadataFilePath = $this->cswMetadataHelper->saveToFile($newCswMetadata);
+
+        if (null === $oldApiMetadata) {
+            // Création
+            $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
+            $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ])->array();
+            if ($publishIfUnpublished) {
+                $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            }
+        } elseif ($oldCswMetadata?->fileIdentifier !== $newCswMetadata->fileIdentifier) {
+            // Changement d'identifiant → suppression + recréation
+            $wasPublished = count($oldApiMetadata['endpoints'] ?? []) > 0;
+            if ($wasPublished) {
+                $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            }
+            $this->metadataApiService->delete($datastoreId, $oldApiMetadata['_id'])->await();
+
+            $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
+            $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], $oldApiMetadata['tags'])->array();
+            if ($wasPublished || $publishIfUnpublished) {
+                $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            }
+        } else {
+            // Mise à jour simple
+            $newApiMetadata = $this->metadataApiService->replaceFile($datastoreId, $oldApiMetadata['_id'], $newMetadataFilePath);
+            $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], $oldApiMetadata['tags'])->array();
+
+            if ($publishIfUnpublished && 0 === count($newApiMetadata['endpoints'] ?? [])) {
+                $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            }
+        }
+
+        $newApiMetadata['csw_metadata'] = $newCswMetadata;
+
+        return $newApiMetadata;
     }
 
     /**
@@ -527,6 +645,11 @@ class CartesMetadataApiService
         return $endpointsList[0]['endpoint'];
     }
 
+    /**
+     * Calcule la bbox depuis les stored_data (chemin legacy sans territoires).
+     *
+     * @return array<string,float>
+     */
     private function getBbox(string $datastoreId, string $datasheetName): array
     {
         $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [

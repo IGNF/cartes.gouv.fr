@@ -133,12 +133,20 @@ const datastoreRoutes = {
         },
         () => "/donnees/integration"
     ),
+    datastore_datasheet_create_next: datastoreRoute.extend("/donnees/creer"),
     datastore_datasheet_view: datastoreRoute.extend(
         {
             datasheetName: param.path.string,
             activeTab: param.query.optional.string.default("metadata"),
         },
         (p) => `/donnees/${p.datasheetName}`
+    ),
+    datastore_datasheet_view_next: datastoreRoute.extend(
+        {
+            datasheetName: param.path.string,
+            activeTab: param.query.optional.string.default("description"),
+        },
+        (p) => `/donnees/${p.datasheetName}/next`
     ),
     datastore_stored_data_details: datastoreRoute.extend(
         {
