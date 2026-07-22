@@ -13,6 +13,7 @@ use App\Services\EntrepotApi\UserApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -74,9 +75,10 @@ class UserController extends AbstractController implements ApiControllerInterfac
     }
 
     #[Route('/me/permissions', name: 'permissions', methods: ['GET'])]
-    public function getUserPermissions(): JsonResponse
+    public function getUserPermissions(Request $request): JsonResponse
     {
-        $permissions = $this->userApiService->getMyPermissions()->resolve();
+        $query = $request->query->all();
+        $permissions = $this->userApiService->getMyPermissions($query)->resolve();
 
         return $this->json($permissions);
     }
@@ -87,6 +89,15 @@ class UserController extends AbstractController implements ApiControllerInterfac
         $permission = $this->userApiService->getPermission($permissionId)->array();
 
         return $this->json($permission);
+    }
+
+    #[Route('/me/permissions/{permissionId}/stats', name: 'permission_stats', methods: ['GET'])]
+    public function getPermissionStats(string $permissionId, Request $request): JsonResponse
+    {
+        $query = $request->query->all();
+        $stats = $this->userApiService->getPermissionStats($permissionId, $query)->resolve();
+
+        return $this->json($stats);
     }
 
     #[Route('/add_key', name: 'add_key', methods: ['POST'])]
@@ -184,6 +195,24 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
+    #[Route('/me/keys/{keyId}/stats', name: 'key_stats', methods: ['GET'])]
+    public function getKeyStats(string $keyId, Request $request): JsonResponse
+    {
+        $query = $request->query->all();
+        $stats = $this->userApiService->getKeyStats($keyId, $query)->resolve();
+
+        return $this->json($stats);
+    }
+
+    #[Route('/me/keys/{keyId}/accesses/{accessId}/stats', name: 'key_access_stats', methods: ['GET'])]
+    public function getAccessStats(string $keyId, string $accessId, Request $request): JsonResponse
+    {
+        $query = $request->query->all();
+        $stats = $this->userApiService->getAccessStats($keyId, $accessId, $query)->resolve();
+
+        return $this->json($stats);
+    }
+
     #[Route('/me/add_to_sandbox', name: 'add_to_sandbox', methods: ['PUT'])]
     public function addMemberToSandbox(ServiceAccount $serviceAccount): JsonResponse
     {
@@ -199,6 +228,20 @@ class UserController extends AbstractController implements ApiControllerInterfac
             $this->userApiService->leaveCommunity($communityId)->await();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/me/stats', name: 'me_stats', methods: ['GET'])]
+    public function getMyStats(Request $request): JsonResponse
+    {
+        try {
+            $query = $request->query->all();
+
+            $stats = $this->userApiService->getStats($query)->resolve();
+
+            return $this->json($stats);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }

@@ -1,0 +1,27 @@
+import { fr } from "@codegouvfr/react-dsfr";
+import Tile from "@codegouvfr/react-dsfr/Tile";
+
+import Main from "@/components/Layout/Main";
+import { useTranslation } from "@/i18n";
+import { routes } from "@/router/router";
+import { statsConfig, StatsScope } from "./statsConfig";
+
+export default function StatsIndex() {
+    const { t } = useTranslation("Stats");
+
+    const scopes = (Object.entries(statsConfig) as [StatsScope, (typeof statsConfig)[StatsScope]][]).filter(([, config]) => !config.disabled);
+
+    return (
+        <Main title={t("scope_selection_title")}>
+            <h1>{t("scope_selection_title")}</h1>
+
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
+                {scopes.map(([scope, { label, desc }]) => (
+                    <div className={fr.cx("fr-col-12", "fr-col-md-4")} key={scope}>
+                        <Tile title={label} linkProps={routes.stats_by_scope({ scope }).link} desc={desc} />
+                    </div>
+                ))}
+            </div>
+        </Main>
+    );
+}

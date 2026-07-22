@@ -15,6 +15,7 @@ import accountSvgUrl from "@/img/pictograms/account.svg?no-inline";
 import contributorSvgUrl from "@/img/pictograms/contributor.svg?no-inline";
 import keyManagerSvgUrl from "@/img/pictograms/key-manager.svg?no-inline";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg?no-inline";
+import statsSvgUrl from "@/img/pictograms/stats.svg?no-inline";
 
 export default function Dashboard() {
     const { data: user } = useUserQuery();
@@ -63,12 +64,19 @@ export default function Dashboard() {
                         imageUrl={keyManagerSvgUrl}
                         title="Mes clés d’accès"
                         desc="Créer et consulter mes accès aux services restreints"
-                        start={
-                            <Badge className={fr.cx("fr-badge--brown-opera")} noIcon={true} as="span" small={true}>
-                                Clés d’accès
-                            </Badge>
-                        }
                         orientation="vertical"
+                        classes={{
+                            img: fr.cx("fr-mb-0"),
+                        }}
+                    />
+                </div>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Tile
+                        linkProps={routes.stats_scope_selection().link}
+                        title={"Mes statistiques de consommation"}
+                        imageUrl={statsSvgUrl}
+                        orientation="vertical"
+                        desc="Consulter les consommations de mes entrepôts et de mon activité personnelle"
                         classes={{
                             img: fr.cx("fr-mb-0"),
                         }}

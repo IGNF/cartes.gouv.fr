@@ -51,14 +51,25 @@ final class UserApiService
         return $this->api->requestAll("users/me/keys/$keyId/accesses");
     }
 
-    public function getMyPermissions(): PaginatedPromise
+    /**
+     * @param array<string,mixed> $query
+     */
+    public function getMyPermissions(array $query = []): PaginatedPromise
     {
-        return $this->api->requestAll('users/me/permissions');
+        return $this->api->requestAll('users/me/permissions', $query);
     }
 
     public function getPermission(string $permissionId): ResponsePromise
     {
         return $this->api->get("users/me/permissions/$permissionId");
+    }
+
+    /**
+     * @param array<string,mixed> $query
+     */
+    public function getPermissionStats(string $permissionId, array $query = []): PaginatedPromise
+    {
+        return $this->api->requestAll("users/me/permissions/$permissionId/stats", $query);
     }
 
     /**
@@ -85,6 +96,14 @@ final class UserApiService
     }
 
     /**
+     * @param array<string,mixed> $query
+     */
+    public function getKeyStats(string $keyId, array $query = []): PaginatedPromise
+    {
+        return $this->api->requestAll("users/me/keys/$keyId/stats", $query);
+    }
+
+    /**
      * @param array<mixed> $body
      */
     public function addAccess(string $keyId, array $body): ResponsePromise
@@ -97,8 +116,24 @@ final class UserApiService
         return $this->api->delete("users/me/keys/$keyId/accesses/$accessId");
     }
 
+    /**
+     * @param array<string,mixed> $query
+     */
+    public function getAccessStats(string $keyId, string $accessId, array $query = []): PaginatedPromise
+    {
+        return $this->api->requestAll("users/me/keys/$keyId/accesses/$accessId/stats", $query);
+    }
+
     public function leaveCommunity(string $communityId): ResponsePromise
     {
         return $this->api->delete("users/me/communities/$communityId");
+    }
+
+    /**
+     * @param array<string,mixed> $query
+     */
+    public function getStats(array $query): PaginatedPromise
+    {
+        return $this->api->requestAll('users/me/stats', $query);
     }
 }

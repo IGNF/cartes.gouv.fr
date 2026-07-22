@@ -50,13 +50,27 @@ const DatePicker = (props: DatePickerProps) => {
                             ...datePickerProps.slotProps,
                             field: { ...datePickerProps.slotProps?.field, clearable: true, onClear: () => onChange?.(undefined) },
                         }}
-                        sx={{ width: "100%" }}
+                        sx={{
+                            width: "100%",
+                            ".MuiPickersInputBase-root": {
+                                paddingX: fr.spacing("4v"),
+                                backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+                            },
+                            ".MuiPickersSectionList-root": {
+                                paddingY: fr.spacing("2v"),
+                            },
+                        }}
                         timezone={"UTC"}
-                        value={value}
+                        value={value ?? null}
                         minDate={minDate}
-                        onChange={(v) => {
-                            if (v) onChange?.(v);
-                            else onChange?.(undefined);
+                        onChange={(v, context) => {
+                            // MUI X v8 : ignorer toute valeur que MUI juge invalide (date
+                            // incomplète, hors minDate/maxDate, disableFuture...). Pendant la
+                            // frappe d'une année (ex. 2→0→2→5 pour "2025"), les valeurs
+                            // intermédiaires hors bornes (0002, 0020, 0202) ne sont pas
+                            // propagées ; seule la date finale valide (2025) est remontée.
+                            if (context.validationError !== null && context.validationError !== undefined) return;
+                            onChange?.(v ?? undefined);
                         }}
                     />
                 </LocalizationProvider>
