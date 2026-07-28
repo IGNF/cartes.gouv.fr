@@ -319,11 +319,22 @@ class UploadIntegrationWorkflow
             'proc_int_id' => $processingExec['_id'],
             CommonTags::DATASHEET_NAME => $upload['tags'][CommonTags::DATASHEET_NAME],
         ];
-        if (isset($upload['tags'][CommonTags::PRODUCER])) {
-            $tags[CommonTags::PRODUCER] = $upload['tags'][CommonTags::PRODUCER];
-        }
-        if (isset($upload['tags'][CommonTags::PRODUCTION_YEAR])) {
-            $tags[CommonTags::PRODUCTION_YEAR] = $upload['tags'][CommonTags::PRODUCTION_YEAR];
+        // tags métier recopiés de la livraison vers la donnée stockée
+        $forwardedTags = [
+            CommonTags::PRODUCER,
+            CommonTags::PRODUCER_SHORT,
+            CommonTags::PRODUCTION_YEAR,
+            CommonTags::PRODUCTION_DATE,
+            CommonTags::THEMES,
+            CommonTags::ZONE,
+            UploadTags::OPEN_DOWNLOAD,
+            UploadTags::OPEN_EXTRACTION,
+            UploadTags::EXTRACTION_PUBLIC,
+        ];
+        foreach ($forwardedTags as $tagName) {
+            if (isset($upload['tags'][$tagName])) {
+                $tags[$tagName] = $upload['tags'][$tagName];
+            }
         }
         $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], $tags)->await();
 
