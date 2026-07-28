@@ -113,18 +113,18 @@ export default function DatasetAddForm({ datastoreId, datasheetName }: DatasetAd
         setValue("data_upload_path", "");
 
         const file = fileInputRef.current?.files?.[0];
-        if (!validateDataFile(file)) {
+        if (!file || !validateDataFile(file)) {
             return;
         }
 
         const uuid = uuidv4();
         setFileUploadInProgress(true);
         setProgressValue(0);
-        setProgressMax(file!.size);
+        setProgressMax(file.size);
 
         fileUploader
-            .uploadFile(uuid, file!, setProgressValue)
-            .then(() => fileUploader.uploadComplete(uuid, file!))
+            .uploadFile(uuid, file, setProgressValue)
+            .then(() => fileUploader.uploadComplete(uuid, file))
             .then((data) => {
                 // projection déduite du fichier déposé (mapping IGNF → EPSG si nécessaire)
                 const sridRaw = data?.srid;
