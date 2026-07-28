@@ -78,26 +78,27 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
     });
     const datasheet = datasheetQuery.data;
 
-    // livraisons dont l'intégration en base de données n'a pas réussi ou n'est pas terminée
+    const datasheetUploads = useMemo(
+        () => datasheet?.upload_list?.filter((upload) => upload.type === "VECTOR" && upload.tags.datasheet_name === datasheetName) ?? [],
+        [datasheet, datasheetName]
+    );
+
+    // livraisons affichées dans le tableau : traitement d'intégration pas encore lancé
+    // (dès qu'il est lancé, la donnée stockée existe et prend le relais dans le tableau)
     const unfinishedUploads = useMemo(() => {
-        return (
-            datasheet?.upload_list
-                ?.filter((upload) => upload.type === "VECTOR")
-                ?.filter((upload) => {
-                    if (upload.tags.datasheet_name !== datasheetName) {
-                        return false;
-                    }
-                    if (upload.tags.integration_progress === undefined) {
-                        return true;
-                    }
+        return datasheetUploads.filter((upload) => {
+            if (upload.tags.integration_progress === undefined) {
+                return true;
+            }
 
-                    const progress = parseIntegrationProgress(upload.tags.integration_progress);
-                    return progress !== null && progress["integration_processing"] === "waiting";
-                }) ?? []
-        );
-    }, [datasheet, datasheetName]);
+            const progress = parseIntegrationProgress(upload.tags.integration_progress);
+            return progress !== null && progress["integration_processing"] === "waiting";
+        });
+    }, [datasheetUploads]);
 
-    const uploadsInProgress = useMemo(() => unfinishedUploads.filter((upload) => !uploadHasFailure(upload)), [unfinishedUploads]);
+    // livraisons dont l'intégration doit encore avancer : toutes celles sans échec, y compris
+    // celles dont le traitement est lancé (le ping finalise l'intégration et supprime la livraison)
+    const uploadsInProgress = useMemo(() => datasheetUploads.filter((upload) => !uploadHasFailure(upload)), [datasheetUploads]);
 
     // fait avancer l'intégration des livraisons en cours en arrière-plan (envoi des fichiers, vérifications, traitement)
     const integrationPingQueries = useQueries({
