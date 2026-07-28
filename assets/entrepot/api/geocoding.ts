@@ -41,6 +41,11 @@ type GeocodingResponse = {
     features: GeocodingFeature[];
 };
 
+/** Territoire issu de la recherche d'unités administratives, enrichi du code INSEE (affichage uniquement, non persisté) */
+export type AdminUnitTerritory = CswMetadataTerritory & {
+    insee?: string;
+};
+
 /** Adresse BAN retournée par searchAddresses, déjà décomposée en champs formulaire */
 export type GeocodingAddress = {
     /** Libellé complet affiché dans la liste de suggestions */
@@ -59,12 +64,12 @@ const BASE_URL = "https://data.geopf.fr/geocodage/search";
 
 /**
  * Recherche des unités administratives (communes, départements, régions) via l'API de
- * géocodage Géoplateforme et les convertit en territoires `{ id, title, bbox }`.
+ * géocodage Géoplateforme et les convertit en territoires `{ id, title, bbox, insee }`.
  *
  * La bbox est dérivée du polygone retourné par `returntruegeometry=true` ; elle est vide
  * si la géométrie est absente ou non parsable.
  */
-const searchAdminUnits = async (search: string, signal: AbortSignal): Promise<CswMetadataTerritory[]> => {
+const searchAdminUnits = async (search: string, signal: AbortSignal): Promise<AdminUnitTerritory[]> => {
     const params = new URLSearchParams({
         q: search,
         index: "poi",
@@ -76,7 +81,7 @@ const searchAdminUnits = async (search: string, signal: AbortSignal): Promise<Cs
 
     const response = await jsonFetch<GeocodingResponse>(`${BASE_URL}?${params.toString()}`, { signal }, undefined, false, false);
 
-    return response.features.map((feature): CswMetadataTerritory => {
+    return response.features.map((feature): AdminUnitTerritory => {
         const p = feature.properties;
 
         // Identifiant stable BD TOPO ; fallback sur citycode si absent
@@ -88,7 +93,10 @@ const searchAdminUnits = async (search: string, signal: AbortSignal): Promise<Cs
         // Bbox dérivée du polygone (best-effort)
         const bbox = p.truegeometry ? (bboxFromGeoJsonString(p.truegeometry) ?? []) : [];
 
-        return { id, title, bbox };
+        // Code INSEE de la collectivité (absent pour les EPCI), pour lever les homonymies dans la liste
+        const insee = p.citycode?.[0];
+
+        return { id, title, bbox, insee };
     });
 };
 
