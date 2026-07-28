@@ -152,6 +152,22 @@ const getBreadcrumb = (
         case "datastore_datasheet_view":
         case "datastore_datasheet_view_next":
             return { ...datastoreBaseProps, currentPageLabel: route.params.datasheetName };
+        case "datastore_dataset_add_next":
+            return {
+                ...datastoreBaseProps,
+                segments: [
+                    ...datastoreBaseProps.segments,
+                    {
+                        label: route.params.datasheetName,
+                        linkProps: routes.datastore_datasheet_view_next({
+                            datastoreId: route.params.datastoreId,
+                            datasheetName: route.params.datasheetName,
+                            activeTab: "dataset",
+                        }).link,
+                    },
+                ],
+                currentPageLabel: "Ajouter une donnée",
+            };
         case "datastore_datasheet_create_next":
             return { ...datastoreBaseProps, currentPageLabel: t("datastore_create_datasheet") };
         case "datastore_stored_data_details": {
