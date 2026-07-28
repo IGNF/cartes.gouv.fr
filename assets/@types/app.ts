@@ -129,7 +129,14 @@ export interface StoredData extends StoredDataPrivateDetailResponseDto {
     tags: {
         datasheet_name?: string;
         producer?: string;
+        producer_short?: string;
         production_year?: string;
+        /** date de production de la donnée (AAAA-MM-JJ) */
+        date?: string;
+        /** thématiques séparées par des virgules */
+        themes?: string;
+        /** étendue spatiale (zone de téléchargement) */
+        zone?: string;
     };
 }
 export {
@@ -183,7 +190,14 @@ export type Upload = UploadPrivateDetailResponseDto & {
         integration_progress?: string;
         integration_current_step?: string;
         producer?: string;
+        producer_short?: string;
         production_year?: string;
+        /** date de production de la donnée (AAAA-MM-JJ) */
+        date?: string;
+        /** thématiques séparées par des virgules */
+        themes?: string;
+        /** étendue spatiale (zone de téléchargement) */
+        zone?: string;
     };
 };
 
