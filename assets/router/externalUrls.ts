@@ -12,6 +12,8 @@ export const externalUrls = {
     helpUserGuideCatalogueGeneral: appRoot + "/aide/fr/guides-utilisateur/rechercher-une-donnee/generalites-catalogue/",
     helpUserGuideGeopfServicesTutorial: appRoot + "/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/tutoriels/",
     helpProducerGuideCreateDatasheet: appRoot + "/aide/fr/guides-producteur/publier-des-donnees-via-cartes-gouv/deposer-donnees-sur-cartes-gouv/",
+    helpDeveloperGuideVectorFeed: appRoot + "/aide/fr/guides-developpeur/tutoriels/gestion-des-donnees-vecteur/alimentation-diffusion-vecteur/",
+    qgisPluginGeoplateforme: "https://geoplateforme.github.io/plugin-qgis-geoplateforme/",
     helpUserGuideCreateKeys: appRoot + "/aide/fr/guides-utilisateur/creation-des-cles-et-integration-sig/",
     catalogue: catalogueUrl ?? appRoot + "/rechercher-une-donnee",
     maps: appRoot + "/explorer-les-cartes",

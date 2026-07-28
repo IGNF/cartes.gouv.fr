@@ -23,6 +23,7 @@ import { useStyles } from "tss-react";
 import DatasheetHeader from "./DatasheetHeader";
 
 const DescriptionTab = lazy(() => import("../DescriptionTab/DescriptionTab"));
+const DatasetTabNext = lazy(() => import("../DatasetTabNext/DatasetTabNext"));
 
 const publishConfirmModal = createModal({
     id: "datasheet-next-publish-confirm-modal",
@@ -225,7 +226,7 @@ export default function DatasheetViewNext(props: DatasheetViewProps) {
                                         [DatasheetViewActiveTabEnum.Description]: <DescriptionTab datastoreId={datastoreId} datasheetName={datasheetName} />,
                                         [DatasheetViewActiveTabEnum.Preview]: <p>Aperçu</p>,
                                         [DatasheetViewActiveTabEnum.Annexes]: <p>Annexes</p>,
-                                        [DatasheetViewActiveTabEnum.Dataset]: <p>Données</p>,
+                                        [DatasheetViewActiveTabEnum.Dataset]: <DatasetTabNext datastoreId={datastoreId} datasheetName={datasheetName} />,
                                         [DatasheetViewActiveTabEnum.Wfs]: <p>Flux WFS</p>,
                                         [DatasheetViewActiveTabEnum.Wms]: <p>Flux WMS</p>,
                                         [DatasheetViewActiveTabEnum.Tms]: <p>Flux TMS</p>,
