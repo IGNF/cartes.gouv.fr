@@ -15,6 +15,7 @@ const DatasheetUploadIntegrationPage = lazy(() => import("../entrepot/pages/data
 const DatasheetView = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView"));
 const DatasheetViewNext = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetViewNext"));
 const DatasheetCreateNext = lazy(() => import("../entrepot/pages/datasheet/DatasheetCreate/DatasheetCreateNext"));
+const DatasetAddForm = lazy(() => import("../entrepot/pages/datasheet/DatasetAdd/DatasetAddForm"));
 const StoredDataDetails = lazy(() => import("../entrepot/pages/data_details/StoredDataDetails"));
 const UploadDetails = lazy(() => import("../entrepot/pages/data_details/UploadDetails"));
 const WfsServiceForm = lazy(() => import("../entrepot/pages/service/wfs/WfsServiceForm"));
@@ -87,6 +88,10 @@ function GroupDatastore(props: IGroupDatastoreProps) {
             case "datastore_datasheet_create_next":
                 return {
                     render: <DatasheetCreateNext datastoreId={route.params.datastoreId} />,
+                };
+            case "datastore_dataset_add_next":
+                return {
+                    render: <DatasetAddForm datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />,
                 };
             case "datastore_stored_data_details":
                 return {
