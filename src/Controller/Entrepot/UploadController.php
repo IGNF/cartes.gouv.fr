@@ -84,10 +84,14 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 throw new AppException('Chemin de fichier invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Chemin de fichier invalide']);
             }
 
+            // description libre si fournie (nouveau parcours), sinon nom technique (ancien parcours)
+            $description = $content['data_description'] ?? null;
+            $description = is_string($description) && '' !== trim($description) ? trim($description) : $content['data_technical_name'];
+
             // déclaration de livraison
             $uploadData = [
                 'name' => $content['data_technical_name'],
-                'description' => $content['data_technical_name'],
+                'description' => $description,
                 'type' => UploadTypes::VECTOR,
                 'srs' => $content['data_srid'],
             ];
@@ -100,6 +104,28 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 CommonTags::PRODUCER => $content['producer'],
                 CommonTags::PRODUCTION_YEAR => $content['production_year'],
             ];
+
+            // tags optionnels du nouveau parcours de dépôt
+            $optionalTags = [
+                CommonTags::PRODUCER_SHORT => $content['producer_short'] ?? null,
+                CommonTags::PRODUCTION_DATE => $content['production_date'] ?? null,
+                CommonTags::ZONE => $content['zone'] ?? null,
+            ];
+            foreach ($optionalTags as $tagName => $value) {
+                if (is_string($value) && '' !== trim($value)) {
+                    $tags[$tagName] = trim($value);
+                }
+            }
+
+            if (isset($content['themes']) && is_array($content['themes']) && [] !== $content['themes']) {
+                $tags[CommonTags::THEMES] = implode(',', array_map('strval', $content['themes']));
+            }
+
+            foreach ([UploadTags::OPEN_DOWNLOAD, UploadTags::OPEN_EXTRACTION, UploadTags::EXTRACTION_PUBLIC] as $boolTag) {
+                if (isset($content[$boolTag])) {
+                    $tags[$boolTag] = (bool) $content[$boolTag];
+                }
+            }
 
             if (isset($content['email_notification'])) {
                 $tags['email_notification'] = (bool) $content['email_notification'];
