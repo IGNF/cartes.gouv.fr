@@ -325,7 +325,7 @@ class UploadIntegrationWorkflow
             CommonTags::PRODUCER_SHORT,
             CommonTags::PRODUCTION_YEAR,
             CommonTags::PRODUCTION_DATE,
-            CommonTags::THEMES,
+            CommonTags::CONFIG_THEME,
         ];
         foreach ($forwardedTags as $tagName) {
             if (isset($upload['tags'][$tagName])) {
