@@ -5,20 +5,22 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import Table from "@codegouvfr/react-dsfr/Table";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ReactNode, useMemo, useState } from "react";
 import { useStyles } from "tss-react";
 
 import { DatasheetDetailed, DatasheetUploadItem } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import StoredDataStatusBadge from "@/components/Utils/Badges/StoredDataStatusBadge";
 import LoadingText from "@/components/Utils/LoadingText";
+import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
 import { formatDateFromISO, integrationProgressHasFailure, parseIntegrationProgress } from "@/utils";
+import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetViewNext";
 import DatasetAddBanners from "./DatasetAddBanners";
 
 type DatasetType = "vector" | "raster";
@@ -76,29 +78,26 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
         });
     }, [datasheetUploads]);
 
-    // livraisons dont l'intégration doit encore avancer : toutes celles sans échec, y compris
-    // celles dont le traitement est lancé (le ping finalise l'intégration et supprime la livraison)
+    // livraisons dont l'intégration n'est pas terminée ni en échec (suivie depuis le dialogue d'intégration)
     const uploadsInProgress = useMemo(() => datasheetUploads.filter((upload) => !uploadHasFailure(upload)), [datasheetUploads]);
 
-    // fait avancer l'intégration des livraisons en cours en arrière-plan (envoi des fichiers, vérifications, traitement)
-    const integrationPingQueries = useQueries({
-        queries: uploadsInProgress.map((upload) => ({
-            queryKey: RQKeys.datastore_upload_integration(datastoreId, upload._id),
-            queryFn: ({ signal }: { signal?: AbortSignal }) => api.upload.pingIntegrationProgress(datastoreId, upload._id, { signal }),
-            refetchInterval: (query: { state: { status: string } }) => (query.state.status === "error" ? false : 3000),
-            refetchIntervalInBackground: true,
-            retry: false,
-            staleTime: 0,
-        })),
-    });
+    // publications existantes : supprimer la dernière livraison d'une fiche sans publication supprime la fiche entière
+    const nbPublications =
+        (datasheet?.vector_db_list?.length ?? 0) + (datasheet?.pyramid_vector_list?.length ?? 0) + (datasheet?.pyramid_raster_list?.length ?? 0);
+    const isLastUpload = unfinishedUploads.length === 1 && nbPublications === 0;
 
-    // rafraîchit la fiche dès qu'une étape d'intégration change d'état
-    const progressSignature = integrationPingQueries.map((query) => query.data?.integration_progress ?? "").join("|");
-    useEffect(() => {
-        if (progressSignature.replaceAll("|", "") !== "") {
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-        }
-    }, [progressSignature, datastoreId, datasheetName, queryClient]);
+    const { mutate: deleteUnfinishedUpload, isPending: isDeletingUpload } = useMutation({
+        mutationFn: (uploadId: string) => api.upload.remove(datastoreId, uploadId),
+        onSuccess(uploadId) {
+            queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet: DatasheetDetailed) => {
+                return {
+                    ...datasheet,
+                    upload_list: datasheet.upload_list?.filter((upload) => upload._id !== uploadId) ?? [],
+                };
+            });
+            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+        },
+    });
 
     const rows = useMemo<DatasetRow[]>(() => {
         if (!datasheet) {
@@ -117,15 +116,53 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
                         {failed ? "Échoué" : "En cours"}
                     </Badge>
                 ),
-                action: failed ? (
-                    <Button
-                        priority="secondary"
-                        size="small"
-                        linkProps={routes.datastore_upload_details({ datastoreId, uploadId: upload._id, datasheetName }).link}
-                    >
-                        Voir le rapport
-                    </Button>
-                ) : null,
+                action: (
+                    <>
+                        {failed ? (
+                            <Button
+                                priority="secondary"
+                                size="small"
+                                linkProps={routes.datastore_upload_details({ datastoreId, uploadId: upload._id, datasheetName }).link}
+                            >
+                                Voir le rapport
+                            </Button>
+                        ) : (
+                            canAddData && (
+                                <Button
+                                    priority="secondary"
+                                    size="small"
+                                    linkProps={
+                                        routes.datastore_datasheet_upload_integration({
+                                            datastoreId,
+                                            uploadId: upload._id,
+                                            datasheetName,
+                                            datasheetViewVariant: "next",
+                                        }).link
+                                    }
+                                >
+                                    Reprendre l’intégration
+                                </Button>
+                            )
+                        )}
+                        {canAddData && (
+                            <Button
+                                className={fr.cx("fr-ml-2v")}
+                                iconId="fr-icon-delete-fill"
+                                priority="secondary"
+                                size="small"
+                                onClick={() => {
+                                    if (isLastUpload) {
+                                        deleteUploadConfirmModal.open();
+                                    } else {
+                                        deleteUnfinishedUpload(upload._id);
+                                    }
+                                }}
+                            >
+                                Supprimer
+                            </Button>
+                        )}
+                    </>
+                ),
             };
         });
 
@@ -152,7 +189,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
 
         // du plus récent au plus ancien
         return [...uploadRows, ...storedDataRows].sort((a, b) => (b.creation ?? "").localeCompare(a.creation ?? ""));
-    }, [datasheet, unfinishedUploads, datastoreId, datasheetName]);
+    }, [datasheet, unfinishedUploads, datastoreId, datasheetName, canAddData, isLastUpload, deleteUnfinishedUpload]);
 
     const filteredRows = useMemo(() => (typeFilter === "all" ? rows : rows.filter((row) => row.type === typeFilter)), [rows, typeFilter]);
 
@@ -264,6 +301,14 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
                     </>
                 )}
             </div>
+
+            {isDeletingUpload && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message="Suppression de la livraison en cours ..." withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
         </>
     );
 }

@@ -130,6 +130,8 @@ const datastoreRoutes = {
         {
             uploadId: param.query.string,
             datasheetName: param.query.optional.string,
+            // variante de la vue fiche vers laquelle rediriger en fin d'intégration ("classic" | "next")
+            datasheetViewVariant: param.query.optional.string.default("classic"),
         },
         () => "/donnees/integration"
     ),
