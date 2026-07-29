@@ -45,20 +45,35 @@ export default function DatasetSection({ fileInputRef, fileError, uploadInProgre
                     onChange: onFileChange,
                     accept: DATASET_FILE_EXTENSIONS.map((ext) => `.${ext}`).join(","),
                 }}
-                className={fr.cx("fr-input-group")}
+                className={fr.cx("fr-input-group", "fr-mb-4v")}
             />
 
-            {uploadInProgress && <Progress label="Téléversement du fichier en cours ..." value={progressValue} max={progressMax} />}
-
-            <Button
-                type="button"
-                priority="tertiary no outline"
-                iconId="fr-icon-information-line"
-                className={fr.cx("fr-mb-3w")}
-                onClick={() => formatsHelpModal.open()}
+            <div
+                className={fr.cx("fr-mb-4v")}
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: "1",
+                    gap: "0.5rem",
+                }}
             >
-                Plus d’informations sur les formats acceptés
-            </Button>
+                <Button
+                    type="button"
+                    priority="tertiary no outline"
+                    className={fr.cx("fr-link")}
+                    style={{
+                        color: fr.colors.decisions.text.default.info.default,
+                        borderBottom: `1px solid ${fr.colors.decisions.text.default.info.default}`,
+                        padding: 0,
+                    }}
+                    onClick={() => formatsHelpModal.open()}
+                    size="small"
+                >
+                    <span className={fr.cx("fr-icon-eye-fill", "fr-icon--sm", "fr-mr-2v")} />
+                    Plus d’informations sur les formats acceptés
+                </Button>
+                {uploadInProgress && <Progress label="Téléversement du fichier en cours ..." value={progressValue} max={progressMax} />}
+            </div>
 
             <Input
                 label="Nom du jeu de données"
