@@ -1,38 +1,13 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 
 import { Upload } from "@/@types/app";
 import { parseIntegrationProgress } from "@/utils";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
-import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import { DatasheetViewActiveTabEnum } from "../../DatasheetView/DatasheetView/DatasheetView";
-
-const getStepIcon = (status: string) => {
-    let icon = <span className={fr.cx("fr-icon-time-line")} />;
-
-    switch (status) {
-        case "in_progress":
-            icon = <LoadingIcon />;
-            break;
-        case "successful":
-            icon = <span className={fr.cx("fr-icon-checkbox-line")} />;
-            break;
-        case "failed":
-            icon = <span className={fr.cx("fr-icon-close-circle-line")} />;
-            break;
-        case "waiting":
-        default:
-            break;
-    }
-    return icon;
-};
-
-type IntegrationStatus = "at_least_one_failure" | "proc_int_launched" | "all_successful";
+import DatasheetUploadIntegrationView, { IntegrationStatus } from "./DatasheetUploadIntegrationView";
 
 type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
@@ -48,8 +23,6 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     uploadId,
     datasheetViewVariant = "classic",
 }) => {
-    const { t } = useTranslation("DatasheetUploadIntegration");
-
     // route de retour vers la fiche, onglet « données » de la variante demandée
     const getDatasheetViewRoute = useCallback(
         (name: string) =>
@@ -140,114 +113,24 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
         }
     }, [integrationStatus, datastoreId, upload?.tags?.datasheet_name, queryClient, getDatasheetViewRoute]);
 
+    const handleDatasheetViewClick = useCallback(() => {
+        if (upload?.tags?.datasheet_name) {
+            queryClient.refetchQueries({
+                queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
+            });
+            getDatasheetViewRoute(upload.tags.datasheet_name).push();
+        }
+    }, [upload?.tags?.datasheet_name, queryClient, datastoreId, getDatasheetViewRoute]);
+
     return (
-        <div className={fr.cx("fr-container")}>
-            {integrationStatus === "at_least_one_failure" ? (
-                <div className={fr.cx("fr-grid-row")}>
-                    <div className={fr.cx("fr-col")}>
-                        <h6 className={fr.cx("fr-h6")}>
-                            <i className={fr.cx("fr-icon-close-circle-line", "fr-icon--lg")} /> {"L’intégration de vos données a échoué"}
-                        </h6>
-                    </div>
-                </div>
-            ) : (
-                <>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <div className={fr.cx("fr-col")}>
-                            <h6 className={fr.cx("fr-h6")}>
-                                <LoadingIcon largeIcon={true} /> {t("data_integration_in_progress")}
-                            </h6>
-                        </div>
-                    </div>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <div className={fr.cx("fr-col")}>
-                            <p>{t("long_operation_information")}</p>
-                        </div>
-                    </div>
-                </>
-            )}
-
-            <div className={fr.cx("fr-grid-row", "fr-px-4w")}>
-                <div className={fr.cx("fr-col", "fr-col--middle")}>
-                    {integrationProgress &&
-                        Object.entries(integrationProgress).map(([step, status]) => (
-                            <div className={fr.cx("fr-grid-row")} key={step}>
-                                <p>
-                                    {getStepIcon(status)}
-                                    &nbsp;{t("step_title", { step_name: step })} : {t("step_status_text", { step_status: status })}
-                                </p>
-                            </div>
-                        ))}
-                </div>
-            </div>
-
-            {integrationStatus === "proc_int_launched" && <p>{t("continue_browsing_data_not_ready")}</p>}
-
-            {(integrationStatus === "all_successful" || integrationStatus === "proc_int_launched") && upload?.tags?.datasheet_name !== undefined && (
-                <div className={fr.cx("fr-grid-row")}>
-                    <ButtonsGroup
-                        buttons={[
-                            {
-                                children: "Consulter la fiche de données",
-                                onClick: () => {
-                                    if (upload?.tags?.datasheet_name) {
-                                        queryClient.refetchQueries({
-                                            queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
-                                        });
-                                        getDatasheetViewRoute(upload.tags.datasheet_name).push();
-                                    }
-                                },
-                            },
-                        ]}
-                        inlineLayoutWhen="always"
-                    />
-                </div>
-            )}
-
-            {integrationStatus === "at_least_one_failure" && upload?.tags?.datasheet_name !== undefined && (
-                <div className={fr.cx("fr-grid-row")}>
-                    <ButtonsGroup
-                        buttons={[
-                            {
-                                children: t("view_datasheet"),
-                                onClick: () => {
-                                    if (upload?.tags?.datasheet_name) {
-                                        queryClient.refetchQueries({
-                                            queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
-                                        });
-                                        getDatasheetViewRoute(upload.tags.datasheet_name).push();
-                                    }
-                                },
-                            },
-                        ]}
-                        inlineLayoutWhen="always"
-                    />
-                </div>
-            )}
-
-            {integrationStatus === "at_least_one_failure" && upload?.tags?.vectordb_id !== undefined && (
-                <div className={fr.cx("fr-grid-row")}>
-                    <ButtonsGroup
-                        buttons={[
-                            {
-                                children: t("check_error_report"),
-                                linkProps: routes.datastore_stored_data_details({
-                                    datastoreId,
-                                    storedDataId: upload?.tags?.vectordb_id,
-                                    datasheetName,
-                                }).link,
-                            },
-                            {
-                                children: t("back_to_datasheet_list"),
-                                linkProps: routes.datasheet_list({ datastoreId }).link,
-                                priority: "secondary",
-                            },
-                        ]}
-                        inlineLayoutWhen="always"
-                    />
-                </div>
-            )}
-        </div>
+        <DatasheetUploadIntegrationView
+            datastoreId={datastoreId}
+            datasheetName={datasheetName}
+            upload={upload}
+            integrationProgress={integrationProgress}
+            integrationStatus={integrationStatus}
+            onDatasheetViewClick={handleDatasheetViewClick}
+        />
     );
 };
 
