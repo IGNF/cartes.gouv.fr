@@ -14,9 +14,4 @@ final class UploadTags
     public const DATA_UPLOAD_PATH = 'data_upload_path';
 
     public const FILE_TREE = 'file_tree';
-
-    // droits et accès déclarés au dépôt (câblage effectif des services : ticket à part)
-    public const OPEN_DOWNLOAD = 'open_download';
-    public const OPEN_EXTRACTION = 'open_extraction';
-    public const EXTRACTION_PUBLIC = 'extraction_public';
 }
