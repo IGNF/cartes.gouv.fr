@@ -5,10 +5,9 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
-import { ChangeEventHandler, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useStyles } from "tss-react";
-import { v4 as uuidv4 } from "uuid";
 
 import { Upload } from "@/@types/app";
 import Main from "@/components/Layout/Main";
@@ -17,22 +16,19 @@ import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import { useDatastore } from "@/contexts/datastore";
 import defaultProjections from "@/data/default_projections.json";
-import ignfProjections from "@/data/ignf_projections.json";
 import api from "@/entrepot/api";
-import FileUploader from "@/modules/FileUploader";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
-import { delta, getFileExtension, looksLikeShapefileComponent } from "@/utils";
+import { delta } from "@/utils";
 import MetadataSection from "../forms/MetadataSection";
-import { DATASET_FILE_EXTENSIONS, DATASET_MAX_FILE_SIZE, buildDatasetAddSchema, datasetAddDefaultValues, type DatasetAddFormValues } from "./datasetAddSchema";
+import { buildDatasetAddSchema, datasetAddDefaultValues, type DatasetAddFormValues } from "./datasetAddSchema";
 import DatasetSection from "./sections/DatasetSection";
 import ProducerSection from "./sections/ProducerSection";
 import SpatialReferenceSection from "./sections/SpatialReferenceSection";
 import TemporalReferenceSection from "./sections/TemporalReferenceSection";
 import ThemesSection from "./sections/ThemesSection";
-
-const fileUploader = new FileUploader();
+import useDatasetFileUpload from "./useDatasetFileUpload";
 
 type DatasetAddFormProps = {
     datastoreId: string;
@@ -45,14 +41,6 @@ export default function DatasetAddForm({ datastoreId, datasheetName }: DatasetAd
     const queryClient = useQueryClient();
 
     const datasetTabLink = routes.datastore_datasheet_view_next({ datastoreId, datasheetName, activeTab: "dataset" }).link;
-
-    // ----- Téléversement du fichier (avant soumission du formulaire) -----
-
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [fileError, setFileError] = useState<string>();
-    const [fileUploadInProgress, setFileUploadInProgress] = useState(false);
-    const [progressValue, setProgressValue] = useState(0);
-    const [progressMax, setProgressMax] = useState(0);
 
     const [projections, setProjections] = useState<Record<string, string>>(defaultProjections);
 
@@ -82,66 +70,24 @@ export default function DatasetAddForm({ datastoreId, datasheetName }: DatasetAd
         formState: { isValidating },
     } = form;
 
-    const validateDataFile = (file?: File): boolean => {
-        if (!file) {
-            setFileError("Veuillez sélectionner un fichier");
-            return false;
-        }
+    // ----- Téléversement du fichier (avant soumission du formulaire) -----
 
-        if (looksLikeShapefileComponent(file.name)) {
-            setFileError(`Le fichier ${file.name} semble faire partie d’un Shapefile. Déposez une archive zip contenant tous les fichiers composants.`);
-            return false;
-        }
-
-        const extension = getFileExtension(file.name);
-        if (!extension || !DATASET_FILE_EXTENSIONS.includes(extension)) {
-            setFileError(`L’extension du fichier ${file.name} n’est pas acceptée`);
-            return false;
-        }
-
-        if (file.size > DATASET_MAX_FILE_SIZE) {
-            setFileError("La taille du fichier ne peut pas excéder 2 Go");
-            return false;
-        }
-
-        return true;
-    };
-
-    const handleFileChange: ChangeEventHandler<HTMLInputElement> = () => {
-        setFileError(undefined);
-        setValue("data_upload_path", "");
-
-        const file = fileInputRef.current?.files?.[0];
-        if (!file || !validateDataFile(file)) {
-            return;
-        }
-
-        const uuid = uuidv4();
-        setFileUploadInProgress(true);
-        setProgressValue(0);
-        setProgressMax(file.size);
-
-        fileUploader
-            .uploadFile(uuid, file, setProgressValue)
-            .then(() => fileUploader.uploadComplete(uuid, file))
-            .then((data) => {
-                // projection déduite du fichier déposé (mapping IGNF → EPSG si nécessaire)
-                const sridRaw = data?.srid;
-                const sridMapped = typeof sridRaw === "string" && sridRaw !== "" && sridRaw in ignfProjections ? ignfProjections[sridRaw] : sridRaw;
-
-                if (typeof sridMapped === "string" && sridMapped.trim() !== "") {
-                    setValue("srid", sridMapped, { shouldValidate: true });
-                }
-                setValue("data_upload_path", String(data?.filename ?? ""), { shouldValidate: true });
-            })
-            .catch((err) => {
-                console.error(err);
-                setFileError(err?.msg ?? "Le téléversement du fichier a échoué");
-            })
-            .finally(() => {
-                setFileUploadInProgress(false);
-            });
-    };
+    const {
+        fileInputRef,
+        fileError,
+        uploadInProgress: fileUploadInProgress,
+        progressValue,
+        progressMax,
+        handleFileChange,
+    } = useDatasetFileUpload({
+        onFileSelected: () => setValue("data_upload_path", ""),
+        onUploadSuccess: ({ srid, uploadPath }) => {
+            if (srid) {
+                setValue("srid", srid, { shouldValidate: true });
+            }
+            setValue("data_upload_path", uploadPath, { shouldValidate: true });
+        },
+    });
 
     // ----- Organismes proposés en autocomplétion -----
 
