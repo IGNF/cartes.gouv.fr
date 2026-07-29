@@ -117,7 +117,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
             }
 
             if (isset($content['themes']) && is_array($content['themes']) && [] !== $content['themes']) {
-                $tags[CommonTags::THEMES] = implode(',', array_map('strval', $content['themes']));
+                $tags[CommonTags::CONFIG_THEME] = implode(', ', array_map('strval', $content['themes']));
             }
 
             if (isset($content['email_notification'])) {
