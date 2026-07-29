@@ -18,7 +18,7 @@ import useCommunityRights from "@/hooks/useCommunityRights";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
-import { formatDateFromISO } from "@/utils";
+import { formatDateFromISO, integrationProgressHasFailure, parseIntegrationProgress } from "@/utils";
 import DatasetAddBanners from "./DatasetAddBanners";
 
 type DatasetType = "vector" | "raster";
@@ -33,27 +33,7 @@ type DatasetRow = {
     action: ReactNode;
 };
 
-const parseIntegrationProgress = (rawProgress: string | undefined): Record<string, string> | null => {
-    if (!rawProgress) {
-        return null;
-    }
-
-    try {
-        const parsed = JSON.parse(rawProgress);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-            return parsed as Record<string, string>;
-        }
-    } catch {
-        // ignore les erreurs de parsing JSON
-    }
-
-    return null;
-};
-
-const uploadHasFailure = (upload: DatasheetUploadItem): boolean => {
-    const progress = parseIntegrationProgress(upload.tags.integration_progress);
-    return progress !== null && Object.values(progress).includes("failed");
-};
+const uploadHasFailure = (upload: DatasheetUploadItem): boolean => integrationProgressHasFailure(upload.tags.integration_progress);
 
 type DatasetTabNextProps = {
     datastoreId: string;
