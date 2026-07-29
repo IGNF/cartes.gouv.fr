@@ -26,7 +26,6 @@ import { routes } from "@/router/router";
 import { delta, getFileExtension, looksLikeShapefileComponent } from "@/utils";
 import MetadataSection from "../forms/MetadataSection";
 import { DATASET_FILE_EXTENSIONS, DATASET_MAX_FILE_SIZE, buildDatasetAddSchema, datasetAddDefaultValues, type DatasetAddFormValues } from "./datasetAddSchema";
-import AccessRightsSection from "./sections/AccessRightsSection";
 import DatasetSection from "./sections/DatasetSection";
 import ProducerSection from "./sections/ProducerSection";
 import SpatialReferenceSection from "./sections/SpatialReferenceSection";
@@ -170,10 +169,6 @@ export default function DatasetAddForm({ datastoreId, datasheetName }: DatasetAd
                 themes: values.themes,
                 production_date: datefnsFormat(values.production_date, "yyyy-MM-dd"),
                 production_year: values.production_date.getFullYear(),
-                zone: values.zone,
-                open_download: values.open_download,
-                open_extraction: values.open_extraction,
-                extraction_public: values.open_extraction ? values.extraction_public : false,
                 email_notification: values.email_notification,
             };
 
@@ -244,9 +239,6 @@ export default function DatasetAddForm({ datastoreId, datasheetName }: DatasetAd
                         </MetadataSection>
                         <MetadataSection title="Référence spatiale">
                             <SpatialReferenceSection projections={projections} />
-                        </MetadataSection>
-                        <MetadataSection title="Droits et accès">
-                            <AccessRightsSection />
                         </MetadataSection>
                     </div>
 

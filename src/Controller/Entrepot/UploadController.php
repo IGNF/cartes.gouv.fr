@@ -109,7 +109,6 @@ class UploadController extends AbstractController implements ApiControllerInterf
             $optionalTags = [
                 CommonTags::PRODUCER_SHORT => $content['producer_short'] ?? null,
                 CommonTags::PRODUCTION_DATE => $content['production_date'] ?? null,
-                CommonTags::ZONE => $content['zone'] ?? null,
             ];
             foreach ($optionalTags as $tagName => $value) {
                 if (is_string($value) && '' !== trim($value)) {
@@ -119,12 +118,6 @@ class UploadController extends AbstractController implements ApiControllerInterf
 
             if (isset($content['themes']) && is_array($content['themes']) && [] !== $content['themes']) {
                 $tags[CommonTags::THEMES] = implode(',', array_map('strval', $content['themes']));
-            }
-
-            foreach ([UploadTags::OPEN_DOWNLOAD, UploadTags::OPEN_EXTRACTION, UploadTags::EXTRACTION_PUBLIC] as $boolTag) {
-                if (isset($content[$boolTag])) {
-                    $tags[$boolTag] = (bool) $content[$boolTag];
-                }
             }
 
             if (isset($content['email_notification'])) {
