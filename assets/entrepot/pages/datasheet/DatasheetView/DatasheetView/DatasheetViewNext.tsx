@@ -40,6 +40,12 @@ const deleteConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
+// confirmation avant suppression de la dernière livraison (qui supprime la fiche entière)
+export const deleteUploadConfirmModal = createModal({
+    id: "datasheet-next-delete-upload-confirm-modal",
+    isOpenedByDefault: false,
+});
+
 export enum DatasheetViewActiveTabEnum {
     Description = "description",
     Preview = "preview",
@@ -355,6 +361,28 @@ export default function DatasheetViewNext(props: DatasheetViewProps) {
                         </>
                     )}
                 </deleteConfirmModal.Component>,
+                document.body
+            )}
+
+            {/* Modale : Supprimer la dernière livraison (supprime la fiche entière) */}
+            {createPortal(
+                <deleteUploadConfirmModal.Component
+                    title={`Voulez-vous supprimer la fiche de données ${datasheetName} ?`}
+                    buttons={[
+                        {
+                            children: tCommon("cancel"),
+                            doClosesModal: true,
+                            priority: "secondary",
+                        },
+                        {
+                            children: tCommon("delete"),
+                            onClick: () => datasheetDeleteMutation.mutate(),
+                            priority: "primary",
+                        },
+                    ]}
+                >
+                    <strong>En supprimant cette livraison, la fiche de données {datasheetName} sera supprimée.</strong>
+                </deleteUploadConfirmModal.Component>,
                 document.body
             )}
         </>
