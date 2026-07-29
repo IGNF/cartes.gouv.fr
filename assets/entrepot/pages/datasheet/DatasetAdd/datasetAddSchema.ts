@@ -69,10 +69,6 @@ export function buildDatasetAddSchema({ projections, onProjectionResolved }: Bui
                         }
                     },
                 }),
-            zone: yup.string().trim().required("L’étendue spatiale est obligatoire"),
-            open_download: yup.boolean().required(),
-            open_extraction: yup.boolean().required(),
-            extraction_public: yup.boolean().required(),
             email_notification: yup.boolean().required(),
         })
         .required();
@@ -88,9 +84,5 @@ export const datasetAddDefaultValues: Partial<DatasetAddFormValues> = {
     producer_short: "",
     themes: [],
     srid: "EPSG:2154",
-    zone: "",
-    open_download: false,
-    open_extraction: false,
-    extraction_public: false,
     email_notification: true,
 };
