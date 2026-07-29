@@ -14,7 +14,6 @@ import Main from "@/components/Layout/Main";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
-import { useDatastore } from "@/contexts/datastore";
 import defaultProjections from "@/data/default_projections.json";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -33,11 +32,11 @@ import useDatasetFileUpload from "./useDatasetFileUpload";
 type DatasetAddFormProps = {
     datastoreId: string;
     datasheetName: string;
+    /** valeur par défaut proposée : le nom du responsable de la donnée (custodian des métadonnées) */
+    defaultProducer: string;
 };
 
-export default function DatasetAddForm({ datastoreId, datasheetName }: DatasetAddFormProps) {
-    const { datastore } = useDatastore();
-
+export default function DatasetAddForm({ datastoreId, datasheetName, defaultProducer }: DatasetAddFormProps) {
     const queryClient = useQueryClient();
 
     const datasetTabLink = routes.datastore_datasheet_view_next({ datastoreId, datasheetName, activeTab: "dataset" }).link;
@@ -60,7 +59,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName }: DatasetAd
         reValidateMode: "onBlur",
         defaultValues: {
             ...datasetAddDefaultValues,
-            producer: datastore.name,
+            producer: defaultProducer,
         },
     });
 
@@ -175,7 +174,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName }: DatasetAd
                             />
                         </MetadataSection>
                         <MetadataSection title="Producteur">
-                            <ProducerSection organizationsOptions={organizationsOptions} defaultProducer={datastore.name} />
+                            <ProducerSection organizationsOptions={organizationsOptions} defaultProducer={defaultProducer} />
                         </MetadataSection>
                         <MetadataSection title="Thématiques">
                             <ThemesSection />
