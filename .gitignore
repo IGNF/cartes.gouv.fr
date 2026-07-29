@@ -42,3 +42,6 @@ yarn-error.log
 
 /.serena
 /.playwright-mcp
+
+/.claude
+**/migration-frankenphp.md
