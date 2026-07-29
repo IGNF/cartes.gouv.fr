@@ -133,8 +133,8 @@ export interface StoredData extends StoredDataPrivateDetailResponseDto {
         production_year?: string;
         /** date de production de la donnée (AAAA-MM-JJ) */
         date?: string;
-        /** thématiques séparées par des virgules */
-        themes?: string;
+        /** thématiques séparées par « , » */
+        theme?: string;
     };
 }
 export {
@@ -192,8 +192,8 @@ export type Upload = UploadPrivateDetailResponseDto & {
         production_year?: string;
         /** date de production de la donnée (AAAA-MM-JJ) */
         date?: string;
-        /** thématiques séparées par des virgules */
-        themes?: string;
+        /** thématiques séparées par « , » */
+        theme?: string;
     };
 };
 
