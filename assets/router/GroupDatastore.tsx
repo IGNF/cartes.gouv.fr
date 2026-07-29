@@ -68,6 +68,7 @@ function GroupDatastore(props: IGroupDatastoreProps) {
                             datastoreId={route.params.datastoreId}
                             uploadId={route.params.uploadId}
                             datasheetName={route.params.datasheetName}
+                            datasheetViewVariant={route.params.datasheetViewVariant === "next" ? "next" : "classic"}
                         />
                     ),
                 };
