@@ -10,5 +10,4 @@ final class CommonTags
     public const PRODUCER_SHORT = 'producer_short';
     public const PRODUCTION_YEAR = 'production_year';
     public const PRODUCTION_DATE = 'date';
-    public const THEMES = 'themes';
 }
