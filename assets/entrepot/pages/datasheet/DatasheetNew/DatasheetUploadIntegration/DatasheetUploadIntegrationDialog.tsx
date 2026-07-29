@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 
 import { Upload } from "@/@types/app";
 import { parseIntegrationProgress } from "@/utils";
@@ -38,10 +38,26 @@ type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
     datasheetName: string | undefined;
     uploadId: string;
+    /** variante de la vue fiche vers laquelle rediriger en fin d'intégration (défaut : ancienne vue) */
+    datasheetViewVariant?: "classic" | "next";
 };
 
-const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId }) => {
+const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({
+    datastoreId,
+    datasheetName,
+    uploadId,
+    datasheetViewVariant = "classic",
+}) => {
     const { t } = useTranslation("DatasheetUploadIntegration");
+
+    // route de retour vers la fiche, onglet « données » de la variante demandée
+    const getDatasheetViewRoute = useCallback(
+        (name: string) =>
+            datasheetViewVariant === "next"
+                ? routes.datastore_datasheet_view_next({ datastoreId, datasheetName: name, activeTab: "dataset" })
+                : routes.datastore_datasheet_view({ datastoreId, datasheetName: name, activeTab: DatasheetViewActiveTabEnum.Dataset }),
+        [datastoreId, datasheetViewVariant]
+    );
 
     const [shouldPingIntProg, setShouldPingIntProg] = useState<boolean>(true);
 
@@ -118,17 +134,11 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                     queryClient.invalidateQueries({
                         queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                     });
-                    routes
-                        .datastore_datasheet_view({
-                            datastoreId,
-                            datasheetName: upload?.tags?.datasheet_name,
-                            activeTab: DatasheetViewActiveTabEnum.Dataset,
-                        })
-                        .push();
+                    getDatasheetViewRoute(upload.tags.datasheet_name).push();
                 }
                 break;
         }
-    }, [integrationStatus, datastoreId, upload?.tags?.datasheet_name, queryClient]);
+    }, [integrationStatus, datastoreId, upload?.tags?.datasheet_name, queryClient, getDatasheetViewRoute]);
 
     return (
         <div className={fr.cx("fr-container")}>
@@ -184,13 +194,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                         queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                                         });
-                                        routes
-                                            .datastore_datasheet_view({
-                                                datastoreId,
-                                                datasheetName: upload?.tags?.datasheet_name,
-                                                activeTab: DatasheetViewActiveTabEnum.Dataset,
-                                            })
-                                            .push();
+                                        getDatasheetViewRoute(upload.tags.datasheet_name).push();
                                     }
                                 },
                             },
@@ -211,13 +215,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                         queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                                         });
-                                        routes
-                                            .datastore_datasheet_view({
-                                                datastoreId,
-                                                datasheetName: upload?.tags?.datasheet_name,
-                                                activeTab: DatasheetViewActiveTabEnum.Dataset,
-                                            })
-                                            .push();
+                                        getDatasheetViewRoute(upload.tags.datasheet_name).push();
                                     }
                                 },
                             },

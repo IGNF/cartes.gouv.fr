@@ -20,6 +20,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
 import { delta } from "@/utils";
+import DatasheetUploadIntegrationDialog from "../DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 import MetadataSection from "../forms/MetadataSection";
 import { buildDatasetAddSchema, datasetAddDefaultValues, type DatasetAddFormValues } from "./datasetAddSchema";
 import DatasetSection from "./sections/DatasetSection";
@@ -120,9 +121,8 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
             return api.upload.add(datastoreId, payload);
         },
         onSuccess: () => {
-            // retour sur l'onglet données : l'intégration se poursuit en arrière-plan (ping depuis l'onglet)
+            // l'intégration est suivie par le dialogue affiché ci-dessous, qui redirige vers l'onglet données à la fin
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-            routes.datastore_datasheet_view_next({ datastoreId, datasheetName, activeTab: "dataset" }).push();
         },
     });
 
@@ -228,6 +228,16 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
                     <div className={fr.cx("fr-grid-row")}>
                         <LoadingText as="h6" message="Ajout de la donnée en cours ..." withSpinnerIcon={true} />
                     </div>
+                </Wait>
+            )}
+            {addUploadMutation.isSuccess && addUploadMutation.data?._id !== undefined && (
+                <Wait>
+                    <DatasheetUploadIntegrationDialog
+                        datastoreId={datastoreId}
+                        uploadId={addUploadMutation.data._id}
+                        datasheetName={datasheetName}
+                        datasheetViewVariant="next"
+                    />
                 </Wait>
             )}
         </Main>
