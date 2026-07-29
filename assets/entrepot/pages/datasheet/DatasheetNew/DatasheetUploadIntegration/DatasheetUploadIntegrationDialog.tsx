@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
 import { Upload } from "@/@types/app";
+import { parseIntegrationProgress } from "@/utils";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
@@ -29,23 +30,6 @@ const getStepIcon = (status: string) => {
             break;
     }
     return icon;
-};
-
-const parseIntegrationProgress = (rawProgress: string | undefined): Record<string, string> | null => {
-    if (!rawProgress) {
-        return null;
-    }
-
-    try {
-        const parsed = JSON.parse(rawProgress);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-            return parsed as Record<string, string>;
-        }
-    } catch {
-        // ignore JSON parse errors
-    }
-
-    return null;
 };
 
 type IntegrationStatus = "at_least_one_failure" | "proc_int_launched" | "all_successful";
