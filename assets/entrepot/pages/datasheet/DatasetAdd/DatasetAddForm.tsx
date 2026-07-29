@@ -132,7 +132,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
     const { css, cx } = useStyles();
 
     return (
-        <Main title={`Ajouter une donnée — ${datasheetName}`}>
+        <Main title={`Ajouter une donnée - ${datasheetName}`}>
             <h1 className={fr.cx("fr-mb-1w")}>Ajouter une donnée</h1>
             <p className={fr.cx("fr-text--sm")}>Sauf mention contraire « (optionnel) » dans le label, tous les champs sont obligatoires.</p>
 
