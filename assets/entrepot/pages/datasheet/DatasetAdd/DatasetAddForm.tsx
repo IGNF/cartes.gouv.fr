@@ -1,12 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
+import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { useMemo, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useStyles } from "tss-react";
 
 import { Upload } from "@/@types/app";
@@ -68,6 +68,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
         handleSubmit,
         setValue,
         formState: { isValidating },
+        control,
     } = form;
 
     // ----- Téléversement du fichier (avant soumission du formulaire) -----
@@ -185,18 +186,21 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
                         <MetadataSection title="Référence spatiale">
                             <SpatialReferenceSection projections={projections} />
                         </MetadataSection>
+                        <MetadataSection>
+                            <Controller
+                                control={control}
+                                name={"email_notification"}
+                                render={({ field: { value, onChange } }) => (
+                                    <ToggleSwitch
+                                        checked={value}
+                                        label="Recevoir une alerte par courriel lorsque le chargement est terminé."
+                                        onChange={onChange}
+                                        showCheckedHint={false}
+                                    />
+                                )}
+                            />
+                        </MetadataSection>
                     </div>
-
-                    <hr className={fr.cx("fr-mt-3w")} />
-
-                    <Checkbox
-                        options={[
-                            {
-                                label: "Recevoir une alerte par courriel lorsque le chargement est terminé.",
-                                nativeInputProps: { ...form.register("email_notification") },
-                            },
-                        ]}
-                    />
 
                     <ButtonsGroup
                         buttons={[
