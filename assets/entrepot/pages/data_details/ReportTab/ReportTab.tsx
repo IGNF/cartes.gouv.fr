@@ -74,6 +74,19 @@ const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
                             <Accordion titleAs="h3" label={"Fichiers déposés"} defaultExpanded={true} className={fr.cx("fr-mt-2v")}>
                                 <UploadFileTree fileTree={reportQuery?.data?.input_upload?.file_tree} />
                             </Accordion>
+
+                            <Accordion titleAs="h3" label={"Tags"} className={fr.cx("fr-mt-2v")}>
+                                <pre
+                                    className={fr.cx("fr-text--sm", "fr-p-2v")}
+                                    style={{
+                                        whiteSpace: "pre-wrap",
+                                        wordBreak: "break-word",
+                                        backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+                                    }}
+                                >
+                                    <code>{JSON.stringify(reportQuery?.data?.input_upload?.tags, null, 2)}</code>
+                                </pre>
+                            </Accordion>
                         </Accordion>
 
                         <Accordion titleAs="h2" label={`${step++}. Vérifications`} defaultExpanded={true}>
