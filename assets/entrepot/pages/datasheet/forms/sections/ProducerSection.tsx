@@ -3,8 +3,6 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/SelectNext";
 import Tag from "@codegouvfr/react-dsfr/Tag";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { Controller, useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { useStyles } from "tss-react";
 
@@ -14,9 +12,9 @@ import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import ImageFieldUpload from "@/components/Input/ImageFieldUpload";
 import api from "@/entrepot/api";
 import type { GeocodingAddress } from "@/entrepot/api/geocoding";
+import useOrganizationNamesQuery from "@/hooks/queries/useOrganizationNamesQuery";
 import { useTranslation } from "@/i18n/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
-import { delta } from "@/utils";
 import { MetadataFormValues, PRODUCER_ROLES, type ProducerRole } from "../metadataSchema";
 
 /** Formats acceptés pour le logo producteur */
@@ -61,16 +59,7 @@ export default function ProducerSection() {
 
     const { css } = useStyles();
 
-    const { data: organizations } = useQuery({
-        queryKey: RQKeys.catalogs_organizations(),
-        queryFn: ({ signal }) => api.catalogs.getAllOrganizations({ signal }),
-        staleTime: delta.hours(10),
-    });
-
-    const organizationsOptions = useMemo(() => {
-        if (!organizations) return [];
-        return organizations.map((org) => org.name.trim()).toSorted();
-    }, [organizations]);
+    const { data: organizationsOptions = [] } = useOrganizationNamesQuery();
 
     return (
         <>
