@@ -109,6 +109,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
             $optionalTags = [
                 CommonTags::PRODUCER_SHORT => $content['producer_short'] ?? null,
                 CommonTags::PRODUCTION_DATE => $content['production_date'] ?? null,
+                CommonTags::ZONE => $content['zone'] ?? null,
             ];
             foreach ($optionalTags as $tagName => $value) {
                 if (is_string($value) && '' !== trim($value)) {
