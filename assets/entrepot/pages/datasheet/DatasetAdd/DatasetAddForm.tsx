@@ -116,6 +116,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
                 themes: values.themes,
                 production_date: datefnsFormat(values.production_date, "yyyy-MM-dd"),
                 production_year: values.production_date.getFullYear(),
+                zone: values.zone,
                 email_notification: values.email_notification,
             };
 

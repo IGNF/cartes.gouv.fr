@@ -135,6 +135,8 @@ export interface StoredData extends StoredDataPrivateDetailResponseDto {
         date?: string;
         /** thématiques séparées par « , » */
         theme?: string;
+        /** étendue spatiale (zone de téléchargement) */
+        zone?: string;
     };
 }
 export {
@@ -194,6 +196,8 @@ export type Upload = UploadPrivateDetailResponseDto & {
         date?: string;
         /** thématiques séparées par « , » */
         theme?: string;
+        /** étendue spatiale (zone de téléchargement) */
+        zone?: string;
     };
 };
 
