@@ -13,7 +13,13 @@ export default function DatasetAddBanners() {
                 description={
                     <>
                         {"Pour ajouter vos données raster "}
-                        <a className={fr.cx("fr-link")} {...externalLink("helpProducerGuideCreateDatasheet", "Consulter l’aide")}>
+                        <a
+                            className={fr.cx("fr-link")}
+                            style={{
+                                color: fr.colors.decisions.text.default.info.default,
+                            }}
+                            {...externalLink("helpProducerGuideCreateDatasheet", "Consulter l’aide")}
+                        >
                             Consulter l’aide
                         </a>
                     </>
@@ -24,10 +30,22 @@ export default function DatasetAddBanners() {
                 title="Ajouter vos données directement depuis vos outils :"
                 description={
                     <>
-                        <a className={fr.cx("fr-link", "fr-mr-2w")} {...externalLink("helpDeveloperGuideVectorFeed", "Depuis une API")}>
+                        <a
+                            className={fr.cx("fr-link", "fr-mr-2w")}
+                            style={{
+                                color: fr.colors.decisions.text.default.info.default,
+                            }}
+                            {...externalLink("helpDeveloperGuideVectorFeed", "Depuis une API")}
+                        >
                             Depuis une API
                         </a>
-                        <a className={fr.cx("fr-link")} {...externalLink("qgisPluginGeoplateforme", "Depuis QGIS")}>
+                        <a
+                            className={fr.cx("fr-link")}
+                            style={{
+                                color: fr.colors.decisions.text.default.info.default,
+                            }}
+                            {...externalLink("qgisPluginGeoplateforme", "Depuis QGIS")}
+                        >
                             Depuis QGIS
                         </a>
                     </>
