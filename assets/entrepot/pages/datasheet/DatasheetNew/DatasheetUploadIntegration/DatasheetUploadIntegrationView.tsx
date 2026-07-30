@@ -15,25 +15,17 @@ type IntegrationStepStatusBadgeProps = {
     status: string;
 };
 
+// waiting : pas d'entrée → badge gris sans severity
+const severityByStatus: Partial<Record<string, BadgeProps["severity"]>> = {
+    successful: "success",
+    in_progress: "info",
+    failed: "error",
+};
+
 const IntegrationStepStatusBadge: FC<IntegrationStepStatusBadgeProps> = ({ status }) => {
     const { t } = useTranslation("DatasheetUploadIntegration");
 
-    let badgeSeverity: BadgeProps["severity"] | undefined = undefined;
-    switch (status) {
-        case "successful":
-            badgeSeverity = "success";
-            break;
-        case "in_progress":
-            badgeSeverity = "info";
-            break;
-        case "failed":
-            badgeSeverity = "error";
-            break;
-        default:
-            // waiting : badge gris sans severity
-            badgeSeverity = undefined;
-            break;
-    }
+    const badgeSeverity = severityByStatus[status];
 
     // le DSFR impose l’icône de statut sur un badge à severity : pour in_progress, icône play-circle du design posée en enfant
     const inProgress = status === "in_progress";
@@ -89,21 +81,7 @@ const DatasheetUploadIntegrationView: FC<DatasheetUploadIntegrationViewProps> = 
                 <p className={cx(classes.continueText, fr.cx("fr-mt-3w", "fr-mb-0"))}>{t("continue_browsing_data_not_ready")}</p>
             )}
 
-            {(integrationStatus === "all_successful" || integrationStatus === "proc_int_launched") && upload?.tags?.datasheet_name !== undefined && (
-                <ButtonsGroup
-                    className={fr.cx("fr-mt-3w")}
-                    alignment="center"
-                    buttons={[
-                        {
-                            children: t("view_datasheet"),
-                            onClick: onDatasheetViewClick,
-                        },
-                    ]}
-                    inlineLayoutWhen="always"
-                />
-            )}
-
-            {integrationStatus === "at_least_one_failure" && upload?.tags?.datasheet_name !== undefined && (
+            {integrationStatus !== undefined && upload?.tags?.datasheet_name !== undefined && (
                 <ButtonsGroup
                     className={fr.cx("fr-mt-3w")}
                     alignment="center"
