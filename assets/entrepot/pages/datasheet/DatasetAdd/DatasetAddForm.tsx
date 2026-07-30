@@ -7,7 +7,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { useMemo, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { useStyles } from "tss-react";
 
 import { Upload } from "@/@types/app";
 import Main from "@/components/Layout/Main";
@@ -22,6 +21,7 @@ import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
 import DatasheetUploadIntegrationDialog from "../DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 import MetadataSection from "../forms/MetadataSection";
+import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
 import { buildDatasetAddSchema, datasetAddDefaultValues, type DatasetAddFormValues } from "./datasetAddSchema";
 import DatasetSection from "./sections/DatasetSection";
 import ProducerSection from "./sections/ProducerSection";
@@ -123,8 +123,6 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
 
     const onSubmit = handleSubmit((values) => addUploadMutation.mutate(values));
 
-    const { css, cx } = useStyles();
-
     return (
         <Main title={`Ajouter une donnée - ${datasheetName}`}>
             <h1 className={fr.cx("fr-mb-1w")}>Ajouter une donnée</h1>
@@ -142,22 +140,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
 
             <FormProvider {...form}>
                 <form onSubmit={onSubmit} noValidate>
-                    <div
-                        className={cx(
-                            fr.cx("fr-grid-row", "fr-grid-row--gutters"),
-                            css({
-                                ["& > section"]: {
-                                    padding: `${fr.spacing("6v")} !important`,
-                                    [fr.breakpoints.up("md")]: {
-                                        padding: `${fr.spacing("10v")} !important`,
-                                    },
-                                },
-                                ["& > section:not(:last-child)"]: {
-                                    borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
-                                },
-                            })
-                        )}
-                    >
+                    <MetadataSectionsContainer>
                         <MetadataSection title="Jeu de données">
                             <DatasetSection
                                 fileInputRef={fileInputRef}
@@ -194,7 +177,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
                                 )}
                             />
                         </MetadataSection>
-                    </div>
+                    </MetadataSectionsContainer>
 
                     <ButtonsGroup
                         buttons={[
