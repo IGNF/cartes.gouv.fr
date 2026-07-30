@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ReactNode, useMemo, useState } from "react";
 import { useStyles } from "tss-react";
 
-import { DatasheetDetailed, DatasheetUploadItem } from "@/@types/app";
+import { DatasheetDetailed } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import StoredDataStatusBadge from "@/components/Utils/Badges/StoredDataStatusBadge";
 import LoadingText from "@/components/Utils/LoadingText";
@@ -19,7 +19,7 @@ import useCommunityRights from "@/hooks/useCommunityRights";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
-import { formatDateFromISO, integrationProgressHasFailure, parseIntegrationProgress } from "@/utils";
+import { formatDateFromISO, getDatasheetPublicationsCount, parseIntegrationProgress } from "@/utils";
 import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetViewNext";
 import useDeleteUploadMutation from "../../../../../hooks/queries/useDeleteUploadMutation";
 import DatasetAddBanners from "./DatasetAddBanners";
@@ -35,8 +35,6 @@ type DatasetRow = {
     status: ReactNode;
     action: ReactNode;
 };
-
-const uploadHasFailure = (upload: DatasheetUploadItem): boolean => integrationProgressHasFailure(upload.tags.integration_progress);
 
 type DatasetTabNextProps = {
     datastoreId: string;
@@ -64,38 +62,35 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
         [datasheet, datasheetName]
     );
 
-    // livraisons affichées dans le tableau : traitement d'intégration pas encore lancé
-    // (dès qu'il est lancé, la donnée stockée existe et prend le relais dans le tableau)
-    const unfinishedUploads = useMemo(() => {
-        return datasheetUploads.filter((upload) => {
-            if (upload.tags.integration_progress === undefined) {
-                return true;
-            }
-
-            const progress = parseIntegrationProgress(upload.tags.integration_progress);
-            return progress !== null && progress["integration_processing"] === "waiting";
-        });
-    }, [datasheetUploads]);
-
-    // livraisons dont l'intégration tourne réellement : lancée, sans échec ni totalement réussie
-    const uploadsInProgress = useMemo(
+    // analyse du tag integration_progress, une seule fois par livraison
+    const parsedUploads = useMemo(
         () =>
-            datasheetUploads.filter((upload) => {
+            datasheetUploads.map((upload) => {
                 const progress = parseIntegrationProgress(upload.tags.integration_progress);
-                if (progress === null || progress["integration_processing"] === "waiting") {
-                    return false; // jamais lancée : proposée à la reprise dans le tableau
-                }
+                const statuses = Object.values(progress ?? {});
+                // pas encore lancée : tag absent ou étape d'intégration toujours en attente
+                const notLaunched = upload.tags.integration_progress === undefined || (progress !== null && progress["integration_processing"] === "waiting");
+                const failed = statuses.includes("failed");
 
-                const statuses = Object.values(progress);
-                return !statuses.includes("failed") && !statuses.every((status) => status === "successful");
+                return {
+                    upload,
+                    failed,
+                    notLaunched,
+                    // intégration réellement en cours : lancée, sans échec ni totalement réussie
+                    inProgress: progress !== null && !notLaunched && !failed && !statuses.every((status) => status === "successful"),
+                };
             }),
         [datasheetUploads]
     );
 
+    // livraisons affichées dans le tableau : traitement d'intégration pas encore lancé
+    // (dès qu'il est lancé, la donnée stockée existe et prend le relais dans le tableau)
+    const unfinishedUploads = useMemo(() => parsedUploads.filter(({ notLaunched }) => notLaunched), [parsedUploads]);
+
+    const hasUploadInProgress = parsedUploads.some(({ inProgress }) => inProgress);
+
     // publications existantes : supprimer la dernière livraison d'une fiche sans publication supprime la fiche entière
-    const nbPublications =
-        (datasheet?.vector_db_list?.length ?? 0) + (datasheet?.pyramid_vector_list?.length ?? 0) + (datasheet?.pyramid_raster_list?.length ?? 0);
-    const isLastUpload = unfinishedUploads.length === 1 && nbPublications === 0;
+    const isLastUpload = unfinishedUploads.length === 1 && getDatasheetPublicationsCount(datasheet) === 0;
 
     const { mutate: deleteUnfinishedUpload, isPending: isDeletingUpload } = useDeleteUploadMutation(datastoreId, datasheetName);
 
@@ -104,8 +99,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
             return [];
         }
 
-        const uploadRows: DatasetRow[] = unfinishedUploads.map((upload) => {
-            const failed = uploadHasFailure(upload);
+        const uploadRows: DatasetRow[] = unfinishedUploads.map(({ upload, failed }) => {
             return {
                 id: upload._id,
                 name: upload.name,
@@ -207,7 +201,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
 
     return (
         <>
-            {uploadsInProgress.length > 0 && (
+            {hasUploadInProgress && (
                 <Notice
                     className={fr.cx("fr-mb-2w")}
                     title="Donnée en cours de chargement"
