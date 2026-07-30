@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
@@ -190,6 +191,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     }, [showDataInfos, setFormValue]);
 
     const onSubmit = async (formData) => {
+        return;
+
         const dataFile = dataFileRef.current?.files?.[0];
 
         if (isValid && validateDataFile(dataFile)) {
@@ -301,6 +304,13 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 />
                 <h1 className={fr.cx("fr-m-0")}>{t("title", { datasheetName: datasheetName })}</h1>
             </div>
+            <Alert
+                className={fr.cx("fr-mb-4w")}
+                severity="warning"
+                title="Parcours en cours de refonte"
+                description="Ce parcours de dépôt est en cours de refonte et est temporairement désactivé. Il est conservé à titre de référence visuelle uniquement."
+                closable={false}
+            />
             <p>{tCommon("mandatory_fields")}</p>
             <Input
                 label={t("datasheet.name")}
@@ -413,6 +423,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     },
                     {
                         children: t("upload_file"),
+                        disabled: true,
                         onClick: () => {
                             const dataFile = dataFileRef.current?.files?.[0];
                             validateDataFile(dataFile);
