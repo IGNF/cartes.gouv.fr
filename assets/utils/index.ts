@@ -1,5 +1,6 @@
 export * from "./api";
 export * from "./browser";
+export * from "./datasheet";
 export * from "./format";
 export * from "./metadata";
 export * from "./lang";
