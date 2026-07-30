@@ -6,6 +6,8 @@ export const DATASET_NAME_MAX_LENGTH = 80;
 export const DATASET_DESCRIPTION_MAX_LENGTH = 250;
 export const PRODUCER_SHORT_MAX_LENGTH = 15;
 export const DATASET_MAX_FILE_SIZE = 2_000_000_000; // 2 Go
+/** limite Entrepôt : 99 caractères max par valeur de tag (les thématiques sont jointes par « , » dans un seul tag) */
+export const THEMES_TAG_MAX_LENGTH = 99;
 export const DATASET_FILE_EXTENSIONS = ["gpkg", "zip", "geojson", "csv", "sql"];
 
 type BuildDatasetAddSchemaOptions = {
@@ -40,7 +42,16 @@ export function buildDatasetAddSchema({ projections, onProjectionResolved }: Bui
                 .trim()
                 .uppercase()
                 .max(PRODUCER_SHORT_MAX_LENGTH, `L’acronyme ne peut pas dépasser ${PRODUCER_SHORT_MAX_LENGTH} caractères`),
-            themes: yup.array().of(yup.string().required()).min(1, "Sélectionnez au moins une thématique").required(),
+            themes: yup
+                .array()
+                .of(yup.string().required())
+                .min(1, "Sélectionnez au moins une thématique")
+                .test(
+                    "themes-tag-length",
+                    `Retirez des thématiques : la sélection dépasse la limite de ${THEMES_TAG_MAX_LENGTH} caractères`,
+                    (themes) => (themes ?? []).join(", ").length <= THEMES_TAG_MAX_LENGTH
+                )
+                .required(),
             production_date: yup
                 .date()
                 .typeError("La date de production est invalide")
