@@ -8,6 +8,21 @@ export const PRODUCER_SHORT_MAX_LENGTH = 15;
 /** limite Entrepôt : 99 caractères max par valeur de tag (les thématiques sont jointes par « , » dans un seul tag) */
 export const THEMES_TAG_MAX_LENGTH = 99;
 
+// résolutions EPSG en cours ou réussies, partagées entre validations (le resolver yup revalide tout le schéma à chaque déclenchement)
+const epsgResolutions = new Map<string, ReturnType<typeof api.epsg.getProjFromEpsg>>();
+
+const resolveEpsgProjection = (srid: string) => {
+    let resolution = epsgResolutions.get(srid);
+    if (!resolution) {
+        resolution = api.epsg.getProjFromEpsg(srid);
+        // échec (réseau, code inconnu) : retiré du cache pour permettre une nouvelle tentative
+        resolution.catch(() => epsgResolutions.delete(srid));
+        epsgResolutions.set(srid, resolution);
+    }
+
+    return resolution;
+};
+
 type BuildDatasetAddSchemaOptions = {
     /** projections EPSG actuellement proposées dans la liste déroulante */
     projections: Record<string, string>;
@@ -67,7 +82,7 @@ export function buildDatasetAddSchema({ projections, onProjectionResolved }: Bui
 
                         // projection absente de la liste par défaut : vérifie qu’il s’agit bien d’une projection EPSG connue
                         try {
-                            const proj = await api.epsg.getProjFromEpsg(srid);
+                            const proj = await resolveEpsgProjection(srid);
                             onProjectionResolved(srid, proj.name);
 
                             return true;
