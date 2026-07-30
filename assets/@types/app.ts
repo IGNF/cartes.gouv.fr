@@ -176,24 +176,14 @@ export interface PyramidRaster extends StoredData {
     type_infos?: StoredDataRok4PyramidRasterDetailsDto;
 }
 
-/** upload (livraison) */
+/** upload (livraison) — reprend les tags métier communs des données stockées */
 export type Upload = UploadPrivateDetailResponseDto & {
-    tags: {
-        datasheet_name?: string;
+    tags: StoredData["tags"] & {
         proc_int_id?: string;
         vectordb_id?: string;
         data_upload_path?: string;
         integration_progress?: string;
         integration_current_step?: string;
-        producer?: string;
-        producer_short?: string;
-        production_year?: string;
-        /** date de production de la donnée (AAAA-MM-JJ) */
-        date?: string;
-        /** thématiques séparées par « , » */
-        theme?: string;
-        /** étendue spatiale (zone de téléchargement) */
-        zone?: string;
     };
 };
 
