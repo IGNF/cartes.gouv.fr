@@ -294,7 +294,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
                             caption="Jeux de données"
                             noCaption
                             fixed
-                            headers={["Jeu de données", "Type", "Date de publication", "Statut", "Action"]}
+                            headers={["Jeu de données", "Type", "Date de création", "Statut", "Action"]}
                             data={filteredRows.map((row) => [
                                 row.name,
                                 <Badge
