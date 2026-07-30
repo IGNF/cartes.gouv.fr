@@ -6,6 +6,7 @@ import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { ChangeEventHandler, RefObject } from "react";
 import { createPortal } from "react-dom";
 import { useFormContext } from "react-hook-form";
+import { tss } from "tss-react";
 
 import Progress from "@/components/Utils/Progress";
 import { DATASET_FILE_EXTENSIONS } from "@/utils";
@@ -34,6 +35,8 @@ export default function DatasetSection({ fileInputRef, fileError, uploadInProgre
     // le fichier est porté par data_upload_path (renseigné après téléversement réussi)
     const uploadPathError = errors.data_upload_path?.message;
 
+    const { classes, cx } = useStyles();
+
     return (
         <div>
             <Upload
@@ -49,24 +52,11 @@ export default function DatasetSection({ fileInputRef, fileError, uploadInProgre
                 className={fr.cx("fr-input-group", "fr-mb-4v")}
             />
 
-            <div
-                className={fr.cx("fr-mb-4v")}
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    flex: "1",
-                    gap: "0.5rem",
-                }}
-            >
+            <div className={cx(classes.uploadFooter, fr.cx("fr-mb-4v"))}>
                 <Button
                     type="button"
                     priority="tertiary no outline"
-                    className={fr.cx("fr-link")}
-                    style={{
-                        color: fr.colors.decisions.text.default.info.default,
-                        borderBottom: `1px solid ${fr.colors.decisions.text.default.info.default}`,
-                        padding: 0,
-                    }}
+                    className={cx(classes.formatsHelpButton, fr.cx("fr-link"))}
                     onClick={() => formatsHelpModal.open()}
                     size="small"
                 >
@@ -118,3 +108,17 @@ export default function DatasetSection({ fileInputRef, fileError, uploadInProgre
         </div>
     );
 }
+
+const useStyles = tss.withName({ DatasetSection }).create({
+    uploadFooter: {
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        gap: "0.5rem",
+    },
+    formatsHelpButton: {
+        color: fr.colors.decisions.text.default.info.default,
+        borderBottom: `1px solid ${fr.colors.decisions.text.default.info.default}`,
+        padding: 0,
+    },
+});

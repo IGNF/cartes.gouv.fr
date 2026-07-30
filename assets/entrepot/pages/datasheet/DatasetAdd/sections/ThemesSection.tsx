@@ -5,6 +5,7 @@ import { getThematicCategories } from "@/utils/metadata";
 import { type DatasetAddFormValues } from "../datasetAddSchema";
 
 const thematicCategories = getThematicCategories();
+const thematicCategoryLabels = new Map(thematicCategories.map((category) => [category.code, category.text]));
 
 export default function ThemesSection() {
     const { control } = useFormContext<DatasetAddFormValues>();
@@ -18,8 +19,8 @@ export default function ThemesSection() {
                     <AutocompleteSelect
                         label="Thématiques"
                         hintText="Vous pouvez sélectionner plusieurs thématiques"
-                        options={thematicCategories.map((c) => c.code)}
-                        getOptionLabel={(option) => thematicCategories.find((c) => c.code === option)?.text ?? String(option)}
+                        options={thematicCategories.map((category) => category.code)}
+                        getOptionLabel={(option) => thematicCategoryLabels.get(option) ?? String(option)}
                         searchFilter={{ limit: 40 }}
                         state={error ? "error" : "default"}
                         stateRelatedMessage={error?.message}
