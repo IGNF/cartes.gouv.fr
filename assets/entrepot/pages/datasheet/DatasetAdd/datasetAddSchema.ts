@@ -1,6 +1,7 @@
 import * as yup from "yup";
 
 import api from "@/entrepot/api";
+import { regex } from "@/utils";
 
 export const DATASET_NAME_MAX_LENGTH = 80;
 export const DATASET_DESCRIPTION_MAX_LENGTH = 250;
@@ -38,7 +39,12 @@ export function buildDatasetAddSchema({ projections, onProjectionResolved }: Bui
                 .string()
                 .trim()
                 .required("Le nom du jeu de données est obligatoire")
-                .max(DATASET_NAME_MAX_LENGTH, `Le nom du jeu de données ne peut pas dépasser ${DATASET_NAME_MAX_LENGTH} caractères`),
+                .max(DATASET_NAME_MAX_LENGTH, `Le nom du jeu de données ne peut pas dépasser ${DATASET_NAME_MAX_LENGTH} caractères`)
+                // même contrainte que UploadAddDTO côté backend — garder les deux synchronisés
+                .matches(
+                    regex.public_name,
+                    "Le nom du jeu de données doit commencer par une lettre ou un underscore et ne contenir que des lettres non accentuées, chiffres, tirets, points ou underscores"
+                ),
             description: yup
                 .string()
                 .trim()
