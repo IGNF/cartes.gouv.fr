@@ -78,8 +78,20 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
         });
     }, [datasheetUploads]);
 
-    // livraisons dont l'intégration n'est pas terminée ni en échec (suivie depuis le dialogue d'intégration)
-    const uploadsInProgress = useMemo(() => datasheetUploads.filter((upload) => !uploadHasFailure(upload)), [datasheetUploads]);
+    // livraisons dont l'intégration tourne réellement : lancée, sans échec ni totalement réussie
+    const uploadsInProgress = useMemo(
+        () =>
+            datasheetUploads.filter((upload) => {
+                const progress = parseIntegrationProgress(upload.tags.integration_progress);
+                if (progress === null || progress["integration_processing"] === "waiting") {
+                    return false; // jamais lancée : proposée à la reprise dans le tableau
+                }
+
+                const statuses = Object.values(progress);
+                return !statuses.includes("failed") && !statuses.every((status) => status === "successful");
+            }),
+        [datasheetUploads]
+    );
 
     // publications existantes : supprimer la dernière livraison d'une fiche sans publication supprime la fiche entière
     const nbPublications =
