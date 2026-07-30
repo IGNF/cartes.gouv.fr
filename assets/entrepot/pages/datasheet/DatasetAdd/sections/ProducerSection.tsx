@@ -9,17 +9,17 @@ import { PRODUCER_SHORT_MAX_LENGTH, type DatasetAddFormValues } from "../dataset
 type ProducerSectionProps = {
     /** noms des organismes proposés en autocomplétion */
     organizationsOptions: string[];
-    /** valeur par défaut proposée : le nom du responsable de la donnée */
-    defaultProducer?: string;
 };
 
-export default function ProducerSection({ organizationsOptions, defaultProducer }: ProducerSectionProps) {
+export default function ProducerSection({ organizationsOptions }: ProducerSectionProps) {
     const {
         register,
         control,
-        formState: { errors },
+        formState: { errors, defaultValues },
     } = useFormContext<DatasetAddFormValues>();
 
+    // valeur par défaut proposée : le nom du responsable de la donnée (custodian des métadonnées)
+    const defaultProducer = defaultValues?.producer;
     const producer = useWatch({ control, name: "producer" });
     const producerChanged = Boolean(defaultProducer) && producer !== "" && producer !== defaultProducer;
 
