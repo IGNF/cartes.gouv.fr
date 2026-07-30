@@ -18,6 +18,7 @@ import api from "@/entrepot/api";
 import useOrganizationNamesQuery from "@/hooks/queries/useOrganizationNamesQuery";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
+import { applyApiValidationErrors } from "@/modules/setApiFormErrors";
 import { routes } from "@/router/router";
 import DatasheetUploadIntegrationDialog from "../DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 import MetadataSection from "../forms/MetadataSection";
@@ -67,6 +68,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
     const {
         handleSubmit,
         setValue,
+        setError,
         trigger,
         formState: { isValidating },
         control,
@@ -101,19 +103,12 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
 
     const addUploadMutation = useMutation<Upload, CartesApiException, DatasetAddFormValues>({
         mutationFn: (values) => {
+            // clés du payload = champs du formulaire (validés à l'identique par UploadAddDTO côté backend)
             const payload = {
-                data_name: datasheetName,
-                data_technical_name: values.name,
-                data_description: values.description,
-                data_srid: values.srid,
-                data_upload_path: values.data_upload_path,
-                producer: values.producer,
+                datasheet_name: datasheetName,
+                ...values,
                 producer_short: values.producer_short || undefined,
-                themes: values.themes,
                 production_date: datefnsFormat(values.production_date, "yyyy-MM-dd"),
-                production_year: values.production_date.getFullYear(),
-                zone: values.zone,
-                email_notification: values.email_notification,
             };
 
             return api.upload.add(datastoreId, payload);
@@ -121,6 +116,9 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
         onSuccess: () => {
             // l'intégration est suivie par le dialogue affiché ci-dessous, qui redirige vers l'onglet données à la fin
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+        },
+        onError: (error) => {
+            applyApiValidationErrors(error, setError);
         },
     });
 
