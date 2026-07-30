@@ -218,7 +218,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
                     })
                 )}
             >
-                <h2 className={fr.cx("fr-h5", "fr-mb-1w")}>Données</h2>
+                <h2 className={fr.cx("fr-h5", "fr-mb-10v")}>Données</h2>
 
                 <DatasetAddBanners />
 
