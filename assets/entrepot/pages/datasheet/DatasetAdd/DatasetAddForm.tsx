@@ -155,7 +155,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
                             />
                         </MetadataSection>
                         <MetadataSection title="Producteur">
-                            <ProducerSection organizationsOptions={organizationsOptions} defaultProducer={defaultProducer} />
+                            <ProducerSection organizationsOptions={organizationsOptions} />
                         </MetadataSection>
                         <MetadataSection title="Thématiques">
                             <ThemesSection />
