@@ -5,7 +5,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import Table from "@codegouvfr/react-dsfr/Table";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ReactNode, useMemo, useState } from "react";
 import { useStyles } from "tss-react";
 
@@ -21,6 +21,7 @@ import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
 import { formatDateFromISO, integrationProgressHasFailure, parseIntegrationProgress } from "@/utils";
 import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetViewNext";
+import useDeleteUploadMutation from "../../../../../hooks/queries/useDeleteUploadMutation";
 import DatasetAddBanners from "./DatasetAddBanners";
 
 type DatasetType = "vector" | "raster";
@@ -43,8 +44,6 @@ type DatasetTabNextProps = {
 };
 
 export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTabNextProps) {
-    const queryClient = useQueryClient();
-
     const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
 
     const { userRights, isSupervisor } = useCommunityRights();
@@ -98,18 +97,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
         (datasheet?.vector_db_list?.length ?? 0) + (datasheet?.pyramid_vector_list?.length ?? 0) + (datasheet?.pyramid_raster_list?.length ?? 0);
     const isLastUpload = unfinishedUploads.length === 1 && nbPublications === 0;
 
-    const { mutate: deleteUnfinishedUpload, isPending: isDeletingUpload } = useMutation({
-        mutationFn: (uploadId: string) => api.upload.remove(datastoreId, uploadId),
-        onSuccess(_, uploadId) {
-            queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet: DatasheetDetailed) => {
-                return {
-                    ...datasheet,
-                    upload_list: datasheet.upload_list?.filter((upload) => upload._id !== uploadId) ?? [],
-                };
-            });
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-        },
-    });
+    const { mutate: deleteUnfinishedUpload, isPending: isDeletingUpload } = useDeleteUploadMutation(datastoreId, datasheetName);
 
     const rows = useMemo<DatasetRow[]>(() => {
         if (!datasheet) {
