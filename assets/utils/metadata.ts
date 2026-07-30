@@ -3,9 +3,13 @@ import { Metadata } from "@/@types/app";
 import inspireKeywords from "@/data/thematic-inspire.json";
 import categories from "@/data/topic_categories.json";
 
-/** nom de l'organisme responsable de la donnée (producteur de rôle « custodian ») */
-export const getMetadataCustodianName = (metadata: Metadata | undefined): string | undefined =>
-    metadata?.csw_metadata?.producers?.find((producer) => producer.role === "custodian")?.organization_name;
+/** nom de l'organisme responsable de la donnée : producteur de rôle « custodian », à défaut le point de contact qui en tient lieu */
+export const getMetadataCustodianName = (metadata: Metadata | undefined): string | undefined => {
+    const producers = metadata?.csw_metadata?.producers;
+    const custodian = producers?.find((producer) => producer.role === "custodian") ?? producers?.find((producer) => producer.role === "pointOfContact");
+
+    return custodian?.organization_name;
+};
 
 export const getInspireKeywords = () => {
     // récupérer et applatir tous les sous-tableaux
