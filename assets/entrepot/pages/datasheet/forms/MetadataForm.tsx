@@ -14,6 +14,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { applyApiValidationErrors } from "@/modules/setApiFormErrors";
 import { delta } from "@/utils";
 import MetadataSection from "./MetadataSection";
+import MetadataSectionsContainer from "./MetadataSectionsContainer";
 import { MetadataFormValues, buildMetadataSchema, defaultMetadataValues } from "./metadataSchema";
 import DateSection from "./sections/DateSection";
 import DescriptionSection from "./sections/DescriptionSection";
@@ -131,22 +132,7 @@ export default function MetadataForm({
                             })
                         )}
                     >
-                        <div
-                            className={cx(
-                                fr.cx("fr-grid-row", "fr-grid-row--gutters"),
-                                css({
-                                    ["& > section"]: {
-                                        padding: `${fr.spacing("6v")} !important`,
-                                        [fr.breakpoints.up("md")]: {
-                                            padding: `${fr.spacing("10v")} !important`,
-                                        },
-                                    },
-                                    ["& > section:not(:last-child)"]: {
-                                        borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
-                                    },
-                                })
-                            )}
-                        >
+                        <MetadataSectionsContainer>
                             <MetadataSection title={t("section.description")}>
                                 <DescriptionSection isEditMode={mode === "edit"} existingThumbnailUrl={existingThumbnailUrl} />
                             </MetadataSection>
@@ -165,7 +151,7 @@ export default function MetadataForm({
                             <MetadataSection title={t("section.metadataInfo")}>
                                 <MetadataInfoSection />
                             </MetadataSection>
-                        </div>
+                        </MetadataSectionsContainer>
 
                         <div className={fr.cx("fr-container")}>{renderBottomActions?.({ isSubmitting })}</div>
                     </div>
