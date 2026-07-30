@@ -17,6 +17,12 @@ export default function SpatialReferenceSection({ projections }: SpatialReferenc
 
     const selectedSrid = watch("srid");
 
+    // la projection détectée au téléversement peut manquer dans la liste (résolution EPSG asynchrone échouée) : on l’affiche telle quelle plutôt qu’un select vide
+    const options = Object.entries(projections).map(([code, name]) => ({ label: name, value: code }));
+    if (selectedSrid && !(selectedSrid in projections)) {
+        options.unshift({ label: selectedSrid, value: selectedSrid });
+    }
+
     return (
         <div>
             <SelectNext
@@ -28,10 +34,7 @@ export default function SpatialReferenceSection({ projections }: SpatialReferenc
                     ...register("srid"),
                     value: selectedSrid,
                 }}
-                options={Object.entries(projections).map(([code, name]) => ({
-                    label: name,
-                    value: code,
-                }))}
+                options={options}
             />
         </div>
     );
