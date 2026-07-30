@@ -8,7 +8,8 @@ import { createPortal } from "react-dom";
 import { useFormContext } from "react-hook-form";
 
 import Progress from "@/components/Utils/Progress";
-import { DATASET_DESCRIPTION_MAX_LENGTH, DATASET_FILE_EXTENSIONS, DATASET_NAME_MAX_LENGTH, type DatasetAddFormValues } from "../datasetAddSchema";
+import { DATASET_FILE_EXTENSIONS } from "@/utils";
+import { DATASET_DESCRIPTION_MAX_LENGTH, DATASET_NAME_MAX_LENGTH, type DatasetAddFormValues } from "../datasetAddSchema";
 
 const formatsHelpModal = createModal({
     id: "dataset-add-formats-help-modal",

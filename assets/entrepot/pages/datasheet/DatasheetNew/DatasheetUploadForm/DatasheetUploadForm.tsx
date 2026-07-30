@@ -21,17 +21,21 @@ import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import defaultProjections from "../../../../../data/default_projections.json";
-import ignfProjections from "../../../../../data/ignf_projections.json";
 import { useTranslation } from "../../../../../i18n/i18n";
 import FileUploader from "../../../../../modules/FileUploader";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes, useRoute } from "../../../../../router/router";
-import { delta, getFileExtension, looksLikeShapefileComponent, regex } from "../../../../../utils";
+import {
+    DATASET_FILE_EXTENSIONS,
+    DATASET_MAX_FILE_SIZE,
+    delta,
+    getFileExtension,
+    looksLikeShapefileComponent,
+    mapIgnfToEpsg,
+    regex,
+} from "../../../../../utils";
 import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
-
-const maxFileSize = 2000000000; // 2 GB
-const fileExtensions = ["gpkg", "zip", "geojson", "csv", "sql"];
 
 const fileUploader = new FileUploader();
 
@@ -207,13 +211,13 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
             return false;
         }
 
-        if (!extension || !fileExtensions.includes(extension)) {
+        if (!extension || !DATASET_FILE_EXTENSIONS.includes(extension)) {
             setDataFileError(t("upload_extension_error", { filename: file.name }));
             return false;
         }
 
-        if (file.size > maxFileSize) {
-            setDataFileError(t("upload_max_size_error", { maxSize: maxFileSize }));
+        if (file.size > DATASET_MAX_FILE_SIZE) {
+            setDataFileError(t("upload_max_size_error", { maxSize: DATASET_MAX_FILE_SIZE }));
             return false;
         }
 
@@ -243,10 +247,10 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 fileUploader
                     .uploadComplete(uuid, file)
                     .then(async (data) => {
-                        const sridRaw = data?.srid;
-                        const sridMapped = typeof sridRaw === "string" && sridRaw !== "" && sridRaw in ignfProjections ? ignfProjections[sridRaw] : sridRaw;
+                        // projection déduite du fichier déposé (mapping IGNF → EPSG si nécessaire)
+                        const sridMapped = mapIgnfToEpsg(data?.srid);
 
-                        if (typeof sridMapped === "string" && sridMapped.trim() !== "") {
+                        if (sridMapped) {
                             setFormValue("data_srid", sridMapped, { shouldValidate: true });
                         } else {
                             setFormValue("data_srid", "", { shouldValidate: false, shouldDirty: false });
@@ -315,7 +319,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 hint={t("upload_hint")}
                 state={dataFileError === undefined ? "default" : "error"}
                 stateRelatedMessage={dataFileError}
-                nativeInputProps={{ onChange: postDataFile, ref: dataFileRef, accept: fileExtensions.map((ext) => `.${ext}`).join(",") }}
+                nativeInputProps={{ onChange: postDataFile, ref: dataFileRef, accept: DATASET_FILE_EXTENSIONS.map((ext) => `.${ext}`).join(",") }}
                 className={fr.cx("fr-input-group")}
             />
             {fileUploadInProgress && <Progress label={t("upload_running")} value={progressValue} max={progressMax} />}
