@@ -283,7 +283,7 @@ class UploadIntegrationWorkflow
             ],
         ];
 
-        if (isset($upload['tags']['email_notification']) && filter_var($upload['tags']['email_notification'], FILTER_VALIDATE_BOOLEAN)) {
+        if (isset($upload['tags'][CommonTags::EMAIL_NOTIFICATION]) && filter_var($upload['tags'][CommonTags::EMAIL_NOTIFICATION], FILTER_VALIDATE_BOOLEAN)) {
             /** @var \App\Security\User|null */
             $user = $this->security->getUser();
             $userEmail = $user?->getEmail();
@@ -325,7 +325,7 @@ class UploadIntegrationWorkflow
             CommonTags::PRODUCER_SHORT,
             CommonTags::PRODUCTION_YEAR,
             CommonTags::PRODUCTION_DATE,
-            CommonTags::CONFIG_THEME,
+            CommonTags::THEME_CATEGORIES,
             CommonTags::ZONE,
         ];
         foreach ($forwardedTags as $tagName) {
