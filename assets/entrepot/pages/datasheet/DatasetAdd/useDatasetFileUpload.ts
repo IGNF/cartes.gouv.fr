@@ -25,6 +25,8 @@ type UseDatasetFileUploadOptions = {
 /** téléversement du fichier de données (validation, envoi, progression, détection de projection) */
 export default function useDatasetFileUpload({ onFileSelected, onUploadSuccess }: UseDatasetFileUploadOptions) {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    // identifiant du téléversement courant : un nouveau fichier remplace le précédent, dont les callbacks sont alors ignorés
+    const currentUploadRef = useRef<string | undefined>(undefined);
     const [fileError, setFileError] = useState<string>();
     const [uploadInProgress, setUploadInProgress] = useState(false);
     const [progressValue, setProgressValue] = useState(0);
@@ -65,14 +67,21 @@ export default function useDatasetFileUpload({ onFileSelected, onUploadSuccess }
         }
 
         const uuid = uuidv4();
+        currentUploadRef.current = uuid;
         setUploadInProgress(true);
         setProgressValue(0);
         setProgressMax(file.size);
 
+        const isCurrent = () => currentUploadRef.current === uuid;
+
         fileUploader
-            .uploadFile(uuid, file, setProgressValue)
+            .uploadFile(uuid, file, (value) => isCurrent() && setProgressValue(value))
             .then(() => fileUploader.uploadComplete(uuid, file))
             .then((data) => {
+                if (!isCurrent()) {
+                    return;
+                }
+
                 // projection déduite du fichier déposé (mapping IGNF → EPSG si nécessaire)
                 const sridRaw = data?.srid;
                 const sridMapped = typeof sridRaw === "string" && sridRaw !== "" && sridRaw in ignfProjections ? ignfProjections[sridRaw] : sridRaw;
@@ -84,10 +93,14 @@ export default function useDatasetFileUpload({ onFileSelected, onUploadSuccess }
             })
             .catch((err) => {
                 console.error(err);
-                setFileError(err?.msg ?? "Le téléversement du fichier a échoué");
+                if (isCurrent()) {
+                    setFileError(err?.msg ?? "Le téléversement du fichier a échoué");
+                }
             })
             .finally(() => {
-                setUploadInProgress(false);
+                if (isCurrent()) {
+                    setUploadInProgress(false);
+                }
             });
     };
 
