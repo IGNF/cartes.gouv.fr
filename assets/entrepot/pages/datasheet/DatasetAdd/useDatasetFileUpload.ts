@@ -1,10 +1,8 @@
 import { ChangeEventHandler, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import ignfProjections from "@/data/ignf_projections.json";
 import FileUploader from "@/modules/FileUploader";
-import { getFileExtension, looksLikeShapefileComponent } from "@/utils";
-import { DATASET_FILE_EXTENSIONS, DATASET_MAX_FILE_SIZE } from "./datasetAddSchema";
+import { DATASET_FILE_EXTENSIONS, DATASET_MAX_FILE_SIZE, getFileExtension, looksLikeShapefileComponent, mapIgnfToEpsg } from "@/utils";
 
 const fileUploader = new FileUploader();
 
@@ -82,12 +80,9 @@ export default function useDatasetFileUpload({ onFileSelected, onUploadSuccess }
                     return;
                 }
 
-                // projection déduite du fichier déposé (mapping IGNF → EPSG si nécessaire)
-                const sridRaw = data?.srid;
-                const sridMapped = typeof sridRaw === "string" && sridRaw !== "" && sridRaw in ignfProjections ? ignfProjections[sridRaw] : sridRaw;
-
                 onUploadSuccess({
-                    srid: typeof sridMapped === "string" && sridMapped.trim() !== "" ? sridMapped : undefined,
+                    // projection déduite du fichier déposé (mapping IGNF → EPSG si nécessaire)
+                    srid: mapIgnfToEpsg(data?.srid),
                     uploadPath: String(data?.filename ?? ""),
                 });
             })

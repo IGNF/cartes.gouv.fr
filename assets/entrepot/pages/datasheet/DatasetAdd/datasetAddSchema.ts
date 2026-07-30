@@ -5,10 +5,8 @@ import api from "@/entrepot/api";
 export const DATASET_NAME_MAX_LENGTH = 80;
 export const DATASET_DESCRIPTION_MAX_LENGTH = 250;
 export const PRODUCER_SHORT_MAX_LENGTH = 15;
-export const DATASET_MAX_FILE_SIZE = 2_000_000_000; // 2 Go
 /** limite Entrepôt : 99 caractères max par valeur de tag (les thématiques sont jointes par « , » dans un seul tag) */
 export const THEMES_TAG_MAX_LENGTH = 99;
-export const DATASET_FILE_EXTENSIONS = ["gpkg", "zip", "geojson", "csv", "sql"];
 
 type BuildDatasetAddSchemaOptions = {
     /** projections EPSG actuellement proposées dans la liste déroulante */
