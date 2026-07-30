@@ -67,6 +67,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
     const {
         handleSubmit,
         setValue,
+        trigger,
         formState: { isValidating },
         control,
     } = form;
@@ -84,9 +85,11 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
         onFileSelected: () => setValue("data_upload_path", ""),
         onUploadSuccess: ({ srid, uploadPath }) => {
             if (srid) {
-                setValue("srid", srid, { shouldValidate: true });
+                setValue("srid", srid);
             }
-            setValue("data_upload_path", uploadPath, { shouldValidate: true });
+            setValue("data_upload_path", uploadPath);
+            // une seule passe de validation : le resolver yup revalide tout le schéma à chaque déclenchement
+            trigger(["srid", "data_upload_path"]);
         },
     });
 
