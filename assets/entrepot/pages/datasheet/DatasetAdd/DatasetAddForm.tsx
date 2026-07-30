@@ -3,7 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { useMemo, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
@@ -16,10 +16,10 @@ import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import defaultProjections from "@/data/default_projections.json";
 import api from "@/entrepot/api";
+import useOrganizationNamesQuery from "@/hooks/queries/useOrganizationNamesQuery";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
-import { delta } from "@/utils";
 import DatasheetUploadIntegrationDialog from "../DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 import MetadataSection from "../forms/MetadataSection";
 import { buildDatasetAddSchema, datasetAddDefaultValues, type DatasetAddFormValues } from "./datasetAddSchema";
@@ -92,14 +92,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
 
     // ----- Organismes proposés en autocomplétion -----
 
-    const { data: organizations } = useQuery({
-        queryKey: RQKeys.catalogs_organizations(),
-        queryFn: ({ signal }) => api.catalogs.getAllOrganizations({ signal }),
-        staleTime: delta.hours(10),
-        enabled: !fileUploadInProgress,
-    });
-
-    const organizationsOptions = useMemo(() => organizations?.map((org) => org.name.trim()).sort() ?? [], [organizations]);
+    const { data: organizationsOptions = [] } = useOrganizationNamesQuery({ enabled: !fileUploadInProgress });
 
     // ----- Déclaration de la livraison -----
 
