@@ -88,7 +88,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
 
     const { mutate: deleteUnfinishedUpload, isPending: isDeletingUpload } = useMutation({
         mutationFn: (uploadId: string) => api.upload.remove(datastoreId, uploadId),
-        onSuccess(uploadId) {
+        onSuccess(_, uploadId) {
             queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet: DatasheetDetailed) => {
                 return {
                     ...datasheet,
