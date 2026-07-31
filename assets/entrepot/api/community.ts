@@ -1,6 +1,6 @@
-import { CommunityPermission, UserRightsResponseDto } from "../../@types/app";
+import { UserRightsResponseDto } from "../../@types/app";
 import type { CommunityDetailResponseDto, CommunityUserResponseDto } from "../../@types/entrepot";
-import SymfonyRouting, { QueryParams } from "../../modules/Routing";
+import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 
 const get = (communityId: string, otherOptions: RequestInit = {}) => {
@@ -64,13 +64,6 @@ const removeMember = (communityId: string, userId: string) => {
     );
 };
 
-const getPermissions = (communityId: string, query: QueryParams, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_community_get_permissions", { communityId, ...query });
-    return jsonFetch<CommunityPermission[]>(url, {
-        ...otherOptions,
-    });
-};
-
-const community = { get, modify, getMembers, updateMember, removeMember, getPermissions };
+const community = { get, modify, getMembers, updateMember, removeMember };
 
 export default community;

@@ -204,15 +204,6 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($stats);
     }
 
-    #[Route('/me/keys/{keyId}/accesses/{accessId}/stats', name: 'key_access_stats', methods: ['GET'])]
-    public function getAccessStats(string $keyId, string $accessId, Request $request): JsonResponse
-    {
-        $query = $request->query->all();
-        $stats = $this->userApiService->getAccessStats($keyId, $accessId, $query)->resolve();
-
-        return $this->json($stats);
-    }
-
     #[Route('/me/add_to_sandbox', name: 'add_to_sandbox', methods: ['PUT'])]
     public function addMemberToSandbox(ServiceAccount $serviceAccount): JsonResponse
     {

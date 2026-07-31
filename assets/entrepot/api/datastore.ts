@@ -1,4 +1,3 @@
-import { HitStatisticsDto } from "@/@types/stats";
 import type { Datastore, DatastoreCleanupContentResponse, DatastoreEndpoint, DatastorePermission } from "../../@types/app";
 import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
@@ -82,13 +81,6 @@ const getCleanupStreamUrl = (datastoreId: string) => {
     return SymfonyRouting.generate("cartesgouvfr_api_datastore_cleanup_delete_content_stream", { datastoreId: datastoreId });
 };
 
-const getEndpointStats = (datastoreId: string, endpointId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_endpoint_stats", { datastoreId, endpointId, ...query });
-    return jsonFetch<HitStatisticsDto>(url, {
-        ...otherOptions,
-    });
-};
-
 const datastore = {
     get,
     getSandbox,
@@ -100,7 +92,6 @@ const datastore = {
     removePermission,
     cleanupGetContent,
     getCleanupStreamUrl,
-    getEndpointStats,
 };
 
 export default datastore;

@@ -116,14 +116,6 @@ final class UserApiService
         return $this->api->delete("users/me/keys/$keyId/accesses/$accessId");
     }
 
-    /**
-     * @param array<string,mixed> $query
-     */
-    public function getAccessStats(string $keyId, string $accessId, array $query = []): PaginatedPromise
-    {
-        return $this->api->requestAll("users/me/keys/$keyId/accesses/$accessId/stats", $query);
-    }
-
     public function leaveCommunity(string $communityId): ResponsePromise
     {
         return $this->api->delete("users/me/communities/$communityId");
