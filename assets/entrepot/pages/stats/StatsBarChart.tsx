@@ -18,7 +18,7 @@ export default function StatsBarChart(props: StatsBarChartProps) {
     const { t } = useTranslation("Stats");
 
     if (!stats.total?.begin_date) {
-        return <p className={fr.cx("fr-m-0")}>Aucune donnée trouvée</p>;
+        return <p className={fr.cx("fr-m-0")}>{t("no_data_found")}</p>;
     }
 
     return (

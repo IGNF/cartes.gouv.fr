@@ -7,13 +7,16 @@ import { HitStatisticsDto } from "@/@types/stats";
 import DateRangePicker from "@/components/Input/DateRangePicker";
 import Main from "@/components/Layout/Main";
 import Skeleton from "@/components/Utils/Skeleton";
+import { useSandboxDatastoreQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import { useTranslation } from "@/i18n";
 import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
 import { routes, useRoute } from "@/router/router";
 import DynamicParamSelector from "./DynamicParamSelector";
+import type { StatsScope, StatsScopeConfig } from "./stats.types";
 import StatsBarChart from "./StatsBarChart";
-import { statsConfig, StatsScope } from "./statsConfig";
+import { statsConfig } from "./statsConfig";
 
 function initDate(offsetMonths = 0): Date {
     const d = new Date();
@@ -24,12 +27,6 @@ function initDate(offsetMonths = 0): Date {
     return d;
 }
 
-function getActiveEntityKeys(scope: StatsScope): string[] {
-    const cfg = statsConfig[scope];
-    if (!cfg || cfg.disabled) return [];
-    return Object.keys(cfg.entities).filter((key) => !cfg.entities[key].disabled);
-}
-
 export default function Stats() {
     const { params } = useRoute();
     const scope = params?.["scope"] as StatsScope;
@@ -37,23 +34,35 @@ export default function Stats() {
     const { t } = useTranslation("Stats");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
-    const rawScopeConfig = statsConfig[scope];
-    const scopeConfig = rawScopeConfig?.disabled ? undefined : rawScopeConfig;
+    const scopeConfig: StatsScopeConfig | undefined = statsConfig[scope];
     const entities = scopeConfig?.entities ?? {};
-    const entityTypeKeys = Object.keys(entities).filter((key) => !entities[key].disabled);
-
+    const entityTypeKeys = Object.keys(entities);
     const scopeParam = scopeConfig?.param ?? null;
 
-    const [entityTypeKey, setEntityTypeKey] = useState(() => getActiveEntityKeys(scope)[0]);
+    const [entityTypeKey, setEntityTypeKey] = useState(() => Object.keys(statsConfig[scope]?.entities ?? {})[0]);
     const [resolvedParams, setResolvedParams] = useState<Record<string, string>>({});
 
     const [startDate, setStartDate] = useState<Date | undefined>(() => initDate(1));
     const [endDate, setEndDate] = useState<Date | undefined>(() => initDate());
 
     useEffect(() => {
-        setEntityTypeKey(getActiveEntityKeys(scope)[0]);
+        setEntityTypeKey(Object.keys(statsConfig[scope]?.entities ?? {})[0]);
         setResolvedParams({});
     }, [scope]);
+
+    // périmètre entrepôt : détection "aucun entrepôt" et exclusion du bac à sable
+    const isDatastoreScope = scope === "datastore";
+    const userQuery = useUserQuery();
+    const sandboxQuery = useSandboxDatastoreQuery();
+    const sandboxId = sandboxQuery.data?._id;
+
+    const nonSandboxDatastoreCount = useMemo(
+        () => (userQuery.data?.communities_member ?? []).filter((cm) => cm.community?.datastore && cm.community.datastore !== sandboxId).length,
+        [userQuery.data, sandboxId]
+    );
+    // fail-open : en cas d'erreur sandbox on n'exclut rien plutôt que de bloquer la page
+    const datastoreScopeReady = !isDatastoreScope || (!userQuery.isPending && (!sandboxQuery.isPending || sandboxQuery.isError));
+    const hasNoDatastore = isDatastoreScope && datastoreScopeReady && nonSandboxDatastoreCount === 0;
 
     const currentConfig = entities[entityTypeKey];
 
@@ -89,24 +98,27 @@ export default function Stats() {
         [startDate, endDate]
     );
 
+    // route + params dérivés des valeurs résolues (endpoint/offering pour le param service)
+    const request = currentConfig?.getStatsRequest(resolvedParams);
+
     const statsQuery = useQuery({
-        queryKey: [scope, entityTypeKey, "stats", currentConfig?.apiRoute, resolvedParams, dateQuery],
+        queryKey: [scope, entityTypeKey, "stats", request?.route, request?.routeParams, dateQuery],
         queryFn: ({ signal }) => {
-            const url = SymfonyRouting.generate(currentConfig!.apiRoute, { ...resolvedParams, ...dateQuery });
+            const url = SymfonyRouting.generate(request!.route, { ...request!.routeParams, ...dateQuery });
             return jsonFetch<HitStatisticsDto>(url, { signal });
         },
-        enabled: !!currentConfig && allParamsResolved && !!startDate && !!endDate,
+        enabled: !!request && allParamsResolved && !!startDate && !!endDate,
         refetchOnWindowFocus: false,
     });
 
     const entityTypeOptions = entityTypeKeys.map((key) => ({
         value: key,
-        label: entities[key].label,
+        label: entities[key].label(t),
     }));
 
     return (
         <Main
-            title={t("scope_title", { scope: scope })}
+            title={t("scope_title", { scope })}
             classes={{
                 container: fr.cx("fr-container", "fr-mb-4v"),
             }}
@@ -122,17 +134,21 @@ export default function Stats() {
                         linkProps: routes.stats_scope_selection().link,
                     },
                 ],
-                currentPageLabel: scopeConfig?.label ?? "",
+                currentPageLabel: t("scope_title", { scope }),
             }}
         >
-            <h1>{t("scope_title", { scope: scope })}</h1>
+            <h1>{t("scope_title", { scope })}</h1>
 
             <div className={fr.cx("fr-mb-3w")}>
                 {!currentConfig ? (
-                    <p className={fr.cx("fr-m-0")}>Aucune statistique disponible pour ce périmètre.</p>
+                    <p className={fr.cx("fr-m-0")}>{t("no_stats_for_scope")}</p>
+                ) : isDatastoreScope && !datastoreScopeReady ? (
+                    <Skeleton count={1} rectangleHeight={80} />
+                ) : hasNoDatastore ? (
+                    <p className={fr.cx("fr-m-0")}>{t("no_datastore_message")}</p>
                 ) : (
                     <>
-                        {scope === "datastore" && <p>Sélectionnez un de vos entrepôts pour accéder à des statistiques de consommation détaillées.</p>}
+                        {isDatastoreScope && <p>{t("datastore_intro")}</p>}
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             {scopeParam && (
                                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
@@ -141,6 +157,7 @@ export default function Stats() {
                                         resolvedDeps={resolvedParams}
                                         value={resolvedParams[scopeParam.key]}
                                         onChange={handleParamChange}
+                                        excludeValues={sandboxId ? [sandboxId] : undefined}
                                     />
                                 </div>
                             )}
@@ -148,7 +165,7 @@ export default function Stats() {
                             {entityTypeKeys.length > 1 && (
                                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                                     <Select
-                                        label="Type d'entité"
+                                        label={t("entity_select_label", { scope })}
                                         options={entityTypeOptions}
                                         nativeSelectProps={{
                                             value: entityTypeKey,
@@ -189,7 +206,7 @@ export default function Stats() {
                                     ) : statsQuery.data !== undefined ? (
                                         <StatsBarChart stats={statsQuery.data} startDate={startDate} endDate={endDate} />
                                     ) : (
-                                        <p className={fr.cx("fr-m-0")}>Pas de données</p>
+                                        <p className={fr.cx("fr-m-0")}>{t("no_data")}</p>
                                     )}
                                 </div>
                             </>
