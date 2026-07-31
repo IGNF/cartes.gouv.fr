@@ -1,55 +1,44 @@
 import { CartesUser, EndpointTypeEnum } from "@/@types/app";
-import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import { OfferingStandardListResponseDto } from "@/@types/entrepot";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
+import type { SelectOption, SelectParamDef, ServiceOption, ServiceParamDef, StatsRequest, StatsScope, StatsScopeConfig, StatsTranslator } from "./stats.types";
 
-export type StatsScope = "datastore" | "user" | "community";
+// ---------- valeur encodée du param service : "endpoint:<id>" | "offering:<id>" ----------
 
-export type SelectOption = { value: string; label: string };
+export type ServiceValue = { kind: "endpoint" | "offering"; id: string };
 
-export type ParamDef = {
-    key: string;
-    label: string;
-    queryKey: (deps: Record<string, string>) => string[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    queryFn: (deps: Record<string, string>, options?: RequestInit) => Promise<any>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    toOptions: (data: any) => SelectOption[];
-    dependsOn?: string[];
-};
+export function encodeServiceValue({ kind, id }: ServiceValue): string {
+    return `${kind}:${id}`;
+}
 
-export type StatsEntityConfig = {
-    label: string;
-    apiRoute: string;
-    params: ParamDef[];
-    disabled?: boolean;
-};
+export function parseServiceValue(value: string | undefined): ServiceValue | undefined {
+    if (!value) return undefined;
+    const sep = value.indexOf(":");
+    if (sep === -1) return undefined;
+    const kind = value.slice(0, sep);
+    const id = value.slice(sep + 1);
+    return (kind === "endpoint" || kind === "offering") && id !== "" ? { kind, id } : undefined;
+}
 
-export type StatsScopeConfig = {
-    label: string;
-    desc: string;
-    disabled?: boolean;
-    param?: ParamDef | null; // sélecteur de périmètre (Entrepôt/Communauté), affiché en premier ; null ou absent pour le périmètre user
-    entities: Record<string, StatsEntityConfig>;
-};
-
-// Helper : inférence de type à l'écriture, efface le générique dans ParamDef
+// Helper : inférence de type à l'écriture, efface le générique dans SelectParamDef
 function p<T>(def: {
     key: string;
-    label: string;
+    label: (t: StatsTranslator) => string;
     queryKey: (deps: Record<string, string>) => string[];
     queryFn: (deps: Record<string, string>, options?: RequestInit) => Promise<T>;
-    toOptions: (data: T) => SelectOption[];
+    toOptions: (data: T, t: StatsTranslator) => SelectOption[];
     dependsOn?: string[];
-}): ParamDef {
-    return def;
+}): SelectParamDef {
+    return { kind: "select", ...def };
 }
 
 const datastoreIdParam = p({
     key: "datastoreId",
-    label: "Entrepôt",
+    label: (t) => t("param_datastore_label"),
     queryKey: () => RQKeys.user_me(),
     queryFn: (_, options) => api.user.getMe(options),
+    // l'exclusion de l'entrepôt bac à sable se fait dans Stats.tsx (prop excludeValues)
     toOptions: (user: CartesUser | null) =>
         (user?.communities_member ?? [])
             .filter((cm) => cm.community?.datastore !== null && cm.community?.datastore !== undefined)
@@ -57,56 +46,12 @@ const datastoreIdParam = p({
             .sort((a, b) => a.label.localeCompare(b.label)),
 });
 
-const communityIdParam = p({
-    key: "communityId",
-    label: "Communauté",
-    queryKey: () => RQKeys.user_me(),
-    queryFn: (_, options) => api.user.getMe(options),
-    toOptions: (user: CartesUser | null) =>
-        (user?.communities_member ?? [])
-            .filter((cm) => cm.community !== undefined && cm.rights?.includes(CommunityMemberDtoRightsEnum.COMMUNITY))
-            .map((cm) => ({ value: cm.community!._id, label: cm.community!.name }))
-            .sort((a, b) => a.label.localeCompare(b.label)),
-});
-
-const supportedServiceTypes: EndpointTypeEnum[] = [EndpointTypeEnum.WFS, EndpointTypeEnum.WMSRASTER, EndpointTypeEnum.WMSVECTOR, EndpointTypeEnum.WMTSTMS];
-const endpointIdParam = p({
-    key: "endpointId",
-    label: "Type de service",
-    dependsOn: ["datastoreId"],
-    queryKey: ({ datastoreId }) => RQKeys.datastore(datastoreId),
-    queryFn: ({ datastoreId }, options) => api.datastore.get(datastoreId, options),
-    toOptions: (datastore) =>
-        (datastore.endpoints ?? [])
-            .filter((ep) => supportedServiceTypes.includes(ep.endpoint.type))
-            .sort((a, b) => a.endpoint.type.localeCompare(b.endpoint.type) || (a.endpoint.open === b.endpoint.open ? 0 : a.endpoint.open ? -1 : 1))
-            .map((ep) => ({ value: ep.endpoint._id, label: `${ep.endpoint.type} ${ep.endpoint.open ? "public" : "privé"}` })),
-});
-
-const offeringIdParam = p({
-    key: "offeringId",
-    label: "Offre",
-    dependsOn: ["datastoreId"],
-    queryKey: ({ datastoreId }) => RQKeys.datastore_offering_list(datastoreId),
-    queryFn: ({ datastoreId }, options) => api.service.getOfferings(datastoreId, {}, options),
-    toOptions: (offerings) => offerings.map((o) => ({ value: o._id, label: o.layer_name })).sort((a, b) => a.label.localeCompare(b.label)),
-});
-
 const datastorePermissionIdParam = p({
     key: "permissionId",
-    label: "Permission",
+    label: (t) => t("param_permission_label"),
     dependsOn: ["datastoreId"],
     queryKey: ({ datastoreId }) => RQKeys.datastore_permissions(datastoreId),
     queryFn: ({ datastoreId }, options) => api.datastore.getPermissions(datastoreId, {}, options),
-    toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })).sort((a, b) => a.label.localeCompare(b.label)),
-});
-
-const communityPermissionIdParam = p({
-    key: "permissionId",
-    label: "Permission",
-    dependsOn: ["communityId"],
-    queryKey: ({ communityId }) => RQKeys.community_permissions(communityId),
-    queryFn: ({ communityId }, options) => api.community.getPermissions(communityId, {}, options),
     toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })).sort((a, b) => a.label.localeCompare(b.label)),
 });
 
@@ -116,7 +61,7 @@ const userPermissionQuery = {
 };
 const userPermissionIdParam = p({
     key: "permissionId",
-    label: "Permission",
+    label: (t) => t("param_permission_label"),
     queryKey: () => RQKeys.my_permissions(userPermissionQuery),
     queryFn: (_, options) => api.user.getMyPermissions(userPermissionQuery, options),
     toOptions: (perms) => perms.map((perm) => ({ value: perm._id, label: perm.licence || perm._id })).sort((a, b) => a.label.localeCompare(b.label)),
@@ -124,87 +69,120 @@ const userPermissionIdParam = p({
 
 const userKeyIdParam = p({
     key: "keyId",
-    label: "Clé",
+    label: (t) => t("param_key_label"),
     queryKey: () => RQKeys.my_keys(),
     queryFn: (_, options) => api.user.getMyKeys(options),
     toOptions: (keys) => keys.map((key) => ({ value: key._id, label: key.name })).sort((a, b) => a.label.localeCompare(b.label)),
 });
 
-const userKeyAccessIdParam = p({
-    key: "accessId",
-    label: "Accès",
-    dependsOn: ["keyId"],
-    queryKey: ({ keyId }) => RQKeys.my_key(keyId),
-    queryFn: ({ keyId }, options) => api.user.getMyKeyDetailedWithAccesses(keyId, options),
-    toOptions: (key) =>
-        (key.accesses ?? []).map((access) => ({ value: access._id, label: access.offering.layer_name })).sort((a, b) => a.label.localeCompare(b.label)),
-});
+// ---------- sélecteur Service fusionné (offerings + agrégats endpoint) ----------
+
+const supportedServiceTypes: string[] = [EndpointTypeEnum.WFS, EndpointTypeEnum.WMSRASTER, EndpointTypeEnum.WMSVECTOR, EndpointTypeEnum.WMTSTMS];
+
+// La liste "detailed" est une seule requête (fields=...), chaque offering porte type, open et endpoint {_id, name}
+export function buildServiceOptions(offerings: OfferingStandardListResponseDto[], t: StatsTranslator): ServiceOption[] {
+    const eligible = offerings.filter((o) => supportedServiceTypes.includes(o.type) && o.endpoint?._id);
+
+    // un groupe par endpoint : l'agrégat "tous les X" en 1ʳᵉ option, puis les services par ordre alphabétique
+    const byEndpoint = new Map<string, OfferingStandardListResponseDto[]>();
+    for (const o of eligible) {
+        byEndpoint.set(o.endpoint._id, [...(byEndpoint.get(o.endpoint._id) ?? []), o]);
+    }
+
+    const groups = [...byEndpoint.values()]
+        .map((groupOfferings) => ({
+            endpointId: groupOfferings[0].endpoint._id,
+            endpointName: groupOfferings[0].endpoint.name,
+            type: groupOfferings[0].type as string,
+            open: groupOfferings[0].open,
+            offerings: groupOfferings,
+        }))
+        .sort((a, b) => a.type.localeCompare(b.type) || Number(b.open) - Number(a.open));
+
+    // deux endpoints de même type et visibilité : suffixer avec le nom de l'endpoint pour désambiguïser
+    const labelCounts = new Map<string, number>();
+    groups.forEach((g) => labelCounts.set(`${g.type}|${g.open}`, (labelCounts.get(`${g.type}|${g.open}`) ?? 0) + 1));
+
+    return groups.flatMap((g) => {
+        const baseLabel = t("service_group_label", { type: g.type, open: g.open });
+        const group = (labelCounts.get(`${g.type}|${g.open}`) ?? 0) > 1 ? `${baseLabel} — ${g.endpointName}` : baseLabel;
+        return [
+            { kind: "endpoint" as const, id: g.endpointId, label: t("service_aggregate_label", { type: g.type, open: g.open }), group },
+            ...g.offerings
+                .slice()
+                .sort((a, b) => a.layer_name.localeCompare(b.layer_name))
+                .map((o) => ({ kind: "offering" as const, id: o._id, label: o.layer_name, group })),
+        ];
+    });
+}
+
+const serviceQuery = { detailed: true };
+const serviceParam: ServiceParamDef = {
+    kind: "service",
+    key: "service",
+    label: (t) => t("param_service_label"),
+    dependsOn: ["datastoreId"],
+    queryKey: ({ datastoreId }) => RQKeys.datastore_offering_list(datastoreId, serviceQuery),
+    queryFn: ({ datastoreId }, options) => api.service.getOfferings(datastoreId, serviceQuery, options),
+    toOptions: buildServiceOptions,
+};
+
+// ---------- requêtes de stats ----------
+
+function simpleRequest(route: string, paramKeys: string[]) {
+    return (resolved: Record<string, string>): StatsRequest | undefined => {
+        const routeParams: Record<string, string> = {};
+        for (const key of paramKeys) {
+            if (!resolved[key]) return undefined;
+            routeParams[key] = resolved[key];
+        }
+        return { route, routeParams };
+    };
+}
+
+function serviceRequest({ datastoreId, service }: Record<string, string>): StatsRequest | undefined {
+    const parsed = parseServiceValue(service);
+    if (!datastoreId || !parsed) return undefined;
+    return parsed.kind === "endpoint"
+        ? { route: "cartesgouvfr_api_datastore_get_endpoint_stats", routeParams: { datastoreId, endpointId: parsed.id } }
+        : { route: "cartesgouvfr_api_service_get_service_stats", routeParams: { datastoreId, offeringId: parsed.id } };
+}
+
+// ---------- configuration : l'ordre des clés d'entités définit l'entité par défaut ----------
 
 export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
     datastore: {
-        label: "Statistiques par entrepôt",
-        desc: "Statistiques de consommation de mes entrepôts",
         param: datastoreIdParam,
         entities: {
-            endpoint: {
-                label: "Type de service",
-                apiRoute: "cartesgouvfr_api_datastore_get_endpoint_stats",
-                params: [endpointIdParam],
-            },
-            offering: {
-                label: "Services",
-                apiRoute: "cartesgouvfr_api_service_get_service_stats",
-                params: [offeringIdParam],
+            service: {
+                label: (t) => t("entity_datastore_service"),
+                params: [serviceParam],
+                getStatsRequest: serviceRequest,
             },
             permission: {
-                label: "Permissions",
-                apiRoute: "cartesgouvfr_api_datastore_get_permission_stats",
+                label: (t) => t("entity_datastore_permission"),
                 params: [datastorePermissionIdParam],
-            },
-        },
-    },
-    community: {
-        label: "Statistiques par communauté",
-        desc: "Statistiques de consommation de mes communautés",
-        disabled: true, // statistiques de communauté désactivées temporairement (issue #1032)
-        param: communityIdParam,
-        entities: {
-            community: {
-                label: "Communautés",
-                apiRoute: "cartesgouvfr_api_community_get_stats",
-                params: [],
-            },
-            permission: {
-                label: "Permissions",
-                apiRoute: "cartesgouvfr_api_community_get_permission_stats",
-                params: [communityPermissionIdParam],
+                getStatsRequest: simpleRequest("cartesgouvfr_api_datastore_get_permission_stats", ["datastoreId", "permissionId"]),
             },
         },
     },
     user: {
-        label: "Moi-même",
-        desc: "Mes statistiques personnelles de consommation",
         param: null,
         entities: {
             me: {
-                label: "Moi-même",
-                apiRoute: "cartesgouvfr_api_user_me_stats",
+                label: (t) => t("entity_user_me"),
                 params: [],
+                getStatsRequest: simpleRequest("cartesgouvfr_api_user_me_stats", []),
             },
             permission: {
-                label: "Permissions",
-                apiRoute: "cartesgouvfr_api_user_permission_stats",
+                label: (t) => t("entity_user_permission"),
                 params: [userPermissionIdParam],
+                getStatsRequest: simpleRequest("cartesgouvfr_api_user_permission_stats", ["permissionId"]),
             },
             key: {
-                label: "Clés",
-                apiRoute: "cartesgouvfr_api_user_key_stats",
+                label: (t) => t("entity_user_key"),
                 params: [userKeyIdParam],
-            },
-            key_access: {
-                label: "Accès de clé",
-                apiRoute: "cartesgouvfr_api_user_key_access_stats",
-                params: [userKeyIdParam, userKeyAccessIdParam],
+                getStatsRequest: simpleRequest("cartesgouvfr_api_user_key_stats", ["keyId"]),
             },
         },
     },
