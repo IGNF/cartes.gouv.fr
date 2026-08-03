@@ -190,6 +190,20 @@ const removeElementsWithClassesKeepChildren = (document, classes = []) => {
 };
 
 /**
+ * Découpe une candidate srcset ("<url> <descriptor>") en tolérant les espaces non encodés dans l'URL :
+ * le descriptor est le dernier token uniquement s'il a la forme "325w" ou "2x", le reste est l'URL.
+ * Voir : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#srcset
+ *
+ * @param {string} candidate
+ * @returns {{url: string, descriptor: string|undefined}}
+ */
+const parseSrcsetCandidate = (candidate) => {
+    const tokens = candidate.trim().split(/\s+/);
+    const descriptor = tokens.length > 1 && /^\d+(\.\d+)?[wx]$/.test(tokens.at(-1)) ? tokens.pop() : undefined;
+    return { url: tokens.join(" "), descriptor };
+};
+
+/**
  * Télécharger les img et réécrire l'URL des img
  *
  * @param {HTMLElement} document
@@ -203,20 +217,16 @@ const downloadAllImages = async (document) => {
 
         // srcset
         if (img.srcset && img.srcset.length > 0) {
-            // Chaque candidate srcset est de la forme "<url> <descriptor>" (ex. "/img.png 325w").
-            // On split d'abord sur ", " pour séparer les candidates, puis on trim et on split sur
-            // les espaces/retours à la ligne pour séparer l'URL du descriptor.
-            // L'URL est ensuite encodée via toGatewayUrl() pour éviter que les espaces dans les
-            // noms de fichiers cassent le parsing du srcset côté navigateur.
+            // Les candidates sont séparées par ", " ; l'URL réécrite est encodée via toGatewayUrl()
+            // pour que les espaces dans les noms de fichiers ne cassent pas le srcset côté navigateur
             const srcSet = img.srcset.split(", ");
 
             const newSrcSet = await withConcurrency(srcSet, async (src) => {
-                // split pour séparer l'URL et le descriptor, voir : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#srcset
-                const [originalImgPath, descriptor] = src.trim().split(/\s+/);
+                const { url: originalImgPath, descriptor } = parseSrcsetCandidate(src);
 
                 const newSrc = await downloadFile(originalImgPath);
 
-                // reconstitution de l'URL
+                // reconstitution de la candidate
                 return toGatewayUrl(newSrc) + (descriptor ? " " + descriptor : "");
             });
 
@@ -241,6 +251,24 @@ const downloadAllDownloadableFiles = async (document) => {
         }
     });
 };
+
+/**
+ * Décode un chemin segment par segment ; un segment mal formé (ex. "%" isolé) est conservé tel quel
+ * au lieu de faire échouer tout le run avec une URIError.
+ *
+ * @param {string} path
+ */
+const safeDecodePath = (path) =>
+    path
+        .split("/")
+        .map((segment) => {
+            try {
+                return decodeURI(segment);
+            } catch (_) {
+                return segment;
+            }
+        })
+        .join("/");
 
 /**
  * Convertit un chemin de fichier local téléchargé en URL passerelle S3 correctement encodée.
@@ -283,7 +311,7 @@ const downloadFile = (originalFilePath) => {
  */
 const downloadFileToDisk = async (url) => {
     let newFilePath = normalize(join(OUTPUT_DIR, "media", url.pathname.replace("/sites/default/files", "")));
-    newFilePath = decodeURI(newFilePath);
+    newFilePath = safeDecodePath(newFilePath);
 
     // Écriture atomique : on télécharge vers un fichier temporaire .part, renommé uniquement si complet (#1089)
     const partFilePath = `${newFilePath}.part`;
