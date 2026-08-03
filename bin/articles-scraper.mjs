@@ -2,14 +2,14 @@
 
 import { execFile } from "child_process";
 import { createWriteStream } from "fs";
-import { mkdir, readFile, rm, writeFile } from "fs/promises";
-import { HttpsProxyAgent } from "https-proxy-agent";
+import { mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
 import { JSDOM } from "jsdom";
-import fetch from "node-fetch";
 import { styleText, format as utilFormat } from "node:util";
 import { dirname, join, normalize, resolve } from "path";
 import { format, resolveConfig } from "prettier";
+import { Readable } from "stream";
 import { pipeline } from "stream/promises";
+import { fetch, ProxyAgent } from "undici";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
 
@@ -37,6 +37,12 @@ const RUN_HISTORY_REMOTE_FILE = `${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles/
 const MAX_HISTORY_ENTRIES = 10;
 
 const HTTP_PROXY = process.env.HTTP_PROXY;
+
+// Dispatcher unique au niveau module : réutilisation des connexions via le proxy
+const proxyDispatcher = HTTP_PROXY ? new ProxyAgent(HTTP_PROXY) : undefined;
+
+// Délai maximal d'une requête (connexion + corps) pour éviter un cronjob suspendu indéfiniment
+const FETCH_TIMEOUT = 60_000;
 
 const formatArgs = (args) => (args.length === 1 ? String(args[0]) : utilFormat(...args));
 
@@ -257,19 +263,43 @@ const downloadFile = async (originalFilePath) => {
     let newFilePath = normalize(join(OUTPUT_DIR, "media", url.pathname.replace("/sites/default/files", "")));
     newFilePath = decodeURI(newFilePath);
 
-    logger.log(`Downloading file from ${url.href}`);
+    // Écriture atomique : on télécharge vers un fichier temporaire .part, renommé uniquement si complet (#1089)
+    const partFilePath = `${newFilePath}.part`;
 
-    const response = await withRetry(async () => {
-        const res = await fetch(url.href, getFetchOptions());
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        }
-        return res;
-    });
+    logger.log(`Downloading file from ${url.href}`);
 
     try {
         await ensureDirectoryExists(newFilePath);
-        await pipeline(response.body, createWriteStream(newFilePath));
+
+        // Le retry couvre le fetch ET l'écriture : une troncature du flux est retentée
+        await withRetry(async () => {
+            const response = await fetch(url.href, getFetchOptions());
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            if (!response.body) {
+                throw new Error(`Empty response body (HTTP ${response.status})`);
+            }
+
+            try {
+                await pipeline(Readable.fromWeb(response.body), createWriteStream(partFilePath));
+
+                // Défense en profondeur : taille écrite comparée au Content-Length annoncé
+                const contentLength = parseInt(response.headers.get("content-length"));
+                if (!isNaN(contentLength)) {
+                    const { size } = await stat(partFilePath);
+                    if (size !== contentLength) {
+                        throw new Error(`Truncated download: expected ${contentLength} bytes, got ${size}`);
+                    }
+                }
+            } catch (error) {
+                await rm(partFilePath, { force: true });
+                throw error;
+            }
+        });
+
+        // Un fichier incomplet n'atteint jamais son chemin final, donc jamais le S3
+        await rename(partFilePath, newFilePath);
 
         logger.log(`File saved to ${newFilePath}`);
         stats.files.downloaded++;
@@ -282,15 +312,13 @@ const downloadFile = async (originalFilePath) => {
 };
 
 const getFetchOptions = () => {
-    const options = {};
-
-    if (HTTP_PROXY) {
-        options.agent = new HttpsProxyAgent(HTTP_PROXY);
-    }
+    const options = {
+        dispatcher: proxyDispatcher,
+        signal: AbortSignal.timeout(FETCH_TIMEOUT),
+    };
 
     if (ARTICLES_CMS_USERNAME && ARTICLES_CMS_PASSWORD) {
         options.headers = {
-            ...options?.headers,
             Authorization: `Basic ${btoa(ARTICLES_CMS_USERNAME, ARTICLES_CMS_PASSWORD)}`,
         };
     }
@@ -409,7 +437,8 @@ const pushHistoryToS3 = async () => {
 
 const syncS3 = async () => {
     const destination = `${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles`;
-    const args = ["sync", OUTPUT_DIR, destination];
+    // Exclusion des fichiers temporaires .part au cas où un crash en laisserait un résiduel
+    const args = ["sync", OUTPUT_DIR, destination, "--exclude", "*.part"];
     const command = `rclone ${args.join(" ")}`;
 
     try {

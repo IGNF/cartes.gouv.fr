@@ -6,8 +6,8 @@
     },
     "dependencies": {
         "jsdom": "^28.0.0",
-        "node-fetch": "^3.3.2",
-        "prettier": "^3.0.0"
+        "prettier": "^3.0.0",
+        "undici": "^7.29.0"
     },
     "devDependencies": {
         "@codegouvfr/react-dsfr": "^1.17.0",
@@ -63,7 +63,6 @@
         "geostyler-qgis-parser": "^4.0.2",
         "geostyler-sld-parser": "^9.0.2",
         "globals": "^17.0.0",
-        "https-proxy-agent": "^7.0.6",
         "husky": "^9.0.11",
         "i18nifty": "^4.0.0",
         "intl-messageformat": "^11.0.0",
