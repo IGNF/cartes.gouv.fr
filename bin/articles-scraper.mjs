@@ -298,6 +298,23 @@ const getFetchOptions = () => {
     return options;
 };
 
+/**
+ * Récupère une page HTML avec retry et contrôle du statut HTTP, et renvoie son document parsé
+ *
+ * @param {string} url
+ * @returns {Promise<Document>}
+ */
+const fetchDocument = async (url) =>
+    withRetry(async () => {
+        const response = await fetch(url, getFetchOptions());
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText} (${url})`);
+        }
+
+        const content = await response.text();
+        return new JSDOM(content).window.document;
+    });
+
 const prettify = async (string) => {
     const options = await resolveConfig(resolve(join(__dirname, "..", ".prettierrc")));
     return await format(string, {
@@ -422,10 +439,7 @@ const cleanOutputDir = async () => {
  * Renvoie les numéros de page de début et de fin. La pagination commence à 0.
  */
 const getPageNumbers = async (url) => {
-    const response = await fetch(url, getFetchOptions());
-
-    const content = await response.text();
-    const { document } = new JSDOM(content).window;
+    const document = await fetchDocument(url);
 
     // Lecture du contenu du main
     const $main = document.querySelector("main");
@@ -435,16 +449,21 @@ const getPageNumbers = async (url) => {
     try {
         const $navPaginationUl = $main.querySelector("nav.fr-pagination>.fr-pagination__list");
         const navPagLastChild = $navPaginationUl.lastElementChild.querySelector("a");
-        lastPage = new URL(url + navPagLastChild.href).searchParams.get("page");
+        lastPage = parseInt(new URL(navPagLastChild.href, url).searchParams.get("page"));
     } catch (_) {
         // Si la pagination n'existe pas, on considère qu'il n'y a qu'une seule page
+    }
+
+    if (isNaN(lastPage)) {
+        logger.warn(`Could not determine the last page number on ${url}, only the first page will be processed.`);
+        lastPage = 0;
     }
 
     logger.info(`First page: ${firstPage}, last page: ${lastPage}`);
 
     return {
-        firstPage: parseInt(firstPage),
-        lastPage: parseInt(lastPage),
+        firstPage,
+        lastPage,
     };
 };
 
@@ -468,10 +487,7 @@ const processTagsInDocument = async (document) => {
 const processArticlesIndex = async (baseUrl, page = 0, outputSubDir = "list") => {
     const url = `${baseUrl}/?page=${page}`;
     logger.log(`Fetching articles index from url ${url}`);
-    const response = await fetch(url, getFetchOptions());
-
-    const content = await response.text();
-    const { document } = new JSDOM(content).window;
+    const document = await fetchDocument(url);
 
     // Lecture du contenu du main
     const $main = document.querySelector("main");
@@ -510,10 +526,7 @@ const processArticlesIndex = async (baseUrl, page = 0, outputSubDir = "list") =>
  * @param {string} slug
  */
 const processSingleArticle = async (slug) => {
-    const response = await fetch(`${ARTICLES_CMS_BASE_URL}/${slug}`, getFetchOptions());
-
-    const content = await response.text();
-    const { document } = new JSDOM(content).window;
+    const document = await fetchDocument(`${ARTICLES_CMS_BASE_URL}/${slug}`);
 
     // Lecture du contenu du main
     const $article = document.querySelector("article");
@@ -560,11 +573,13 @@ const processSingleArticle = async (slug) => {
         const articleSlugsList = (await withConcurrency(pagesRange, (page) => processArticlesIndex(ARTICLES_CMS_BASE_URL, page))).flat();
         stats.articles.detected = articleSlugsList.length;
 
-        //  la liste paginée des articles par tag (index pour chaque tag)
-        const response = await fetch(ARTICLES_CMS_BASE_URL, getFetchOptions());
+        // Aucun article détecté = anomalie côté CMS : on s'arrête sans synchroniser pour préserver le contenu du S3 (#1098)
+        if (articleSlugsList.length === 0) {
+            throw new Error("No article found on the articles index, aborting.");
+        }
 
-        const content = await response.text();
-        const { document } = new JSDOM(content).window;
+        //  la liste paginée des articles par tag (index pour chaque tag)
+        const document = await fetchDocument(ARTICLES_CMS_BASE_URL);
 
         const tags = await processTagsInDocument(document);
 
@@ -595,14 +610,24 @@ const processSingleArticle = async (slug) => {
         } else {
             logger.success("All files downloaded successfully.");
         }
+
+        // Un article ou fichier non régénéré serait supprimé du S3 par le sync : on marque le run en échec
+        if (stats.articles.failed > 0 || stats.files.failed > 0) {
+            didScrapeFail = true;
+        }
     } catch (error) {
         didScrapeFail = true;
         logger.error("Script failed:", error);
     }
 
-    const syncResult = await syncS3();
-    if (syncResult.exitCode !== 0) {
-        didScrapeFail = true;
+    // On ne synchronise jamais un moissonnage incomplet : le S3 conserve le contenu du run précédent (#1098)
+    if (didScrapeFail) {
+        logger.error("Scrape failed or incomplete, skipping S3 sync to preserve the existing content.");
+    } else {
+        const syncResult = await syncS3();
+        if (syncResult.exitCode !== 0) {
+            didScrapeFail = true;
+        }
     }
 
     await appendRunHistory({
