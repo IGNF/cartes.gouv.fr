@@ -613,7 +613,8 @@ const processSingleArticle = async (slug) => {
         const tags = await processTagsInDocument(document);
 
         await withConcurrency(tags, async (tag) => {
-            const { firstPage, lastPage } = await getPageNumbers(ARTICLES_CMS_BASE_URL);
+            // La pagination est lue sur l'index du tag lui-même, pas sur l'index général
+            const { firstPage, lastPage } = await getPageNumbers(tag.originalUrl);
             const pagesRange = getArrayRange(firstPage, lastPage); // [0,1,2,3,...,n]
             await withConcurrency(pagesRange, (page) => processArticlesIndex(tag.originalUrl, page, "list/tags/" + tag.tag));
         });
