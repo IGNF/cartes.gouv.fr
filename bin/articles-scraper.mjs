@@ -86,9 +86,12 @@ const withRetry = async (fn, options = {}) => {
             return await fn();
         } catch (error) {
             lastError = error;
-            const delay = retryDelay * Math.pow(2, attempt);
-            logger.warn(`Attempt ${attempt + 1}/${maxRetries} failed. Retrying in ${delay}ms...`);
-            await new Promise((resolve) => setTimeout(resolve, delay));
+            // Pas d'attente inutile après la dernière tentative
+            if (attempt < maxRetries - 1) {
+                const delay = retryDelay * Math.pow(2, attempt);
+                logger.warn(`Attempt ${attempt + 1}/${maxRetries} failed. Retrying in ${delay}ms...`);
+                await new Promise((resolve) => setTimeout(resolve, delay));
+            }
         }
     }
 
@@ -127,7 +130,8 @@ const withConcurrency = async (items, fn, options = {}) => {
         results.push(promise);
 
         if (pending.size >= concurrency) {
-            await Promise.race(pending);
+            // Les rejets sont remontés par le Promise.all final, pas par le race
+            await Promise.race(pending).catch(() => {});
         }
     }
 
@@ -135,11 +139,11 @@ const withConcurrency = async (items, fn, options = {}) => {
 };
 
 /**
- * Binary to ASCII
+ * Encode les identifiants pour un en-tête Authorization Basic
  * @param {string} username
  * @param {string} password
  */
-const btoa = (username, password) => Buffer.from(username + ":" + password, "binary").toString("base64");
+const basicAuthToken = (username, password) => Buffer.from(username + ":" + password, "binary").toString("base64");
 
 async function ensureDirectoryExists(filePath) {
     const dir = dirname(filePath);
@@ -369,7 +373,7 @@ const getFetchOptions = () => {
 
     if (ARTICLES_CMS_USERNAME && ARTICLES_CMS_PASSWORD) {
         options.headers = {
-            Authorization: `Basic ${btoa(ARTICLES_CMS_USERNAME, ARTICLES_CMS_PASSWORD)}`,
+            Authorization: `Basic ${basicAuthToken(ARTICLES_CMS_USERNAME, ARTICLES_CMS_PASSWORD)}`,
         };
     }
 
@@ -546,7 +550,12 @@ const getPageNumbers = async (url) => {
     };
 };
 
-const processTagsInDocument = async (document) => {
+/**
+ * Réécrit les liens de tags vers les pages de tags du site et renvoie la liste des tags trouvés
+ *
+ * @param {Document|HTMLElement} document
+ */
+const processTagsInDocument = (document) => {
     const $tagsGroup = document?.querySelector("ul.fr-tags-group");
     const $tagsList = [...($tagsGroup?.querySelectorAll("a.fr-tag") ?? [])];
 
@@ -660,7 +669,7 @@ const processSingleArticle = async (slug) => {
         //  la liste paginée des articles par tag (index pour chaque tag)
         const document = await fetchDocument(ARTICLES_CMS_BASE_URL);
 
-        const tags = await processTagsInDocument(document);
+        const tags = processTagsInDocument(document);
 
         await withConcurrency(tags, async (tag) => {
             // La pagination est lue sur l'index du tag lui-même, pas sur l'index général
