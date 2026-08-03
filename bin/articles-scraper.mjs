@@ -254,12 +254,34 @@ const toGatewayUrl = (localFilePath) => {
     return ARTICLES_S3_GATEWAY_PATH_ARTICLES + encoded;
 };
 
+// Cache des téléchargements en cours ou terminés, indexé par URL source
+const downloadCache = new Map();
+
 /**
+ * Télécharge un fichier une seule fois par run : les références suivantes réutilisent la même promesse
  *
  * @param {string} originalFilePath
+ * @returns {Promise<string>}
  */
-const downloadFile = async (originalFilePath) => {
+const downloadFile = (originalFilePath) => {
     const url = new URL(ARTICLES_CMS_BASE_URL + originalFilePath);
+
+    if (!downloadCache.has(url.href)) {
+        // Un échec est retiré du cache pour qu'une référence ultérieure retente le téléchargement
+        const promise = downloadFileToDisk(url).catch((error) => {
+            downloadCache.delete(url.href);
+            throw error;
+        });
+        downloadCache.set(url.href, promise);
+    }
+
+    return downloadCache.get(url.href);
+};
+
+/**
+ * @param {URL} url
+ */
+const downloadFileToDisk = async (url) => {
     let newFilePath = normalize(join(OUTPUT_DIR, "media", url.pathname.replace("/sites/default/files", "")));
     newFilePath = decodeURI(newFilePath);
 
