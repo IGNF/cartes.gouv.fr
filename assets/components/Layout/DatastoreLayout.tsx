@@ -11,6 +11,7 @@ import RQKeys from "../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../modules/jsonFetch";
 import Forbidden from "../../pages/error/Forbidden";
 import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
+import UnexpectedError from "../../pages/error/UnexpectedError";
 import LoadingText from "../Utils/LoadingText";
 import AppLayout, { AppLayoutProps } from "./AppLayout";
 import Main from "./Main";
@@ -23,7 +24,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
     const { accessRight, datastoreId, children, ...rest } = props;
 
     const { data: user } = useUserQuery();
-    const { data, error, failureReason, isFetching, isLoading, isPending, status } = useQuery<Datastore, CartesApiException>({
+    const { data, error, failureReason, isFetching, isPending, refetch, status } = useQuery<Datastore, CartesApiException>({
         queryKey: RQKeys.datastore(datastoreId),
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
         staleTime: 3600000,
@@ -40,7 +41,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
         return canUserAccess(user.id, membership, accessRight) === true;
     }, [accessRight, user, datastoreId]);
 
-    if (isLoading || isPending) {
+    if (isPending) {
         return (
             <AppLayout {...rest}>
                 <Main>
@@ -50,8 +51,18 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
         );
     }
 
-    if (error?.code === 404 || failureReason?.code === 404 || !data) {
+    // 404 : ressource inexistante OU inaccessible (l'API Entrepôt répond 404 dans les deux cas, comportement miroir voulu)
+    if (error?.code === 404 || failureReason?.code === 404) {
         return <PageNotFoundWithLayout />;
+    }
+
+    // toute autre erreur (500, réseau...) n'est PAS une 404
+    if (error || !data) {
+        return (
+            <AppLayout {...rest}>
+                <UnexpectedError message={error?.message} onRetry={() => refetch()} />
+            </AppLayout>
+        );
     }
 
     return (
