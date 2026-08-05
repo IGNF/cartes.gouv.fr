@@ -3,6 +3,22 @@ import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entre
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
 
+/**
+ * Retrouve l'appartenance de l'utilisateur à une communauté, par datastore ou par communauté.
+ * Source de vérité unique pour la jointure user ↔ communauté/datastore.
+ */
+export function findMembership(user: CartesUser | null | undefined, criteria: { datastoreId?: string; communityId?: string }): CommunityMemberDto | undefined {
+    const { datastoreId, communityId } = criteria;
+    if (!user?.communities_member || (datastoreId === undefined && communityId === undefined)) {
+        return undefined;
+    }
+    return user.communities_member.find((member) => {
+        if (!member.community) return false;
+        if (datastoreId !== undefined) return member.community.datastore === datastoreId;
+        return member.community._id === communityId;
+    });
+}
+
 export function canUserAccess(
     userId: string,
     communityMember: CommunityMemberDto,
