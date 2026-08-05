@@ -91,7 +91,9 @@ const Alerts: FC = () => {
     // Update alerts mutation
     const { mutate, isPending } = useMutation<Annexe | undefined, CartesApiException, IAlert[]>({
         mutationFn: (alerts) => {
-            if (!datastore) return Promise.reject(new Error("community has no datastore"));
+            if (!datastore) {
+                return Promise.reject({ code: 400, status: "error", message: "La communauté n'a pas d'entrepôt" } satisfies CartesApiException);
+            }
             const data = alerts.map((alert) => ({ ...alert, date: alert.date.toISOString() }));
             const blob = new Blob([JSON.stringify(data)], {
                 type: "application/json",
@@ -99,9 +101,9 @@ const Alerts: FC = () => {
             const file = new File([blob], fileName);
             queryClient.setQueryData(RQKeys.alerts(), () => data);
             if (annexe?._id) {
-                return api.annexe.replaceFile(datastore?._id, annexe?._id, file);
+                return api.annexe.replaceFile(datastore._id, annexe._id, file);
             }
-            return api.annexe.add(datastore?._id, annexePath, file);
+            return api.annexe.add(datastore._id, annexePath, file);
         },
         onError: (error) => {
             setNotification({ severity: "error", title: t("alerts_update_error") });
