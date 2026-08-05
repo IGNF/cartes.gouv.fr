@@ -21,9 +21,10 @@ import PageTitle from "@/components/Layout/PageTitle";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
 import { useCommunity } from "@/contexts/community";
-import { useDatastore } from "@/contexts/datastore";
+import { useDatastoreContext } from "@/contexts/datastore";
 import api from "@/entrepot/api";
 import useUserQuery from "@/hooks/queries/useUserQuery";
+import useCommunityMember from "@/hooks/useCommunityMember";
 import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
@@ -72,7 +73,7 @@ export default function CommunityInfo() {
 
     const userQuery = useUserQuery();
     const { data: user } = userQuery;
-    const { datastore } = useDatastore();
+    const { datastore } = useDatastoreContext(); // communauté possiblement sans entrepôt
     const community: Community = useCommunity();
 
     const queryClient = useQueryClient();
@@ -117,25 +118,27 @@ export default function CommunityInfo() {
                         : undefined,
                 ] satisfies [CommunityDetailResponseDto, Datastore | undefined];
             });
-            queryClient.setQueryData<Datastore>(RQKeys.datastore(datastore._id), (oldData) => {
-                if (!oldData) return oldData;
-                return {
-                    ...oldData,
-                    name: newData.name,
-                    description: newData.description,
-                    contact: newData.contact,
-                    public: newData.public,
-                    community: {
-                        ...oldData.community,
+            if (datastore) {
+                queryClient.setQueryData<Datastore>(RQKeys.datastore(datastore._id), (oldData) => {
+                    if (!oldData) return oldData;
+                    return {
+                        ...oldData,
+                        name: newData.name,
+                        description: newData.description,
                         contact: newData.contact,
                         public: newData.public,
-                    },
-                };
-            });
+                        community: {
+                            ...oldData.community,
+                            contact: newData.contact,
+                            public: newData.public,
+                        },
+                    };
+                });
+                queryClient.invalidateQueries({ queryKey: RQKeys.datastore(datastore._id) });
+            }
 
             queryClient.refetchQueries({ queryKey: RQKeys.user_me() });
-            queryClient.refetchQueries({ queryKey: RQKeys.community(datastore.community._id) });
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore(datastore._id) });
+            queryClient.refetchQueries({ queryKey: RQKeys.community(community._id) });
 
             form.reset({
                 name: newData.name,
@@ -157,10 +160,9 @@ export default function CommunityInfo() {
         communityModifyMutation.mutate(data);
     }
 
+    const member = useCommunityMember({ communityId: community._id });
     const isSupervisor = community.supervisor._id === user?.id;
-    const communityUserRights = user?.communities_member.find((member) => member.community?._id === community._id)?.rights ?? [];
-    const hasCommunityRight = communityUserRights.includes(CommunityMemberDtoRightsEnum.COMMUNITY);
-    const canModifyCommunity = isSupervisor || hasCommunityRight;
+    const canModifyCommunity = isSupervisor || (member?.can(CommunityMemberDtoRightsEnum.COMMUNITY) ?? false);
 
     const leaveCommunityMutation = useMutation({
         mutationFn: () => {
@@ -174,10 +176,13 @@ export default function CommunityInfo() {
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastore._id}>
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} />
+        <DatastoreMain
+            title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : (datastore?.name ?? community.name) })}
+            datastoreId={datastore?._id}
+        >
+            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : (datastore?.name ?? community.name) })} />
 
-            <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={datastore.community._id} />
+            {datastore && <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />}
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>
                 <div
@@ -190,7 +195,7 @@ export default function CommunityInfo() {
                 >
                     <strong className={fr.cx("fr-text--xl", "fr-m-0")}>{t("section_title")}</strong>
 
-                    {isSupervisor ? (
+                    {isSupervisor && datastore ? (
                         <Button priority="tertiary no outline" nativeButtonProps={deleteCommunityModal.buttonProps}>
                             {t("delete_community")}
                         </Button>
@@ -287,7 +292,8 @@ export default function CommunityInfo() {
                 </Wait>
             )}
 
-            <DeleteCommunity />
+            {/* la suppression passe par le nettoyage de l'entrepôt : sans entrepôt, pas de suppression */}
+            {datastore && <DeleteCommunity />}
 
             {/* quitter la commu */}
             {createPortal(

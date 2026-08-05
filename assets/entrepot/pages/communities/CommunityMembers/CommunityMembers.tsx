@@ -21,7 +21,7 @@ import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useCommunity } from "../../../../contexts/community";
-import { useDatastore } from "../../../../contexts/datastore";
+import { useDatastoreContext } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -68,7 +68,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
 
     // Data
     const community = useCommunity();
-    const { datastore } = useDatastore();
+    const { datastore } = useDatastoreContext(); // communauté possiblement sans entrepôt
 
     // Les membres de cette communauté
     const { data: communityMembers, isLoading } = useQuery({
@@ -178,7 +178,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { classes, cx } = useStyles();
 
     return (
-        <DatastoreMain title="Membres" datastoreId={datastore._id} communityId={community._id}>
+        <DatastoreMain title="Membres" datastoreId={datastore?._id} communityId={community._id}>
             {isLoading && <LoadingText />}
             {!isLoading && userId && communityMemberIds.includes(userId) && (
                 <Alert
@@ -195,7 +195,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                 <>
                     <PageTitle title={t("community_members", { communityName: community?.name ?? "" })} />
 
-                    <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />
+                    {datastore && <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />}
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-2v")}>
                         <div
