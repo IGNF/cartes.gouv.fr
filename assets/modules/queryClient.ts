@@ -1,10 +1,19 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 
+import { delta } from "@/utils/delta";
 import RQKeys from "./entrepot/RQKeys";
 import { CartesApiException } from "./jsonFetch";
 
-// délai minimum entre deux invalidations de user_me déclenchées par des erreurs d'autorisation
-const USER_ME_INVALIDATION_MIN_INTERVAL = 30_000;
+/** fenêtre pendant laquelle user_me est considéré assez frais pour ne pas être revalidé */
+export const USER_ME_REVALIDATION_WINDOW = delta.seconds(30);
+
+const USER_ME_KEY = RQKeys.user_me();
+
+/** teste si une query key est celle de user_me */
+export function isUserMeQueryKey(queryKey: readonly unknown[]): boolean {
+    return queryKey.length === USER_ME_KEY.length && USER_ME_KEY.every((part, i) => queryKey[i] === part);
+}
+
 let lastUserMeInvalidation = 0;
 
 /**
@@ -15,15 +24,14 @@ function revalidateUserOnAuthError(error: unknown, queryKey?: readonly unknown[]
     const code = (error as Partial<CartesApiException> | undefined)?.code;
     if (code !== 401 && code !== 403 && code !== 404) return;
 
-    const userMeKey = RQKeys.user_me();
     // ne pas s'auto-invalider si c'est user_me qui a échoué
-    if (queryKey !== undefined && queryKey.length === userMeKey.length && userMeKey.every((part, i) => queryKey[i] === part)) return;
+    if (queryKey !== undefined && isUserMeQueryKey(queryKey)) return;
 
     const now = Date.now();
-    if (now - lastUserMeInvalidation < USER_ME_INVALIDATION_MIN_INTERVAL) return;
+    if (now - lastUserMeInvalidation < USER_ME_REVALIDATION_WINDOW) return;
     lastUserMeInvalidation = now;
 
-    queryClient.invalidateQueries({ queryKey: userMeKey });
+    queryClient.invalidateQueries({ queryKey: USER_ME_KEY });
 }
 
 /**
