@@ -65,7 +65,7 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
         return canUserAccess(user.id, membership, accessRight) === true;
     }, [accessRight, user, communityId]);
 
-    const denialSettled = useRevalidateUserOnDenial(!isAuthorized);
+    const denialSettled = useRevalidateUserOnDenial(!isAuthorized, communityId);
 
     if (isPending || (!isAuthorized && !denialSettled)) {
         return (
