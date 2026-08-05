@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
+import useRevalidateUserOnDenial from "@/hooks/useRevalidateUserOnDenial";
 import { canUserAccess, findMembership } from "@/utils";
 import { Datastore } from "../../@types/app";
 import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
@@ -41,7 +42,9 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
         return canUserAccess(user.id, membership, accessRight) === true;
     }, [accessRight, user, datastoreId]);
 
-    if (isPending) {
+    const denialSettled = useRevalidateUserOnDenial(!isAuthorized);
+
+    if (isPending || (!isAuthorized && !denialSettled)) {
         return (
             <AppLayout {...rest}>
                 <Main>
