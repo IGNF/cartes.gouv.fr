@@ -12,6 +12,7 @@ import RQKeys from "../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../modules/jsonFetch";
 import Forbidden from "../../pages/error/Forbidden";
 import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
+import UnexpectedError from "../../pages/error/UnexpectedError";
 import LoadingText from "../Utils/LoadingText";
 import AppLayout from "./AppLayout";
 import { DatastoreLayoutProps } from "./DatastoreLayout";
@@ -28,7 +29,10 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     const { data: user } = useUserQuery();
     const queryClient = useQueryClient();
 
-    const { data, error, failureReason, isFetching, isLoading, status } = useQuery<[CommunityDetailResponseDto, Datastore | undefined], CartesApiException>({
+    const { data, error, failureReason, isFetching, isPending, refetch, status } = useQuery<
+        [CommunityDetailResponseDto, Datastore | undefined],
+        CartesApiException
+    >({
         queryKey: RQKeys.community(communityId),
         queryFn: async ({ signal }) => {
             const community = await api.community.get(communityId, { signal });
@@ -60,7 +64,7 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
         return canUserAccess(user.id, membership, accessRight) === true;
     }, [accessRight, user, communityId]);
 
-    if (isLoading) {
+    if (isPending) {
         return (
             <AppLayout {...rest}>
                 <Main>
@@ -70,8 +74,18 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
         );
     }
 
-    if (error?.code === 404 || failureReason?.code === 404 || !community) {
+    // 404 : ressource inexistante OU inaccessible (l'API Entrepôt répond 404 dans les deux cas, comportement miroir voulu)
+    if (error?.code === 404 || failureReason?.code === 404) {
         return <PageNotFoundWithLayout />;
+    }
+
+    // toute autre erreur (500, réseau...) n'est PAS une 404
+    if (error || !community) {
+        return (
+            <AppLayout {...rest}>
+                <UnexpectedError message={error?.message} onRetry={() => refetch()} />
+            </AppLayout>
+        );
     }
 
     return (

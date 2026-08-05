@@ -24,7 +24,7 @@ import api from "../../api";
 
 import "./Alerts.scss";
 import Main from "@/components/Layout/Main";
-import { useDatastore } from "@/contexts/datastore";
+import { useDatastoreContext } from "@/contexts/datastore";
 
 function getNewAlert() {
     return {
@@ -78,18 +78,20 @@ const Alerts: FC = () => {
     const title = t("title");
     const [notification, setNotification] = useState<INotification | null>(null);
     const queryClient = useQueryClient();
-    const { datastore } = useDatastore();
+    const { datastore } = useDatastoreContext(); // communauté possiblement sans entrepôt
 
     // Load annex list and find annex matching the given path
     const { data } = useQuery<Annexe[], CartesApiException>({
-        queryKey: RQKeys.datastore_annexe_list(datastore?._id),
-        queryFn: ({ signal }) => api.annexe.getAll(datastore?._id, { signal }),
+        queryKey: RQKeys.datastore_annexe_list(datastore?._id ?? ""),
+        queryFn: ({ signal }) => api.annexe.getAll(datastore!._id, { signal }),
+        enabled: datastore !== undefined,
     });
     const annexe = useMemo(() => data?.find((annexe) => annexe.paths.includes(annexePath)), [data]);
 
     // Update alerts mutation
     const { mutate, isPending } = useMutation<Annexe | undefined, CartesApiException, IAlert[]>({
         mutationFn: (alerts) => {
+            if (!datastore) return Promise.reject(new Error("community has no datastore"));
             const data = alerts.map((alert) => ({ ...alert, date: alert.date.toISOString() }));
             const blob = new Blob([JSON.stringify(data)], {
                 type: "application/json",

@@ -48,6 +48,7 @@ const { i18n } = declareComponentKeys<
     | "search"
     | "clear"
     | "refresh"
+    | "retry"
     | "filter"
     | "remove_filters"
     | "select_option"
@@ -104,6 +105,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     search: "Rechercher",
     clear: "Effacer",
     refresh: "Rafraîchir",
+    retry: "Réessayer",
     filter: "Filtrer",
     remove_filters: "Retirer les filtres",
     select_option: "Sélectionner une option",
@@ -163,6 +165,7 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     search: "Search",
     clear: "Clear",
     refresh: undefined,
+    retry: "Retry",
     filter: "Filter",
     remove_filters: "Remove the filters",
     select_option: "Select an option",
