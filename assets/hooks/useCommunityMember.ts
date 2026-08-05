@@ -27,9 +27,7 @@ export default function useCommunityMember(criteria: CommunityMemberCriteria) {
             rights: membership.rights ?? [],
             isSupervisor: membership.community?.supervisor === user.id,
             /** true si superviseur ou si l'utilisateur a TOUS les droits demandés */
-            can: (...rights: CommunityMemberDtoRightsEnum[]) => canUserAccess(user.id, membership, rights.length > 0 ? rights : undefined) === true,
+            can: (...rights: CommunityMemberDtoRightsEnum[]) => canUserAccess(user.id, membership, rights.length > 0 ? rights : undefined),
         };
     }, [user, datastoreId, communityId]);
 }
-
-export type CommunityMember = NonNullable<ReturnType<typeof useCommunityMember>>;
