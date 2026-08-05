@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import useUserQuery from "./queries/useUserQuery";
+
+type RevalidationStep = "idle" | "started" | "settled";
 
 /**
  * Avant d'afficher un refus d'accès définitif, force UNE revalidation de user_me :
@@ -10,28 +12,21 @@ import useUserQuery from "./queries/useUserQuery";
  */
 export default function useRevalidateUserOnDenial(denied: boolean, resourceId: string): boolean {
     const { refetch } = useUserQuery();
-    const [settled, setSettled] = useState(false);
-    const startedRef = useRef(false);
+    const [state, setState] = useState<{ resourceId: string; step: RevalidationStep }>({ resourceId, step: "idle" });
 
-    // ré-armement si la ressource visée change (navigation d'un refus vers un autre refus)
-    const [prevResourceId, setPrevResourceId] = useState(resourceId);
-    if (prevResourceId !== resourceId) {
-        setPrevResourceId(resourceId);
-        setSettled(false);
-        startedRef.current = false;
-    }
+    // une autre ressource est visée : l'état mémorisé ne s'applique plus, on repart armé
+    const step: RevalidationStep = state.resourceId === resourceId ? state.step : "idle";
 
     useEffect(() => {
         if (!denied) {
             // refus levé : ré-armement pour un éventuel refus ultérieur
-            startedRef.current = false;
-            setSettled(false);
+            setState((s) => (s.resourceId === resourceId && s.step === "idle" ? s : { resourceId, step: "idle" }));
             return;
         }
-        if (startedRef.current) return;
-        startedRef.current = true;
-        refetch().finally(() => setSettled(true));
-    }, [denied, resourceId, refetch]);
+        if (step !== "idle") return;
+        setState({ resourceId, step: "started" });
+        refetch().finally(() => setState({ resourceId, step: "settled" }));
+    }, [denied, resourceId, step, refetch]);
 
-    return denied ? settled : true;
+    return denied ? step === "settled" : true;
 }
