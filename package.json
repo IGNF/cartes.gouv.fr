@@ -10,7 +10,7 @@
         "prettier": "^3.0.0"
     },
     "devDependencies": {
-        "@codegouvfr/react-dsfr": "^1.17.0",
+        "@codegouvfr/react-dsfr": "^1.32.4",
         "@emotion/react": "^11.13.0",
         "@emotion/styled": "^11.11.0",
         "@eslint/js": "^9.37.0",
