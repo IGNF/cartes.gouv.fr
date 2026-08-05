@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { FC, PropsWithChildren, memo, useMemo } from "react";
+import { FC, PropsWithChildren, memo } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useRevalidateUserOnDenial from "@/hooks/useRevalidateUserOnDenial";
-import { canUserAccess, findMembership } from "@/utils";
+import { canAccess } from "@/utils";
 import { Datastore } from "../../@types/app";
 import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import { DatastoreProvider } from "../../contexts/datastore";
@@ -31,16 +31,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
         staleTime: 3600000,
     });
 
-    const isAuthorized = useMemo(() => {
-        if (!user?.id) {
-            return false;
-        }
-        const membership = findMembership(user, { datastoreId });
-        if (!membership) {
-            return false; // n'est pas membre de la communauté
-        }
-        return canUserAccess(user.id, membership, accessRight) === true;
-    }, [accessRight, user, datastoreId]);
+    const isAuthorized = canAccess(user, { datastoreId }, accessRight);
 
     const denialSettled = useRevalidateUserOnDenial(!isAuthorized, datastoreId);
 
