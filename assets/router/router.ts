@@ -240,7 +240,7 @@ const datastoreRoutes = {
             offeringId: param.path.string,
             datasheetName: param.query.string,
         },
-        () => "/service/wms-raster/${p.offeringId}/modification"
+        (p) => `/service/wms-raster/${p.offeringId}/modification`
     ),
     datastore_pyramid_raster_wmts_service_new: datastoreRoute.extend(
         {
