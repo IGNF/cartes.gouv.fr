@@ -42,7 +42,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
         return canUserAccess(user.id, membership, accessRight) === true;
     }, [accessRight, user, datastoreId]);
 
-    const denialSettled = useRevalidateUserOnDenial(!isAuthorized);
+    const denialSettled = useRevalidateUserOnDenial(!isAuthorized, datastoreId);
 
     if (isPending || (!isAuthorized && !denialSettled)) {
         return (
