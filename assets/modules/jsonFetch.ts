@@ -15,54 +15,50 @@ export async function apiFetch(
     isFileUpload: boolean = false,
     isXMLHttpRequest: boolean = true
 ): Promise<Response> {
-    return new Promise((resolve, reject) => {
-        (async function () {
-            const defaultHeaders: HeadersInit = {};
+    const defaultHeaders: HeadersInit = {};
 
-            const fetchConfig: RequestInit = { ...config };
+    const fetchConfig: RequestInit = { ...config };
 
-            if (isFileUpload) {
-                // ne rien changer au FormData si c'est un envoi de fichier
-                fetchConfig.body = body as FormData;
-            } else {
-                // convertir en chaîne JSON
-                fetchConfig.body = body && typeof body === "object" ? JSON.stringify(body) : body;
-            }
+    if (isFileUpload) {
+        // ne rien changer au FormData si c'est un envoi de fichier
+        fetchConfig.body = body as FormData;
+    } else {
+        // convertir en chaîne JSON
+        fetchConfig.body = body && typeof body === "object" ? JSON.stringify(body) : body;
+    }
 
-            // ajouter le header XMLHttpRequest si nécessaire/demandé
-            if (isXMLHttpRequest) {
-                defaultHeaders["X-Requested-With"] = "XMLHttpRequest";
-            }
+    // ajouter le header XMLHttpRequest si nécessaire/demandé
+    if (isXMLHttpRequest) {
+        defaultHeaders["X-Requested-With"] = "XMLHttpRequest";
+    }
 
-            fetchConfig.headers = {
-                ...defaultHeaders,
-                ...config.headers,
-            };
+    fetchConfig.headers = {
+        ...defaultHeaders,
+        ...config.headers,
+    };
 
-            const request = new Request(url, fetchConfig);
+    // NOTE : les erreurs réseau et les annulations (AbortError) sont propagées telles quelles, react-query les gère
+    const response = await fetch(new Request(url, fetchConfig));
 
-            try {
-                const response = await fetch(request);
+    if (response.ok) {
+        useAuthStore.getState().setSessionExpired(false);
+        return response;
+    }
 
-                if (response.ok) {
-                    useAuthStore.getState().setSessionExpired(false);
-                    resolve(response);
-                } else {
-                    const data = await response.json().catch(() => ({}));
-                    if (hasSessionExpired(data)) {
-                        useAuthStore.getState().setSessionExpired(true);
-                    }
-                    reject(data);
-                }
-            } catch (error) {
-                if (error instanceof DOMException && (error?.name === "AbortError" || error?.name === "NetworkError")) {
-                    // NOTE : ne rien faire, requête annulée par react-query parce que requête en doublon (en mode strict de react)
-                } else {
-                    reject(error);
-                }
-            }
-        })();
-    });
+    // corps non-JSON (page d'erreur proxy...) : erreur normalisée à partir du status HTTP
+    const data: Partial<CartesApiException> | null = await response.json().catch(() => null);
+
+    if (data !== null && hasSessionExpired(data)) {
+        useAuthStore.getState().setSessionExpired(true);
+    }
+
+    const apiException: CartesApiException = {
+        ...data,
+        code: typeof data?.code === "number" ? data.code : response.status,
+        status: typeof data?.status === "string" ? data.status : response.statusText,
+        message: typeof data?.message === "string" ? data.message : `${response.status} ${response.statusText}`,
+    };
+    throw apiException;
 }
 
 export async function jsonFetch<T>(
@@ -72,9 +68,11 @@ export async function jsonFetch<T>(
     isFileUpload: boolean = false,
     isXMLHttpRequest: boolean = true
 ): Promise<T> {
-    return (await apiFetch(url, config, body, isFileUpload, isXMLHttpRequest)).json().catch(() => ({}));
+    const response = await apiFetch(url, config, body, isFileUpload, isXMLHttpRequest);
+    return response.json().catch(() => ({}));
 }
 
-const hasSessionExpired = (error) => {
-    return error.code === 401 && error?.details?.controller === "App\\Controller\\ApiControllerInterface" && error?.details?.session_expired === true;
+const hasSessionExpired = (error: Partial<CartesApiException>) => {
+    const details = error?.details as { controller?: string; session_expired?: boolean } | undefined;
+    return error.code === 401 && details?.controller === "App\\Controller\\ApiControllerInterface" && details?.session_expired === true;
 };
