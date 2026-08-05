@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
-import { canUserAccess } from "@/utils";
+import { canUserAccess, findMembership } from "@/utils";
 import { Datastore } from "../../@types/app";
 import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import { DatastoreProvider } from "../../contexts/datastore";
@@ -30,15 +30,15 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
     });
 
     const isAuthorized = useMemo(() => {
-        if (!user?.id || !user?.communities_member) {
+        if (!user?.id) {
             return false;
         }
-        const communityMember = user.communities_member.find((member) => member.community?.datastore === datastoreId);
-        if (!communityMember) {
-            return false; // is not part of the community
+        const membership = findMembership(user, { datastoreId });
+        if (!membership) {
+            return false; // n'est pas membre de la communauté
         }
-        return canUserAccess(user.id, communityMember, accessRight);
-    }, [accessRight, user?.communities_member, datastoreId, user?.id]);
+        return canUserAccess(user.id, membership, accessRight) === true;
+    }, [accessRight, user, datastoreId]);
 
     if (isLoading || isPending) {
         return (
