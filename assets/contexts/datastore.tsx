@@ -13,6 +13,11 @@ export const DatastoreContext = createContext<IDatastoreContext>({
     status: "pending",
 });
 
+/** Variante non bloquante : datastore possiblement absent (communauté sans entrepôt) */
+export function useDatastoreContext(): IDatastoreContext {
+    return use(DatastoreContext);
+}
+
 export function useDatastore() {
     const datastore = use(DatastoreContext);
     if (!datastore || !datastore.datastore) {
