@@ -2,8 +2,8 @@ import { JSX, lazy, useMemo } from "react";
 import { Route } from "type-route";
 
 import { groups } from "./router";
+import routeAccessRights from "./routeAccessRights";
 import CommunityLayout, { CommunityLayoutProps } from "../components/Layout/CommunityLayout";
-import { CommunityMemberDtoRightsEnum } from "../@types/entrepot";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 
 const CommunityInfo = lazy(() => import("../entrepot/pages/communities/CommunityInfo/CommunityInfo"));
@@ -24,7 +24,6 @@ function GroupCommunity(props: IGroupCommunityProps) {
                 };
             case "members_list":
                 return {
-                    layoutProps: { accessRight: CommunityMemberDtoRightsEnum.COMMUNITY },
                     render: <CommunityMembers userId={route.params.userId} />,
                 };
         }
@@ -35,7 +34,7 @@ function GroupCommunity(props: IGroupCommunityProps) {
     }
 
     return (
-        <CommunityLayout communityId={route.params.communityId} {...content?.layoutProps}>
+        <CommunityLayout communityId={route.params.communityId} accessRight={routeAccessRights[route.name]} {...content?.layoutProps}>
             {content.render}
         </CommunityLayout>
     );
