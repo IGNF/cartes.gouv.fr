@@ -23,7 +23,7 @@ export function canUserAccess(
     userId: string,
     communityMember: CommunityMemberDto,
     accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[]
-) {
+): boolean {
     const { community, rights } = communityMember;
     if (community?.supervisor === userId) {
         return true;
@@ -32,9 +32,27 @@ export function canUserAccess(
         return true;
     }
     if (typeof accessRight === "string") {
-        return rights?.includes(accessRight);
+        return rights?.includes(accessRight) ?? false;
     }
     return accessRight.every((right) => rights?.includes(right));
+}
+
+/**
+ * Règle d'accès complète : appartenance (par datastore ou communauté) puis droits éventuels.
+ */
+export function canAccess(
+    user: CartesUser | null | undefined,
+    criteria: { datastoreId?: string; communityId?: string },
+    accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[]
+): boolean {
+    if (!user?.id) {
+        return false;
+    }
+    const membership = findMembership(user, criteria);
+    if (!membership) {
+        return false;
+    }
+    return canUserAccess(user.id, membership, accessRight);
 }
 
 /**

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CartesUser } from "@/@types/app";
 import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import { canUserAccess, findMembership } from "./user";
+import { canAccess, canUserAccess, findMembership } from "./user";
 
 const USER_ID = "user-1";
 const SUPERVISOR_ID = "supervisor-1";
@@ -85,6 +85,21 @@ describe("canUserAccess", () => {
     it("refuse quand rights est absent", () => {
         const member = communityMember();
         member.rights = undefined;
-        expect(canUserAccess(USER_ID, member, CommunityMemberDtoRightsEnum.UPLOAD)).toBeFalsy();
+        expect(canUserAccess(USER_ID, member, CommunityMemberDtoRightsEnum.UPLOAD)).toBe(false);
+    });
+});
+
+describe("canAccess", () => {
+    const member = communityMember();
+
+    it("refuse sans utilisateur ou sans appartenance", () => {
+        expect(canAccess(null, { datastoreId: "datastore-1" })).toBe(false);
+        expect(canAccess(user([member]), { datastoreId: "datastore-2" })).toBe(false);
+    });
+
+    it("autorise le membre, avec et sans droit demandé", () => {
+        expect(canAccess(user([member]), { datastoreId: "datastore-1" })).toBe(true);
+        expect(canAccess(user([member]), { communityId: "community-1" }, [CommunityMemberDtoRightsEnum.UPLOAD])).toBe(true);
+        expect(canAccess(user([member]), { datastoreId: "datastore-1" }, [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
     });
 });
