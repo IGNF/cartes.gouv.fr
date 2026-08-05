@@ -169,8 +169,8 @@ export default function CommunityInfo() {
             if (!user) return Promise.reject(null);
             return api.user.leaveCommunity(community._id);
         },
-        onSuccess: () => {
-            userQuery.refetch();
+        onSuccess: async () => {
+            await userQuery.refetch();
             routes.datastore_selection().push();
         },
     });
