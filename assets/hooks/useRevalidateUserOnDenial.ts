@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { USER_ME_REVALIDATION_WINDOW } from "@/modules/queryClient";
 import useUserQuery from "./queries/useUserQuery";
-
-type RevalidationStep = "idle" | "started" | "settled";
 
 /**
  * Avant d'afficher un refus d'accès définitif, force UNE revalidation de user_me :
@@ -11,22 +10,23 @@ type RevalidationStep = "idle" | "started" | "settled";
  * Retourne true quand le refus peut être affiché (revalidation faite ou non nécessaire).
  */
 export default function useRevalidateUserOnDenial(denied: boolean, resourceId: string): boolean {
-    const { refetch } = useUserQuery();
-    const [state, setState] = useState<{ resourceId: string; step: RevalidationStep }>({ resourceId, step: "idle" });
-
-    // une autre ressource est visée : l'état mémorisé ne s'applique plus, on réinitialise
-    const step: RevalidationStep = state.resourceId === resourceId ? state.step : "idle";
+    const { refetch, dataUpdatedAt } = useUserQuery();
+    const [settledFor, setSettledFor] = useState<string | null>(null);
 
     useEffect(() => {
         if (!denied) {
             // refus levé : réinitialisation pour un éventuel refus ultérieur
-            setState((s) => (s.resourceId === resourceId && s.step === "idle" ? s : { resourceId, step: "idle" }));
+            setSettledFor((current) => (current === null ? current : null));
             return;
         }
-        if (step !== "idle") return;
-        setState({ resourceId, step: "started" });
-        refetch().finally(() => setState({ resourceId, step: "settled" }));
-    }, [denied, resourceId, step, refetch]);
+        // user_me vient d'être (re)chargé : inutile de le redemander
+        if (Date.now() - dataUpdatedAt < USER_ME_REVALIDATION_WINDOW) {
+            setSettledFor(resourceId);
+            return;
+        }
+        // cancelRefetch: false → se greffe sur une requête déjà en vol au lieu de l'annuler
+        refetch({ cancelRefetch: false }).finally(() => setSettledFor(resourceId));
+    }, [denied, resourceId, dataUpdatedAt, refetch]);
 
-    return denied ? step === "settled" : true;
+    return denied ? settledFor === resourceId : true;
 }
