@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CartesUser } from "@/@types/app";
 import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import { canAccess, canUserAccess, findMembership } from "./user";
+import { findMembership, hasAccess, hasRights, isSupervisor } from "./user";
 
 const USER_ID = "user-1";
 const SUPERVISOR_ID = "supervisor-1";
@@ -59,47 +59,63 @@ describe("findMembership", () => {
     });
 });
 
-describe("canUserAccess", () => {
-    it("autorise le superviseur quel que soit le droit demandé", () => {
-        const member = communityMember();
-        if (member.community) member.community.supervisor = USER_ID;
-        expect(canUserAccess(USER_ID, member, CommunityMemberDtoRightsEnum.COMMUNITY)).toBe(true);
+describe("isSupervisor", () => {
+    it("reconnaît le superviseur de la communauté", () => {
+        expect(isSupervisor(SUPERVISOR_ID, communityMember())).toBe(true);
+        expect(isSupervisor(USER_ID, communityMember())).toBe(false);
     });
+});
 
-    it("autorise sans droit demandé (appartenance seule)", () => {
-        expect(canUserAccess(USER_ID, communityMember(), undefined)).toBe(true);
+describe("hasRights", () => {
+    it("autorise quand aucun droit n'est requis (tableau vide)", () => {
+        expect(hasRights(communityMember(), [])).toBe(true);
+        const member = communityMember();
+        member.rights = undefined;
+        expect(hasRights(member, [])).toBe(true);
     });
 
     it("vérifie un droit unique", () => {
-        expect(canUserAccess(USER_ID, communityMember(), CommunityMemberDtoRightsEnum.UPLOAD)).toBe(true);
-        expect(canUserAccess(USER_ID, communityMember(), CommunityMemberDtoRightsEnum.COMMUNITY)).toBe(false);
+        expect(hasRights(communityMember(), [CommunityMemberDtoRightsEnum.UPLOAD])).toBe(true);
+        expect(hasRights(communityMember(), [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
     });
 
-    it("exige TOUS les droits quand un tableau est demandé", () => {
+    it("exige TOUS les droits demandés", () => {
         const member = communityMember();
         member.rights = [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING];
-        expect(canUserAccess(USER_ID, member, [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING])).toBe(true);
-        expect(canUserAccess(USER_ID, member, [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
+        expect(hasRights(member, [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING])).toBe(true);
+        expect(hasRights(member, [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
     });
 
     it("refuse quand rights est absent", () => {
         const member = communityMember();
         member.rights = undefined;
-        expect(canUserAccess(USER_ID, member, CommunityMemberDtoRightsEnum.UPLOAD)).toBe(false);
+        expect(hasRights(member, [CommunityMemberDtoRightsEnum.UPLOAD])).toBe(false);
+    });
+
+    it("ne fait PAS de bypass superviseur (c'est le rôle de hasAccess)", () => {
+        const member = communityMember();
+        if (member.community) member.community.supervisor = USER_ID;
+        expect(hasRights(member, [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
     });
 });
 
-describe("canAccess", () => {
+describe("hasAccess", () => {
     const member = communityMember();
 
     it("refuse sans utilisateur ou sans appartenance", () => {
-        expect(canAccess(null, { datastoreId: "datastore-1" })).toBe(false);
-        expect(canAccess(user([member]), { datastoreId: "datastore-2" })).toBe(false);
+        expect(hasAccess(null, { datastoreId: "datastore-1" })).toBe(false);
+        expect(hasAccess(user([member]), { datastoreId: "datastore-2" })).toBe(false);
     });
 
-    it("autorise le membre, avec et sans droit demandé", () => {
-        expect(canAccess(user([member]), { datastoreId: "datastore-1" })).toBe(true);
-        expect(canAccess(user([member]), { communityId: "community-1" }, [CommunityMemberDtoRightsEnum.UPLOAD])).toBe(true);
-        expect(canAccess(user([member]), { datastoreId: "datastore-1" }, [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
+    it("autorise le membre, avec et sans droits requis", () => {
+        expect(hasAccess(user([member]), { datastoreId: "datastore-1" })).toBe(true);
+        expect(hasAccess(user([member]), { communityId: "community-1" }, [CommunityMemberDtoRightsEnum.UPLOAD])).toBe(true);
+        expect(hasAccess(user([member]), { datastoreId: "datastore-1" }, [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
+    });
+
+    it("autorise le superviseur quel que soit le droit demandé", () => {
+        const supervised = communityMember();
+        if (supervised.community) supervised.community.supervisor = USER_ID;
+        expect(hasAccess(user([supervised]), { communityId: "community-1" }, [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(true);
     });
 });

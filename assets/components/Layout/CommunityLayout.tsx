@@ -3,7 +3,7 @@ import { FC, PropsWithChildren, memo } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useRevalidateUserOnDenial from "@/hooks/useRevalidateUserOnDenial";
-import { canAccess } from "@/utils";
+import { hasAccess } from "@/utils";
 import { Datastore } from "../../@types/app";
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import { CommunityProvider } from "../../contexts/community";
@@ -20,12 +20,12 @@ import { DatastoreLayoutProps } from "./DatastoreLayout";
 import Main from "./Main";
 
 export interface CommunityLayoutProps extends Omit<DatastoreLayoutProps, "datastoreId"> {
-    accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[];
+    requiredRights?: CommunityMemberDtoRightsEnum[];
     communityId: string;
 }
 
 const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => {
-    const { accessRight, children, communityId, ...rest } = props;
+    const { requiredRights, children, communityId, ...rest } = props;
 
     const { data: user } = useUserQuery();
     const queryClient = useQueryClient();
@@ -54,7 +54,7 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
 
     const [community, datastore] = data ?? [];
 
-    const isAuthorized = canAccess(user, { communityId }, accessRight);
+    const isAuthorized = hasAccess(user, { communityId }, requiredRights);
 
     const denialSettled = useRevalidateUserOnDenial(!isAuthorized, communityId);
 

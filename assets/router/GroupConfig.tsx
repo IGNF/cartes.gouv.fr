@@ -2,7 +2,7 @@ import { JSX, lazy, useMemo } from "react";
 import { Route } from "type-route";
 
 import { groups } from "./router";
-import routeAccessRights from "./routeAccessRights";
+import requiredRightsByRoute from "./requiredRightsByRoute";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import CommunityLayout, { CommunityLayoutProps } from "@/components/Layout/CommunityLayout";
 import api from "@/entrepot/api";
@@ -32,7 +32,7 @@ function GroupConfig(props: IGroupConfigProps) {
     }
 
     return (
-        <CommunityLayout communityId={communityId} accessRight={routeAccessRights[route.name]} {...content?.layoutProps}>
+        <CommunityLayout communityId={communityId} requiredRights={requiredRightsByRoute[route.name]} {...content?.layoutProps}>
             {content.render}
         </CommunityLayout>
     );
