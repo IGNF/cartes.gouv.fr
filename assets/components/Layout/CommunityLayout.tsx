@@ -1,9 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo } from "react";
 
-import useUserQuery from "@/hooks/queries/useUserQuery";
-import useRevalidateUserOnDenial from "@/hooks/useRevalidateUserOnDenial";
-import { hasAccess } from "@/utils";
+import useAccessGate from "@/hooks/useAccessGate";
 import { Datastore } from "../../@types/app";
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import { CommunityProvider } from "../../contexts/community";
@@ -27,7 +25,6 @@ export interface CommunityLayoutProps extends Omit<DatastoreLayoutProps, "datast
 const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => {
     const { requiredRights, children, communityId, ...rest } = props;
 
-    const { data: user } = useUserQuery();
     const queryClient = useQueryClient();
 
     const { data, error, failureReason, isFetching, isPending, refetch, status } = useQuery<
@@ -54,11 +51,9 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
 
     const [community, datastore] = data ?? [];
 
-    const isAuthorized = hasAccess(user, { communityId }, requiredRights);
+    const gate = useAccessGate({ communityId }, requiredRights);
 
-    const denialSettled = useRevalidateUserOnDenial(!isAuthorized, communityId);
-
-    if (isPending || (!isAuthorized && !denialSettled)) {
+    if (isPending || gate === "checking") {
         return (
             <AppLayout {...rest}>
                 <Main>
@@ -86,7 +81,7 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
         <AppLayout {...rest}>
             <CommunityProvider community={community}>
                 <DatastoreProvider datastore={datastore} isFetching={isFetching} status={status}>
-                    {isAuthorized ? children : <Forbidden />}
+                    {gate === "granted" ? children : <Forbidden />}
                 </DatastoreProvider>
             </CommunityProvider>
         </AppLayout>

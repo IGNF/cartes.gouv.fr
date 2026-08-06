@@ -1,5 +1,5 @@
 import { useDatastore } from "@/contexts/datastore";
-import useCommunityMember from "./useCommunityMember";
+import useMembership from "./useMembership";
 
 /**
  * Droits de l'utilisateur sur la communauté liée à l'entrepôt courant.
@@ -7,7 +7,7 @@ import useCommunityMember from "./useCommunityMember";
  */
 const useCommunityRights = () => {
     const { datastore } = useDatastore();
-    const member = useCommunityMember({ datastoreId: datastore._id });
+    const member = useMembership({ datastoreId: datastore._id });
 
     return {
         userId: member?.userId,

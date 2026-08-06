@@ -2,18 +2,16 @@ import { useMemo } from "react";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useUserQuery from "@/hooks/queries/useUserQuery";
-import { findMembership, hasRights, isSupervisor } from "@/utils";
-
-type CommunityMemberCriteria = { datastoreId: string; communityId?: never } | { communityId: string; datastoreId?: never };
+import { CommunityRef, findMembership, hasRights, isSupervisor } from "@/utils";
 
 /**
  * Appartenance de l'utilisateur courant à une communauté (par datastore ou par communauté),
  * calculée depuis user.communities_member — aucune requête réseau.
  * Retourne null si l'utilisateur n'est pas membre.
  */
-export default function useCommunityMember(criteria: CommunityMemberCriteria) {
+export default function useMembership(ref: CommunityRef) {
     const { data: user } = useUserQuery();
-    const { datastoreId, communityId } = criteria;
+    const { datastoreId, communityId } = ref;
 
     return useMemo(() => {
         if (!user?.id) return null;
