@@ -15,7 +15,7 @@ import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/hooks/useDatastoreMembership";
 
 type PyramidVectorListItemProps = {
     datasheetName: string;
@@ -43,13 +43,13 @@ const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, 
         enabled: showDescription || isOpenConfirmRemovePyramidModal,
     });
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <>
             <ListItem
                 actionButton={
-                    (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && (
+                    membership?.can(CommunityMemberDtoRightsEnum.BROADCAST) && (
                         <Button
                             onClick={() => {
                                 routes.datastore_pyramid_vector_tms_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
