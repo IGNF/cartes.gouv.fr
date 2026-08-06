@@ -64,7 +64,13 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                     linkProps:
                         datastore._id !== undefined
                             ? routes.datasheet_list({ datastoreId: datastore._id }).link
-                            : { href: "#", onClick: () => addUserToSandbox() },
+                            : {
+                                  href: "#",
+                                  onClick: (e) => {
+                                      e.preventDefault();
+                                      addUserToSandbox();
+                                  },
+                              },
                     isActive: (datastore._id !== undefined && datastoreId === datastore._id) || communityId === datastore.community_id,
                 })),
             ]}
