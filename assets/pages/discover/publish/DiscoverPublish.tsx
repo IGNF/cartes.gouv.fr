@@ -3,7 +3,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 
-import { useSandboxDatastorePrefetchQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { externalUrls } from "@/router/externalUrls";
 import { routes, useRoute } from "@/router/router";
@@ -26,8 +25,6 @@ export default function DiscoverPublish() {
             window.close();
         }
     }, [params, user]);
-
-    useSandboxDatastorePrefetchQuery();
 
     return (
         <Main
