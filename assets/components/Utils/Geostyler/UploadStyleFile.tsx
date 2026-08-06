@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
@@ -12,8 +13,8 @@ import { StyleFormatEnum } from "@/@types/app";
 import { useStyleForm } from "@/contexts/StyleFormContext";
 import { useTranslation } from "@/i18n";
 import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
-import { encodeKey, getFileExtension } from "@/utils";
-import { getParserForExtension, mbParser, sldParser } from "@/utils/geostyler";
+import { encodeKey, getFileExtension, readFileContent } from "@/utils";
+import { getDefaultStyle, getParserForExtension, mbParser, propertyNamesToLowerCase, sldParser } from "@/utils/geostyler";
 import ConfirmDialog, { ConfirmDialogModal } from "../ConfirmDialog";
 import LoadingText from "../LoadingText";
 import useStylesHandler from "./useStylesHandler";
@@ -29,32 +30,6 @@ type UploadStyleFileProps = {
     acceptedFileExtensions?: string[];
 };
 
-function propertyNamesToLowerCase(sldContent: string) {
-    return sldContent.replace(/<(ogc:)?PropertyName>(.*?)<\/(ogc:)?PropertyName>/g, (_, p1, p2) => {
-        return `<${p1 ?? ""}PropertyName>${p2.toLowerCase()}</${p1 ?? ""}PropertyName>`;
-    });
-}
-
-function getDefaultStyle(currentTable: string): GsStyle {
-    return {
-        name: currentTable,
-        rules: [
-            {
-                name: `rule_${Math.floor(Math.random() * 10000)
-                    .toString()
-                    .padStart(4, "0")}`,
-                symbolizers: [
-                    {
-                        kind: "Mark",
-                        wellKnownName: "circle",
-                        color: "#0E1058",
-                    },
-                ],
-            },
-        ],
-    };
-}
-
 const tmsStyleTools = new TMSStyleTools();
 
 const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
@@ -63,9 +38,21 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
     const { t } = useTranslation("UploadStyleFile");
 
     const { currentTable, styleFormats, service, isMapbox } = useStyleForm();
-    const { setError, trigger } = useFormContext();
+    const {
+        formState: { errors },
+        setError,
+        trigger,
+    } = useFormContext();
 
-    const { gsStyle, setGsStyle, strStyle } = useStylesHandler({
+    const {
+        gsStyle,
+        setGsStyle,
+        strStyle,
+        readStyleResult,
+        setReadStyleResult,
+        writeStyleResult,
+        // setWriteStyleResult
+    } = useStylesHandler({
         parser,
         format: styleFormats[currentTable] ?? StyleFormatEnum.SLD,
         initialStrStyle: value,
@@ -97,22 +84,6 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
         }
     }, [strStyle, encodedFieldName]);
 
-    const readFileContent = async (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onerror = () => reject(new Error("Impossible de lire le fichier sélectionné"));
-            reader.onabort = () => reject(new Error("Lecture du fichier annulée"));
-            reader.onload = (e) => {
-                if (typeof e.target?.result === "string") {
-                    resolve(e.target.result);
-                } else {
-                    reject(new Error("Format de fichier non supporté"));
-                }
-            };
-            reader.readAsText(file);
-        });
-    };
-
     async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
         setUploadError(undefined);
 
@@ -134,6 +105,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
             onFormatChange?.(targetFormat);
 
             const gsStyleResult: ReadStyleResult | undefined = await parser.readStyle(extension === "json" ? JSON.parse(content) : content);
+            setReadStyleResult(gsStyleResult);
 
             // debug
             if (gsStyleResult.unsupportedProperties) console.warn("unsupported", gsStyleResult.unsupportedProperties);
@@ -148,6 +120,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
                 try {
                     const currentStr = strStyle;
                     const writeRes = await parser.writeStyle(gsStyle);
+                    // setWriteStyleResult(writeRes);
                     const newStr = typeof writeRes.output === "object" ? JSON.stringify(writeRes.output) : (writeRes.output as string);
 
                     // mettre à jour uniquement si le style a changé
@@ -167,16 +140,20 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
         let defaultStyle = getDefaultStyle(currentTable);
 
         if (service && isMapbox) {
-            const output = (await mbParser.writeStyle(defaultStyle)).output;
+            const writeResult = await mbParser.writeStyle(defaultStyle);
+            // setWriteStyleResult(writeResult);
+            const output = writeResult.output;
             if (output) {
                 const finalMbStyle = tmsStyleTools.buildMbStyle(service, output);
-                defaultStyle = (await mbParser.readStyle(finalMbStyle)).output as GsStyle;
+                const readResult = await mbParser.readStyle(finalMbStyle);
+                defaultStyle = readResult.output as GsStyle;
+                setReadStyleResult(readResult);
             }
         }
 
         setGsStyle(defaultStyle);
         setUploadError(undefined);
-    }, [currentTable, setGsStyle, isMapbox, service]);
+    }, [currentTable, setGsStyle, setReadStyleResult, isMapbox, service]);
 
     const handleRemoveStyle = () => {
         setGsStyle(undefined);
@@ -192,6 +169,74 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
             {uploadError && (
                 <Alert severity="error" title={"Erreur de chargement de style"} description={uploadError} onClose={() => setUploadError(undefined)} />
             )}
+            {errors?.["style_files"]?.[encodeKey(currentTable)]?.message && (
+                <Alert severity="error" small description={errors?.["style_files"]?.[encodeKey(currentTable)]?.message} />
+            )}
+
+            <Accordion label="Read Style Result">
+                {readStyleResult?.errors && (
+                    <>
+                        Erreurs :
+                        <pre>
+                            <code style={{ whiteSpace: "pre" }} className={fr.cx("fr-text--sm")}>
+                                {JSON.stringify(readStyleResult?.errors, null, 4)}
+                            </code>
+                        </pre>
+                    </>
+                )}
+                {readStyleResult?.warnings && (
+                    <>
+                        Avertissements :
+                        <pre>
+                            <code style={{ whiteSpace: "pre" }} className={fr.cx("fr-text--sm")}>
+                                {JSON.stringify(readStyleResult?.warnings, null, 4)}
+                            </code>
+                        </pre>
+                    </>
+                )}
+                {readStyleResult?.unsupportedProperties && (
+                    <>
+                        Propriétés non supportées :
+                        <pre>
+                            <code style={{ whiteSpace: "pre" }} className={fr.cx("fr-text--sm")}>
+                                {JSON.stringify(readStyleResult?.unsupportedProperties, null, 4)}
+                            </code>
+                        </pre>
+                    </>
+                )}
+            </Accordion>
+            <Accordion label="Write Style Result">
+                {writeStyleResult?.errors && (
+                    <>
+                        Erreurs :
+                        <pre>
+                            <code style={{ whiteSpace: "pre" }} className={fr.cx("fr-text--sm")}>
+                                {JSON.stringify(writeStyleResult?.errors, null, 4)}
+                            </code>
+                        </pre>
+                    </>
+                )}
+                {writeStyleResult?.warnings && (
+                    <>
+                        Avertissements :
+                        <pre>
+                            <code style={{ whiteSpace: "pre" }} className={fr.cx("fr-text--sm")}>
+                                {JSON.stringify(writeStyleResult?.warnings, null, 4)}
+                            </code>
+                        </pre>
+                    </>
+                )}
+                {writeStyleResult?.unsupportedProperties && (
+                    <>
+                        Propriétés non supportées :
+                        <pre>
+                            <code style={{ whiteSpace: "pre" }} className={fr.cx("fr-text--sm")}>
+                                {JSON.stringify(writeStyleResult?.unsupportedProperties, null, 4)}
+                            </code>
+                        </pre>
+                    </>
+                )}
+            </Accordion>
             {gsStyle ? (
                 <div>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
