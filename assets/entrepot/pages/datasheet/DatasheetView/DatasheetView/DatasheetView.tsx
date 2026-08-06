@@ -26,7 +26,7 @@ import api from "../../../../api";
 import DatasheetThumbnail from "../DatasheetThumbnail";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/hooks/useDatastoreMembership";
 
 const DatasetListTab = lazy(() => import("../DatasetListTab/DatasetListTab"));
 const DocumentsTab = lazy(() => import("../DocumentsTab/DocumentsTab"));
@@ -144,7 +144,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         }),
     });
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <Main title={`Données ${datasheetName}`}>
@@ -195,7 +195,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                 datastoreId={datastoreId}
                                 datasheetName={datasheetName}
                                 datasheet={datasheetQuery.data}
-                                canEditThumbnail={isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)}
+                                canEditThumbnail={membership?.can(CommunityMemberDtoRightsEnum.ANNEX) ?? false}
                             />
                         </div>
                         <div className={fr.cx("fr-col")}>
@@ -203,11 +203,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             <p className={fr.cx("fr-mb-2v")}>{/* <strong>Création de la fiche de données : </strong>13 Mar. 2023 */}</p>
                             <p className={fr.cx("fr-mb-2v")}>{/* <strong>Mise à jour : </strong>17 Mar. 2023 */}</p>
                         </div>
-                        {(isSupervisor ||
-                            (userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX) &&
-                                userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
-                                userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) &&
-                                userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST))) && (
+                        {membership?.can(
+                            CommunityMemberDtoRightsEnum.ANNEX,
+                            CommunityMemberDtoRightsEnum.UPLOAD,
+                            CommunityMemberDtoRightsEnum.PROCESSING,
+                            CommunityMemberDtoRightsEnum.BROADCAST
+                        ) && (
                             <div className={fr.cx("fr-col-3")}>
                                 <ButtonsGroup
                                     buttons={[

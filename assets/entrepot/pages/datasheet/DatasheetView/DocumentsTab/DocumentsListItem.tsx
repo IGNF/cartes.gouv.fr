@@ -19,7 +19,7 @@ import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/hooks/useDatastoreMembership";
 
 type DocumentsListItemProps = {
     document: DatasheetDocument;
@@ -90,7 +90,7 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
         },
     });
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <>
@@ -138,7 +138,7 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
                             >
                                 {tCommon("see")}
                             </Button>
-                            {(isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)) && (
+                            {membership?.can(CommunityMemberDtoRightsEnum.ANNEX) && (
                                 <MenuList
                                     menuOpenButtonProps={{
                                         iconId: "fr-icon-menu-2-fill",
