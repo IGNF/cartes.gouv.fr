@@ -1,7 +1,9 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo } from "react";
 
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import useAccessGate from "@/hooks/useAccessGate";
+import { delta } from "@/utils/delta";
 import { Datastore } from "../../@types/app";
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import { CommunityProvider } from "../../contexts/community";
@@ -25,31 +27,23 @@ export interface CommunityLayoutProps extends Omit<DatastoreLayoutProps, "datast
 const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => {
     const { requiredRights, children, communityId, ...rest } = props;
 
-    const queryClient = useQueryClient();
-
-    const { data, error, failureReason, isFetching, isPending, refetch, status } = useQuery<
-        [CommunityDetailResponseDto, Datastore | undefined],
-        CartesApiException
-    >({
+    const communityQuery = useQuery<CommunityDetailResponseDto, CartesApiException>({
         queryKey: RQKeys.community(communityId),
-        queryFn: async ({ signal }) => {
-            const community = await api.community.get(communityId, { signal });
-            let datastore: Datastore | undefined;
-            if (community.datastore !== undefined && community.datastore._id) {
-                const datastoreId = community.datastore._id;
-                datastore = await queryClient.ensureQueryData({
-                    queryKey: RQKeys.datastore(datastoreId),
-                    queryFn: () => api.datastore.get(datastoreId, { signal }),
-                    revalidateIfStale: true,
-                });
-            }
-            return [community, datastore];
-        },
-        staleTime: 20000,
+        queryFn: ({ signal }) => api.community.get(communityId, { signal }),
+        staleTime: delta.seconds(20),
         enabled: !!communityId,
     });
+    const community = communityQuery.data;
 
-    const [community, datastore] = data ?? [];
+    // requête dépendante : le datastore éventuel de la communauté (une communauté peut ne pas en avoir)
+    const datastoreId = community?.datastore?._id;
+    const datastoreQuery = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(datastoreId));
+    const datastore = datastoreQuery.data;
+
+    // une requête désactivée n'a ni data ni erreur ; seul isPending doit être conditionné
+    const error = communityQuery.error ?? datastoreQuery.error;
+    const failureReason = communityQuery.failureReason ?? datastoreQuery.failureReason;
+    const isPending = communityQuery.isPending || (datastoreId !== undefined && datastoreQuery.isPending);
 
     const gate = useAccessGate({ communityId }, requiredRights);
 
@@ -72,7 +66,13 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     if (error || !community) {
         return (
             <AppLayout {...rest}>
-                <UnexpectedError message={error?.message} onRetry={() => refetch()} />
+                <UnexpectedError
+                    message={error?.message}
+                    onRetry={() => {
+                        if (communityQuery.error) communityQuery.refetch();
+                        if (datastoreQuery.error) datastoreQuery.refetch();
+                    }}
+                />
             </AppLayout>
         );
     }
@@ -80,7 +80,11 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     return (
         <AppLayout {...rest}>
             <CommunityProvider community={community}>
-                <DatastoreProvider datastore={datastore} isFetching={isFetching} status={status}>
+                <DatastoreProvider
+                    datastore={datastore}
+                    isFetching={communityQuery.isFetching || datastoreQuery.isFetching}
+                    status={datastoreId !== undefined ? datastoreQuery.status : "success"}
+                >
                     {gate === "granted" ? children : <Forbidden />}
                 </DatastoreProvider>
             </CommunityProvider>
