@@ -11,6 +11,7 @@ import VectorDbList from "./VectorDbList/VectorDbList";
 import PyramidRasterList from "./PyramidRasterList/PyramidRasterList";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useCommunityRights from "@/hooks/useCommunityRights";
+import { getDatasheetPublicationsCount, parseIntegrationProgress } from "@/utils";
 
 type DataListTabProps = {
     datastoreId: string;
@@ -32,18 +33,13 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
                         return true;
                     }
 
-                    try {
-                        const integrationProgress = JSON.parse(upload.tags.integration_progress) as Record<string, string>;
-                        return "integration_processing" in integrationProgress && integrationProgress["integration_processing"] === "waiting";
-                    } catch {
-                        return false;
-                    }
+                    const progress = parseIntegrationProgress(upload.tags.integration_progress);
+                    return progress !== null && progress["integration_processing"] === "waiting";
                 }) ?? []
         );
     }, [datasheet]);
 
-    const nbPublications =
-        (datasheet.vector_db_list?.length || 0) + (datasheet.pyramid_vector_list?.length || 0) + (datasheet.pyramid_raster_list?.length || 0);
+    const nbPublications = getDatasheetPublicationsCount(datasheet);
 
     const { userRights, isSupervisor } = useCommunityRights();
 

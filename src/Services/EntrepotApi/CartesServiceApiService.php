@@ -305,7 +305,7 @@ class CartesServiceApiService
         // Mise à jour des métadonnées de la configuration
         $configRequestBody['metadata'] = $this->getNewConfigMetadata($dto->identifier, $configRequestBody['metadata'] ?? []);
         $configTags = [
-            CommonTags::CONFIG_THEME => implode(', ', $dto->category),
+            CommonTags::THEME_CATEGORIES => implode(', ', $dto->category),
         ];
 
         if ($oldOffering) {
@@ -377,7 +377,7 @@ class CartesServiceApiService
         /** @var CswMetadata */
         $cswMetadata = $apiMetadata['csw_metadata'];
 
-        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::CONFIG_THEME], $cswMetadata, $dto);
+        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::THEME_CATEGORIES], $cswMetadata, $dto);
 
         return $offering;
     }
@@ -399,9 +399,9 @@ class CartesServiceApiService
                 $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
 
                 // Mise à jour des tags seulement si nécessaire
-                if ($configTheme !== ($configuration['tags'][CommonTags::CONFIG_THEME] ?? '')) {
+                if ($configTheme !== ($configuration['tags'][CommonTags::THEME_CATEGORIES] ?? '')) {
                     $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
-                        CommonTags::CONFIG_THEME => $configTheme,
+                        CommonTags::THEME_CATEGORIES => $configTheme,
                     ])->array();
                 }
 

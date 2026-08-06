@@ -75,6 +75,7 @@
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "react-dsfr-tiptap": "^2.2.0",
+        "react-easy-crop": "^6.0.2",
         "react-error-boundary": "^6.0.0",
         "react-hook-form": "^7.45.1",
         "sass-embedded": "^1.83.4",
