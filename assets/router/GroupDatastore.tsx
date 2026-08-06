@@ -2,7 +2,7 @@ import { JSX, lazy, useMemo } from "react";
 import { Route } from "type-route";
 
 import { groups } from "./router";
-import routeAccessRights from "./routeAccessRights";
+import requiredRightsByRoute from "./requiredRightsByRoute";
 import DatastoreLayout, { DatastoreLayoutProps } from "../components/Layout/DatastoreLayout";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 
@@ -214,7 +214,7 @@ function GroupDatastore(props: IGroupDatastoreProps) {
     }
 
     return (
-        <DatastoreLayout datastoreId={route.params.datastoreId} accessRight={routeAccessRights[route.name]} {...content?.layoutProps}>
+        <DatastoreLayout datastoreId={route.params.datastoreId} requiredRights={requiredRightsByRoute[route.name]} {...content?.layoutProps}>
             {content.render}
         </DatastoreLayout>
     );

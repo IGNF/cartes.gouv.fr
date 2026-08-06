@@ -2,7 +2,7 @@ import { JSX, lazy, useMemo } from "react";
 import { Route } from "type-route";
 
 import { groups } from "./router";
-import routeAccessRights from "./routeAccessRights";
+import requiredRightsByRoute from "./requiredRightsByRoute";
 import CommunityLayout, { CommunityLayoutProps } from "../components/Layout/CommunityLayout";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 
@@ -34,7 +34,7 @@ function GroupCommunity(props: IGroupCommunityProps) {
     }
 
     return (
-        <CommunityLayout communityId={route.params.communityId} accessRight={routeAccessRights[route.name]} {...content?.layoutProps}>
+        <CommunityLayout communityId={route.params.communityId} requiredRights={requiredRightsByRoute[route.name]} {...content?.layoutProps}>
             {content.render}
         </CommunityLayout>
     );
