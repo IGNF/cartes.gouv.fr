@@ -2,7 +2,7 @@ import Main from "@/components/Layout/Main";
 import { fr } from "@codegouvfr/react-dsfr";
 import { useEffect } from "react";
 
-import { useSandboxDatastoreQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
+import { sandboxCommunityId } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { externalUrls } from "@/router/externalUrls";
 import { routes, useRoute } from "@/router/router";
@@ -27,11 +27,11 @@ export default function DiscoverPublish() {
         }
     }, [params, user]);
 
-    const { data: sandboxDatastore, isPending: sandboxIsPending } = useSandboxDatastoreQuery();
-
     // au moins un entrepôt hors bac à sable : lien direct vers la page de stats des entrepôts
-    const hasNonSandboxDatastore = (user?.communities_member ?? []).some((cm) => cm.community?.datastore && cm.community.datastore !== sandboxDatastore?._id);
-    const statsRoute = !sandboxIsPending && hasNonSandboxDatastore ? routes.stats_by_scope({ scope: "datastore" }) : routes.stats_scope_selection();
+    const hasNonSandboxDatastore = (user?.communities_member ?? []).some(
+        (cm) => cm.community?.datastore && (sandboxCommunityId === null || cm.community._id !== sandboxCommunityId)
+    );
+    const statsRoute = hasNonSandboxDatastore ? routes.stats_by_scope({ scope: "datastore" }) : routes.stats_scope_selection();
 
     return (
         <Main
