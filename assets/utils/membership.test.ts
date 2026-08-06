@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CartesUser } from "@/@types/app";
 import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import { findMembership, hasAccess, hasRights, isSupervisor } from "./user";
+import { findMembership, hasAccess, hasRights, isSupervisor } from "./membership";
 
 const USER_ID = "user-1";
 const SUPERVISOR_ID = "supervisor-1";
