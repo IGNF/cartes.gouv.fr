@@ -24,7 +24,7 @@ import { useCommunity } from "@/contexts/community";
 import { useDatastoreContext } from "@/contexts/datastore";
 import api from "@/entrepot/api";
 import useUserQuery from "@/hooks/queries/useUserQuery";
-import useCommunityMember from "@/hooks/useCommunityMember";
+import useMembership from "@/hooks/useMembership";
 import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
@@ -160,7 +160,7 @@ export default function CommunityInfo() {
         communityModifyMutation.mutate(data);
     }
 
-    const member = useCommunityMember({ communityId: community._id });
+    const member = useMembership({ communityId: community._id });
     const isSupervisor = community.supervisor._id === user?.id;
     const canModifyCommunity = isSupervisor || (member?.can(CommunityMemberDtoRightsEnum.COMMUNITY) ?? false);
 
