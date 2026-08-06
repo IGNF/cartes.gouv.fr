@@ -3,7 +3,7 @@ import { FC, PropsWithChildren, memo } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useRevalidateUserOnDenial from "@/hooks/useRevalidateUserOnDenial";
-import { canAccess } from "@/utils";
+import { hasAccess } from "@/utils";
 import { Datastore } from "../../@types/app";
 import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import { DatastoreProvider } from "../../contexts/datastore";
@@ -18,11 +18,11 @@ import AppLayout, { AppLayoutProps } from "./AppLayout";
 import Main from "./Main";
 
 export interface DatastoreLayoutProps extends Omit<AppLayoutProps, "navItems"> {
-    accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[];
+    requiredRights?: CommunityMemberDtoRightsEnum[];
     datastoreId: string;
 }
 const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => {
-    const { accessRight, datastoreId, children, ...rest } = props;
+    const { requiredRights, datastoreId, children, ...rest } = props;
 
     const { data: user } = useUserQuery();
     const { data, error, failureReason, isFetching, isPending, refetch, status } = useQuery<Datastore, CartesApiException>({
@@ -31,7 +31,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
         staleTime: 3600000,
     });
 
-    const isAuthorized = canAccess(user, { datastoreId }, accessRight);
+    const isAuthorized = hasAccess(user, { datastoreId }, requiredRights);
 
     const denialSettled = useRevalidateUserOnDenial(!isAuthorized, datastoreId);
 

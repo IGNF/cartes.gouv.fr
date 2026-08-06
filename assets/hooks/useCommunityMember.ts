@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useUserQuery from "@/hooks/queries/useUserQuery";
-import { canUserAccess, findMembership } from "@/utils";
+import { findMembership, hasRights, isSupervisor } from "@/utils";
 
 type CommunityMemberCriteria = { datastoreId: string; communityId?: never } | { communityId: string; datastoreId?: never };
 
@@ -25,9 +25,9 @@ export default function useCommunityMember(criteria: CommunityMemberCriteria) {
             userId: user.id,
             membership,
             rights: membership.rights ?? [],
-            isSupervisor: membership.community?.supervisor === user.id,
-            /** true si superviseur ou si l'utilisateur a TOUS les droits demandés */
-            can: (...rights: CommunityMemberDtoRightsEnum[]) => canUserAccess(user.id, membership, rights.length > 0 ? rights : undefined),
+            isSupervisor: isSupervisor(user.id, membership),
+            /** true si superviseur OU si l'utilisateur a TOUS les droits demandés */
+            can: (...requiredRights: CommunityMemberDtoRightsEnum[]) => isSupervisor(user.id, membership) || hasRights(membership, requiredRights),
         };
     }, [user, datastoreId, communityId]);
 }
