@@ -2,14 +2,14 @@
 
 import { execFile } from "child_process";
 import { createWriteStream } from "fs";
-import { mkdir, readFile, rm, writeFile } from "fs/promises";
-import { HttpsProxyAgent } from "https-proxy-agent";
+import { mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
 import { JSDOM } from "jsdom";
-import fetch from "node-fetch";
 import { styleText, format as utilFormat } from "node:util";
 import { dirname, join, normalize, resolve } from "path";
 import { format, resolveConfig } from "prettier";
+import { Readable } from "stream";
 import { pipeline } from "stream/promises";
+import { fetch, ProxyAgent } from "undici";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
 
@@ -37,6 +37,12 @@ const RUN_HISTORY_REMOTE_FILE = `${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles/
 const MAX_HISTORY_ENTRIES = 10;
 
 const HTTP_PROXY = process.env.HTTP_PROXY;
+
+// Dispatcher unique au niveau module : réutilisation des connexions via le proxy
+const proxyDispatcher = HTTP_PROXY ? new ProxyAgent(HTTP_PROXY) : undefined;
+
+// Délai maximal d'une requête (connexion + corps) pour éviter un cronjob suspendu indéfiniment
+const FETCH_TIMEOUT = 60_000;
 
 const formatArgs = (args) => (args.length === 1 ? String(args[0]) : utilFormat(...args));
 
@@ -80,9 +86,12 @@ const withRetry = async (fn, options = {}) => {
             return await fn();
         } catch (error) {
             lastError = error;
-            const delay = retryDelay * Math.pow(2, attempt);
-            logger.warn(`Attempt ${attempt + 1}/${maxRetries} failed. Retrying in ${delay}ms...`);
-            await new Promise((resolve) => setTimeout(resolve, delay));
+            // Pas d'attente inutile après la dernière tentative
+            if (attempt < maxRetries - 1) {
+                const delay = retryDelay * Math.pow(2, attempt);
+                logger.warn(`Attempt ${attempt + 1}/${maxRetries} failed. Retrying in ${delay}ms...`);
+                await new Promise((resolve) => setTimeout(resolve, delay));
+            }
         }
     }
 
@@ -121,7 +130,8 @@ const withConcurrency = async (items, fn, options = {}) => {
         results.push(promise);
 
         if (pending.size >= concurrency) {
-            await Promise.race(pending);
+            // Les rejets sont remontés par le Promise.all final, pas par le race
+            await Promise.race(pending).catch(() => {});
         }
     }
 
@@ -129,11 +139,11 @@ const withConcurrency = async (items, fn, options = {}) => {
 };
 
 /**
- * Binary to ASCII
+ * Encode les identifiants pour un en-tête Authorization Basic
  * @param {string} username
  * @param {string} password
  */
-const btoa = (username, password) => Buffer.from(username + ":" + password, "binary").toString("base64");
+const basicAuthToken = (username, password) => Buffer.from(username + ":" + password, "binary").toString("base64");
 
 async function ensureDirectoryExists(filePath) {
     const dir = dirname(filePath);
@@ -184,6 +194,20 @@ const removeElementsWithClassesKeepChildren = (document, classes = []) => {
 };
 
 /**
+ * Découpe une candidate srcset ("<url> <descriptor>") en tolérant les espaces non encodés dans l'URL :
+ * le descriptor est le dernier token uniquement s'il a la forme "325w" ou "2x", le reste est l'URL.
+ * Voir : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#srcset
+ *
+ * @param {string} candidate
+ * @returns {{url: string, descriptor: string|undefined}}
+ */
+const parseSrcsetCandidate = (candidate) => {
+    const tokens = candidate.trim().split(/\s+/);
+    const descriptor = tokens.length > 1 && /^\d+(\.\d+)?[wx]$/.test(tokens.at(-1)) ? tokens.pop() : undefined;
+    return { url: tokens.join(" "), descriptor };
+};
+
+/**
  * Télécharger les img et réécrire l'URL des img
  *
  * @param {HTMLElement} document
@@ -197,20 +221,16 @@ const downloadAllImages = async (document) => {
 
         // srcset
         if (img.srcset && img.srcset.length > 0) {
-            // Chaque candidate srcset est de la forme "<url> <descriptor>" (ex. "/img.png 325w").
-            // On split d'abord sur ", " pour séparer les candidates, puis on trim et on split sur
-            // les espaces/retours à la ligne pour séparer l'URL du descriptor.
-            // L'URL est ensuite encodée via toGatewayUrl() pour éviter que les espaces dans les
-            // noms de fichiers cassent le parsing du srcset côté navigateur.
+            // Les candidates sont séparées par ", " ; l'URL réécrite est encodée via toGatewayUrl()
+            // pour que les espaces dans les noms de fichiers ne cassent pas le srcset côté navigateur
             const srcSet = img.srcset.split(", ");
 
             const newSrcSet = await withConcurrency(srcSet, async (src) => {
-                // split pour séparer l'URL et le descriptor, voir : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#srcset
-                const [originalImgPath, descriptor] = src.trim().split(/\s+/);
+                const { url: originalImgPath, descriptor } = parseSrcsetCandidate(src);
 
                 const newSrc = await downloadFile(originalImgPath);
 
-                // reconstitution de l'URL
+                // reconstitution de la candidate
                 return toGatewayUrl(newSrc) + (descriptor ? " " + descriptor : "");
             });
 
@@ -237,6 +257,24 @@ const downloadAllDownloadableFiles = async (document) => {
 };
 
 /**
+ * Décode un chemin segment par segment ; un segment mal formé (ex. "%" isolé) est conservé tel quel
+ * au lieu de faire échouer tout le run avec une URIError.
+ *
+ * @param {string} path
+ */
+const safeDecodePath = (path) =>
+    path
+        .split("/")
+        .map((segment) => {
+            try {
+                return decodeURI(segment);
+            } catch (_) {
+                return segment;
+            }
+        })
+        .join("/");
+
+/**
  * Convertit un chemin de fichier local téléchargé en URL passerelle S3 correctement encodée.
  * Indispensable car downloadFile() dé-encode les chemins (decodeURI) : sans ré-encodage,
  * les espaces et virgules dans les noms de fichiers cassent le parsing du srcset.
@@ -248,28 +286,74 @@ const toGatewayUrl = (localFilePath) => {
     return ARTICLES_S3_GATEWAY_PATH_ARTICLES + encoded;
 };
 
+// Cache des téléchargements en cours ou terminés, indexé par URL source
+const downloadCache = new Map();
+
 /**
+ * Télécharge un fichier une seule fois par run : les références suivantes réutilisent la même promesse
  *
  * @param {string} originalFilePath
+ * @returns {Promise<string>}
  */
-const downloadFile = async (originalFilePath) => {
+const downloadFile = (originalFilePath) => {
     const url = new URL(ARTICLES_CMS_BASE_URL + originalFilePath);
+
+    if (!downloadCache.has(url.href)) {
+        // Un échec est retiré du cache pour qu'une référence ultérieure retente le téléchargement
+        const promise = downloadFileToDisk(url).catch((error) => {
+            downloadCache.delete(url.href);
+            throw error;
+        });
+        downloadCache.set(url.href, promise);
+    }
+
+    return downloadCache.get(url.href);
+};
+
+/**
+ * @param {URL} url
+ */
+const downloadFileToDisk = async (url) => {
     let newFilePath = normalize(join(OUTPUT_DIR, "media", url.pathname.replace("/sites/default/files", "")));
-    newFilePath = decodeURI(newFilePath);
+    newFilePath = safeDecodePath(newFilePath);
+
+    // Écriture atomique : on télécharge vers un fichier temporaire .part, renommé uniquement si complet (#1089)
+    const partFilePath = `${newFilePath}.part`;
 
     logger.log(`Downloading file from ${url.href}`);
 
-    const response = await withRetry(async () => {
-        const res = await fetch(url.href, getFetchOptions());
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        }
-        return res;
-    });
-
     try {
         await ensureDirectoryExists(newFilePath);
-        await pipeline(response.body, createWriteStream(newFilePath));
+
+        // Le retry couvre le fetch ET l'écriture : une troncature du flux est retentée
+        await withRetry(async () => {
+            const response = await fetch(url.href, getFetchOptions());
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            if (!response.body) {
+                throw new Error(`Empty response body (HTTP ${response.status})`);
+            }
+
+            try {
+                await pipeline(Readable.fromWeb(response.body), createWriteStream(partFilePath));
+
+                // Défense en profondeur : taille écrite comparée au Content-Length annoncé
+                const contentLength = parseInt(response.headers.get("content-length"));
+                if (!isNaN(contentLength)) {
+                    const { size } = await stat(partFilePath);
+                    if (size !== contentLength) {
+                        throw new Error(`Truncated download: expected ${contentLength} bytes, got ${size}`);
+                    }
+                }
+            } catch (error) {
+                await rm(partFilePath, { force: true });
+                throw error;
+            }
+        });
+
+        // Un fichier incomplet n'atteint jamais son chemin final, donc jamais le S3
+        await rename(partFilePath, newFilePath);
 
         logger.log(`File saved to ${newFilePath}`);
         stats.files.downloaded++;
@@ -282,21 +366,36 @@ const downloadFile = async (originalFilePath) => {
 };
 
 const getFetchOptions = () => {
-    const options = {};
-
-    if (HTTP_PROXY) {
-        options.agent = new HttpsProxyAgent(HTTP_PROXY);
-    }
+    const options = {
+        dispatcher: proxyDispatcher,
+        signal: AbortSignal.timeout(FETCH_TIMEOUT),
+    };
 
     if (ARTICLES_CMS_USERNAME && ARTICLES_CMS_PASSWORD) {
         options.headers = {
-            ...options?.headers,
-            Authorization: `Basic ${btoa(ARTICLES_CMS_USERNAME, ARTICLES_CMS_PASSWORD)}`,
+            Authorization: `Basic ${basicAuthToken(ARTICLES_CMS_USERNAME, ARTICLES_CMS_PASSWORD)}`,
         };
     }
 
     return options;
 };
+
+/**
+ * Récupère une page HTML avec retry et contrôle du statut HTTP, et renvoie son document parsé
+ *
+ * @param {string} url
+ * @returns {Promise<Document>}
+ */
+const fetchDocument = async (url) =>
+    withRetry(async () => {
+        const response = await fetch(url, getFetchOptions());
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText} (${url})`);
+        }
+
+        const content = await response.text();
+        return new JSDOM(content).window.document;
+    });
 
 const prettify = async (string) => {
     const options = await resolveConfig(resolve(join(__dirname, "..", ".prettierrc")));
@@ -392,7 +491,8 @@ const pushHistoryToS3 = async () => {
 
 const syncS3 = async () => {
     const destination = `${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles`;
-    const args = ["sync", OUTPUT_DIR, destination];
+    // Exclusion des fichiers temporaires .part au cas où un crash en laisserait un résiduel
+    const args = ["sync", OUTPUT_DIR, destination, "--exclude", "*.part"];
     const command = `rclone ${args.join(" ")}`;
 
     try {
@@ -422,10 +522,7 @@ const cleanOutputDir = async () => {
  * Renvoie les numéros de page de début et de fin. La pagination commence à 0.
  */
 const getPageNumbers = async (url) => {
-    const response = await fetch(url, getFetchOptions());
-
-    const content = await response.text();
-    const { document } = new JSDOM(content).window;
+    const document = await fetchDocument(url);
 
     // Lecture du contenu du main
     const $main = document.querySelector("main");
@@ -435,20 +532,30 @@ const getPageNumbers = async (url) => {
     try {
         const $navPaginationUl = $main.querySelector("nav.fr-pagination>.fr-pagination__list");
         const navPagLastChild = $navPaginationUl.lastElementChild.querySelector("a");
-        lastPage = new URL(url + navPagLastChild.href).searchParams.get("page");
+        lastPage = parseInt(new URL(navPagLastChild.href, url).searchParams.get("page"));
     } catch (_) {
         // Si la pagination n'existe pas, on considère qu'il n'y a qu'une seule page
+    }
+
+    if (isNaN(lastPage)) {
+        logger.warn(`Could not determine the last page number on ${url}, only the first page will be processed.`);
+        lastPage = 0;
     }
 
     logger.info(`First page: ${firstPage}, last page: ${lastPage}`);
 
     return {
-        firstPage: parseInt(firstPage),
-        lastPage: parseInt(lastPage),
+        firstPage,
+        lastPage,
     };
 };
 
-const processTagsInDocument = async (document) => {
+/**
+ * Réécrit les liens de tags vers les pages de tags du site et renvoie la liste des tags trouvés
+ *
+ * @param {Document|HTMLElement} document
+ */
+const processTagsInDocument = (document) => {
     const $tagsGroup = document?.querySelector("ul.fr-tags-group");
     const $tagsList = [...($tagsGroup?.querySelectorAll("a.fr-tag") ?? [])];
 
@@ -468,10 +575,7 @@ const processTagsInDocument = async (document) => {
 const processArticlesIndex = async (baseUrl, page = 0, outputSubDir = "list") => {
     const url = `${baseUrl}/?page=${page}`;
     logger.log(`Fetching articles index from url ${url}`);
-    const response = await fetch(url, getFetchOptions());
-
-    const content = await response.text();
-    const { document } = new JSDOM(content).window;
+    const document = await fetchDocument(url);
 
     // Lecture du contenu du main
     const $main = document.querySelector("main");
@@ -510,10 +614,7 @@ const processArticlesIndex = async (baseUrl, page = 0, outputSubDir = "list") =>
  * @param {string} slug
  */
 const processSingleArticle = async (slug) => {
-    const response = await fetch(`${ARTICLES_CMS_BASE_URL}/${slug}`, getFetchOptions());
-
-    const content = await response.text();
-    const { document } = new JSDOM(content).window;
+    const document = await fetchDocument(`${ARTICLES_CMS_BASE_URL}/${slug}`);
 
     // Lecture du contenu du main
     const $article = document.querySelector("article");
@@ -560,16 +661,19 @@ const processSingleArticle = async (slug) => {
         const articleSlugsList = (await withConcurrency(pagesRange, (page) => processArticlesIndex(ARTICLES_CMS_BASE_URL, page))).flat();
         stats.articles.detected = articleSlugsList.length;
 
+        // Aucun article détecté = anomalie côté CMS : on s'arrête sans synchroniser pour préserver le contenu du S3 (#1098)
+        if (articleSlugsList.length === 0) {
+            throw new Error("No article found on the articles index, aborting.");
+        }
+
         //  la liste paginée des articles par tag (index pour chaque tag)
-        const response = await fetch(ARTICLES_CMS_BASE_URL, getFetchOptions());
+        const document = await fetchDocument(ARTICLES_CMS_BASE_URL);
 
-        const content = await response.text();
-        const { document } = new JSDOM(content).window;
-
-        const tags = await processTagsInDocument(document);
+        const tags = processTagsInDocument(document);
 
         await withConcurrency(tags, async (tag) => {
-            const { firstPage, lastPage } = await getPageNumbers(ARTICLES_CMS_BASE_URL);
+            // La pagination est lue sur l'index du tag lui-même, pas sur l'index général
+            const { firstPage, lastPage } = await getPageNumbers(tag.originalUrl);
             const pagesRange = getArrayRange(firstPage, lastPage); // [0,1,2,3,...,n]
             await withConcurrency(pagesRange, (page) => processArticlesIndex(tag.originalUrl, page, "list/tags/" + tag.tag));
         });
@@ -595,14 +699,24 @@ const processSingleArticle = async (slug) => {
         } else {
             logger.success("All files downloaded successfully.");
         }
+
+        // Un article ou fichier non régénéré serait supprimé du S3 par le sync : on marque le run en échec
+        if (stats.articles.failed > 0 || stats.files.failed > 0) {
+            didScrapeFail = true;
+        }
     } catch (error) {
         didScrapeFail = true;
         logger.error("Script failed:", error);
     }
 
-    const syncResult = await syncS3();
-    if (syncResult.exitCode !== 0) {
-        didScrapeFail = true;
+    // On ne synchronise jamais un moissonnage incomplet : le S3 conserve le contenu du run précédent (#1098)
+    if (didScrapeFail) {
+        logger.error("Scrape failed or incomplete, skipping S3 sync to preserve the existing content.");
+    } else {
+        const syncResult = await syncS3();
+        if (syncResult.exitCode !== 0) {
+            didScrapeFail = true;
+        }
     }
 
     await appendRunHistory({
