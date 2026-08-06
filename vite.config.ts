@@ -1,3 +1,4 @@
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { Unhead } from "@unhead/react/vite";
 import autoprefixer from "autoprefixer";
@@ -43,6 +44,12 @@ export default defineConfig(({ mode }) => {
                 }),
                 enforce: "pre",
             },
+            tanstackRouter({
+                target: "react",
+                autoCodeSplitting: true,
+                routesDirectory: "./assets/routes",
+                generatedRouteTree: "./assets/routeTree.gen.ts",
+            }),
             react(),
             Unhead(),
             symfonyPlugin({

@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import pluginQuery from "@tanstack/eslint-plugin-query";
+import pluginRouter from "@tanstack/eslint-plugin-router";
 import prettier from "eslint-config-prettier";
 import pluginReact from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -16,6 +17,7 @@ export default defineConfig([
         "public/build",
         "public/bundles",
         "assets/data",
+        "assets/routeTree.gen.ts",
         "vendor",
         "var",
     ]),
@@ -76,6 +78,7 @@ export default defineConfig([
     reactHooks.configs.flat.recommended,
     reactRefresh.configs.recommended,
     ...pluginQuery.configs["flat/recommended"],
+    ...pluginRouter.configs["flat/recommended"],
     jsxA11y.flatConfigs.strict,
     prettier,
 
