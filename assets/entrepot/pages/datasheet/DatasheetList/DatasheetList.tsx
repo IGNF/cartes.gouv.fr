@@ -30,7 +30,7 @@ import DatasheetListItem from "./DatasheetListItem";
 import NoData from "./NoData";
 import SandboxDatastoreExplanation from "./SandboxDatastoreExplanation";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/hooks/useDatastoreMembership";
 
 const filterTests = {
     [FilterEnum.ENABLED]: (d: Datasheet) => d.nb_publications > 0,
@@ -76,7 +76,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     const { classes, cx } = useStyles();
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastoreId}>
@@ -100,9 +100,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                             <Badge severity="info" noIcon={true}>
                                 {filteredItems.length ?? 0}
                             </Badge>
-                            {(isSupervisor ||
-                                (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
-                                    userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
+                            {membership?.can(CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING) && (
                                 <Button
                                     linkProps={
                                         datasheetCreationImpossible

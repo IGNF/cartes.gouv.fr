@@ -21,7 +21,7 @@ import { getFileExtension } from "../../../../../utils";
 import api from "../../../../api";
 import DocumentsListItem from "./DocumentsListItem";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/hooks/useDatastoreMembership";
 
 const documentAddModal = createModal({
     id: "datasheet-document-add-modal",
@@ -159,11 +159,11 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
         },
     });
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <>
-            {(isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)) && (
+            {membership?.can(CommunityMemberDtoRightsEnum.ANNEX) && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
                     <Button
                         iconId="fr-icon-add-line"

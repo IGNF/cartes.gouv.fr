@@ -10,7 +10,7 @@ import UnfinishedUploadList from "./UnfinishedUploadList";
 import VectorDbList from "./VectorDbList/VectorDbList";
 import PyramidRasterList from "./PyramidRasterList/PyramidRasterList";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/hooks/useDatastoreMembership";
 
 type DataListTabProps = {
     datastoreId: string;
@@ -45,11 +45,11 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
     const nbPublications =
         (datasheet.vector_db_list?.length || 0) + (datasheet.pyramid_vector_list?.length || 0) + (datasheet.pyramid_raster_list?.length || 0);
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <>
-            {(isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) && userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
+            {membership?.can(CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING) && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
                     <Button iconId="fr-icon-add-line" linkProps={routes.datastore_datasheet_upload({ datastoreId, datasheetName: datasheet.name }).link}>
                         Ajouter un fichier de données
