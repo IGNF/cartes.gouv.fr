@@ -6,7 +6,11 @@ import { delta } from "@/utils/delta";
 export function datastoreQueryOptions(datastoreId: string | undefined) {
     return {
         queryKey: RQKeys.datastore(datastoreId ?? ""),
-        queryFn: ({ signal }: { signal: AbortSignal }) => api.datastore.get(datastoreId!, { signal }),
+        queryFn: ({ signal }: { signal: AbortSignal }) => {
+            // un refetch() manuel contourne enabled : ne jamais appeler l'API sans id
+            if (datastoreId === undefined) return Promise.reject(new Error("datastoreId manquant"));
+            return api.datastore.get(datastoreId, { signal });
+        },
         staleTime: delta.hours(1),
         enabled: datastoreId !== undefined,
     };
