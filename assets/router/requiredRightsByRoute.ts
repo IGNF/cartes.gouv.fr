@@ -8,8 +8,8 @@ type RouteName = keyof typeof routes;
  * Une route absente de cette matrice n'exige que l'appartenance.
  * TODO produit : compléter pour les routes datastore (permissions, consommation...).
  */
-const routeAccessRights: Partial<Record<RouteName, CommunityMemberDtoRightsEnum[]>> = {
+const requiredRightsByRoute: Partial<Record<RouteName, CommunityMemberDtoRightsEnum[]>> = {
     members_list: [CommunityMemberDtoRightsEnum.COMMUNITY],
 };
 
-export default routeAccessRights;
+export default requiredRightsByRoute;

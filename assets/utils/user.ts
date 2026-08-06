@@ -3,6 +3,9 @@ import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entre
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
 
+/** Désigne une communauté, directement ou via son datastore */
+export type CommunityRef = { datastoreId: string; communityId?: never } | { communityId: string; datastoreId?: never };
+
 /**
  * Retrouve l'appartenance de l'utilisateur à une communauté, par datastore ou par communauté.
  * Source de vérité unique pour la jointure user ↔ communauté/datastore.
@@ -19,40 +22,28 @@ export function findMembership(user: CartesUser | null | undefined, criteria: { 
     });
 }
 
-export function canUserAccess(
-    userId: string,
-    communityMember: CommunityMemberDto,
-    accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[]
-): boolean {
-    const { community, rights } = communityMember;
-    if (community?.supervisor === userId) {
-        return true;
-    }
-    if (!accessRight) {
-        return true;
-    }
-    if (typeof accessRight === "string") {
-        return rights?.includes(accessRight) ?? false;
-    }
-    return accessRight.every((right) => rights?.includes(right));
+/** true si l'utilisateur est le superviseur de la communauté */
+export function isSupervisor(userId: string, membership: CommunityMemberDto): boolean {
+    return membership.community?.supervisor === userId;
+}
+
+/** true si l'appartenance porte TOUS les droits demandés (tableau vide : aucun droit requis) */
+export function hasRights(membership: CommunityMemberDto, requiredRights: CommunityMemberDtoRightsEnum[]): boolean {
+    return requiredRights.every((right) => membership.rights?.includes(right) === true);
 }
 
 /**
- * Règle d'accès complète : appartenance (par datastore ou communauté) puis droits éventuels.
+ * Règle d'accès complète : appartenance (par datastore ou communauté), puis superviseur ou droits requis.
  */
-export function canAccess(
-    user: CartesUser | null | undefined,
-    criteria: { datastoreId?: string; communityId?: string },
-    accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[]
-): boolean {
+export function hasAccess(user: CartesUser | null | undefined, ref: CommunityRef, requiredRights: CommunityMemberDtoRightsEnum[] = []): boolean {
     if (!user?.id) {
         return false;
     }
-    const membership = findMembership(user, criteria);
+    const membership = findMembership(user, ref);
     if (!membership) {
         return false;
     }
-    return canUserAccess(user.id, membership, accessRight);
+    return isSupervisor(user.id, membership) || hasRights(membership, requiredRights);
 }
 
 /**
