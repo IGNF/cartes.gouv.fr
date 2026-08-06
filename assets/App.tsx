@@ -6,7 +6,7 @@ import { FC } from "react";
 
 import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
-import { queryClient } from "./modules/queryClient";
+import { isUserMeQueryKey, queryClient } from "./modules/queryClient";
 import { RouteProvider } from "./router/router";
 import RouterRenderer from "./router/RouterRenderer";
 import { bootstrapUser } from "./utils";
@@ -32,8 +32,7 @@ const App: FC = () => {
                 dehydrateOptions: {
                     // ne pas persister (localstorage) les données utilisateur : elles sont rechargées depuis le serveur à chaque chargement de page
                     shouldDehydrateQuery: (query) => {
-                        const isQueryUserMe = query.queryKey.length === 2 && query.queryKey[0] === "user" && query.queryKey[1] === "me";
-                        return defaultShouldDehydrateQuery(query) && !isQueryUserMe;
+                        return defaultShouldDehydrateQuery(query) && !isUserMeQueryKey(query.queryKey);
                     },
                 },
             }}
