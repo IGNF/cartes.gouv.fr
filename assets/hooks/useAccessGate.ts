@@ -32,7 +32,14 @@ export default function useAccessGate(ref: CommunityRef, requiredRights?: Commun
             return;
         }
         // cancelRefetch: false → se greffe sur une requête déjà en vol au lieu de l'annuler
-        refetch({ cancelRefetch: false }).finally(() => setSettledFor(resourceId));
+        let stale = false;
+        refetch({ cancelRefetch: false }).finally(() => {
+            // ignorer le callback si l'effet a été invalidé entre-temps (navigation rapide)
+            if (!stale) setSettledFor(resourceId);
+        });
+        return () => {
+            stale = true;
+        };
     }, [granted, resourceId, dataUpdatedAt, refetch]);
 
     if (granted) return "granted";
