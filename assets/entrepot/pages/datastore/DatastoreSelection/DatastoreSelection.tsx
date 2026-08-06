@@ -52,7 +52,13 @@ export default function DatastoreSelection() {
                             linkProps={
                                 datastore._id !== undefined
                                     ? routes.datasheet_list({ datastoreId: datastore._id }).link
-                                    : { href: "#", onClick: () => addUserToSandbox() }
+                                    : {
+                                          href: "#",
+                                          onClick: (e) => {
+                                              e.preventDefault();
+                                              addUserToSandbox();
+                                          },
+                                      }
                             }
                             endDetail="Voir"
                             enlargeLink={true}
