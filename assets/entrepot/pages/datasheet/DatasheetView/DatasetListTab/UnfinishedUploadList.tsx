@@ -14,7 +14,7 @@ import Wait from "../../../../../components/Utils/Wait";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/hooks/useDatastoreMembership";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;
@@ -45,7 +45,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
         },
     });
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <>
@@ -96,9 +96,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                         {"Voir le rapport"}
                                     </Button>
                                 ) : (
-                                    (isSupervisor ||
-                                        (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
-                                            userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
+                                    membership?.can(CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING) && (
                                         <Button
                                             className={fr.cx("fr-mr-2w")}
                                             linkProps={
@@ -113,9 +111,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                         </Button>
                                     )
                                 )}
-                                {(isSupervisor ||
-                                    (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
-                                        userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
+                                {membership?.can(CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING) && (
                                     <Button
                                         iconId="fr-icon-delete-fill"
                                         priority="secondary"

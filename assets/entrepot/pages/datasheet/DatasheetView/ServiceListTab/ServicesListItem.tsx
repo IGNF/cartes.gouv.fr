@@ -10,7 +10,7 @@ import { symToStr } from "tsafe/symToStr";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/hooks/useDatastoreMembership";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
@@ -61,7 +61,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
 
     const [showDescription, toggleShowDescription] = useToggle();
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <>
@@ -92,8 +92,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         },
                     },
                     [OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) &&
-                        (isSupervisor ||
-                            (userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX) && userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST))) && {
+                        membership?.can(CommunityMemberDtoRightsEnum.ANNEX, CommunityMemberDtoRightsEnum.BROADCAST) && {
                             text: "Gérer les styles",
                             iconId: "ri-flashlight-line",
                             linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId: service._id }).link,
@@ -110,7 +109,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         disabled: service.open === true,
                     },
                     [OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) &&
-                        (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && {
+                        membership?.can(CommunityMemberDtoRightsEnum.BROADCAST) && {
                             text: "Modifier les informations de publication",
                             iconId: "ri-edit-box-line",
                             linkProps: (() => {
@@ -166,7 +165,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                             })(),
                         },
                     service.type === OfferingTypeEnum.WMSVECTOR &&
-                        (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)) && {
+                        membership?.can(CommunityMemberDtoRightsEnum.PROCESSING) && {
                             text: "Créer un service raster WMS/WMTS",
                             iconId: "ri-add-box-line",
                             linkProps: routes.datastore_pyramid_raster_generate({ datastoreId, offeringId: service._id, datasheetName }).link,
@@ -177,7 +176,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                     //     iconId: "fr-icon-refresh-line",
                     //     onClick: () => console.warn("Action non implémentée"),
                     // },
-                    (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && {
+                    membership?.can(CommunityMemberDtoRightsEnum.BROADCAST) && {
                         text: "Dépublier",
                         iconId: "ri-arrow-go-back-line",
                         onClick: () => unpublishServiceConfirmModal.open(),
