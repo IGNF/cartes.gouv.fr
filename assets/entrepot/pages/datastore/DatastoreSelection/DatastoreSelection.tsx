@@ -15,7 +15,7 @@ import sandboxDatastoreThumbnailSvg from "@/img/sandbox-datastore-thumbnail.svg"
 
 export default function DatastoreSelection() {
     const { t: tCommon } = useTranslation("Common");
-    const { datastoreList, addUserToSandbox, sandboxDatastore, userMemberOfSandbox, query } = useDatastoreSelection();
+    const { datastoreList, addUserToSandbox, query } = useDatastoreSelection();
 
     const { params } = useRoute();
     const page = params["page"] ? parseInt(params["page"]) : 1;
@@ -43,22 +43,22 @@ export default function DatastoreSelection() {
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 {paginatedItems.map((datastore, i) => (
-                    <div key={datastore._id + i} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                    <div key={(datastore._id ?? "sandbox") + i} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
                         <Card
                             imageUrl={datastore.is_sandbox === true ? sandboxDatastoreThumbnailSvg : placeholder16x9}
                             imageAlt=""
-                            title={datastore._id === sandboxDatastore?._id ? tCommon("sandbox") : datastore.name}
+                            title={datastore.is_sandbox === true ? tCommon("sandbox") : datastore.name}
                             titleAs="h6"
                             linkProps={
-                                datastore.is_sandbox === true && !userMemberOfSandbox
-                                    ? { href: "#", onClick: () => addUserToSandbox() }
-                                    : routes.datasheet_list({ datastoreId: datastore._id }).link
+                                datastore._id !== undefined
+                                    ? routes.datasheet_list({ datastoreId: datastore._id }).link
+                                    : { href: "#", onClick: () => addUserToSandbox() }
                             }
                             endDetail="Voir"
                             enlargeLink={true}
                             size="small"
                             data-sandbox={datastore.is_sandbox === true ? "true" : undefined}
-                            data-user-member-of-sandbox={datastore.is_sandbox === true && userMemberOfSandbox}
+                            data-user-member-of-sandbox={datastore.is_sandbox === true && datastore._id !== undefined}
                         />
                     </div>
                 ))}

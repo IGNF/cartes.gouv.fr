@@ -7,6 +7,7 @@
         {% if annexes_url is defined and annexes_url is not empty %}data-annexes-url="{{ annexes_url }}"{% endif %}
         {% if config is defined and config.community_id is defined and config.community_id is not empty %}data-config-community-id="{{ config.community_id }}"{% endif %}
         {% if config is defined and config.technical_name is defined and config.technical_name is not empty %}data-config-technical-name="{{ config.technical_name }}"{% endif %}
+        {% if sandbox is defined and sandbox.community_id is defined and sandbox.community_id is not empty %}data-sandbox-community-id="{{ sandbox.community_id }}"{% endif %}
     ></div>
 
     {% if app.user is defined and app.user is not null %}

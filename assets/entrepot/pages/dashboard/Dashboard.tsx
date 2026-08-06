@@ -7,7 +7,6 @@ import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import api from "@/entrepot/api";
 import { useApiEspaceCoStore } from "@/espaceco/stores/ApiEspaceCoStore";
-import { useSandboxDatastorePrefetchQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
 import { routes } from "@/router/router";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 
@@ -36,8 +35,6 @@ export default function Dashboard() {
             text: "Participer",
         },
     };
-
-    useSandboxDatastorePrefetchQuery();
 
     return (
         <Main noticeProps={noticeProps} title={"Tableau de bord"}>
