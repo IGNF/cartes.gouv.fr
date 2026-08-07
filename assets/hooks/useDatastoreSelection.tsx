@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 
 import { sandboxCommunityId } from "@/env";
-import { routes } from "@/router/router";
 import { findMembership } from "@/utils";
 import api from "../entrepot/api";
 import { CartesApiException } from "../modules/jsonFetch";
@@ -19,6 +19,7 @@ type DatastoreSelectionInfo = {
 const collator = new Intl.Collator("fr");
 
 const useDatastoreSelection = () => {
+    const navigate = useNavigate();
     const userQuery = useUserQuery();
     const { data: user } = userQuery;
 
@@ -31,7 +32,7 @@ const useDatastoreSelection = () => {
             const { data: freshUser } = await userQuery.refetch();
             const datastoreId = sandboxCommunityId !== null ? findMembership(freshUser, { communityId: sandboxCommunityId })?.community?.datastore : undefined;
             if (datastoreId) {
-                routes.datasheet_list({ datastoreId }).push();
+                navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
             }
         },
     });
