@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 
 import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
 import { usePagination } from "@/hooks/usePagination";
+import { searchAwareActiveOptions } from "@/router/RouterLink";
 import { Datastore, StoredData, StoredDataTypeEnum, VectorDb } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -142,6 +143,7 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
                         to: "/tableau-de-bord/entrepots/$datastoreId/consommation",
                         params: { datastoreId: datastore._id },
                         search: { tab: DatastoreManageStorageTab.POSTGRESQL, page: pageNumber, limit },
+                        activeOptions: searchAwareActiveOptions,
                     })}
                 />
             )}
