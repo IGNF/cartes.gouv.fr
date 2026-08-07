@@ -5,6 +5,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
@@ -32,7 +33,6 @@ import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes } from "../../../../router/router";
 import SldStyleWmsVectorValidator from "../../../../validations/sld/sldStyle";
 import api from "../../../api";
 import AccessRestrictions from "../common/AccessRestrictions/AccessRestrictions";
@@ -129,6 +129,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
 
     const queryClient = useQueryClient();
     const { datastore } = useDatastore();
+    const navigate = useNavigate();
 
     const createServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
@@ -141,9 +142,13 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             if (vectorDbQuery.data?.tags?.datasheet_name) {
                 queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name) });
                 queryClient.invalidateQueries({ queryKey: RQKeys.datastore_stored_data_uses(datastoreId, vectorDbId) });
-                routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                navigate({
+                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                    params: { datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name },
+                    search: { activeTab: "services" },
+                });
             } else {
-                routes.datasheet_list({ datastoreId }).push();
+                navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
             }
         },
     });
@@ -171,10 +176,14 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             if (vectorDbQuery.data?.tags?.datasheet_name) {
                 queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name) });
                 queryClient.invalidateQueries({ queryKey: RQKeys.datastore_stored_data_uses(datastoreId, vectorDbId) });
-                routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                navigate({
+                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                    params: { datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name },
+                    search: { activeTab: "services" },
+                });
                 queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, vectorDbQuery.data?.tags?.datasheet_name) });
             } else {
-                routes.datasheet_list({ datastoreId }).push();
+                navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
             }
         },
     });
@@ -331,7 +340,9 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     description={
                         <>
                             <p>{vectorDbQuery.error?.message}</p>
-                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                            <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>
+                                {t("back_to_data_list")}
+                            </Button>
                         </>
                     }
                 />
@@ -343,7 +354,9 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     description={
                         <>
                             <p>{offeringQuery.error?.message}</p>
-                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                            <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>
+                                {t("back_to_data_list")}
+                            </Button>
                         </>
                     }
                 />
