@@ -43,3 +43,10 @@ export function externalLink(route: keyof typeof externalUrls, title?: string): 
         title: title ? `${title} - ouvre une nouvelle fenêtre` : "Ouvre une nouvelle fenêtre",
     };
 }
+
+// Ouverture même onglet : target explicite car react-dsfr force _blank (+ icône lien externe)
+// sur les URLs absolues, forme qui dépend de l'env (ex. catalogueUrl) ; les props explicites priment
+export function sameTabLink(url: keyof typeof externalUrls | (string & {})): RegisteredLinkProps {
+    const href = url in externalUrls ? externalUrls[url as keyof typeof externalUrls] : url;
+    return { href, target: "_self" };
+}
