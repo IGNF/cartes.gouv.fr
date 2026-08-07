@@ -7,6 +7,7 @@ import Card from "@codegouvfr/react-dsfr/Card";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { differenceInCalendarDays, parseISO } from "date-fns";
 import { FC, useState } from "react";
 import { useStyles } from "tss-react/mui";
@@ -25,8 +26,9 @@ import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
+
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/permissions/");
 
 type DatastoreManagePermissionsProps = {
     datastoreId: string;
@@ -71,9 +73,8 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
     const [currentPermission, setCurrentPermission] = useState<string | undefined>(undefined);
 
-    const { params } = useRoute();
-    const page = params["page"] ? parseInt(params["page"]) : 1;
-    const limit = params["limit"] ? parseInt(params["limit"]) : 4;
+    const navigate = useNavigate();
+    const { page, limit } = route.useSearch();
 
     const { paginatedItems, totalPages } = usePagination(permissions ?? [], page, limit);
 
@@ -111,7 +112,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                             {permissions?.length ?? 0}
                         </Badge>
                         <Button
-                            linkProps={routes.datastore_add_permission({ datastoreId: datastoreId }).link}
+                            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/permissions/ajout", params: { datastoreId } }}
                             iconId="fr-icon-add-line"
                             iconPosition="right"
                             className={fr.cx("fr-ml-auto")}
@@ -216,10 +217,11 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                                         {
                                                             children: tCommon("modify"),
                                                             iconId: "fr-icon-edit-line",
-                                                            onClick: routes.datastore_edit_permission({
-                                                                datastoreId: datastoreId,
-                                                                permissionId: permission._id,
-                                                            }).push,
+                                                            onClick: () =>
+                                                                navigate({
+                                                                    to: "/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification",
+                                                                    params: { datastoreId, permissionId: permission._id },
+                                                                }),
                                                         },
                                                         {
                                                             children: tCommon("delete"),
@@ -247,7 +249,9 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                     count={totalPages}
                                     showFirstLast={true}
                                     getPageLinkProps={(pageNumber) => ({
-                                        ...routes.datastore_manage_permissions({ datastoreId, page: pageNumber, limit: limit }).link,
+                                        to: "/tableau-de-bord/entrepots/$datastoreId/permissions",
+                                        params: { datastoreId },
+                                        search: { page: pageNumber, limit },
                                     })}
                                     defaultPage={page}
                                 />

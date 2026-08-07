@@ -3,6 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { FC, memo, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -15,7 +16,6 @@ import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { routes, useRoutePaginationParams } from "../../../../../router/router";
 import { niceBytes } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
@@ -26,6 +26,9 @@ const confirmDialogModal = createModal({
     isOpenedByDefault: false,
 });
 
+// Search typé de la route consommation (page parente des onglets)
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/consommation");
+
 type PostgresqlUsageProps = {
     datastore: Datastore;
 };
@@ -33,7 +36,7 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
 
-    const { page, limit } = useRoutePaginationParams();
+    const { page, limit } = route.useSearch();
 
     const pgUsage = useMemo(() => {
         return datastore?.storages.data?.find((data) => data.storage.type === "POSTGRESQL");
@@ -121,10 +124,10 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
                             vectorDb.tags.datasheet_name !== undefined && {
                                 iconId: "fr-icon-arrow-right-s-line",
                                 priority: "tertiary no outline",
-                                linkProps: routes.datastore_datasheet_view({
-                                    datastoreId: datastore._id,
-                                    datasheetName: vectorDb.tags.datasheet_name,
-                                }).link,
+                                linkProps: {
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                    params: { datastoreId: datastore._id, datasheetName: vectorDb.tags.datasheet_name },
+                                },
                                 children: tCommon("see_2"),
                             },
                         ]}
@@ -135,9 +138,11 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
                 <Pagination
                     defaultPage={page}
                     count={totalPages}
-                    getPageLinkProps={(pageNumber: number) =>
-                        routes.datastore_manage_storage({ datastoreId: datastore._id, limit, page: pageNumber, tab: DatastoreManageStorageTab.POSTGRESQL }).link
-                    }
+                    getPageLinkProps={(pageNumber: number) => ({
+                        to: "/tableau-de-bord/entrepots/$datastoreId/consommation",
+                        params: { datastoreId: datastore._id },
+                        search: { tab: DatastoreManageStorageTab.POSTGRESQL, page: pageNumber, limit },
+                    })}
                 />
             )}
 
