@@ -4,11 +4,12 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { FC } from "react";
 
+import { RouterProvider } from "@tanstack/react-router";
+
 import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
 import { isUserMeQueryKey, queryClient } from "./modules/queryClient";
-import { RouteProvider } from "./router/router";
-import RouterRenderer from "./router/RouterRenderer";
+import { router } from "./router/tanstackRouter";
 import { bootstrapUser } from "./utils";
 
 import "./sass/helpers.scss";
@@ -39,13 +40,11 @@ const App: FC = () => {
         >
             <ReactQueryDevtools initialIsOpen={false} />
 
-            <RouteProvider>
-                <ErrorBoundary>
-                    <AlertProvider>
-                        <RouterRenderer />
-                    </AlertProvider>
-                </ErrorBoundary>
-            </RouteProvider>
+            <ErrorBoundary>
+                <AlertProvider>
+                    <RouterProvider router={router} />
+                </AlertProvider>
+            </ErrorBoundary>
         </PersistQueryClientProvider>
     );
 };
