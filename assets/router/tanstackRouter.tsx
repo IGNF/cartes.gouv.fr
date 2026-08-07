@@ -1,6 +1,8 @@
 import { createRouter } from "@tanstack/react-router";
 
 import { CommunityMemberDtoRightsEnum } from "../@types/entrepot";
+import LoadingText from "../components/Utils/LoadingText";
+import Main from "../components/Layout/Main";
 import SymfonyRouting from "../modules/Routing";
 import { queryClient } from "../modules/queryClient";
 import { routeTree } from "../routeTree.gen";
@@ -11,6 +13,12 @@ export const router = createRouter({
     basepath: SymfonyRouting.getBaseUrl() || "/",
     context: { queryClient },
     defaultPreload: "intent",
+    // chargement des chunks de routes (autoCodeSplitting) : rendu dans l'Outlet du layout parent
+    defaultPendingComponent: () => (
+        <Main>
+            <LoadingText withSpinnerIcon />
+        </Main>
+    ),
 });
 
 declare module "@tanstack/react-router" {
