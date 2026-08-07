@@ -7,6 +7,7 @@ import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import { useStyles } from "tss-react";
@@ -28,7 +29,6 @@ import useMembership from "@/hooks/useMembership";
 import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
-import { routes } from "@/router/router";
 import DeleteCommunity from "./DeleteCommunity/DeleteCommunity";
 import { deleteCommunityModal } from "./DeleteCommunity/deleteCommunityModal";
 
@@ -77,6 +77,7 @@ export default function CommunityInfo() {
     const community: Community = useCommunity();
 
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const form = useForm<CommunityInfoFormType>({
         resolver: yupResolver(schema),
@@ -141,7 +142,7 @@ export default function CommunityInfo() {
         },
         onSuccess: async () => {
             await userQuery.refetch();
-            routes.datastore_selection().push();
+            navigate({ to: "/tableau-de-bord/entrepots" });
         },
     });
 
