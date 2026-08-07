@@ -1,13 +1,14 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC } from "react";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
 import PageTitle from "@/components/Layout/PageTitle";
+import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
-import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import AnnexeUsage from "./storages/AnnexeUsage";
 import EndpointsUsage from "./storages/EndpointsUsage";
@@ -24,7 +25,8 @@ const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/cons
 const DatastoreManageStorage: FC = () => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
-    const { datastore, isFetching } = useDatastore();
+    const { datastoreId } = route.useParams();
+    const { data: datastore, isFetching } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
 
     const navigate = useNavigate();
     const { tab } = route.useSearch();
