@@ -1,7 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MainNavigation from "@codegouvfr/react-dsfr/MainNavigation";
-
-import { routes, useRoute } from "@/router/router";
+import { useMatchRoute } from "@tanstack/react-router";
 import { tss } from "tss-react";
 
 type DatastoreTertiaryNavigationProps = {
@@ -10,7 +9,7 @@ type DatastoreTertiaryNavigationProps = {
 };
 export default function DatastoreTertiaryNavigation(props: DatastoreTertiaryNavigationProps) {
     const { datastoreId, communityId } = props;
-    const { name: routeName } = useRoute();
+    const matchRoute = useMatchRoute();
 
     const { classes } = useStyles();
 
@@ -19,28 +18,28 @@ export default function DatastoreTertiaryNavigation(props: DatastoreTertiaryNavi
             items={[
                 {
                     text: "Fiches de données",
-                    linkProps: routes.datasheet_list({ datastoreId }).link,
-                    isActive: routeName === "datasheet_list",
+                    linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } },
+                    isActive: !!matchRoute({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees" }),
                 },
                 {
                     text: "Membres",
-                    linkProps: routes.members_list({ communityId: communityId }).link,
-                    isActive: routeName === "members_list",
+                    linkProps: { to: "/tableau-de-bord/communaute/$communityId/membres", params: { communityId } },
+                    isActive: !!matchRoute({ to: "/tableau-de-bord/communaute/$communityId/membres" }),
                 },
                 {
                     text: "Permissions",
-                    linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
-                    isActive: routeName === "datastore_manage_permissions",
+                    linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params: { datastoreId } },
+                    isActive: !!matchRoute({ to: "/tableau-de-bord/entrepots/$datastoreId/permissions" }),
                 },
                 {
                     text: "Consommation",
-                    linkProps: routes.datastore_manage_storage({ datastoreId }).link,
-                    isActive: routeName === "datastore_manage_storage",
+                    linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/consommation", params: { datastoreId } },
+                    isActive: !!matchRoute({ to: "/tableau-de-bord/entrepots/$datastoreId/consommation" }),
                 },
                 {
                     text: "Info",
-                    linkProps: routes.community_info({ communityId }).link,
-                    isActive: routeName === "community_info",
+                    linkProps: { to: "/tableau-de-bord/communaute/$communityId", params: { communityId } },
+                    isActive: !!matchRoute({ to: "/tableau-de-bord/communaute/$communityId" }),
                 },
             ]}
             classes={{
