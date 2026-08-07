@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -12,7 +12,7 @@ import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
 import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
-import { useDatastore } from "@/contexts/datastore";
+import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { ConfigurationTypeEnum, EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
@@ -112,7 +112,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     const editMode = useMemo(() => !!offeringId, [offeringId]);
 
     const queryClient = useQueryClient();
-    const { datastore } = useDatastore();
+    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
     const navigate = useNavigate();
 
     const createServiceMutation = useMutation<Service, CartesApiException>({

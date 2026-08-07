@@ -1,10 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
+import { useQueryErrorResetBoundary } from "@tanstack/react-query";
+import { createFileRoute, ErrorComponentProps, notFound, Outlet, useRouter } from "@tanstack/react-router";
 
-import { CartesUser, Datastore } from "@/@types/app";
-import LoadingText from "@/components/Utils/LoadingText";
-import Main from "@/components/Layout/Main";
-import { DatastoreProvider } from "@/contexts/datastore";
+import { CartesUser } from "@/@types/app";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useRequiredRights from "@/hooks/useRequiredRights";
@@ -31,39 +28,41 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
         }
         return { membership };
     },
+    loader: ({ context, params }) => {
+        // préchauffe le DTO complet sans bloquer le rendu du shell ; les pages le consomment en useSuspenseQuery
+        void context.queryClient.prefetchQuery(datastoreQueryOptions(params.datastoreId));
+    },
     component: DatastoreLayoutRoute,
+    errorComponent: DatastoreErrorComponent,
 });
 
-// Portage de DatastoreLayout (sans AppLayout, fourni par le layout _private)
-function DatastoreLayoutRoute() {
-    const { datastoreId } = Route.useParams();
-
-    const { data, error, failureReason, isFetching, isPending, refetch, status } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(datastoreId));
-
-    const { data: user } = useUserQuery();
-    const requiredRights = useRequiredRights();
-
-    if (isPending) {
-        return (
-            <Main>
-                <LoadingText withSpinnerIcon />
-            </Main>
-        );
-    }
+// Partition miroir-404 (portage de DatastoreLayout) : les erreurs des useSuspenseQuery des pages remontent ici
+function DatastoreErrorComponent({ error }: ErrorComponentProps) {
+    const router = useRouter();
+    const { reset } = useQueryErrorResetBoundary();
 
     // 404 : ressource inexistante OU inaccessible (l'API Entrepôt répond 404 dans les deux cas, comportement miroir voulu)
-    if (error?.code === 404 || failureReason?.code === 404) {
+    if ((error as Partial<CartesApiException>)?.code === 404) {
         return <PageNotFound />;
     }
 
     // toute autre erreur (500, réseau...) n'est PAS une 404
-    if (error || !data) {
-        return <UnexpectedError message={error?.message} onRetry={() => refetch()} />;
-    }
-
     return (
-        <DatastoreProvider datastore={data} isFetching={isFetching} status={status}>
-            {hasAccess(user, { datastoreId }, requiredRights) ? <Outlet /> : <Forbidden />}
-        </DatastoreProvider>
+        <UnexpectedError
+            message={error.message}
+            onRetry={() => {
+                reset();
+                router.invalidate();
+            }}
+        />
     );
+}
+
+function DatastoreLayoutRoute() {
+    const { datastoreId } = Route.useParams();
+
+    const { data: user } = useUserQuery();
+    const requiredRights = useRequiredRights();
+
+    return hasAccess(user, { datastoreId }, requiredRights) ? <Outlet /> : <Forbidden />;
 }

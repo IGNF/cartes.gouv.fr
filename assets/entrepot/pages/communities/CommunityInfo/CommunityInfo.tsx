@@ -6,7 +6,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
@@ -14,7 +14,7 @@ import { useStyles } from "tss-react";
 import isEmail from "validator/lib/isEmail";
 import * as yup from "yup";
 
-import { Community } from "@/@types/app";
+import { Community, Datastore } from "@/@types/app";
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
@@ -22,8 +22,8 @@ import PageTitle from "@/components/Layout/PageTitle";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
 import { useCommunity } from "@/contexts/community";
-import { useDatastoreContext } from "@/contexts/datastore";
 import api from "@/entrepot/api";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useMembership from "@/hooks/useMembership";
 import { getTranslation, useTranslation } from "@/i18n";
@@ -73,8 +73,8 @@ export default function CommunityInfo() {
 
     const userQuery = useUserQuery();
     const { data: user } = userQuery;
-    const { datastore } = useDatastoreContext(); // communauté possiblement sans entrepôt
     const community: Community = useCommunity();
+    const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(community.datastore?._id)); // communauté possiblement sans entrepôt
 
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -264,7 +264,7 @@ export default function CommunityInfo() {
             )}
 
             {/* la suppression passe par le nettoyage de l'entrepôt : sans entrepôt, pas de suppression */}
-            {datastore && <DeleteCommunity />}
+            {datastore && <DeleteCommunity datastore={datastore} />}
 
             {/* quitter la commu */}
             {createPortal(

@@ -4,7 +4,6 @@ import { FC, PropsWithChildren, memo } from "react";
 import { Datastore } from "../../@types/app";
 import { CommunityDetailResponseDto } from "../../@types/entrepot";
 import { CommunityProvider } from "../../contexts/community";
-import { DatastoreProvider } from "../../contexts/datastore";
 import api from "../../entrepot/api";
 import { datastoreQueryOptions } from "../../hooks/queries/datastoreQueryOptions";
 import useUserQuery from "../../hooks/queries/useUserQuery";
@@ -74,17 +73,7 @@ const CommunityGate: FC<PropsWithChildren<CommunityGateProps>> = ({ communityId,
         );
     }
 
-    return (
-        <CommunityProvider community={community}>
-            <DatastoreProvider
-                datastore={datastoreQuery.data}
-                isFetching={communityQuery.isFetching || datastoreQuery.isFetching}
-                status={datastoreId !== undefined ? datastoreQuery.status : "success"}
-            >
-                {hasAccess(user, { communityId }, requiredRights) ? children : <Forbidden />}
-            </DatastoreProvider>
-        </CommunityProvider>
-    );
+    return <CommunityProvider community={community}>{hasAccess(user, { communityId }, requiredRights) ? children : <Forbidden />}</CommunityProvider>;
 };
 
 export default memo(CommunityGate);

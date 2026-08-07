@@ -16,7 +16,7 @@ import Wait from "../../../components/Utils/Wait";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../i18n";
 import { formatDateTime } from "../../../utils";
-import { Annexe } from "../../../@types/app";
+import { Annexe, Datastore } from "../../../@types/app";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { useAlertStore } from "../../../stores/AlertStore";
@@ -24,7 +24,8 @@ import api from "../../api";
 
 import "./Alerts.scss";
 import Main from "@/components/Layout/Main";
-import { useDatastoreContext } from "@/contexts/datastore";
+import { useCommunity } from "@/contexts/community";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 
 function getNewAlert() {
     return {
@@ -78,7 +79,8 @@ const Alerts: FC = () => {
     const title = t("title");
     const [notification, setNotification] = useState<INotification | null>(null);
     const queryClient = useQueryClient();
-    const { datastore } = useDatastoreContext(); // communauté possiblement sans entrepôt
+    const community = useCommunity();
+    const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(community.datastore?._id)); // communauté possiblement sans entrepôt
 
     // Load annex list and find annex matching the given path
     const { data } = useQuery<Annexe[], CartesApiException>({

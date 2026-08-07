@@ -16,13 +16,13 @@ import PageTitle from "@/components/Layout/PageTitle";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
-import { UserRightsResponseDto } from "../../../../@types/app";
+import { Datastore, UserRightsResponseDto } from "../../../../@types/app";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useCommunity } from "../../../../contexts/community";
-import { useDatastoreContext } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -71,7 +71,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
 
     // Data
     const community = useCommunity();
-    const { datastore } = useDatastoreContext(); // communauté possiblement sans entrepôt
+    const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(community.datastore?._id)); // communauté possiblement sans entrepôt
 
     // Les membres de cette communauté
     const { data: communityMembers, isLoading } = useQuery({
