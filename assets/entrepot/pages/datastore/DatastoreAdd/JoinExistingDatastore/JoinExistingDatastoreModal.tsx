@@ -15,7 +15,6 @@ import api from "@/entrepot/api";
 import { annexesUrl } from "@/env";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
-import { routes } from "@/router/router";
 import { joinModal, successModal } from "./modal";
 
 function getInputProps(
@@ -279,7 +278,7 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
                     buttons={[
                         {
                             children: "Fermer",
-                            linkProps: routes.datastore_selection().link,
+                            linkProps: { to: "/tableau-de-bord/entrepots" },
                         },
                     ]}
                 >

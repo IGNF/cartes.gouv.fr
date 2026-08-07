@@ -1,11 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC } from "react";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
 import PageTitle from "@/components/Layout/PageTitle";
-import { routes, useRoute } from "@/router/router";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
@@ -19,13 +19,17 @@ import UploadUsage from "./storages/UploadUsage";
 import { DatastoreManageStorageTab } from "./types";
 import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
 
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/consommation");
+
 const DatastoreManageStorage: FC = () => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
     const { datastore, isFetching } = useDatastore();
 
-    const route = useRoute();
-    const currentTab = route.params?.["tab"] ?? DatastoreManageStorageTab.POSTGRESQL;
+    const navigate = useNavigate();
+    const { tab } = route.useSearch();
+    // le search "tab" est une string libre côté URL, alignée sur les valeurs de l'enum
+    const currentTab = tab as DatastoreManageStorageTab;
 
     const hasFilesystemStorage = datastore?.storages.data?.find((data) => data.storage.type === "FILESYSTEM") !== undefined;
 
@@ -54,7 +58,14 @@ const DatastoreManageStorage: FC = () => {
                     <div className={fr.cx("fr-col-12")}>
                         <Tabs
                             selectedTabId={currentTab}
-                            onTabChange={(tabId: string) => routes.datastore_manage_storage({ datastoreId: datastore._id, tab: tabId }).replace()}
+                            onTabChange={(tabId: string) =>
+                                navigate({
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/consommation",
+                                    params: { datastoreId: datastore._id },
+                                    search: { tab: tabId },
+                                    replace: true,
+                                })
+                            }
                             tabs={[
                                 {
                                     tabId: DatastoreManageStorageTab.POSTGRESQL,
