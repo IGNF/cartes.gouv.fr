@@ -29,9 +29,7 @@ const DatastoreManageStorage: FC = () => {
     const { data: datastore, isFetching } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
 
     const navigate = useNavigate();
-    const { tab } = route.useSearch();
-    // le search "tab" est une string libre côté URL, alignée sur les valeurs de l'enum
-    const currentTab = tab as DatastoreManageStorageTab;
+    const { tab: currentTab } = route.useSearch();
 
     const hasFilesystemStorage = datastore?.storages.data?.find((data) => data.storage.type === "FILESYSTEM") !== undefined;
 
