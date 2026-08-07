@@ -13,7 +13,6 @@ import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import DataCard from "../DataCard";
 
@@ -210,10 +209,10 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                                         metadata.tags.datasheet_name !== undefined && {
                                             iconId: "fr-icon-arrow-right-s-line",
                                             priority: "tertiary no outline",
-                                            linkProps: routes.datastore_datasheet_view({
-                                                datastoreId: datastore._id,
-                                                datasheetName: metadata.tags.datasheet_name,
-                                            }).link,
+                                            linkProps: {
+                                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                                params: { datastoreId: datastore._id, datasheetName: metadata.tags.datasheet_name },
+                                            },
                                             children: tCommon("see_2"),
                                         },
                                     ]}

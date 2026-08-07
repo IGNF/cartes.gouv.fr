@@ -5,6 +5,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import api from "../../../api";
@@ -13,7 +14,6 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routes } from "../../../../router/router";
 import ScrollOfferingList from "./ScrollOfferingList";
 import { getEditSchema } from "./ValidationSchemas";
 import createRequestBody, { EditPermissionFormType } from "./utils";
@@ -28,6 +28,8 @@ type EditPermissionFormProps = {
 const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissionId }) => {
     const { t } = useTranslation("DatastorePermissions");
     const { t: tCommon } = useTranslation("Common");
+
+    const navigate = useNavigate();
 
     const queryClient = useQueryClient();
 
@@ -52,7 +54,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                 const newPermissions = oldPermissions?.filter((p) => p._id !== permissionId) || [];
                 return [...newPermissions, ...[permission]];
             });
-            routes.datastore_manage_permissions({ datastoreId: datastoreId }).push();
+            navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params: { datastoreId } });
         },
     });
 
@@ -166,7 +168,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                         <ButtonsGroup
                             buttons={[
                                 {
-                                    linkProps: routes.datastore_manage_permissions({ datastoreId: datastoreId }).link,
+                                    linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params: { datastoreId } },
                                     children: tCommon("cancel"),
                                     priority: "secondary",
                                 },
