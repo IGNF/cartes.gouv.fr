@@ -3,6 +3,8 @@ import { createRootRouteWithContext, ErrorComponentProps, Outlet, SearchParamErr
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import AppLayout from "../components/Layout/AppLayout";
+import Main from "../components/Layout/Main";
+import LoadingText from "../components/Utils/LoadingText";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import UnexpectedError from "../pages/error/UnexpectedError";
 
@@ -11,7 +13,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     component: RootComponent,
     notFoundComponent: PageNotFoundWithLayout,
     errorComponent: RootErrorComponent,
+    pendingComponent: RootPending,
 });
+
+function RootPending() {
+    return (
+        <AppLayout>
+            <Main>
+                <LoadingText withSpinnerIcon />
+            </Main>
+        </AppLayout>
+    );
+}
 
 function RootErrorComponent({ error }: ErrorComponentProps) {
     const router = useRouter();
