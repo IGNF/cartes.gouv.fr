@@ -166,12 +166,26 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
                                 height: fr.spacing("10v"),
                             })
                         ),
-                        input: fr.cx("fr-py-0"),
+                        input: cx(
+                            fr.cx("fr-py-0"),
+                            css({
+                                // placeholder aligné sur les selects dsfr (MUI l'affiche en opacité 0.42 sinon)
+                                "&::placeholder": {
+                                    color: fr.colors.decisions.text.default.grey.default,
+                                    opacity: 1,
+                                },
+                                "&:disabled::placeholder": {
+                                    color: fr.colors.decisions.text.disabled.grey.default,
+                                },
+                            })
+                        ),
                         endAdornment: fr.cx("fr-mr-1v"),
                         popper: css({
                             zIndex: "999999 !important",
                             ["& .MuiAutocomplete-option"]: {
                                 padding: "8px 16px !important",
+                                // "anywhere" compte dans la largeur min-content, sans quoi les noms sans espace débordent (option en flex)
+                                overflowWrap: "anywhere",
                             },
                         }),
                         popupIndicator: css({
