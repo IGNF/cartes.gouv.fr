@@ -9,7 +9,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
 import { isUserMeQueryKey, queryClient } from "./modules/queryClient";
-import { router } from "./router/tanstackRouter";
+import { router } from "./router";
 import { bootstrapUser } from "./utils";
 
 import "./sass/helpers.scss";
