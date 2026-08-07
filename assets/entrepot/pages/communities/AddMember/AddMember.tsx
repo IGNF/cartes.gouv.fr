@@ -5,6 +5,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { ToggleSwitchGroup } from "@codegouvfr/react-dsfr/ToggleSwitchGroup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { FC, useCallback } from "react";
 import { createPortal } from "react-dom";
@@ -18,7 +19,6 @@ import { useTranslation } from "../../../../i18n/i18n";
 import { ComponentKey } from "../../../../i18n/types";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes } from "../../../../router/router";
 import { regex } from "../../../../utils";
 import api from "../../../api";
 import { getRights, rightTypes } from "../UserRights";
@@ -38,6 +38,7 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
     const { t } = useTranslation({ AddMember });
     const { t: tCommon } = useTranslation("Common");
     const { t: tRights } = useTranslation("Rights");
+    const navigate = useNavigate();
 
     const schema = (t: TranslationFunction<"AddMember", ComponentKey>) =>
         yup.object({
@@ -72,7 +73,7 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
         },
         onSuccess: () => {
             resetAll();
-            routes.members_list({ communityId }).push(); // Suppression du parametre userId de la requete
+            navigate({ to: "/tableau-de-bord/communaute/$communityId/membres", params: { communityId } }); // Suppression du parametre userId de la requete
             queryClient.refetchQueries({ queryKey: RQKeys.community_members(communityId) });
         },
     });
@@ -88,7 +89,7 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
     // Annulation
     const handleOnCancel = () => {
         resetAll();
-        routes.members_list({ communityId }).push();
+        navigate({ to: "/tableau-de-bord/communaute/$communityId/membres", params: { communityId } });
     };
 
     // Ajout de l'utilisateur
