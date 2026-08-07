@@ -2,7 +2,7 @@ import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 
 import { catalogueUrl } from "@/env";
 import SymfonyRouting from "@/modules/Routing";
-import { appRoot } from "./router";
+import { appRoot } from "./appRoot";
 
 export const externalUrls = {
     help: appRoot + "/aide/",

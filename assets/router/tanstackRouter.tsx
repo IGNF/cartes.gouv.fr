@@ -1,0 +1,24 @@
+import { createRouter } from "@tanstack/react-router";
+
+import { CommunityMemberDtoRightsEnum } from "../@types/entrepot";
+import SymfonyRouting from "../modules/Routing";
+import { queryClient } from "../modules/queryClient";
+import { routeTree } from "../routeTree.gen";
+
+// Router TanStack : basepath dérivé du routing Symfony (vide en dev → "/"), contexte typé { queryClient }
+export const router = createRouter({
+    routeTree,
+    basepath: SymfonyRouting.getBaseUrl() || "/",
+    context: { queryClient },
+    defaultPreload: "intent",
+});
+
+declare module "@tanstack/react-router" {
+    interface Register {
+        router: typeof router;
+    }
+    // Droits requis par route (sémantique : TOUS les droits listés), lus par les gates des sous-arbres
+    interface StaticDataRouteOption {
+        requiredRights?: CommunityMemberDtoRightsEnum[];
+    }
+}
