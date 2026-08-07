@@ -10,6 +10,7 @@ import { ListHeader } from "@/components/Layout/ListHeader";
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
 import { usePagination } from "@/hooks/usePagination";
 import { useTranslation } from "@/i18n";
+import { searchAwareActiveOptions } from "@/router/RouterLink";
 
 import placeholder16x9 from "@/img/placeholder.16x9.png";
 import sandboxDatastoreThumbnailSvg from "@/img/sandbox-datastore-thumbnail.svg";
@@ -79,6 +80,7 @@ export default function DatastoreSelection() {
                         getPageLinkProps={(pageNumber) => ({
                             to: "/tableau-de-bord/entrepots",
                             search: { page: pageNumber, limit },
+                            activeOptions: searchAwareActiveOptions,
                         })}
                         defaultPage={page}
                     />

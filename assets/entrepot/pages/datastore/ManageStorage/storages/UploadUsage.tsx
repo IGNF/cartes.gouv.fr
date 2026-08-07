@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 
 import { CartesApiException } from "@/modules/jsonFetch";
 import { type QueryParams } from "@/modules/Routing";
+import { searchAwareActiveOptions } from "@/router/RouterLink";
 import { Datastore, Upload } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -163,6 +164,7 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                         to: "/tableau-de-bord/entrepots/$datastoreId/consommation",
                         params: { datastoreId: datastore._id },
                         search: { tab: DatastoreManageStorageTab.UPLOAD, page: pageNumber, limit },
+                        activeOptions: searchAwareActiveOptions,
                     })}
                 />
             )}

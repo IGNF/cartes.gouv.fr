@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 
 import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
 import { usePagination } from "@/hooks/usePagination";
+import { searchAwareActiveOptions } from "@/router/RouterLink";
 import { Datastore, StoredData } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -163,6 +164,7 @@ const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
                         to: "/tableau-de-bord/entrepots/$datastoreId/consommation",
                         params: { datastoreId: datastore._id },
                         search: { tab: DatastoreManageStorageTab.S3, page: pageNumber, limit },
+                        activeOptions: searchAwareActiveOptions,
                     })}
                 />
             )}
