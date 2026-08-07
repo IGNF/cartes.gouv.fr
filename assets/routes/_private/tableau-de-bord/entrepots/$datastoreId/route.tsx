@@ -10,6 +10,7 @@ import useUserQuery from "@/hooks/queries/useUserQuery";
 import useRequiredRights from "@/hooks/useRequiredRights";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
+import { revalidateUser } from "@/modules/queryClient";
 import Forbidden from "@/pages/error/Forbidden";
 import PageNotFound from "@/pages/error/PageNotFound";
 import UnexpectedError from "@/pages/error/UnexpectedError";
@@ -21,8 +22,11 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
         const user = context.queryClient.getQueryData<CartesUser | null>(RQKeys.user_me());
         const membership = findMembership(user, { datastoreId: params.datastoreId });
 
-        // 404 miroir : appartenance inconnue = entrepôt inexistant ou inaccessible
+        // 404 miroir : appartenance inconnue = entrepôt inexistant ou inaccessible.
+        // Deny-path : UNE revalidation throttlée de user_me — si l'appartenance (ré)apparaît,
+        // router.invalidate() ré-exécute ce gate et la page se rend.
         if (!membership) {
+            revalidateUser();
             throw notFound();
         }
         return { membership };
