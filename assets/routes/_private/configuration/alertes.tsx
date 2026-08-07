@@ -5,6 +5,7 @@ import CommunityGate from "@/components/Layout/CommunityGate";
 import { configCommunityId } from "@/env";
 import Alerts from "@/entrepot/pages/config/Alerts";
 import RQKeys from "@/modules/entrepot/RQKeys";
+import { revalidateUser } from "@/modules/queryClient";
 import PageNotFound from "@/pages/error/PageNotFound";
 import { findMembership } from "@/utils";
 
@@ -16,7 +17,9 @@ export const Route = createFileRoute("/_private/configuration/alertes")({
         }
         const user = context.queryClient.getQueryData<CartesUser | null>(RQKeys.user_me());
         const membership = findMembership(user, { communityId: configCommunityId });
+        // Deny-path : UNE revalidation throttlée de user_me avant 404 définitif
         if (!membership) {
+            revalidateUser();
             throw notFound();
         }
         return { membership };
