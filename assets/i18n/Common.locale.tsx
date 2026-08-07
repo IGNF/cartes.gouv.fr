@@ -106,7 +106,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     refresh: "Rafraîchir",
     filter: "Filtrer",
     remove_filters: "Retirer les filtres",
-    select_option: "Sélectionnez une option",
+    select_option: "Sélectionner une option",
     last_refresh_date: ({ dataUpdatedAt }) => `Mise à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
     nb_results: ({ displayed, total }) => {
         if (total === 0) return "Aucun résultat";
