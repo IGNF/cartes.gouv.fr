@@ -20,7 +20,6 @@ const { i18n } = declareComponentKeys<
     | "param_service_label"
     | "param_permission_label"
     | "param_key_label"
-    | "param_placeholder"
     | { K: "service_group_label"; P: { type: string; open: boolean }; R: string }
     | { K: "service_aggregate_label"; P: { type: string; open: boolean }; R: string }
     | "service_select_no_match"
@@ -74,7 +73,6 @@ export const StatsFrTranslations: Translations<"fr">["Stats"] = {
     param_service_label: "Service",
     param_permission_label: "Permission",
     param_key_label: "Clé",
-    param_placeholder: "Sélectionnez une option",
     service_group_label: ({ type, open }) => `${type} ${open ? "public" : "privé"}`,
     service_aggregate_label: ({ type, open }) => `Tous les ${type} ${open ? "publics" : "privés"}`,
     service_select_no_match: "Aucun service ne correspond à votre recherche",
@@ -122,7 +120,6 @@ export const StatsEnTranslations: Translations<"en">["Stats"] = {
     param_service_label: undefined,
     param_permission_label: undefined,
     param_key_label: undefined,
-    param_placeholder: undefined,
     service_group_label: undefined,
     service_aggregate_label: undefined,
     service_select_no_match: undefined,

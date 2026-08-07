@@ -148,7 +148,7 @@ function serviceRequest({ datastoreId, service }: Record<string, string>): Stats
         : { route: "cartesgouvfr_api_service_get_service_stats", routeParams: { datastoreId, offeringId: parsed.id } };
 }
 
-// ---------- configuration : l'ordre des clés d'entités définit l'entité par défaut ----------
+// ---------- configuration ----------
 
 export const statsConfig: Record<StatsScope, StatsScopeConfig> = {
     datastore: {

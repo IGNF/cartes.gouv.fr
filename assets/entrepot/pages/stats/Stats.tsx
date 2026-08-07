@@ -18,6 +18,12 @@ import type { StatsScope, StatsScopeConfig } from "./stats.types";
 import StatsBarChart from "./StatsBarChart";
 import { statsConfig } from "./statsConfig";
 
+// Aucune entité pré-sélectionnée, sauf si le scope n'en a qu'une (le select est alors masqué)
+function initEntityTypeKey(scope: StatsScope): string | undefined {
+    const keys = Object.keys(statsConfig[scope]?.entities ?? {});
+    return keys.length === 1 ? keys[0] : undefined;
+}
+
 function initDate(offsetMonths = 0): Date {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -39,14 +45,14 @@ export default function Stats() {
     const entityTypeKeys = Object.keys(entities);
     const scopeParam = scopeConfig?.param ?? null;
 
-    const [entityTypeKey, setEntityTypeKey] = useState(() => Object.keys(statsConfig[scope]?.entities ?? {})[0]);
+    const [entityTypeKey, setEntityTypeKey] = useState<string | undefined>(() => initEntityTypeKey(scope));
     const [resolvedParams, setResolvedParams] = useState<Record<string, string>>({});
 
     const [startDate, setStartDate] = useState<Date | undefined>(() => initDate(1));
     const [endDate, setEndDate] = useState<Date | undefined>(() => initDate());
 
     useEffect(() => {
-        setEntityTypeKey(Object.keys(statsConfig[scope]?.entities ?? {})[0]);
+        setEntityTypeKey(initEntityTypeKey(scope));
         setResolvedParams({});
     }, [scope]);
 
@@ -64,7 +70,7 @@ export default function Stats() {
     const datastoreScopeReady = !isDatastoreScope || (!userQuery.isPending && (!sandboxQuery.isPending || sandboxQuery.isError));
     const hasNoDatastore = isDatastoreScope && datastoreScopeReady && nonSandboxDatastoreCount === 0;
 
-    const currentConfig = entities[entityTypeKey];
+    const currentConfig = entityTypeKey ? entities[entityTypeKey] : undefined;
 
     // Combinaison du param de périmètre + params de l'entité pour la résolution et les resets
     const allParams = useMemo(() => (scopeParam ? [scopeParam, ...(currentConfig?.params ?? [])] : (currentConfig?.params ?? [])), [scopeParam, currentConfig]);
@@ -140,7 +146,7 @@ export default function Stats() {
             <h1>{t("scope_title", { scope })}</h1>
 
             <div className={fr.cx("fr-mb-3w")}>
-                {!currentConfig ? (
+                {!scopeConfig ? (
                     <p className={fr.cx("fr-m-0")}>{t("no_stats_for_scope")}</p>
                 ) : isDatastoreScope && !datastoreScopeReady ? (
                     <Skeleton count={1} rectangleHeight={80} />
@@ -168,14 +174,14 @@ export default function Stats() {
                                         label={t("entity_select_label", { scope })}
                                         options={entityTypeOptions}
                                         nativeSelectProps={{
-                                            value: entityTypeKey,
+                                            value: entityTypeKey ?? "",
                                             onChange: (e) => handleEntityTypeChange(e.currentTarget.value),
                                         }}
                                     />
                                 </div>
                             )}
 
-                            {currentConfig.params.map((param) => (
+                            {currentConfig?.params.map((param) => (
                                 <div className={fr.cx("fr-col-12", "fr-col-md-4")} key={param.key}>
                                     <DynamicParamSelector
                                         param={param}

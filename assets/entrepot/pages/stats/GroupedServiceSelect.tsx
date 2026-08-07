@@ -23,6 +23,7 @@ export default function GroupedServiceSelect(props: GroupedServiceSelectProps) {
     const { label, options, value, onChange } = props;
 
     const { t } = useTranslation("Stats");
+    const { t: tCommon } = useTranslation("Common");
     const { css } = useStyles();
 
     const selected = useMemo(() => options.find((option) => encodeServiceValue(option) === value) ?? null, [options, value]);
@@ -54,7 +55,7 @@ export default function GroupedServiceSelect(props: GroupedServiceSelectProps) {
     return (
         <AutocompleteSelect<ServiceOption, false>
             label={label}
-            placeholder={t("param_placeholder")}
+            placeholder={tCommon("select_option")}
             multiple={false}
             options={options}
             value={selected}

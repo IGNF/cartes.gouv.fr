@@ -65,7 +65,7 @@ function SelectParamField(props: DynamicParamSelectorProps & { param: SelectPara
     return (
         <Select
             label={param.label(t)}
-            placeholder={isLoading ? t("options_loading") : depsReady && displayOptions.length === 0 ? t("no_options") : t("param_placeholder")}
+            placeholder={isLoading ? t("options_loading") : depsReady && displayOptions.length === 0 ? t("no_options") : undefined}
             disabled={isDisabled}
             options={displayOptions}
             nativeSelectProps={{
@@ -84,14 +84,7 @@ function ServiceParamField(props: DynamicParamSelectorProps & { param: ServicePa
 
     // états sans options : même rendu que les selects standard (SelectNext désactivé + placeholder)
     if (!depsReady || isLoading || options.length === 0) {
-        return (
-            <Select
-                label={param.label(t)}
-                placeholder={isLoading ? t("options_loading") : depsReady ? t("no_options") : t("param_placeholder")}
-                disabled
-                options={[]}
-            />
-        );
+        return <Select label={param.label(t)} placeholder={isLoading ? t("options_loading") : depsReady ? t("no_options") : undefined} disabled options={[]} />;
     }
 
     return <GroupedServiceSelect label={param.label(t)} options={options} value={value} onChange={(encoded) => onChange(param.key, encoded)} />;
