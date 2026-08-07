@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_private")({
     beforeLoad: ({ context }) => {
         const user = context.queryClient.getQueryData<CartesUser | null>(RQKeys.user_me());
         if (!user) {
-            throw redirect({ href: SymfonyRouting.generate("cartesgouvfr_security_login") });
+            throw redirect({ href: SymfonyRouting.generate("cartesgouvfr_security_login"), reloadDocument: true });
         }
     },
     component: PrivateLayout,
