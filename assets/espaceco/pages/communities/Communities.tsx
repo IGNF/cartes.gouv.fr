@@ -21,6 +21,7 @@ import CommunityList from "./CommunityList";
 import { CreateCommunityDialog, CreateCommunityDialogModal } from "./CreateCommunityDialog";
 import SearchCommunity from "./SearchCommunity";
 import useUserMe from "@/espaceco/hooks/useUserMe";
+import { searchAwareActiveOptions } from "@/router/RouterLink";
 
 const route = getRouteApi("/_private/espace-collaboratif/");
 
@@ -187,7 +188,11 @@ const Communities: FC = () => {
                                     <Pagination
                                         count={communityQuery.data.totalPages}
                                         defaultPage={queryParams.page}
-                                        getPageLinkProps={(pageNumber) => ({ to: "/espace-collaboratif", search: { filter: filter, page: pageNumber } })}
+                                        getPageLinkProps={(pageNumber) => ({
+                                            to: "/espace-collaboratif",
+                                            search: { filter: filter, page: pageNumber },
+                                            activeOptions: searchAwareActiveOptions,
+                                        })}
                                     />
                                 </div>
                             </div>
@@ -203,7 +208,11 @@ const Communities: FC = () => {
                                 <Pagination
                                     count={communitiesAsMemberQuery.data.totalPages}
                                     defaultPage={queryParams.page}
-                                    getPageLinkProps={(pageNumber) => ({ to: "/espace-collaboratif", search: { filter: filter, page: pageNumber } })}
+                                    getPageLinkProps={(pageNumber) => ({
+                                        to: "/espace-collaboratif",
+                                        search: { filter: filter, page: pageNumber },
+                                        activeOptions: searchAwareActiveOptions,
+                                    })}
                                 />
                             </div>
                         </div>
