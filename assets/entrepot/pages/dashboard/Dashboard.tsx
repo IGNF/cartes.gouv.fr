@@ -7,7 +7,6 @@ import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import api from "@/entrepot/api";
 import { useApiEspaceCoStore } from "@/espaceco/stores/ApiEspaceCoStore";
-import { routes } from "@/router/router";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 
 import accountSvgUrl from "@/img/pictograms/account.svg?no-inline";
@@ -44,7 +43,7 @@ export default function Dashboard() {
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                     <Tile
-                        linkProps={routes.my_account().link}
+                        linkProps={{ to: "/mon-compte" }}
                         imageUrl={accountSvgUrl}
                         title="Mon compte"
                         desc="Consulter et modifier mes informations personnelles"
@@ -56,7 +55,7 @@ export default function Dashboard() {
                 </div>
                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                     <Tile
-                        linkProps={routes.my_access_keys().link}
+                        linkProps={{ to: "/mes-cles" }}
                         imageUrl={keyManagerSvgUrl}
                         title="Mes clés d’accès"
                         desc="Créer et consulter mes accès aux services restreints"
@@ -73,7 +72,7 @@ export default function Dashboard() {
                 </div>
                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                     <Tile
-                        linkProps={routes.datastore_selection().link}
+                        linkProps={{ to: "/tableau-de-bord/entrepots" }}
                         imageUrl={uploaderSvgUrl}
                         title="Mes entrepôts"
                         desc="Gérer mes entrepôts et mes fiches de données"
@@ -92,7 +91,7 @@ export default function Dashboard() {
                 {isApiEspaceCoDefined() && (
                     <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                         <Tile
-                            linkProps={routes.espaceco_community_list().link}
+                            linkProps={{ to: "/espace-collaboratif" }}
                             imageUrl={contributorSvgUrl}
                             title="Mes guichets"
                             desc="Créer, modifier et partager mes guichets"
@@ -106,7 +105,7 @@ export default function Dashboard() {
                 {canShowConfig && (
                     <div key={configDatastore?.community?.datastore} className={fr.cx("fr-col-12", "fr-col-md-4")}>
                         <Tile
-                            linkProps={routes.config_alerts().link}
+                            linkProps={{ to: "/configuration/alertes" }}
                             title={"Alertes"}
                             pictogram={<System />}
                             orientation="vertical"
