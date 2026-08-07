@@ -6,6 +6,7 @@ import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useToggle } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { FC, Fragment, JSX, ReactNode, memo, useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -20,7 +21,6 @@ import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/Sto
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import { ComponentKey } from "../../../../../../i18n/types";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
-import { routes } from "../../../../../../router/router";
 import api from "../../../../../api";
 import ListItem from "../../ListItem";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
@@ -99,6 +99,8 @@ const getHintText = (
 const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreId, vectorDb }) => {
     const { t } = useTranslation("VectorDbList");
 
+    const navigate = useNavigate();
+
     // création d'un service
     const [serviceType, setServiceType] = useState<ServiceTypes>();
 
@@ -171,18 +173,30 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
     const handleCreateService = () => {
         switch (serviceType) {
             case "wfs":
-                routes.datastore_wfs_service_new({ datastoreId, vectorDbId: vectorDb._id, datasheetName }).push();
+                navigate({
+                    to: "/tableau-de-bord/entrepots/$datastoreId/service/wfs/ajout",
+                    params: { datastoreId },
+                    search: { vectorDbId: vectorDb._id, datasheetName },
+                });
                 break;
 
             case "wms-vector":
-                routes.datastore_wms_vector_service_new({ datastoreId, vectorDbId: vectorDb._id, datasheetName }).push();
+                navigate({
+                    to: "/tableau-de-bord/entrepots/$datastoreId/service/wms-vecteur/ajout",
+                    params: { datastoreId },
+                    search: { vectorDbId: vectorDb._id, datasheetName },
+                });
                 break;
 
             case "tms":
                 if (!technicalName) {
                     return;
                 }
-                routes.datastore_pyramid_vector_generate({ datastoreId, vectorDbId: vectorDb._id, technicalName, datasheetName }).push();
+                navigate({
+                    to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout",
+                    params: { datastoreId },
+                    search: { vectorDbId: vectorDb._id, technicalName, datasheetName },
+                });
                 break;
 
             default:
@@ -231,7 +245,11 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                     {
                         text: t("show_details"),
                         iconId: "fr-icon-file-text-fill",
-                        linkProps: routes.datastore_stored_data_details({ datastoreId, datasheetName, storedDataId: vectorDb._id }).link,
+                        linkProps: {
+                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
+                            params: { datastoreId, storedDataId: vectorDb._id },
+                            search: { datasheetName },
+                        },
                     },
                     membership?.can(CommunityMemberDtoRightsEnum.BROADCAST, CommunityMemberDtoRightsEnum.ANNEX, CommunityMemberDtoRightsEnum.PROCESSING) && {
                         text: tCommon("delete"),
