@@ -6,7 +6,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
-import { routes } from "../../../../../router/router";
 import { CheckStatusEnum, type DatasheetDetailed, type DatasheetUploadItem } from "../../../../../@types/app";
 import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";
 import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetView";
@@ -85,13 +84,11 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                 {failureCase ? (
                                     <Button
                                         className={fr.cx("fr-mr-2w")}
-                                        linkProps={
-                                            routes.datastore_upload_details({
-                                                datastoreId,
-                                                uploadId: upload._id,
-                                                datasheetName: upload.tags.datasheet_name,
-                                            }).link
-                                        }
+                                        linkProps={{
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport",
+                                            params: { datastoreId, uploadId: upload._id },
+                                            search: { datasheetName: upload.tags.datasheet_name },
+                                        }}
                                     >
                                         {"Voir le rapport"}
                                     </Button>
@@ -99,13 +96,11 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                     membership?.can(CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING) && (
                                         <Button
                                             className={fr.cx("fr-mr-2w")}
-                                            linkProps={
-                                                routes.datastore_datasheet_upload_integration({
-                                                    datastoreId,
-                                                    uploadId: upload._id,
-                                                    datasheetName: upload.tags.datasheet_name,
-                                                }).link
-                                            }
+                                            linkProps={{
+                                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/integration",
+                                                params: { datastoreId },
+                                                search: { uploadId: upload._id, datasheetName: upload.tags.datasheet_name },
+                                            }}
                                         >
                                             {"Reprendre l'intégration"}
                                         </Button>
