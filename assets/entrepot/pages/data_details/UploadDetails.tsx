@@ -2,9 +2,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
+import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { UploadReport } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
@@ -12,7 +13,6 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import api from "../../api";
 import UploadPreviewTab from "./PreviewTab/UploadPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
-import { useDatastore } from "../../../contexts/datastore";
 import Main from "../../../components/Layout/Main";
 
 type UploadDetailsProps = {
@@ -21,7 +21,7 @@ type UploadDetailsProps = {
 };
 
 const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
-    const { datastore } = useDatastore();
+    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
 
     const reportQuery = useQuery<UploadReport, CartesApiException>({
         queryKey: RQKeys.datastore_upload_report(datastoreId, uploadId),

@@ -6,7 +6,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Card from "@codegouvfr/react-dsfr/Card";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import Tag from "@codegouvfr/react-dsfr/Tag";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { differenceInCalendarDays, parseISO } from "date-fns";
 import { FC, useState } from "react";
@@ -18,11 +18,11 @@ import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNa
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
 import Skeleton from "@/components/Utils/Skeleton";
+import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { usePagination } from "@/hooks/usePagination";
 import { formatDateFromISO } from "@/utils";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
-import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -40,8 +40,8 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
     const queryClient = useQueryClient();
 
-    // Le datastore
-    const { datastore, status: datastoreStatus } = useDatastore();
+    // Le datastore (le chargement initial est couvert par la Suspense de la route)
+    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
 
     // Les permissions
     const {
@@ -125,7 +125,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                 // TODO recherche et filtres ici
             )}
 
-            {datastoreStatus === "pending" || permissionStatus === "pending" ? (
+            {permissionStatus === "pending" ? (
                 <Skeleton count={6} rectangleHeight={200} />
             ) : permissions?.length === 0 ? (
                 <Alert className={fr.cx("fr-mb-1w")} severity={"info"} title={t("list.no_permissions")} closable />

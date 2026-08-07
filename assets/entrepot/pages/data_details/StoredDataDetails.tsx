@@ -2,9 +2,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
+import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { StoredDataReport, StoredDataStatusEnum } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
@@ -12,7 +13,6 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import api from "../../api";
 import StoredDataPreviewTab from "./PreviewTab/StoredDataPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
-import { useDatastore } from "../../../contexts/datastore";
 import Main from "../../../components/Layout/Main";
 
 type StoredDataDetailsProps = {
@@ -21,7 +21,7 @@ type StoredDataDetailsProps = {
 };
 const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedDataId }) => {
     const [reportQueryEnabled, setReportQueryEnabled] = useState(true);
-    const { datastore } = useDatastore();
+    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
 
     const reportQuery = useQuery<StoredDataReport, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),

@@ -6,11 +6,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { DatastoreCleanupEntitiesCount, FailedCleanupItem } from "@/@types/app";
+import { Datastore, DatastoreCleanupEntitiesCount, FailedCleanupItem } from "@/@types/app";
 import LoadingText from "@/components/Utils/LoadingText";
 import Progress from "@/components/Utils/Progress";
 import { useCommunity } from "@/contexts/community";
-import { useDatastore } from "@/contexts/datastore";
 import api from "@/entrepot/api";
 import useEventSource from "@/hooks/useEventSource";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -42,8 +41,12 @@ const ENTITY_LABELS: Record<(typeof ENTITY_ORDER)[number], string> = {
     uploads: "Livraisons",
 };
 
-export default function DeleteCommunity() {
-    const { datastore } = useDatastore();
+type DeleteCommunityProps = {
+    datastore: Datastore;
+};
+
+// datastore garanti : rendu seulement quand la communauté a un entrepôt (frontière structurelle)
+export default function DeleteCommunity({ datastore }: DeleteCommunityProps) {
     const community = useCommunity();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
