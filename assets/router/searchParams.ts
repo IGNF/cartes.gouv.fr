@@ -8,6 +8,18 @@ export function numberParam(value: unknown, fallback: number): number {
     return Number.isNaN(num) ? fallback : num;
 }
 
+export function optionalNumberParam(value: unknown): number | undefined {
+    if (value === undefined || value === null || value === "") {
+        return undefined;
+    }
+    const num = Number(value);
+    return Number.isNaN(num) ? undefined : num;
+}
+
+export function enumParam<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+    return allowed.includes(value as T) ? (value as T) : fallback;
+}
+
 export function stringParam(value: unknown, fallback: string): string {
     return value === undefined || value === null ? fallback : String(value);
 }
