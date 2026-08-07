@@ -12,7 +12,7 @@ export const router = createRouter({
     routeTree,
     basepath: SymfonyRouting.getBaseUrl() || "/",
     context: { queryClient },
-    defaultPreload: "intent",
+    defaultPreload: false,
     // chargement des chunks de routes (autoCodeSplitting) : rendu dans l'Outlet du layout parent
     defaultPendingComponent: () => (
         <Main>
