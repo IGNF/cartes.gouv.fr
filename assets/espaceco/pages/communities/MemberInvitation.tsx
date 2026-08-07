@@ -5,6 +5,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useEffect, useMemo, useState } from "react";
 
 import Main from "@/components/Layout/Main";
@@ -15,7 +16,6 @@ import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
-import { routes } from "../../../router/router";
 import api from "../../api";
 import "../../../../assets/sass/pages/espaceco/member_invitation.scss";
 import useUserMe from "@/espaceco/hooks/useUserMe";
@@ -31,6 +31,7 @@ type ErrorMessage = {
 };
 
 const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
+    const navigate = useNavigate();
     const { data: me, isError: isMeError, error: meError } = useUserMe();
 
     const { t } = useTranslation("MemberInvitation");
@@ -93,7 +94,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
             }
             return Promise.resolve(undefined);
         },
-        onSuccess: () => routes.espaceco_community_list().push(),
+        onSuccess: () => navigate({ to: "/espace-collaboratif" }),
     });
 
     const community = useMemo(() => query.data, [query.data]);
