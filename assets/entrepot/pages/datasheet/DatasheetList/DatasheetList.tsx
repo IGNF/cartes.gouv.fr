@@ -6,6 +6,7 @@ import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC, useMemo } from "react";
 import { tss } from "tss-react";
 import { useToggle } from "@mantine/hooks";
@@ -23,7 +24,6 @@ import Skeleton from "../../../../components/Utils/Skeleton";
 import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import { SortByEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";
@@ -36,6 +36,8 @@ const filterTests = {
     [FilterEnum.ENABLED]: (d: Datasheet) => d.nb_publications > 0,
     [FilterEnum.DISABLED]: (d: Datasheet) => d.nb_publications === 0,
 };
+
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/");
 
 type DatasheetListProps = {
     datastoreId: string;
@@ -62,17 +64,20 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
         metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use
     );
 
-    const { params } = useRoute();
-    const page = params["page"] ? parseInt(params["page"]) : 1;
-    const limit = params["limit"] ? parseInt(params["limit"]) : 10;
+    const searchParams = route.useSearch();
+    const { page, limit } = searchParams;
+    const navigate = useNavigate();
 
     const [showFilters, toggleShowFilters] = useToggle();
 
     // filtre et tri
-    const { search, searchedItems } = useSearch(datasheetList ?? []);
-    const { filteredItems, filters } = useFilters(searchedItems, ["published"], filterTests);
-    const { sortBy, sortOrder, sortedItems } = useSort(filteredItems, ["name", "nb_publications"]);
+    const { search, searchedItems } = useSearch(datasheetList ?? [], searchParams.search ?? "");
+    const { filteredItems, filters } = useFilters(searchedItems, searchParams, ["published"], filterTests);
+    const { sortBy, sortOrder, sortedItems } = useSort(filteredItems, searchParams, ["name", "nb_publications"]);
     const { paginatedItems, totalPages } = usePagination(sortedItems, page, limit);
+
+    // useFilters ne produit que des valeurs scalaires pour published
+    const published = filters.published as FilterEnum;
 
     const { classes, cx } = useStyles();
 
@@ -105,7 +110,10 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                     linkProps={
                                         datasheetCreationImpossible
                                             ? { href: undefined, "aria-hidden": true }
-                                            : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link
+                                            : {
+                                                  to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement" as const,
+                                                  params: { datastoreId },
+                                              }
                                     }
                                     iconId="fr-icon-add-line"
                                     iconPosition="right"
@@ -143,7 +151,12 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 label={tCommon("search")}
                                 onButtonClick={(text) => {
                                     if (!isLoading) {
-                                        routes.datasheet_list({ ...filters, datastoreId, search: text, sortBy, sortOrder }).replace();
+                                        navigate({
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                            params: { datastoreId },
+                                            search: { search: text, sortBy, sortOrder, published },
+                                            replace: true,
+                                        });
                                     }
                                 }}
                                 allowEmptySearch={true}
@@ -180,19 +193,20 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                         onChange: (event) => {
                                             const value = event.target.value;
                                             if (value === FilterEnum.ALL.toString()) {
-                                                routes.datasheet_list({ datastoreId, search, sortBy, sortOrder }).replace();
+                                                navigate({
+                                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                                    params: { datastoreId },
+                                                    search: { search, sortBy, sortOrder },
+                                                    replace: true,
+                                                });
                                             } else {
-                                                const published = value === FilterEnum.ENABLED.toString() ? FilterEnum.ENABLED : FilterEnum.DISABLED;
-                                                routes
-                                                    .datasheet_list({
-                                                        ...filters,
-                                                        datastoreId,
-                                                        search,
-                                                        sortBy,
-                                                        sortOrder,
-                                                        published,
-                                                    })
-                                                    .replace();
+                                                const selectedPublished = value === FilterEnum.ENABLED.toString() ? FilterEnum.ENABLED : FilterEnum.DISABLED;
+                                                navigate({
+                                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                                    params: { datastoreId },
+                                                    search: { search, sortBy, sortOrder, published: selectedPublished },
+                                                    replace: true,
+                                                });
                                             }
                                         },
                                     }}
@@ -229,9 +243,12 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                             const selectedSortBy = selectedSort?.[0];
                                             const selectedSortOrder = Number(selectedSort?.[1]);
                                             if (!selectedSortBy || isNaN(selectedSortOrder) || selectedSortOrder === 0) return;
-                                            routes
-                                                .datasheet_list({ ...filters, datastoreId, search, sortBy: selectedSortBy, sortOrder: selectedSortOrder })
-                                                .replace();
+                                            navigate({
+                                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                                params: { datastoreId },
+                                                search: { search, sortBy: selectedSortBy, sortOrder: selectedSortOrder, published },
+                                                replace: true,
+                                            });
                                         },
                                     }}
                                     placeholder={t("sort_placeholder")}
@@ -276,8 +293,9 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                         count={totalPages}
                                         showFirstLast={true}
                                         getPageLinkProps={(pageNumber) => ({
-                                            ...routes.datasheet_list({ ...filters, datastoreId, page: pageNumber, limit: limit, search, sortBy, sortOrder })
-                                                .link,
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                            params: { datastoreId },
+                                            search: { page: pageNumber, limit, search, sortBy, sortOrder, published },
                                         })}
                                         defaultPage={page}
                                     />
