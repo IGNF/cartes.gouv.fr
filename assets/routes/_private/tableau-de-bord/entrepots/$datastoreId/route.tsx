@@ -1,5 +1,5 @@
 import { useQueryErrorResetBoundary } from "@tanstack/react-query";
-import { createFileRoute, ErrorComponentProps, notFound, Outlet, useRouter } from "@tanstack/react-router";
+import { createFileRoute, ErrorComponentProps, notFound, Outlet, SearchParamError, useRouter } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
@@ -40,6 +40,11 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
 function DatastoreErrorComponent({ error }: ErrorComponentProps) {
     const router = useRouter();
     const { reset } = useQueryErrorResetBoundary();
+
+    // Un échec de validateSearch d'une feuille s'arrête ici (errorComponent le plus proche) → même mapping 404 qu'à la racine
+    if (error instanceof SearchParamError) {
+        return <PageNotFound />;
+    }
 
     // 404 : ressource inexistante OU inaccessible (l'API Entrepôt répond 404 dans les deux cas, comportement miroir voulu)
     if ((error as Partial<CartesApiException>)?.code === 404) {
