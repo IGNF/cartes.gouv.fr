@@ -16,6 +16,7 @@ import PageTitle from "@/components/Layout/PageTitle";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
+import { searchAwareActiveOptions } from "@/router/RouterLink";
 import { Datastore, UserRightsResponseDto } from "../../../../@types/app";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
@@ -335,6 +336,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                                 to: "/tableau-de-bord/communaute/$communityId/membres",
                                 params: { communityId: community._id },
                                 search: { userId, page: pageNumber, limit, search },
+                                activeOptions: searchAwareActiveOptions,
                             })}
                             defaultPage={page}
                         />

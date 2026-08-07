@@ -19,6 +19,7 @@ import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOpt
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
+import { searchAwareActiveOptions } from "@/router/RouterLink";
 import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Skeleton from "../../../../components/Utils/Skeleton";
@@ -295,6 +296,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                             to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
                                             params: { datastoreId },
                                             search: { page: pageNumber, limit, search, sortBy, sortOrder, published },
+                                            activeOptions: searchAwareActiveOptions,
                                         })}
                                         defaultPage={page}
                                     />
