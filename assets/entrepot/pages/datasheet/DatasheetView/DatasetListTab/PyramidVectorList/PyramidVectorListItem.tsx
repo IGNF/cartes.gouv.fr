@@ -3,13 +3,13 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useToggle } from "@mantine/hooks";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, memo, useMemo } from "react";
 
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
 import { DatasheetStoredDataItem, PyramidVector, StoredDataStatusEnum } from "../../../../../../@types/app";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
-import { routes } from "../../../../../../router/router";
 import ListItem from "../../ListItem";
 import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
@@ -27,6 +27,8 @@ const { t: tCommon } = getTranslation("Common");
 
 const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, datastoreId, pyramid }) => {
     const { t } = useTranslation("PyramidVectorList");
+
+    const navigate = useNavigate();
 
     const [showDescription, toggleShowDescription] = useToggle();
 
@@ -52,7 +54,11 @@ const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, 
                     membership?.can(CommunityMemberDtoRightsEnum.BROADCAST) && (
                         <Button
                             onClick={() => {
-                                routes.datastore_pyramid_vector_tms_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
+                                navigate({
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/service/tms/ajout",
+                                    params: { datastoreId },
+                                    search: { pyramidId: pyramid._id, datasheetName },
+                                });
                             }}
                             className={fr.cx("fr-mr-2v")}
                             priority="secondary"
@@ -70,7 +76,11 @@ const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, 
                     {
                         text: t("show_details"),
                         iconId: "fr-icon-file-text-fill",
-                        linkProps: routes.datastore_stored_data_details({ datastoreId, datasheetName, storedDataId: pyramid._id }).link,
+                        linkProps: {
+                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
+                            params: { datastoreId, storedDataId: pyramid._id },
+                            search: { datasheetName },
+                        },
                     },
                     {
                         text: tCommon("delete"),

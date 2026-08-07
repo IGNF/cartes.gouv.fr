@@ -3,6 +3,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, memo, ReactNode, useMemo, useRef } from "react";
 import { useToggle } from "@mantine/hooks";
 
@@ -18,7 +19,6 @@ import {
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import { useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
-import { routes } from "../../../../../../router/router";
 import api from "../../../../../api";
 import ListItem from "../../ListItem";
 import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
@@ -56,6 +56,8 @@ type PyramidRasterListItemProps = {
 const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, datastoreId, pyramid }) => {
     const { t } = useTranslation("PyramidRasterList");
     const { t: tCommon } = useTranslation("Common");
+
+    const navigate = useNavigate();
 
     const [showDescription, toggleShowDescription] = useToggle();
 
@@ -136,10 +138,18 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
 
                                 switch (serviceType) {
                                     case OfferingTypeEnum.WMSRASTER:
-                                        routes.datastore_pyramid_raster_wms_raster_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
+                                        navigate({
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/service/wms-raster/ajout",
+                                            params: { datastoreId },
+                                            search: { pyramidId: pyramid._id, datasheetName },
+                                        });
                                         break;
                                     case OfferingTypeEnum.WMTSTMS:
-                                        routes.datastore_pyramid_raster_wmts_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
+                                        navigate({
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/service/wmts/ajout",
+                                            params: { datastoreId },
+                                            search: { pyramidId: pyramid._id, datasheetName },
+                                        });
                                         break;
                                     default:
                                         throw new Error(`Publication ${serviceType} n'est pas encore implémentée`);
@@ -160,7 +170,10 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
                     {
                         text: t("show_details"),
                         iconId: "fr-icon-file-text-fill",
-                        linkProps: routes.datastore_stored_data_details({ datastoreId, storedDataId: pyramid._id }).link,
+                        linkProps: {
+                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
+                            params: { datastoreId, storedDataId: pyramid._id },
+                        },
                     },
                     {
                         text: tCommon("delete"),

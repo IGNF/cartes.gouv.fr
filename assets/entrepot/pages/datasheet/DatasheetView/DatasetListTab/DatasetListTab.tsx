@@ -4,7 +4,6 @@ import { FC, memo, useMemo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { DatasheetDetailed } from "../../../../../@types/app";
-import { routes } from "../../../../../router/router";
 import PyramidVectorList from "./PyramidVectorList/PyramidVectorList";
 import UnfinishedUploadList from "./UnfinishedUploadList";
 import VectorDbList from "./VectorDbList/VectorDbList";
@@ -51,7 +50,14 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
         <>
             {membership?.can(CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING) && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                    <Button iconId="fr-icon-add-line" linkProps={routes.datastore_datasheet_upload({ datastoreId, datasheetName: datasheet.name }).link}>
+                    <Button
+                        iconId="fr-icon-add-line"
+                        linkProps={{
+                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement",
+                            params: { datastoreId },
+                            search: { datasheetName: datasheet.name },
+                        }}
+                    >
                         Ajouter un fichier de données
                     </Button>
                 </div>
