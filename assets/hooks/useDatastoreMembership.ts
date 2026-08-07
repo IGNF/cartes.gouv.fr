@@ -1,4 +1,5 @@
-import { useDatastore } from "@/contexts/datastore";
+import { useParams } from "@tanstack/react-router";
+
 import useMembership from "./useMembership";
 
 /**
@@ -6,9 +7,10 @@ import useMembership from "./useMembership";
  * Null si l'appartenance est introuvable (données périmées) : dégrade en "aucun droit" au lieu de lever une erreur.
  */
 const useDatastoreMembership = () => {
-    const { datastore } = useDatastore();
+    // ce hook n'est appelé que sous le layout datastore
+    const { datastoreId } = useParams({ from: "/_private/tableau-de-bord/entrepots/$datastoreId" });
 
-    return useMembership({ datastoreId: datastore._id });
+    return useMembership({ datastoreId });
 };
 
 export default useDatastoreMembership;

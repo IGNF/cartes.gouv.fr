@@ -5,7 +5,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC, useMemo } from "react";
 import { tss } from "tss-react";
@@ -15,13 +15,13 @@ import DatastoreMain from "@/components/Layout/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
+import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
 import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Skeleton from "../../../../components/Utils/Skeleton";
-import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import api from "../../../api";
@@ -44,14 +44,13 @@ type DatasheetListProps = {
 };
 const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatasheetList");
-    const { datastore } = useDatastore();
+    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
     const { t: tCommon } = useTranslation("Common");
 
     const datasheetListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),
         queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
         staleTime: 60000,
-        enabled: datastore !== undefined,
     });
     const { data: datasheetList, dataUpdatedAt, isFetching, isLoading, refetch } = datasheetListQuery;
 

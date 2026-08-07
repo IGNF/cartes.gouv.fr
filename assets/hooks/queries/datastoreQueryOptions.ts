@@ -15,3 +15,12 @@ export function datastoreQueryOptions(datastoreId: string | undefined) {
         enabled: datastoreId !== undefined,
     };
 }
+
+/** Variante pour useSuspenseQuery (id obligatoire, pas de enabled) */
+export function datastoreSuspenseQueryOptions(datastoreId: string) {
+    return {
+        queryKey: RQKeys.datastore(datastoreId),
+        queryFn: ({ signal }: { signal: AbortSignal }) => api.datastore.get(datastoreId, { signal }),
+        staleTime: delta.hours(1),
+    };
+}
