@@ -5,6 +5,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -17,7 +18,6 @@ import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import TableSelection from "../../common/TableSelection/TableSelection";
 import formatForm from "../format-form";
@@ -85,6 +85,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
 
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
@@ -145,9 +146,13 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                 if (vectorDbQuery.data?.tags?.datasheet_name) {
                     queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name) });
                     queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
-                    routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "dataset" }).push();
+                    navigate({
+                        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                        params: { datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name },
+                        search: { activeTab: "dataset" },
+                    });
                 } else {
-                    routes.datasheet_list({ datastoreId }).push();
+                    navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
                 }
             })
             .catch((error) => {
@@ -169,7 +174,9 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                     severity="error"
                     closable={false}
                     title={t("stored_data.fetch_failed")}
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>}
+                    description={
+                        <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>{t("back_to_data_list")}</Button>
+                    }
                 />
             ) : (
                 <>

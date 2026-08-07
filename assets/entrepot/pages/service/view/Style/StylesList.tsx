@@ -14,7 +14,6 @@ import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
-import { routes } from "@/router/router";
 
 import "@/sass/components/styles-list.css";
 
@@ -113,13 +112,11 @@ function StylesList(props: StylesListProps) {
                         <Button
                             size="small"
                             iconId="ri-add-line"
-                            linkProps={
-                                routes.datastore_service_style_add({
-                                    datastoreId,
-                                    datasheetName,
-                                    offeringId,
-                                }).link
-                            }
+                            linkProps={{
+                                to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout",
+                                params: { datastoreId, offeringId },
+                                search: { datasheetName },
+                            }}
                         >
                             {tCommon("add")}
                         </Button>
@@ -165,14 +162,11 @@ function StylesList(props: StylesListProps) {
                                         title={tStyle("edit_style")}
                                         priority={"tertiary no outline"}
                                         iconId={"fr-icon-edit-line"}
-                                        linkProps={
-                                            routes.datastore_service_style_edit({
-                                                datastoreId,
-                                                datasheetName,
-                                                offeringId,
-                                                styleTechnicalName: style.technical_name,
-                                            }).link
-                                        }
+                                        linkProps={{
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/$styleTechnicalName/modification",
+                                            params: { datastoreId, offeringId, styleTechnicalName: style.technical_name },
+                                            search: { datasheetName },
+                                        }}
                                     />
                                     <Button
                                         title={tStyle("remove_style")}
