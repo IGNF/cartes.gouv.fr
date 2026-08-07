@@ -16,6 +16,25 @@ export function isUserMeQueryKey(queryKey: readonly unknown[]): boolean {
 
 let lastUserMeInvalidation = 0;
 
+// Callback appelé après chaque revalidation de user_me (branché par tanstackRouter sur router.invalidate(),
+// enregistré par callback pour éviter l'import circulaire queryClient ↔ router)
+let onUserRevalidated: (() => void) | null = null;
+export function setOnUserRevalidated(callback: () => void): void {
+    onUserRevalidated = callback;
+}
+
+/**
+ * Revalidation throttlée de user_me (au plus une par fenêtre de 30 s) : les gates se ré-évaluent
+ * une fois le refetch terminé, via le callback (router.invalidate()).
+ */
+export function revalidateUser(): void {
+    const now = Date.now();
+    if (now - lastUserMeInvalidation < USER_ME_REVALIDATION_WINDOW) return;
+    lastUserMeInvalidation = now;
+
+    queryClient.invalidateQueries({ queryKey: USER_ME_KEY }).then(() => onUserRevalidated?.());
+}
+
 /**
  * Sur une erreur d'autorisation ou d'existence (401/403/404), les droits de l'utilisateur
  * ont pu changer côté serveur : on revalide user_me pour que les gates se ré-évaluent.
@@ -27,11 +46,7 @@ function revalidateUserOnAuthError(error: unknown, queryKey?: readonly unknown[]
     // ne pas s'auto-invalider si c'est user_me qui a échoué
     if (queryKey !== undefined && isUserMeQueryKey(queryKey)) return;
 
-    const now = Date.now();
-    if (now - lastUserMeInvalidation < USER_ME_REVALIDATION_WINDOW) return;
-    lastUserMeInvalidation = now;
-
-    queryClient.invalidateQueries({ queryKey: USER_ME_KEY });
+    revalidateUser();
 }
 
 /**
