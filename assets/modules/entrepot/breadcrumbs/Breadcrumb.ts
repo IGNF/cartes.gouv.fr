@@ -131,10 +131,12 @@ const getBreadcrumb = (
                 segments: [
                     ...publishProps.segments,
                     { label: t("datastore_selection"), linkProps: { to: "/tableau-de-bord/entrepots" } },
+                    // communauté sans entrepôt : pas de segment plutôt qu'un lien mort vers un datastore fictif
                     params.communityId !== undefined &&
-                        community !== undefined && {
+                        community !== undefined &&
+                        datastore !== undefined && {
                             label: community?.is_sandbox === true ? tCommon("sandbox") : community?.name,
-                            linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId: datastore?._id ?? "XXXX" } },
+                            linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId: datastore._id } },
                         },
                 ].filter(Boolean) as BreadcrumbProps["segments"],
                 currentPageLabel: t(name),
