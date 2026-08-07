@@ -1,8 +1,9 @@
 import { createGroup, createRouter, defineRoute, param } from "type-route";
 
-import SymfonyRouting from "../modules/Routing";
+import { appRoot } from "./appRoot";
 
-export const appRoot = SymfonyRouting.getBaseUrl();
+// Ré-export transitoire : les consommateurs migrent vers ./appRoot (ce fichier disparaît avec type-route)
+export { appRoot };
 
 // Routes non protégées
 const publicRoutes = {
