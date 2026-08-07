@@ -5,6 +5,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { compareAsc } from "date-fns";
 import { FC, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -16,7 +17,6 @@ import Wait from "../../../../components/Utils/Wait";
 import { getTranslation, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes } from "../../../../router/router";
 import "../../../../sass/pages/my_keys.scss";
 import api from "../../../api";
 
@@ -57,6 +57,7 @@ const createRequestBody = (editMode: boolean, formValues: KeyFormValuesType) => 
 };
 
 const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
+    const navigate = useNavigate();
     const { t: tCommon } = useTranslation("Common");
 
     /* Mode edition ? */
@@ -190,7 +191,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
                 keys?.push(keyWithAccesses);
                 return keys;
             });
-            routes.my_access_keys().push();
+            navigate({ to: "/mes-cles" });
         },
     });
 
@@ -216,7 +217,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
             if (keyId && keyWithAccesses) {
                 queryClient.setQueryData<UserKeyWithAccessesResponseDto>(RQKeys.my_key(keyId), keyWithAccesses);
             }
-            routes.my_access_keys().push();
+            navigate({ to: "/mes-cles" });
         },
     });
 

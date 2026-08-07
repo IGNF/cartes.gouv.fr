@@ -1,30 +1,33 @@
 import Main from "@/components/Layout/Main";
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { externalUrls } from "@/router/externalUrls";
-import { routes, useRoute } from "@/router/router";
 
 import classes from "./DiscoverPublish.module.css";
 
 import backgroundImgUrl from "@/img/discover/publish/background.png?w=400;800;1200;1400;2160&format=png&as=srcset";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
 
+const route = getRouteApi("/_public/publier-une-donnee");
+
 export default function DiscoverPublish() {
-    const { params } = useRoute();
+    const search = route.useSearch();
+    const navigate = useNavigate();
     const { data: user } = useUserQuery();
 
     useEffect(() => {
-        if (params?.["authentication_failed"] !== undefined) {
-            routes.discover_publish().replace();
+        if (search.authentication_failed !== undefined) {
+            navigate({ to: "/publier-une-donnee", replace: true });
         }
 
-        if (user && params?.["session_expired_login_success"] === 1) {
+        if (user && search.session_expired_login_success === 1) {
             window.close();
         }
-    }, [params, user]);
+    }, [search, user, navigate]);
 
     return (
         <Main
@@ -52,7 +55,7 @@ export default function DiscoverPublish() {
                         <Button
                             iconId="fr-icon-arrow-right-s-line"
                             iconPosition="right"
-                            linkProps={user ? routes.datastore_selection().link : { href: externalUrls.login }}
+                            linkProps={user ? { to: "/tableau-de-bord/entrepots" } : { href: externalUrls.login }}
                         >
                             {user ? "Voir mes entrepôts" : "Connectez-vous pour commencer"}
                         </Button>

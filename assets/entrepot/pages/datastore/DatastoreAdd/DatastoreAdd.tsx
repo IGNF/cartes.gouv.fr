@@ -3,9 +3,10 @@ import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { tss } from "tss-react";
 
+import { useMatchRoute, useNavigate } from "@tanstack/react-router";
+
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import { useTranslation } from "@/i18n";
-import { routes, useRoute } from "@/router/router";
 import CreateNewDatastore from "./CreateNewDatastore";
 import JoinExistingDatastore from "./JoinExistingDatastore/JoinExistingDatastore";
 
@@ -13,7 +14,11 @@ export default function DatastoreAdd() {
     const { t } = useTranslation("DatastoreAdd");
     const { classes } = useStyles();
 
-    const route = useRoute();
+    const matchRoute = useMatchRoute();
+    const navigate = useNavigate();
+    // page montée par deux routes : création d'entrepôt ou adhésion à des communautés
+    const isCreateRequest = !!matchRoute({ to: "/tableau-de-bord/entrepots/demande-de-creation" });
+    const isJoinCommunity = !!matchRoute({ to: "/rejoindre-des-communautes" });
 
     return (
         <DatastoreMain title={t("title")}>
@@ -33,15 +38,15 @@ export default function DatastoreAdd() {
                                     {
                                         label: t("datastore_add_type", { type: "create" }),
                                         nativeInputProps: {
-                                            checked: route.name === routes.datastore_create_request.name,
-                                            onChange: () => routes.datastore_create_request().push(),
+                                            checked: isCreateRequest,
+                                            onChange: () => navigate({ to: "/tableau-de-bord/entrepots/demande-de-creation" }),
                                         },
                                     },
                                     {
                                         label: t("datastore_add_type", { type: "existing" }),
                                         nativeInputProps: {
-                                            checked: route.name === routes.join_community.name,
-                                            onChange: () => routes.join_community().push(),
+                                            checked: isJoinCommunity,
+                                            onChange: () => navigate({ to: "/rejoindre-des-communautes" }),
                                         },
                                     },
                                 ]}
@@ -50,11 +55,11 @@ export default function DatastoreAdd() {
                     </div>
                 </div>
 
-                {route.name === routes.datastore_create_request.name ? (
+                {isCreateRequest ? (
                     <div className={cx(classes.createNew)}>
                         <CreateNewDatastore classes={classes} />
                     </div>
-                ) : route.name === routes.join_community.name ? (
+                ) : isJoinCommunity ? (
                     <div className={cx(classes.joinExisting)}>
                         <JoinExistingDatastore />
                     </div>
