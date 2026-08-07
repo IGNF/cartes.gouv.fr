@@ -4,7 +4,7 @@ import { CommunityMemberDtoRightsEnum } from "../@types/entrepot";
 import LoadingText from "../components/Utils/LoadingText";
 import Main from "../components/Layout/Main";
 import SymfonyRouting from "../modules/Routing";
-import { queryClient } from "../modules/queryClient";
+import { queryClient, setOnUserRevalidated } from "../modules/queryClient";
 import { routeTree } from "../routeTree.gen";
 
 // Router TanStack : basepath dérivé du routing Symfony (vide en dev → "/"), contexte typé { queryClient }
@@ -20,6 +20,9 @@ export const router = createRouter({
         </Main>
     ),
 });
+
+// Couture unique de revalidation (décision 5) : user_me revalidé → les beforeLoad se ré-exécutent
+setOnUserRevalidated(() => router.invalidate());
 
 declare module "@tanstack/react-router" {
     interface Register {
