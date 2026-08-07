@@ -87,7 +87,6 @@
         "svgo": "^4.0.0",
         "tsafe": "^1.6.5",
         "tss-react": "^4.9.12",
-        "type-route": "^1.0.1",
         "typescript": "^5.1.6",
         "typescript-eslint": "^8.46.1",
         "uuid": "^14.0.0",
