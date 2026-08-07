@@ -6,6 +6,7 @@ import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useMemo, useState } from "react";
 import { tss } from "tss-react";
 
@@ -25,10 +26,11 @@ import { useDatastoreContext } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import { AddMember, addMemberModal } from "../AddMember/AddMember";
 import { complete, rightTypes, UserRights } from "../UserRights";
+
+const route = getRouteApi("/_private/tableau-de-bord/communaute/$communityId/membres");
 
 type CommunityMembersProps = {
     userId?: string;
@@ -63,6 +65,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { t } = useTranslation({ CommunityMembers });
 
     const { data: user } = useUserQuery();
+    const navigate = useNavigate();
     // const [members, setMembers] = useState<Member[]>([]);
     const [currentMember, setCurrentMember] = useState<string | undefined>(undefined);
 
@@ -109,11 +112,9 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
         return members;
     }, [communityMembers, communitySupervisor, user?.id]);
 
-    const { params } = useRoute();
-    const page = params["page"] ? parseInt(params["page"]) : 1;
-    const limit = params["limit"] ? parseInt(params["limit"]) : 20;
+    const { page, limit, search } = route.useSearch();
 
-    const { search, searchedItems } = useSearch(members);
+    const { searchedItems } = useSearch(members, search);
     const { paginatedItems, totalPages } = usePagination(searchedItems, page, limit);
 
     useEffect(() => {
@@ -187,7 +188,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                     title={t("already_member", { userId: userId })}
                     closable
                     onClose={() => {
-                        routes.members_list({ communityId: community._id }).push();
+                        navigate({ to: "/tableau-de-bord/communaute/$communityId/membres", params: { communityId: community._id } });
                     }}
                 />
             )}
@@ -230,7 +231,12 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                                 label={tCommon("search")}
                                 onButtonClick={(text) => {
                                     if (!isLoading) {
-                                        routes.members_list({ communityId: community._id, userId, search: text }).replace();
+                                        navigate({
+                                            to: "/tableau-de-bord/communaute/$communityId/membres",
+                                            params: { communityId: community._id },
+                                            search: { userId, search: text },
+                                            replace: true,
+                                        });
                                     }
                                 }}
                                 allowEmptySearch={true}
@@ -326,7 +332,9 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                             count={totalPages}
                             showFirstLast={true}
                             getPageLinkProps={(pageNumber) => ({
-                                ...routes.members_list({ communityId: community._id, userId, page: pageNumber, limit: limit, search }).link,
+                                to: "/tableau-de-bord/communaute/$communityId/membres",
+                                params: { communityId: community._id },
+                                search: { userId, page: pageNumber, limit, search },
                             })}
                             defaultPage={page}
                         />
