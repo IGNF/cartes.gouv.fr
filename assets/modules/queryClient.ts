@@ -16,7 +16,7 @@ export function isUserMeQueryKey(queryKey: readonly unknown[]): boolean {
 
 let lastUserMeInvalidation = 0;
 
-// Callback appelé après chaque revalidation de user_me (branché par tanstackRouter sur router.invalidate(),
+// Callback appelé après chaque revalidation de user_me (branché par router/index sur router.invalidate(),
 // enregistré par callback pour éviter l'import circulaire queryClient ↔ router)
 let onUserRevalidated: (() => void) | null = null;
 export function setOnUserRevalidated(callback: () => void): void {
