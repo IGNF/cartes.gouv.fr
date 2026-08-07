@@ -1,4 +1,4 @@
-import { appRoot } from "./router/router";
+import { appRoot } from "./router/appRoot";
 
 const rootDataset = (document.getElementById("root") as HTMLDivElement)?.dataset;
 
