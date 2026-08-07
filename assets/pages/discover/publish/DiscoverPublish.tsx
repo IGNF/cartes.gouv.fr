@@ -1,9 +1,8 @@
 import Main from "@/components/Layout/Main";
 import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 
-import { useSandboxDatastorePrefetchQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
+import { useSandboxDatastoreQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { externalUrls } from "@/router/externalUrls";
 import { routes, useRoute } from "@/router/router";
@@ -12,6 +11,7 @@ import classes from "./DiscoverPublish.module.css";
 
 import backgroundImgUrl from "@/img/discover/publish/background.png?w=400;800;1200;1400;2160&format=png&as=srcset";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
+import ButtonsGroup, { ButtonsGroupProps } from "@codegouvfr/react-dsfr/ButtonsGroup";
 
 export default function DiscoverPublish() {
     const { params } = useRoute();
@@ -27,7 +27,11 @@ export default function DiscoverPublish() {
         }
     }, [params, user]);
 
-    useSandboxDatastorePrefetchQuery();
+    const { data: sandboxDatastore, isPending: sandboxIsPending } = useSandboxDatastoreQuery();
+
+    // au moins un entrepôt hors bac à sable : lien direct vers la page de stats des entrepôts
+    const hasNonSandboxDatastore = (user?.communities_member ?? []).some((cm) => cm.community?.datastore && cm.community.datastore !== sandboxDatastore?._id);
+    const statsRoute = !sandboxIsPending && hasNonSandboxDatastore ? routes.stats_by_scope({ scope: "datastore" }) : routes.stats_scope_selection();
 
     return (
         <Main
@@ -52,13 +56,26 @@ export default function DiscoverPublish() {
                             Hébergez vos données, diffusez-les sous forme de flux et exploitez-les dans cartes.gouv.fr ou vos propres outils.
                         </p>
 
-                        <Button
-                            iconId="fr-icon-arrow-right-s-line"
-                            iconPosition="right"
-                            linkProps={user ? routes.datastore_selection().link : { href: externalUrls.login }}
-                        >
-                            {user ? "Voir mes entrepôts" : "Connectez-vous pour commencer"}
-                        </Button>
+                        <ButtonsGroup
+                            buttons={
+                                [
+                                    {
+                                        iconId: "fr-icon-arrow-right-s-line",
+                                        iconPosition: "right",
+                                        linkProps: user ? routes.datastore_selection().link : { href: externalUrls.login },
+                                        children: user ? "Voir mes entrepôts" : "Connectez-vous pour commencer",
+                                    },
+                                    user
+                                        ? {
+                                              children: "Mes statistiques de consommation",
+                                              linkProps: statsRoute.link,
+                                              priority: "secondary",
+                                          }
+                                        : null,
+                                ].filter(Boolean) as ButtonsGroupProps["buttons"]
+                            }
+                            inlineLayoutWhen="always"
+                        />
                     </div>
                 </div>
             </div>

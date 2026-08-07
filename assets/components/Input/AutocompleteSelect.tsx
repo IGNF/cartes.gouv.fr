@@ -21,6 +21,7 @@ interface AutocompleteSelectExtraProps<T> {
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
     searchFilter?: CreateFilterOptionsConfig<T>;
+    placeholder?: string;
 }
 
 type AutocompleteSelectProps<
@@ -49,6 +50,7 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
         state = "default",
         stateRelatedMessage,
         searchFilter = defaultSearchFilter,
+        placeholder,
         options,
         multiple,
         value,
@@ -139,30 +141,51 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
                     autoComplete={autoComplete}
                     multiple={multiple}
                     filterSelectedOptions={multiple}
+                    isOptionEqualToValue={isOptionEqualToValue}
                     disablePortal={disablePortal}
                     filterOptions={filterOptions ?? createFilterOptions({ ...defaultSearchFilter, ...searchFilter })}
                     options={options}
                     getOptionLabel={resolveOptionLabel as never}
-                    renderInput={(params) => <TextField {...params} inputRef={ref} variant={"filled"} size={"small"} error={state === "error"} />}
+                    renderInput={(params) => (
+                        <TextField {...params} inputRef={ref} variant={"filled"} size={"small"} error={state === "error"} placeholder={placeholder} />
+                    )}
                     renderValue={resolvedRenderValue}
                     popupIcon={popupIcon}
                     clearIcon={clearIcon}
                     forcePopupIcon={forcePopupIcon}
                     classes={{
                         inputRoot: cx(
-                            fr.cx("fr-py-0", "fr-pl-3v"),
+                            fr.cx("fr-py-0", "fr-pl-3v", {
+                                "fr-mt-2v": !multipleSelectedTags,
+                            }),
                             css({
                                 // style d'un input dsfr
                                 borderRadius: "0.25rem 0.25rem 0 0",
                                 boxShadow: "inset 0 -2px 0 0 var(--border-plain-grey)",
+                                // hauteur identique à .fr-input (1.5rem ligne + 0.5rem×2 padding = 2.5rem)
+                                height: fr.spacing("10v"),
                             })
                         ),
-                        input: fr.cx("fr-py-3v"),
+                        input: cx(
+                            fr.cx("fr-py-0"),
+                            css({
+                                // placeholder aligné sur les selects dsfr (MUI l'affiche en opacité 0.42 sinon)
+                                "&::placeholder": {
+                                    color: fr.colors.decisions.text.default.grey.default,
+                                    opacity: 1,
+                                },
+                                "&:disabled::placeholder": {
+                                    color: fr.colors.decisions.text.disabled.grey.default,
+                                },
+                            })
+                        ),
                         endAdornment: fr.cx("fr-mr-1v"),
                         popper: css({
                             zIndex: "999999 !important",
                             ["& .MuiAutocomplete-option"]: {
                                 padding: "8px 16px !important",
+                                // "anywhere" compte dans la largeur min-content, sans quoi les noms sans espace débordent (option en flex)
+                                overflowWrap: "anywhere",
                             },
                         }),
                         popupIndicator: css({
