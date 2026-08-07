@@ -10,7 +10,6 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../i18n/i18n";
-import { routes } from "../../../router/router";
 import { COMMUNITY_FORM_STEPS } from "./FormSteps";
 import Databases from "./management/Databases";
 import Description from "./management/Description";
@@ -84,7 +83,7 @@ const CreateCommunity: FC = () => {
                             description={
                                 <>
                                     <p>{meError.message}</p>
-                                    <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                                    <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
                                 </>
                             }
                         />

@@ -22,7 +22,6 @@ import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes } from "../../../../router/router";
 import "../../../../sass/pages/espaceco/member.scss";
 import api from "../../../api";
 import { AddMembersDialog, AddMembersDialogModal } from "./member/AddMembersDialog";
@@ -291,7 +290,7 @@ const Members: FC = () => {
                     description={
                         <>
                             <p>{membersQuery.error.message}</p>
-                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                            <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
                         </>
                     }
                 />
