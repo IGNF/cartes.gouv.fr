@@ -1,13 +1,13 @@
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 
 import { defaultNavItems } from "@/config/navItems/navItems";
-import { groups, useRoute } from "@/router/router";
+import useIsPublicRoute from "@/hooks/useIsPublicRoute";
 
 type UseNavItemsReturn = MainNavigationProps.Item[] | undefined;
 export default function useNavItems(): UseNavItemsReturn {
-    const route = useRoute();
+    const isPublicRoute = useIsPublicRoute();
 
-    if (groups.public.has(route)) {
+    if (isPublicRoute) {
         return defaultNavItems();
     }
 

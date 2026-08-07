@@ -2,9 +2,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import SideMenu from "@codegouvfr/react-dsfr/SideMenu";
 import { tss } from "tss-react";
 
+import { useMatchRoute } from "@tanstack/react-router";
+
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
 import { useTranslation } from "@/i18n";
-import { routes, useRoute } from "@/router/router";
 
 type DatastoreSideMenuProps = {
     datastoreId?: string;
@@ -12,7 +13,7 @@ type DatastoreSideMenuProps = {
 };
 export default function DatastoreSideMenu({ datastoreId, communityId }: DatastoreSideMenuProps) {
     const { t: tCommon } = useTranslation("Common");
-    const route = useRoute();
+    const matchRoute = useMatchRoute();
     const { classes, css, cx } = useStyles();
 
     const { datastoreList, addUserToSandbox } = useDatastoreSelection();
@@ -55,15 +56,15 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
             items={[
                 {
                     text: "Tous les entrepôts",
-                    linkProps: routes.datastore_selection().link,
+                    linkProps: { to: "/tableau-de-bord/entrepots" },
                     expandedByDefault: true,
-                    isActive: route.name === routes.datastore_selection().name,
+                    isActive: !!matchRoute({ to: "/tableau-de-bord/entrepots" }),
                 },
                 ...datastoreList.map((datastore) => ({
                     text: datastore.is_sandbox === true ? tCommon("sandbox") : datastore.name,
                     linkProps:
                         datastore._id !== undefined
-                            ? routes.datasheet_list({ datastoreId: datastore._id }).link
+                            ? { to: "/tableau-de-bord/entrepots/$datastoreId/donnees" as const, params: { datastoreId: datastore._id } }
                             : {
                                   href: "#",
                                   onClick: (e) => {
