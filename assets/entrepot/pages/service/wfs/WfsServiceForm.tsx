@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
-import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
+import ServiceFormErrors from "@/entrepot/components/ServiceFormErrors";
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { ConfigurationTypeEnum, EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";

@@ -14,10 +14,10 @@ import { fromLonLat, transformExtent } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useEffect, useRef } from "react";
 
-import type { CartesStyle, GeostylerStyles, OfferingTypeEnum } from "../../@types/app";
-import { BoundingBox } from "../../@types/entrepot";
-import olDefaults from "../../data/ol-defaults.json";
-import useCapabilities from "../../hooks/useCapabilities";
+import type { CartesStyle, GeostylerStyles, OfferingTypeEnum } from "@/@types/app";
+import { BoundingBox } from "@/@types/entrepot";
+import olDefaults from "@/data/ol-defaults.json";
+import useCapabilities from "@/hooks/useCapabilities";
 import StyleHelper from "@/entrepot/modules/Style/StyleHelper";
 
 import "ol/ol.css";

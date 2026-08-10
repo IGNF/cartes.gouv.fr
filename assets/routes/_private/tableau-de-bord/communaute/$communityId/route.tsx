@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
-import CommunityGate from "@/components/Layout/CommunityGate";
+import CommunityGate from "@/entrepot/components/CommunityGate";
 import api from "@/entrepot/api";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { revalidateUser } from "@/modules/queryClient";

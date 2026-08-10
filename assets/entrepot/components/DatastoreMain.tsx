@@ -7,10 +7,10 @@ import { useHead } from "@unhead/react";
 import { PropsWithChildren } from "react";
 import { tss } from "tss-react";
 
-import DatastoreSideMenu from "@/components/Layout/DatastoreSideMenu";
+import DatastoreSideMenu from "@/entrepot/components/DatastoreSideMenu";
 import useBreadcrumb from "@/entrepot/hooks/useBreadcrumb";
-import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
-import { type MainProps } from "./Main";
+import SessionExpiredAlert from "@/components/Utils/SessionExpiredAlert";
+import { type MainProps } from "@/components/Layout/Main";
 
 export type DatastoreMainProps = PropsWithChildren<
     MainProps & {

@@ -9,7 +9,7 @@ import { FC, useMemo } from "react";
 import { catalogueUrl } from "@/env";
 import { getThematicCategories } from "@/utils";
 import { MetadataHierarchyLevel, type Metadata } from "../../../../../@types/app";
-import ExtentMap from "../../../../../components/Utils/ExtentMap";
+import ExtentMap from "@/entrepot/components/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipboard";
 import { useTranslation } from "../../../../../i18n/i18n";

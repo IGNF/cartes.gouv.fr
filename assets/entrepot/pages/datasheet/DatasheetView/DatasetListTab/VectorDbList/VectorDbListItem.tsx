@@ -17,7 +17,7 @@ import useDataUsesQuery from "@/entrepot/hooks/queries/useDataUsesQuery";
 import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 import { DatasheetStoredDataItem, DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
 import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";
-import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
+import StoredDataStatusBadge from "@/entrepot/components/Badges/StoredDataStatusBadge";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import { ComponentKey } from "../../../../../../i18n/types";
 import RQKeys from "@/entrepot/modules/RQKeys";

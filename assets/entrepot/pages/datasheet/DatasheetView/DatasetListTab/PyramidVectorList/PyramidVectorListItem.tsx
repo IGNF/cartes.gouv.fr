@@ -8,7 +8,7 @@ import { FC, memo, useMemo } from "react";
 
 import useDataUsesQuery from "@/entrepot/hooks/queries/useDataUsesQuery";
 import { DatasheetStoredDataItem, PyramidVector, StoredDataStatusEnum } from "../../../../../../@types/app";
-import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
+import StoredDataStatusBadge from "@/entrepot/components/Badges/StoredDataStatusBadge";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import ListItem from "../../ListItem";
 import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
