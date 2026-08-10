@@ -8,7 +8,7 @@ import { PropsWithChildren } from "react";
 import { tss } from "tss-react";
 
 import DatastoreSideMenu from "@/components/Layout/DatastoreSideMenu";
-import useBreadcrumb from "@/hooks/useBreadcrumb";
+import useBreadcrumb from "@/entrepot/hooks/useBreadcrumb";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import { type MainProps } from "./Main";
 

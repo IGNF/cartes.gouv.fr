@@ -13,8 +13,8 @@ import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
-import useDatastoreMembership from "@/hooks/useDatastoreMembership";
+import useDataUsesQuery from "@/entrepot/hooks/queries/useDataUsesQuery";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 import { DatasheetStoredDataItem, DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
 import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";

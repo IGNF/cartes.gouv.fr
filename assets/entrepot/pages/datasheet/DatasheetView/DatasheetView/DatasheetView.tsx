@@ -12,7 +12,7 @@ import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
 import LoadingText from "@/components/Utils/LoadingText";
-import { blockingProcessingStatuses } from "@/hooks/queries/useStoredDataUseProcessings";
+import { blockingProcessingStatuses } from "@/entrepot/hooks/queries/useStoredDataUseProcessings";
 import { delta } from "@/utils";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import type { Datasheet, DatasheetDetailed, Metadata, Service } from "../../../../../@types/app";
@@ -26,7 +26,7 @@ import api from "../../../../api";
 import DatasheetThumbnail from "../DatasheetThumbnail";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useDatastoreMembership from "@/hooks/useDatastoreMembership";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 const DatasetListTab = lazy(() => import("../DatasetListTab/DatasetListTab"));
 const DocumentsTab = lazy(() => import("../DocumentsTab/DocumentsTab"));

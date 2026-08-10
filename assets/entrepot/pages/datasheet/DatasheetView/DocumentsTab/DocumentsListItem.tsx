@@ -19,7 +19,7 @@ import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../../api";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useDatastoreMembership from "@/hooks/useDatastoreMembership";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 type DocumentsListItemProps = {
     document: DatasheetDocument;

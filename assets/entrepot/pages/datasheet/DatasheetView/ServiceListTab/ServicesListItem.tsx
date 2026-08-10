@@ -10,7 +10,7 @@ import { symToStr } from "tsafe/symToStr";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
-import useDatastoreMembership from "@/hooks/useDatastoreMembership";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";

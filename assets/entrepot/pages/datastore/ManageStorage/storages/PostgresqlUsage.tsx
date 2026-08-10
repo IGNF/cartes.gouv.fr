@@ -7,7 +7,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { FC, memo, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
+import useStoredDataListQuery from "@/entrepot/hooks/queries/useStoredDataListQuery";
 import { usePagination } from "@/hooks/usePagination";
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import { Datastore, StoredData, StoredDataTypeEnum, VectorDb } from "../../../../../@types/app";

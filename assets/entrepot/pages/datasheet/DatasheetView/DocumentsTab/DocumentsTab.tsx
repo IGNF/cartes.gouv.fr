@@ -21,7 +21,7 @@ import { getFileExtension } from "../../../../../utils";
 import api from "../../../../api";
 import DocumentsListItem from "./DocumentsListItem";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useDatastoreMembership from "@/hooks/useDatastoreMembership";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 const documentAddModal = createModal({
     id: "datasheet-document-add-modal",

@@ -7,7 +7,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { FC, memo, ReactNode, useMemo, useRef } from "react";
 import { useToggle } from "@mantine/hooks";
 
-import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
+import useDataUsesQuery from "@/entrepot/hooks/queries/useDataUsesQuery";
 import {
     DatasheetStoredDataItem,
     DatastoreEndpoint,
@@ -26,7 +26,7 @@ import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
 import { PyramidRasterServiceChoiceDialog, type PyramidRasterServiceChoiceDialogOpenFn } from "./PyramidRasterServiceChoiceDialog";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useDatastoreMembership from "@/hooks/useDatastoreMembership";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 const getHintText = (endpoints: DatastoreEndpoint[]): ReactNode => (
     <ul className={fr.cx("fr-raw-list")}>

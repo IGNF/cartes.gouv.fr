@@ -2,9 +2,9 @@ import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { createFileRoute, ErrorComponentProps, notFound, Outlet, SearchParamError, useRouter } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
-import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
-import useRequiredRights from "@/hooks/useRequiredRights";
+import useRequiredRights from "@/entrepot/hooks/useRequiredRights";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { revalidateUser } from "@/modules/queryClient";

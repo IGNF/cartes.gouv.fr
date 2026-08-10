@@ -12,8 +12,8 @@ import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
 import { StyleFormProvider } from "@/contexts/StyleFormContext";
-import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
-import { useTableStyles } from "@/hooks/useTableStyles";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import { useTableStyles } from "@/entrepot/hooks/useTableStyles";
 import { encodeKey, encodeKeys } from "@/utils";
 import {
     ConfigurationTypeEnum,
@@ -28,7 +28,7 @@ import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
-import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
+import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";

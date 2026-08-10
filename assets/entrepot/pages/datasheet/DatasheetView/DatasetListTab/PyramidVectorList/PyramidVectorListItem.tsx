@@ -6,7 +6,7 @@ import { useToggle } from "@mantine/hooks";
 import { useNavigate } from "@tanstack/react-router";
 import { FC, memo, useMemo } from "react";
 
-import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
+import useDataUsesQuery from "@/entrepot/hooks/queries/useDataUsesQuery";
 import { DatasheetStoredDataItem, PyramidVector, StoredDataStatusEnum } from "../../../../../../@types/app";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
@@ -15,7 +15,7 @@ import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useDatastoreMembership from "@/hooks/useDatastoreMembership";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 type PyramidVectorListItemProps = {
     datasheetName: string;
