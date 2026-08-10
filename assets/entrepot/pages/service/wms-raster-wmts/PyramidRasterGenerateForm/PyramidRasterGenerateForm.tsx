@@ -20,7 +20,7 @@ import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
 import ZoomRange from "../../../../../components/Utils/ZoomRange";
 import olDefaults from "../../../../../data/ol-defaults.json";
-import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
+import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";

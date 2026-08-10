@@ -4,7 +4,7 @@ import { useMatches, useParams, useSearch } from "@tanstack/react-router";
 import { use, useMemo } from "react";
 
 import { Datastore } from "@/@types/app";
-import { CommunityContext } from "@/contexts/community";
+import { CommunityContext } from "@/entrepot/contexts/community";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { datastoreQueryOptions } from "./queries/datastoreQueryOptions";
 import getBreadcrumb, { BreadcrumbRouteParams } from "@/entrepot/modules/breadcrumbs/Breadcrumb";

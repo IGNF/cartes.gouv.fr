@@ -5,7 +5,7 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
-import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { UploadReport } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "@/entrepot/modules/RQKeys";

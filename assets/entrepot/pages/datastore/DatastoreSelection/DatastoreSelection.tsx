@@ -7,7 +7,7 @@ import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { getRouteApi } from "@tanstack/react-router";
 
 import { ListHeader } from "@/components/Layout/ListHeader";
-import useDatastoreSelection from "@/hooks/useDatastoreSelection";
+import useDatastoreSelection from "@/entrepot/hooks/useDatastoreSelection";
 import { usePagination } from "@/hooks/usePagination";
 import { useTranslation } from "@/i18n";
 import { searchAwareActiveOptions } from "@/router/AppLink";

@@ -9,7 +9,7 @@ import { createPortal } from "react-dom";
 import { Datastore, DatastoreCleanupEntitiesCount, FailedCleanupItem } from "@/@types/app";
 import LoadingText from "@/components/Utils/LoadingText";
 import Progress from "@/components/Utils/Progress";
-import { useCommunity } from "@/contexts/community";
+import { useCommunity } from "@/entrepot/contexts/community";
 import api from "@/entrepot/api";
 import useEventSource from "@/hooks/useEventSource";
 import RQKeys from "@/entrepot/modules/RQKeys";

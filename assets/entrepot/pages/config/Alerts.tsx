@@ -24,8 +24,8 @@ import api from "../../api";
 
 import "./Alerts.scss";
 import Main from "@/components/Layout/Main";
-import { useCommunity } from "@/contexts/community";
-import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { useCommunity } from "@/entrepot/contexts/community";
+import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 
 function getNewAlert() {
     return {

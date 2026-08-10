@@ -18,7 +18,7 @@ import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNa
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
 import Skeleton from "@/components/Utils/Skeleton";
-import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { usePagination } from "@/hooks/usePagination";
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import { formatDateFromISO } from "@/utils";

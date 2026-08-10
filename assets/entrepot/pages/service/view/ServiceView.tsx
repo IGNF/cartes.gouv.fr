@@ -7,7 +7,7 @@ import { FC } from "react";
 import { OfferingStatusEnum, OfferingTypeEnum } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
+import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import PrivateServiceExplanation from "./PrivateServiceExplanation";
 import ServiceViewContent from "./ServiceViewContent";
 

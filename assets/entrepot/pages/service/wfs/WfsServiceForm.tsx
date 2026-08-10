@@ -12,14 +12,14 @@ import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
 import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
-import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { ConfigurationTypeEnum, EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { filterGeometricRelations } from "../../../../helpers";
-import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
+import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";

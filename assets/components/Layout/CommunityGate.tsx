@@ -3,11 +3,11 @@ import { FC, PropsWithChildren, memo } from "react";
 
 import { Datastore } from "../../@types/app";
 import { CommunityDetailResponseDto } from "../../@types/entrepot";
-import { CommunityProvider } from "../../contexts/community";
+import { CommunityProvider } from "@/entrepot/contexts/community";
 import api from "../../entrepot/api";
-import { datastoreQueryOptions } from "../../hooks/queries/datastoreQueryOptions";
+import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "../../hooks/queries/useUserQuery";
-import useRequiredRights from "../../hooks/useRequiredRights";
+import useRequiredRights from "@/entrepot/hooks/useRequiredRights";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../modules/jsonFetch";
 import Forbidden from "../../pages/error/Forbidden";
