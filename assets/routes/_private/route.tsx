@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_private")({
     },
     component: PrivateLayout,
     notFoundComponent: PageNotFound,
-    // ce layout pend au chargement de son chunk (rechargement pleine page) : chrome complet, pas le pending nu de la racine
+    // ce layout pend au chargement de son chunk (rechargement pleine page) : en-tête et pied de page affichés, pas le pending nu de la racine
     pendingComponent: PrivateLayoutPending,
 });
 
