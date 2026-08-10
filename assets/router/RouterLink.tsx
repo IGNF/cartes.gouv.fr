@@ -7,13 +7,13 @@ export const searchAwareActiveOptions: LinkProps["activeOptions"] = { exact: tru
 /**
  * Lien enregistré auprès de react-dsfr : Link TanStack si `to` est fourni, ancre native sinon.
  *
- * Sans `to`, le Link TanStack ignore `href` et cible la page courante marquée active (liens du chrome cassés).
+ * Sans `to`, le Link TanStack ignore `href` et cible la page courante marquée active (liens de l'en-tête et du pied de page cassés).
  *
  * `activeOptions` :
  *
  * `exact: true` : le fuzzy matching pose des aria-current="page" parasites sur les liens ancêtres (le DSFR désactive les liens [aria-current] du fil d'Ariane et surligne les items de nav).
  *
- * `includeSearch: false` : les liens du chrome restent actifs quelle que soit la search ; surcharger par lien (searchAwareActiveOptions) quand l'identité du lien vit dans la search (pagination).
+ * `includeSearch: false` : les liens de navigation (en-tête, menu) restent actifs quelle que soit la search ; surcharger par lien (searchAwareActiveOptions) quand l'identité du lien vit dans la search (pagination).
  */
 const RouterLink = forwardRef<HTMLAnchorElement, LinkProps & { href?: string }>(function RouterLink(props, ref) {
     if (props.to === undefined) {
