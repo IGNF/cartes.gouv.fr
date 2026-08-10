@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
-import CommunityGate from "@/components/Layout/CommunityGate";
+import CommunityGate from "@/entrepot/components/CommunityGate";
 import { configCommunityId } from "@/env";
 import Alerts from "@/entrepot/pages/config/Alerts";
 import RQKeys from "@/entrepot/modules/RQKeys";

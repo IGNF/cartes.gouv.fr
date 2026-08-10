@@ -10,8 +10,8 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useMemo, useState } from "react";
 import { tss } from "tss-react";
 
-import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
+import DatastoreMain from "@/entrepot/components/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/entrepot/components/DatastoreTertiaryNavigation";
 import PageTitle from "@/components/Layout/PageTitle";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { usePagination } from "@/hooks/usePagination";

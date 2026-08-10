@@ -16,7 +16,7 @@ import {
     PyramidRaster,
     StoredDataStatusEnum,
 } from "../../../../../../@types/app";
-import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
+import StoredDataStatusBadge from "@/entrepot/components/Badges/StoredDataStatusBadge";
 import { useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../../../api";

@@ -3,7 +3,7 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useEffect, useState } from "react";
 
 import { CartesStyle, OfferingTypeEnum, StoredDataTypeEnum } from "@/@types/app";
-import RMap from "@/components/Utils/RMap";
+import RMap from "@/entrepot/components/RMap";
 import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import getWebService from "@/entrepot/modules/WebServices/WebServices";
 import BaseLayer from "ol/layer/Base";

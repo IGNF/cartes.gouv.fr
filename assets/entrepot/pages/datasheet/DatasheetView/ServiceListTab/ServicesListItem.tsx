@@ -14,7 +14,7 @@ import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
-import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
+import OfferingStatusBadge from "@/entrepot/components/Badges/OfferingStatusBadge";
 import Wait from "../../../../../components/Utils/Wait";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { offeringTypeDisplayName } from "../../../../../utils";

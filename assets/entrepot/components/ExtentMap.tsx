@@ -15,9 +15,9 @@ import VectorSource from "ol/source/Vector";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useEffect, useMemo, useRef } from "react";
 
-import type { BoundingBox, JsonNode } from "../../@types/entrepot";
-import olDefaults from "../../data/ol-defaults.json";
-import useCapabilities from "../../hooks/useCapabilities";
+import type { BoundingBox, JsonNode } from "@/@types/entrepot";
+import olDefaults from "@/data/ol-defaults.json";
+import useCapabilities from "@/hooks/useCapabilities";
 
 import "ol/ol.css";
 

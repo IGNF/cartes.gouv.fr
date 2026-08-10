@@ -13,8 +13,8 @@ import { FC, useState } from "react";
 import { useStyles } from "tss-react/mui";
 
 import { DatastorePermission } from "@/@types/app";
-import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
+import DatastoreMain from "@/entrepot/components/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/entrepot/components/DatastoreTertiaryNavigation";
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
 import Skeleton from "@/components/Utils/Skeleton";
