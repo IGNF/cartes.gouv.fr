@@ -15,7 +15,7 @@ export const searchAwareActiveOptions: LinkProps["activeOptions"] = { exact: tru
  *
  * `includeSearch: false` : les liens de navigation (en-tête, menu) restent actifs quelle que soit la search ; surcharger par lien (searchAwareActiveOptions) quand l'identité du lien vit dans la search (pagination).
  */
-const RouterLink = forwardRef<HTMLAnchorElement, LinkProps & { href?: string }>(function RouterLink(props, ref) {
+const AppLink = forwardRef<HTMLAnchorElement, LinkProps & { href?: string }>(function AppLink(props, ref) {
     if (props.to === undefined) {
         const { href, children, ...anchorProps } = props as React.AnchorHTMLAttributes<HTMLAnchorElement>;
         return (
@@ -27,4 +27,4 @@ const RouterLink = forwardRef<HTMLAnchorElement, LinkProps & { href?: string }>(
     return <Link ref={ref} activeOptions={{ exact: true, includeSearch: false }} {...props} />;
 });
 
-export default RouterLink;
+export default AppLink;
