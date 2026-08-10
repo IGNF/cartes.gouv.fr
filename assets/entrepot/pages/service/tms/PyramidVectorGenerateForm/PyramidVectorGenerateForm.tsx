@@ -11,8 +11,8 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { type StoredDataRelation, type VectorDb } from "../../../../../@types/app";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
 import olDefaults from "../../../../../data/ol-defaults.json";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n";
@@ -224,20 +224,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                     />
                 </>
             )}
-            {isSubmitting && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("pyramid_creation_launch_in_progress")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {isSubmitting && <LoadingOverlay message={t("pyramid_creation_launch_in_progress")} />}
         </Main>
     );
 };

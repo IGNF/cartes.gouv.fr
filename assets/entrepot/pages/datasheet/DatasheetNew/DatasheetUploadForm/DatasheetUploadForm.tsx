@@ -17,8 +17,7 @@ import * as yup from "yup";
 
 import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import Main from "@/components/Layout/Main";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
-import LoadingText from "../../../../../components/Utils/LoadingText";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import defaultProjections from "@/entrepot/data/default_projections.json";
@@ -428,18 +427,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 alignment="right"
                 className={fr.cx("fr-mt-2w")}
             />
-            {isValidating && (
-                <Wait>
-                    <LoadingIcon largeIcon={true} />
-                </Wait>
-            )}
-            {addUploadMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("datasheet.creation_running")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {isValidating && <LoadingOverlay />}
+            {addUploadMutation.isPending && <LoadingOverlay message={t("datasheet.creation_running")} />}
             {addUploadMutation.isSuccess && addUploadMutation.data?._id !== undefined && (
                 <Wait>
                     <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={addUploadMutation.data?._id} datasheetName={datasheetName} />

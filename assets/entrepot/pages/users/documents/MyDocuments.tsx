@@ -15,7 +15,7 @@ import { useDebouncedCallback } from "@mantine/hooks";
 import { DocumentDetailsResponseDto } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException, jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
@@ -224,7 +224,7 @@ const MyDocuments: FC = () => {
                     />
                     <div>
                         <Button onClick={() => documentsQuery.fetchNextPage()} disabled={!documentsQuery.hasNextPage || documentsQuery.isFetching}>
-                            {documentsQuery.isFetchingNextPage ? "Loading more..." : documentsQuery.hasNextPage ? "Load More" : "Nothing more to load"}
+                            {documentsQuery.isFetchingNextPage ? "Loading more" : documentsQuery.hasNextPage ? "Load More" : "Nothing more to load"}
                         </Button>
                     </div>
                     <div>{documentsQuery.isFetching && !documentsQuery.isFetchingNextPage ? "Fetching..." : null}</div>
@@ -402,29 +402,13 @@ const MyDocuments: FC = () => {
                 }
             })()}
 
-            {addDocumentMutation.isPending && (
-                <Wait>
-                    <p className={fr.cx("fr-h6", "fr-m-0", "fr-p-0")}>Ajout du document en cours</p>
-                </Wait>
-            )}
+            {addDocumentMutation.isPending && <LoadingOverlay message="Ajout du document en cours" />}
 
-            {replaceDocumentMutation.isPending && (
-                <Wait>
-                    <p className={fr.cx("fr-h6", "fr-m-0", "fr-p-0")}>Remplacement du document en cours</p>
-                </Wait>
-            )}
+            {replaceDocumentMutation.isPending && <LoadingOverlay message="Remplacement du document en cours" />}
 
-            {modifyDocumentMutation.isPending && (
-                <Wait>
-                    <p className={fr.cx("fr-h6", "fr-m-0", "fr-p-0")}>Modification du document en cours</p>
-                </Wait>
-            )}
+            {modifyDocumentMutation.isPending && <LoadingOverlay message="Modification du document en cours" />}
 
-            {deleteDocumentMutation.isPending && (
-                <Wait>
-                    <p className={fr.cx("fr-h6", "fr-m-0", "fr-p-0")}>Suppression du document en cours</p>
-                </Wait>
-            )}
+            {deleteDocumentMutation.isPending && <LoadingOverlay message="Suppression du document en cours" />}
         </Main>
     );
 };

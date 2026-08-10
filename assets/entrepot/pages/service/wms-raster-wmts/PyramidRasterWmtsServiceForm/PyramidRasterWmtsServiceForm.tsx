@@ -14,9 +14,8 @@ import ServiceFormErrors from "@/entrepot/components/ServiceFormErrors";
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidRaster, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
 import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
@@ -269,18 +268,7 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
             )}
 
             {(createServiceMutation.isPending || editServiceMutation.isPending) && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon largeIcon={true} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{editMode ? t("modify.in_progress") : t("publish.in_progress")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
+                <LoadingOverlay message={editMode ? t("modify.in_progress") : t("publish.in_progress")} />
             )}
         </Main>
     );

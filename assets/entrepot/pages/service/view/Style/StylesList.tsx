@@ -8,8 +8,8 @@ import { useState } from "react";
 
 import { CartesStyle, Service } from "@/@types/app";
 import ConfirmDialog, { ConfirmDialogModal } from "@/components/Utils/ConfirmDialog";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
-import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
@@ -217,16 +217,7 @@ function StylesList(props: StylesListProps) {
                 </div>
             </div>
 
-            {(isPendingChangeCurrentStyle || isRemovePending) && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? tCommon("removing") : tCommon("modifying")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {(isPendingChangeCurrentStyle || isRemovePending) && <LoadingOverlay message={isRemovePending ? tCommon("removing") : tCommon("modifying")} />}
             <ConfirmDialog
                 title={tStyle("remove_style_confirmation", { styleName: styleToRemove })}
                 onConfirm={() => {

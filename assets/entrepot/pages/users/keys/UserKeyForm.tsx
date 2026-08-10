@@ -2,7 +2,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -12,8 +11,8 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum, UserKeyWithAccessesResponseDto } from "../../../../@types/app";
 import { PermissionWithOfferingsDetailsResponseDto, UserKeyResponseDto, UserKeyResponseDtoTypeEnum } from "../../../../@types/entrepot";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import Wait from "../../../../components/Utils/Wait";
 import { getTranslation, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -225,14 +224,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
         <Main title={t("title", { keyId })}>
             <h1>{t("title", { keyId: keyId })}</h1>
             {(addKeyStatus === "pending" || updatekeyStatus === "pending") && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={cx(fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v"), "frx-icon-spin")} />
-                            <h6 className={fr.cx("fr-m-0")}>{addKeyStatus === "pending" ? tCommon("adding") : tCommon("modifying")}</h6>
-                        </div>
-                    </div>
-                </Wait>
+                <LoadingOverlay message={addKeyStatus === "pending" ? tCommon("adding") : tCommon("modifying")} />
             )}
             {addKeyError && <Alert severity="warning" closable title={tCommon("error")} description={addKeyError.message} />}
             {updatekeyError && <Alert severity="warning" closable title={tCommon("error")} description={updatekeyError.message} />}
