@@ -18,8 +18,7 @@ import { useForm } from "react-hook-form";
 import { useStyles } from "tss-react";
 import * as yup from "yup";
 
-import LoadingIcon from "@/components/Utils/LoadingIcon";
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "@/i18n";
 import { ComponentKey } from "@/i18n/types";
 import { jsonFetch } from "@/modules/jsonFetch";
@@ -174,20 +173,7 @@ export default function CreateNewDatastore({ classes }: CreateNewDatastoreProps)
                 </Button>
             </form>
 
-            {datastoreRequestMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("is_sending")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {datastoreRequestMutation.isPending && <LoadingOverlay message={t("is_sending")} />}
 
             {createPortal(
                 <successModal.Component

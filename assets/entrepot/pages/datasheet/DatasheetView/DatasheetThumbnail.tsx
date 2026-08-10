@@ -15,7 +15,7 @@ import * as yup from "yup";
 
 import type { Datasheet, DatasheetDetailed, DatasheetThumbnailAnnexe } from "../../../../@types/app";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
-import Wait from "../../../../components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "../../../../i18n/i18n";
 import { ComponentKey } from "../../../../i18n/types";
 import RQKeys from "@/entrepot/modules/RQKeys";
@@ -240,16 +240,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                         className={fr.cx("fr-my-3w")}
                     />
                 )}
-                {deleteThumbnailMutation.isPending && (
-                    <Wait>
-                        <div className={fr.cx("fr-container")}>
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                                <h6 className={fr.cx("fr-m-0")}>{t("thumbnail_modal.action_being", { action: "delete" })}</h6>
-                            </div>
-                        </div>
-                    </Wait>
-                )}
+                {deleteThumbnailMutation.isPending && <LoadingOverlay message={t("thumbnail_modal.action_being", { action: "delete" })} />}
             </div>
             {createPortal(
                 <addThumbnailModal.Component title={t("thumbnail_modal.title")} buttons={thumbnailModalButtons}>

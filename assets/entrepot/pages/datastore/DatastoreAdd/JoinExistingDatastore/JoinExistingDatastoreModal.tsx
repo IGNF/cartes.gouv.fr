@@ -9,8 +9,7 @@ import { FieldValues, RegisterOptions, useForm, UseFormRegister } from "react-ho
 import { tss } from "tss-react";
 
 import { CommunityListResponseDto } from "@/@types/entrepot";
-import LoadingIcon from "@/components/Utils/LoadingIcon";
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import api from "@/entrepot/api";
 import { annexesUrl } from "@/env";
 import { useTranslation } from "@/i18n";
@@ -303,20 +302,7 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
                 document.body
             )}
 
-            {joinCommunityMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("is_sending")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {joinCommunityMutation.isPending && <LoadingOverlay message={t("is_sending")} />}
         </>
     );
 }

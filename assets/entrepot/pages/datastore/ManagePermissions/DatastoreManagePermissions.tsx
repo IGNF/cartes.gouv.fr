@@ -23,7 +23,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import { formatDateFromISO } from "@/utils";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
-import Wait from "../../../../components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -88,16 +88,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
             <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
 
             {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={removeError.message} />}
-            {removeStatus === "pending" && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{tCommon("removing")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {removeStatus === "pending" && <LoadingOverlay message={tCommon("removing")} />}
 
             {permissionStatus !== "pending" && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>

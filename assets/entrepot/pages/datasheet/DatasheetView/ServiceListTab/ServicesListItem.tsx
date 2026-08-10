@@ -15,7 +15,7 @@ import { CartesApiException } from "@/modules/jsonFetch";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
 import OfferingStatusBadge from "@/entrepot/components/Badges/OfferingStatusBadge";
-import Wait from "../../../../../components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { offeringTypeDisplayName } from "@/entrepot/utils/offering";
 import api from "../../../../api";
@@ -224,16 +224,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                 document.body
             )}
 
-            {unpublishServiceMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>En cours de dépublication</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {unpublishServiceMutation.isPending && <LoadingOverlay message="En cours de dépublication" />}
 
             {unpublishServiceMutation.error && <Alert severity="error" closable title={unpublishServiceMutation.error.message} />}
 

@@ -11,9 +11,8 @@ import { CartesApiException } from "@/modules/jsonFetch";
 import { type QueryParams } from "@/modules/Routing";
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import type { Datastore, StaticFile } from "../../../../../@types/app";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { decodeContentRange, delta, PaginatedListResponse } from "../../../../../utils";
@@ -159,16 +158,7 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
                 document.body
             )}
 
-            {deleteStaticMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("storage.statics.deletion.in_progress")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {deleteStaticMutation.isPending && <LoadingOverlay message={t("storage.statics.deletion.in_progress")} />}
         </>
     );
 };

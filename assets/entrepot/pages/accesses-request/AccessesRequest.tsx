@@ -17,8 +17,8 @@ import useUserQuery from "@/hooks/queries/useUserQuery";
 import { sameTabLink } from "@/router/externalUrls";
 import { CswMetadata } from "../../../@types/app";
 import Main from "../../../components/Layout/Main";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../components/Utils/LoadingText";
-import Wait from "../../../components/Utils/Wait";
 import { getTranslation, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -268,20 +268,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                 )
             )}
 
-            {requestMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("sending_message")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {requestMutation.isPending && <LoadingOverlay message={t("sending_message")} />}
         </Main>
     );
 };

@@ -9,8 +9,7 @@ import api from "../../../../api";
 import { CheckStatusEnum, type DatasheetDetailed, type DatasheetUploadItem } from "../../../../../@types/app";
 import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";
 import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetView";
-import Wait from "../../../../../components/Utils/Wait";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
@@ -126,16 +125,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                     </div>
                 );
             })}
-            {deleteUnfinishedUpload.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("storage.upload.deletion.in_progress")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {deleteUnfinishedUpload.isPending && <LoadingOverlay message={t("storage.upload.deletion.in_progress")} />}
         </>
     );
 };

@@ -2,7 +2,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -10,8 +9,8 @@ import { FC, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import api from "../../../api";
 import DatePicker from "../../../../components/Input/DatePicker";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import ScrollOfferingList from "./ScrollOfferingList";
@@ -99,16 +98,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
     return (
         <Main title={t("edit_form.document_title", { id: permissionId })}>
             <h1>{t("edit_form.title", { permission: permissionQuery.data })}</h1>
-            {updateMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={cx(fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v"), "frx-icon-spin")} />
-                            <h6 className={fr.cx("fr-m-0")}>{tCommon("modifying")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {updateMutation.isPending && <LoadingOverlay message={tCommon("modifying")} />}
             {updateMutation.error && <Alert severity="warning" closable title={tCommon("error")} description={updateMutation.error.message} />}
             {offeringsQuery.isLoading || permissionQuery.isLoading ? (
                 <LoadingText />

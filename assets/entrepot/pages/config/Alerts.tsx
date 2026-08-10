@@ -12,8 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { IAlert } from "../../../@types/alert";
 import CreateAlert, { alertSchema } from "../../../components/Modal/CreateAlert/CreateAlert";
-import Wait from "../../../components/Utils/Wait";
-import LoadingIcon from "../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "../../../i18n";
 import { formatDateTime } from "../../../utils";
 import { Annexe, Datastore } from "../../../@types/app";
@@ -317,11 +316,7 @@ const Alerts: FC = () => {
                 </Button>
             </form>
             <CreateAlert key={alert.id} alert={alert} isEdit={Boolean(alert.title)} ModalComponent={modal.Component} onSubmit={addOrUpdateAlert} />
-            {isPending && (
-                <Wait>
-                    <LoadingIcon largeIcon={true} />
-                </Wait>
-            )}
+            {isPending && <LoadingOverlay />}
         </Main>
     );
 };
