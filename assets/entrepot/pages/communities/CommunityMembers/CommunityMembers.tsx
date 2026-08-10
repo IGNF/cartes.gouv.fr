@@ -16,7 +16,7 @@ import PageTitle from "@/components/Layout/PageTitle";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
-import { searchAwareActiveOptions } from "@/router/RouterLink";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import { Datastore, UserRightsResponseDto } from "../../../../@types/app";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";

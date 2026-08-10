@@ -19,7 +19,7 @@ import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOpt
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
-import { searchAwareActiveOptions } from "@/router/RouterLink";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Skeleton from "../../../../components/Utils/Skeleton";

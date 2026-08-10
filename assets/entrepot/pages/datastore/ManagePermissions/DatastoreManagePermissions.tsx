@@ -20,7 +20,7 @@ import PageTitle from "@/components/Layout/PageTitle";
 import Skeleton from "@/components/Utils/Skeleton";
 import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { usePagination } from "@/hooks/usePagination";
-import { searchAwareActiveOptions } from "@/router/RouterLink";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import { formatDateFromISO } from "@/utils";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";

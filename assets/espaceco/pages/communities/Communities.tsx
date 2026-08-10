@@ -21,7 +21,7 @@ import CommunityList from "./CommunityList";
 import { CreateCommunityDialog, CreateCommunityDialogModal } from "./CreateCommunityDialog";
 import SearchCommunity from "./SearchCommunity";
 import useUserMe from "@/espaceco/hooks/useUserMe";
-import { searchAwareActiveOptions } from "@/router/RouterLink";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 
 const route = getRouteApi("/_private/espace-collaboratif/");
 

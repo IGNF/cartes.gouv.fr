@@ -9,7 +9,7 @@ import { createPortal } from "react-dom";
 
 import { CartesApiException } from "@/modules/jsonFetch";
 import { type QueryParams } from "@/modules/Routing";
-import { searchAwareActiveOptions } from "@/router/RouterLink";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import { Datastore, Upload } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";

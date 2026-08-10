@@ -6,9 +6,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import App from "@/App";
-import RouterLink from "@/router/RouterLink";
+import AppLink from "@/router/AppLink";
 
-// (props: LinkProps) => … et non typeof RouterLink : l'unpacking d'un composant générique retombe sur AnyRouter,
+// (props: LinkProps) => … et non typeof AppLink : l'unpacking d'un composant générique retombe sur AnyRouter,
 // LinkProps instancie ses génériques par défaut sur RegisteredRouter (pattern documenté par react-dsfr).
 declare module "@codegouvfr/react-dsfr/spa" {
     interface RegisterLink {
@@ -23,7 +23,7 @@ if (import.meta.env?.APP_ENV?.toLowerCase() === "prod") {
     document.getElementsByClassName("sf-toolbar")?.[0]?.classList?.remove("sf-display-none");
 }
 
-startReactDsfr({ defaultColorScheme: "light", Link: RouterLink });
+startReactDsfr({ defaultColorScheme: "light", Link: AppLink });
 
 const head = createHead();
 
