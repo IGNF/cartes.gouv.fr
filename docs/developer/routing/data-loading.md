@@ -19,17 +19,17 @@ Test rapide requise/optionnelle : _« si cette requête échoue, la page doit-el
 
 ### Gate
 
-Référence : `assets/routes/_private/tableau-de-bord/entrepots/$datastoreId/route.tsx` (`beforeLoad`).
+Références : [`$datastoreId/route.tsx`](../../../assets/routes/_private/tableau-de-bord/entrepots/$datastoreId/route.tsx) (gate d'appartenance, `beforeLoad`), [`_private/route.tsx`](../../../assets/routes/_private/route.tsx) (gate d'authentification).
 
 - Lecture synchrone du cache (`context.queryClient.getQueryData(RQKeys.user_me())` + `findMembership`), **aucun fetch** : `user_me` est bootstrappé dans le DOM.
 - Appartenance absente → `revalidateUser()` (une revalidation throttlée) puis `throw notFound()` (miroir-404 : inexistant et inaccessible sont indistinguables).
 - Membre sans droit suffisant → `Forbidden`, rendu par le layout via `useMatches()` + `staticData.requiredRights` (les feuilles déclarent leurs droits, `beforeLoad` n'y a pas accès).
 - `return { membership }` fournit l'appartenance au sous-arbre via le contexte de route typé.
-- Exception assumée : le sous-arbre espaceco a un gate **async** (`await ensureQueryData` en `beforeLoad`, `assets/routes/_private/espace-collaboratif/route.tsx`) car son `getMe` n'est pas bootstrappé.
+- Exception assumée : le sous-arbre espaceco a un gate **async** (`await ensureQueryData` en `beforeLoad`, [`espace-collaboratif/route.tsx`](../../../assets/routes/_private/espace-collaboratif/route.tsx)) car son `getMe` n'est pas bootstrappé.
 
 ### Donnée requise
 
-Références : `assets/routes/_private/tableau-de-bord/entrepots/$datastoreId/route.tsx` (loader), `assets/entrepot/hooks/queries/datastoreQueryOptions.ts` (factory), `assets/entrepot/pages/datasheet/DatasheetList/DatasheetList.tsx` (consommation).
+Références : [`$datastoreId/route.tsx`](../../../assets/routes/_private/tableau-de-bord/entrepots/$datastoreId/route.tsx) (loader), [`datastoreQueryOptions.ts`](../../../assets/entrepot/hooks/queries/datastoreQueryOptions.ts) (factory), [`DatasheetList.tsx`](../../../assets/entrepot/pages/datasheet/DatasheetList/DatasheetList.tsx) et [`WfsServiceForm.tsx`](../../../assets/entrepot/pages/service/wfs/WfsServiceForm.tsx) (consommation).
 
 ```tsx
 // route (layout ou feuille) : préchauffage, ne bloque JAMAIS la navigation
@@ -50,7 +50,7 @@ const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datas
 
 ### Donnée optionnelle
 
-Référence : `assets/entrepot/pages/datasheet/DatasheetView/MetadataTab/MetadataTab.tsx`.
+Références : [`MetadataTab.tsx`](../../../assets/entrepot/pages/datasheet/DatasheetView/MetadataTab/MetadataTab.tsx) (dont 404 sémantique), [`AnnexeUsage.tsx`](../../../assets/entrepot/pages/datastore/ManageStorage/storages/AnnexeUsage.tsx) (widget de consommation), [`DatasheetView.tsx`](../../../assets/entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.tsx) (page progressive : plusieurs requêtes en parallèle autour d'un rendu immédiat).
 
 - `useQuery` classique, la page se rend sans attendre ; indicateur local pendant `isLoading`, `LoadingIcon` discret pendant `isFetching` (rafraîchissement en arrière-plan).
 - **Toute requête optionnelle a une branche d'erreur visible** (`Alert severity="error"`). Une requête sans branche d'erreur est un bug (état vide éternel).
@@ -58,21 +58,21 @@ Référence : `assets/entrepot/pages/datasheet/DatasheetView/MetadataTab/Metadat
 
 ### Mutation
 
-Référence : suppression dans `assets/entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.tsx`.
+Références : suppression dans [`DatasheetView.tsx`](../../../assets/entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.tsx), superpositions `Wait` dans [`EmailPlanners.tsx`](../../../assets/espaceco/pages/communities/management/reports/EmailPlanners.tsx).
 
 - `isPending` → superposition `Wait` + `LoadingText` ; erreur → `Alert` locale (ou snackbar pour un succès).
 - Le router n'affiche rien pour une mutation : ne pas chercher à utiliser pending/errorComponent ici.
 
 ## Attente (pending)
 
-- La suspension d'une donnée requise est affichée par le `pendingComponent` le plus proche, sinon `defaultPendingComponent` (`assets/router/index.tsx`).
-- Les layouts `_private`/`_public` fournissent un pending avec en-tête et pied de page ; une feuille ne définit un `pendingComponent` que pour proposer mieux (ex. `Skeleton` de liste).
+- La suspension d'une donnée requise est affichée par le `pendingComponent` le plus proche, sinon `defaultPendingComponent` ([`router/index.tsx`](../../../assets/router/index.tsx)).
+- Les layouts [`_private`](../../../assets/routes/_private/route.tsx)/[`_public`](../../../assets/routes/_public/route.tsx) fournissent un pending avec en-tête et pied de page ; une feuille ne définit un `pendingComponent` que pour proposer mieux (ex. `Skeleton` de liste).
 - Seuils : défauts TanStack non surchargés à ce jour (`defaultPendingMs` 1000 ms avant affichage, `defaultPendingMinMs` 500 ms d'affichage minimum — évite le flash).
 - Préchargement à l'intention (`defaultPreload: "intent"`, délai 200 ms) : au survol/touch d'un lien, le router charge le chunk et exécute `beforeLoad` + `loader`. Coût nul en régime permanent (les loaders sont des `prefetchQuery` qui respectent le `staleTime` react-query ; `defaultPreloadStaleTime: 0` laisse react-query décider de la fraîcheur). Un preload ne suit jamais un redirect `reloadDocument` et ses résultats ne sont pas réutilisés par la navigation réelle.
 
 ## Erreurs
 
-Partition de référence : `DatastoreErrorComponent` dans `assets/routes/_private/tableau-de-bord/entrepots/$datastoreId/route.tsx`.
+Partitions de référence : `DatastoreErrorComponent` dans [`$datastoreId/route.tsx`](../../../assets/routes/_private/tableau-de-bord/entrepots/$datastoreId/route.tsx) (sous-arbre), `RootErrorComponent` dans [`__root.tsx`](../../../assets/routes/__root.tsx) (racine).
 
 - `SearchParamError` (échec de `validateSearch`) → rendu 404. Piège : cette erreur n'atteint jamais `notFoundComponent`, tout sous-arbre qui définit son propre `errorComponent` doit la re-mapper.
 - `CartesApiException.code === 404` → `PageNotFound` (miroir-404).
@@ -83,7 +83,7 @@ Partition de référence : `DatastoreErrorComponent` dans `assets/routes/_privat
 
 - `await ensureQueryData` dans un `loader` (bloque la navigation, casse light-first).
 - Plusieurs `useSuspenseQuery` empilés dans un même composant : les fetchs deviennent **séquentiels** → `useSuspenseQueries`, ou reclasser en optionnelle.
-- Convertir en suspense les requêtes secondaires d'une page progressive (ex. `DatasheetView` : l'en-tête et les onglets se rendent pendant que les requêtes arrivent — c'est voulu).
+- Convertir en suspense les requêtes secondaires d'une page progressive (ex. [`DatasheetView.tsx`](../../../assets/entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.tsx) : l'en-tête et les onglets se rendent pendant que les requêtes arrivent — c'est voulu).
 - Passer un `UseQueryResult` en prop à un enfant.
 - Requête sans branche d'erreur visible.
 - Charger le DTO complet datastore/community pour une page qui n'a besoin que de l'appartenance (`membership` du contexte de route suffit pour les boutons gated, le titre, la navigation).
