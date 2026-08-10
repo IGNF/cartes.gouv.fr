@@ -1,5 +1,5 @@
 import { UserMe } from "@/@types/app_espaceco";
-import RQKeys from "@/modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { useQuery } from "@tanstack/react-query";
 import api from "../api";

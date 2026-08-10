@@ -3,7 +3,7 @@ import { TableDetailedDTO } from "@/@types/espaceco";
 import LoadingText from "@/components/Utils/LoadingText";
 import api from "@/espaceco/api";
 import { useTranslation } from "@/i18n";
-import RQKeys from "@/modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { fr } from "@codegouvfr/react-dsfr";
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Alert from "@codegouvfr/react-dsfr/Alert";

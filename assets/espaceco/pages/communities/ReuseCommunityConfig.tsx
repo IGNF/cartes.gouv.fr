@@ -3,7 +3,7 @@ import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
 import api from "@/espaceco/api";
 import { useTranslation } from "@/i18n";
-import RQKeys from "@/modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";

@@ -2,7 +2,7 @@ import { DatabaseResponseDTO } from "@/@types/espaceco";
 import api from "@/espaceco/api";
 import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import { useTranslation } from "@/i18n/i18n";
-import RQKeys from "@/modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { fr } from "@codegouvfr/react-dsfr";
 import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode, useState } from "react";

@@ -22,7 +22,7 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import categories from "../../../../data/topic_categories.json";
 import { useTranslation } from "../../../../i18n/i18n";
 import { ComponentKey } from "../../../../i18n/types";
-import RQKeys from "../../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import "../../../../sass/pages/espaceco/community.scss";
 import { setToNull } from "../../../../utils";

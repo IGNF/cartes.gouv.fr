@@ -1,5 +1,5 @@
 import { CommunityListFilter } from "../../@types/app_espaceco";
-import { withQueryKeyNamespace } from "../withQueryKeyNamespace";
+import { withQueryKeyNamespace } from "@/modules/withQueryKeyNamespace";
 
 /**
  * Toutes les clés sont préfixées par "espaceco" (via withQueryKeyNamespace).

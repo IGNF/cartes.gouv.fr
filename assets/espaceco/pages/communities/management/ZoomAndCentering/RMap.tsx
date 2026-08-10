@@ -19,8 +19,8 @@ import { ZoomAndCenteringFormType } from "../../../../../@types/app_espaceco";
 import olDefaults from "../../../../../data/ol-defaults.json";
 import useCapabilities from "../../../../../hooks/useCapabilities";
 import punaise from "../../../../../img/punaise.png";
-import DisplayCenterControl from "../../../../../ol/controls/DisplayCenterControl";
-import drawExtent from "../../../../../ol/drawextent";
+import DisplayCenterControl from "@/espaceco/ol/controls/DisplayCenterControl";
+import drawExtent from "@/espaceco/ol/drawextent";
 
 const mapStyle: CSSProperties = {
     height: "400px",

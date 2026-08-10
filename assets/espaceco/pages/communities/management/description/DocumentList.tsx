@@ -11,7 +11,7 @@ import { DocumentDTO } from "../../../../../@types/espaceco";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
 import api from "../../../../api";

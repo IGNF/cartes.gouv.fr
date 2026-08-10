@@ -1,4 +1,4 @@
-import statuses from "../data/report_statuses.json";
+import statuses from "@/espaceco/data/report_statuses.json";
 import { OpenWithEmailType } from "./app_espaceco";
 
 export interface ConstraintsDTO {
