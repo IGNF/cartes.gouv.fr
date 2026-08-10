@@ -7,7 +7,7 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import { catalogueUrl } from "@/env";
-import { getThematicCategories } from "@/utils";
+import { getThematicCategories } from "@/entrepot/utils/metadata";
 import { MetadataHierarchyLevel, type Metadata } from "../../../../../@types/app";
 import ExtentMap from "@/entrepot/components/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -18,7 +18,7 @@ import { CartesApiException } from "../../../../../modules/jsonFetch";
 import api from "../../../../api";
 import MetadataField from "./MetadataField";
 
-import frequencyCodes from "../../../../../data/maintenance_frequency.json";
+import frequencyCodes from "@/entrepot/data/maintenance_frequency.json";
 
 const thematicCategories = getThematicCategories();
 

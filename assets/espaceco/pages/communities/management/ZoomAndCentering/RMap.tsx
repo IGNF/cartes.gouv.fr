@@ -15,12 +15,13 @@ import Style from "ol/style/Style";
 import View from "ol/View";
 import { CSSProperties, FC, useCallback, useEffect, useMemo, useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
+
 import { ZoomAndCenteringFormType } from "../../../../../@types/app_espaceco";
 import olDefaults from "../../../../../data/ol-defaults.json";
 import useCapabilities from "../../../../../hooks/useCapabilities";
 import punaise from "../../../../../img/punaise.png";
-import DisplayCenterControl from "@/espaceco/ol/controls/DisplayCenterControl";
-import drawExtent from "@/espaceco/ol/drawextent";
+import DisplayCenterControl from "@/espaceco/modules/ol/controls/DisplayCenterControl";
+import drawExtent from "@/espaceco/modules/ol/drawextent";
 
 const mapStyle: CSSProperties = {
     height: "400px",

@@ -1,5 +1,5 @@
 // Themes et mot cles INSPIRE
-import inspireKeywords from "@/data/thematic-inspire.json";
+import inspireKeywords from "@/entrepot/data/thematic-inspire.json";
 import categories from "@/data/topic_categories.json";
 
 export const getInspireKeywords = () => {

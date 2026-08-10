@@ -15,7 +15,7 @@ import useDataUsesQuery from "@/entrepot/hooks/queries/useDataUsesQuery";
 import useStoredDataUseProcessings from "@/entrepot/hooks/queries/useStoredDataUseProcessings";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
-import { offeringTypeDisplayName } from "@/utils";
+import { offeringTypeDisplayName } from "@/entrepot/utils/offering";
 
 type StoredDataDeleteConfirmDialogProps = {
     modal: ReturnType<typeof createModal>;

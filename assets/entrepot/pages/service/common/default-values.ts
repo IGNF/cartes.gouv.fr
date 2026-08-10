@@ -2,7 +2,8 @@ import { format as datefnsFormat } from "date-fns";
 
 import { Datastore, EndpointTypeEnum, Metadata, MetadataFormValuesType, MetadataHierarchyLevel, Service, StoredData } from "../../../../@types/app";
 import { ConfigurationWfsDetailsContent, ConfigurationWmsVectorDetailsContent } from "../../../../@types/entrepot";
-import { getProjectionCode, removeDiacritics } from "../../../../utils";
+import { getProjectionCode } from "@/entrepot/utils/map";
+import { removeDiacritics } from "../../../../utils";
 import { PyramidVectorTmsServiceFormValuesType } from "../tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm";
 import { WfsServiceFormValuesType, WfsTableInfos } from "../wfs/WfsServiceForm";
 import { WmsVectorServiceFormValuesType } from "../wms-vector/WmsVectorServiceForm";

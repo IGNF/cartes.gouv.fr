@@ -9,9 +9,10 @@ import { Controller, UseFormReturn } from "react-hook-form";
 import type { PyramidRaster, PyramidVector } from "../../../../@types/app";
 import { MetadataHierarchyLevel, type ServiceFormValuesBaseType, type VectorDb } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
-import resolutions from "../../../../data/md_resolutions.json";
+import resolutions from "@/entrepot/data/md_resolutions.json";
 import { getTranslation } from "../../../../i18n/i18n";
-import { LanguageType, charsets, getLanguages } from "../../../../utils";
+import { LanguageType, getLanguages } from "@/entrepot/utils/lang";
+import { charsets } from "../../../../utils";
 
 /**
  * Récupère le type de fichier (undefined, csv ou geopackage)

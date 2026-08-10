@@ -10,7 +10,7 @@ import { WfsServiceFormValuesType } from "./WfsServiceForm";
 
 // Themes et mot cles INSPIRE
 import { useTranslation } from "../../../../i18n";
-import { getInspireKeywords } from "../../../../utils";
+import { getInspireKeywords } from "@/entrepot/utils/metadata";
 
 type TablesInfoFormProps = {
     tables: StoredDataDetailsRelationDto[];
