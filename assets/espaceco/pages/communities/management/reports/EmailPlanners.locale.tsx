@@ -31,11 +31,11 @@ export const EmailPlannersFrTranslations: Translations<"fr">["EmailPlanners"] = 
     cancel_event_header: "Evénement annulateur",
     repeat_header: "Répétition",
     add: "Ajouter un email de suivi",
-    adding: "Ajout de l'email de suivi en cours ...",
+    adding: "Ajout de l'email de suivi en cours",
     modify: "Modifier l'email de suivi",
-    modifying: "Modification de l'email de suivi en cours ...",
+    modifying: "Modification de l'email de suivi en cours",
     remove: "Supprimer l'email de suivi",
-    removing: "Suppression de l'email de suivi en cours ...",
+    removing: "Suppression de l'email de suivi en cours",
     confirm_remove_title: "Êtes-vous sûr de vouloir supprimer cet email de suivi ?",
 };
 
