@@ -47,7 +47,7 @@ export const AccessesRequestFrTranslations: Translations<"fr">["AccessesRequest"
     myself: "Moi",
     community: ({ name }) => `${name}`,
     send_request: "Envoyer la demande",
-    sending_message: "Votre message est en cours d’envoi ...",
+    sending_message: "Votre message est en cours d’envoi",
     request_sent_successfully: "Votre demande a été envoyée au producteur. Vous avez reçu une confirmation de votre demande par courriel.",
 };
 
