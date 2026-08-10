@@ -52,7 +52,7 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     "datasheet.name_regex_error":
         "Le nom de la fiche de donnée ne peut contenir que des caractères alphanumériques, espaces blancs et certains caractères spéciaux",
     "datasheet.name_already_exists_error": ({ datasheetName }) => `Une fiche de donnée existe déjà avec le nom "${datasheetName}"`,
-    "datasheet.creation_running": "Création de la livraison en cours...",
+    "datasheet.creation_running": "Création de la livraison en cours",
     upload: "Déposez votre fichier de données",
     // NB: la taille maximale doit correspondre à celle effectivement implémentée dans DatasheetUploadForm
     upload_hint: (
@@ -97,7 +97,7 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
         `Le fichier ${filename} semble faire partie d’un Shapefile (format multi-fichiers). Téléversez une archive .zip contenant au minimum les fichiers .shp, .shx et .dbf (et éventuellement .prj, .cpg, .qix, .shp.xml).`,
     upload_extension_error: ({ filename }) => `L’extension du fichier ${filename} n'est pas correcte`,
     upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${niceBytes(maxSize.toString())}`,
-    upload_running: "Téléversement en cours ...",
+    upload_running: "Téléversement en cours",
     technical_name: "Nom technique de votre donnée",
     technical_name_hint: "Ce nom technique est invisible par votre utilisateur final. Il apparaitra uniquement dans votre espace de travail",
     technical_name_mandatory_error: "Le nom technique de la donnée est obligatoire",

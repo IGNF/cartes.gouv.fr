@@ -9,7 +9,7 @@ export const SearchCommunityFrTranslations: Translations<"fr">["SearchCommunity"
     default_label: "Nom du guichet :",
     default_placeholder: "Recherche du guichet par son nom",
     no_options: "Aucun guichet",
-    loading: "Recherche en cours ...",
+    loading: "Recherche en cours",
 };
 
 export const SearchCommunityEnTranslations: Translations<"en">["SearchCommunity"] = {

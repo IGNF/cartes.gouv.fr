@@ -28,7 +28,7 @@ export type I18n = typeof i18n;
 
 export const PyramidVectorGenerateFormFrTranslations: Translations<"fr">["PyramidVectorGenerateForm"] = {
     title: "Générer une pyramide de tuiles vectorielles",
-    "stored_data.loading": "Chargement de la donnée stockée...",
+    "stored_data.loading": "Chargement de la donnée stockée",
     "stored_data.fetch_failed": "Récupération des informations sur la donnée stockée a échoué",
     "step.title": ({ stepNumber }) => {
         switch (stepNumber) {
@@ -63,7 +63,7 @@ export const PyramidVectorGenerateFormFrTranslations: Translations<"fr">["Pyrami
     "step_sample.define_sample": "Définir un échantillon",
     generate_pyramid: "Générer la pyramide complète",
     generate_sample: "Générer l’échantillon",
-    pyramid_creation_launch_in_progress: "Demande de création de la pyramide de tuiles en cours ...",
+    pyramid_creation_launch_in_progress: "Demande de création de la pyramide de tuiles en cours",
     back_to_data_list: "Retour à mes données",
 };
 

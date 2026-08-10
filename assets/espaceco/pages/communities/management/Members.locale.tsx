@@ -43,11 +43,11 @@ export const EscoCommunityMembersFrTranslations: Translations<"fr">["EscoCommuni
     add_members_failed: "L'ajout de nouveaux membres a échoué",
     remove_member_failed: "La suppression d'un membre a échoué",
     back_to_list: "Retour à la liste des guichets",
-    loading_members: "Chargement des membres du guichet ...",
-    loading_membership_requests: "Chargement des demandes d’affiliation ...",
+    loading_members: "Chargement des membres du guichet",
+    loading_membership_requests: "Chargement des demandes d’affiliation",
     membership_requests: ({ count }) => `Demandes d’affiliation (${count})`,
     filter_placeholder: "Recherche des membres par le nom utilisateur, nom ou prénom",
-    adding_members: "Ajout de nouveaux membres en cours ...",
+    adding_members: "Ajout de nouveaux membres en cours",
     username_header: "Nom de l'utilisateur",
     name_header: "Nom, prénom",
     status_header: "Statut",
@@ -65,14 +65,14 @@ export const EscoCommunityMembersFrTranslations: Translations<"fr">["EscoCommuni
         }
     },
     date_header: "Date de la demande",
-    updating_role: "Mise à jour du rôle de l'utilisateur en cours ...",
-    updating_grids: "Mise à jour des emprises de l'utilisateur en cours ...",
+    updating_role: "Mise à jour du rôle de l'utilisateur en cours",
+    updating_grids: "Mise à jour des emprises de l'utilisateur en cours",
     removing_action: ({ action }) => {
         switch (action) {
             case "remove":
-                return "Suppression de l'utilisateur en cours ...";
+                return "Suppression de l'utilisateur en cours";
             case "reject":
-                return "Rejet de la demande d'affiliation en cours ...";
+                return "Rejet de la demande d'affiliation en cours";
             default:
                 return "";
         }
@@ -99,7 +99,7 @@ export const EscoCommunityMembersEnTranslations: Translations<"en">["EscoCommuni
     loading_membership_requests: undefined,
     membership_requests: ({ count }) => `Membership requests (${count})`,
     filter_placeholder: undefined,
-    adding_members: "Adding new members ...",
+    adding_members: "Adding new members",
     username_header: "username",
     name_header: undefined,
     status_header: "Status",

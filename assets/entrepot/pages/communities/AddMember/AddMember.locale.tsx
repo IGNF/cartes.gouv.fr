@@ -14,7 +14,7 @@ export const AddMemberFrTranslations: Translations<"fr">["AddMember"] = {
     id_mandatory: "L’identifiant est obligatoire",
     id_must_be_uuid: "L’Identifiant doit être un UUID",
     already_member: ({ userId }) => `l’utilisateur ${userId} est déjà membre de cet espace de travail`,
-    running: "Ajout d’utilisateur en cours ...",
+    running: "Ajout d’utilisateur en cours",
 };
 
 export const AddMemberEnTranslations: Translations<"en">["AddMember"] = {

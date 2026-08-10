@@ -61,7 +61,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
     "tab_label.documents": ({ num }) => `Documents (${num})`,
     "datasheet.back_to_list": "Retour à ma liste de données",
     "datasheet.remove": "Supprimer la fiche de données",
-    "datasheet.being_removed": ({ datasheetName }) => `Suppression de la fiche de données ${datasheetName} en cours ...`,
+    "datasheet.being_removed": ({ datasheetName }) => `Suppression de la fiche de données ${datasheetName} en cours`,
     "file_validation.required_error": "Aucun fichier n'a été choisi",
     "file_validation.size_error": "La taille du fichier ne peut excéder 2 Mo",
     "file_validation.format_error": "Le fichier doit être au format jpeg ou png",
@@ -71,11 +71,11 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
     "thumbnail_modal.action_being": ({ action }) => {
         switch (action) {
             case "add":
-                return "Ajout de la vignette en cours ...";
+                return "Ajout de la vignette en cours";
             case "modify":
-                return "Remplacement de la vignette en cours ...";
+                return "Remplacement de la vignette en cours";
             case "delete":
-                return "Suppression de la vignette en cours ...";
+                return "Suppression de la vignette en cours";
         }
     },
     thumbnail_action: ({ action }) => {
@@ -174,7 +174,7 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
     "tab_label.documents": ({ num }) => `Documents (${num})`,
     "datasheet.back_to_list": "Back to my data list",
     "datasheet.remove": "Delete datasheet",
-    "datasheet.being_removed": ({ datasheetName }) => `Datasheet ${datasheetName} being removed ...`,
+    "datasheet.being_removed": ({ datasheetName }) => `Datasheet ${datasheetName} being removed`,
     "file_validation.required_error": "No files have been chosen",
     "file_validation.size_error": "File size cannot exceed 2 MB",
     "file_validation.format_error": "Format required for file is jpeg or png",
@@ -184,11 +184,11 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
     "thumbnail_modal.action_being": ({ action }) => {
         switch (action) {
             case "add":
-                return "Thumbnail being added ...";
+                return "Thumbnail being added";
             case "modify":
-                return "Thumbnail being replaced ...";
+                return "Thumbnail being replaced";
             case "delete":
-                return "Thumbnail being deleted ...";
+                return "Thumbnail being deleted";
         }
     },
     thumbnail_action: ({ action }) => {

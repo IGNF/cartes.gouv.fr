@@ -12,7 +12,7 @@ type LoadingTextProps = {
 const LoadingText = ({ message, className = "", as: HtmlTag = "h1", withSpinnerIcon = false }: LoadingTextProps) => {
     return (
         <HtmlTag className={className}>
-            {message ? message : "Chargement..."} {withSpinnerIcon && <LoadingIcon largeIcon={HtmlTag !== "p"} />}
+            {message ? message : "Chargement"} {withSpinnerIcon && <LoadingIcon largeIcon={HtmlTag !== "p"} />}
         </HtmlTag>
     );
 };

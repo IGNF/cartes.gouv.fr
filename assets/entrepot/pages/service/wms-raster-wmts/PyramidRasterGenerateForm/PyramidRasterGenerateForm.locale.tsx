@@ -32,7 +32,7 @@ export const PyramidRasterGenerateFormFrTranslations: Translations<"fr">["Pyrami
                 return "";
         }
     },
-    "wmsv-service.loading": "Chargement du service WMS-Vecteur...",
+    "wmsv-service.loading": "Chargement du service WMS-Vecteur",
     "wmsv-service.fetch_failed": "Récupération des informations sur le service WMS-Vecteur a échoué",
     "wmsv-service.bbox_not_found": "La bbox du service WMS-Vecteur n'a pas été trouvée, veuillez vérifier le service et la donnée stockée utilisée",
     back_to_datasheet: "Retour à la fiche de données",

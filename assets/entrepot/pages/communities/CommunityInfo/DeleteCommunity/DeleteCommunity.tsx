@@ -217,7 +217,7 @@ export default function DeleteCommunity({ datastore }: DeleteCommunityProps) {
                     state === "disclaimer"
                         ? { children: "Continuer", onClick: proceedFromDisclaimer, doClosesModal: false }
                         : {
-                              children: isActive ? "Suppression en cours..." : confirmButtonLabel,
+                              children: isActive ? "Suppression en cours" : confirmButtonLabel,
                               onClick: startDeletion,
                               disabled: isActive || isLoading,
                               doClosesModal: false,
@@ -246,7 +246,7 @@ export default function DeleteCommunity({ datastore }: DeleteCommunityProps) {
                 )}
 
                 {isLoading ? (
-                    <LoadingText message="Récupération du contenu de l’entrepôt..." as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
+                    <LoadingText message="Récupération du contenu de l’entrepôt" as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
                 ) : (
                     <>
                         {state === "confirm" && (
@@ -278,7 +278,7 @@ export default function DeleteCommunity({ datastore }: DeleteCommunityProps) {
                             </>
                         )}
 
-                        {state === "connecting" && <LoadingText message="En cours de préparation..." as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />}
+                        {state === "connecting" && <LoadingText message="En cours de préparation" as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />}
 
                         {state === "cleanup_progress" && (
                             <ul className={fr.cx("fr-raw-list")}>
@@ -296,7 +296,7 @@ export default function DeleteCommunity({ datastore }: DeleteCommunityProps) {
                         )}
 
                         {state === "deleting" && (
-                            <LoadingText message="Envoi de la demande de suppression en cours..." as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
+                            <LoadingText message="Envoi de la demande de suppression en cours" as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
                         )}
 
                         {state === "error" && hasContent && (

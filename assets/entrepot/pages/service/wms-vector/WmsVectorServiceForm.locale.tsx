@@ -19,8 +19,8 @@ export type I18n = typeof i18n;
 
 export const WmsVectorServiceFormFrTranslations: Translations<"fr">["WmsVectorServiceForm"] = {
     title: ({ editMode }) => (editMode ? "Modifier le service WMS-Vecteur" : "Créer et publier un service WMS-Vecteur"),
-    "stored_data.loading": "Chargement de la donnée stockée...",
-    "stored_data_and_offering.loading": "Chargement de la donnée stockée et du service à modifier...",
+    "stored_data.loading": "Chargement de la donnée stockée",
+    "stored_data_and_offering.loading": "Chargement de la donnée stockée et du service à modifier",
     "stored_data.fetch_failed": "Récupération des informations sur la donnée stockée a échoué",
     "offering.fetch_failed": "Récupération des informations sur le service à modifier a échoué",
     "step.title": ({ stepNumber }) => {

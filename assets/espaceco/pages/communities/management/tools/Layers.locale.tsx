@@ -23,8 +23,8 @@ export type I18n = typeof i18n;
 
 export const LayerToolsFrTranslations: Translations<"fr">["LayerTools"] = {
     direct_contribution_tools: "Définir les outils de contribution directe liés aux base de données",
-    loading_layers: "Recherche des couches associées à des tables ...",
-    updating_layers: "Mise à jour des outils de configuration ...",
+    loading_layers: "Recherche des couches associées à des tables",
+    updating_layers: "Mise à jour des outils de configuration",
     no_editable_layers: "Aucune couche éditable",
     num_layers: ({ num }) =>
         num === 0 ? (
