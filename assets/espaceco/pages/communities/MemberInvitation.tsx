@@ -11,8 +11,8 @@ import { FC, useEffect, useMemo, useState } from "react";
 import Main from "@/components/Layout/Main";
 import { CommunityMember, Role } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../components/Utils/LoadingText";
-import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -105,22 +105,10 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
             {query.isLoading && <LoadingText as="h6" message={t("community_loading")} />}
             {query.isError && <Alert severity="error" closable title={t("community_loading_failed")} />}
             {updateRoleMutation.isError && <Alert severity="error" closable title={updateRoleMutation.error.message} />}
-            {updateRoleMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("inviting")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {updateRoleMutation.isPending && <LoadingOverlay message={t("inviting")} />}
 
             {removeMemberMutation.isError && <Alert severity="error" closable title={removeMemberMutation.error.message} />}
-            {removeMemberMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("rejecting")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {removeMemberMutation.isPending && <LoadingOverlay message={t("rejecting")} />}
 
             {errorMessage ? (
                 <Alert severity={errorMessage.type} closable title={errorMessage.message} />
