@@ -10,9 +10,8 @@ import { FC, useMemo, useState } from "react";
 import Main from "@/components/Layout/Main";
 import { CommunityListFilter, GetResponse, arrCommunityListFilters } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
-import LoadingText from "../../../components/Utils/LoadingText";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import Skeleton from "../../../components/Utils/Skeleton";
-import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -115,13 +114,7 @@ const Communities: FC = () => {
         <Main title={t("title")}>
             <h1>{t("title")}</h1>
             <div>
-                {isPending && (
-                    <Wait>
-                        <div className={fr.cx("fr-grid-row")}>
-                            <LoadingText as="h6" message={t("community_creation")} withSpinnerIcon={true} />
-                        </div>
-                    </Wait>
-                )}
+                {isPending && <LoadingOverlay message={t("community_creation")} />}
                 {isError && (
                     <Alert
                         severity="error"

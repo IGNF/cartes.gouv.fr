@@ -1,6 +1,5 @@
 import { CommunityResponseDTO } from "@/@types/espaceco";
-import LoadingIcon from "@/components/Utils/LoadingIcon";
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import api from "@/espaceco/api";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/espaceco/modules/RQKeys";
@@ -53,12 +52,7 @@ const ReuseCommunityConfig: FC<ReuseCommunityConfigProps> = ({ title, descriptio
             />
             {reuse && (
                 <>
-                    {query.isLoading && (
-                        <Wait>
-                            <span className={fr.cx("fr-mr-2v")}>{t("loading_community")}</span>
-                            <LoadingIcon largeIcon={true} />
-                        </Wait>
-                    )}
+                    {query.isLoading && <LoadingOverlay message={t("loading_community")} />}
                     {query.isError && <Alert className={fr.cx("fr-my-3w")} severity={"error"} title={tCommon("error")} description={query.error.message} />}
                     <div className={fr.cx("fr-grid-row")}>
                         <div style={{ minWidth: "100%" }}>

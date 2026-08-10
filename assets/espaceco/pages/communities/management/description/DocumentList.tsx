@@ -8,8 +8,7 @@ import { FC, ReactNode, useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { v4 as uuidv4 } from "uuid";
 import { DocumentDTO } from "../../../../../@types/espaceco";
-import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
@@ -156,27 +155,9 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
             {addDocumentMutation.isError && <Alert severity="error" closable title={addDocumentMutation.error.message} />}
             {updateDocumentMutation.isError && <Alert severity="error" closable title={updateDocumentMutation.error.message} />}
             {removeDocumentMutation.isError && <Alert severity="error" closable title={removeDocumentMutation.error.message} />}
-            {addDocumentMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("desc.adding_document")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
-            {updateDocumentMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("desc.updating_document")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
-            {removeDocumentMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("desc.removing_document")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {addDocumentMutation.isPending && <LoadingOverlay message={t("desc.adding_document")} />}
+            {updateDocumentMutation.isPending && <LoadingOverlay message={t("desc.updating_document")} />}
+            {removeDocumentMutation.isPending && <LoadingOverlay message={t("desc.removing_document")} />}
             {datas.length ? (
                 <Table className={fr.cx("fr-table--sm", "fr-mb-0")} bordered fixed caption={t("desc.documents")} data={datas} />
             ) : (

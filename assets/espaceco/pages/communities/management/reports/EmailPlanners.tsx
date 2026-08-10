@@ -9,8 +9,7 @@ import { UseFormReturn, useWatch } from "react-hook-form";
 import { EmailPlannerAddType, ReportFormType } from "../../../../../@types/app_espaceco";
 import { EmailPlannerDTO, ReportStatusesDTO, ThemeDTO } from "../../../../../@types/espaceco";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../../components/Utils/ConfirmDialog";
-import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
@@ -177,27 +176,9 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
             {addPlannerMutation.isError && <Alert severity="error" closable title={addPlannerMutation.error.message} />}
             {updatePlannerMutation.isError && <Alert severity="error" closable title={updatePlannerMutation.error.message} />}
             {removePlannerMutation.isError && <Alert severity="error" closable title={removePlannerMutation.error.message} />}
-            {addPlannerMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("adding")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
-            {updatePlannerMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("modifying")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
-            {removePlannerMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("removing")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {addPlannerMutation.isPending && <LoadingOverlay message={t("adding")} />}
+            {updatePlannerMutation.isPending && <LoadingOverlay message={t("modifying")} />}
+            {removePlannerMutation.isPending && <LoadingOverlay message={t("removing")} />}
             <h3>{tmc("report.manage.emailplanners")}</h3>
             <span className={fr.cx("fr-hint-text")}>{tmc("report.manage.emailplanners_explain")}</span>
             {datas.length === 0 ? (

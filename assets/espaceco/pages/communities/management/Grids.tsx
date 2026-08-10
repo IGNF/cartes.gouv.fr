@@ -5,8 +5,7 @@ import { FC } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "../../../../i18n/i18n";
 import GridList from "./GridList";
-import Wait from "@/components/Utils/Wait";
-import LoadingText from "@/components/Utils/LoadingText";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 
 type GridForm = {
@@ -39,13 +38,7 @@ const Grids: FC = () => {
         <>
             <h3>{tmc("grid.grids")}</h3>
             {tmc("grid.explain")}
-            {isCommunityUpdating && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {isCommunityUpdating && <LoadingOverlay message={tmc("updating")} />}
             {isCommunityUpdatingError && (
                 <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
             )}
