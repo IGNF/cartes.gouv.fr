@@ -2,6 +2,7 @@ import { createFileRoute, notFound, SearchSchemaInput } from "@tanstack/react-ro
 
 import { CommunityProvider } from "@/espaceco/contexts/CommunityContext";
 import ManageCommunity from "@/espaceco/pages/communities/ManageCommunity";
+import PageNotFound from "@/pages/error/PageNotFound";
 import { stringParam } from "@/router/searchParams";
 
 type ManageCommunitySearch = {
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/_private/espace-collaboratif/$communityId
         }
     },
     component: ManageCommunityRoute,
+    notFoundComponent: PageNotFound,
 });
 
 function ManageCommunityRoute() {

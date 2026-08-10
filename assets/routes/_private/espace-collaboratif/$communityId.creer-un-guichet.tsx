@@ -2,6 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 
 import { CommunityProvider } from "@/espaceco/contexts/CommunityContext";
 import CreateCommunity from "@/espaceco/pages/communities/CreateCommunity";
+import PageNotFound from "@/pages/error/PageNotFound";
 
 // communityId espaceco = number (params.parse/stringify) ; id non numérique → 404 dans beforeLoad
 export const Route = createFileRoute("/_private/espace-collaboratif/$communityId/creer-un-guichet")({
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/_private/espace-collaboratif/$communityId
         }
     },
     component: CreateCommunityRoute,
+    notFoundComponent: PageNotFound,
 });
 
 function CreateCommunityRoute() {
