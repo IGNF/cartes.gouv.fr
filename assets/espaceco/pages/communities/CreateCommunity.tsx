@@ -2,7 +2,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { FC, useMemo } from "react";
 
 import Main from "@/components/Layout/Main";
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import useUserMe from "@/espaceco/hooks/useUserMe";
 import { fr } from "@codegouvfr/react-dsfr";
@@ -63,13 +63,7 @@ const CreateCommunity: FC = () => {
                         title={t("step_title", { step: currentStep })}
                         nextTitle={!stepper.isLastStep() ? t("step_title", { step: currentStep + 1 }) : ""}
                     />
-                    {isCommunityUpdating && (
-                        <Wait>
-                            <div className={fr.cx("fr-grid-row")}>
-                                <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
-                            </div>
-                        </Wait>
-                    )}
+                    {isCommunityUpdating && <LoadingOverlay message={tmc("updating")} />}
                     {isCommunityUpdatingError && (
                         <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
                     )}

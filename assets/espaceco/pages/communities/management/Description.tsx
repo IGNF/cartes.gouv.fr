@@ -1,4 +1,4 @@
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
@@ -238,13 +238,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
 
     return (
         <>
-            {isCommunityUpdating && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {isCommunityUpdating && <LoadingOverlay message={tmc("updating")} />}
             {isCommunityUpdatingError && (
                 <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
             )}
