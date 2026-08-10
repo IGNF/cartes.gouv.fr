@@ -3,7 +3,7 @@ import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 import { delta } from "@/utils";
 import type { Service } from "../../@types/app";
 import api from "../../entrepot/api";
-import RQKeys from "../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { type CartesApiException } from "../../modules/jsonFetch";
 
 export default function useServiceQuery(

@@ -12,7 +12,7 @@ import Progress from "@/components/Utils/Progress";
 import { useCommunity } from "@/contexts/community";
 import api from "@/entrepot/api";
 import useEventSource from "@/hooks/useEventSource";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { deleteCommunityModal } from "./deleteCommunityModal";
 
 type DeleteCommunityState = "disclaimer" | "loading" | "confirm" | "connecting" | "cleanup_progress" | "deleting" | "error" | "mail_sent";

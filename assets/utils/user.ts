@@ -1,5 +1,5 @@
 import { CartesUser } from "@/@types/app";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { queryClient } from "@/modules/queryClient";
 
 /**

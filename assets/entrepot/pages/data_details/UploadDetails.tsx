@@ -8,7 +8,7 @@ import { FC, useMemo } from "react";
 import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { UploadReport } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
-import RQKeys from "../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import api from "../../api";
 import UploadPreviewTab from "./PreviewTab/UploadPreviewTab";

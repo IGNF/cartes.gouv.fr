@@ -14,7 +14,7 @@ import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { annexesUrl } from "@/env";
 import { useTranslation } from "@/i18n";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { joinModal, successModal } from "./modal";
 
 function getInputProps(

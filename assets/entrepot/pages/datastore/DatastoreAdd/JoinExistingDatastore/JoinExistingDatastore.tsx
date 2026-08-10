@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { CommunityListResponseDto } from "@/@types/entrepot";
 import api from "@/entrepot/api";
 import useUserQuery from "@/hooks/queries/useUserQuery";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { regex, removeDiacritics } from "@/utils";
 import { JoinExistingDatastoreModal } from "./JoinExistingDatastoreModal";

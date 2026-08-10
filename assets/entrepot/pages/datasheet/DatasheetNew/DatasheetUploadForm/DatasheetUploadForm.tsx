@@ -25,7 +25,7 @@ import defaultProjections from "../../../../../data/default_projections.json";
 import ignfProjections from "../../../../../data/ignf_projections.json";
 import { useTranslation } from "../../../../../i18n/i18n";
 import FileUploader from "../../../../../modules/FileUploader";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { delta, getFileExtension, looksLikeShapefileComponent, regex } from "../../../../../utils";
 import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";

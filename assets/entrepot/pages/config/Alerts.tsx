@@ -18,7 +18,7 @@ import { useTranslation } from "../../../i18n";
 import { formatDateTime } from "../../../utils";
 import { Annexe, Datastore } from "../../../@types/app";
 import { CartesApiException } from "../../../modules/jsonFetch";
-import RQKeys from "../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { useAlertStore } from "../../../stores/AlertStore";
 import api from "../../api";
 

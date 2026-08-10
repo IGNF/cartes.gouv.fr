@@ -1,5 +1,5 @@
 import api from "@/entrepot/api";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { delta } from "@/utils/delta";
 
 /** Options communes de la requête datastore ; désactivée tant que l'id est inconnu */

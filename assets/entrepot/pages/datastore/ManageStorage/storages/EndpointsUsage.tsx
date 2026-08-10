@@ -11,7 +11,7 @@ import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import api from "../../../../api";
 import DataCard from "../DataCard";

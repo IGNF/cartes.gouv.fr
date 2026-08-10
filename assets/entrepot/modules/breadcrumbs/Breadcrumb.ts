@@ -1,7 +1,7 @@
 import { BreadcrumbProps, addBreadcrumbTranslations } from "@codegouvfr/react-dsfr/Breadcrumb";
 
-import { Community, Datastore } from "../../../@types/app";
-import { getTranslation } from "../../../i18n/i18n";
+import { Community, Datastore } from "@/@types/app";
+import { getTranslation } from "@/i18n/i18n";
 
 const { t } = getTranslation("Breadcrumb");
 const { t: tCommon } = getTranslation("Common");

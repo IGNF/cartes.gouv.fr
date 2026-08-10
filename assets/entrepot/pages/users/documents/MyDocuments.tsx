@@ -16,7 +16,7 @@ import { DocumentDetailsResponseDto } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException, jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
 import { niceBytes } from "@/utils";

@@ -4,7 +4,7 @@ import { CartesUser } from "@/@types/app";
 import AppLayout from "@/components/Layout/AppLayout";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import SymfonyRouting from "@/modules/Routing";
 import PageNotFound from "@/pages/error/PageNotFound";
 

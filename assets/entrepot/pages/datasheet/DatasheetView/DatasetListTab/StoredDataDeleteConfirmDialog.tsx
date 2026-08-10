@@ -14,7 +14,7 @@ import api from "@/entrepot/api";
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
 import useStoredDataUseProcessings from "@/hooks/queries/useStoredDataUseProcessings";
 import { useTranslation } from "@/i18n";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { offeringTypeDisplayName } from "@/utils";
 
 type StoredDataDeleteConfirmDialogProps = {

@@ -7,7 +7,7 @@ import { UseFormReturn } from "react-hook-form";
 
 import { DatastoreEndpoint, DatastorePermission, EndpointTypeEnum, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../../api";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 
