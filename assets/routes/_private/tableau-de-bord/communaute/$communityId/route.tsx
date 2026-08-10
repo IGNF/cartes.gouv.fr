@@ -5,6 +5,7 @@ import CommunityGate from "@/entrepot/components/CommunityGate";
 import api from "@/entrepot/api";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { revalidateUser } from "@/modules/queryClient";
+import PageNotFound from "@/pages/error/PageNotFound";
 import { findMembership } from "@/utils";
 import { delta } from "@/utils/delta";
 
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/_private/tableau-de-bord/communaute/$comm
         });
     },
     component: CommunityLayoutRoute,
+    notFoundComponent: PageNotFound,
 });
 
 function CommunityLayoutRoute() {

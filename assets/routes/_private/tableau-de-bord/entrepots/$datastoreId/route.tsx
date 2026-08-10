@@ -34,6 +34,8 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
     },
     component: DatastoreLayoutRoute,
     errorComponent: DatastoreErrorComponent,
+
+    notFoundComponent: PageNotFound,
 });
 
 // Partition miroir-404 (portage de DatastoreLayout) : les erreurs des useSuspenseQuery des pages remontent ici
