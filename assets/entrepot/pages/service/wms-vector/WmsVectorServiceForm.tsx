@@ -11,7 +11,7 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
-import { StyleFormProvider } from "@/contexts/StyleFormContext";
+import { StyleFormProvider } from "@/entrepot/contexts/StyleFormContext";
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { useTableStyles } from "@/entrepot/hooks/useTableStyles";
 import { encodeKey, encodeKeys } from "@/utils";
@@ -33,7 +33,7 @@ import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import SldStyleWmsVectorValidator from "../../../../validations/sld/sldStyle";
+import SldStyleWmsVectorValidator from "@/entrepot/validations/sld/sldStyle";
 import api from "../../../api";
 import AccessRestrictions from "../common/AccessRestrictions/AccessRestrictions";
 import TableSelection from "../common/TableSelection/TableSelection";
