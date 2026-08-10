@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { CartesStyle, OfferingTypeEnum, StoredDataTypeEnum } from "@/@types/app";
 import RMap from "@/components/Utils/RMap";
 import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
-import getWebService from "@/modules/WebServices/WebServices";
+import getWebService from "@/entrepot/modules/WebServices/WebServices";
 import BaseLayer from "ol/layer/Base";
 import ServiceShareInfo from "./ServiceShareInfo";
 import StylesList from "./Style/StylesList";

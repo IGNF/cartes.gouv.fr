@@ -18,7 +18,7 @@ import type { CartesStyle, GeostylerStyles, OfferingTypeEnum } from "../../@type
 import { BoundingBox } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
-import StyleHelper from "../../modules/Style/StyleHelper";
+import StyleHelper from "@/entrepot/modules/Style/StyleHelper";
 
 import "ol/ol.css";
 

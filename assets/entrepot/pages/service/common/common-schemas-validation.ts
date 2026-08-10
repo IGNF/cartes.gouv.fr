@@ -3,7 +3,7 @@ import * as yup from "yup";
 import { Datastore } from "@/@types/app";
 import { getTranslation } from "../../../../i18n/i18n";
 import { regex } from "../../../../utils";
-import validations from "../../../../validations";
+import validations from "@/entrepot/validations";
 
 const { t: tValidMD } = getTranslation("ValidationMetadatas");
 export class CommonSchemasValidation {
