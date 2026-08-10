@@ -11,12 +11,13 @@ import getBreadcrumb, { BreadcrumbRouteParams } from "@/entrepot/modules/breadcr
 
 export default function useBreadcrumb(customBreadcrumbProps?: BreadcrumbProps) {
     const matches = useMatches();
-    const pathParams = useParams({ strict: false });
-    const search: Record<string, unknown> = useSearch({ strict: false });
+
+    const pathParams = useParams({ strict: false, shouldThrow: false });
+    const search: Record<string, unknown> | undefined = useSearch({ strict: false, shouldThrow: false });
     const community = use(CommunityContext);
 
     // datastore courant : celui de l'URL, sinon celui de la communauté (lecture du cache, préchargé par les loaders)
-    const datastoreId = pathParams.datastoreId ?? community?.datastore?._id;
+    const datastoreId = pathParams?.datastoreId ?? community?.datastore?._id;
     const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(datastoreId));
 
     // id de la route matchée la plus profonde
@@ -25,10 +26,10 @@ export default function useBreadcrumb(customBreadcrumbProps?: BreadcrumbProps) {
     // fusion params de chemin + search (type-route fusionnait les deux dans route.params)
     const params: BreadcrumbRouteParams = useMemo(
         () => ({
-            datastoreId: pathParams.datastoreId,
-            communityId: pathParams.communityId !== undefined ? String(pathParams.communityId) : undefined,
-            datasheetName: pathParams.datasheetName ?? (typeof search.datasheetName === "string" ? search.datasheetName : undefined),
-            offeringId: pathParams.offeringId ?? (typeof search.offeringId === "string" ? search.offeringId : undefined),
+            datastoreId: pathParams?.datastoreId,
+            communityId: pathParams?.communityId !== undefined ? String(pathParams.communityId) : undefined,
+            datasheetName: pathParams?.datasheetName ?? (typeof search?.datasheetName === "string" ? search.datasheetName : undefined),
+            offeringId: pathParams?.offeringId ?? (typeof search?.offeringId === "string" ? search.offeringId : undefined),
         }),
         [pathParams, search]
     );
