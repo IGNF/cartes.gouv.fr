@@ -25,7 +25,7 @@ import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { bboxToWkt } from "../../../../../utils";
+import { bboxToWkt } from "@/entrepot/utils/map";
 import api from "../../../../api";
 import { DatasheetViewActiveTabEnum } from "../../../datasheet/DatasheetView/DatasheetView/DatasheetView";
 

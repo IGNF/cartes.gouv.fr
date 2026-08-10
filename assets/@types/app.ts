@@ -1,4 +1,4 @@
-import { LanguageType } from "@/utils";
+import { LanguageType } from "@/entrepot/utils/lang";
 import { SummaryProps } from "@codegouvfr/react-dsfr/Summary";
 import {
     AccessCreateDto,

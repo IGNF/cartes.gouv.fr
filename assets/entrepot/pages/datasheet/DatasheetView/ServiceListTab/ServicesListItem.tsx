@@ -17,7 +17,7 @@ import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service 
 import OfferingStatusBadge from "@/entrepot/components/Badges/OfferingStatusBadge";
 import Wait from "../../../../../components/Utils/Wait";
 import RQKeys from "@/entrepot/modules/RQKeys";
-import { offeringTypeDisplayName } from "../../../../../utils";
+import { offeringTypeDisplayName } from "@/entrepot/utils/offering";
 import api from "../../../../api";
 import ListItem from "../ListItem";
 import ServiceDesc from "./ServiceDesc";

@@ -1,6 +1,6 @@
 // Langues iso639-2
 // https://github.com/haliaeetus/iso-639/blob/master/data/iso_639-2.json
-import langs from "@/data/iso_639-2.json";
+import langs from "@/entrepot/data/iso_639-2.json";
 
 export type LanguageType = {
     language: string;

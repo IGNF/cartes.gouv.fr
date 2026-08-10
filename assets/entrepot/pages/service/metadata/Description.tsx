@@ -11,9 +11,10 @@ import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastor
 import { type ServiceFormValuesBaseType } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
-import frequencyCodes from "../../../../data/maintenance_frequency.json";
+import frequencyCodes from "@/entrepot/data/maintenance_frequency.json";
 import { getTranslation } from "../../../../i18n/i18n";
-import { getInspireKeywords, getThematicCategories, regex } from "../../../../utils";
+import { getInspireKeywords, getThematicCategories } from "@/entrepot/utils/metadata";
+import { regex } from "../../../../utils";
 
 const keywords = getInspireKeywords();
 const thematicCategories = getThematicCategories();
