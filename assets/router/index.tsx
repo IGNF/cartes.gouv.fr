@@ -12,7 +12,9 @@ export const router = createRouter({
     routeTree,
     basepath: SymfonyRouting.getBaseUrl() || "/",
     context: { queryClient },
-    defaultPreload: false,
+    defaultPreload: "intent",
+    defaultPreloadDelay: 200,
+    defaultPreloadStaleTime: 0, // react-query décide de la fraîcheur, pas le cache de preload du router
     // chargement des chunks de routes (autoCodeSplitting) : rendu dans l'Outlet du layout parent
     defaultPendingComponent: () => (
         <Main>
