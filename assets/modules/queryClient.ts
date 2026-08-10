@@ -1,7 +1,7 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 
 import { delta } from "@/utils/delta";
-import RQKeys from "./entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "./jsonFetch";
 
 /** fenêtre pendant laquelle user_me est considéré assez frais pour ne pas être revalidé */

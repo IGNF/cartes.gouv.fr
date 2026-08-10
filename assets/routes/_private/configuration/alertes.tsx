@@ -4,7 +4,7 @@ import { CartesUser } from "@/@types/app";
 import CommunityGate from "@/components/Layout/CommunityGate";
 import { configCommunityId } from "@/env";
 import Alerts from "@/entrepot/pages/config/Alerts";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { revalidateUser } from "@/modules/queryClient";
 import PageNotFound from "@/pages/error/PageNotFound";
 import { findMembership } from "@/utils";

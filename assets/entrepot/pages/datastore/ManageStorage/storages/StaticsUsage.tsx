@@ -15,7 +15,7 @@ import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { decodeContentRange, delta, PaginatedListResponse } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";

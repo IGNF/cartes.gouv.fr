@@ -1,6 +1,6 @@
 import { type ProcessingExecution, ProcessingExecutionStatusEnum } from "@/@types/app";
 import api from "@/entrepot/api";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { delta } from "@/utils";
 import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 

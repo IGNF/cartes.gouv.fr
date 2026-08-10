@@ -6,7 +6,7 @@ import { FC, Fragment, useMemo } from "react";
 
 import { PyramidVector, StoredDataReport, StoredDataTypeEnum, VectorDb } from "../../../../@types/app";
 import ExtentMap from "../../../../components/Utils/ExtentMap";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { niceBytes } from "../../../../utils";
 import api from "../../../api";

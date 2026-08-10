@@ -1,6 +1,6 @@
-import { ConfigurationTypeEnum, OfferingTypeEnum } from "../../@types/app";
-import { type QueryParams } from "../Routing";
-import { withQueryKeyNamespace } from "../withQueryKeyNamespace";
+import { ConfigurationTypeEnum, OfferingTypeEnum } from "@/@types/app";
+import { type QueryParams } from "@/modules/Routing";
+import { withQueryKeyNamespace } from "@/modules/withQueryKeyNamespace";
 
 /**
  * Factory pour créer des query keys pour react-query.

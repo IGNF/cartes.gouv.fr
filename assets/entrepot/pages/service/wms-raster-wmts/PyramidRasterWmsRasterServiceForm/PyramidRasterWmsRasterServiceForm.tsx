@@ -20,7 +20,7 @@ import Wait from "../../../../../components/Utils/Wait";
 import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import api from "../../../../api";
 import AccessRestrictions from "../../common/AccessRestrictions/AccessRestrictions";

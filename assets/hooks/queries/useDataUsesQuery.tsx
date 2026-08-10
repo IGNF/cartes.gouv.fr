@@ -1,7 +1,7 @@
 import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 
 import api from "@/entrepot/api";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { delta } from "@/utils";
 
 export default function useDataUsesQuery(

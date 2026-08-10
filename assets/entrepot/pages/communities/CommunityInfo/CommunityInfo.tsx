@@ -27,7 +27,7 @@ import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useMembership from "@/hooks/useMembership";
 import { getTranslation, useTranslation } from "@/i18n";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import DeleteCommunity from "./DeleteCommunity/DeleteCommunity";
 import { deleteCommunityModal } from "./DeleteCommunity/deleteCommunityModal";

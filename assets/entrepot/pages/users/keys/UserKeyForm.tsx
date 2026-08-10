@@ -15,7 +15,7 @@ import { PermissionWithOfferingsDetailsResponseDto, UserKeyResponseDto, UserKeyR
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { getTranslation, useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import "../../../../sass/pages/my_keys.scss";
 import api from "../../../api";

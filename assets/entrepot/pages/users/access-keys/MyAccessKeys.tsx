@@ -10,7 +10,7 @@ import { PermissionWithOfferingsDetailsResponseDto, UserKeyDetailsResponseDtoUse
 import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { getTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../api";
 import UserKeysListTab from "../keys/UserKeysListTab/UserKeysListTab";
 import PermissionsListTab from "../permissions/PermissionsListTab";

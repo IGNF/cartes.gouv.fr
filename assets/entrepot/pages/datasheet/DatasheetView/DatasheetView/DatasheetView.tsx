@@ -20,7 +20,7 @@ import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { type CartesApiException } from "../../../../../modules/jsonFetch";
 import api from "../../../../api";
 import DatasheetThumbnail from "../DatasheetThumbnail";
