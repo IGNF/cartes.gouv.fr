@@ -4,11 +4,11 @@ import { FC, useEffect, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 
 import { GeostylerStyles, Service, StyleFormatEnum } from "@/@types/app";
-import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
+import UploadStyleFiles from "@/entrepot/components/Geostyler/UploadStyleFiles";
 import RMap from "@/components/Utils/RMap";
-import { useStyleForm } from "@/contexts/StyleFormContext";
-import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
-import getWebService from "@/modules/WebServices/WebServices";
+import { useStyleForm } from "@/entrepot/contexts/StyleFormContext";
+import TMSStyleTools from "@/entrepot/modules/Style/TMSStyleFilesManager/TMSStyleTools";
+import getWebService from "@/entrepot/modules/WebServices/WebServices";
 import { decodeKeys } from "@/utils";
 
 type UploadLayerStylesProps = {

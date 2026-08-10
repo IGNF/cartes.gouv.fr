@@ -9,7 +9,7 @@ import { SearchCommunityEnTranslations } from "@/espaceco/pages/communities/Sear
 import { DatabasesEnTranslations } from "@/espaceco/pages/communities/management/databases/Databases.locale";
 import { LayerToolsEnTranslations } from "@/espaceco/pages/communities/management/tools/Layers.locale";
 import { InputCollectionEnTranslations } from "../../components/Input/InputCollection/InputCollection.locale";
-import { UploadStyleFileEnTranslations } from "../../components/Utils/Geostyler/UploadStyleFile.locale";
+import { UploadStyleFileEnTranslations } from "@/entrepot/components/Geostyler/UploadStyleFile.locale";
 import { AccessesRequestEnTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
 import { AddMemberEnTranslations } from "../../entrepot/pages/communities/AddMember/AddMember.locale";
 import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities/CommunityMembers/CommunityMembers.locale";
@@ -60,11 +60,11 @@ import { ThemeEnTranslations } from "../../espaceco/pages/communities/management
 import { AddOrEditEmailPlannerEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlanner.locale";
 import { EmailPlannerKeywordsEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords.locale";
 import { FunctionalitiesEnTranslations } from "../../espaceco/pages/communities/management/tools/Functionalities.locale";
-import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
+import { TMSStyleFilesManagerEnTranslations } from "@/entrepot/modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbEnTranslations } from "@/entrepot/modules/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
-import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
-import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";
+import { mapboxStyleValidationEnTranslations } from "@/entrepot/validations/mapbox/MapboxStyleValidator.locale";
+import { SldStyleValidationErrorsEnTranslations } from "@/entrepot/validations/sld/SldStyleValidation.locale";
 import { commonEnTranslations } from "../Common.locale";
 import type { Translations } from "../types";
 
