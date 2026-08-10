@@ -5,7 +5,7 @@ import { GetResponse, SearchGridFilters } from "../../../../@types/app_espaceco"
 import { GridDTO } from "../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import api from "../../../api";
 
 export type SearchGridsProps = {

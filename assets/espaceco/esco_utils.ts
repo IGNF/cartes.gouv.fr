@@ -1,4 +1,4 @@
-import thumbnails from "../data/doc_thumbnail";
+import thumbnails from "./data/doc_thumbnail";
 import { getFileExtension } from "../utils";
 
 const getFileURI = async (file: File): Promise<string | null> => {
