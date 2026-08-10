@@ -5,7 +5,7 @@
 import * as olColor from "ol/color";
 import Control from "ol/control/Control";
 
-import "../../../sass/pages/espaceco/drawcenter.scss";
+import "@/sass/pages/espaceco/drawcenter.scss";
 
 type DisplayCenterOptions = {
     color?: number[] | string;
