@@ -20,7 +20,7 @@ import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entr
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import { ComponentKey } from "../../../../../../i18n/types";
-import RQKeys from "../../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../../../api";
 import ListItem from "../../ListItem";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";

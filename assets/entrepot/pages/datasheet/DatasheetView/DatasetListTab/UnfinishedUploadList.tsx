@@ -4,7 +4,7 @@ import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../../api";
 import { CheckStatusEnum, type DatasheetDetailed, type DatasheetUploadItem } from "../../../../../@types/app";
 import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";

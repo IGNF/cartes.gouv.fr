@@ -25,7 +25,7 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useCommunity } from "../../../../contexts/community";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
 import { AddMember, addMemberModal } from "../AddMember/AddMember";

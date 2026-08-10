@@ -24,7 +24,7 @@ import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Skeleton from "../../../../components/Utils/Skeleton";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../api";
 import { SortByEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";

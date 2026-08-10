@@ -2,7 +2,7 @@ import { useQueries, UseQueryOptions } from "@tanstack/react-query";
 
 import { StaticFile } from "@/@types/app";
 import api from "@/entrepot/api";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 
 export type useTableStylesReturn = {

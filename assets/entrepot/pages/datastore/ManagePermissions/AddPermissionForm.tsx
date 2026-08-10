@@ -19,7 +19,7 @@ import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import "../../../../sass/pages/permission.scss";
 import api from "../../../api";
 import CommunityListForm from "./CommunityListForm";

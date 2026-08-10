@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 import api from "../../../../api";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { PermissionWithOfferingsDetailsResponseDto } from "../../../../../@types/entrepot";
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";

@@ -61,7 +61,7 @@ import { AddOrEditEmailPlannerEnTranslations } from "../../espaceco/pages/commun
 import { EmailPlannerKeywordsEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords.locale";
 import { FunctionalitiesEnTranslations } from "../../espaceco/pages/communities/management/tools/Functionalities.locale";
 import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
-import { BreadcrumbEnTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
+import { BreadcrumbEnTranslations } from "@/entrepot/modules/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
 import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";

@@ -8,7 +8,7 @@ import api from "../../entrepot/api";
 import { datastoreQueryOptions } from "../../hooks/queries/datastoreQueryOptions";
 import useUserQuery from "../../hooks/queries/useUserQuery";
 import useRequiredRights from "../../hooks/useRequiredRights";
-import RQKeys from "../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../modules/jsonFetch";
 import Forbidden from "../../pages/error/Forbidden";
 import PageNotFound from "../../pages/error/PageNotFound";

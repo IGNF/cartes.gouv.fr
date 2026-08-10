@@ -23,7 +23,7 @@ import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
 import { decodeKeys, encodeKey, encodeKeys, getFileExtension, removeDiacritics } from "@/utils";
 import { CartesStyle, OfferingTypeEnum, Service, StyleFormatEnum } from "../../../../../@types/app";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import getWebService from "../../../../../modules/WebServices/WebServices";
 import validations from "../../../../../validations";

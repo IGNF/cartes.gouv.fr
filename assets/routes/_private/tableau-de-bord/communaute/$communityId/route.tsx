@@ -3,7 +3,7 @@ import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import { CartesUser } from "@/@types/app";
 import CommunityGate from "@/components/Layout/CommunityGate";
 import api from "@/entrepot/api";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { revalidateUser } from "@/modules/queryClient";
 import { findMembership } from "@/utils";
 import { delta } from "@/utils/delta";

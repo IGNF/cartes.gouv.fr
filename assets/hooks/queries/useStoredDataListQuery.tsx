@@ -2,7 +2,7 @@ import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 
 import { StoredData } from "@/@types/app";
 import api from "@/entrepot/api";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { type QueryParams } from "@/modules/Routing";
 import { delta } from "@/utils";

@@ -17,7 +17,7 @@ import type { UserRightsResponseDto } from "../../../../@types/app";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../i18n/i18n";
 import { ComponentKey } from "../../../../i18n/types";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { regex } from "../../../../utils";
 import api from "../../../api";

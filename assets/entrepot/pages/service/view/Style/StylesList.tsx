@@ -12,7 +12,7 @@ import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 
 import "@/sass/components/styles-list.css";
