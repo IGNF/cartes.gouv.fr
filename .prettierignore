@@ -1,4 +1,6 @@
 /assets/data
+/assets/entrepot/data
+/assets/espaceco/data
 /**.xml
 /**.twig
 /assets/routeTree.gen.ts
