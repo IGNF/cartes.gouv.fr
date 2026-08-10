@@ -5,7 +5,7 @@ import { Controller, useFormContext, useWatch } from "react-hook-form";
 
 import { GeostylerStyles, Service, StyleFormatEnum } from "@/@types/app";
 import UploadStyleFiles from "@/entrepot/components/Geostyler/UploadStyleFiles";
-import RMap from "@/components/Utils/RMap";
+import RMap from "@/entrepot/components/RMap";
 import { useStyleForm } from "@/entrepot/contexts/StyleFormContext";
 import TMSStyleTools from "@/entrepot/modules/Style/TMSStyleFilesManager/TMSStyleTools";
 import getWebService from "@/entrepot/modules/WebServices/WebServices";

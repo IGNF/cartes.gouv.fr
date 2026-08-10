@@ -9,7 +9,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
+import ServiceFormErrors from "@/entrepot/components/ServiceFormErrors";
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidVector, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";

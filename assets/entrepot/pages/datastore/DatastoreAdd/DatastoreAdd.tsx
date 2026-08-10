@@ -5,7 +5,7 @@ import { tss } from "tss-react";
 
 import { useMatchRoute, useNavigate } from "@tanstack/react-router";
 
-import DatastoreMain from "@/components/Layout/DatastoreMain";
+import DatastoreMain from "@/entrepot/components/DatastoreMain";
 import { useTranslation } from "@/i18n";
 import CreateNewDatastore from "./CreateNewDatastore";
 import JoinExistingDatastore from "./JoinExistingDatastore/JoinExistingDatastore";

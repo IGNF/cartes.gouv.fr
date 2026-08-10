@@ -1,4 +1,4 @@
-import DatastoreMain from "@/components/Layout/DatastoreMain";
+import DatastoreMain from "@/entrepot/components/DatastoreMain";
 import { fr } from "@codegouvfr/react-dsfr";
 import Card from "@codegouvfr/react-dsfr/Card";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";

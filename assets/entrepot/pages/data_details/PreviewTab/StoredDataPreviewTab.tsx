@@ -5,7 +5,7 @@ import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { FC, Fragment, useMemo } from "react";
 
 import { PyramidVector, StoredDataReport, StoredDataTypeEnum, VectorDb } from "../../../../@types/app";
-import ExtentMap from "../../../../components/Utils/ExtentMap";
+import ExtentMap from "@/entrepot/components/ExtentMap";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { niceBytes } from "../../../../utils";

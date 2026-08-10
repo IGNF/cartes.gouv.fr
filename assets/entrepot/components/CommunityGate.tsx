@@ -1,22 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo } from "react";
 
-import { Datastore } from "../../@types/app";
-import { CommunityDetailResponseDto } from "../../@types/entrepot";
+import { Datastore } from "@/@types/app";
+import { CommunityDetailResponseDto } from "@/@types/entrepot";
 import { CommunityProvider } from "@/entrepot/contexts/community";
-import api from "../../entrepot/api";
+import api from "@/entrepot/api";
 import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
-import useUserQuery from "../../hooks/queries/useUserQuery";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import useRequiredRights from "@/entrepot/hooks/useRequiredRights";
 import RQKeys from "@/entrepot/modules/RQKeys";
-import { CartesApiException } from "../../modules/jsonFetch";
-import Forbidden from "../../pages/error/Forbidden";
-import PageNotFound from "../../pages/error/PageNotFound";
-import UnexpectedError from "../../pages/error/UnexpectedError";
-import { hasAccess } from "../../utils";
-import { delta } from "../../utils/delta";
-import LoadingText from "../Utils/LoadingText";
-import Main from "./Main";
+import { CartesApiException } from "@/modules/jsonFetch";
+import Forbidden from "@/pages/error/Forbidden";
+import PageNotFound from "@/pages/error/PageNotFound";
+import UnexpectedError from "@/pages/error/UnexpectedError";
+import { hasAccess } from "@/utils";
+import { delta } from "@/utils/delta";
+import LoadingText from "@/components/Utils/LoadingText";
+import Main from "@/components/Layout/Main";
 
 export interface CommunityGateProps {
     communityId: string;

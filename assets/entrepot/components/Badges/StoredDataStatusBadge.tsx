@@ -3,46 +3,36 @@ import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { FC, memo, ReactNode, useMemo } from "react";
 
-import { OfferingStatusEnum } from "../../../@types/app";
+import { StoredData, StoredDataStatusEnum } from "@/@types/app";
 
-type OfferingStatusBadgeProps = {
-    status: OfferingStatusEnum;
+type StoredDataStatusBadgeProps = {
+    status: StoredData["status"];
 };
 
-const OfferingStatusBadge: FC<OfferingStatusBadgeProps> = ({ status }) => {
+const StoredDataStatusBadge: FC<StoredDataStatusBadgeProps> = ({ status }) => {
     const { severity, text } = useMemo(() => {
         let severity: AlertProps.Severity = "info";
         let text: NonNullable<ReactNode> = "";
 
         switch (status) {
-            case OfferingStatusEnum.PUBLISHED:
+            case StoredDataStatusEnum.GENERATED:
                 severity = "success";
-                text = "Publié";
+                text = "Prêt";
                 break;
 
-            case OfferingStatusEnum.PUBLISHING:
+            case StoredDataStatusEnum.CREATED:
+            case StoredDataStatusEnum.GENERATING:
                 severity = "warning";
                 text = (
                     <>
                         En cours de
                         <br />
-                        publication
+                        génération
                     </>
                 );
                 break;
 
-            case OfferingStatusEnum.UNPUBLISHING:
-                severity = "warning";
-                text = (
-                    <>
-                        En cours de
-                        <br />
-                        dépublication
-                    </>
-                );
-                break;
-
-            case OfferingStatusEnum.MODIFYING:
+            case StoredDataStatusEnum.MODIFYING:
                 severity = "warning";
                 text = (
                     <>
@@ -53,9 +43,14 @@ const OfferingStatusBadge: FC<OfferingStatusBadgeProps> = ({ status }) => {
                 );
                 break;
 
-            case OfferingStatusEnum.UNSTABLE:
+            case StoredDataStatusEnum.UNSTABLE:
                 severity = "error";
                 text = "Echoué";
+                break;
+
+            case StoredDataStatusEnum.DELETED:
+                severity = "info";
+                text = "Supprimé";
                 break;
 
             default:
@@ -74,4 +69,4 @@ const OfferingStatusBadge: FC<OfferingStatusBadgeProps> = ({ status }) => {
     );
 };
 
-export default memo(OfferingStatusBadge);
+export default memo(StoredDataStatusBadge);
