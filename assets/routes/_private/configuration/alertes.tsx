@@ -25,6 +25,7 @@ export const Route = createFileRoute("/_private/configuration/alertes")({
         return { membership };
     },
     component: AlertsRoute,
+    notFoundComponent: PageNotFound,
 });
 
 function AlertsRoute() {
