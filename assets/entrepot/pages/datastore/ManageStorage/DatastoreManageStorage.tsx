@@ -7,7 +7,7 @@ import { FC } from "react";
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
 import PageTitle from "@/components/Layout/PageTitle";
-import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../i18n/i18n";
 import AnnexeUsage from "./storages/AnnexeUsage";
@@ -18,7 +18,7 @@ import S3Usage from "./storages/S3Usage";
 import StaticsUsage from "./storages/StaticsUsage";
 import UploadUsage from "./storages/UploadUsage";
 import { DatastoreManageStorageTab } from "./types";
-import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
+import useStoredDataListQuery from "@/entrepot/hooks/queries/useStoredDataListQuery";
 
 const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/consommation");
 

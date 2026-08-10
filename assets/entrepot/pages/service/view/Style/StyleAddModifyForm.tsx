@@ -18,7 +18,7 @@ import LoadingIcon from "@/components/Utils/LoadingIcon";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import { StyleFormProvider } from "@/contexts/StyleFormContext";
-import useServiceQuery from "@/hooks/queries/useServiceQuery";
+import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
 import { decodeKeys, encodeKey, encodeKeys, getFileExtension, removeDiacritics } from "@/utils";
 import { CartesStyle, OfferingTypeEnum, Service, StyleFormatEnum } from "../../../../../@types/app";

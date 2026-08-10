@@ -21,11 +21,11 @@ import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNa
 import PageTitle from "@/components/Layout/PageTitle";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
-import { useCommunity } from "@/contexts/community";
+import { useCommunity } from "@/entrepot/contexts/community";
 import api from "@/entrepot/api";
-import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
-import useMembership from "@/hooks/useMembership";
+import useMembership from "@/entrepot/hooks/useMembership";
 import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";

@@ -10,13 +10,13 @@ import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
-import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidVector, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
-import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
+import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";

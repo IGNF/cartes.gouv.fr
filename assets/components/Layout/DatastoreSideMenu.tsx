@@ -4,7 +4,7 @@ import { tss } from "tss-react";
 
 import { useMatchRoute } from "@tanstack/react-router";
 
-import useDatastoreSelection from "@/hooks/useDatastoreSelection";
+import useDatastoreSelection from "@/entrepot/hooks/useDatastoreSelection";
 import { useTranslation } from "@/i18n";
 
 type DatastoreSideMenuProps = {

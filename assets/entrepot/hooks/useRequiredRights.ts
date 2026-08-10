@@ -1,6 +1,6 @@
 import { useMatches } from "@tanstack/react-router";
 
-import { CommunityMemberDtoRightsEnum } from "../@types/entrepot";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 
 /** Droits requis déclarés par la route matchée la plus profonde (staticData.requiredRights) ; vide = appartenance seule */
 export default function useRequiredRights(): CommunityMemberDtoRightsEnum[] {

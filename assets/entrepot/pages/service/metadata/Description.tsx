@@ -7,7 +7,7 @@ import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
-import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { type ServiceFormValuesBaseType } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";

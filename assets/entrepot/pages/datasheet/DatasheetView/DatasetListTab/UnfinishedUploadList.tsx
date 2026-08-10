@@ -13,7 +13,7 @@ import Wait from "../../../../../components/Utils/Wait";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useDatastoreMembership from "@/hooks/useDatastoreMembership";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;

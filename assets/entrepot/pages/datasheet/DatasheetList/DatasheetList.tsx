@@ -15,7 +15,7 @@ import DatastoreMain from "@/components/Layout/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
-import { datastoreSuspenseQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
@@ -31,7 +31,7 @@ import DatasheetListItem from "./DatasheetListItem";
 import NoData from "./NoData";
 import SandboxDatastoreExplanation from "./SandboxDatastoreExplanation";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useDatastoreMembership from "@/hooks/useDatastoreMembership";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 const filterTests = {
     [FilterEnum.ENABLED]: (d: Datasheet) => d.nb_publications > 0,

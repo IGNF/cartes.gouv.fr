@@ -1,5 +1,5 @@
 import { createContext, ReactNode, use } from "react";
-import { CommunityDetailResponseDto } from "../@types/entrepot";
+import { CommunityDetailResponseDto } from "@/@types/entrepot";
 
 export const CommunityContext = createContext<CommunityDetailResponseDto | null>(null);
 

@@ -5,7 +5,7 @@ import { useHead } from "@unhead/react";
 import { PropsWithChildren, memo } from "react";
 
 import { IUseAlert } from "@/hooks/useAlert";
-import useBreadcrumb from "@/hooks/useBreadcrumb";
+import useBreadcrumb from "@/entrepot/hooks/useBreadcrumb";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 
 export interface MainProps {

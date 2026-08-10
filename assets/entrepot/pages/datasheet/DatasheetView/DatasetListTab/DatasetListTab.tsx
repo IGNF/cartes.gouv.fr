@@ -9,7 +9,7 @@ import UnfinishedUploadList from "./UnfinishedUploadList";
 import VectorDbList from "./VectorDbList/VectorDbList";
 import PyramidRasterList from "./PyramidRasterList/PyramidRasterList";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useDatastoreMembership from "@/hooks/useDatastoreMembership";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 type DataListTabProps = {
     datastoreId: string;

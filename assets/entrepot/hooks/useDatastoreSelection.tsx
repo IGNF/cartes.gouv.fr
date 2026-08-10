@@ -4,9 +4,9 @@ import { useMemo } from "react";
 
 import { sandboxCommunityId } from "@/env";
 import { findMembership } from "@/utils";
-import api from "../entrepot/api";
-import { CartesApiException } from "../modules/jsonFetch";
-import useUserQuery from "./queries/useUserQuery";
+import api from "@/entrepot/api";
+import { CartesApiException } from "@/modules/jsonFetch";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 
 type DatastoreSelectionInfo = {
     /** absent uniquement pour l'entrée sandbox tant que l'utilisateur n'en est pas membre */
