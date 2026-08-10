@@ -13,8 +13,8 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { DatasheetDocumentTypeEnum } from "../../../../../@types/app";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { getFileExtension } from "../../../../../utils";
@@ -291,13 +291,7 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
                 document.body
             )}
 
-            {addDocumentMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("documents_tab.add_document.in_progress")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {addDocumentMutation.isPending && <LoadingOverlay message={t("documents_tab.add_document.in_progress")} />}
         </>
     );
 };

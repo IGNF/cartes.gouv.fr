@@ -11,10 +11,9 @@ import useStoredDataListQuery from "@/entrepot/hooks/queries/useStoredDataListQu
 import { usePagination } from "@/hooks/usePagination";
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import { Datastore, StoredData } from "../../../../../@types/app";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
-import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { niceBytes } from "../../../../../utils";
@@ -175,16 +174,7 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
                 document.body
             )}
 
-            {deleteStoredDataMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("storage.filesystem.deletion.in_progress")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {deleteStoredDataMutation.isPending && <LoadingOverlay message={t("storage.filesystem.deletion.in_progress")} />}
         </>
     );
 };

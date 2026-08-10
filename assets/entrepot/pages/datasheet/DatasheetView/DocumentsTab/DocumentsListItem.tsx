@@ -11,9 +11,8 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { DatasheetDocument } from "../../../../../@types/app";
-import LoadingText from "../../../../../components/Utils/LoadingText";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import MenuList from "../../../../../components/Utils/MenuList";
-import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../../api";
@@ -215,13 +214,7 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
                 window.document.body
             )}
 
-            {editDocumentMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("documents_tab.edit_document.in_progress")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {editDocumentMutation.isPending && <LoadingOverlay message={t("documents_tab.edit_document.in_progress")} />}
 
             {createPortal(
                 <confirmDeleteDocumentModal.Component
@@ -250,13 +243,7 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
                 window.document.body
             )}
 
-            {deleteDocumentMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("documents_tab.delete_document.in_progress")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {deleteDocumentMutation.isPending && <LoadingOverlay message={t("documents_tab.delete_document.in_progress")} />}
         </>
     );
 };

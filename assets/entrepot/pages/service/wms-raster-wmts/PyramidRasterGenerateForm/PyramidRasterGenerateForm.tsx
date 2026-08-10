@@ -15,9 +15,8 @@ import * as yup from "yup";
 import type { PyramidRaster } from "../../../../../@types/app";
 import type { ConfigurationWmsVectorDetailsContent } from "../../../../../@types/entrepot";
 import Main from "../../../../../components/Layout/Main";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
 import ZoomRange from "../../../../../components/Utils/ZoomRange";
 import olDefaults from "../../../../../data/ol-defaults.json";
 import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
@@ -245,20 +244,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                 </>
             )}
 
-            {generatePyramidRasterMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon largeIcon={true} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("generate.in_progress")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {generatePyramidRasterMutation.isPending && <LoadingOverlay message={t("generate.in_progress")} />}
         </Main>
     );
 };
