@@ -11,7 +11,7 @@ import { CommunitiesLayers, CommunityFeatureTypeLayer, geometryTypes, RefToolLay
 import { arrLayerTools, arrRefLayerTools, CommunityResponseDTO, LayerTools, RefLayerTools } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n";
-import RQKeys from "../../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
 import { getFunctionalities, getToolsDefaultValues } from "../DefaultValues";

@@ -5,7 +5,7 @@ import { useDebouncedState } from "@mantine/hooks";
 import { SearchResult } from "../../../../../@types/app_espaceco";
 import AutocompleteSelect from "../../../../../components/Input/AutocompleteSelect";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { jsonFetch } from "../../../../../modules/jsonFetch";
 
 type SearchProps = {

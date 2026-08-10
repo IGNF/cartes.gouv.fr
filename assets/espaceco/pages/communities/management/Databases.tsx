@@ -3,7 +3,7 @@ import LoadingText from "@/components/Utils/LoadingText";
 import api from "@/espaceco/api";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { useTranslation } from "@/i18n";
-import RQKeys from "@/modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";

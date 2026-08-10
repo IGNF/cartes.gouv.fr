@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import api from "@/espaceco/api";
-import RQKeys from "@/modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 
 // Gate async localisé au sous-arbre espaceco : le « me » espaceco n'est pas bootstrappé dans le DOM (décision 8)
 export const Route = createFileRoute("/_private/espace-collaboratif")({

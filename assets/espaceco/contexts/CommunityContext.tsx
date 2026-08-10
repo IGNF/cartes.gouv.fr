@@ -1,6 +1,6 @@
 import { CommunityFormMode } from "@/@types/app_espaceco";
 import { CommunityResponseDTO } from "@/@types/espaceco";
-import RQKeys from "@/modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, ReactNode, use, useState } from "react";
