@@ -1,4 +1,4 @@
-import { CommunityListFilter } from "../../@types/app_espaceco";
+import { CommunityListFilter } from "@/@types/app_espaceco";
 import { withQueryKeyNamespace } from "@/modules/withQueryKeyNamespace";
 
 /**
