@@ -21,8 +21,8 @@ import { Datastore, UserRightsResponseDto } from "../../../../@types/app";
 import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import Wait from "../../../../components/Utils/Wait";
 import { useCommunity } from "@/entrepot/contexts/community";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
@@ -341,16 +341,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                             defaultPage={page}
                         />
                     </div>
-                    {(isRemovePending || isModifyPending) && (
-                        <Wait>
-                            <div className={fr.cx("fr-container")}>
-                                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                                    <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? tCommon("removing") : tCommon("modifying")}</h6>
-                                </div>
-                            </div>
-                        </Wait>
-                    )}
+                    {(isRemovePending || isModifyPending) && <LoadingOverlay message={isRemovePending ? tCommon("removing") : tCommon("modifying")} />}
                 </>
             )}
             <AddMember communityId={community._id} communityMemberIds={communityMemberIds} userId={userId} />

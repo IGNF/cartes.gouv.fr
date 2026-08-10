@@ -14,9 +14,8 @@ import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
 import Main from "@/components/Layout/Main";
-import LoadingIcon from "@/components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "@/components/Utils/LoadingText";
-import Wait from "@/components/Utils/Wait";
 import { StyleFormProvider } from "@/entrepot/contexts/StyleFormContext";
 import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import TMSStyleTools from "@/entrepot/modules/Style/TMSStyleFilesManager/TMSStyleTools";
@@ -412,20 +411,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                 </>
             ) : null}
 
-            {addModifyMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon largeIcon={true} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{editMode ? tCommon("modifying") : tCommon("adding")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {addModifyMutation.isPending && <LoadingOverlay message={editMode ? tCommon("modifying") : tCommon("adding")} />}
 
             {createPortal(
                 <confirmReturnModal.Component

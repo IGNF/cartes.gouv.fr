@@ -6,7 +6,6 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -16,8 +15,8 @@ import { PermissionCreateDtoTypeEnum } from "../../../../@types/entrepot";
 import DatePicker from "../../../../components/Input/DatePicker";
 import InputCollection from "../../../../components/Input/InputCollection/InputCollection";
 import Main from "../../../../components/Layout/Main";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import "../../../../sass/pages/permission.scss";
@@ -139,16 +138,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
     return (
         <Main title={t("add_form.title")}>
             <h1>{t("add_form.title")}</h1>
-            {addPermissionStatus === "pending" && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={cx(fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v"), "frx-icon-spin")} />
-                            <h6 className={fr.cx("fr-m-0")}>{tCommon("adding")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {addPermissionStatus === "pending" && <LoadingOverlay message={tCommon("adding")} />}
             {addPermissionError && <Alert severity="warning" closable title={tCommon("error")} description={addPermissionError.message} />}
             {isLoading || isOfferingsLoading ? (
                 <LoadingText />

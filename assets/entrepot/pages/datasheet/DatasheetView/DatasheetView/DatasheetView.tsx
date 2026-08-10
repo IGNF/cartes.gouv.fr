@@ -11,6 +11,7 @@ import { FC, lazy, Suspense, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "@/components/Utils/LoadingText";
 import { blockingProcessingStatuses } from "@/entrepot/hooks/queries/useStoredDataUseProcessings";
 import { delta } from "@/utils";
@@ -18,7 +19,6 @@ import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import type { Datasheet, DatasheetDetailed, Metadata, Service } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
-import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { type CartesApiException } from "../../../../../modules/jsonFetch";
@@ -296,16 +296,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 </>
             )}
 
-            {datasheetDeleteMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} largeIcon={true} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("datasheet.being_removed", { datasheetName: datasheetName })}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {datasheetDeleteMutation.isPending && <LoadingOverlay message={t("datasheet.being_removed", { datasheetName: datasheetName })} />}
             <>
                 {createPortal(
                     <deleteDataConfirmModal.Component
