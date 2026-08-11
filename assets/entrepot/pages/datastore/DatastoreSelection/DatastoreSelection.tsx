@@ -49,7 +49,7 @@ export default function DatastoreSelection() {
                         <Card
                             imageUrl={datastore.is_sandbox === true ? sandboxDatastoreThumbnailSvg : placeholder16x9}
                             imageAlt=""
-                            title={datastore.is_sandbox === true ? tCommon("sandbox") : datastore.name}
+                            title={tCommon("datastore_name", { name: datastore.name, isSandbox: datastore.is_sandbox })}
                             titleAs="h6"
                             linkProps={
                                 datastore._id !== undefined

@@ -7,15 +7,15 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import { catalogueUrl } from "@/env";
+import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 import { getThematicCategories } from "@/entrepot/utils/metadata";
 import { MetadataHierarchyLevel, type Metadata } from "../../../../../@types/app";
 import ExtentMap from "@/entrepot/components/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipboard";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import api from "../../../../api";
 import MetadataField from "./MetadataField";
 
 import frequencyCodes from "@/entrepot/data/maintenance_frequency.json";
@@ -31,11 +31,8 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
 
     const { data: metadata } = metadataQuery;
 
-    const datastoreQuery = useQuery({
-        queryKey: RQKeys.datastore(datastoreId),
-        queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
-        staleTime: 3600000,
-    });
+    const datastoreQuery = useQuery(datastoreQueryOptions(datastoreId));
+    const isSandbox = useDatastoreMembership()?.isSandbox;
 
     const frequencyCode = useMemo(() => {
         const code = metadata?.csw_metadata?.frequency_code;
@@ -44,7 +41,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
 
     const catalogueDatasheetUrl = useMemo(() => {
         // si datastore sandbox
-        if (datastoreQuery.data?.is_sandbox === true) {
+        if (isSandbox) {
             const metadataEndpoint = datastoreQuery.data?.endpoints?.find((ep) => ep.endpoint._id === metadata?.endpoints?.[0]?._id);
             const cswBaseUrl = metadataEndpoint?.endpoint.urls?.[0].url.trim();
 
@@ -55,7 +52,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
         }
 
         return `${catalogueUrl}/dataset/${metadata?.file_identifier}`;
-    }, [metadata?.file_identifier, datastoreQuery.data?.is_sandbox, datastoreQuery.data?.endpoints, metadata?.endpoints]);
+    }, [metadata?.file_identifier, isSandbox, datastoreQuery.data?.endpoints, metadata?.endpoints]);
 
     const isPublished = useMemo(
         () => metadataQuery.data?.endpoints?.length !== undefined && metadataQuery.data?.endpoints?.length > 0,
@@ -77,7 +74,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col-12")}>
                         {isPublished ? (
-                            datastoreQuery.data?.is_sandbox === true ? (
+                            isSandbox ? (
                                 <CallOut
                                     buttonProps={{
                                         children: "Consulter le service de métadonnées",

@@ -61,7 +61,7 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                     isActive: !!matchRoute({ to: "/tableau-de-bord/entrepots" }),
                 },
                 ...datastoreList.map((datastore) => ({
-                    text: datastore.is_sandbox === true ? tCommon("sandbox") : datastore.name,
+                    text: tCommon("datastore_name", { name: datastore.name, isSandbox: datastore.is_sandbox }),
                     linkProps:
                         datastore._id !== undefined
                             ? { to: "/tableau-de-bord/entrepots/$datastoreId/donnees" as const, params: { datastoreId: datastore._id } }

@@ -62,21 +62,6 @@ class SandboxService
         return $processings['create_rast_pyr'];
     }
 
-    public function getSandboxCommunityId(): ?string
-    {
-        return $this->sandboxCommunityId;
-    }
-
-    public function isSandboxCommunity(string $CommunityId): bool
-    {
-        return null !== $this->sandboxCommunityId && $this->sandboxCommunityId === $CommunityId;
-    }
-
-    public function getSandboxDatastoreId(): ?string
-    {
-        return $this->sandboxDatastoreId;
-    }
-
     public function isSandboxDatastore(string $datastoreId): bool
     {
         return null !== $this->sandboxDatastoreId && $this->sandboxDatastoreId === $datastoreId;

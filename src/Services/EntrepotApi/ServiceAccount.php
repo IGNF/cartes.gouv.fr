@@ -47,35 +47,6 @@ class ServiceAccount
         $this->token = $this->getAccessToken();
     }
 
-    public function getSandboxCommunity(): ?array
-    {
-        if (!$this->token) {
-            return null;
-        }
-
-        if (!$this->sandBoxCommunityId) {
-            return null;
-        }
-
-        $options = $this->prepareOptions();
-
-        try {
-            $response = $this->apiClient->request('GET', "communities/{$this->sandBoxCommunityId}", $options);
-            $sandboxCommunity = $this->handleResponse($response);
-
-            $sandboxDatastoreId = $sandboxCommunity['datastore']['_id'];
-            $response = $this->apiClient->request('GET', "datastores/$sandboxDatastoreId", $options);
-            $sandboxDatastore = $this->handleResponse($response);
-
-            return [
-                'community' => $sandboxCommunity,
-                'datastore' => $sandboxDatastore,
-            ];
-        } catch (ApiException $e) {
-            return null;
-        }
-    }
-
     /**
      * Ajout de l'utilisateur courant (logge) a la communaute liee au datastore "Bac à sable".
      */

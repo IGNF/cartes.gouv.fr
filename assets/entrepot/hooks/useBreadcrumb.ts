@@ -5,7 +5,10 @@ import { use, useMemo } from "react";
 
 import { Datastore } from "@/@types/app";
 import { CommunityContext } from "@/entrepot/contexts/community";
+import { sandboxCommunityId } from "@/env";
+import useUserQuery from "@/hooks/queries/useUserQuery";
 import { CartesApiException } from "@/modules/jsonFetch";
+import { findMembership, isSandboxCommunity } from "@/utils";
 import { datastoreQueryOptions } from "./queries/datastoreQueryOptions";
 import getBreadcrumb, { BreadcrumbRouteParams } from "@/entrepot/modules/breadcrumbs/Breadcrumb";
 
@@ -15,10 +18,14 @@ export default function useBreadcrumb(customBreadcrumbProps?: BreadcrumbProps) {
     const pathParams = useParams({ strict: false, shouldThrow: false });
     const search: Record<string, unknown> | undefined = useSearch({ strict: false, shouldThrow: false });
     const community = use(CommunityContext);
+    const { data: user } = useUserQuery();
 
     // datastore courant : celui de l'URL, sinon celui de la communauté (lecture du cache, préchargé par les loaders)
     const datastoreId = pathParams?.datastoreId ?? community?.datastore?._id;
     const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(datastoreId));
+
+    const datastoreIsSandbox = isSandboxCommunity(findMembership(user, { datastoreId })?.community, sandboxCommunityId);
+    const communityIsSandbox = isSandboxCommunity(community ?? undefined, sandboxCommunityId);
 
     // id de la route matchée la plus profonde
     const routeId = matches[matches.length - 1]?.routeId;
@@ -39,6 +46,6 @@ export default function useBreadcrumb(customBreadcrumbProps?: BreadcrumbProps) {
             return customBreadcrumbProps;
         }
 
-        return getBreadcrumb(routeId, params, datastore, community);
-    }, [routeId, params, datastore, community, customBreadcrumbProps]);
+        return getBreadcrumb(routeId, params, datastore, community, { datastoreIsSandbox, communityIsSandbox });
+    }, [routeId, params, datastore, community, datastoreIsSandbox, communityIsSandbox, customBreadcrumbProps]);
 }
