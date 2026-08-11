@@ -7,7 +7,7 @@ import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import { FC, useMemo } from "react";
+import { FC, Suspense } from "react";
 import { tss } from "tss-react";
 import { useToggle } from "@mantine/hooks";
 
@@ -16,6 +16,8 @@ import DatastoreTertiaryNavigation from "@/entrepot/components/DatastoreTertiary
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import { datasheetListQueryOptions } from "@/entrepot/hooks/queries/datasheetListQueryOptions";
+import { sandboxCommunityId } from "@/env";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
@@ -24,8 +26,6 @@ import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Skeleton from "../../../../components/Utils/Skeleton";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "@/entrepot/modules/RQKeys";
-import api from "../../../api";
 import { SortByEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";
 import NoData from "./NoData";
@@ -45,24 +45,16 @@ type DatasheetListProps = {
 };
 const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatasheetList");
-    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
     const { t: tCommon } = useTranslation("Common");
 
-    const datasheetListQuery = useQuery({
-        queryKey: RQKeys.datastore_datasheet_list(datastoreId),
-        queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
-        staleTime: 60000,
-    });
+    // titre, sandbox et navigation dérivés de l'appartenance (user_me, synchrone) : la requête datastore ne bloque plus la page
+    const membership = useDatastoreMembership();
+    const community = membership?.membership.community;
+    const isSandbox = sandboxCommunityId !== null && community?._id === sandboxCommunityId;
+    const datastoreName = isSandbox ? tCommon("sandbox") : community?.name;
+
+    const datasheetListQuery = useQuery(datasheetListQueryOptions(datastoreId));
     const { data: datasheetList, dataUpdatedAt, isFetching, isLoading, refetch } = datasheetListQuery;
-
-    const metadataEndpoint = useMemo(
-        () => datastore?.endpoints?.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA),
-        [datastore?.endpoints]
-    );
-
-    const datasheetCreationImpossible = Boolean(
-        metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use
-    );
 
     const searchParams = route.useSearch();
     const { page, limit } = searchParams;
@@ -81,15 +73,11 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     const { classes, cx } = useStyles();
 
-    const membership = useDatastoreMembership();
-
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })}>
-                {datastore?.is_sandbox === true && <SandboxDatastoreExplanation />}
-            </PageTitle>
+        <DatastoreMain title={t("title", { datastoreName })} datastoreId={datastoreId}>
+            <PageTitle title={t("title", { datastoreName })}>{isSandbox && <SandboxDatastoreExplanation />}</PageTitle>
 
-            <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
+            <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={community?._id ?? ""} />
 
             {datasheetList && datasheetList?.length > 0 && (
                 <>
@@ -106,37 +94,17 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 {filteredItems.length ?? 0}
                             </Badge>
                             {membership?.can(CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING) && (
-                                <Button
-                                    linkProps={
-                                        datasheetCreationImpossible
-                                            ? { href: undefined, "aria-hidden": true }
-                                            : {
-                                                  to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement" as const,
-                                                  params: { datastoreId },
-                                              }
-                                    }
-                                    iconId="fr-icon-add-line"
-                                    iconPosition="right"
-                                    className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
-                                >
-                                    {t("create_datasheet")}
-                                </Button>
+                                // rendu optimiste : bouton actif tant que le quota (requête datastore différée) est inconnu
+                                <Suspense fallback={<CreateDatasheetButton datastoreId={datastoreId} />}>
+                                    <CreateDatasheetButtonWithQuota datastoreId={datastoreId} />
+                                </Suspense>
                             )}
                         </div>
                     </div>
 
-                    {metadataEndpoint && datasheetCreationImpossible && (
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                            <div className={fr.cx("fr-col")}>
-                                <Alert
-                                    severity="warning"
-                                    title={t("datasheet_creation_impossible")}
-                                    as="h2"
-                                    description={t("metadata_endpoint_quota_reached")}
-                                />
-                            </div>
-                        </div>
-                    )}
+                    <Suspense fallback={null}>
+                        <MetadataQuotaAlert datastoreId={datastoreId} />
+                    </Suspense>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-2v")}>
                         <div
@@ -313,6 +281,63 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 };
 
 export default DatasheetList;
+
+/** true si le quota du point d'accès métadonnées est atteint ; suspend sur la requête datastore */
+function useDatasheetCreationImpossible(datastoreId: string): boolean {
+    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+
+    const metadataEndpoint = datastore?.endpoints?.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA);
+
+    return Boolean(metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use);
+}
+
+type CreateDatasheetButtonProps = {
+    datastoreId: string;
+    creationImpossible?: boolean;
+};
+
+function CreateDatasheetButton({ datastoreId, creationImpossible = false }: CreateDatasheetButtonProps) {
+    const { t } = useTranslation("DatasheetList");
+
+    return (
+        <Button
+            linkProps={
+                creationImpossible
+                    ? { href: undefined, "aria-hidden": true }
+                    : {
+                          to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement" as const,
+                          params: { datastoreId },
+                      }
+            }
+            iconId="fr-icon-add-line"
+            iconPosition="right"
+            className={fr.cx("fr-ml-auto", creationImpossible && "fr-hidden")}
+        >
+            {t("create_datasheet")}
+        </Button>
+    );
+}
+
+function CreateDatasheetButtonWithQuota({ datastoreId }: { datastoreId: string }) {
+    const creationImpossible = useDatasheetCreationImpossible(datastoreId);
+
+    return <CreateDatasheetButton datastoreId={datastoreId} creationImpossible={creationImpossible} />;
+}
+
+function MetadataQuotaAlert({ datastoreId }: { datastoreId: string }) {
+    const { t } = useTranslation("DatasheetList");
+    const creationImpossible = useDatasheetCreationImpossible(datastoreId);
+
+    if (!creationImpossible) return null;
+
+    return (
+        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+            <div className={fr.cx("fr-col")}>
+                <Alert severity="warning" title={t("datasheet_creation_impossible")} as="h2" description={t("metadata_endpoint_quota_reached")} />
+            </div>
+        </div>
+    );
+}
 
 const useStyles = tss.withName({ DatasheetList }).create({
     filterRoot: {
