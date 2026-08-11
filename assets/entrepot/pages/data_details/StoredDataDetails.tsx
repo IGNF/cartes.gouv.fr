@@ -6,6 +6,8 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
+import { useTranslation } from "@/i18n";
 import { StoredDataReport, StoredDataStatusEnum } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "@/entrepot/modules/RQKeys";
@@ -21,7 +23,11 @@ type StoredDataDetailsProps = {
 };
 const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedDataId }) => {
     const [reportQueryEnabled, setReportQueryEnabled] = useState(true);
-    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+    // conserve le blocage et le miroir-404 de la page
+    useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+    const { t: tCommon } = useTranslation("Common");
+    const membership = useDatastoreMembership();
+    const datastoreName = tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox });
 
     const reportQuery = useQuery<StoredDataReport, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
@@ -91,7 +97,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
                                 },
                                 {
                                     label: "Rapport de génération",
-                                    content: <ReportTab datastoreName={datastore?.name} reportQuery={reportQuery} />,
+                                    content: <ReportTab datastoreName={datastoreName} reportQuery={reportQuery} />,
                                 },
                             ]}
                         />

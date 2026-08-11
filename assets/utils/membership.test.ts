@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CartesUser } from "@/@types/app";
 import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import { findMembership, hasAccess, hasRights, isSupervisor } from "./membership";
+import { findMembership, hasAccess, hasRights, isSandboxCommunity, isSupervisor } from "./membership";
 
 const USER_ID = "user-1";
 const SUPERVISOR_ID = "supervisor-1";
@@ -56,6 +56,18 @@ describe("findMembership", () => {
         }
         expect(findMembership(user([withoutCommunity, noDatastore]), { datastoreId: "datastore-1" })).toBeUndefined();
         expect(findMembership(user([withoutCommunity, noDatastore]), { communityId: "community-3" })).toBe(noDatastore);
+    });
+});
+
+describe("isSandboxCommunity", () => {
+    it("reconnaît la communauté bac à sable par son id", () => {
+        expect(isSandboxCommunity(communityMember().community, "community-1")).toBe(true);
+        expect(isSandboxCommunity(communityMember().community, "community-2")).toBe(false);
+    });
+
+    it("jamais sandbox sans id configuré ou sans communauté", () => {
+        expect(isSandboxCommunity(communityMember().community, null)).toBe(false);
+        expect(isSandboxCommunity(undefined, "community-1")).toBe(false);
     });
 });
 

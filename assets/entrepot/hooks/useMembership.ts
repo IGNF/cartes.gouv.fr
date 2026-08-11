@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import { sandboxCommunityId } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
-import { CommunityRef, findMembership, hasRights, isSupervisor } from "@/utils";
+import { CommunityRef, findMembership, hasRights, isSandboxCommunity, isSupervisor } from "@/utils";
 
 /**
  * Appartenance de l'utilisateur courant à une communauté (par datastore ou par communauté),
@@ -22,6 +23,8 @@ export default function useMembership(ref: CommunityRef) {
         return {
             userId: user.id,
             membership,
+            community: membership.community,
+            isSandbox: isSandboxCommunity(membership.community, sandboxCommunityId),
             rights: membership.rights ?? [],
             isSupervisor: isSupervisor(user.id, membership),
             /** true si superviseur OU si l'utilisateur a TOUS les droits demandés */

@@ -54,7 +54,7 @@ const { i18n } = declareComponentKeys<
     | "select_option"
     | { K: "last_refresh_date"; P: { dataUpdatedAt: number }; R: string }
     | { K: "nb_results"; P: { displayed: number; total: number }; R: string }
-    | "sandbox"
+    | { K: "datastore_name"; P: { name: string | undefined; isSandbox: boolean | undefined }; R: string | undefined }
     | "email_notification"
 >()("Common");
 export type I18n = typeof i18n;
@@ -115,7 +115,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
         if (total === 1) return "1 résultat affiché sur 1";
         return `${displayed} résultats affichés sur ${total}`;
     },
-    sandbox: "Espace Découverte",
+    datastore_name: ({ name, isSandbox }) => (isSandbox ? "Espace Découverte" : name),
     email_notification: "Être notifié par courriel à la fin de la génération",
 };
 
@@ -171,6 +171,6 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     select_option: "Select an option",
     last_refresh_date: undefined,
     nb_results: undefined,
-    sandbox: undefined,
+    datastore_name: undefined,
     email_notification: undefined,
 };

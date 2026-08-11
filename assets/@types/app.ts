@@ -8,7 +8,6 @@ import {
     BoundingBox,
     CheckingExecutionStandardDetailResponseDto,
     CheckingExecutionStandardDetailResponseDtoStatusEnum,
-    CommunityDetailResponseDto,
     CommunityMemberDto,
     CommunityUserResponseDtoRightsEnum,
     ConfigurationAltimetryDetailsContent,
@@ -60,13 +59,7 @@ export type CartesUser = {
 };
 
 /** datastore */
-export type Datastore = DatastoreDetailResponseDto & {
-    is_sandbox?: boolean;
-};
-
-export type Community = CommunityDetailResponseDto & {
-    is_sandbox?: boolean;
-};
+export type Datastore = DatastoreDetailResponseDto;
 
 /** fiche de donnée */
 export type Datasheet = {
