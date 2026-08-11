@@ -6,10 +6,7 @@ import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { delta } from "@/utils/delta";
 
-/**
- * Options communes de la requête liste des fiches de données (requête principale de la page).
- * throwOnError : toute erreur (dont 404 miroir) remonte à l'errorComponent du layout datastore.
- */
+/** throwOnError : toute erreur (dont 404 miroir) remonte à l'errorComponent du layout datastore */
 export function datasheetListQueryOptions(datastoreId: string): UseQueryOptions<Datasheet[], CartesApiException> {
     return {
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),

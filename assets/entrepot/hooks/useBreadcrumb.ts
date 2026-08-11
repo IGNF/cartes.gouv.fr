@@ -24,7 +24,6 @@ export default function useBreadcrumb(customBreadcrumbProps?: BreadcrumbProps) {
     const datastoreId = pathParams?.datastoreId ?? community?.datastore?._id;
     const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(datastoreId));
 
-    // flags sandbox dérivés de l'appartenance (user_me) + env : le DTO ne porte plus is_sandbox
     const datastoreIsSandbox = isSandboxCommunity(findMembership(user, { datastoreId })?.community, sandboxCommunityId);
     const communityIsSandbox = isSandboxCommunity(community ?? undefined, sandboxCommunityId);
 
