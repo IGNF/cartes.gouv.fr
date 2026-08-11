@@ -1,5 +1,5 @@
 import { CartesUser } from "@/@types/app";
-import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import { CommunityMemberDto, CommunityMemberDtoRightsEnum, CommunityUserDto } from "@/@types/entrepot";
 
 /** Désigne une communauté, directement ou via son datastore */
 export type CommunityRef = { datastoreId: string; communityId?: never } | { communityId: string; datastoreId?: never };
@@ -18,6 +18,11 @@ export function findMembership(user: CartesUser | null | undefined, criteria: { 
         if (datastoreId !== undefined) return member.community.datastore === datastoreId;
         return member.community._id === communityId;
     });
+}
+
+/** true si la communauté est celle du bac à sable (id absent de la config : jamais sandbox) */
+export function isSandboxCommunity(community: CommunityUserDto | undefined, sandboxCommunityId: string | null): boolean {
+    return sandboxCommunityId !== null && community?._id === sandboxCommunityId;
 }
 
 /** true si l'utilisateur est le superviseur de la communauté */
