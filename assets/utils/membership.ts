@@ -21,7 +21,7 @@ export function findMembership(user: CartesUser | null | undefined, criteria: { 
 }
 
 /** true si la communauté est celle du bac à sable (id absent de la config : jamais sandbox) */
-export function isSandboxCommunity(community: CommunityUserDto | undefined, sandboxCommunityId: string | null): boolean {
+export function isSandboxCommunity(community: Pick<CommunityUserDto, "_id"> | undefined, sandboxCommunityId: string | null): boolean {
     return sandboxCommunityId !== null && community?._id === sandboxCommunityId;
 }
 
