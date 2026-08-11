@@ -17,6 +17,7 @@ const breadcrumbNameByRouteId = {
     "/_private/tableau-de-bord/entrepots/demande-de-creation": "datastore_create_request",
     "/_private/rejoindre-des-communautes": "join_community",
     "/_private/demande-acces/$fileIdentifier": "accesses_request",
+    "/_private/tableau-de-bord/statistiques-de-consommation": "stats_scope_selection",
     "/_private/tableau-de-bord/communaute/$communityId/": "community_info",
     "/_private/tableau-de-bord/communaute/$communityId/membres": "members_list",
     "/_private/tableau-de-bord/entrepots/$datastoreId/consommation": "datastore_manage_storage",

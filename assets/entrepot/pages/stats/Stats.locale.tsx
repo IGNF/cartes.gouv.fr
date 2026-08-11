@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 
 import { StatsType } from "@/@types/stats";
 import { Translations } from "@/i18n/types";
-import { routes } from "@/router/router";
+import AppLink from "@/router/AppLink";
 import type { StatsScope } from "./stats.types";
 
 const { i18n } = declareComponentKeys<
@@ -79,7 +79,10 @@ export const StatsFrTranslations: Translations<"fr">["Stats"] = {
     no_datastore_message: (
         <>
             {"Vous ne faites partie d'aucun entrepôt. Consultez "}
-            <a {...routes.stats_by_scope({ scope: "user" }).link}>vos statistiques personnelles</a>.
+            <AppLink to="/tableau-de-bord/statistiques-de-consommation" search={{ scope: "user" }}>
+                vos statistiques personnelles
+            </AppLink>
+            .
         </>
     ),
     datastore_intro: "Sélectionnez un de vos entrepôts pour accéder à des statistiques de consommation détaillées.",

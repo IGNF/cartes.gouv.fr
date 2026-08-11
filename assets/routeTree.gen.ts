@@ -25,6 +25,7 @@ import { Route as PrivateEspaceCollaboratifIndexRouteImport } from './routes/_pr
 import { Route as PrivateMesClesIndexRouteImport } from './routes/_private/mes-cles/index'
 import { Route as PrivateMesClesAjoutRouteImport } from './routes/_private/mes-cles/ajout'
 import { Route as PrivateTableauDeBordIndexRouteImport } from './routes/_private/tableau-de-bord/index'
+import { Route as PrivateTableauDeBordStatistiquesDeConsommationRouteImport } from './routes/_private/tableau-de-bord/statistiques-de-consommation'
 import { Route as PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRouteImport } from './routes/_private/espace-collaboratif/$communityId.creer-un-guichet'
 import { Route as PrivateEspaceCollaboratifCommunityIdGererLeGuichetRouteImport } from './routes/_private/espace-collaboratif/$communityId.gerer-le-guichet'
 import { Route as PrivateEspaceCollaboratifCommunityIdInvitationRouteImport } from './routes/_private/espace-collaboratif/$communityId.invitation'
@@ -144,6 +145,12 @@ const PrivateTableauDeBordIndexRoute =
   PrivateTableauDeBordIndexRouteImport.update({
     id: '/tableau-de-bord/',
     path: '/tableau-de-bord/',
+    getParentRoute: () => PrivateRouteRoute,
+  } as any)
+const PrivateTableauDeBordStatistiquesDeConsommationRoute =
+  PrivateTableauDeBordStatistiquesDeConsommationRouteImport.update({
+    id: '/tableau-de-bord/statistiques-de-consommation',
+    path: '/tableau-de-bord/statistiques-de-consommation',
     getParentRoute: () => PrivateRouteRoute,
   } as any)
 const PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRoute =
@@ -404,6 +411,7 @@ export interface FileRoutesByFullPath {
   '/configuration/alertes': typeof PrivateConfigurationAlertesRoute
   '/demande-acces/$fileIdentifier': typeof PrivateDemandeAccesFileIdentifierRoute
   '/mes-cles/ajout': typeof PrivateMesClesAjoutRoute
+  '/tableau-de-bord/statistiques-de-consommation': typeof PrivateTableauDeBordStatistiquesDeConsommationRoute
   '/espace-collaboratif/': typeof PrivateEspaceCollaboratifIndexRoute
   '/mes-cles/': typeof PrivateMesClesIndexRoute
   '/tableau-de-bord/': typeof PrivateTableauDeBordIndexRoute
@@ -455,6 +463,7 @@ export interface FileRoutesByTo {
   '/configuration/alertes': typeof PrivateConfigurationAlertesRoute
   '/demande-acces/$fileIdentifier': typeof PrivateDemandeAccesFileIdentifierRoute
   '/mes-cles/ajout': typeof PrivateMesClesAjoutRoute
+  '/tableau-de-bord/statistiques-de-consommation': typeof PrivateTableauDeBordStatistiquesDeConsommationRoute
   '/espace-collaboratif': typeof PrivateEspaceCollaboratifIndexRoute
   '/mes-cles': typeof PrivateMesClesIndexRoute
   '/tableau-de-bord': typeof PrivateTableauDeBordIndexRoute
@@ -508,6 +517,7 @@ export interface FileRoutesById {
   '/_private/configuration/alertes': typeof PrivateConfigurationAlertesRoute
   '/_private/demande-acces/$fileIdentifier': typeof PrivateDemandeAccesFileIdentifierRoute
   '/_private/mes-cles/ajout': typeof PrivateMesClesAjoutRoute
+  '/_private/tableau-de-bord/statistiques-de-consommation': typeof PrivateTableauDeBordStatistiquesDeConsommationRoute
   '/_private/espace-collaboratif/': typeof PrivateEspaceCollaboratifIndexRoute
   '/_private/mes-cles/': typeof PrivateMesClesIndexRoute
   '/_private/tableau-de-bord/': typeof PrivateTableauDeBordIndexRoute
@@ -562,6 +572,7 @@ export interface FileRouteTypes {
     | '/configuration/alertes'
     | '/demande-acces/$fileIdentifier'
     | '/mes-cles/ajout'
+    | '/tableau-de-bord/statistiques-de-consommation'
     | '/espace-collaboratif/'
     | '/mes-cles/'
     | '/tableau-de-bord/'
@@ -613,6 +624,7 @@ export interface FileRouteTypes {
     | '/configuration/alertes'
     | '/demande-acces/$fileIdentifier'
     | '/mes-cles/ajout'
+    | '/tableau-de-bord/statistiques-de-consommation'
     | '/espace-collaboratif'
     | '/mes-cles'
     | '/tableau-de-bord'
@@ -665,6 +677,7 @@ export interface FileRouteTypes {
     | '/_private/configuration/alertes'
     | '/_private/demande-acces/$fileIdentifier'
     | '/_private/mes-cles/ajout'
+    | '/_private/tableau-de-bord/statistiques-de-consommation'
     | '/_private/espace-collaboratif/'
     | '/_private/mes-cles/'
     | '/_private/tableau-de-bord/'
@@ -822,6 +835,13 @@ declare module '@tanstack/react-router' {
       path: '/tableau-de-bord'
       fullPath: '/tableau-de-bord/'
       preLoaderRoute: typeof PrivateTableauDeBordIndexRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/tableau-de-bord/statistiques-de-consommation': {
+      id: '/_private/tableau-de-bord/statistiques-de-consommation'
+      path: '/tableau-de-bord/statistiques-de-consommation'
+      fullPath: '/tableau-de-bord/statistiques-de-consommation'
+      preLoaderRoute: typeof PrivateTableauDeBordStatistiquesDeConsommationRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
     '/_private/espace-collaboratif/$communityId/creer-un-guichet': {
@@ -1209,6 +1229,7 @@ interface PrivateRouteRouteChildren {
   PrivateConfigurationAlertesRoute: typeof PrivateConfigurationAlertesRoute
   PrivateDemandeAccesFileIdentifierRoute: typeof PrivateDemandeAccesFileIdentifierRoute
   PrivateMesClesAjoutRoute: typeof PrivateMesClesAjoutRoute
+  PrivateTableauDeBordStatistiquesDeConsommationRoute: typeof PrivateTableauDeBordStatistiquesDeConsommationRoute
   PrivateMesClesIndexRoute: typeof PrivateMesClesIndexRoute
   PrivateTableauDeBordIndexRoute: typeof PrivateTableauDeBordIndexRoute
   PrivateTableauDeBordCommunauteCommunityIdRouteRoute: typeof PrivateTableauDeBordCommunauteCommunityIdRouteRouteWithChildren
@@ -1229,6 +1250,8 @@ const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivateDemandeAccesFileIdentifierRoute:
     PrivateDemandeAccesFileIdentifierRoute,
   PrivateMesClesAjoutRoute: PrivateMesClesAjoutRoute,
+  PrivateTableauDeBordStatistiquesDeConsommationRoute:
+    PrivateTableauDeBordStatistiquesDeConsommationRoute,
   PrivateMesClesIndexRoute: PrivateMesClesIndexRoute,
   PrivateTableauDeBordIndexRoute: PrivateTableauDeBordIndexRoute,
   PrivateTableauDeBordCommunauteCommunityIdRouteRoute:
