@@ -29,7 +29,6 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
         return { membership };
     },
     loader: ({ context, params }) => {
-        // préchauffe le DTO complet sans bloquer le rendu du shell ; les pages le consomment en useSuspenseQuery
         void context.queryClient.prefetchQuery(datastoreQueryOptions(params.datastoreId));
     },
     component: DatastoreLayoutRoute,
