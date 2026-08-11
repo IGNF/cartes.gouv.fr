@@ -1,8 +1,8 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
-import CommunityGate from "@/entrepot/components/CommunityGate";
 import { configCommunityId } from "@/env";
+import { datastoreAnnexeListQueryOptions } from "@/entrepot/hooks/queries/datastoreAnnexeListQueryOptions";
 import Alerts from "@/entrepot/pages/config/Alerts";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { revalidateUser } from "@/modules/queryClient";
@@ -24,19 +24,18 @@ export const Route = createFileRoute("/_private/configuration/alertes")({
         }
         return { membership };
     },
+    loader: ({ context }) => {
+        const datastoreId = context.membership.community?.datastore;
+        if (datastoreId !== undefined) {
+            void context.queryClient.prefetchQuery(datastoreAnnexeListQueryOptions(datastoreId));
+        }
+    },
     component: AlertsRoute,
     notFoundComponent: PageNotFound,
 });
 
 function AlertsRoute() {
-    // impossible après le gate, garde de type
-    if (!configCommunityId) {
-        return <PageNotFound />;
-    }
+    const { membership } = Route.useRouteContext();
 
-    return (
-        <CommunityGate communityId={configCommunityId}>
-            <Alerts />
-        </CommunityGate>
-    );
+    return <Alerts datastoreId={membership.community?.datastore} />;
 }
