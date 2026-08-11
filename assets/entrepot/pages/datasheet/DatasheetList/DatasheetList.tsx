@@ -17,7 +17,7 @@ import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { datasheetListQueryOptions } from "@/entrepot/hooks/queries/datasheetListQueryOptions";
-import { sandboxCommunityId } from "@/env";
+import { datastoreLabel } from "@/entrepot/utils/datastoreLabel";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
@@ -49,9 +49,9 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     // titre, sandbox et navigation dérivés de l'appartenance (user_me, synchrone) : la requête datastore ne bloque plus la page
     const membership = useDatastoreMembership();
-    const community = membership?.membership.community;
-    const isSandbox = sandboxCommunityId !== null && community?._id === sandboxCommunityId;
-    const datastoreName = isSandbox ? tCommon("sandbox") : community?.name;
+    const community = membership?.community;
+    const isSandbox = membership?.isSandbox === true;
+    const datastoreName = datastoreLabel(community?.name, isSandbox);
 
     const datasheetListQuery = useQuery(datasheetListQueryOptions(datastoreId));
     const { data: datasheetList, dataUpdatedAt, isFetching, isLoading, refetch } = datasheetListQuery;

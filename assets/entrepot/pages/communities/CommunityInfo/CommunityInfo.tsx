@@ -14,7 +14,7 @@ import { useStyles } from "tss-react";
 import isEmail from "validator/lib/isEmail";
 import * as yup from "yup";
 
-import { Community, Datastore } from "@/@types/app";
+import { Datastore } from "@/@types/app";
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import DatastoreMain from "@/entrepot/components/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/entrepot/components/DatastoreTertiaryNavigation";
@@ -75,7 +75,7 @@ export default function CommunityInfo() {
 
     const userQuery = useUserQuery();
     const { data: user } = userQuery;
-    const community: Community = useCommunity();
+    const community: CommunityDetailResponseDto = useCommunity();
     const isSandbox = isSandboxCommunity(community, sandboxCommunityId);
     const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(community.datastore?._id)); // communauté possiblement sans entrepôt
 

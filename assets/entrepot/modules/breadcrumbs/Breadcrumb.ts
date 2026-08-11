@@ -1,6 +1,7 @@
 import { BreadcrumbProps, addBreadcrumbTranslations } from "@codegouvfr/react-dsfr/Breadcrumb";
 
-import { Community, Datastore } from "@/@types/app";
+import { Datastore } from "@/@types/app";
+import { CommunityDetailResponseDto } from "@/@types/entrepot";
 import { datastoreLabel } from "@/entrepot/utils/datastoreLabel";
 import { getTranslation } from "@/i18n/i18n";
 
@@ -71,7 +72,7 @@ const getBreadcrumb = (
     routeId: string | undefined,
     params: BreadcrumbRouteParams,
     datastore: Datastore | undefined,
-    community: Community | null | undefined,
+    community: CommunityDetailResponseDto | null | undefined,
     { datastoreIsSandbox, communityIsSandbox }: BreadcrumbSandboxFlags
 ): BreadcrumbProps | undefined => {
     addBreadcrumbTranslations({
