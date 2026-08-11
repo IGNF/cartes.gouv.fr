@@ -54,6 +54,14 @@ const privateRoutes = {
         },
         (p) => `${appRoot}/demande-acces/${p.fileIdentifier}`
     ),
+
+    stats_scope_selection: defineRoute(`${appRoot}/tableau-de-bord/statistiques-de-consommation`),
+    stats_by_scope: defineRoute(
+        {
+            scope: param.query.optional.string,
+        },
+        () => `${appRoot}/tableau-de-bord/statistiques-de-consommation`
+    ),
 };
 
 const communityRoute = defineRoute(

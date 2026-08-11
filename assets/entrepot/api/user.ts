@@ -1,4 +1,4 @@
-import SymfonyRouting from "../../modules/Routing";
+import SymfonyRouting, { QueryParams } from "../../modules/Routing";
 
 import { CartesUser, UserKeyDetailedWithAccessesResponseDto, UserKeyWithAccessesResponseDto } from "../../@types/app";
 import { PermissionWithOfferingsDetailsResponseDto, UserKeyCreateDtoUserKeyInfoDto, UserKeyResponseDto, UserKeyUpdateDto } from "../../@types/entrepot";
@@ -34,8 +34,8 @@ const getMyKeysDetailedWithAccesses = (otherOptions: RequestInit = {}) => {
 };
 
 /* Retourne les permissions de l'utilisateur */
-const getMyPermissions = (otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_user_permissions");
+const getMyPermissions = (query: QueryParams = {}, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_permissions", query);
     return jsonFetch<PermissionWithOfferingsDetailsResponseDto[]>(url, {
         ...otherOptions,
     });
