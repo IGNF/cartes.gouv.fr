@@ -7,7 +7,7 @@ import { FC, useMemo } from "react";
 
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
-import { datastoreLabel } from "@/entrepot/utils/datastoreLabel";
+import { useTranslation } from "@/i18n";
 import { UploadReport } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "@/entrepot/modules/RQKeys";
@@ -23,10 +23,11 @@ type UploadDetailsProps = {
 };
 
 const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
-    // conserve le blocage et le miroir-404 de la page ; le nom d'affichage vient de l'appartenance
+    // conserve le blocage et le miroir-404 de la page
     useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+    const { t: tCommon } = useTranslation("Common");
     const membership = useDatastoreMembership();
-    const datastoreName = datastoreLabel(membership?.community?.name, membership?.isSandbox);
+    const datastoreName = tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox });
 
     const reportQuery = useQuery<UploadReport, CartesApiException>({
         queryKey: RQKeys.datastore_upload_report(datastoreId, uploadId),

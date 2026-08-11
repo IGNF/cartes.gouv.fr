@@ -2,10 +2,10 @@ import { BreadcrumbProps, addBreadcrumbTranslations } from "@codegouvfr/react-ds
 
 import { Datastore } from "@/@types/app";
 import { CommunityDetailResponseDto } from "@/@types/entrepot";
-import { datastoreLabel } from "@/entrepot/utils/datastoreLabel";
 import { getTranslation } from "@/i18n/i18n";
 
 const { t } = getTranslation("Breadcrumb");
+const { t: tCommon } = getTranslation("Common");
 
 // Nom historique de la route (= clé i18n du fil d'Ariane), dérivé de l'id de route TanStack
 const breadcrumbNameByRouteId = {
@@ -101,11 +101,11 @@ const getBreadcrumb = (
             ...publishProps.segments,
             { label: t("datastore_selection"), linkProps: { to: "/tableau-de-bord/entrepots" } },
             datastoreId !== undefined && {
-                label: datastoreLabel(datastore?.name, datastoreIsSandbox),
+                label: tCommon("datastore_name", { name: datastore?.name, isSandbox: datastoreIsSandbox }),
                 linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } },
             },
         ].filter(Boolean) as BreadcrumbProps["segments"],
-        currentPageLabel: datastoreLabel(datastore?.name, datastoreIsSandbox) || "",
+        currentPageLabel: tCommon("datastore_name", { name: datastore?.name, isSandbox: datastoreIsSandbox }) || "",
     };
 
     const espacecoBaseProps: BreadcrumbProps = {
@@ -145,7 +145,7 @@ const getBreadcrumb = (
                     params.communityId !== undefined &&
                         community !== undefined &&
                         datastore !== undefined && {
-                            label: datastoreLabel(community?.name, communityIsSandbox),
+                            label: tCommon("datastore_name", { name: community?.name, isSandbox: communityIsSandbox }),
                             linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId: datastore._id } },
                         },
                 ].filter(Boolean) as BreadcrumbProps["segments"],
@@ -177,7 +177,7 @@ const getBreadcrumb = (
             return {
                 ...publishProps,
                 segments: [...publishProps.segments, { label: t("datastore_selection"), linkProps: { to: "/tableau-de-bord/entrepots" } }],
-                currentPageLabel: datastoreLabel(datastore?.name, datastoreIsSandbox),
+                currentPageLabel: tCommon("datastore_name", { name: datastore?.name, isSandbox: datastoreIsSandbox }),
             };
 
         case "datastore_datasheet_upload": {

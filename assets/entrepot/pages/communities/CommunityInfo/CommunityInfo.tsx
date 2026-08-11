@@ -24,7 +24,6 @@ import { useCommunity } from "@/entrepot/contexts/community";
 import api from "@/entrepot/api";
 import { sandboxCommunityId } from "@/env";
 import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
-import { datastoreLabel } from "@/entrepot/utils/datastoreLabel";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useMembership from "@/entrepot/hooks/useMembership";
 import { isSandboxCommunity } from "@/utils";
@@ -150,8 +149,11 @@ export default function CommunityInfo() {
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastoreLabel(datastore?.name ?? community.name, isSandbox) })} datastoreId={datastore?._id}>
-            <PageTitle title={t("title", { datastoreName: datastoreLabel(datastore?.name ?? community.name, isSandbox) })} />
+        <DatastoreMain
+            title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name ?? community.name, isSandbox }) })}
+            datastoreId={datastore?._id}
+        >
+            <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name ?? community.name, isSandbox }) })} />
 
             {datastore && <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />}
 
@@ -268,7 +270,7 @@ export default function CommunityInfo() {
                         },
                     ]}
                 >
-                    {t("leave_modal.body", { datastoreName: datastoreLabel(community?.name, isSandbox) })}
+                    {t("leave_modal.body", { datastoreName: tCommon("datastore_name", { name: community?.name, isSandbox }) })}
                 </leaveCommunityModal.Component>,
                 document.body
             )}

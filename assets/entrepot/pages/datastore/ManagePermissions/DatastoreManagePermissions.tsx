@@ -20,7 +20,6 @@ import PageTitle from "@/components/Layout/PageTitle";
 import Skeleton from "@/components/Utils/Skeleton";
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
-import { datastoreLabel } from "@/entrepot/utils/datastoreLabel";
 import { usePagination } from "@/hooks/usePagination";
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import { formatDateFromISO } from "@/utils";
@@ -85,8 +84,8 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     const { css } = useStyles();
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastoreLabel(datastore?.name, isSandbox) })} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName: datastoreLabel(datastore?.name, isSandbox) })} />
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastoreId}>
+            <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} />
 
             <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
 

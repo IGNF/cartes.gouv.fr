@@ -9,7 +9,6 @@ import DatastoreTertiaryNavigation from "@/entrepot/components/DatastoreTertiary
 import PageTitle from "@/components/Layout/PageTitle";
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
-import { datastoreLabel } from "@/entrepot/utils/datastoreLabel";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../i18n/i18n";
 import AnnexeUsage from "./storages/AnnexeUsage";
@@ -26,6 +25,7 @@ const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/cons
 
 const DatastoreManageStorage: FC = () => {
     const { t } = useTranslation("DatastoreManageStorage");
+    const { t: tCommon } = useTranslation("Common");
     const { datastoreId } = route.useParams();
     const { data: datastore, isFetching } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
     const isSandbox = useDatastoreMembership()?.isSandbox;
@@ -43,11 +43,11 @@ const DatastoreManageStorage: FC = () => {
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastoreLabel(datastore?.name, isSandbox) })} datastoreId={datastore._id}>
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastore._id}>
             <PageTitle
                 title={
                     <>
-                        {t("title", { datastoreName: datastoreLabel(datastore?.name, isSandbox) })}
+                        {t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}
                         {isFetching && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon />}
                     </>
                 }
