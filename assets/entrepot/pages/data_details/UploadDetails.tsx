@@ -6,6 +6,8 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
+import { datastoreLabel } from "@/entrepot/utils/datastoreLabel";
 import { UploadReport } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "@/entrepot/modules/RQKeys";
@@ -21,7 +23,10 @@ type UploadDetailsProps = {
 };
 
 const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
-    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+    // conserve le blocage et le miroir-404 de la page ; le nom d'affichage vient de l'appartenance
+    useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+    const membership = useDatastoreMembership();
+    const datastoreName = datastoreLabel(membership?.community?.name, membership?.isSandbox === true);
 
     const reportQuery = useQuery<UploadReport, CartesApiException>({
         queryKey: RQKeys.datastore_upload_report(datastoreId, uploadId),
@@ -80,7 +85,7 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
                                 },
                                 {
                                     label: "Rapport de livraison",
-                                    content: <ReportTab datastoreName={datastore?.name} reportQuery={reportQuery} />,
+                                    content: <ReportTab datastoreName={datastoreName} reportQuery={reportQuery} />,
                                 },
                             ]}
                         />

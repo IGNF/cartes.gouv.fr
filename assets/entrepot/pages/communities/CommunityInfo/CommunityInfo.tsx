@@ -22,9 +22,12 @@ import PageTitle from "@/components/Layout/PageTitle";
 import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useCommunity } from "@/entrepot/contexts/community";
 import api from "@/entrepot/api";
+import { sandboxCommunityId } from "@/env";
 import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import { datastoreLabel } from "@/entrepot/utils/datastoreLabel";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useMembership from "@/entrepot/hooks/useMembership";
+import { isSandboxCommunity } from "@/utils";
 import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
@@ -73,6 +76,7 @@ export default function CommunityInfo() {
     const userQuery = useUserQuery();
     const { data: user } = userQuery;
     const community: Community = useCommunity();
+    const isSandbox = isSandboxCommunity(community, sandboxCommunityId);
     const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(community.datastore?._id)); // communauté possiblement sans entrepôt
 
     const queryClient = useQueryClient();
@@ -146,11 +150,8 @@ export default function CommunityInfo() {
     });
 
     return (
-        <DatastoreMain
-            title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : (datastore?.name ?? community.name) })}
-            datastoreId={datastore?._id}
-        >
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : (datastore?.name ?? community.name) })} />
+        <DatastoreMain title={t("title", { datastoreName: datastoreLabel(datastore?.name ?? community.name, isSandbox) })} datastoreId={datastore?._id}>
+            <PageTitle title={t("title", { datastoreName: datastoreLabel(datastore?.name ?? community.name, isSandbox) })} />
 
             {datastore && <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />}
 
@@ -267,7 +268,7 @@ export default function CommunityInfo() {
                         },
                     ]}
                 >
-                    {t("leave_modal.body", { datastoreName: community.is_sandbox === true ? tCommon("sandbox") : community?.name })}
+                    {t("leave_modal.body", { datastoreName: datastoreLabel(community?.name, isSandbox) })}
                 </leaveCommunityModal.Component>,
                 document.body
             )}

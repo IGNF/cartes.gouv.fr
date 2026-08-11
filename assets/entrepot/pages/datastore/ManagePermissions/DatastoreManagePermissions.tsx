@@ -19,6 +19,8 @@ import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
 import Skeleton from "@/components/Utils/Skeleton";
 import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
+import { datastoreLabel } from "@/entrepot/utils/datastoreLabel";
 import { usePagination } from "@/hooks/usePagination";
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import { formatDateFromISO } from "@/utils";
@@ -43,6 +45,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
     // Le datastore (le chargement initial est couvert par la Suspense de la route)
     const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+    const isSandbox = useDatastoreMembership()?.isSandbox === true;
 
     // Les permissions
     const {
@@ -82,8 +85,8 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     const { css } = useStyles();
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} />
+        <DatastoreMain title={t("title", { datastoreName: datastoreLabel(datastore?.name, isSandbox) })} datastoreId={datastoreId}>
+            <PageTitle title={t("title", { datastoreName: datastoreLabel(datastore?.name, isSandbox) })} />
 
             <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
 
