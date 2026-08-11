@@ -28,7 +28,7 @@ const DatastoreManageStorage: FC = () => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { datastoreId } = route.useParams();
     const { data: datastore, isFetching } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
-    const isSandbox = useDatastoreMembership()?.isSandbox === true;
+    const isSandbox = useDatastoreMembership()?.isSandbox;
 
     const navigate = useNavigate();
     const { tab: currentTab } = route.useSearch();

@@ -32,7 +32,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
     const { data: metadata } = metadataQuery;
 
     const datastoreQuery = useQuery(datastoreQueryOptions(datastoreId));
-    const isSandbox = useDatastoreMembership()?.isSandbox === true;
+    const isSandbox = useDatastoreMembership()?.isSandbox;
 
     const frequencyCode = useMemo(() => {
         const code = metadata?.csw_metadata?.frequency_code;

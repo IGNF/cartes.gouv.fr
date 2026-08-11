@@ -45,7 +45,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
     // Le datastore (le chargement initial est couvert par la Suspense de la route)
     const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
-    const isSandbox = useDatastoreMembership()?.isSandbox === true;
+    const isSandbox = useDatastoreMembership()?.isSandbox;
 
     // Les permissions
     const {

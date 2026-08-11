@@ -50,7 +50,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     // titre, sandbox et navigation dérivés de l'appartenance (user_me, synchrone) : la requête datastore ne bloque plus la page
     const membership = useDatastoreMembership();
     const community = membership?.community;
-    const isSandbox = membership?.isSandbox === true;
+    const isSandbox = membership?.isSandbox;
     const datastoreName = datastoreLabel(community?.name, isSandbox);
 
     const datasheetListQuery = useQuery(datasheetListQueryOptions(datastoreId));

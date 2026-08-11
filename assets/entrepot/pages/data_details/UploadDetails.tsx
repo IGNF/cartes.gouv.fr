@@ -26,7 +26,7 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
     // conserve le blocage et le miroir-404 de la page ; le nom d'affichage vient de l'appartenance
     useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
     const membership = useDatastoreMembership();
-    const datastoreName = datastoreLabel(membership?.community?.name, membership?.isSandbox === true);
+    const datastoreName = datastoreLabel(membership?.community?.name, membership?.isSandbox);
 
     const reportQuery = useQuery<UploadReport, CartesApiException>({
         queryKey: RQKeys.datastore_upload_report(datastoreId, uploadId),
