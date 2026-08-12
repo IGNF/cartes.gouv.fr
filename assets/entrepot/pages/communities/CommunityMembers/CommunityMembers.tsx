@@ -18,6 +18,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import { Datastore, UserRightsResponseDto } from "../../../../@types/app";
+import { communityMembersQueryOptions } from "@/entrepot/hooks/queries/communityQueryOptions";
 import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
@@ -75,11 +76,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(community.datastore?._id)); // communauté possiblement sans entrepôt
 
     // Les membres de cette communauté
-    const { data: communityMembers, isLoading } = useQuery({
-        queryKey: RQKeys.community_members(community._id),
-        queryFn: ({ signal }) => api.community.getMembers(community._id, { signal }),
-        staleTime: 20000,
-    });
+    const { data: communityMembers, isLoading } = useQuery(communityMembersQueryOptions(community._id));
 
     const communitySupervisor = useMemo(() => {
         return community?.supervisor._id;

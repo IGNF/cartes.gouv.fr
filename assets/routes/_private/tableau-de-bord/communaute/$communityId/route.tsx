@@ -1,13 +1,18 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
-import CommunityGate from "@/entrepot/components/CommunityGate";
-import api from "@/entrepot/api";
+import { CommunityProvider } from "@/entrepot/contexts/community";
+import { communityQueryOptions } from "@/entrepot/hooks/queries/communityQueryOptions";
+import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import useUserQuery from "@/hooks/queries/useUserQuery";
+import useRequiredRights from "@/entrepot/hooks/useRequiredRights";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { revalidateUser } from "@/modules/queryClient";
+import ApiErrorPage from "@/pages/error/ApiErrorPage";
+import Forbidden from "@/pages/error/Forbidden";
 import PageNotFound from "@/pages/error/PageNotFound";
-import { findMembership } from "@/utils";
-import { delta } from "@/utils/delta";
+import { findMembership, hasAccess } from "@/utils";
 
 // Gate synchrone du sous-arbre communauté : user_me est bootstrappé dans le cache, aucun fetch (light-first)
 export const Route = createFileRoute("/_private/tableau-de-bord/communaute/$communityId")({
@@ -25,23 +30,27 @@ export const Route = createFileRoute("/_private/tableau-de-bord/communaute/$comm
         return { membership };
     },
     loader: ({ context, params }) => {
-        // préchauffe la communauté sans bloquer le rendu du shell (le datastore éventuel dépend de la réponse)
-        void context.queryClient.prefetchQuery({
-            queryKey: RQKeys.community(params.communityId),
-            queryFn: ({ signal }) => api.community.get(params.communityId, { signal }),
-            staleTime: delta.seconds(20),
-        });
+        void context.queryClient.prefetchQuery(communityQueryOptions(params.communityId));
+
+        // le datastore éventuel part en parallèle : son id vient de membership, pas de la réponse communauté
+        const datastoreId = context.membership.community?.datastore;
+        if (datastoreId !== undefined) {
+            void context.queryClient.prefetchQuery(datastoreQueryOptions(datastoreId));
+        }
     },
     component: CommunityLayoutRoute,
+    errorComponent: ApiErrorPage,
+
     notFoundComponent: PageNotFound,
 });
 
 function CommunityLayoutRoute() {
     const { communityId } = Route.useParams();
 
-    return (
-        <CommunityGate communityId={communityId}>
-            <Outlet />
-        </CommunityGate>
-    );
+    const { data: community } = useSuspenseQuery(communityQueryOptions(communityId));
+
+    const { data: user } = useUserQuery();
+    const requiredRights = useRequiredRights();
+
+    return <CommunityProvider community={community}>{hasAccess(user, { communityId }, requiredRights) ? <Outlet /> : <Forbidden />}</CommunityProvider>;
 }

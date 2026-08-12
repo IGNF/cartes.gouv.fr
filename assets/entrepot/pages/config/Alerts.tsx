@@ -15,7 +15,7 @@ import CreateAlert, { alertSchema } from "../../../components/Modal/CreateAlert/
 import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "../../../i18n";
 import { formatDateTime } from "../../../utils";
-import { Annexe, Datastore } from "../../../@types/app";
+import { Annexe } from "../../../@types/app";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import RQKeys from "@/entrepot/modules/RQKeys";
 import { useAlertStore } from "../../../stores/AlertStore";
@@ -23,8 +23,7 @@ import api from "../../api";
 
 import "./Alerts.scss";
 import Main from "@/components/Layout/Main";
-import { useCommunity } from "@/entrepot/contexts/community";
-import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import { datastoreAnnexeListQueryOptions } from "@/entrepot/hooks/queries/datastoreAnnexeListQueryOptions";
 
 function getNewAlert() {
     return {
@@ -71,28 +70,27 @@ interface INotification {
     title: string;
 }
 
-const Alerts: FC = () => {
+type AlertsProps = {
+    /** id de l'entrepôt de la communauté de configuration (communauté possiblement sans entrepôt) */
+    datastoreId?: string;
+};
+
+const Alerts: FC<AlertsProps> = ({ datastoreId }) => {
     const alerts = useAlertStore(({ alerts }) => alerts);
     const [alert, setAlert] = useState<IAlert>(getNewAlert());
     const { t } = useTranslation("alerts");
     const title = t("title");
     const [notification, setNotification] = useState<INotification | null>(null);
     const queryClient = useQueryClient();
-    const community = useCommunity();
-    const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(community.datastore?._id)); // communauté possiblement sans entrepôt
 
     // Load annex list and find annex matching the given path
-    const { data } = useQuery<Annexe[], CartesApiException>({
-        queryKey: RQKeys.datastore_annexe_list(datastore?._id ?? ""),
-        queryFn: ({ signal }) => api.annexe.getAll(datastore!._id, { signal }),
-        enabled: datastore !== undefined,
-    });
+    const { data } = useQuery<Annexe[], CartesApiException>(datastoreAnnexeListQueryOptions(datastoreId));
     const annexe = useMemo(() => data?.find((annexe) => annexe.paths.includes(annexePath)), [data]);
 
     // Update alerts mutation
     const { mutate, isPending } = useMutation<Annexe | undefined, CartesApiException, IAlert[]>({
         mutationFn: (alerts) => {
-            if (!datastore) {
+            if (!datastoreId) {
                 return Promise.reject({ code: 400, status: "error", message: "La communauté n'a pas d'entrepôt" } satisfies CartesApiException);
             }
             const data = alerts.map((alert) => ({ ...alert, date: alert.date.toISOString() }));
@@ -102,9 +100,9 @@ const Alerts: FC = () => {
             const file = new File([blob], fileName);
             queryClient.setQueryData(RQKeys.alerts(), () => data);
             if (annexe?._id) {
-                return api.annexe.replaceFile(datastore._id, annexe._id, file);
+                return api.annexe.replaceFile(datastoreId, annexe._id, file);
             }
-            return api.annexe.add(datastore._id, annexePath, file);
+            return api.annexe.add(datastoreId, annexePath, file);
         },
         onError: (error) => {
             setNotification({ severity: "error", title: t("alerts_update_error") });

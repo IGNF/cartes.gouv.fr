@@ -1,16 +1,14 @@
-import { useQueryErrorResetBoundary } from "@tanstack/react-query";
-import { createFileRoute, ErrorComponentProps, notFound, Outlet, SearchParamError, useRouter } from "@tanstack/react-router";
+import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
 import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useRequiredRights from "@/entrepot/hooks/useRequiredRights";
 import RQKeys from "@/entrepot/modules/RQKeys";
-import { CartesApiException } from "@/modules/jsonFetch";
 import { revalidateUser } from "@/modules/queryClient";
+import ApiErrorPage from "@/pages/error/ApiErrorPage";
 import Forbidden from "@/pages/error/Forbidden";
 import PageNotFound from "@/pages/error/PageNotFound";
-import UnexpectedError from "@/pages/error/UnexpectedError";
 import { findMembership, hasAccess } from "@/utils";
 
 // Gate synchrone du sous-arbre datastore : user_me est bootstrappé dans le cache, aucun fetch (light-first)
@@ -32,37 +30,10 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
         void context.queryClient.prefetchQuery(datastoreQueryOptions(params.datastoreId));
     },
     component: DatastoreLayoutRoute,
-    errorComponent: DatastoreErrorComponent,
+    errorComponent: ApiErrorPage,
 
     notFoundComponent: PageNotFound,
 });
-
-// Partition miroir-404 (portage de DatastoreLayout) : les erreurs des useSuspenseQuery des pages remontent ici
-function DatastoreErrorComponent({ error }: ErrorComponentProps) {
-    const router = useRouter();
-    const { reset } = useQueryErrorResetBoundary();
-
-    // Un échec de validateSearch d'une feuille s'arrête ici (errorComponent le plus proche) → même mapping 404 qu'à la racine
-    if (error instanceof SearchParamError) {
-        return <PageNotFound />;
-    }
-
-    // 404 : ressource inexistante OU inaccessible (l'API Entrepôt répond 404 dans les deux cas, comportement miroir voulu)
-    if ((error as Partial<CartesApiException>)?.code === 404) {
-        return <PageNotFound />;
-    }
-
-    // toute autre erreur (500, réseau...) n'est PAS une 404
-    return (
-        <UnexpectedError
-            message={error.message}
-            onRetry={() => {
-                reset();
-                router.invalidate();
-            }}
-        />
-    );
-}
 
 function DatastoreLayoutRoute() {
     const { datastoreId } = Route.useParams();
