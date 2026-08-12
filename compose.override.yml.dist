@@ -1,0 +1,6 @@
+# Copier ce fichier en compose.override.yml (non versionné) pour les ajustements
+# propres à votre machine. Fusionné automatiquement par `docker compose up`.
+services:
+    app_dev:
+        user: "1000:1000" # id -u / id -g
+        # userns_mode: "host" # si le daemon utilise userns-remap

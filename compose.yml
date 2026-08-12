@@ -33,7 +33,7 @@ services:
         networks:
             - web_dev
         restart: unless-stopped
-        user: "1000:1000" # à ajuster en fonction de votre installation
+        user: "1000:1000" # à ajuster via compose.override.yml (voir compose.override.yml.dist)
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.cartesgouvfr.rule=Host(`cartesgouvfr-dev.docker.localhost`)"

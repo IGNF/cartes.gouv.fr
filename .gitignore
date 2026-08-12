@@ -23,6 +23,9 @@ yarn-error.log
 .history
 /SAVES/
 
+# ajustements Docker Compose propres à la machine (voir compose.override.yml.dist)
+/compose.override.yml
+
 ### Cypress
 /cypress/screenshots
 /cypress/videos
