@@ -4,6 +4,7 @@ import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { JSX, lazy, Suspense, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { useStyles } from "tss-react";
 
 import { DatasheetDetailed, Metadata, Service } from "@/@types/app";
 import DatasheetMain from "@/components/Layout/Datasheet/DatasheetMain";
@@ -17,13 +18,13 @@ import useCatalogueDatasheetUrl from "@/hooks/useCatalogueDatasheetUrl";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
-import { delta } from "@/utils";
 import { routes } from "@/router/router";
-import { useStyles } from "tss-react";
+import { delta } from "@/utils";
 import DatasheetHeader from "./DatasheetHeader";
 
 const DescriptionTab = lazy(() => import("../DescriptionTab/DescriptionTab"));
 const DatasetTabNext = lazy(() => import("../DatasetTabNext/DatasetTabNext"));
+const ServicesListTabNext = lazy(() => import("../ServiceListTab/ServicesListTabNext"));
 
 const publishConfirmModal = createModal({
     id: "datasheet-next-publish-confirm-modal",
@@ -48,24 +49,16 @@ export const deleteUploadConfirmModal = createModal({
 
 export enum DatasheetViewActiveTabEnum {
     Description = "description",
-    Preview = "preview",
     Annexes = "annexes",
     Dataset = "dataset",
-    Wfs = "wfs",
-    Wms = "wms",
-    Tms = "tms",
-    Wmts = "wmts",
+    Services = "services",
 }
 
 const tabs: Array<{ label: string; value: DatasheetViewActiveTabEnum }> = [
     { label: "Description", value: DatasheetViewActiveTabEnum.Description },
-    { label: "Aperçu", value: DatasheetViewActiveTabEnum.Preview },
     { label: "Annexes", value: DatasheetViewActiveTabEnum.Annexes },
     { label: "Données", value: DatasheetViewActiveTabEnum.Dataset },
-    { label: "Flux WFS", value: DatasheetViewActiveTabEnum.Wfs },
-    { label: "Flux WMS", value: DatasheetViewActiveTabEnum.Wms },
-    { label: "Flux TMS", value: DatasheetViewActiveTabEnum.Tms },
-    { label: "Flux WMTS", value: DatasheetViewActiveTabEnum.Wmts },
+    { label: "Flux", value: DatasheetViewActiveTabEnum.Services },
 ];
 
 type DatasheetViewProps = {
@@ -230,13 +223,9 @@ export default function DatasheetViewNext(props: DatasheetViewProps) {
                                 {(() => {
                                     const tabContent: Record<DatasheetViewActiveTabEnum, JSX.Element> = {
                                         [DatasheetViewActiveTabEnum.Description]: <DescriptionTab datastoreId={datastoreId} datasheetName={datasheetName} />,
-                                        [DatasheetViewActiveTabEnum.Preview]: <p>Aperçu</p>,
                                         [DatasheetViewActiveTabEnum.Annexes]: <p>Annexes</p>,
                                         [DatasheetViewActiveTabEnum.Dataset]: <DatasetTabNext datastoreId={datastoreId} datasheetName={datasheetName} />,
-                                        [DatasheetViewActiveTabEnum.Wfs]: <p>Flux WFS</p>,
-                                        [DatasheetViewActiveTabEnum.Wms]: <p>Flux WMS</p>,
-                                        [DatasheetViewActiveTabEnum.Tms]: <p>Flux TMS</p>,
-                                        [DatasheetViewActiveTabEnum.Wmts]: <p>Flux WMTS</p>,
+                                        [DatasheetViewActiveTabEnum.Services]: <ServicesListTabNext datastoreId={datastoreId} datasheetName={datasheetName} />,
                                     };
 
                                     return tabContent[activeTab as DatasheetViewActiveTabEnum] ?? <p>Onglet inconnu</p>;

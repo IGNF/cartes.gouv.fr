@@ -20,8 +20,9 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
 import { formatDateFromISO, getDatasheetPublicationsCount, parseIntegrationProgress } from "@/utils";
-import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetViewNext";
 import useDeleteUploadMutation from "../../../../../hooks/queries/useDeleteUploadMutation";
+import DatasheetViewTab from "../../DatasheetViewTab";
+import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetViewNext";
 import DatasetAddBanners from "./DatasetAddBanners";
 
 type DatasetType = "vector" | "raster";
@@ -210,14 +211,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
                 />
             )}
 
-            <div
-                className={cx(
-                    fr.cx("fr-container", "fr-py-4w"),
-                    css({
-                        backgroundColor: fr.colors.decisions.background.default.grey.default,
-                    })
-                )}
-            >
+            <DatasheetViewTab>
                 <h2 className={fr.cx("fr-h5", "fr-mb-10v")}>Données</h2>
 
                 <DatasetAddBanners />
@@ -294,7 +288,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName }: DatasetTa
                         />
                     </>
                 )}
-            </div>
+            </DatasheetViewTab>
 
             {isDeletingUpload && (
                 <Wait>

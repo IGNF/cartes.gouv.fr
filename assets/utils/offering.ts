@@ -1,5 +1,6 @@
-import { OfferingStatusEnum, OfferingTypeEnum } from "@/@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
 import { OfferingStandardListResponseDtoStatusEnum } from "@/@types/entrepot";
+import { routes } from "@/router/router";
 
 /**
  * Indique si l'offering n'est plus diffusée (dépubliée ou en cours de dépublication) :
@@ -7,6 +8,65 @@ import { OfferingStandardListResponseDtoStatusEnum } from "@/@types/entrepot";
  */
 export const isOfferingUnavailable = (status: OfferingStatusEnum | OfferingStandardListResponseDtoStatusEnum): boolean =>
     [OfferingStatusEnum.UNPUBLISHING, OfferingStatusEnum.UNPUBLISHED].includes(status as OfferingStatusEnum);
+
+export const editableOfferingTypes: OfferingTypeEnum[] = [
+    OfferingTypeEnum.WFS,
+    OfferingTypeEnum.WMSVECTOR,
+    OfferingTypeEnum.WMSRASTER,
+    OfferingTypeEnum.WMTSTMS,
+];
+
+export function getServiceEditLink(datastoreId: string, datasheetName: string, service: Service) {
+    switch (service.type) {
+        case OfferingTypeEnum.WMSVECTOR:
+            return routes.datastore_wms_vector_service_edit({
+                datastoreId,
+                vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
+                offeringId: service._id,
+                datasheetName,
+            }).link;
+
+        case OfferingTypeEnum.WMSRASTER:
+            return routes.datastore_pyramid_raster_wms_raster_service_edit({
+                datastoreId,
+                pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                offeringId: service._id,
+                datasheetName,
+            }).link;
+
+        case OfferingTypeEnum.WFS:
+            return routes.datastore_wfs_service_edit({
+                datastoreId,
+                vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
+                offeringId: service._id,
+                datasheetName,
+            }).link;
+
+        case OfferingTypeEnum.WMTSTMS:
+            switch (service.configuration.pyramid?.type) {
+                case StoredDataTypeEnum.ROK4PYRAMIDVECTOR:
+                    return routes.datastore_pyramid_vector_tms_service_edit({
+                        datastoreId,
+                        pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                        offeringId: service._id,
+                        datasheetName,
+                    }).link;
+                case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
+                    return routes.datastore_pyramid_raster_wmts_service_edit({
+                        datastoreId,
+                        pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                        offeringId: service._id,
+                        datasheetName,
+                    }).link;
+
+                default:
+                    return routes.page_not_found().link;
+            }
+
+        default:
+            return routes.page_not_found().link;
+    }
+}
 
 export const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
     switch (type) {
