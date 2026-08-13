@@ -164,6 +164,13 @@ const datastoreRoutes = {
         },
         (p) => `/donnees/${p.datasheetName}/next/ajouter`
     ),
+    datastore_service_add_next: datastoreRoute.extend(
+        {
+            datasheetName: param.path.string,
+        },
+        (p) => `/donnees/${p.datasheetName}/next/service/ajout`
+    ),
+
     datastore_stored_data_details: datastoreRoute.extend(
         {
             storedDataId: param.path.string,
