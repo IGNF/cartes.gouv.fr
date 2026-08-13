@@ -3,7 +3,6 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useToggle } from "@mantine/hooks";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
@@ -11,15 +10,13 @@ import { symToStr } from "tsafe/symToStr";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import useCommunityRights from "@/hooks/useCommunityRights";
-import { CartesApiException } from "@/modules/jsonFetch";
+import useUnpublishServiceMutation from "@/hooks/queries/useUnpublishServiceMutation";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
-import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "../../../../../@types/app";
 import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
 import Wait from "../../../../../components/Utils/Wait";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../router/router";
-import { offeringTypeDisplayName } from "../../../../../utils";
-import api from "../../../../api";
+import { editableOfferingTypes, getServiceEditLink, offeringTypeDisplayName } from "../../../../../utils";
 import ListItem from "../ListItem";
 import ServiceDesc from "./ServiceDesc";
 
@@ -29,7 +26,6 @@ type ServicesListItemProps = {
     datasheetName: string;
 };
 const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, datastoreId }) => {
-    const queryClient = useQueryClient();
     const setMessage = useSnackbarStore((state) => state.setMessage);
 
     const unpublishServiceConfirmModal = createModal({
@@ -37,27 +33,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
         isOpenedByDefault: false,
     });
 
-    const unpublishServiceMutation = useMutation<null, CartesApiException, Service>({
-        mutationFn: (service: Service) => {
-            if (![OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WMTSTMS].includes(service.type)) {
-                console.warn(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
-                return Promise.reject(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
-            }
-
-            return api.service.unpublishService(datastoreId, service._id);
-        },
-        onSuccess() {
-            queryClient.setQueryData(
-                RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
-                (servicesList: Service[] | undefined): Service[] | undefined => {
-                    return servicesList?.filter((s) => s._id !== service._id);
-                }
-            );
-
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
-        },
-    });
+    const unpublishServiceMutation = useUnpublishServiceMutation(datastoreId, datasheetName);
 
     const [showDescription, toggleShowDescription] = useToggle();
 
@@ -109,61 +85,11 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
                         disabled: service.open === true,
                     },
-                    [OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) &&
+                    editableOfferingTypes.includes(service.type) &&
                         (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && {
                             text: "Modifier les informations de publication",
                             iconId: "ri-edit-box-line",
-                            linkProps: (() => {
-                                switch (service.type) {
-                                    case OfferingTypeEnum.WMSVECTOR:
-                                        return routes.datastore_wms_vector_service_edit({
-                                            datastoreId,
-                                            vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
-                                            offeringId: service._id,
-                                            datasheetName,
-                                        }).link;
-
-                                    case OfferingTypeEnum.WMSRASTER:
-                                        return routes.datastore_pyramid_raster_wms_raster_service_edit({
-                                            datastoreId,
-                                            pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                            offeringId: service._id,
-                                            datasheetName,
-                                        }).link;
-
-                                    case OfferingTypeEnum.WFS:
-                                        return routes.datastore_wfs_service_edit({
-                                            datastoreId,
-                                            vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
-                                            offeringId: service._id,
-                                            datasheetName,
-                                        }).link;
-
-                                    case OfferingTypeEnum.WMTSTMS:
-                                        switch (service.configuration.pyramid?.type) {
-                                            case StoredDataTypeEnum.ROK4PYRAMIDVECTOR:
-                                                return routes.datastore_pyramid_vector_tms_service_edit({
-                                                    datastoreId,
-                                                    pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                                    offeringId: service._id,
-                                                    datasheetName,
-                                                }).link;
-                                            case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
-                                                return routes.datastore_pyramid_raster_wmts_service_edit({
-                                                    datastoreId,
-                                                    pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                                    offeringId: service._id,
-                                                    datasheetName,
-                                                }).link;
-
-                                            default:
-                                                return routes.page_not_found().link;
-                                        }
-
-                                    default:
-                                        return routes.page_not_found().link;
-                                }
-                            })(),
+                            linkProps: getServiceEditLink(datastoreId, datasheetName, service),
                         },
                     service.type === OfferingTypeEnum.WMSVECTOR &&
                         (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)) && {
