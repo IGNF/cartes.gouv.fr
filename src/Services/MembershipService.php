@@ -62,6 +62,17 @@ class MembershipService
     }
 
     /**
+     * À appeler après une mutation d'appartenance faite par l'utilisateur lui-même.
+     */
+    public function invalidateCurrentUser(): void
+    {
+        $user = $this->security->getUser();
+        if ($user instanceof User && null !== $user->getKeycloakId()) {
+            $this->entrepotUserCache->invalidate($user->getKeycloakId());
+        }
+    }
+
+    /**
      * Cherche dans le token, puis re-vérifie une fois avec des données fraîches si absent
      * (l'appartenance a pu changer il y a moins de 60 s, le TTL du cache).
      *

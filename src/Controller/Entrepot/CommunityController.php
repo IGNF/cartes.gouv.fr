@@ -48,6 +48,8 @@ class CommunityController extends AbstractController implements ApiControllerInt
         try {
             $data = json_decode($request->getContent(), true);
             $community = $this->communityApiService->modifyCommunity($communityId, $data)->array();
+            // le nom de la communauté fait partie des infos dérivées de l'appartenance
+            $this->membershipService->invalidateCurrentUser();
 
             return new JsonResponse($community);
         } catch (ApiException $ex) {
@@ -104,6 +106,10 @@ class CommunityController extends AbstractController implements ApiControllerInt
 
             $this->communityApiService->addOrModifyUserRights($communityId, $userId, ['rights' => $rights])->await();
 
+            if ($userId === $user->getId()) {
+                $this->membershipService->invalidateCurrentUser();
+            }
+
             return new JsonResponse([
                 'user' => $userId,
                 'rights' => $rights,
@@ -135,6 +141,10 @@ class CommunityController extends AbstractController implements ApiControllerInt
             }
 
             $this->communityApiService->removeUserRights($communityId, $userId)->await();
+
+            if ($userId === $user->getId()) {
+                $this->membershipService->invalidateCurrentUser();
+            }
 
             return new JsonResponse(['user' => $userId]);
         } catch (ApiException $ex) {
