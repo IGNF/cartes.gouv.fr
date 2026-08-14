@@ -8,6 +8,7 @@ export const externalUrls = {
     help: appRoot + "/aide/",
     helpProducerGuide: appRoot + "/aide/fr/guides-producteur/",
     helpProducerGuideGeneral: appRoot + "/aide/fr/guides-producteur/presentation-producteur/generalites-producteur/",
+    helpProducerGuideChooseServiceType: appRoot + "/aide/fr/guides-producteur/publier-des-donnees-via-cartes-gouv/choisir-son-flux/",
     helpUserGuideExploreMaps: appRoot + "/aide/fr/guides-utilisateur/visualiseur-cartographique/generalites-visualiseur/",
     helpUserGuideCatalogueGeneral: appRoot + "/aide/fr/guides-utilisateur/rechercher-une-donnee/generalites-catalogue/",
     helpUserGuideGeopfServicesTutorial: appRoot + "/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/tutoriels/",
