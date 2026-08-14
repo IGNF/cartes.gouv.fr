@@ -17,6 +17,7 @@ use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
 use App\Services\GeonetworkApiService;
+use App\Services\MembershipService;
 use App\Services\SandboxService;
 use App\Utils;
 use Psr\Log\LoggerInterface;
@@ -49,6 +50,7 @@ class CartesServiceApiService
         private SandboxService $sandboxService,
         private CartesStylesApiService $cartesStylesApiService,
         private GeonetworkApiService $geonetworkApiService,
+        private MembershipService $membershipService,
         private CacheInterface $cache,
         private LoggerInterface $logger,
         HttpClientInterface $httpClient,
@@ -577,8 +579,8 @@ class CartesServiceApiService
      */
     private function addPermissionForCurrentCommunity(string $datastoreId, array $offering): void
     {
-        $datastore = $this->datastoreApiService->get($datastoreId);
-        $this->addPermissionForCommunity($datastoreId, $datastore['community']['_id'], $offering);
+        $communityId = $this->membershipService->getDatastoreCommunityId($datastoreId);
+        $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
     }
 
     /**
