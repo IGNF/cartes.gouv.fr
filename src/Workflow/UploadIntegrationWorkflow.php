@@ -285,7 +285,7 @@ class UploadIntegrationWorkflow
         if (isset($upload['tags']['email_notification']) && filter_var($upload['tags']['email_notification'], FILTER_VALIDATE_BOOLEAN)) {
             /** @var \App\Security\User|null */
             $user = $this->security->getUser();
-            $userEmail = $user->getEmail();
+            $userEmail = $user?->getEmail();
             $datasheetName = $upload['tags'][CommonTags::DATASHEET_NAME] ?? null;
 
             if ($userEmail && $datasheetName) {
