@@ -10,8 +10,8 @@ use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
+use App\Services\MembershipService;
 use App\Services\RSSFeed\RSSFeed;
 use App\Utils;
 use OpenApi\Attributes as OA;
@@ -38,7 +38,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
 
     public function __construct(
         private AnnexeApiService $annexeApiService,
-        private DatastoreApiService $datastoreApiService,
+        private MembershipService $membershipService,
         private MetadataApiService $metadataApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
         private CswMetadataHelper $metadataHelper,
@@ -160,7 +160,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function addThumbnail(string $datastoreId, Request $request): JsonResponse
     {
         try {
-            $datastore = $this->datastoreApiService->get($datastoreId);
+            $datastoreTechnicalName = $this->membershipService->getDatastoreTechnicalName($datastoreId);
             $datasheetName = $request->request->get('datasheetName');
             $annexeUrl = $this->parameterBag->get('annexes_url');
 
@@ -183,7 +183,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             }
 
             $annexe = $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
-            $annexe['url'] = $annexeUrl.'/'.$datastore['technical_name'].$annexe['paths'][0];
+            $annexe['url'] = $annexeUrl.'/'.$datastoreTechnicalName.$annexe['paths'][0];
 
             // Creation ou mise a jour des métadonnées
             $metadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
