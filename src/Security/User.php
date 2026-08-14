@@ -143,6 +143,36 @@ class User implements UserInterface
         return $this->communitiesMember;
     }
 
+    /**
+     * `community.datastore` est un id string dans users/me, absent si la communauté n'a pas de datastore.
+     *
+     * @return array<mixed>|null
+     */
+    public function findMembershipByDatastore(string $datastoreId): ?array
+    {
+        foreach ($this->communitiesMember as $member) {
+            if (($member['community']['datastore'] ?? null) === $datastoreId) {
+                return $member;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<mixed>|null
+     */
+    public function findMembershipByCommunity(string $communityId): ?array
+    {
+        foreach ($this->communitiesMember as $member) {
+            if (($member['community']['_id'] ?? null) === $communityId) {
+                return $member;
+            }
+        }
+
+        return null;
+    }
+
     public function getAccountCreationDate(): ?\DateTimeInterface
     {
         return $this->accountCreationDate;
