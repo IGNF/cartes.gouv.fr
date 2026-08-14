@@ -7,7 +7,7 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\MembershipService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -33,7 +33,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
     public function __construct(
         private AnnexeApiService $annexeApiService,
-        private DatastoreApiService $datastoreApiService,
+        private MembershipService $membershipService,
         private CartesMetadataApiService $cartesMetadataApiService,
         private Filesystem $fs,
         ParameterBagInterface $parameters,
@@ -66,8 +66,6 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             $documentDescription = $request->request->get('description');
 
             $files = $request->files;
-
-            $datastore = $this->datastoreApiService->get($datastoreId);
 
             /** @var array<mixed> $listAnnexe entité annexe de l'API entrepôt */
             $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
@@ -108,8 +106,10 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
                     $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], ["datasheet_name=$datasheetName", 'type=document'], true);
 
+                    $datastoreTechnicalName = $this->membershipService->getDatastoreTechnicalName($datastoreId);
+
                     $newDocument['id'] = $fileAnnexe['_id'];
-                    $newDocument['url'] = $this->annexesBaseUrl.'/'.$datastore['technical_name'].$fileAnnexe['paths'][0];
+                    $newDocument['url'] = $this->annexesBaseUrl.'/'.$datastoreTechnicalName.$fileAnnexe['paths'][0];
 
                     break;
             }
