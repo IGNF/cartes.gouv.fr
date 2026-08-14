@@ -190,12 +190,11 @@ class CartesStylesApiService
     }
 
     /**
-     * @param array<mixed> $datastore
      * @param array<mixed> $annexe
      */
-    public function getAnnexeAbsoluteUrl(array $datastore, array $annexe): string
+    public function getAnnexeAbsoluteUrl(string $datastoreTechnicalName, array $annexe): string
     {
-        return $this->parameters->get('annexes_url').'/'.$datastore['technical_name'].$annexe['paths'][0];
+        return $this->parameters->get('annexes_url').'/'.$datastoreTechnicalName.$annexe['paths'][0];
     }
 
     /**
