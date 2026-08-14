@@ -6,8 +6,9 @@ use App\Constants\EntrepotApi\Community;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
+use App\Security\User;
 use App\Services\EntrepotApi\CommunityApiService;
-use App\Services\EntrepotApi\UserApiService;
+use App\Services\MembershipService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,7 +26,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
 {
     public function __construct(
         private CommunityApiService $communityApiService,
-        private UserApiService $userApiService,
+        private MembershipService $membershipService,
     ) {
     }
 
@@ -70,18 +71,17 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function updateMember(string $communityId, Request $request): JsonResponse
     {
         try {
-            $me = $this->userApiService->getMe()->array();
+            $user = $this->getUser();
+            assert($user instanceof User);
 
             // Suis-je membre de cette communaute
-            $communityMember = array_values(array_filter($me['communities_member'], function ($member) use ($communityId) {
-                return $member['community']['_id'] == $communityId;
-            }));
-            if (0 === count($communityMember)) {
+            $membership = $this->membershipService->findByCommunity($communityId);
+            if (null === $membership) {
                 throw new CartesApiException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
             // Ai-je le droit de modifier les membres ?
-            if (!$this->_allowedToModifyMembers($communityMember[0], $me)) {
+            if (!$this->_allowedToModifyMembers($membership, $user->getId())) {
                 throw new CartesApiException("Vous n'avez pas les droits pour ajouter un utilisateur ou modifier ses permissions", JsonResponse::HTTP_BAD_REQUEST);
             }
 
@@ -117,13 +117,12 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function removeMember(string $communityId, Request $request): JsonResponse
     {
         try {
-            $me = $this->userApiService->getMe()->array();
+            $user = $this->getUser();
+            assert($user instanceof User);
 
             // Suis-je membre de cette communaute
-            $communityMember = array_values(array_filter($me['communities_member'], function ($member) use ($communityId) {
-                return $member['community']['_id'] == $communityId;
-            }));
-            if (0 === count($communityMember)) {
+            $membership = $this->membershipService->findByCommunity($communityId);
+            if (null === $membership) {
                 throw new CartesApiException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
@@ -131,7 +130,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $userId = $data['user_id'];
 
             // Ai-je le droit de modifier les membres ?
-            if ($me['_id'] !== $userId && !$this->_allowedToModifyMembers($communityMember[0], $me)) {
+            if ($user->getId() !== $userId && !$this->_allowedToModifyMembers($membership, $user->getId())) {
                 throw new CartesApiException("Vous n'avez pas les droits pour supprimer un membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
@@ -164,18 +163,17 @@ class CommunityController extends AbstractController implements ApiControllerInt
      *  - si je suis superviseur
      *  - si j'ai le droit COMMUNITY
      *
-     * @param array<mixed> $communityMember
-     * @param array<mixed> $me
+     * @param array<mixed> $membership
      *
      * @return bool
      */
-    private function _allowedToModifyMembers($communityMember, $me)
+    private function _allowedToModifyMembers($membership, ?string $myUserId)
     {
-        if ($me['_id'] === $communityMember['community']['supervisor']) {
+        if ($myUserId === $membership['community']['supervisor']) {
             return true;
         }
 
-        if (in_array('COMMUNITY', $communityMember['rights'])) {
+        if (in_array('COMMUNITY', $membership['rights'])) {
             return true;
         }
 
