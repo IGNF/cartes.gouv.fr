@@ -3,12 +3,14 @@
 namespace App\Security;
 
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 class User implements UserInterface
 {
     private string $email;
     private string $userName;
     private string $id;
+    private ?string $keycloakId;
 
     /** @var array<string> */
     private array $roles = [];
@@ -34,6 +36,7 @@ class User implements UserInterface
     public function __construct(array $keycloakUserInfo = [], array $apiUserInfo = [])
     {
         $this->email = $keycloakUserInfo['email'];
+        $this->keycloakId = $keycloakUserInfo['sub'] ?? null;
         $this->id = $apiUserInfo['_id'];
         $this->firstName = $keycloakUserInfo['given_name'] ?? null;
         $this->lastName = $keycloakUserInfo['family_name'] ?? null;
@@ -116,6 +119,12 @@ class User implements UserInterface
         return $this->id;
     }
 
+    #[Ignore]
+    public function getKeycloakId(): ?string
+    {
+        return $this->keycloakId;
+    }
+
     public function getFirstName(): ?string
     {
         return $this->firstName;
@@ -192,6 +201,7 @@ class User implements UserInterface
     {
         return new User([
             'email' => 'test@test.com',
+            'sub' => '3f3ba6e0-38b9-4e26-8b29-7c9d26f42c46',
             'given_name' => 'Test',
             'family_name' => 'User',
             'preferred_username' => 'test_user',
