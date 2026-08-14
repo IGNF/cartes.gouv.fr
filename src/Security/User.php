@@ -211,6 +211,9 @@ class User implements UserInterface
         if (array_key_exists('communities_member', $apiUserInfo)) {
             $this->communitiesMember = $apiUserInfo['communities_member'];
         }
+        if (array_key_exists('last_login', $apiUserInfo)) {
+            $this->lastLoginDate = new \DateTime($apiUserInfo['last_login']);
+        }
         if (array_key_exists('documents_quota', $apiUserInfo)) {
             $this->documentsQuota = $apiUserInfo['documents_quota'];
         }
