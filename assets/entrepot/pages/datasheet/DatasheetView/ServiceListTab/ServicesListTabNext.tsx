@@ -19,12 +19,13 @@ import MenuList from "@/components/Utils/MenuList";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
+import useUnpublishServiceMutation from "@/hooks/queries/useUnpublishServiceMutation";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { usePagination } from "@/hooks/usePagination";
-import useUnpublishServiceMutation from "@/hooks/queries/useUnpublishServiceMutation";
 import placeholder1x1 from "@/img/placeholder.1x1.png";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
+import { externalUrls } from "@/router/externalUrls";
 import { routes } from "@/router/router";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import { editableOfferingTypes, formatDateFromISO, getServiceEditLink } from "@/utils";
@@ -193,7 +194,10 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
             <DatasheetViewTab>
                 <h2 className={fr.cx("fr-h5", "fr-mb-4w")}>Flux</h2>
 
-                <ServiceInfoBanner title="Chaque type de flux est adapté à un besoin particulier. Renseignez-vous avant de publier." linkHref="#" />
+                <ServiceInfoBanner
+                    title="Chaque type de flux est adapté à un besoin particulier. Renseignez-vous avant de publier."
+                    linkHref={externalUrls.helpProducerGuideChooseServiceType}
+                />
 
                 {sortedServices.length === 0 ? (
                     <div
