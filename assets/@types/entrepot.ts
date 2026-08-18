@@ -5003,6 +5003,7 @@ export enum OfferingStandardDetailResponseDtoStatusEnum {
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
+    UNPUBLISHED = "UNPUBLISHED",
     UNSTABLE = "UNSTABLE",
 }
 
@@ -5368,6 +5369,7 @@ export enum PermissionOfferingResponseDtoStatusEnum {
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
+    UNPUBLISHED = "UNPUBLISHED",
     UNSTABLE = "UNSTABLE",
 }
 
@@ -5632,6 +5634,7 @@ export enum OfferingStandardListResponseDtoStatusEnum {
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
+    UNPUBLISHED = "UNPUBLISHED",
     UNSTABLE = "UNSTABLE",
 }
 
@@ -5729,6 +5732,7 @@ export enum OfferingExtendedListResponseDtoStatusEnum {
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
+    UNPUBLISHED = "UNPUBLISHED",
     UNSTABLE = "UNSTABLE",
 }
 
@@ -5911,6 +5915,7 @@ export enum OfferingCatalogResponseDtoStatusEnum {
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
+    UNPUBLISHED = "UNPUBLISHED",
     UNSTABLE = "UNSTABLE",
 }
 
@@ -5974,6 +5979,7 @@ export enum OfferingExtendedDetailResponseDtoStatusEnum {
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
+    UNPUBLISHED = "UNPUBLISHED",
     UNSTABLE = "UNSTABLE",
 }
 
@@ -6454,6 +6460,7 @@ export enum GetOfferingsParamsStatusEnum {
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
+    UNPUBLISHED = "UNPUBLISHED",
     UNSTABLE = "UNSTABLE",
 }
 
@@ -6597,6 +6604,7 @@ export enum GetAll8ParamsStatusEnum {
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
+    UNPUBLISHED = "UNPUBLISHED",
     UNSTABLE = "UNSTABLE",
 }
 
@@ -6800,6 +6808,7 @@ export enum GetAll23ParamsStatusEnum {
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
+    UNPUBLISHED = "UNPUBLISHED",
     UNSTABLE = "UNSTABLE",
 }
 
