@@ -282,7 +282,7 @@ class UploadIntegrationWorkflow
             ],
         ];
 
-        if (isset($upload['tags']['email_notification']) && filter_var($upload['tags']['email_notification'], FILTER_VALIDATE_BOOLEAN)) {
+        if (isset($upload['tags'][CommonTags::EMAIL_NOTIFICATION]) && filter_var($upload['tags'][CommonTags::EMAIL_NOTIFICATION], FILTER_VALIDATE_BOOLEAN)) {
             /** @var \App\Security\User|null */
             $user = $this->security->getUser();
             $userEmail = $user->getEmail();
@@ -318,11 +318,19 @@ class UploadIntegrationWorkflow
             'proc_int_id' => $processingExec['_id'],
             CommonTags::DATASHEET_NAME => $upload['tags'][CommonTags::DATASHEET_NAME],
         ];
-        if (isset($upload['tags'][CommonTags::PRODUCER])) {
-            $tags[CommonTags::PRODUCER] = $upload['tags'][CommonTags::PRODUCER];
-        }
-        if (isset($upload['tags'][CommonTags::PRODUCTION_YEAR])) {
-            $tags[CommonTags::PRODUCTION_YEAR] = $upload['tags'][CommonTags::PRODUCTION_YEAR];
+        // tags métier recopiés de la livraison vers la donnée stockée
+        $forwardedTags = [
+            CommonTags::PRODUCER,
+            CommonTags::PRODUCER_SHORT,
+            CommonTags::PRODUCTION_YEAR,
+            CommonTags::PRODUCTION_DATE,
+            CommonTags::THEME_CATEGORIES,
+            CommonTags::ZONE,
+        ];
+        foreach ($forwardedTags as $tagName) {
+            if (isset($upload['tags'][$tagName])) {
+                $tags[$tagName] = $upload['tags'][$tagName];
+            }
         }
         $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], $tags)->await();
 
