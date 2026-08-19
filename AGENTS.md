@@ -59,7 +59,7 @@ External API references:
 
 ## Commands
 
-Run inside the Docker container (`docker exec -it cartesgouvfr-app-1 bash`):
+Run inside the Docker container (`docker exec -it cartesgouvfr-app_dev-1 bash`):
 
 - `composer check-rules` - full PHP validation (twig/container/yaml lint, PHPMD, PHPStan)
 - `composer fix-style` - fix PHP & Twig code style
