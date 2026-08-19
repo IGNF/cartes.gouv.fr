@@ -13,12 +13,12 @@ import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/component
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
-import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
+import { OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
 import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
 import Wait from "../../../../../components/Utils/Wait";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../router/router";
-import { offeringTypeDisplayName } from "../../../../../utils";
+import { isOfferingUnavailable, offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
 import ListItem from "../ListItem";
 import ServiceDesc from "./ServiceDesc";
@@ -63,19 +63,23 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
 
     const { userRights, isSupervisor } = useCommunityRights();
 
+    const offeringUnavailable = isOfferingUnavailable(service.status);
+
     return (
         <>
             <ListItem
                 actionButton={
                     <Button
                         className={fr.cx("fr-mr-2v")}
-                        linkProps={routes.datastore_service_view({ datastoreId, offeringId: service._id, datasheetName: datasheetName }).link}
                         priority="secondary"
+                        {...(offeringUnavailable
+                            ? { disabled: true }
+                            : { linkProps: routes.datastore_service_view({ datastoreId, offeringId: service._id, datasheetName: datasheetName }).link })}
                     >
                         Visualiser
                     </Button>
                 }
-                badge={<OfferingStatusBadge status={service.status as OfferingStatusEnum} />}
+                badge={<OfferingStatusBadge status={service.status} />}
                 buttonTitle="Voir les données liées"
                 date={service?.configuration?.last_event?.date}
                 menuListItems={[
@@ -83,6 +87,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         autoClose: false,
                         text: "Copier l’URL de diffusion",
                         iconId: "ri-file-copy-line",
+                        disabled: offeringUnavailable,
                         onClick: async () => {
                             if (!service.share_url) {
                                 setMessage("URL de diffusion indisponible");
@@ -96,6 +101,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                             (userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX) && userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST))) && {
                             text: "Gérer les styles",
                             iconId: "ri-flashlight-line",
+                            disabled: offeringUnavailable,
                             linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId: service._id }).link,
                         },
                     // {
@@ -107,12 +113,13 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         text: "Gérer les permissions d’accès",
                         iconId: "ri-lock-line",
                         linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
-                        disabled: service.open === true,
+                        disabled: service.open === true || offeringUnavailable,
                     },
                     [OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) &&
                         (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && {
                             text: "Modifier les informations de publication",
                             iconId: "ri-edit-box-line",
+                            disabled: offeringUnavailable,
                             linkProps: (() => {
                                 switch (service.type) {
                                     case OfferingTypeEnum.WMSVECTOR:
@@ -169,6 +176,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)) && {
                             text: "Créer un service raster WMS/WMTS",
                             iconId: "ri-add-box-line",
+                            disabled: offeringUnavailable,
                             linkProps: routes.datastore_pyramid_raster_generate({ datastoreId, offeringId: service._id, datasheetName }).link,
                         },
                     // NOTE : reporté cf. issue #249
