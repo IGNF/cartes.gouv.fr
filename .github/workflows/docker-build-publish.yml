@@ -59,7 +59,8 @@ jobs:
               id: meta
               uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
               env:
-                  DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+                  # index seulement sur release : un push de PR (sans provenance/SBOM) n'a pas d'index OCI
+                  DOCKER_METADATA_ANNOTATIONS_LEVELS: ${{ github.ref_type == 'tag' && 'manifest,index' || 'manifest' }}
               with:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
                   # Éphémère : pr-<numéro>-<sha court> (le numéro de PR est parsé par le sweep de nettoyage).
