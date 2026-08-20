@@ -35,5 +35,10 @@ services:
         class: App\ApiClient\ApiClient
         factory: ['@App\ApiClient\ApiClientFactory', "createEspaceCoStyleClient"]
 
+    # Formatter du canal access : message logfmt seul, la ligne doit rester brute pour Loki
+    app.monolog.access_line_formatter:
+        class: Monolog\Formatter\LineFormatter
+        arguments: ["%%message%%\n"]
+
 imports:
     - { resource: parameters.yaml }

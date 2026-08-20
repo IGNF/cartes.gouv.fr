@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Monolog;
+
+use Monolog\LogRecord;
+use Monolog\Processor\ProcessorInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+
+/**
+ * Ajoute le request_id à chaque enregistrement pour corréler tous les logs d'une même requête.
+ */
+class RequestIdProcessor implements ProcessorInterface
+{
+    public function __construct(
+        private RequestStack $requestStack,
+        private RequestIdResolver $requestIdResolver,
+    ) {
+    }
+
+    public function __invoke(LogRecord $record): LogRecord
+    {
+        $request = $this->requestStack->getCurrentRequest();
+        if (null !== $request) {
+            $record->extra['request_id'] = $this->requestIdResolver->resolve($request);
+        }
+
+        return $record;
+    }
+}

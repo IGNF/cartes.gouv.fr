@@ -15,6 +15,13 @@
 	# Conteneur immutable : pas de reload de config, l'endpoint d'admin est inutile
 	admin off
 
+	# client_ip des access logs = IP réelle résolue depuis X-Forwarded-For.
+	# N'affecte pas PHP : REMOTE_ADDR reste le pair TCP, la résolution applicative
+	# appartient à Symfony (TRUSTED_PROXIES).
+	servers {
+		trusted_proxies static private_ranges
+	}
+
 	# Logs en texte brut ; level_format upper évite les codes couleur ANSI
 	log {
 		format console {
@@ -27,8 +34,6 @@
 
 	# respond (405 TRACE, 404 .ht*) doit passer avant les redirections
 	order respond before redir
-
-	# La résolution X-Forwarded-For appartient à Symfony (TRUSTED_PROXIES)
 }
 
 :8000 {
@@ -66,7 +71,9 @@
 	@hidden path */.ht*
 	rewrite @hidden /__fichier-cache__
 
-	# Redirections héritées (ex-RedirectMatch du vhost Apache), query string préservée
+	# Redirections héritées (ex-RedirectMatch du vhost Apache), query string préservée.
+	# Tout ajout ici doit aussi être exclu du matcher @phpHandled ci-dessous,
+	# sinon la redirection ne sera pas loggée.
 	redir / /explorer-les-cartes{?query} 301
 	@faq path /faq /faq/
 	redir @faq /aide/fr{?query} 301
@@ -81,23 +88,38 @@
 	@indexphp path_regexp idx ^/index\.php(?:/(.*))?$
 	redir @indexphp /{re.idx.1}{?query} 301
 
-	# Ne pas logger les probes de santé (équivalent du SetEnvIf dontlog)
+	# Ne pas logger les probes de santé : redondant tant que @phpHandled est actif,
+	# gardé comme filet si le log_skip ci-dessous est retiré (rollback)
 	@health path_regexp ^/tableau-de-bord/health/?$
 	log_skip @health
 
+	# Requêtes dynamiques (front controller) : loggées par Symfony en logfmt
+	# (voir docs/developer/logs.md), Caddy ne logge que ce qu'il sert lui-même
+	# (fichiers existants, redirections héritées ci-dessus, canonicalisation, TRACE)
+	@phpHandled {
+		not file
+		not path / /faq /faq/ /a-propos /a-propos/ /nous-ecrire /nous-ecrire/ /offre /offre/ /index.php*
+		not method TRACE
+	}
+	log_skip @phpHandled
+
 	# Access log en texte brut ; filter supprime les champs et headers sans intérêt
 	# (blocklist : un nouveau header non listé réapparaîtra dans les logs).
-	# Conservés volontairement : Referer, User-Agent, X-Forwarded-For (parité avec
-	# l'ex-LogFormat Apache), X-Request-Id, host/method/uri/proto, status, size, duration.
+	# Conservés volontairement : Referer, User-Agent, X-Request-Id, client_ip
+	# (résolu via trusted_proxies), host/method/uri, status, size, duration (en ms).
 	log {
 		output stdout
 		format filter {
 			wrap console {
 				level_format upper
+				duration_format ms
 			}
 			fields {
-				# champs hors headers
+				# champs hors headers (client_ip suffit : remote_ip = ingress, XFF = redondant)
+				request>remote_ip delete
 				request>remote_port delete
+				request>proto delete
+				request>headers>X-Forwarded-For delete
 				bytes_read delete
 				user_id delete
 				resp_headers delete
@@ -126,7 +148,7 @@
 				request>headers>Sec-Ch-Ua-Platform delete
 				request>headers>Sec-Gpc delete
 				request>headers>Dnt delete
-				# ajoutés par l'ingress (redondants : XFF suffit)
+				# ajoutés par l'ingress (redondants : client_ip suffit)
 				request>headers>X-Real-Ip delete
 				request>headers>X-Scheme delete
 				request>headers>X-Forwarded-Proto delete
