@@ -7,12 +7,19 @@ on:
         tags: ["v*"]
     pull_request:
 
+# Annule les runs obsolètes d'une même PR ; groupe unique hors PR pour ne jamais remplacer un run de main ou de tag, même en attente
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
     # Use docker.io for Docker Hub if empty
     REGISTRY: ghcr.io
     # github.repository as <account>/<repo>
     IMAGE_NAME: ${{ github.repository }}
-    IS_TAG: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    # Push sur GHCR : tag de release, ou PR interne hors bots (Dependabot : token en lecture seule ;
+    # Renovate : images sans intérêt). Push sur main, PR de fork ou de bot : build + scan uniquement.
+    PUSH_IMAGE: ${{ github.ref_type == 'tag' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && !startsWith(github.head_ref, 'dependabot/') && !startsWith(github.head_ref, 'renovate/')) }}
 
 jobs:
     docker-build-publish-scan:
@@ -36,10 +43,10 @@ jobs:
             - name: Setup Docker buildx
               uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
-            # Login nécessaire uniquement quand on pousse (tag semver)
+            # Login nécessaire uniquement quand on pousse
             # https://github.com/docker/login-action
             - name: Log into registry ${{ env.REGISTRY }}
-              if: env.IS_TAG == 'true'
+              if: env.PUSH_IMAGE == 'true'
               uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
               with:
                   registry: ${{ env.REGISTRY }}
@@ -52,43 +59,45 @@ jobs:
               id: meta
               uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
               env:
-                  DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+                  # index seulement sur release : un push de PR (sans provenance/SBOM) n'a pas d'index OCI
+                  DOCKER_METADATA_ANNOTATIONS_LEVELS: ${{ github.ref_type == 'tag' && 'manifest,index' || 'manifest' }}
               with:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  # Éphémère : pr-<numéro>-<sha court> (le numéro de PR est parsé par le sweep de nettoyage).
+                  # Durable : X.Y.Z, X.Y et latest (flavor auto) sur tag de release uniquement.
                   tags: |
-                      type=ref,event=branch
-                      type=ref,event=pr
-                      type=sha
+                      type=ref,event=pr,suffix=-{{sha}}
                       type=semver,pattern={{version}}
                       type=semver,pattern={{major}}.{{minor}}
 
-            # Build unique : push (avec SBOM + provenance) sur tag semver, sinon load local pour le scan
+            # Build unique : push si PUSH_IMAGE, sinon load local pour le scan.
+            # SBOM + provenance réservés aux releases pour garder les images de PR légères.
             # https://github.com/docker/build-push-action
-            - name: Build Docker image (push to registry on semver tag only)
+            - name: Build Docker image (push to registry per PUSH_IMAGE)
               id: build
               uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
               with:
                   context: .
                   file: .docker/Dockerfile
                   pull: true
-                  push: ${{ env.IS_TAG == 'true' }}
-                  load: ${{ env.IS_TAG != 'true' }}
-                  sbom: ${{ env.IS_TAG == 'true' }}
-                  provenance: ${{ env.IS_TAG == 'true' && 'mode=max' || 'false' }}
+                  push: ${{ env.PUSH_IMAGE == 'true' }}
+                  load: ${{ env.PUSH_IMAGE != 'true' }}
+                  sbom: ${{ github.ref_type == 'tag' }}
+                  provenance: ${{ github.ref_type == 'tag' && 'mode=max' || 'false' }}
                   target: prod
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
                   # annotations uniquement quand on pousse : l'exporter docker (load) ne les supporte pas
-                  annotations: ${{ env.IS_TAG == 'true' && steps.meta.outputs.annotations || '' }}
+                  annotations: ${{ env.PUSH_IMAGE == 'true' && steps.meta.outputs.annotations || '' }}
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
-            # Scan informatif (ne bloque pas la CI en cas d'alertes levées). Sur tag : scan de l'image poussée par digest (même artefact);
+            # Scan informatif (ne bloque pas la CI en cas d'alertes levées). Si l'image est poussée : scan par digest (même artefact);
             # sinon : scan local par image ID (insensible aux tags multiples).
             - name: Run Trivy vulnerability scanner
               uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
               with:
-                  image-ref: ${{ env.IS_TAG == 'true' && format('{0}/{1}@{2}', env.REGISTRY, env.IMAGE_NAME, steps.build.outputs.digest) || steps.build.outputs.imageid }}
+                  image-ref: ${{ env.PUSH_IMAGE == 'true' && format('{0}/{1}@{2}', env.REGISTRY, env.IMAGE_NAME, steps.build.outputs.digest) || steps.build.outputs.imageid }}
                   format: "sarif"
                   output: "trivy-results.sarif"
 
@@ -110,7 +119,7 @@ jobs:
                   # Lien Security filtré sur la ref exacte du run (PR, tag ou branche)
                   if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
                       filter="pr:${PR_NUMBER}"
-                  elif [ "$IS_TAG" = "true" ]; then
+                  elif [ "$GITHUB_REF_TYPE" = "tag" ]; then
                       filter="ref:refs/tags/${GITHUB_REF_NAME}"
                   else
                       filter="branch:${GITHUB_REF_NAME}"
@@ -123,7 +132,7 @@ jobs:
                       echo "|---|---|"
                       echo "| Image ID | \`${IMAGE_ID:-—}\` |"
                       echo "| Digest | \`${IMAGE_DIGEST:-—}\` |"
-                      echo "| Poussée sur ${REGISTRY} | $([ "$IS_TAG" = "true" ] && echo "oui" || echo "non (branche/PR)") |"
+                      echo "| Poussée sur ${REGISTRY} | $([ "$PUSH_IMAGE" = "true" ] && echo "oui" || echo "non (build de scan uniquement)") |"
                       if [ -f trivy-results.sarif ]; then
                           count=$(jq '[.runs[].results[]] | length' trivy-results.sarif)
                           echo "| Vulnérabilités (Trivy) | ${count} — [Security → Code scanning](https://github.com/${GITHUB_REPOSITORY}/security/code-scanning?query=${query}) |"
