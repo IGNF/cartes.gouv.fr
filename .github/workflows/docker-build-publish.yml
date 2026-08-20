@@ -7,9 +7,9 @@ on:
         tags: ["v*"]
     pull_request:
 
-# Annule les runs obsolètes d'une même PR (jamais ceux de main ou d'un tag)
+# Annule les runs obsolètes d'une même PR ; groupe unique hors PR pour ne jamais remplacer un run de main ou de tag, même en attente
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
+    group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
     cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
