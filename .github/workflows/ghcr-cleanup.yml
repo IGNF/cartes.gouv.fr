@@ -1,0 +1,130 @@
+name: Nettoyage des images GHCR éphémères
+
+# Supprime les images pr-<numéro>-<sha> dont la PR est fermée depuis au moins GRACE_DAYS jours.
+# Sans état ni mémoire entre les runs : chaque passage redérive tout du registre + de l'état des PR.
+# Fail-closed : toute PR irrésoluble (tag non parsable, erreur API, PR introuvable) protège ses images.
+on:
+    schedule:
+        - cron: "17 3 * * *"
+    workflow_dispatch:
+        inputs:
+            dry-run:
+                description: "Lister sans supprimer"
+                type: boolean
+                default: true
+
+permissions:
+    contents: read
+    packages: write
+    pull-requests: read
+
+env:
+    # Dry-run par défaut : en manuel via l'input, en planifié tant que la variable de repo
+    # GHCR_CLEANUP_DRY_RUN ne vaut pas explicitement "false"
+    DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || github.event_name == 'schedule' && vars.GHCR_CLEANUP_DRY_RUN != 'false' }}
+    GRACE_DAYS: ${{ vars.GHCR_CLEANUP_GRACE_DAYS || 7 }}
+
+jobs:
+    cleanup:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Déterminer les tags supprimables
+              id: verdicts
+              uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+              with:
+                  script: |
+                      const { owner, repo } = context.repo;
+                      const graceDays = Number(process.env.GRACE_DAYS);
+                      const cutoff = Date.now() - graceDays * 24 * 60 * 60 * 1000;
+
+                      // (a) une seule énumération du registre, extraction des tags éphémères
+                      const versions = await github.paginate(
+                          github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg,
+                          { org: owner, package_type: "container", package_name: repo.toLowerCase(), state: "active", per_page: 100 }
+                      );
+                      const images = [];
+                      for (const version of versions) {
+                          for (const tag of version.metadata?.container?.tags ?? []) {
+                              const match = tag.match(/^pr-(\d+)-[0-9a-f]+$/);
+                              if (match) {
+                                  images.push({ tag, pr: Number(match[1]) });
+                              } else if (tag.startsWith("pr-")) {
+                                  core.warning(`Tag éphémère non parsable, image protégée : ${tag}`);
+                              }
+                          }
+                      }
+                      core.info(`${versions.length} versions dans le registre, ${images.length} tags éphémères pr-*`);
+
+                      // (b) état des PR en une passe GraphQL par lots (alias), pas d'appel par image
+                      const prStates = new Map();
+                      const prNumbers = [...new Set(images.map((image) => image.pr))];
+                      for (let i = 0; i < prNumbers.length; i += 50) {
+                          const chunk = prNumbers.slice(i, i + 50);
+                          const fields = chunk.map((n) => `pr${n}: pullRequest(number: ${n}) { state closedAt }`).join(" ");
+                          let data;
+                          try {
+                              data = await github.graphql(
+                                  `query ($owner: String!, $repo: String!) { repository(owner: $owner, name: $repo) { ${fields} } }`,
+                                  { owner, repo }
+                              );
+                          } catch (error) {
+                              // réponse partielle (ex. PR introuvable) : on garde ce qui a été résolu
+                              data = error.data;
+                              if (!data?.repository) {
+                                  core.warning(`Erreur GraphQL, lot de PR protégé (${chunk.join(", ")}) : ${error.message}`);
+                                  continue;
+                              }
+                          }
+                          for (const n of chunk) {
+                              const pr = data.repository[`pr${n}`];
+                              if (pr) prStates.set(n, pr);
+                              else core.warning(`PR #${n} introuvable, ses images sont protégées`);
+                          }
+                      }
+
+                      // (c) verdict par image : supprimable ssi PR fermée depuis plus de GRACE_DAYS jours
+                      const deletable = [];
+                      const rows = [];
+                      for (const { tag, pr } of images.sort((a, b) => a.pr - b.pr || a.tag.localeCompare(b.tag))) {
+                          const state = prStates.get(pr);
+                          let verdict;
+                          if (!state) {
+                              verdict = "PROTÉGÉE (PR irrésolue)";
+                          } else if (state.state === "OPEN") {
+                              verdict = "CONSERVÉE (PR ouverte)";
+                          } else if (Date.parse(state.closedAt) <= cutoff) {
+                              verdict = "SUPPRIMABLE";
+                              deletable.push(tag);
+                          } else {
+                              verdict = `CONSERVÉE (délai de grâce ${graceDays} j)`;
+                          }
+                          rows.push([tag, `#${pr}`, state?.state ?? "?", state?.closedAt ?? "-", verdict]);
+                          core.info(rows.at(-1).join(" | "));
+                      }
+
+                      await core.summary
+                          .addHeading(`Nettoyage GHCR (dry-run : ${process.env.DRY_RUN}, grâce : ${graceDays} j)`, 3)
+                          .addTable([
+                              [{ data: "Tag", header: true }, { data: "PR", header: true }, { data: "État", header: true }, { data: "Fermée le", header: true }, { data: "Verdict", header: true }],
+                              ...rows,
+                          ])
+                          .write();
+
+                      core.info(`${deletable.length} tag(s) supprimable(s)`);
+                      // regex ancrées : nos tags ne contiennent aucun métacaractère
+                      core.setOutput("delete-tags", deletable.map((tag) => `^${tag}$`).join(","));
+
+            # Action manifest-aware : supprime aussi les manifests enfants (plateformes) et les
+            # référents attestation/cosign non taggés du parent supprimé, sans orphaniser les images conservées
+            - name: Supprimer les images
+              if: steps.verdicts.outputs.delete-tags != ''
+              uses: dataaxiom/ghcr-cleanup-action@d52806a0dc70b430571a37da1fde39733ffd640f # v1.2.2
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  delete-tags: ${{ steps.verdicts.outputs.delete-tags }}
+                  # ceinture-bretelles : les tags de release sont exclus quoi qu'il arrive
+                  exclude-tags: ^(latest|sha-.+|\d+\.\d+(\.\d+)?)$
+                  use-regex: true
+                  dry-run: ${{ env.DRY_RUN }}
+                  validate: true
+                  log-level: info
