@@ -14,6 +14,10 @@ on:
                 type: boolean
                 default: true
 
+# Sérialise les exécutions (cron et déclenchements manuels) : jamais deux suppressions en parallèle
+concurrency:
+    group: ghcr-cleanup
+
 permissions:
     contents: read
     packages: write
@@ -36,6 +40,10 @@ jobs:
                   script: |
                       const { owner, repo } = context.repo;
                       const graceDays = Number(process.env.GRACE_DAYS);
+                      if (!Number.isFinite(graceDays) || graceDays < 0) {
+                          core.setFailed(`GHCR_CLEANUP_GRACE_DAYS invalide : « ${process.env.GRACE_DAYS} »`);
+                          return;
+                      }
                       const cutoff = Date.now() - graceDays * 24 * 60 * 60 * 1000;
 
                       // (a) une seule énumération du registre, extraction des tags éphémères
@@ -112,8 +120,9 @@ jobs:
                           .write();
 
                       core.info(`${deletable.length} tag(s) supprimable(s)`);
-                      // regex ancrées : nos tags ne contiennent aucun métacaractère
-                      core.setOutput("delete-tags", deletable.map((tag) => `^${tag}$`).join(","));
+                      // une seule regex en alternance (en mode regex l'action ne découpe pas la liste) ;
+                      // ancrée, et nos tags ne contiennent aucun métacaractère
+                      core.setOutput("delete-tags", deletable.length ? `^(${deletable.join("|")})$` : "");
 
             # Action manifest-aware : supprime aussi les manifests enfants (plateformes) et les
             # référents attestation/cosign non taggés du parent supprimé, sans orphaniser les images conservées
