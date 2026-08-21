@@ -100,7 +100,7 @@
 	# (fichiers existants, redirections héritées ci-dessus, canonicalisation, TRACE)
 	@phpHandled {
 		not file
-		not path / /faq /faq/ /a-propos /a-propos/ /nous-ecrire /nous-ecrire/ /offre /offre/ /index.php*
+		not path / /faq /faq/ /a-propos /a-propos/ /nous-ecrire /nous-ecrire/ /offre /offre/ /index.php /index.php/*
 		not method TRACE
 	}
 	log_skip @phpHandled
