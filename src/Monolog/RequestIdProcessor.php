@@ -19,7 +19,8 @@ class RequestIdProcessor implements ProcessorInterface
 
     public function __invoke(LogRecord $record): LogRecord
     {
-        $request = $this->requestStack->getCurrentRequest();
+        // Requête principale : les sous-requêtes (rendu d'erreur, fragments) partagent son id
+        $request = $this->requestStack->getMainRequest();
         if (null !== $request) {
             $record->extra['request_id'] = $this->requestIdResolver->resolve($request);
         }
