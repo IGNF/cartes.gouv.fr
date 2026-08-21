@@ -51,8 +51,11 @@
 		-X-Powered-By
 	}
 
-	# Cache long pour les assets Vite (noms de fichiers hashés)
-	@build path /build/*
+	# Assets Vite hashés ; file : sans lui, la page HTML renvoyée pour un asset disparu serait cachée 1 an
+	@build {
+		path /build/*
+		file
+	}
 	header @build Cache-Control "public, max-age=31536000, immutable"
 
 	# Statiques à nom fixe : cache modéré avec revalidation (ETag/Last-Modified
