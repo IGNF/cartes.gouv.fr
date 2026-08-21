@@ -165,7 +165,6 @@ WORKDIR ${project_dir}
 COPY --link --from=node_dist /usr/local/bin/node /usr/local/bin/node
 COPY --link --from=deps_nodejs_runtime ${project_dir}/node_modules node_modules
 COPY --link --from=deps_php ${project_dir}/vendor vendor
-COPY --link --from=deps_php ${project_dir}/public/bundles public/bundles
 COPY --link --from=deps_nodejs_build ${project_dir}/public/build public/build
 COPY --exclude=.git --exclude=var . .
 
