@@ -1,8 +1,11 @@
 # Configuration FrankenPHP / Caddy de cartes.gouv.fr
 {
 	frankenphp {
-		# nombre de threads php maximum pour traiter des requêtes simultanées
+		# Épinglé : le défaut (2 x CPU) lirait les coeurs du noeud - voir docs/developer/dimensionnement.md
 		num_threads {$FRANKENPHP_NUM_THREADS:4}
+
+		# Threads à la demande pour absorber les pics - voir docs/developer/dimensionnement.md
+		max_threads {$FRANKENPHP_MAX_THREADS:8}
 
 		# Worker mode (désactivé pour le moment)
 		# worker /opt/cartesgouvfr-site/public/index.php
