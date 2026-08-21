@@ -6,6 +6,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueries, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
@@ -13,20 +14,18 @@ import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
 import Main from "@/components/Layout/Main";
-import LoadingIcon from "@/components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "@/components/Utils/LoadingText";
-import Wait from "@/components/Utils/Wait";
-import { StyleFormProvider } from "@/contexts/StyleFormContext";
-import useServiceQuery from "@/hooks/queries/useServiceQuery";
-import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
-import { routes } from "@/router/router";
+import { StyleFormProvider } from "@/entrepot/contexts/StyleFormContext";
+import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
+import TMSStyleTools from "@/entrepot/modules/Style/TMSStyleFilesManager/TMSStyleTools";
 import { decodeKeys, encodeKey, encodeKeys, getFileExtension, removeDiacritics } from "@/utils";
 import { CartesStyle, OfferingTypeEnum, Service, StyleFormatEnum } from "../../../../../@types/app";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import getWebService from "../../../../../modules/WebServices/WebServices";
-import validations from "../../../../../validations";
+import getWebService from "@/entrepot/modules/WebServices/WebServices";
+import validations from "@/entrepot/validations";
 import api from "../../../../api";
 import UploadLayerStyles from "./UploadLayerStyles";
 
@@ -133,6 +132,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     const editMode: boolean = Boolean(styleTechnicalName);
 
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const serviceQuery = useServiceQuery(datastoreId, offeringId, { staleTime: 600000 });
     const { data: service } = serviceQuery;
@@ -320,7 +320,11 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                 });
 
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offeringId) });
-            routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).push();
+            navigate({
+                to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
+                params: { datastoreId, offeringId },
+                search: { datasheetName },
+            });
         },
     });
 
@@ -333,7 +337,9 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                     severity="error"
                     closable={false}
                     title={serviceQuery.error.message}
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
+                    description={
+                        <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>Retour à mes données</Button>
+                    }
                 />
             ) : serviceQuery.data ? (
                 <>
@@ -345,7 +351,13 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                             size="large"
                             {...(isDirty
                                 ? { onClick: confirmReturnModal.open }
-                                : { linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).link })}
+                                : {
+                                      linkProps: {
+                                          to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
+                                          params: { datastoreId, offeringId },
+                                          search: { datasheetName },
+                                      },
+                                  })}
                         />
                         <h1 className={fr.cx("fr-m-0")}>{editMode ? `Modifier le style "${style.name}"` : "Ajouter un style"}</h1>
                         {serviceQuery?.data?.type && (
@@ -399,20 +411,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                 </>
             ) : null}
 
-            {addModifyMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon largeIcon={true} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{editMode ? tCommon("modifying") : tCommon("adding")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {addModifyMutation.isPending && <LoadingOverlay message={editMode ? tCommon("modifying") : tCommon("adding")} />}
 
             {createPortal(
                 <confirmReturnModal.Component
@@ -421,7 +420,12 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         {
                             children: "Annuler",
                             priority: "secondary",
-                            onClick: routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).push,
+                            onClick: () =>
+                                navigate({
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
+                                    params: { datastoreId, offeringId },
+                                    search: { datasheetName },
+                                }),
                         },
                         {
                             children: "Enregistrer les modifications",

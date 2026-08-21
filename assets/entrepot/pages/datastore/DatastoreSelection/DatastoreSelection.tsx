@@ -1,25 +1,27 @@
-import DatastoreMain from "@/components/Layout/DatastoreMain";
+import DatastoreMain from "@/entrepot/components/DatastoreMain";
 import { fr } from "@codegouvfr/react-dsfr";
 import Card from "@codegouvfr/react-dsfr/Card";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 
+import { getRouteApi } from "@tanstack/react-router";
+
 import { ListHeader } from "@/components/Layout/ListHeader";
-import useDatastoreSelection from "@/hooks/useDatastoreSelection";
+import useDatastoreSelection from "@/entrepot/hooks/useDatastoreSelection";
 import { usePagination } from "@/hooks/usePagination";
 import { useTranslation } from "@/i18n";
-import { routes, useRoute } from "@/router/router";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 
 import placeholder16x9 from "@/img/placeholder.16x9.png";
 import sandboxDatastoreThumbnailSvg from "@/img/sandbox-datastore-thumbnail.svg";
 
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/");
+
 export default function DatastoreSelection() {
     const { t: tCommon } = useTranslation("Common");
-    const { datastoreList, addUserToSandbox, sandboxDatastore, userMemberOfSandbox, query } = useDatastoreSelection();
+    const { datastoreList, addUserToSandbox, query } = useDatastoreSelection();
 
-    const { params } = useRoute();
-    const page = params["page"] ? parseInt(params["page"]) : 1;
-    const limit = params["limit"] ? parseInt(params["limit"]) : 20;
+    const { page, limit } = route.useSearch();
 
     const { paginatedItems, totalPages } = usePagination(datastoreList, page, limit);
 
@@ -43,22 +45,28 @@ export default function DatastoreSelection() {
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 {paginatedItems.map((datastore, i) => (
-                    <div key={datastore._id + i} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                    <div key={(datastore._id ?? "sandbox") + i} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
                         <Card
                             imageUrl={datastore.is_sandbox === true ? sandboxDatastoreThumbnailSvg : placeholder16x9}
                             imageAlt=""
-                            title={datastore._id === sandboxDatastore?._id ? tCommon("sandbox") : datastore.name}
+                            title={tCommon("datastore_name", { name: datastore.name, isSandbox: datastore.is_sandbox })}
                             titleAs="h6"
                             linkProps={
-                                datastore.is_sandbox === true && !userMemberOfSandbox
-                                    ? { href: "#", onClick: () => addUserToSandbox() }
-                                    : routes.datasheet_list({ datastoreId: datastore._id }).link
+                                datastore._id !== undefined
+                                    ? { to: "/tableau-de-bord/entrepots/$datastoreId/donnees" as const, params: { datastoreId: datastore._id } }
+                                    : {
+                                          href: "#",
+                                          onClick: (e) => {
+                                              e.preventDefault();
+                                              addUserToSandbox();
+                                          },
+                                      }
                             }
                             endDetail="Voir"
                             enlargeLink={true}
                             size="small"
                             data-sandbox={datastore.is_sandbox === true ? "true" : undefined}
-                            data-user-member-of-sandbox={datastore.is_sandbox === true && userMemberOfSandbox}
+                            data-user-member-of-sandbox={datastore.is_sandbox === true && datastore._id !== undefined}
                         />
                     </div>
                 ))}
@@ -70,7 +78,9 @@ export default function DatastoreSelection() {
                         count={totalPages}
                         showFirstLast={true}
                         getPageLinkProps={(pageNumber) => ({
-                            ...routes.datastore_selection({ page: pageNumber, limit: limit }).link,
+                            to: "/tableau-de-bord/entrepots",
+                            search: { page: pageNumber, limit },
+                            activeOptions: searchAwareActiveOptions,
                         })}
                         defaultPage={page}
                     />

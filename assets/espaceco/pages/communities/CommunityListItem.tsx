@@ -8,7 +8,7 @@ import useUserMe from "../../hooks/useUserMe";
 import { useToggle } from "@mantine/hooks";
 import { useTranslation } from "../../../i18n/i18n";
 import placeholder1x1 from "../../../img/placeholder.1x1.png";
-import { appRoot, routes } from "../../../router/router";
+import { appRoot } from "@/router/appRoot";
 
 import "../../../sass/pages/espaceco/community.scss";
 
@@ -25,8 +25,11 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
     const [showDescription, toggleShowDescription] = useToggle();
     const modifyButtonProps = useMemo(() => {
         return community.active
-            ? { link: routes.espaceco_manage_community({ communityId: community.id }).link, title: tCommon("modify") }
-            : { link: routes.espaceco_create_community({ communityId: community.id }).link, title: t("append_community") };
+            ? { link: { to: "/espace-collaboratif/$communityId/gerer-le-guichet" as const, params: { communityId: community.id } }, title: tCommon("modify") }
+            : {
+                  link: { to: "/espace-collaboratif/$communityId/creer-un-guichet" as const, params: { communityId: community.id } },
+                  title: t("append_community"),
+              };
     }, [community, t, tCommon]);
 
     const communityRole = useMemo(() => {

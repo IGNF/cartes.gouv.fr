@@ -1,11 +1,11 @@
 import Main from "@/components/Layout/Main";
 import { fr } from "@codegouvfr/react-dsfr";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-import { useSandboxDatastoreQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
+import { sandboxCommunityId } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { externalUrls } from "@/router/externalUrls";
-import { routes, useRoute } from "@/router/router";
 
 import classes from "./DiscoverPublish.module.css";
 
@@ -13,25 +13,31 @@ import backgroundImgUrl from "@/img/discover/publish/background.png?w=400;800;12
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
 import ButtonsGroup, { ButtonsGroupProps } from "@codegouvfr/react-dsfr/ButtonsGroup";
 
+const route = getRouteApi("/_public/publier-une-donnee");
+
 export default function DiscoverPublish() {
-    const { params } = useRoute();
+    const search = route.useSearch();
+    const navigate = useNavigate();
     const { data: user } = useUserQuery();
 
     useEffect(() => {
-        if (params?.["authentication_failed"] !== undefined) {
-            routes.discover_publish().replace();
+        if (search.authentication_failed !== undefined) {
+            navigate({ to: "/publier-une-donnee", replace: true });
         }
 
-        if (user && params?.["session_expired_login_success"] === 1) {
+        if (user && search.session_expired_login_success === 1) {
             window.close();
         }
-    }, [params, user]);
-
-    const { data: sandboxDatastore, isPending: sandboxIsPending } = useSandboxDatastoreQuery();
+    }, [search, user, navigate]);
 
     // au moins un entrepôt hors bac à sable : lien direct vers la page de stats des entrepôts
-    const hasNonSandboxDatastore = (user?.communities_member ?? []).some((cm) => cm.community?.datastore && cm.community.datastore !== sandboxDatastore?._id);
-    const statsRoute = !sandboxIsPending && hasNonSandboxDatastore ? routes.stats_by_scope({ scope: "datastore" }) : routes.stats_scope_selection();
+    const hasNonSandboxDatastore = (user?.communities_member ?? []).some(
+        (cm) => cm.community?.datastore && (sandboxCommunityId === null || cm.community._id !== sandboxCommunityId)
+    );
+    const statsLinkProps = {
+        to: "/tableau-de-bord/statistiques-de-consommation",
+        search: hasNonSandboxDatastore ? { scope: "datastore" } : {},
+    } as const;
 
     return (
         <Main
@@ -62,13 +68,13 @@ export default function DiscoverPublish() {
                                     {
                                         iconId: "fr-icon-arrow-right-s-line",
                                         iconPosition: "right",
-                                        linkProps: user ? routes.datastore_selection().link : { href: externalUrls.login },
+                                        linkProps: user ? { to: "/tableau-de-bord/entrepots" } : { href: externalUrls.login },
                                         children: user ? "Voir mes entrepôts" : "Connectez-vous pour commencer",
                                     },
                                     user
                                         ? {
                                               children: "Mes statistiques de consommation",
-                                              linkProps: statsRoute.link,
+                                              linkProps: statsLinkProps,
                                               priority: "secondary",
                                           }
                                         : null,

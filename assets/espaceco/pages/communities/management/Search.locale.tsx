@@ -7,10 +7,10 @@ export type I18n = typeof i18n;
 
 export const SearchFrTranslations: Translations<"fr">["Search"] = {
     no_results: "Aucun résultat",
-    loading: "Recherche en cours ...",
+    loading: "Recherche en cours",
 };
 
 export const SearchEnTranslations: Translations<"en">["Search"] = {
     no_results: "No results",
-    loading: "Searching ...",
+    loading: "Searching",
 };

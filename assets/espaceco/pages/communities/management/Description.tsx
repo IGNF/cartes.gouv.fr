@@ -1,4 +1,4 @@
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
@@ -22,7 +22,7 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import categories from "../../../../data/topic_categories.json";
 import { useTranslation } from "../../../../i18n/i18n";
 import { ComponentKey } from "../../../../i18n/types";
-import RQKeys from "../../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import "../../../../sass/pages/espaceco/community.scss";
 import { setToNull } from "../../../../utils";
@@ -238,13 +238,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
 
     return (
         <>
-            {isCommunityUpdating && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {isCommunityUpdating && <LoadingOverlay message={tmc("updating")} />}
             {isCommunityUpdatingError && (
                 <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
             )}

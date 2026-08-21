@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC, useMemo } from "react";
 
 import { ManageCommunityActiveTabEnum } from "@/@types/app_espaceco";
@@ -10,7 +11,6 @@ import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import useUserMe from "@/espaceco/hooks/useUserMe";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../i18n/i18n";
-import { routes, useRoute } from "../../../router/router";
 import Databases from "./management/Databases";
 import Description from "./management/Description";
 import Grids from "./management/Grids";
@@ -20,6 +20,8 @@ import Reports from "./management/Reports";
 import Tools from "./management/Tools";
 import ZoomAndCentering from "./management/ZoomAndCentering";
 
+const route = getRouteApi("/_private/espace-collaboratif/$communityId/gerer-le-guichet");
+
 const ManageCommunity: FC = () => {
     const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();
 
@@ -27,9 +29,10 @@ const ManageCommunity: FC = () => {
 
     const { community, isCommunityLoading, isCommunityError, communityError } = useCommunityContext();
 
-    const route = useRoute();
-    const activeTab: ManageCommunityActiveTabEnum = Object.values(ManageCommunityActiveTabEnum).includes(route.params?.["activeTab"])
-        ? route.params?.["activeTab"]
+    const search = route.useSearch();
+    const navigate = useNavigate();
+    const activeTab: ManageCommunityActiveTabEnum = Object.values(ManageCommunityActiveTabEnum).includes(search.activeTab as ManageCommunityActiveTabEnum)
+        ? (search.activeTab as ManageCommunityActiveTabEnum)
         : ManageCommunityActiveTabEnum.Description;
 
     const isAdmin = useMemo(() => {
@@ -66,7 +69,7 @@ const ManageCommunity: FC = () => {
                     description={
                         <>
                             <p>{meError.message}</p>
-                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                            <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
                         </>
                     }
                 />
@@ -78,7 +81,7 @@ const ManageCommunity: FC = () => {
                     description={
                         <>
                             <p>{communityError?.message}</p>
-                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                            <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
                         </>
                     }
                 />
@@ -98,7 +101,12 @@ const ManageCommunity: FC = () => {
                             }))}
                             selectedTabId={activeTab}
                             onTabChange={(activeTab) => {
-                                routes.espaceco_manage_community({ communityId: community.id, activeTab }).replace();
+                                navigate({
+                                    to: "/espace-collaboratif/$communityId/gerer-le-guichet",
+                                    params: { communityId: community.id },
+                                    search: { activeTab },
+                                    replace: true,
+                                });
                             }}
                         >
                             <>

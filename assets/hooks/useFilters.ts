@@ -1,5 +1,3 @@
-import { useRoute } from "@/router/router";
-
 export enum FilterEnum {
     ALL = 0,
     ENABLED = 1,
@@ -38,11 +36,12 @@ interface IUseFiltersResult<T> {
     filters: IFilters;
 }
 
-export function useFilters<T>(data: T[], availableFilters: string[], tests = defaultTests): IUseFiltersResult<T> {
-    const { params } = useRoute();
+/** Filtre une liste ; les valeurs viennent du useSearch typé de la route appelante (clé → valeur brute) */
+export function useFilters<T>(data: T[], filterValues: Record<string, unknown>, availableFilters: string[], tests = defaultTests): IUseFiltersResult<T> {
     const filters = Object.fromEntries(
         availableFilters.map((key) => {
-            const value = params[key] ? parseInt(params[key]) : FilterEnum.ALL;
+            const raw = filterValues[key];
+            const value = raw !== undefined && raw !== null ? Number(raw) : FilterEnum.ALL;
             return [key, availableValues.includes(value) ? value : FilterEnum.ALL];
         })
     );

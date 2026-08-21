@@ -14,12 +14,13 @@ import * as yup from "yup";
 
 import { catalogueUrl } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
+import { sameTabLink } from "@/router/externalUrls";
 import { CswMetadata } from "../../../@types/app";
 import Main from "../../../components/Layout/Main";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../components/Utils/LoadingText";
-import Wait from "../../../components/Utils/Wait";
 import { getTranslation, useTranslation } from "../../../i18n/i18n";
-import RQKeys from "../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import api from "../../api";
 
@@ -110,7 +111,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                     severity="error"
                     closable={false}
                     title={metadataQuery.error.message}
-                    description={<Button linkProps={{ href: catalogueDatasheetUrl }}>{t("back_to_catalogue")}</Button>}
+                    description={<Button linkProps={sameTabLink(catalogueDatasheetUrl)}>{t("back_to_catalogue")}</Button>}
                     className={fr.cx("fr-mb-6v")}
                 />
             ) : (
@@ -150,7 +151,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                         {privateLayers.length === 0 ? (
                             <div>
                                 <p>{t("explanation_no_private_services")}</p>
-                                <Button linkProps={{ href: catalogueDatasheetUrl }} className={fr.cx("fr-mb-6v")}>
+                                <Button linkProps={sameTabLink(catalogueDatasheetUrl)} className={fr.cx("fr-mb-6v")}>
                                     {t("back_to_catalogue")}
                                 </Button>
                             </div>
@@ -180,7 +181,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                             >
                                 <Success color="blue-cumulus" width={"4rem"} height={"4rem"} />
                                 <p>{t("request_sent_successfully")}</p>
-                                <Button linkProps={{ href: catalogueDatasheetUrl }}>{t("back_to_catalogue")}</Button>
+                                <Button linkProps={sameTabLink(catalogueDatasheetUrl)}>{t("back_to_catalogue")}</Button>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit(onSubmit)}>
@@ -267,20 +268,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                 )
             )}
 
-            {requestMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("sending_message")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {requestMutation.isPending && <LoadingOverlay message={t("sending_message")} />}
         </Main>
     );
 };

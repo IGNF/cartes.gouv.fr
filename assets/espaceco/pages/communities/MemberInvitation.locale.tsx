@@ -24,9 +24,9 @@ export type I18n = typeof i18n;
 
 export const MemberInvitationFrTranslations: Translations<"fr">["MemberInvitation"] = {
     document_title: "Invitation",
-    community_loading: "Chargement du guichet en cours ...",
+    community_loading: "Chargement du guichet en cours",
     community_loading_failed: "La récupération des informations du guichet a échoué.",
-    userme_loading: "Chargement de vos données utilisateur en cours ...",
+    userme_loading: "Chargement de vos données utilisateur en cours",
     userme_loading_failed: "La récupération de vous données d'utilisateur a échoué.",
     logo: "Logo du guichet",
     community_name: ({ name }) => (
@@ -60,13 +60,13 @@ export const MemberInvitationFrTranslations: Translations<"fr">["MemberInvitatio
     not_member: "Vous n'êtes pas membre de ce guichet",
     accept: "Accepter et rejoindre le guichet",
     reject: "Refuser l'invitation",
-    inviting: "Invitation en cours ...",
-    rejecting: "Refus en cours ...",
+    inviting: "Invitation en cours",
+    rejecting: "Refus en cours",
 };
 
 export const MemberInvitationEnTranslations: Translations<"en">["MemberInvitation"] = {
     document_title: "Invitation",
-    community_loading: "Community loading ...",
+    community_loading: "Community loading",
     community_loading_failed: undefined,
     userme_loading: undefined,
     userme_loading_failed: undefined,

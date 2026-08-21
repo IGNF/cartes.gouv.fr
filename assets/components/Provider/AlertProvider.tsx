@@ -4,7 +4,7 @@ import { symToStr } from "tsafe/symToStr";
 
 import { IApiAlert } from "../../@types/alert";
 import { CartesApiException } from "../../modules/jsonFetch";
-import RQKeys from "../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../entrepot/api";
 import { useAlertStore } from "../../stores/AlertStore";
 

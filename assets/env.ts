@@ -1,9 +1,10 @@
-import { appRoot } from "./router/router";
+import { appRoot } from "./router/appRoot";
 
 const rootDataset = (document.getElementById("root") as HTMLDivElement)?.dataset;
 
 export const espaceCoUrl = rootDataset?.["apiEspacecoUrl"] ?? null;
 export const catalogueUrl = rootDataset?.["catalogueUrl"] ?? appRoot + "/rechercher-une-donnee";
 export const configCommunityId = rootDataset?.["configCommunityId"] ?? null;
+export const sandboxCommunityId = rootDataset?.["sandboxCommunityId"] ?? null;
 export const configTechnicalName = rootDataset?.["configTechnicalName"] ?? null;
 export const annexesUrl = rootDataset?.["annexesUrl"] ?? "https://data.geopf.fr/annexes";

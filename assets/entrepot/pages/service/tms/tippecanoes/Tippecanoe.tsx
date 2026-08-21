@@ -3,7 +3,7 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-import tippecanoeOptions from "@/data/tippecanoe_options";
+import tippecanoeOptions from "@/entrepot/data/tippecanoe_options";
 import { useTranslation } from "../../../../../i18n";
 import RichLabel from "./RichLabel";
 

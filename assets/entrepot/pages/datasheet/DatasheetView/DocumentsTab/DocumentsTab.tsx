@@ -13,15 +13,15 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { DatasheetDocumentTypeEnum } from "../../../../../@types/app";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { getFileExtension } from "../../../../../utils";
 import api from "../../../../api";
 import DocumentsListItem from "./DocumentsListItem";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 const documentAddModal = createModal({
     id: "datasheet-document-add-modal",
@@ -159,11 +159,11 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
         },
     });
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <>
-            {(isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)) && (
+            {membership?.can(CommunityMemberDtoRightsEnum.ANNEX) && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
                     <Button
                         iconId="fr-icon-add-line"
@@ -291,13 +291,7 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
                 document.body
             )}
 
-            {addDocumentMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("documents_tab.add_document.in_progress")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {addDocumentMutation.isPending && <LoadingOverlay message={t("documents_tab.add_document.in_progress")} />}
         </>
     );
 };

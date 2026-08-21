@@ -1,13 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useEffect, useMemo, useState } from "react";
 
 import { Upload } from "@/@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { routes } from "../../../../../router/router";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../../api";
 import { DatasheetViewActiveTabEnum } from "../../DatasheetView/DatasheetView/DatasheetView";
 
@@ -62,6 +62,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     const [shouldPingIntProg, setShouldPingIntProg] = useState<boolean>(true);
 
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     // définition des query
     // query qui "ping" ou "poll" et récupère le progress en boucle
@@ -134,17 +135,15 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                     queryClient.invalidateQueries({
                         queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                     });
-                    routes
-                        .datastore_datasheet_view({
-                            datastoreId,
-                            datasheetName: upload?.tags?.datasheet_name,
-                            activeTab: DatasheetViewActiveTabEnum.Dataset,
-                        })
-                        .push();
+                    navigate({
+                        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                        params: { datastoreId, datasheetName: upload.tags.datasheet_name },
+                        search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
+                    });
                 }
                 break;
         }
-    }, [integrationStatus, datastoreId, upload?.tags?.datasheet_name, queryClient]);
+    }, [integrationStatus, datastoreId, upload?.tags?.datasheet_name, queryClient, navigate]);
 
     return (
         <div className={fr.cx("fr-container")}>
@@ -200,13 +199,11 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                         queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                                         });
-                                        routes
-                                            .datastore_datasheet_view({
-                                                datastoreId,
-                                                datasheetName: upload?.tags?.datasheet_name,
-                                                activeTab: DatasheetViewActiveTabEnum.Dataset,
-                                            })
-                                            .push();
+                                        navigate({
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                            params: { datastoreId, datasheetName: upload.tags.datasheet_name },
+                                            search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
+                                        });
                                     }
                                 },
                             },
@@ -227,13 +224,11 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                         queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                                         });
-                                        routes
-                                            .datastore_datasheet_view({
-                                                datastoreId,
-                                                datasheetName: upload?.tags?.datasheet_name,
-                                                activeTab: DatasheetViewActiveTabEnum.Dataset,
-                                            })
-                                            .push();
+                                        navigate({
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                            params: { datastoreId, datasheetName: upload.tags.datasheet_name },
+                                            search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
+                                        });
                                     }
                                 },
                             },
@@ -249,15 +244,15 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                         buttons={[
                             {
                                 children: t("check_error_report"),
-                                linkProps: routes.datastore_stored_data_details({
-                                    datastoreId,
-                                    storedDataId: upload?.tags?.vectordb_id,
-                                    datasheetName,
-                                }).link,
+                                linkProps: {
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
+                                    params: { datastoreId, storedDataId: upload.tags.vectordb_id },
+                                    search: { datasheetName },
+                                },
                             },
                             {
                                 children: t("back_to_datasheet_list"),
-                                linkProps: routes.datasheet_list({ datastoreId }).link,
+                                linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } },
                                 priority: "secondary",
                             },
                         ]}

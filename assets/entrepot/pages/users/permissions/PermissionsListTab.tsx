@@ -1,12 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
+import { Link } from "@tanstack/react-router";
 import { compareAsc } from "date-fns";
 import { FC, useState } from "react";
 
 import { PermissionWithOfferingsDetailsResponseDto } from "../../../../@types/entrepot";
 import { useTranslation } from "../../../../i18n/i18n";
 import { formatDateWithoutTimeFromISO } from "../../../../utils";
-import { routes } from "../../../../router/router";
 import { externalLink } from "@/router/externalUrls";
 
 import "../../../../sass/pages/my_keys.scss";
@@ -109,13 +109,13 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                     </a>
                 </div>
                 <div className={fr.cx("fr-mt-2v")}>
-                    <a
-                        {...routes.datastore_selection().link}
+                    <Link
+                        to="/tableau-de-bord/entrepots"
                         className={fr.cx("fr-link", "fr-icon-arrow-right-line", "fr-link--icon-right")}
                         title={t("discover_workspaces") + " - " + tCommon("new_window")}
                     >
                         {t("discover_workspaces")}
-                    </a>
+                    </Link>
                 </div>
             </div>
         </div>

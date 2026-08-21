@@ -10,15 +10,14 @@ import { symToStr } from "tsafe/symToStr";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
-import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
-import Wait from "../../../../../components/Utils/Wait";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { routes } from "../../../../../router/router";
-import { offeringTypeDisplayName } from "../../../../../utils";
+import OfferingStatusBadge from "@/entrepot/components/Badges/OfferingStatusBadge";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
+import RQKeys from "@/entrepot/modules/RQKeys";
+import { offeringTypeDisplayName } from "@/entrepot/utils/offering";
 import api from "../../../../api";
 import ListItem from "../ListItem";
 import ServiceDesc from "./ServiceDesc";
@@ -61,7 +60,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
 
     const [showDescription, toggleShowDescription] = useToggle();
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <>
@@ -69,7 +68,11 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                 actionButton={
                     <Button
                         className={fr.cx("fr-mr-2v")}
-                        linkProps={routes.datastore_service_view({ datastoreId, offeringId: service._id, datasheetName: datasheetName }).link}
+                        linkProps={{
+                            to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
+                            params: { datastoreId, offeringId: service._id },
+                            search: { datasheetName },
+                        }}
                         priority="secondary"
                     >
                         Visualiser
@@ -92,11 +95,14 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         },
                     },
                     [OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) &&
-                        (isSupervisor ||
-                            (userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX) && userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST))) && {
+                        membership?.can(CommunityMemberDtoRightsEnum.ANNEX, CommunityMemberDtoRightsEnum.BROADCAST) && {
                             text: "Gérer les styles",
                             iconId: "ri-flashlight-line",
-                            linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId: service._id }).link,
+                            linkProps: {
+                                to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
+                                params: { datastoreId, offeringId: service._id },
+                                search: { datasheetName },
+                            },
                         },
                     // {
                     //     text: "Mettre à jour la légende",
@@ -106,70 +112,69 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                     {
                         text: "Gérer les permissions d’accès",
                         iconId: "ri-lock-line",
-                        linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
+                        linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params: { datastoreId } },
                         disabled: service.open === true,
                     },
                     [OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) &&
-                        (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && {
+                        membership?.can(CommunityMemberDtoRightsEnum.BROADCAST) && {
                             text: "Modifier les informations de publication",
                             iconId: "ri-edit-box-line",
                             linkProps: (() => {
                                 switch (service.type) {
                                     case OfferingTypeEnum.WMSVECTOR:
-                                        return routes.datastore_wms_vector_service_edit({
-                                            datastoreId,
-                                            vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
-                                            offeringId: service._id,
-                                            datasheetName,
-                                        }).link;
+                                        return {
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/service/wms-vecteur/$offeringId/modification" as const,
+                                            params: { datastoreId, offeringId: service._id },
+                                            search: { vectorDbId: service.configuration.type_infos.used_data[0].stored_data, datasheetName },
+                                        };
 
                                     case OfferingTypeEnum.WMSRASTER:
-                                        return routes.datastore_pyramid_raster_wms_raster_service_edit({
-                                            datastoreId,
-                                            pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                            offeringId: service._id,
-                                            datasheetName,
-                                        }).link;
+                                        return {
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/service/wms-raster/$offeringId/modification" as const,
+                                            params: { datastoreId, offeringId: service._id },
+                                            search: { pyramidId: service.configuration.type_infos.used_data[0].stored_data, datasheetName },
+                                        };
 
                                     case OfferingTypeEnum.WFS:
-                                        return routes.datastore_wfs_service_edit({
-                                            datastoreId,
-                                            vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
-                                            offeringId: service._id,
-                                            datasheetName,
-                                        }).link;
+                                        return {
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/service/wfs/$offeringId/modification" as const,
+                                            params: { datastoreId, offeringId: service._id },
+                                            search: { vectorDbId: service.configuration.type_infos.used_data[0].stored_data, datasheetName },
+                                        };
 
                                     case OfferingTypeEnum.WMTSTMS:
                                         switch (service.configuration.pyramid?.type) {
                                             case StoredDataTypeEnum.ROK4PYRAMIDVECTOR:
-                                                return routes.datastore_pyramid_vector_tms_service_edit({
-                                                    datastoreId,
-                                                    pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                                    offeringId: service._id,
-                                                    datasheetName,
-                                                }).link;
+                                                return {
+                                                    to: "/tableau-de-bord/entrepots/$datastoreId/service/tms/$offeringId/modification" as const,
+                                                    params: { datastoreId, offeringId: service._id },
+                                                    search: { pyramidId: service.configuration.type_infos.used_data[0].stored_data, datasheetName },
+                                                };
                                             case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
-                                                return routes.datastore_pyramid_raster_wmts_service_edit({
-                                                    datastoreId,
-                                                    pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                                    offeringId: service._id,
-                                                    datasheetName,
-                                                }).link;
+                                                return {
+                                                    to: "/tableau-de-bord/entrepots/$datastoreId/service/wmts/$offeringId/modification" as const,
+                                                    params: { datastoreId, offeringId: service._id },
+                                                    search: { pyramidId: service.configuration.type_infos.used_data[0].stored_data, datasheetName },
+                                                };
 
                                             default:
-                                                return routes.page_not_found().link;
+                                                return { to: "/404" as const };
                                         }
 
                                     default:
-                                        return routes.page_not_found().link;
+                                        return { to: "/404" as const };
                                 }
                             })(),
                         },
                     service.type === OfferingTypeEnum.WMSVECTOR &&
-                        (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)) && {
+                        membership?.can(CommunityMemberDtoRightsEnum.PROCESSING) && {
                             text: "Créer un service raster WMS/WMTS",
                             iconId: "ri-add-box-line",
-                            linkProps: routes.datastore_pyramid_raster_generate({ datastoreId, offeringId: service._id, datasheetName }).link,
+                            linkProps: {
+                                to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout",
+                                params: { datastoreId },
+                                search: { offeringId: service._id, datasheetName },
+                            },
                         },
                     // NOTE : reporté cf. issue #249
                     // {
@@ -177,7 +182,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                     //     iconId: "fr-icon-refresh-line",
                     //     onClick: () => console.warn("Action non implémentée"),
                     // },
-                    (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && {
+                    membership?.can(CommunityMemberDtoRightsEnum.BROADCAST) && {
                         text: "Dépublier",
                         iconId: "ri-arrow-go-back-line",
                         onClick: () => unpublishServiceConfirmModal.open(),
@@ -219,16 +224,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                 document.body
             )}
 
-            {unpublishServiceMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>En cours de dépublication</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {unpublishServiceMutation.isPending && <LoadingOverlay message="En cours de dépublication" />}
 
             {unpublishServiceMutation.error && <Alert severity="error" closable title={unpublishServiceMutation.error.message} />}
 

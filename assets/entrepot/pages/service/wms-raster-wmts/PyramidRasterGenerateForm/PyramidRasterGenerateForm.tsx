@@ -7,6 +7,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -14,18 +15,16 @@ import * as yup from "yup";
 import type { PyramidRaster } from "../../../../../@types/app";
 import type { ConfigurationWmsVectorDetailsContent } from "../../../../../@types/entrepot";
 import Main from "../../../../../components/Layout/Main";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
 import ZoomRange from "../../../../../components/Utils/ZoomRange";
 import olDefaults from "../../../../../data/ol-defaults.json";
-import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
+import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { routes } from "../../../../../router/router";
-import { bboxToWkt } from "../../../../../utils";
+import { bboxToWkt } from "@/entrepot/utils/map";
 import api from "../../../../api";
 import { DatasheetViewActiveTabEnum } from "../../../datasheet/DatasheetView/DatasheetView/DatasheetView";
 
@@ -54,6 +53,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     const serviceQuery = useServiceQuery(datastoreId, offeringId);
 
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const schemas = {};
     schemas[STEPS.TECHNICAL_NAME] = yup.object({
@@ -98,7 +98,11 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         onSuccess() {
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
-            routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "dataset" }).push();
+            navigate({
+                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                params: { datastoreId, datasheetName },
+                search: { activeTab: "dataset" },
+            });
         },
     });
 
@@ -136,7 +140,11 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                         <>
                             <p>{serviceQuery.error?.message}</p>
                             <Button
-                                linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: DatasheetViewActiveTabEnum.Services }).link}
+                                linkProps={{
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                    params: { datastoreId, datasheetName },
+                                    search: { activeTab: DatasheetViewActiveTabEnum.Services },
+                                }}
                             >
                                 {t("back_to_datasheet")}
                             </Button>
@@ -150,7 +158,11 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                     title={t("wmsv-service.bbox_not_found")}
                     description={
                         <Button
-                            linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: DatasheetViewActiveTabEnum.Services }).link}
+                            linkProps={{
+                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                params: { datastoreId, datasheetName },
+                                search: { activeTab: DatasheetViewActiveTabEnum.Services },
+                            }}
                         >
                             {t("back_to_datasheet")}
                         </Button>
@@ -232,20 +244,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                 </>
             )}
 
-            {generatePyramidRasterMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon largeIcon={true} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("generate.in_progress")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {generatePyramidRasterMutation.isPending && <LoadingOverlay message={t("generate.in_progress")} />}
         </Main>
     );
 };

@@ -3,7 +3,7 @@ import { FC, memo, useMemo } from "react";
 
 import type { DatasheetStoredDataItem, Offering, PyramidRaster, PyramidVector, VectorDb } from "../../../../../@types/app";
 import type { ProcessingExecutionStoredDataDto } from "../../../../../@types/entrepot";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../../api";
 import Desc from "../Desc";
 

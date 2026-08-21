@@ -2,7 +2,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { FC, useMemo } from "react";
 
 import Main from "@/components/Layout/Main";
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import useUserMe from "@/espaceco/hooks/useUserMe";
 import { fr } from "@codegouvfr/react-dsfr";
@@ -10,7 +10,6 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../i18n/i18n";
-import { routes } from "../../../router/router";
 import { COMMUNITY_FORM_STEPS } from "./FormSteps";
 import Databases from "./management/Databases";
 import Description from "./management/Description";
@@ -64,13 +63,7 @@ const CreateCommunity: FC = () => {
                         title={t("step_title", { step: currentStep })}
                         nextTitle={!stepper.isLastStep() ? t("step_title", { step: currentStep + 1 }) : ""}
                     />
-                    {isCommunityUpdating && (
-                        <Wait>
-                            <div className={fr.cx("fr-grid-row")}>
-                                <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
-                            </div>
-                        </Wait>
-                    )}
+                    {isCommunityUpdating && <LoadingOverlay message={tmc("updating")} />}
                     {isCommunityUpdatingError && (
                         <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
                     )}
@@ -84,7 +77,7 @@ const CreateCommunity: FC = () => {
                             description={
                                 <>
                                     <p>{meError.message}</p>
-                                    <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                                    <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
                                 </>
                             }
                         />

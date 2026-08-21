@@ -7,9 +7,8 @@ import { useMemo, useState } from "react";
 import { CommunityListResponseDto } from "@/@types/entrepot";
 import api from "@/entrepot/api";
 import useUserQuery from "@/hooks/queries/useUserQuery";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
-import { routes } from "@/router/router";
 import { regex, removeDiacritics } from "@/utils";
 import { JoinExistingDatastoreModal } from "./JoinExistingDatastoreModal";
 import { joinModal } from "./modal";
@@ -76,7 +75,7 @@ export default function JoinExistingDatastore() {
                             imageUrl={placeholder16x9}
                             imageAlt=""
                             linkProps={{
-                                href: routes.join_community().href, // href inutile mais pour avoir le style "lien étendu"
+                                to: "/rejoindre-des-communautes", // cible inutile (navigation annulée par preventDefault) mais pour avoir le style "lien étendu"
                                 onClick: (e) => {
                                     e.preventDefault();
                                     setSelectedCommunity(community);

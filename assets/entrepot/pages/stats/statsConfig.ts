@@ -1,7 +1,7 @@
 import { CartesUser, EndpointTypeEnum } from "@/@types/app";
 import { OfferingStandardListResponseDto } from "@/@types/entrepot";
 import api from "@/entrepot/api";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import type { SelectOption, SelectParamDef, ServiceOption, ServiceParamDef, StatsRequest, StatsScope, StatsScopeConfig, StatsTranslator } from "./stats.types";
 
 // ---------- valeur encodée du param service : "endpoint:<id>" | "offering:<id>" ----------

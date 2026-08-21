@@ -1,4 +1,4 @@
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
@@ -11,7 +11,7 @@ import { CommunitiesLayers, CommunityFeatureTypeLayer, geometryTypes, RefToolLay
 import { arrLayerTools, arrRefLayerTools, CommunityResponseDTO, LayerTools, RefLayerTools } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n";
-import RQKeys from "../../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
 import { getFunctionalities, getToolsDefaultValues } from "../DefaultValues";
@@ -169,24 +169,14 @@ const Tools: FC = () => {
         <div>
             {isLoading && <LoadingText as={"h6"} message={tLayer("loading_layers")} />}
             {isError && <Alert severity="error" closable title={error.message} />}
-            {isCommunityUpdating && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {isCommunityUpdating && <LoadingOverlay message={tmc("updating")} />}
             {isCommunityUpdatingError && (
                 <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
             )}
             {isUpdatingLayersError ? (
                 <Alert severity="error" closable title={updatingLayersError.message} />
             ) : isUpdatingLayers ? (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={tLayer("updating_layers")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
+                <LoadingOverlay message={tLayer("updating_layers")} />
             ) : (
                 <FormProvider {...methods}>
                     <div>

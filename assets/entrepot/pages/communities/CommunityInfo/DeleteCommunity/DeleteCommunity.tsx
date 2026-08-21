@@ -2,18 +2,17 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { DatastoreCleanupEntitiesCount, FailedCleanupItem } from "@/@types/app";
+import { Datastore, DatastoreCleanupEntitiesCount, FailedCleanupItem } from "@/@types/app";
 import LoadingText from "@/components/Utils/LoadingText";
 import Progress from "@/components/Utils/Progress";
-import { useCommunity } from "@/contexts/community";
-import { useDatastore } from "@/contexts/datastore";
+import { useCommunity } from "@/entrepot/contexts/community";
 import api from "@/entrepot/api";
 import useEventSource from "@/hooks/useEventSource";
-import RQKeys from "@/modules/entrepot/RQKeys";
-import { routes } from "@/router/router";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { deleteCommunityModal } from "./deleteCommunityModal";
 
 type DeleteCommunityState = "disclaimer" | "loading" | "confirm" | "connecting" | "cleanup_progress" | "deleting" | "error" | "mail_sent";
@@ -42,10 +41,15 @@ const ENTITY_LABELS: Record<(typeof ENTITY_ORDER)[number], string> = {
     uploads: "Livraisons",
 };
 
-export default function DeleteCommunity() {
-    const { datastore } = useDatastore();
+type DeleteCommunityProps = {
+    datastore: Datastore;
+};
+
+// datastore garanti : rendu seulement quand la communauté a un entrepôt (frontière structurelle)
+export default function DeleteCommunity({ datastore }: DeleteCommunityProps) {
     const community = useCommunity();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const isOpenModal = useIsModalOpen(deleteCommunityModal);
 
     const [state, setState] = useState<DeleteCommunityState>("disclaimer");
@@ -193,7 +197,7 @@ export default function DeleteCommunity() {
                     {
                         children: "Continuer",
                         onClick: () => {
-                            routes.datastore_selection().push();
+                            navigate({ to: "/tableau-de-bord/entrepots" });
                         },
                     },
                 ]}
@@ -213,7 +217,7 @@ export default function DeleteCommunity() {
                     state === "disclaimer"
                         ? { children: "Continuer", onClick: proceedFromDisclaimer, doClosesModal: false }
                         : {
-                              children: isActive ? "Suppression en cours..." : confirmButtonLabel,
+                              children: isActive ? "Suppression en cours" : confirmButtonLabel,
                               onClick: startDeletion,
                               disabled: isActive || isLoading,
                               doClosesModal: false,
@@ -242,7 +246,7 @@ export default function DeleteCommunity() {
                 )}
 
                 {isLoading ? (
-                    <LoadingText message="Récupération du contenu de l’entrepôt..." as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
+                    <LoadingText message="Récupération du contenu de l’entrepôt" as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
                 ) : (
                     <>
                         {state === "confirm" && (
@@ -274,7 +278,7 @@ export default function DeleteCommunity() {
                             </>
                         )}
 
-                        {state === "connecting" && <LoadingText message="En cours de préparation..." as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />}
+                        {state === "connecting" && <LoadingText message="En cours de préparation" as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />}
 
                         {state === "cleanup_progress" && (
                             <ul className={fr.cx("fr-raw-list")}>
@@ -292,7 +296,7 @@ export default function DeleteCommunity() {
                         )}
 
                         {state === "deleting" && (
-                            <LoadingText message="Envoi de la demande de suppression en cours..." as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
+                            <LoadingText message="Envoi de la demande de suppression en cours" as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
                         )}
 
                         {state === "error" && hasContent && (

@@ -134,14 +134,14 @@ export type I18n = typeof i18n;
 
 export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Gérer le guichet" : `Gérer le guichet - ${name}`),
-    loading: "Chargement du guichet en cours ...",
-    loading_me: "Récupération des informations de votre compte en cours ...",
+    loading: "Chargement du guichet en cours",
+    loading_me: "Récupération des informations de votre compte en cours",
     me_fetch_failed: "La récupération des informations sur votre compte a échoué.",
     community_fetch_failed: "La récupération des informations sur le guichet a échoué.",
     back_to_list: "Retour à la liste des guichets",
     no_rights: "Vous n'avez pas les droits de modifier un guichet. Il faut être admin ou gestionnaire d'un guichet.",
     forbidden_access: "Ce guichet est en cours de création, il n'est pas accessible en modification.",
-    updating: "Mise à jour du guichet en cours ...",
+    updating: "Mise à jour du guichet en cours",
     updating_success: "La mise à jour du guichet s'est bien passée.",
     updating_failed: "La mise à jour du guichet a échoué.",
     create_now: "Créer le guichet maintenant",
@@ -190,11 +190,11 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     running_action: ({ action }) => {
         switch (action) {
             case "add":
-                return "Ajout du logo en cours ...";
+                return "Ajout du logo en cours";
             case "modify":
-                return "Mise à jour du logo en cours ...";
+                return "Mise à jour du logo en cours";
             case "delete":
-                return "Suppression du logo en cours ...";
+                return "Suppression du logo en cours";
         }
     },
     "logo_confirm_delete_modal.title": "Êtes-vous sûr de vouloir supprimer le logo de ce guichet ?",
@@ -205,10 +205,10 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "desc.documents_hint":
         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dicta suscipit tempora culpa, ea quis illo veniam vero consequuntur soluta nesciunt.",
     "desc.no_documents": "Aucun document",
-    "desc.adding_document": "Ajout d'un document en cours ...",
-    "desc.updating_document": "Modification d'un document en cours ...",
+    "desc.adding_document": "Ajout d'un document en cours",
+    "desc.updating_document": "Modification d'un document en cours",
     "desc.confirm_remove_document": "Êtes-vous sûr de vouloir supprimer ce document ?",
-    "desc.removing_document": "Suppression du document en cours ...",
+    "desc.removing_document": "Suppression du document en cours",
     "desc.listed.title": "Le guichet doit-il apparaître dans la liste des guichets publics ?",
     "desc.listed_hint": "Un guichet non listé n’apparaitra pas dans la liste des guichets",
     "desc.membership_requests.title": "Le guichet est-il ouvert aux demandes d’affiliation ?",

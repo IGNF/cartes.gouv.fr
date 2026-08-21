@@ -3,7 +3,7 @@ import LoadingText from "@/components/Utils/LoadingText";
 import api from "@/espaceco/api";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { useTranslation } from "@/i18n";
-import RQKeys from "@/modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -15,7 +15,7 @@ import ActionButtonsEdition from "./ActionButtonsEdition";
 import DatabasePermissionList from "./databases/DatabasePermissionList";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { fr } from "@codegouvfr/react-dsfr";
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 
 const Databases: FC = () => {
     const { t: tCommon } = useTranslation("Common");
@@ -89,13 +89,7 @@ const Databases: FC = () => {
     return (
         <>
             {/* Mise à jour */}
-            {isUpdating && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("update_permissions")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {isUpdating && <LoadingOverlay message={t("update_permissions")} />}
             {isUpdatingError && <Alert severity="error" closable title={tCommon("error")} description={updatingError.message} className={fr.cx("fr-my-3w")} />}
             {isLoading ? (
                 <LoadingText as={"h6"} message={t("loading_permissions")} />

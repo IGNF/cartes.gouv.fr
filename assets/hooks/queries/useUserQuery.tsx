@@ -2,7 +2,7 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
 import { CartesUser } from "@/@types/app";
 import api from "@/entrepot/api";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { delta } from "@/utils/delta";
 

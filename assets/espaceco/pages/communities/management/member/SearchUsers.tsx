@@ -5,7 +5,7 @@ import { isUser } from "../../../../../@types/app_espaceco";
 import { UserDTO } from "../../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../../components/Input/AutocompleteSelect";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import api from "../../../../api";
 import isEmail from "validator/lib/isEmail";
 

@@ -1,17 +1,20 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
 import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { type ServiceFormValuesBaseType } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
-import frequencyCodes from "../../../../data/maintenance_frequency.json";
+import frequencyCodes from "@/entrepot/data/maintenance_frequency.json";
 import { getTranslation } from "../../../../i18n/i18n";
-import { getInspireKeywords, getThematicCategories, regex } from "../../../../utils";
-import { useDatastore } from "@/contexts/datastore";
+import { getInspireKeywords, getThematicCategories } from "@/entrepot/utils/metadata";
+import { regex } from "../../../../utils";
 
 const keywords = getInspireKeywords();
 const thematicCategories = getThematicCategories();
@@ -26,7 +29,9 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = getTranslation("MetadatasForm");
 
-    const { datastore } = useDatastore();
+    // composant toujours rendu sous le layout datastore
+    const { datastoreId } = useParams({ from: "/_private/tableau-de-bord/entrepots/$datastoreId" });
+    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
 
     const {
         register,

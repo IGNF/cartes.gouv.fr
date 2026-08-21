@@ -2,18 +2,19 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
+import { useTranslation } from "@/i18n";
 import { StoredDataReport, StoredDataStatusEnum } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
-import RQKeys from "../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
-import { routes } from "../../../router/router";
 import api from "../../api";
 import StoredDataPreviewTab from "./PreviewTab/StoredDataPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
-import { useDatastore } from "../../../contexts/datastore";
 import Main from "../../../components/Layout/Main";
 
 type StoredDataDetailsProps = {
@@ -22,7 +23,11 @@ type StoredDataDetailsProps = {
 };
 const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedDataId }) => {
     const [reportQueryEnabled, setReportQueryEnabled] = useState(true);
-    const { datastore } = useDatastore();
+    // conserve le blocage et le miroir-404 de la page
+    useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+    const { t: tCommon } = useTranslation("Common");
+    const membership = useDatastoreMembership();
+    const datastoreName = tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox });
 
     const reportQuery = useQuery<StoredDataReport, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
@@ -49,7 +54,11 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
                     <Button
                         iconId="fr-icon-arrow-left-s-line"
                         priority="tertiary no outline"
-                        linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "dataset" }).link}
+                        linkProps={{
+                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                            params: { datastoreId, datasheetName },
+                            search: { activeTab: "dataset" },
+                        }}
                         title="Retour à la fiche de donnée"
                         size="large"
                     />
@@ -57,7 +66,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
                     <Button
                         iconId="fr-icon-arrow-left-s-line"
                         priority="tertiary no outline"
-                        linkProps={routes.datasheet_list({ datastoreId }).link}
+                        linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}
                         title="Retour à mes données"
                         size="large"
                     />
@@ -88,7 +97,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
                                 },
                                 {
                                     label: "Rapport de génération",
-                                    content: <ReportTab datastoreName={datastore?.name} reportQuery={reportQuery} />,
+                                    content: <ReportTab datastoreName={datastoreName} reportQuery={reportQuery} />,
                                 },
                             ]}
                         />

@@ -53,8 +53,8 @@ export const DatabasesFrTranslations: Translations<"fr">["Databases"] = {
     all_columns_have_permissions: "Toutes les colonnes ont une permission",
     loading_database: ({ title }) => `Récupération des tables de la base de données ${title}`,
     loading_table: ({ title }) => `Récupération des colonnes de la table ${title}`,
-    loading_permissions: "Chargement des permissions en cours ...",
-    update_permissions: "Mise à jour des permissions en cours ...",
+    loading_permissions: "Chargement des permissions en cours",
+    update_permissions: "Mise à jour des permissions en cours",
     get_option: ({ option }) => {
         switch (option) {
             case "none":
@@ -82,7 +82,7 @@ export const DatabasesFrTranslations: Translations<"fr">["Databases"] = {
     "search.default_label": "Base de données",
     "search.default_placeholder": "Recherche de la base de données par son intitulé (title)",
     "search.no_options": "Aucune base",
-    "search.loading": "Recherche en cours ...",
+    "search.loading": "Recherche en cours",
     get_level: ({ level }) => {
         switch (level) {
             case "NONE":

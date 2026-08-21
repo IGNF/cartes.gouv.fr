@@ -6,14 +6,12 @@ import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { Configuration, Datastore, EndpointTypeEnum, Metadata, Offering, OfferingTypeEnum } from "../../../../../@types/app";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
-import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import DataCard from "../DataCard";
 
@@ -210,10 +208,10 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                                         metadata.tags.datasheet_name !== undefined && {
                                             iconId: "fr-icon-arrow-right-s-line",
                                             priority: "tertiary no outline",
-                                            linkProps: routes.datastore_datasheet_view({
-                                                datastoreId: datastore._id,
-                                                datasheetName: metadata.tags.datasheet_name,
-                                            }).link,
+                                            linkProps: {
+                                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                                params: { datastoreId: datastore._id, datasheetName: metadata.tags.datasheet_name },
+                                            },
                                             children: tCommon("see_2"),
                                         },
                                     ]}
@@ -246,16 +244,7 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                 document.body
             )}
 
-            {unpublishOfferingMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("storage.endpoints.deletion.in_progress")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {unpublishOfferingMutation.isPending && <LoadingOverlay message={t("storage.endpoints.deletion.in_progress")} />}
 
             {createPortal(
                 <confirmDeleteMetadataModal.Component
@@ -284,16 +273,7 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                 document.body
             )}
 
-            {deleteMetadataMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("storage.endpoints.metadata.deletion.in_progress")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {deleteMetadataMutation.isPending && <LoadingOverlay message={t("storage.endpoints.metadata.deletion.in_progress")} />}
         </>
     );
 };

@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 
-import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
+import UploadStyleFiles from "@/entrepot/components/Geostyler/UploadStyleFiles";
 import { WmsVectorServiceFormValuesType } from "./WmsVectorServiceForm";
 
 type UploadStyleFileProps = {

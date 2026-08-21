@@ -3,7 +3,7 @@ import { FC, useMemo } from "react";
 
 import type { PyramidRaster, PyramidVector, Service, VectorDb } from "../../../../../@types/app";
 import { ConfigurationTypeEnum } from "../../../../../@types/app";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../../api";
 import Desc from "../Desc";
 

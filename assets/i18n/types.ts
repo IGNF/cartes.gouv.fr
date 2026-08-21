@@ -17,7 +17,7 @@ export const languagesDisplayNames: Record<Language, string> = {
 export type Language = (typeof languages)[number];
 export type ComponentKey =
     | import("./Common.locale").I18n
-    | import("../modules/entrepot/breadcrumbs/Breadcrumb.locale").I18n
+    | import("@/entrepot/modules/breadcrumbs/Breadcrumb.locale").I18n
     | import("../entrepot/pages/communities/Rights.locale").I18n
     | import("../entrepot/pages/service/view/Style/Style.locale").I18n
     | import("../entrepot/pages/users/me/Me.locale").I18n
@@ -42,9 +42,9 @@ export type ComponentKey =
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.locale").I18n
-    | import("../validations/sld/SldStyleValidation.locale").I18n
-    | import("../validations/mapbox/MapboxStyleValidator.locale").I18n
-    | import("../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale").I18n
+    | import("@/entrepot/validations/sld/SldStyleValidation.locale").I18n
+    | import("@/entrepot/validations/mapbox/MapboxStyleValidator.locale").I18n
+    | import("@/entrepot/modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale").I18n
     | import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm.locale").I18n
     | import("../entrepot/pages/service/wfs/WfsServiceForm.locale").I18n
     | import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm.locale").I18n
@@ -54,7 +54,7 @@ export type ComponentKey =
     | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale").I18n
     | import("../entrepot/pages/service/common/TableSelection/TableSelection.locale").I18n
     | import("../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale").I18n
-    | import("../components/Utils/Geostyler/UploadStyleFile.locale").I18n
+    | import("@/entrepot/components/Geostyler/UploadStyleFile.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
     | import("../espaceco/pages/communities/CommunityList.locale").I18n
     | import("../espaceco/pages/communities/SearchCommunity.locale").I18n
@@ -85,7 +85,7 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/CommunityList.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
     | import("../components/Input/KeyValueList.locale").I18n
-    | import("../components/Utils/Geostyler/UploadStyleFile.locale").I18n
+    | import("@/entrepot/components/Geostyler/UploadStyleFile.locale").I18n
     | import("../entrepot/pages/stats/Stats.locale").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
