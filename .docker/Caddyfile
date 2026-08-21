@@ -102,7 +102,11 @@
 	# public/.htaccess est un fichier : @phpHandled ne le saute pas, Symfony le loggerait en double
 	log_skip @hidden
 
-	# Access log filtré en blocklist : tout header non listé réapparaîtra dans les logs
+	# Seuls les headers recopiés ici apparaissent dans l'access log (allowlist) ; header absent = chaîne vide
+	log_append user_agent {header.User-Agent}
+	log_append referer {header.Referer}
+	log_append request_id {header.X-Request-Id}
+
 	log {
 		output stdout
 		format filter {
@@ -111,48 +115,15 @@
 				duration_format ms
 			}
 			fields {
-				# champs hors headers (client_ip suffit : remote_ip = ingress, XFF = redondant)
+				# headers supprimés en bloc, recopiés au cas par cas via log_append
+				request>headers delete
+				# client_ip suffit : remote_ip = ingress
 				request>remote_ip delete
 				request>remote_port delete
 				request>proto delete
-				request>headers>X-Forwarded-For delete
 				bytes_read delete
 				user_id delete
 				resp_headers delete
-				# credentials (déjà REDACTED par Caddy, supprimés entièrement)
-				request>headers>Cookie delete
-				request>headers>Authorization delete
-				# négociation / cache
-				request>headers>Accept delete
-				request>headers>Accept-Encoding delete
-				request>headers>Accept-Language delete
-				request>headers>Cache-Control delete
-				request>headers>Pragma delete
-				request>headers>If-None-Match delete
-				request>headers>If-Modified-Since delete
-				request>headers>Connection delete
-				request>headers>Keep-Alive delete
-				request>headers>Priority delete
-				request>headers>Upgrade-Insecure-Requests delete
-				# fetch metadata / client hints / privacy
-				request>headers>Sec-Fetch-Site delete
-				request>headers>Sec-Fetch-Mode delete
-				request>headers>Sec-Fetch-Dest delete
-				request>headers>Sec-Fetch-User delete
-				request>headers>Sec-Ch-Ua delete
-				request>headers>Sec-Ch-Ua-Mobile delete
-				request>headers>Sec-Ch-Ua-Platform delete
-				request>headers>Sec-Gpc delete
-				request>headers>Dnt delete
-				# ajoutés par l'ingress (redondants : client_ip suffit)
-				request>headers>X-Real-Ip delete
-				request>headers>X-Scheme delete
-				request>headers>X-Forwarded-Proto delete
-				request>headers>X-Forwarded-Host delete
-				request>headers>X-Forwarded-Port delete
-				request>headers>X-Forwarded-Scheme delete
-				# toujours "XMLHttpRequest" (injecté par jsonFetch)
-				request>headers>X-Requested-With delete
 			}
 		}
 	}

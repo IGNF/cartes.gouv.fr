@@ -33,4 +33,6 @@ Finalité : sécurité et diagnostic (traçabilité par compte attendue par les 
 | `request_id` | aléatoire par requête (ingress, sinon généré) | ne relie pas l'activité entre requêtes                                                       |
 | adresse IP   | absente                                       | l'IP reste uniquement dans l'access log Caddy (statiques/redirections), comme historiquement |
 
+L'access log Caddy supprime tous les headers de requête et ne recopie en allowlist (`log_append`) que `User-Agent`, `Referer` et `X-Request-Id` : un header inattendu (injecté par un proxy, envoyé par un scanner) n'est jamais journalisé.
+
 Ne jamais logger d'objet utilisateur, d'email ou de token dans le `context` d'un log applicatif.
