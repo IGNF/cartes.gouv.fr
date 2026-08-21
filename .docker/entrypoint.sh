@@ -19,8 +19,13 @@ if [ -z "$(ls -A "$env_dir" 2>/dev/null)" ]; then
     warmup_pid=$!
     warmup_status=0
     wait $warmup_pid || warmup_status=$?
-    if [ "$stop" = 1 ]; then
+    # Warmup échoué ou interrompu : purger le cache partiel, sinon le prochain démarrage le servirait tel quel
+    if [ "$warmup_status" -ne 0 ]; then
         kill $warmup_pid 2>/dev/null || true
+        wait $warmup_pid 2>/dev/null || true
+        find "$env_dir" -mindepth 1 -delete 2>/dev/null || true
+    fi
+    if [ "$stop" = 1 ]; then
         exit 143
     fi
     # Un warmup en échec doit faire crasher le conteneur, pas servir un cache cassé
