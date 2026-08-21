@@ -14,7 +14,7 @@ method=GET path=/api/datastores/190b.../metadata/arbres status=200 duration_ms=2
 - `duration_ms` est mesuré depuis `REQUEST_TIME_FLOAT` (temps PHP).
 - `route` et `user` sont omis quand ils n'existent pas (404, requête anonyme).
 - En prod, le handler `access` sort le message brut sur stdout ; les autres handlers excluent le canal pour éviter la double sortie. Les requêtes servies par Caddy sans PHP (fichiers statiques, redirections héritées, TRACE) restent loggées par l'access log Caddy (voir `.docker/Caddyfile`), qui saute les requêtes dynamiques (`log_skip`).
-- Limite assumée : une requête qui tue le process PHP (fatal dur, OOM) n'a pas de ligne d'accès, seule la trace stderr subsiste.
+- Limite assumée : une requête qui tue le process PHP (fatal dur, OOM) ou dont la réponse 5xx est générée par Caddy lui-même n'a pas de ligne d'accès (le `log_skip` s'évalue sur la requête, pas sur le statut), seule la trace stderr subsiste.
 
 ## Corrélation par request_id
 
