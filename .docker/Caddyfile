@@ -32,7 +32,7 @@
 	# Laisser au plus 25 s aux requêtes en cours à l'arrêt (drain infini par défaut)
 	grace_period 25s
 
-	# respond (405 TRACE, 404 .ht*) doit passer avant les redirections
+	# respond (405 TRACE) doit passer avant les redirections
 	order respond before redir
 }
 
