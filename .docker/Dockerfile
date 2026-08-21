@@ -20,66 +20,26 @@ FROM ${composer_image} AS composer_bin
 FROM ${node_slim_image} AS node_dist
 
 #----------------------------------------------------------------------
-# Installer les dépendances PHP dans une couche dédiée
+# Installer les dépendances PHP dans une couche dédiée (aucun boot du kernel ici)
 #----------------------------------------------------------------------
 FROM docker.io/library/php:${php_version}-cli@sha256:90db578653480744d7137d42e26055bc12c75099eab0cbb38bc8da79a94b1443 AS deps_php
 COPY --from=composer_bin /composer /usr/bin/composer
-# APCu requis pour booter le kernel prod (cache.system)
-ARG apcu_version=5.1.28
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get -qq update && apt-get -qq install -y git unzip \
-    && curl -fsSL https://pecl.php.net/get/apcu-${apcu_version}.tgz -o /tmp/apcu.tgz \
-    && pecl install /tmp/apcu.tgz && docker-php-ext-enable apcu && rm /tmp/apcu.tgz
+    apt-get -qq update && apt-get -qq install -y git unzip
 
 ARG project_dir
 WORKDIR ${project_dir}
-ENV APP_ENV=prod \
-    COMPOSER_CACHE_DIR=/var/cache/composer
+ENV COMPOSER_CACHE_DIR=/var/cache/composer
 
 # Couche dépendances composer mise en cache grâce aux fichiers composer.json, composer.lock et symfony.lock
 COPY composer.json composer.lock symfony.lock ./
 RUN --mount=type=cache,target=/var/cache/composer \
     composer install --prefer-dist --no-dev --no-scripts --no-autoloader --no-progress
 
-# Copie du reste du projet pour générer l'autoloader et installer les assets
+# Copie du reste du projet pour générer l'autoloader optimisé (classmap de src/)
 COPY . .
-RUN composer dump-autoload --no-dev --optimize \
-    && php bin/console assets:install \
-    && composer symfony-routing-dump
-
-#----------------------------------------------------------------------
-# Installer les dépendances JavaScript/nodejs dans une couche dédiée
-#----------------------------------------------------------------------
-FROM ${node_alpine_image} AS deps_nodejs_build
-ARG project_dir
-WORKDIR ${project_dir}
-
-RUN apk add --no-cache git
-
-# Couche dépendances mise en cache grâce aux fichiers package.json et package-lock.json
-COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci
-
-# Copie du reste du projet pour générer le build Vite (public/build)
-COPY .env vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
-COPY --exclude=index --exclude=logs --exclude=FETCH_HEAD --exclude=ORIG_HEAD .git .git
-COPY assets assets
-
-# Récupération des artefacts PHP consommés par le build Vite (cf. assets/modules/Routing.ts)
-COPY --from=deps_php ${project_dir}/vendor/friendsofsymfony/jsrouting-bundle/Resources/js vendor/friendsofsymfony/jsrouting-bundle/Resources/js
-COPY --from=deps_php ${project_dir}/var/cache/fosRoutes.json var/cache/fosRoutes.json
-RUN npm run build
-
-#----------------------------------------------------------------------
-# node_modules de production (runtime du scraper), indépendant des autres stages
-#----------------------------------------------------------------------
-FROM ${node_alpine_image} AS deps_nodejs_runtime
-ARG project_dir
-WORKDIR ${project_dir}
-
-COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --ignore-scripts
+RUN composer dump-autoload --no-dev --optimize
 
 #----------------------------------------------------------------------
 # Créer l'image de base de l'application
@@ -146,6 +106,52 @@ COPY .docker/Caddyfile /etc/frankenphp/Caddyfile
 #----------------------------------------------------------------------
 ENV XDG_CONFIG_HOME=/tmp/caddy-config \
     XDG_DATA_HOME=/tmp/caddy-data
+
+#----------------------------------------------------------------------
+# Dump des routes pour le build Vite, sur le PHP-ZTS de prod
+# (booter le kernel prod exige APCu : cache.system = apcu, cf. config/packages/cache.yaml)
+#----------------------------------------------------------------------
+FROM base_app AS routing_dump
+ARG project_dir
+WORKDIR ${project_dir}
+ENV APP_ENV=prod \
+    APP_DEBUG=0
+
+COPY --from=deps_php ${project_dir} ./
+RUN php bin/console fos:js-routing:dump --target ./var/cache/fosRoutes.json --format json
+
+#----------------------------------------------------------------------
+# Installer les dépendances JavaScript/nodejs dans une couche dédiée
+#----------------------------------------------------------------------
+FROM ${node_alpine_image} AS deps_nodejs_build
+ARG project_dir
+WORKDIR ${project_dir}
+
+RUN apk add --no-cache git
+
+# Couche dépendances mise en cache grâce aux fichiers package.json et package-lock.json
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci
+
+# Copie du reste du projet pour générer le build Vite (public/build)
+COPY .env vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
+COPY --exclude=index --exclude=logs --exclude=FETCH_HEAD --exclude=ORIG_HEAD .git .git
+COPY assets assets
+
+# Récupération des artefacts PHP consommés par le build Vite (cf. assets/modules/Routing.ts)
+COPY --from=deps_php ${project_dir}/vendor/friendsofsymfony/jsrouting-bundle/Resources/js vendor/friendsofsymfony/jsrouting-bundle/Resources/js
+COPY --from=routing_dump ${project_dir}/var/cache/fosRoutes.json var/cache/fosRoutes.json
+RUN npm run build
+
+#----------------------------------------------------------------------
+# node_modules de production (runtime du scraper), indépendant des autres stages
+#----------------------------------------------------------------------
+FROM ${node_alpine_image} AS deps_nodejs_runtime
+ARG project_dir
+WORKDIR ${project_dir}
+
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --ignore-scripts
 
 #----------------------------------------------------------------------
 # Installer l'application pour production
