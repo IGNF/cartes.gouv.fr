@@ -1,6 +1,7 @@
 monolog:
     channels:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+        - access # Ligne d'accès applicative, une par requête (voir docs/developer/logs.md)
 
 when@dev:
     monolog:
@@ -45,20 +46,27 @@ when@prod:
                 handler: stdout_stream
                 min_level: notice
                 max_level: warning
-                channels: ["!deprecation"]
+                channels: ["!deprecation", "!access"]
 
             # Écrit les logs opérationnels sur stdout pour Kubernetes.
             stdout_stream:
                 type: stream
                 path: php://stdout
-                channels: ["!deprecation"]
+                channels: ["!deprecation", "!access"]
 
             # Écrit les erreurs et niveaux supérieurs sur stderr.
             stderr_error_plus:
                 type: stream
                 path: php://stderr
                 level: error
-                channels: ["!deprecation"]
+                channels: ["!deprecation", "!access"]
+
+            # Ligne d'accès applicative : message logfmt brut sur stdout, sans décoration.
+            access:
+                type: stream
+                path: php://stdout
+                channels: [access]
+                formatter: app.monolog.access_line_formatter
 
             # Isole les deprécations sur stderr via leur canal dédié.
             deprecation:
@@ -70,4 +78,4 @@ when@prod:
             console:
                 type: console
                 process_psr_3_messages: false
-                channels: ["!event", "!doctrine"]
+                channels: ["!event", "!doctrine", "!access"]

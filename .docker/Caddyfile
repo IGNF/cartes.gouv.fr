@@ -1,0 +1,132 @@
+{
+	frankenphp {
+		# Épinglé : le défaut (2 x CPU) lirait les coeurs du noeud - voir docs/developer/dimensionnement.md
+		num_threads {$FRANKENPHP_NUM_THREADS:4}
+
+		# Threads à la demande pour absorber les pics - voir docs/developer/dimensionnement.md
+		max_threads {$FRANKENPHP_MAX_THREADS:8}
+
+		# Worker mode (PR ultérieure ; nécessitera runtime/frankenphp-symfony)
+		# worker /opt/cartesgouvfr-site/public/index.php
+	}
+
+	# TLS terminé par le reverse proxy amont
+	auto_https off
+
+	# Conteneur immutable : pas de reload de config, l'endpoint d'admin est inutile
+	admin off
+
+	# Ne sert que le client_ip des access logs ; REMOTE_ADDR et la résolution Symfony (TRUSTED_PROXIES) inchangés
+	servers {
+		trusted_proxies static private_ranges
+		trusted_proxies_strict
+	}
+
+	# Logs en texte brut ; level_format upper évite les codes couleur ANSI
+	log {
+		format console {
+			level_format upper
+		}
+	}
+
+	# Laisser au plus 25 s aux requêtes en cours à l'arrêt (drain infini par défaut)
+	grace_period 25s
+
+	# respond (405 TRACE) doit passer avant les redirections
+	order respond before redir
+}
+
+:8000 {
+	root * /opt/cartesgouvfr-site/public
+
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+		-X-Powered-By
+	}
+
+	# Assets Vite hashés ; file : sans lui, la page HTML renvoyée pour un asset disparu serait cachée 1 an
+	@build {
+		path /build/*
+		file
+	}
+	header @build Cache-Control "public, max-age=31536000, immutable"
+
+	# Statiques à nom fixe, cache modéré avec revalidation ; file : même garde que @build
+	@static {
+		path /favicon/* /bundles/* /favicon.ico /robots.txt
+		file
+	}
+	header @static Cache-Control "public, max-age=86400, must-revalidate"
+
+	# Équivalent du TraceEnable Off d'Apache
+	@trace method TRACE
+	respond @trace 405
+
+	# .ht* jamais servis : réécrits vers un chemin inexistant, donc 404 React du front controller
+	@hidden path */.ht*
+	rewrite @hidden /__fichier-cache__
+
+	# Redirections héritées du vhost Apache, query string préservée ; tout ajout
+	# doit aussi être exclu du matcher @phpHandled, sinon il ne sera pas loggé
+	redir / /explorer-les-cartes{?query} 301
+	@faq path /faq /faq/
+	redir @faq /aide/fr{?query} 301
+	@apropos path /a-propos /a-propos/
+	redir @apropos /decouvrir{?query} 301
+	@nousecrire path /nous-ecrire /nous-ecrire/
+	redir @nousecrire /aide/fr/nous-ecrire{?query} 301
+	@offre path /offre /offre/
+	redir @offre /offres{?query} 301
+
+	# Canonicalisation /index.php → URL propre (parité avec public/.htaccess)
+	@indexphp path_regexp idx ^/index\.php(?:/(.*))?$
+	redir @indexphp /{re.idx.1}{?query} 301
+
+	# Probes de santé jamais loggées ; filet si le log_skip @phpHandled est retiré (rollback)
+	@health path_regexp ^/tableau-de-bord/health/?$
+	log_skip @health
+
+	# Requêtes dynamiques loggées par Symfony (docs/developer/logs.md), Caddy ne logge que ce qu'il sert lui-même
+	@phpHandled {
+		not file
+		not path / /faq /faq/ /a-propos /a-propos/ /nous-ecrire /nous-ecrire/ /offre /offre/ /index.php /index.php/*
+		not method TRACE
+	}
+	log_skip @phpHandled
+
+	# public/.htaccess est un fichier : @phpHandled ne le saute pas, Symfony le loggerait en double
+	log_skip @hidden
+
+	# Seuls les headers recopiés ici apparaissent dans l'access log (allowlist) ; header absent = chaîne vide
+	log_append user_agent {header.User-Agent}
+	log_append referer {header.Referer}
+	log_append request_id {header.X-Request-Id}
+
+	log {
+		output stdout
+		format filter {
+			wrap console {
+				level_format upper
+				duration_format ms
+			}
+			fields {
+				# headers supprimés en bloc, recopiés au cas par cas via log_append
+				request>headers delete
+				# client_ip suffit : remote_ip = ingress
+				request>remote_ip delete
+				request>remote_port delete
+				request>proto delete
+				bytes_read delete
+				user_id delete
+				resp_headers delete
+			}
+		}
+	}
+
+	php_server
+}

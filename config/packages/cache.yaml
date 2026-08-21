@@ -16,4 +16,11 @@ framework:
 
         # Namespaced pools use the above "app" backend by default
         #pools:
-            #my.dedicated.cache: null
+        #my.dedicated.cache: null
+
+# En prod, APCu pour app et system : permet un conteneur entièrement read-only (le pool system écrit des métadonnées à la volée après le warmup - EROFS sinon)
+when@prod:
+    framework:
+        cache:
+            app: cache.adapter.apcu
+            system: cache.adapter.apcu
