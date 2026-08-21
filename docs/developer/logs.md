@@ -20,15 +20,17 @@ method=GET path=/api/datastores/190b.../metadata/arbres status=200 duration_ms=2
 
 `RequestIdProcessor` ajoute `extra.request_id` à tous les enregistrements monolog : l'id vient du header `X-Request-Id` posé par l'ingress (aussi présent dans l'access log Caddy), ou est généré (UUID v7) hors ingress. Coller un request_id dans la recherche du dashboard remonte la ligne d'accès et tous les logs applicatifs de la requête.
 
+La corrélation suppose que l'ingress écrase tout `X-Request-Id` fourni par le client (comportement standard des ingress nginx). L'application valide le format de l'id (anti-injection logfmt) mais ne peut pas garantir son unicité si cette hypothèse tombe : au pire, une recherche corrèle des requêtes sans lien, sans impact applicatif.
+
 ## Données personnelles
 
 Finalité : sécurité et diagnostic (traçabilité par compte attendue par les recommandations CNIL/ANSSI de journalisation). Minimisation appliquée :
 
-| Champ        | Contenu                                    | Minimisation                                                                                 |
-| ------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------- |
-| `user`       | UUID technique du compte (`User::getId()`) | jamais l'email, le username ni le nom                                                        |
-| `path`       | URI brute                                  | sans query string (risque de données personnelles dans les paramètres)                       |
-| `request_id` | aléatoire par requête                      | ne relie pas l'activité entre requêtes                                                       |
-| adresse IP   | absente                                    | l'IP reste uniquement dans l'access log Caddy (statiques/redirections), comme historiquement |
+| Champ        | Contenu                                       | Minimisation                                                                                 |
+| ------------ | --------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `user`       | UUID technique du compte (`User::getId()`)    | jamais l'email, le username ni le nom                                                        |
+| `path`       | URI brute                                     | sans query string (risque de données personnelles dans les paramètres)                       |
+| `request_id` | aléatoire par requête (ingress, sinon généré) | ne relie pas l'activité entre requêtes                                                       |
+| adresse IP   | absente                                       | l'IP reste uniquement dans l'access log Caddy (statiques/redirections), comme historiquement |
 
 Ne jamais logger d'objet utilisateur, d'email ou de token dans le `context` d'un log applicatif.
