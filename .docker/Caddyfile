@@ -15,11 +15,13 @@
 	# Conteneur immutable : pas de reload de config, l'endpoint d'admin est inutile
 	admin off
 
-	# client_ip des access logs = IP réelle résolue depuis X-Forwarded-For.
+	# client_ip des access logs = première IP non privée de X-Forwarded-For en
+	# partant de la droite (strict) : un header forgé par le client est sans effet.
 	# N'affecte pas PHP : REMOTE_ADDR reste le pair TCP, la résolution applicative
 	# appartient à Symfony (TRUSTED_PROXIES).
 	servers {
 		trusted_proxies static private_ranges
+		trusted_proxies_strict
 	}
 
 	# Logs en texte brut ; level_format upper évite les codes couleur ANSI
