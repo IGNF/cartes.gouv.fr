@@ -103,6 +103,10 @@
 	}
 	log_skip @phpHandled
 
+	# Les .ht* finissent aussi dans le front controller (réécriture ci-dessus) mais
+	# public/.htaccess existe : @phpHandled ne les saute pas, Symfony les loggerait en double
+	log_skip @hidden
+
 	# Access log en texte brut ; filter supprime les champs et headers sans intérêt
 	# (blocklist : un nouveau header non listé réapparaîtra dans les logs).
 	# Conservés volontairement : Referer, User-Agent, X-Request-Id, client_ip
