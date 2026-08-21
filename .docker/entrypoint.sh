@@ -18,10 +18,15 @@ env_dir="var/cache/${APP_ENV:-prod}"
 if [ -z "$(ls -A "$env_dir" 2>/dev/null)" ]; then
     php bin/console cache:warmup &
     warmup_pid=$!
-    wait $warmup_pid || true
+    warmup_status=0
+    wait $warmup_pid || warmup_status=$?
     if [ "$stop" = 1 ]; then
         kill $warmup_pid 2>/dev/null || true
         exit 143
+    fi
+    # Un warmup en échec doit faire crasher le conteneur, pas servir un cache cassé
+    if [ "$warmup_status" -ne 0 ]; then
+        exit "$warmup_status"
     fi
 fi
 
