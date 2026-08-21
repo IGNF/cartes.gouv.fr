@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1-labs@sha256:7d49dad25a050e14338ba7028b0460243f9d911dedc160a8fe20c34738fef3af
 #----------------------------------------------------------------------
-# Images épinglées par digest (tag + digest maintenus par Renovate,
-# sauf php et frankenphp qui sont couplés entre eux)
+# Images épinglées par digest, tag + digest maintenus par Renovate
 #----------------------------------------------------------------------
 ARG project_dir=/opt/cartesgouvfr-site
 
@@ -12,8 +11,7 @@ ARG node_alpine_image=docker.io/library/node:24.14.0-alpine@sha256:7fddd9ddeae81
 ARG node_slim_image=docker.io/library/node:24.14.0-slim@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8
 ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90
 
-# php_version pilote le tag de l'image php (stage deps_php) et le dépôt deb ;
-# couplé à frankenphp_version (bump PHP = changer les deux)
+# php_version pilote le tag de l'image php et le dépôt deb ; couplé à frankenphp_version (bump PHP = changer les deux)
 ARG php_version=8.2
 ARG frankenphp_version=1.12.4+php82-1
 
@@ -26,8 +24,7 @@ FROM ${node_slim_image} AS node_dist
 #----------------------------------------------------------------------
 FROM docker.io/library/php:${php_version}-cli@sha256:90db578653480744d7137d42e26055bc12c75099eab0cbb38bc8da79a94b1443 AS deps_php
 COPY --from=composer_bin /composer /usr/bin/composer
-# apcu (https://pecl.php.net/package/APCu) : requis pour booter le kernel prod (cache.system en APCu) via bin/console ;
-# tarball via curl car le client PEAR ne sait pas traverser le proxy
+# APCu requis pour booter le kernel prod (cache.system)
 ARG apcu_version=5.1.28
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -112,10 +109,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && update-locale LANG=fr_FR.UTF-8
 
 #------------------------------------------------------------------------
-# Installer FrankenPHP et PHP (ZTS) depuis le dépôt deb officiel
-# en savoir plus : https://frankenphp.dev/ (section "deb Packages")
-# Le binaire frankenphp embarque déjà : curl, dom, mbstring, opcache,
-# openssl, simplexml, sodium, xml, zlib, etc.
+# Installer FrankenPHP et PHP (ZTS) depuis le dépôt deb officiel (https://frankenphp.dev/)
+# curl, dom, mbstring, opcache, openssl, xml… sont déjà intégrés au binaire
 #------------------------------------------------------------------------
 ARG php_version
 ARG frankenphp_version
@@ -147,8 +142,7 @@ COPY .docker/php.ini /etc/php-zts/conf.d/99-app.ini
 COPY .docker/Caddyfile /etc/frankenphp/Caddyfile
 
 #----------------------------------------------------------------------
-# Répertoires d'état de Caddy sous /tmp : compatibles avec un rootfs
-# read-only (le chart k8s monte /tmp en emptyDir), créés au démarrage
+# Répertoires d'état de Caddy sous /tmp, compatibles rootfs read-only (créés au démarrage)
 #----------------------------------------------------------------------
 ENV XDG_CONFIG_HOME=/tmp/caddy-config \
     XDG_DATA_HOME=/tmp/caddy-data
@@ -160,8 +154,7 @@ FROM base_app AS prod
 ARG project_dir
 WORKDIR ${project_dir}
 
-# Copies du moins au plus volatile ; --link rebase les couches indépendamment
-# de base_app. nodejs requis au runtime pour bin/articles-scraper.mjs (cron)
+# Copies du moins au plus volatile ; node requis au runtime par bin/articles-scraper.mjs (cron)
 COPY --link --from=node_dist /usr/local/bin/node /usr/local/bin/node
 COPY --link --from=deps_nodejs_runtime ${project_dir}/node_modules node_modules
 COPY --link --from=deps_php ${project_dir}/vendor vendor
@@ -178,10 +171,6 @@ RUN echo "opcache.validate_timestamps=0" > /etc/php-zts/conf.d/99-opcache-prod.i
 RUN mkdir -p var/data && chown -R www-data:www-data var
 USER www-data
 RUN php bin/console cache:clear
-
-# Rootfs read-only en k8s : seuls var/data (PVC), var/cache et var/log
-# (emptyDir) et /tmp doivent être inscriptibles ; l'entrypoint régénère
-# le cache quand le montage masque celui de l'image
 
 # --noproxy : ne jamais passer par un proxy sortant (HTTP_PROXY) pour joindre localhost
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \

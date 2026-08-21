@@ -1,4 +1,3 @@
-# Configuration FrankenPHP / Caddy de cartes.gouv.fr
 {
 	frankenphp {
 		# Épinglé : le défaut (2 x CPU) lirait les coeurs du noeud - voir docs/developer/dimensionnement.md
@@ -7,9 +6,8 @@
 		# Threads à la demande pour absorber les pics - voir docs/developer/dimensionnement.md
 		max_threads {$FRANKENPHP_MAX_THREADS:8}
 
-		# Worker mode (désactivé pour le moment)
+		# Worker mode (PR ultérieure ; nécessitera runtime/frankenphp-symfony)
 		# worker /opt/cartesgouvfr-site/public/index.php
-		# ajouter runtime/frankenphp-symfony aux dépendances composer
 	}
 
 	# TLS terminé par le reverse proxy amont
@@ -18,10 +16,7 @@
 	# Conteneur immutable : pas de reload de config, l'endpoint d'admin est inutile
 	admin off
 
-	# client_ip des access logs = première IP non privée de X-Forwarded-For en
-	# partant de la droite (strict) : un header forgé par le client est sans effet.
-	# N'affecte pas PHP : REMOTE_ADDR reste le pair TCP, la résolution applicative
-	# appartient à Symfony (TRUSTED_PROXIES).
+	# Ne sert que le client_ip des access logs ; REMOTE_ADDR et la résolution Symfony (TRUSTED_PROXIES) inchangés
 	servers {
 		trusted_proxies static private_ranges
 		trusted_proxies_strict
@@ -61,8 +56,7 @@
 	}
 	header @build Cache-Control "public, max-age=31536000, immutable"
 
-	# Statiques à nom fixe : cache modéré avec revalidation (ETag/Last-Modified
-	# fournis par Caddy) ; le matcher `file` évite de cacher un fallback SPA 404
+	# Statiques à nom fixe, cache modéré avec revalidation ; file : même garde que @build
 	@static {
 		path /favicon/* /bundles/* /favicon.ico /robots.txt
 		file
@@ -73,15 +67,12 @@
 	@trace method TRACE
 	respond @trace 405
 
-	# Ne jamais servir les fichiers .ht* (public/.htaccess reste dans l'image pour
-	# XAMPP) : réécrire vers un chemin inexistant pour que la requête tombe dans le
-	# front controller - l'utilisateur voit la page 404 React, comme tout chemin inconnu
+	# .ht* jamais servis : réécrits vers un chemin inexistant, donc 404 React du front controller
 	@hidden path */.ht*
 	rewrite @hidden /__fichier-cache__
 
-	# Redirections héritées (ex-RedirectMatch du vhost Apache), query string préservée.
-	# Tout ajout ici doit aussi être exclu du matcher @phpHandled ci-dessous,
-	# sinon la redirection ne sera pas loggée.
+	# Redirections héritées du vhost Apache, query string préservée ; tout ajout
+	# doit aussi être exclu du matcher @phpHandled, sinon il ne sera pas loggé
 	redir / /explorer-les-cartes{?query} 301
 	@faq path /faq /faq/
 	redir @faq /aide/fr{?query} 301
@@ -96,14 +87,11 @@
 	@indexphp path_regexp idx ^/index\.php(?:/(.*))?$
 	redir @indexphp /{re.idx.1}{?query} 301
 
-	# Ne pas logger les probes de santé : redondant tant que @phpHandled est actif,
-	# gardé comme filet si le log_skip ci-dessous est retiré (rollback)
+	# Probes de santé jamais loggées ; filet si le log_skip @phpHandled est retiré (rollback)
 	@health path_regexp ^/tableau-de-bord/health/?$
 	log_skip @health
 
-	# Requêtes dynamiques (front controller) : loggées par Symfony en logfmt
-	# (voir docs/developer/logs.md), Caddy ne logge que ce qu'il sert lui-même
-	# (fichiers existants, redirections héritées ci-dessus, canonicalisation, TRACE)
+	# Requêtes dynamiques loggées par Symfony (docs/developer/logs.md), Caddy ne logge que ce qu'il sert lui-même
 	@phpHandled {
 		not file
 		not path / /faq /faq/ /a-propos /a-propos/ /nous-ecrire /nous-ecrire/ /offre /offre/ /index.php /index.php/*
@@ -111,14 +99,10 @@
 	}
 	log_skip @phpHandled
 
-	# Les .ht* finissent aussi dans le front controller (réécriture ci-dessus) mais
-	# public/.htaccess existe : @phpHandled ne les saute pas, Symfony les loggerait en double
+	# public/.htaccess est un fichier : @phpHandled ne le saute pas, Symfony le loggerait en double
 	log_skip @hidden
 
-	# Access log en texte brut ; filter supprime les champs et headers sans intérêt
-	# (blocklist : un nouveau header non listé réapparaîtra dans les logs).
-	# Conservés volontairement : Referer, User-Agent, X-Request-Id, client_ip
-	# (résolu via trusted_proxies), host/method/uri, status, size, duration (en ms).
+	# Access log filtré en blocklist : tout header non listé réapparaîtra dans les logs
 	log {
 		output stdout
 		format filter {
@@ -173,7 +157,5 @@
 		}
 	}
 
-	# Front controller Symfony : fichiers existants servis tels quels,
-	# tout le reste vers public/index.php
 	php_server
 }

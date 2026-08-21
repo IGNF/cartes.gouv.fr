@@ -19,7 +19,7 @@
 /cypress
 /cypress.config.*
 
-# Outillage dev / IDE / IA — inutile dans le contexte de build
+# Outillage dev / IDE / IA - inutile dans le contexte de build
 /.claude
 /.serena
 /.superpowers

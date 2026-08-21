@@ -26,8 +26,7 @@ services:
             - APP_ENV=prod
             - APP_ROOT_URL=https://cartesgouvfr-prod.docker.localhost
             - FRANKENPHP_NUM_THREADS=4
-        # Rootfs read-only : cache Symfony embarqué dans l'image, cache.app en APCu,
-        # logs sur stdout/stderr — seuls /tmp et var/data ont besoin d'être inscriptibles
+        # Rootfs read-only : seuls /tmp et var/data inscriptibles (cache dans l'image, logs sur stdout)
         read_only: true
         tmpfs:
             - /tmp

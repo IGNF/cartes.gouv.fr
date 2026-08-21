@@ -18,10 +18,7 @@ framework:
         #pools:
         #my.dedicated.cache: null
 
-# En prod, utiliser APCu (mémoire partagée) pour tout cache (app et système) plutôt que le filesystem.
-# - permet un conteneur entièrement read-only (aucune écriture dans var/cache après warmup)
-# - app = petites réponses d'API à TTL court, recalculables et non persistées entre redémarrages
-# - system = métadonnées serializer/validator/property-access générées à la volée (non couvertes par le warmup — EROFS sinon)
+# En prod, APCu pour app et system : permet un conteneur entièrement read-only (le pool system écrit des métadonnées à la volée après le warmup - EROFS sinon)
 when@prod:
     framework:
         cache:
