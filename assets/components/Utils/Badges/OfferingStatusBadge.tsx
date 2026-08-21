@@ -42,6 +42,11 @@ const OfferingStatusBadge: FC<OfferingStatusBadgeProps> = ({ status }) => {
                 );
                 break;
 
+            case OfferingStatusEnum.UNPUBLISHED:
+                severity = "info";
+                text = "Dépublié";
+                break;
+
             case OfferingStatusEnum.MODIFYING:
                 severity = "warning";
                 text = (
