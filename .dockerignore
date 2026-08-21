@@ -34,7 +34,6 @@
 /phpmd.xml
 /phpstan.neon
 /.prettierignore
-/.prettierrc
 /README.md
 /CONTRIBUTING.md
 /tests
