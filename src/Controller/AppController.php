@@ -9,6 +9,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class AppController extends AbstractController
 {
+    public const HEALTH_ROUTE = 'cartesgouvfr_app_health';
+
     #[Route(
         '/{reactRouting}',
         name: 'cartesgouvfr_app',
@@ -29,7 +31,7 @@ class AppController extends AbstractController
 
     #[Route(
         '/tableau-de-bord/health',
-        name: 'cartesgouvfr_app_health',
+        name: self::HEALTH_ROUTE,
         options: ['expose' => true]
     )]
     public function health(): Response
