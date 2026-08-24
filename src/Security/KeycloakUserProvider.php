@@ -6,7 +6,6 @@ use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use Psr\Log\LoggerInterface;
 use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\Exception\TimeoutException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
@@ -26,7 +25,6 @@ class KeycloakUserProvider implements UserProviderInterface
     public function __construct(
         private ClientRegistry $clientRegistry,
         private KeycloakTokenManager $tokenManager,
-        private ParameterBagInterface $params,
         private EntrepotUserCache $entrepotUserCache,
         private LoggerInterface $logger,
         private CacheInterface $cache,
@@ -35,11 +33,6 @@ class KeycloakUserProvider implements UserProviderInterface
 
     public function loadUser(): User
     {
-        //  création d'un utilisateur bidon si en mode test
-        if ('test' === $this->params->get('app_env')) {
-            return User::getTestUser();
-        }
-
         /** @var KeycloakClient */
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 

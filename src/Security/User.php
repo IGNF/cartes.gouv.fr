@@ -229,34 +229,4 @@ class User implements UserInterface
 
         return $this;
     }
-
-    public static function getTestUser(): User
-    {
-        return new User([
-            'email' => 'test@test.com',
-            'sub' => '3f3ba6e0-38b9-4e26-8b29-7c9d26f42c46',
-            'given_name' => 'Test',
-            'family_name' => 'User',
-            'preferred_username' => 'test_user',
-        ], [
-            '_id' => 'fc5a7948-142a-4dae-b24e-5550fe7183f9',
-            'creation' => '2023-06-26T11:52:25.924679Z',
-            'last_login' => '2023-08-01T14:09:41.074381Z',
-            'communities_member' => [[
-                'rights' => ['ANNEX', 'BROADCAST', 'PROCESSING', 'UPLOAD'],
-                'community' => [
-                    'name' => 'cartes.gouv - dev',
-                    'technical_name' => 'cartes-gouv-dev',
-                    'datastore' => '190b714d-daa7-402b-8360-c75baa4c69cc',
-                    'supervisor' => '6b3637ed-c1cf-409c-a54c-fb77d4c16ea6',
-                    'public' => true,
-                    '_id' => 'a0f47300-4c9b-464a-b23f-639ccfa6a673',
-                ],
-            ]],
-            'documents_quota' => 50000000,
-            'documents_use' => 0,
-            'keys_quota' => 1000,
-            'keys_use' => 3,
-        ]);
-    }
 }
