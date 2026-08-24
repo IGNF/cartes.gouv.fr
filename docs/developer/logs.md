@@ -7,12 +7,13 @@ Le dashboard Grafana/Loki de la plateforme affiche les lignes brutes (pas de par
 `AccessLogSubscriber` (kernel.terminate, donc après envoi de la réponse) émet une ligne logfmt par requête traitée par Symfony :
 
 ```
-method=GET path=/api/datastores/190b.../metadata/arbres status=200 duration_ms=226 route=cartesgouvfr_api_metadata_get request_id=38aa3379... user=fc5a7948-...
+method=GET path=/api/datastores/190b.../metadata/arbres status=200 duration_ms=226 route=cartesgouvfr_api_metadata_get request_id=38aa3379... user=fc5a7948-... referer=https://cartes.gouv.fr/explorer-les-cartes user_agent=Mozilla/5.0_(X11;_Linux_x86_64)...
 ```
 
 - Chaque token se cherche tel quel dans le dashboard : `status=500`, un chemin, un request_id, un user.
 - `duration_ms` est mesuré depuis `REQUEST_TIME_FLOAT` (temps PHP).
-- `route` et `user` sont omis quand ils n'existent pas (404, requête anonyme).
+- `route` et `user` sont omis quand ils n'existent pas (404, requête anonyme), `referer` et `user_agent` quand les headers sont absents.
+- `referer` et `user_agent` sont des valeurs contrôlées par le client : nettoyées en tokens plats (espaces, guillemets et `=` remplacés par `_`) et tronquées, même logique anti-injection que `request_id`.
 - En prod, le handler `access` sort le message brut sur stdout ; les autres handlers excluent le canal pour éviter la double sortie. Les requêtes servies par Caddy sans PHP (fichiers statiques, redirections héritées, TRACE) restent loggées par l'access log Caddy (voir `.docker/Caddyfile`), qui saute les requêtes dynamiques (`log_skip`).
 - Limite assumée : une requête qui tue le process PHP (fatal dur, OOM) ou dont la réponse 5xx est générée par Caddy lui-même n'a pas de ligne d'accès (le `log_skip` s'évalue sur la requête, pas sur le statut), seule la trace stderr subsiste.
 
@@ -31,6 +32,8 @@ Finalité : sécurité et diagnostic (traçabilité par compte attendue par les 
 | `user`       | UUID technique du compte (`User::getId()`)    | jamais l'email, le username ni le nom                                                        |
 | `path`       | URI brute                                     | sans query string (risque de données personnelles dans les paramètres)                       |
 | `request_id` | aléatoire par requête (ingress, sinon généré) | ne relie pas l'activité entre requêtes                                                       |
+| `referer`    | URL d'origine de la navigation                | sans query string, même règle que `path`                                                     |
+| `user_agent` | chaîne navigateur nettoyée                    | donnée technique de diagnostic, tronquée à 200 caractères                                    |
 | adresse IP   | absente                                       | l'IP reste uniquement dans l'access log Caddy (statiques/redirections), comme historiquement |
 
 L'access log Caddy supprime tous les headers de requête et ne recopie en allowlist (`log_append`) que `User-Agent`, `Referer` et `X-Request-Id` : un header inattendu (injecté par un proxy, envoyé par un scanner) n'est jamais journalisé.

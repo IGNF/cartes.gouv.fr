@@ -56,6 +56,9 @@ final class AccessLogSubscriber implements EventSubscriberInterface
             'request_id' => $this->requestIdResolver->resolve($request),
             // UUID technique du compte, jamais l'email ni le username
             'user' => $user instanceof User ? $user->getId() : null,
+            // Referer sans query string (même minimisation que path) ; mêmes clés que l'access log Caddy
+            'referer' => $this->sanitizeToken(strtok((string) $request->headers->get('Referer'), '?')),
+            'user_agent' => $this->sanitizeToken($request->headers->get('User-Agent')),
         ];
 
         $line = [];
@@ -66,5 +69,17 @@ final class AccessLogSubscriber implements EventSubscriberInterface
         }
 
         $this->logger->info(implode(' ', $line));
+    }
+
+    /**
+     * Valeur contrôlée par le client : token plat sans espace ni « = », tronqué (anti-injection logfmt, ligne cherchable).
+     */
+    private function sanitizeToken(string|false|null $value): ?string
+    {
+        if (!\is_string($value) || '' === $value) {
+            return null;
+        }
+
+        return (string) preg_replace('/[^\x21-\x7E]|[="\\\\]/', '_', substr($value, 0, 200));
     }
 }
