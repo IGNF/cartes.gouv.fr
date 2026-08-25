@@ -65,11 +65,9 @@ class EntrepotUserCache
     {
         return $this->cache->get(self::CACHE_KEY_PREFIX.$keycloakId, function (ItemInterface $item) {
             $item->expiresAfter(self::TTL);
+            $data = $this->userApiService->getMe()->array();
 
-            return [
-                'fetched_at' => time(),
-                'data' => $this->userApiService->getMe()->array(),
-            ];
+            return ['fetched_at' => time(), 'data' => $data];
         }, $beta);
     }
 }
