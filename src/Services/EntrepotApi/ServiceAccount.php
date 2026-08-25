@@ -4,6 +4,7 @@ namespace App\Services\EntrepotApi;
 
 use App\Exception\ApiException;
 use App\Security\User;
+use App\Services\MembershipService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\Exception\JsonException;
@@ -27,6 +28,7 @@ class ServiceAccount
     public function __construct(
         private ParameterBagInterface $parameters,
         private Security $security,
+        private MembershipService $membershipService,
     ) {
         // L'id de la community liee au datastore "Bac à sable"
         $sandbox = $this->parameters->get('sandbox');
@@ -58,6 +60,8 @@ class ServiceAccount
             throw new AccessDeniedException();
         }
 
+        // lecture fraîche : le token peut encore lister une appartenance quittée il y a moins de 60 s sur un autre pod
+        $this->membershipService->refreshCurrentUser();
         if (null !== $user->findMembershipByCommunity($this->sandBoxCommunityId)) {
             return;
         }
