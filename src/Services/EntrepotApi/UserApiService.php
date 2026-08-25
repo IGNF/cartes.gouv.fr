@@ -65,11 +65,16 @@ final class UserApiService
     }
 
     /**
+     * Relecture volontaire après le PATCH : l'OpenAPI annonce le même DTO que le GET (type_infos requis),
+     * mais la réponse réelle du PATCH omet type_infos, creation et update (constaté le 25/08/2026).
+     *
      * @param array<mixed> $body
      */
     public function updateKey(string $keyId, array $body): array
     {
-        return $this->api->patch("users/me/keys/$keyId", $body)->array();
+        $this->api->patch("users/me/keys/$keyId", $body)->await();
+
+        return $this->getMyKey($keyId)->array();
     }
 
     public function removeKey(string $keyId): ResponsePromise
