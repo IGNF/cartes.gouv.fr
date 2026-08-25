@@ -2,57 +2,39 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Exception\ApiException;
+use App\ApiClient\ApiClient;
+use App\ApiClient\ServiceAccountAuthenticationException;
 use App\Security\User;
 use App\Services\MembershipService;
+use App\Services\SandboxService;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpClient\Exception\JsonException;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
 
+/**
+ * Actions faites au nom du compte de service du bac à sable (et non de l'utilisateur connecté).
+ */
 class ServiceAccount
 {
-    /** @var HttpClientInterface */
-    private $apiClient;
-
-    /** @var array<mixed> */
-    private $token;
-
-    /** @var string */
-    private $sandBoxCommunityId;
-
     public function __construct(
-        private ParameterBagInterface $parameters,
         private Security $security,
         private MembershipService $membershipService,
+        private SandboxService $sandboxService,
+        #[Autowire(service: 'app.api_client.entrepot_sandbox_service_account')]
+        private ApiClient $api,
     ) {
-        // L'id de la community liee au datastore "Bac à sable"
-        $sandbox = $this->parameters->get('sandbox');
-        if ($sandbox && isset($sandbox['community_id'])) {
-            $this->sandBoxCommunityId = $sandbox['community_id'];
-        }
-
-        $this->apiClient = HttpClient::createForBaseUri($this->parameters->get('api_entrepot_url').'/', [
-            'proxy' => $this->parameters->get('http_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
-        ]);
-
-        // Recuperation du token du compte de service
-        $this->token = $this->getAccessToken();
     }
 
     /**
-     * Ajout de l'utilisateur courant (logge) a la communaute liee au datastore "Bac à sable".
+     * Ajoute l'utilisateur connecté à la communauté du bac à sable (no-op s'il en est déjà membre).
+     *
+     * @throws AccessDeniedException bac à sable non configuré, utilisateur absent ou compte de service non authentifié
      */
     public function addCurrentUserToSandbox(): void
     {
-        if (!$this->token) {
-            throw new AccessDeniedException();
+        $sandboxCommunityId = $this->sandboxService->getSandboxCommunityId();
+        if (null === $sandboxCommunityId) {
+            throw new AccessDeniedException('Bac à sable non configuré');
         }
 
         $user = $this->security->getUser();
@@ -62,101 +44,16 @@ class ServiceAccount
 
         // lecture fraîche : le token peut encore lister une appartenance quittée il y a moins de 60 s sur un autre pod
         $this->membershipService->refreshCurrentUser();
-        if (null !== $user->findMembershipByCommunity($this->sandBoxCommunityId)) {
+        if (null !== $user->findMembershipByCommunity($sandboxCommunityId)) {
             return;
         }
 
-        $options = $this->prepareOptions([
-            'rights' => ['ANNEX', 'BROADCAST', 'PROCESSING', 'UPLOAD'],
-        ]);
-
-        $response = $this->apiClient->request('PUT', "communities/{$this->sandBoxCommunityId}/users/{$user->getId()}", $options);
-        $this->handleResponse($response);
-    }
-
-    /**
-     * Recuperation du Token.
-     */
-    private function getAccessToken(): ?array
-    {
-        $uri = $this->parameters->get('iam_url').'/realms/'.$this->parameters->get('iam_realm').'/protocol/openid-connect/';
-
-        $client = HttpClient::createForBaseUri($uri, [
-            'proxy' => $this->parameters->get('http_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
-        ]);
-
-        $body = [
-            'grant_type' => 'client_credentials',
-            'client_id' => $this->parameters->get('sandbox_service_account')['client_id'],
-            'client_secret' => $this->parameters->get('sandbox_service_account')['client_secret'],
-        ];
-
-        $response = $client->request('POST', 'token', [
-            'body' => $body,
-            'headers' => [
-                'Content-Type' => 'application/x-www-form-urlencoded',
-                'Accept' => 'application/json',
-            ],
-        ]);
-
-        if (Response::HTTP_OK !== $response->getStatusCode()) {
-            return null;
-        }
-
-        return \json_decode($response->getContent(), true);
-    }
-
-    /**
-     * Undocumented function.
-     *
-     * @param array<mixed> $body
-     * @param array<mixed> $query
-     * @param array<mixed> $headers
-     */
-    private function prepareOptions($body = [], $query = [], $headers = []): array
-    {
-        $defaultHeaders = [
-            'Content-Type' => 'application/json',
-        ];
-
-        $options = [
-            'json' => $body,
-            'headers' => array_merge($defaultHeaders, $headers),
-        ];
-
-        $options['headers']['Authorization'] = "Bearer {$this->token['access_token']}";
-        $options['query'] = $query;
-
-        return $options;
-    }
-
-    private function handleResponse(ResponseInterface $response): mixed
-    {
-        $content = null;
-
-        $statusCode = $response->getStatusCode();
-        if ($statusCode >= 200 && $statusCode < 300) { // if request is successful
-            if (204 == $statusCode || '' == $response->getContent()) { // if response body is empty
-                $content = [];
-            } else {
-                $content = $response->toArray();
-            }
-
-            return $content;
-        }
-
-        $errorMsg = 'Entrepot API Error';
         try {
-            $errorResponse = $response->toArray(false);
-            if (array_key_exists('error_description', $errorResponse)) {
-                $errorMsg = is_array($errorResponse['error_description']) ? implode(', ', $errorResponse['error_description']) : $errorResponse['error_description'];
-            }
-        } catch (JsonException $ex) {
-            $errorResponse = $response->getContent(false);
+            $this->api->put("communities/$sandboxCommunityId/users/{$user->getId()}", [
+                'rights' => ['ANNEX', 'BROADCAST', 'PROCESSING', 'UPLOAD'],
+            ])->await();
+        } catch (ServiceAccountAuthenticationException $e) {
+            throw new AccessDeniedException('Compte de service non authentifié', $e);
         }
-
-        throw new ApiException($errorMsg, $statusCode, $errorResponse);
     }
 }

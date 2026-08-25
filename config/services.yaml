@@ -35,6 +35,10 @@ services:
         class: App\ApiClient\ApiClient
         factory: ['@App\ApiClient\ApiClientFactory', "createEspaceCoStyleClient"]
 
+    app.api_client.entrepot_sandbox_service_account:
+        class: App\ApiClient\ApiClient
+        factory: ['@App\ApiClient\ApiClientFactory', "createSandboxServiceAccountClient"]
+
     # Formatter du canal access : message logfmt seul, la ligne doit rester brute pour Loki
     app.monolog.access_line_formatter:
         class: Monolog\Formatter\LineFormatter
