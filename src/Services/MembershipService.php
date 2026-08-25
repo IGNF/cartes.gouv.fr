@@ -6,6 +6,7 @@ use App\Dto\Datastore\DatastoreIdentity;
 use App\Security\EntrepotUserCache;
 use App\Security\User;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\UserApiService;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -18,6 +19,7 @@ class MembershipService
         private Security $security,
         private EntrepotUserCache $entrepotUserCache,
         private DatastoreApiService $datastoreApiService,
+        private UserApiService $userApiService,
     ) {
     }
 
@@ -76,6 +78,23 @@ class MembershipService
         if ($user instanceof User && null !== $user->getKeycloakId()) {
             $this->entrepotUserCache->invalidate($user->getKeycloakId());
         }
+    }
+
+    /**
+     * Recharge users/me à travers le cache serveur et met à jour l'utilisateur du token.
+     */
+    public function refreshCurrentUser(): void
+    {
+        $user = $this->security->getUser();
+        if (!$user instanceof User) {
+            return;
+        }
+
+        $keycloakId = $user->getKeycloakId();
+        $apiUserInfo = null !== $keycloakId
+            ? $this->entrepotUserCache->refresh($keycloakId)
+            : $this->userApiService->getMe()->array();
+        $user->updateFromApiInfo($apiUserInfo);
     }
 
     /**

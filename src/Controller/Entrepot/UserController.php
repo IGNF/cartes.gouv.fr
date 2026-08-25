@@ -7,10 +7,10 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\User\UserKeyDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Security\EntrepotUserCache;
 use App\Security\User;
 use App\Services\EntrepotApi\ServiceAccount;
 use App\Services\EntrepotApi\UserApiService;
+use App\Services\MembershipService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,7 +29,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
 {
     public function __construct(
         private UserApiService $userApiService,
-        private EntrepotUserCache $entrepotUserCache,
+        private MembershipService $membershipService,
     ) {
     }
 
@@ -44,11 +44,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         assert($user instanceof User);
 
         // rafraîchit à travers le cache serveur pour qu'il voie aussi la donnée fraîche
-        $keycloakId = $user->getKeycloakId();
-        $apiUserInfo = null !== $keycloakId
-            ? $this->entrepotUserCache->refresh($keycloakId)
-            : $this->userApiService->getMe()->array();
-        $user->updateFromApiInfo($apiUserInfo);
+        $this->membershipService->refreshCurrentUser();
 
         return $this->json($user);
     }
@@ -216,7 +212,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function addMemberToSandbox(ServiceAccount $serviceAccount): JsonResponse
     {
         $serviceAccount->addCurrentUserToSandbox();
-        $this->invalidateUserCache();
+        $this->membershipService->invalidateCurrentUser();
 
         return new JsonResponse();
     }
@@ -226,19 +222,11 @@ class UserController extends AbstractController implements ApiControllerInterfac
     {
         try {
             $this->userApiService->leaveCommunity($communityId)->await();
-            $this->invalidateUserCache();
+            $this->membershipService->invalidateCurrentUser();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
-    }
-
-    private function invalidateUserCache(): void
-    {
-        $user = $this->getUser();
-        if ($user instanceof User && null !== $user->getKeycloakId()) {
-            $this->entrepotUserCache->invalidate($user->getKeycloakId());
         }
     }
 
