@@ -23,13 +23,19 @@ final class AnnexeApiService
     }
 
     /**
-     * URL publique d'une annexe ; le nom technique du datastore vient de l'appartenance de l'utilisateur.
-     *
+     * Préfixe des URL publiques des annexes du datastore ; à résoudre avant un effet de bord pour ne pas laisser d'annexe orpheline.
+     */
+    public function getBaseUrl(string $datastoreId): string
+    {
+        return $this->annexesUrl.'/'.$this->membershipService->getDatastoreIdentity($datastoreId)->technicalName;
+    }
+
+    /**
      * @param array<mixed> $annexe
      */
     public function getAbsoluteUrl(string $datastoreId, array $annexe): string
     {
-        return $this->annexesUrl.'/'.$this->membershipService->getDatastoreIdentity($datastoreId)->technicalName.$annexe['paths'][0];
+        return $this->getBaseUrl($datastoreId).$annexe['paths'][0];
     }
 
     /**

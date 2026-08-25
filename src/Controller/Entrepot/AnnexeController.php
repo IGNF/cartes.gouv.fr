@@ -156,6 +156,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function addThumbnail(string $datastoreId, Request $request): JsonResponse
     {
         try {
+            $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
             $datasheetName = $request->request->get('datasheetName');
 
             $uuid = Uuid::v4();
@@ -177,7 +178,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             }
 
             $annexe = $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
-            $annexe['url'] = $this->annexeApiService->getAbsoluteUrl($datastoreId, $annexe);
+            $annexe['url'] = $annexesBaseUrl.$annexe['paths'][0];
 
             // Creation ou mise a jour des métadonnées
             $metadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);

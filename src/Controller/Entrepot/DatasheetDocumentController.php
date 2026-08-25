@@ -100,10 +100,11 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
                     $annexePath = join('/', ['documents', $datasheetName, $uuid, $file->getClientOriginalName()]);
 
+                    $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
                     $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], ["datasheet_name=$datasheetName", 'type=document'], true);
 
                     $newDocument['id'] = $fileAnnexe['_id'];
-                    $newDocument['url'] = $this->annexeApiService->getAbsoluteUrl($datastoreId, $fileAnnexe);
+                    $newDocument['url'] = $annexesBaseUrl.$fileAnnexe['paths'][0];
 
                     break;
             }
