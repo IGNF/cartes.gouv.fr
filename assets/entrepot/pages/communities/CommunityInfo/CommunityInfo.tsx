@@ -23,11 +23,13 @@ import Wait from "@/components/Utils/Wait";
 import { useCommunity } from "@/contexts/community";
 import { useDatastore } from "@/contexts/datastore";
 import api from "@/entrepot/api";
+import { sandboxCommunityId } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
+import { isSandboxCommunity } from "@/utils";
 import DeleteCommunity from "./DeleteCommunity/DeleteCommunity";
 import { deleteCommunityModal } from "./DeleteCommunity/deleteCommunityModal";
 
@@ -74,6 +76,7 @@ export default function CommunityInfo() {
     const { data: user } = userQuery;
     const { datastore } = useDatastore();
     const community: Community = useCommunity();
+    const isSandbox = isSandboxCommunity(community, sandboxCommunityId);
 
     const queryClient = useQueryClient();
 
@@ -174,8 +177,8 @@ export default function CommunityInfo() {
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastore._id}>
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} />
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastore._id}>
+            <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} />
 
             <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={datastore.community._id} />
 
@@ -304,7 +307,7 @@ export default function CommunityInfo() {
                         },
                     ]}
                 >
-                    {t("leave_modal.body", { datastoreName: community.is_sandbox === true ? tCommon("sandbox") : community?.name })}
+                    {t("leave_modal.body", { datastoreName: tCommon("datastore_name", { name: community?.name, isSandbox }) })}
                 </leaveCommunityModal.Component>,
                 document.body
             )}

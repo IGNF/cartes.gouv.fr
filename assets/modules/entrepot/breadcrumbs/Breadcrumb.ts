@@ -8,7 +8,18 @@ import { routes } from "../../../router/router";
 const { t } = getTranslation("Breadcrumb");
 const { t: tCommon } = getTranslation("Common");
 
-const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, community?: Community | null): BreadcrumbProps | undefined => {
+/** Flags sandbox dérivés côté hook (appartenance + env) : le module pur ne peut pas les calculer lui-même */
+export type BreadcrumbSandboxFlags = {
+    datastoreIsSandbox: boolean;
+    communityIsSandbox: boolean;
+};
+
+const getBreadcrumb = (
+    route: Route<typeof routes>,
+    datastore: Datastore | undefined,
+    community: Community | null | undefined,
+    { datastoreIsSandbox, communityIsSandbox }: BreadcrumbSandboxFlags
+): BreadcrumbProps | undefined => {
     addBreadcrumbTranslations({
         lang: "fr",
         messages: { home: t("dashboard") },
@@ -32,11 +43,11 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
             ...publishProps.segments,
             { label: t("datastore_selection"), linkProps: routes.datastore_selection().link },
             "datastoreId" in route.params && {
-                label: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name,
+                label: tCommon("datastore_name", { name: datastore?.name, isSandbox: datastoreIsSandbox }),
                 linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link,
             },
         ].filter(Boolean) as BreadcrumbProps["segments"],
-        currentPageLabel: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name || "",
+        currentPageLabel: tCommon("datastore_name", { name: datastore?.name, isSandbox: datastoreIsSandbox }) || "",
     };
 
     const espacecoBaseProps: BreadcrumbProps = {
@@ -74,7 +85,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
                     { label: t("datastore_selection"), linkProps: routes.datastore_selection().link },
                     "communityId" in route.params &&
                         community !== undefined && {
-                            label: community?.is_sandbox === true ? tCommon("sandbox") : community?.name,
+                            label: tCommon("datastore_name", { name: community?.name, isSandbox: communityIsSandbox }),
                             linkProps: routes.datasheet_list({ datastoreId: datastore?._id ?? "XXXX" }).link,
                         },
                 ].filter(Boolean) as BreadcrumbProps["segments"],
@@ -106,7 +117,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
             return {
                 ...publishProps,
                 segments: [...publishProps.segments, { label: t("datastore_selection"), linkProps: routes.datastore_selection().link }],
-                currentPageLabel: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name,
+                currentPageLabel: tCommon("datastore_name", { name: datastore?.name, isSandbox: datastoreIsSandbox }),
             };
 
         case "datastore_datasheet_upload": {

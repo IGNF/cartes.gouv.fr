@@ -5,6 +5,9 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
+import useMembership from "@/hooks/useMembership";
+import { useTranslation } from "@/i18n";
+
 import { UploadReport } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
@@ -23,6 +26,10 @@ type UploadDetailsProps = {
 
 const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
     const { datastore } = useDatastore();
+    const { t: tCommon } = useTranslation("Common");
+    // le libellé « Espace Découverte » vient de l’appartenance, le DTO ne porte plus is_sandbox
+    const membership = useMembership({ datastoreId: datastore?._id });
+    const datastoreName = tCommon("datastore_name", { name: datastore?.name, isSandbox: membership?.isSandbox });
 
     const reportQuery = useQuery<UploadReport, CartesApiException>({
         queryKey: RQKeys.datastore_upload_report(datastoreId, uploadId),
@@ -77,7 +84,7 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
                                 },
                                 {
                                     label: "Rapport de livraison",
-                                    content: <ReportTab datastoreName={datastore?.name} reportQuery={reportQuery} />,
+                                    content: <ReportTab datastoreName={datastoreName} reportQuery={reportQuery} />,
                                 },
                             ]}
                         />

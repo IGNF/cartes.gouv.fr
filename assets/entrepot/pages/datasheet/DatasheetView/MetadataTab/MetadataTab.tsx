@@ -7,6 +7,7 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import { catalogueUrl } from "@/env";
+import useMembership from "@/hooks/useMembership";
 import { getThematicCategories } from "@/utils";
 import { MetadataHierarchyLevel, type Metadata } from "../../../../../@types/app";
 import ExtentMap from "../../../../../components/Utils/ExtentMap";
@@ -36,6 +37,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
         staleTime: 3600000,
     });
+    const isSandbox = useMembership({ datastoreId })?.isSandbox === true;
 
     const frequencyCode = useMemo(() => {
         const code = metadata?.csw_metadata?.frequency_code;
@@ -44,7 +46,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
 
     const catalogueDatasheetUrl = useMemo(() => {
         // si datastore sandbox
-        if (datastoreQuery.data?.is_sandbox === true) {
+        if (isSandbox) {
             const metadataEndpoint = datastoreQuery.data?.endpoints?.find((ep) => ep.endpoint._id === metadata?.endpoints?.[0]?._id);
             const cswBaseUrl = metadataEndpoint?.endpoint.urls?.[0].url.trim();
 
@@ -55,7 +57,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
         }
 
         return `${catalogueUrl}/dataset/${metadata?.file_identifier}`;
-    }, [metadata?.file_identifier, datastoreQuery.data?.is_sandbox, datastoreQuery.data?.endpoints, metadata?.endpoints]);
+    }, [metadata?.file_identifier, isSandbox, datastoreQuery.data?.endpoints, metadata?.endpoints]);
 
     const isPublished = useMemo(
         () => metadataQuery.data?.endpoints?.length !== undefined && metadataQuery.data?.endpoints?.length > 0,
@@ -77,7 +79,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col-12")}>
                         {isPublished ? (
-                            datastoreQuery.data?.is_sandbox === true ? (
+                            isSandbox ? (
                                 <CallOut
                                     buttonProps={{
                                         children: "Consulter le service de métadonnées",

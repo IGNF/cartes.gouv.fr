@@ -15,6 +15,7 @@ import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNa
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
+import useMembership from "@/hooks/useMembership";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
 import { SortOrderEnum, useSort } from "@/hooks/useSort";
@@ -44,6 +45,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatasheetList");
     const { datastore } = useDatastore();
     const { t: tCommon } = useTranslation("Common");
+    const isSandbox = useMembership({ datastoreId })?.isSandbox === true;
 
     const datasheetListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),
@@ -79,9 +81,9 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { userRights, isSupervisor } = useCommunityRights();
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })}>
-                {datastore?.is_sandbox === true && <SandboxDatastoreExplanation />}
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastoreId}>
+            <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}>
+                {isSandbox && <SandboxDatastoreExplanation />}
             </PageTitle>
 
             <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />

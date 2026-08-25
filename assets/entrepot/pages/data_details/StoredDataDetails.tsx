@@ -5,6 +5,9 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
+import useMembership from "@/hooks/useMembership";
+import { useTranslation } from "@/i18n";
+
 import { StoredDataReport, StoredDataStatusEnum } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
@@ -23,6 +26,10 @@ type StoredDataDetailsProps = {
 const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedDataId }) => {
     const [reportQueryEnabled, setReportQueryEnabled] = useState(true);
     const { datastore } = useDatastore();
+    const { t: tCommon } = useTranslation("Common");
+    // le libellé « Espace Découverte » vient de l’appartenance, le DTO ne porte plus is_sandbox
+    const membership = useMembership({ datastoreId: datastore?._id });
+    const datastoreName = tCommon("datastore_name", { name: datastore?.name, isSandbox: membership?.isSandbox });
 
     const reportQuery = useQuery<StoredDataReport, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
@@ -88,7 +95,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
                                 },
                                 {
                                     label: "Rapport de génération",
-                                    content: <ReportTab datastoreName={datastore?.name} reportQuery={reportQuery} />,
+                                    content: <ReportTab datastoreName={datastoreName} reportQuery={reportQuery} />,
                                 },
                             ]}
                         />

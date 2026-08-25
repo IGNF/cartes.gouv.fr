@@ -1,89 +1,73 @@
 import { useMutation } from "@tanstack/react-query";
+import { useMemo } from "react";
 
+import { sandboxCommunityId } from "@/env";
 import { routes } from "@/router/router";
+import { findMembership } from "@/utils";
 import api from "../entrepot/api";
 import { CartesApiException } from "../modules/jsonFetch";
-import { useSandboxDatastoreQuery } from "./queries/useSandboxDatastoreQuery";
 import useUserQuery from "./queries/useUserQuery";
 
 type DatastoreSelectionInfo = {
-    _id: string;
-    technical_name: string;
-    name: string;
+    /** absent uniquement pour l’entrée sandbox tant que l’utilisateur n’en est pas membre */
+    _id?: string;
+    name?: string;
     community_id: string;
     is_sandbox?: boolean;
 };
+
+const collator = new Intl.Collator("fr");
+
 const useDatastoreSelection = () => {
     const userQuery = useUserQuery();
     const { data: user } = userQuery;
-
-    const communitiesMember = user?.communities_member ?? [];
-
-    const sandboxDatastoreQuery = useSandboxDatastoreQuery();
-    const { data: sandboxDatastore } = sandboxDatastoreQuery;
 
     const { mutate: addUserToSandbox } = useMutation<undefined, CartesApiException>({
         mutationFn: () => {
             return api.user.addToSandbox();
         },
-        onSuccess: () => {
-            userQuery.refetch();
-            if (sandboxDatastore?._id) {
-                routes.datasheet_list({ datastoreId: sandboxDatastore._id }).push();
+        onSuccess: async () => {
+            // attendre le rafraîchissement de user_me avant de naviguer : l’entrepôt sandbox vient de l’appartenance
+            const { data: freshUser } = await userQuery.refetch();
+            const datastoreId = sandboxCommunityId !== null ? findMembership(freshUser, { communityId: sandboxCommunityId })?.community?.datastore : undefined;
+            if (datastoreId) {
+                routes.datasheet_list({ datastoreId }).push();
             }
         },
     });
 
-    // création de la liste des entrepôts
-    const datastoreList: DatastoreSelectionInfo[] = communitiesMember
-        .filter((cm) => cm.community !== undefined && cm.community.datastore !== undefined)
-        .map((cm) => ({
-            _id: cm.community!.datastore,
-            technical_name: cm.community!.technical_name,
-            name: cm.community!.name!,
-            community_id: cm.community!._id,
-            is_sandbox: cm.community?.datastore === sandboxDatastore?._id,
-        }));
+    // liste des entrepôts, entièrement depuis user.communities_member (aucune requête)
+    const datastoreList: DatastoreSelectionInfo[] = useMemo(() => {
+        const list: DatastoreSelectionInfo[] = (user?.communities_member ?? [])
+            .filter((cm) => cm.community !== undefined && cm.community.datastore !== undefined)
+            .map((cm) => ({
+                _id: cm.community!.datastore,
+                name: cm.community!.name!,
+                community_id: cm.community!._id,
+                is_sandbox: sandboxCommunityId !== null && cm.community!._id === sandboxCommunityId,
+            }));
 
-    const userMemberOfSandbox = sandboxDatastore !== undefined && datastoreList.find((ds) => ds._id === sandboxDatastore._id) !== undefined;
+        // entrée sandbox proposée même sans appartenance (l’utilisateur la rejoint au clic)
+        if (sandboxCommunityId !== null && list.find((ds) => ds.is_sandbox === true) === undefined) {
+            list.push({ community_id: sandboxCommunityId, is_sandbox: true });
+        }
 
-    // ajout de l'entrepôt sandbox si l'utilisateur ne fait pas encore partie de cet entrepôt
-    if (sandboxDatastore !== undefined && !userMemberOfSandbox) {
-        datastoreList.unshift({
-            _id: sandboxDatastore._id,
-            technical_name: sandboxDatastore.technical_name,
-            name: sandboxDatastore.name,
-            community_id: sandboxDatastore.community._id,
-            is_sandbox: true,
-        });
-    }
+        // sandbox en premier, puis ordre alphabétique
+        return list.sort((a, b) => (b.is_sandbox === true ? 1 : 0) - (a.is_sandbox === true ? 1 : 0) || collator.compare(a.name ?? "", b.name ?? ""));
+    }, [user?.communities_member]);
 
-    // tri alphabétique
-    datastoreList.sort((a, b) => a.name.localeCompare(b.name));
-
-    // tri pour positionner le datastore bac à sable en premier
-    const sortedDatastoreList = datastoreList.sort((a, b) => {
-        if (a._id === sandboxDatastore?._id) return -1;
-        if (b._id === sandboxDatastore?._id) return 1;
-        return 0;
-    });
-
-    const refetch = () => {
-        sandboxDatastoreQuery.refetch();
-        userQuery.refetch();
-    };
-
-    const query = {
-        isFetching: sandboxDatastoreQuery.isFetching || userQuery.isFetching,
-        refetch,
-        dataUpdatedAt: Math.max(sandboxDatastoreQuery.dataUpdatedAt, userQuery.dataUpdatedAt),
-    };
+    const query = useMemo(
+        () => ({
+            isFetching: userQuery.isFetching,
+            refetch: userQuery.refetch,
+            dataUpdatedAt: userQuery.dataUpdatedAt,
+        }),
+        [userQuery.isFetching, userQuery.refetch, userQuery.dataUpdatedAt]
+    );
 
     return {
-        datastoreList: sortedDatastoreList,
+        datastoreList,
         addUserToSandbox,
-        sandboxDatastore,
-        userMemberOfSandbox,
         query,
     };
 };
