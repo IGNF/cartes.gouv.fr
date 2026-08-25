@@ -199,9 +199,12 @@ class CartesServiceApiService
         return $shareUrl;
     }
 
-    public function unpublish(string $datastoreId, string $offeringId): void
+    /**
+     * @param array<mixed>|null $offering offering déjà chargée par l'appelant, évite un GET
+     */
+    public function unpublish(string $datastoreId, string $offeringId, ?array $offering = null): void
     {
-        $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+        $offering ??= $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
 
         switch ($offering['type']) {
             case OfferingTypes::WFS:
@@ -510,30 +513,38 @@ class CartesServiceApiService
      */
     private function handlePermissions(string $datastoreId, array $offering, CommonDTO $dto): void
     {
+        $shareWithCommunity = 'your_community' === $dto->share_with;
+        if (!$shareWithCommunity && false !== $offering['open']) {
+            return;
+        }
+
+        // une seule lecture paginée des permissions pour les deux étapes, tenue à jour des créations
+        $permissions = $this->datastoreApiService->getPermissions($datastoreId)->resolve();
+
         // création d'une permission pour la communauté actuelle
-        if ('your_community' === $dto->share_with) {
-            $this->addPermissionForCurrentCommunity($datastoreId, $offering);
+        if ($shareWithCommunity) {
+            $this->addPermissionForCurrentCommunity($datastoreId, $offering, $permissions);
         }
 
         if (false === $offering['open']) {
             // création d'une permission pour la communauté config si demandée
             $configCommunityId = $this->params->get('config')['community_id'];
             if ($dto->allow_view_data) {
-                $this->addPermissionForCommunity($datastoreId, $configCommunityId, $offering);
+                $this->addPermissionForCommunity($datastoreId, $configCommunityId, $offering, $permissions);
             } else {
                 // sinon suppression de la permission pour la communauté config si elle existe déjà (elle a été créée lors de la création ou d'une modification précédente de l'offering)
-                $this->removeExistingConfigPermission($datastoreId, $offering);
+                $this->removeExistingConfigPermission($datastoreId, $offering, $permissions);
             }
         }
     }
 
     /**
      * @param array<mixed> $offering
+     * @param array<mixed> $permissions
      */
-    private function removeExistingConfigPermission(string $datastoreId, array $offering): void
+    private function removeExistingConfigPermission(string $datastoreId, array $offering, array $permissions): void
     {
         $configCommunityId = $this->params->get('config')['community_id'];
-        $permissions = $this->datastoreApiService->getPermissions($datastoreId)->resolve();
 
         $existingPermission = array_filter($permissions, function ($permission) use ($offering, $configCommunityId) {
             return isset($permission['offerings'])
@@ -576,19 +587,20 @@ class CartesServiceApiService
 
     /**
      * @param array<mixed> $offering
+     * @param array<mixed> $permissions
      */
-    private function addPermissionForCurrentCommunity(string $datastoreId, array $offering): void
+    private function addPermissionForCurrentCommunity(string $datastoreId, array $offering, array &$permissions): void
     {
         $communityId = $this->membershipService->getDatastoreIdentity($datastoreId)->communityId;
-        $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+        $this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions);
     }
 
     /**
      * @param array<mixed> $offering
+     * @param array<mixed> $permissions permissions déjà lues, complétées par celles créées ici
      */
-    private function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering): void
+    private function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering, array &$permissions): void
     {
-        $permissions = $this->datastoreApiService->getPermissions($producerDatastoreId)->resolve();
         $offeringId = $offering['_id'];
 
         $offeringPermissions = array_filter($permissions, function ($permission) use ($offeringId) {
@@ -616,7 +628,8 @@ class CartesServiceApiService
             'communities' => [$consumerCommunityId],
         ];
 
-        $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody)->await();
+        $created = $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody)->array();
+        array_push($permissions, ...$created);
     }
 
     /**

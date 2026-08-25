@@ -114,7 +114,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
 
             try {
-                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName);
+                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documentsList);
             } catch (\Exception $ex) {
             }
 
@@ -153,7 +153,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
 
             try {
-                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName);
+                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documentsList);
             } catch (\Exception $ex) {
             }
 
@@ -181,6 +181,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
                 $document = $tempDocumentsList[0];
             }
 
+            $newDocumentsList = $initialDocumentsList;
             if (null !== $document) {
                 switch ($document['type']) {
                     case 'file':
@@ -195,7 +196,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             }
 
             try {
-                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName);
+                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $newDocumentsList);
             } catch (\Exception $ex) {
             }
 

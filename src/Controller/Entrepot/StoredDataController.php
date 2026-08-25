@@ -133,7 +133,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
             // récupération de détails sur l'upload s'il y en a un qui a servi à créer la stored_data
             if (isset($storedData['tags']['upload_id'])) {
                 $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id'])->array();
-                $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id']);
+                $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id'], $inputUpload);
                 $inputUpload['checks'] = [];
                 $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
 

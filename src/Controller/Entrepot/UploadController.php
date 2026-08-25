@@ -179,7 +179,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
 
             // supprime livraison si intégration terminée
             if (false === $getOnlyProgress && $uploadIntegrationWorkflow->isIntegrationCompleted($progress)) {
-                $this->uploadApiService->remove($datastoreId, $uploadId)->await();
+                $this->uploadApiService->remove($datastoreId, $uploadId, $upload)->await();
             }
 
             // retourne l'upload complet + tags de progression pour que le frontend ait les données
@@ -216,7 +216,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
         try {
             // Récupération des détails de l'upload ayant échoué
             $inputUpload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
-            $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id']);
+            $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id'], $inputUpload);
             $inputUpload['checks'] = [];
             $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
 

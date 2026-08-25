@@ -11,6 +11,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class ConfigurationApiService
 {
+    // attributs du DTO détaillé d'une offering, identiques dans la liste et le GET unitaire
+    private const OFFERING_DETAIL_FIELDS = 'open,available,layer_name,type,status,endpoint,configuration,urls,creation,extra,update,public_activity';
+
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
         public readonly ApiClient $api,
@@ -117,6 +120,14 @@ final class ConfigurationApiService
     }
 
     /**
+     * Offerings de la configuration avec tous les attributs du DTO détaillé : pas besoin de GET par offering.
+     */
+    public function getConfigurationOfferingsDetailed(string $datastoreId, string $configurationId): PaginatedPromise
+    {
+        return $this->getConfigurationOfferings($datastoreId, $configurationId, ['fields' => self::OFFERING_DETAIL_FIELDS]);
+    }
+
+    /**
      * @param array<mixed> $query
      */
     public function getOfferingsList(string $datastoreId, array $query = []): PaginatedResponse
@@ -149,7 +160,7 @@ final class ConfigurationApiService
     {
         return $this->getAllOfferings($datastoreId, [
             ...$query,
-            'fields' => 'open,available,layer_name,type,status,endpoint,configuration,urls,creation,extra,update,public_activity', // tous les attributs sont présents, donc pas besoin de GET détaillé pour chaque offering
+            'fields' => self::OFFERING_DETAIL_FIELDS, // tous les attributs sont présents, donc pas besoin de GET détaillé pour chaque offering
         ]);
     }
 
