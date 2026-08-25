@@ -290,11 +290,10 @@ class CartesMetadataApiService
         $layers = [];
 
         foreach ($configurationsList as $configuration) {
-            $configurationOfferings = $this->configurationApiService->getConfigurationOfferings($datastoreId, $configuration['_id'])->resolve();
+            $configurationOfferings = $this->configurationApiService->getConfigurationOfferingsDetailed($datastoreId, $configuration['_id'])->resolve();
 
             if (count($configurationOfferings) > 0) {
                 $offering = $configurationOfferings[0];
-                $offering = $this->configurationApiService->getOffering($datastoreId, $offering['_id'])->array();
 
                 $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
 
