@@ -114,7 +114,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
 
             try {
-                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName);
+                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documentsList);
             } catch (\Exception $ex) {
             }
 
@@ -153,7 +153,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
 
             try {
-                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName);
+                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documentsList);
             } catch (\Exception $ex) {
             }
 
@@ -181,6 +181,8 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
                 $document = $tempDocumentsList[0];
             }
 
+            $newDocumentsList = array_values(array_filter($initialDocumentsList, fn ($doc) => $doc['id'] !== $documentId));
+
             if (null !== $document) {
                 switch ($document['type']) {
                     case 'file':
@@ -188,14 +190,11 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
                         break;
                 }
 
-                $newDocumentsList = array_filter($initialDocumentsList, fn ($doc) => $doc['id'] !== $documentId);
-                $newDocumentsList = array_values($newDocumentsList);
-
                 $this->updateListAnnexe($datastoreId, $listAnnexe, $newDocumentsList);
             }
 
             try {
-                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName);
+                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $newDocumentsList);
             } catch (\Exception $ex) {
             }
 
