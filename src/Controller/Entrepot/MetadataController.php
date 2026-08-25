@@ -121,8 +121,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function getFileContent(string $datastoreId, string $metadataId, Request $request): Response
     {
         try {
-            $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
-            $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
+            $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadataId)->text();
 
             $format = $request->query->get('format', 'xml');
 
