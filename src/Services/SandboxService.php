@@ -11,6 +11,7 @@ class SandboxService
 {
     private ?string $sandboxCommunityId;
     private ?string $sandboxDatastoreId = null;
+    private bool $sandboxDatastoreIdResolved = false;
 
     public function __construct(
         private ParameterBagInterface $parameterBag,
@@ -36,11 +37,15 @@ class SandboxService
         return $this->getProcessings($datastoreId)['create_rast_pyr'];
     }
 
+    /** null si le bac à sable n'est pas configuré */
+    public function getSandboxCommunityId(): ?string
+    {
+        return $this->sandboxCommunityId;
+    }
+
     public function isSandboxDatastore(string $datastoreId): bool
     {
-        $sandboxDatastoreId = $this->getSandboxDatastoreId();
-
-        return null !== $sandboxDatastoreId && $sandboxDatastoreId === $datastoreId;
+        return $this->getSandboxDatastoreId() === $datastoreId;
     }
 
     /**
@@ -54,7 +59,7 @@ class SandboxService
     }
 
     /**
-     * Résolu au premier besoin (pas au constructeur) : la communauté sandbox est la même pour tous, cache serveur 24 h.
+     * Résolu au premier besoin, pas au constructeur : la communauté sandbox est la même pour tous.
      */
     private function getSandboxDatastoreId(): ?string
     {
@@ -62,10 +67,15 @@ class SandboxService
             return null;
         }
 
-        return $this->sandboxDatastoreId ??= $this->cache->get("community-{$this->sandboxCommunityId}-datastore-id", function (ItemInterface $item): ?string {
-            $item->expiresAfter(86400);
+        if (!$this->sandboxDatastoreIdResolved) {
+            $this->sandboxDatastoreId = $this->cache->get("community-{$this->sandboxCommunityId}-datastore-id", function (ItemInterface $item): ?string {
+                $item->expiresAfter(86400);
 
-            return $this->communityApiService->get($this->sandboxCommunityId)->array()['datastore']['_id'] ?? null;
-        });
+                return $this->communityApiService->get($this->sandboxCommunityId)->array()['datastore']['_id'] ?? null;
+            });
+            $this->sandboxDatastoreIdResolved = true;
+        }
+
+        return $this->sandboxDatastoreId;
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\ApiClient;
 
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -51,7 +50,7 @@ final class ServiceAccountHttpClient implements HttpClientInterface
     }
 
     /**
-     * @throws AccessDeniedException si le compte de service ne peut pas s'authentifier
+     * @throws ServiceAccountAuthenticationException
      */
     private function getAccessToken(): string
     {
@@ -70,11 +69,11 @@ final class ServiceAccountHttpClient implements HttpClientInterface
             ]);
             $accessToken = $response->toArray()['access_token'] ?? null;
         } catch (ExceptionInterface $e) {
-            throw new AccessDeniedException('Compte de service : échec de l\'authentification', $e);
+            throw new ServiceAccountAuthenticationException('Compte de service : échec de l\'authentification', 0, $e);
         }
 
         if (!is_string($accessToken) || '' === $accessToken) {
-            throw new AccessDeniedException('Compte de service : token absent de la réponse');
+            throw new ServiceAccountAuthenticationException('Compte de service : token absent de la réponse');
         }
 
         return $this->accessToken = $accessToken;

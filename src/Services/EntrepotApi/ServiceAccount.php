@@ -3,11 +3,12 @@
 namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
+use App\ApiClient\ServiceAccountAuthenticationException;
 use App\Security\User;
 use App\Services\MembershipService;
+use App\Services\SandboxService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
@@ -15,17 +16,13 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
  */
 class ServiceAccount
 {
-    private ?string $sandboxCommunityId;
-
     public function __construct(
-        ParameterBagInterface $parameters,
         private Security $security,
         private MembershipService $membershipService,
+        private SandboxService $sandboxService,
         #[Autowire(service: 'app.api_client.entrepot_sandbox_service_account')]
         private ApiClient $api,
     ) {
-        // id vide dans la config par défaut : bac à sable non configuré
-        $this->sandboxCommunityId = ($parameters->get('sandbox')['community_id'] ?? null) ?: null;
     }
 
     /**
@@ -35,7 +32,8 @@ class ServiceAccount
      */
     public function addCurrentUserToSandbox(): void
     {
-        if (null === $this->sandboxCommunityId) {
+        $sandboxCommunityId = $this->sandboxService->getSandboxCommunityId();
+        if (null === $sandboxCommunityId) {
             throw new AccessDeniedException('Bac à sable non configuré');
         }
 
@@ -46,12 +44,16 @@ class ServiceAccount
 
         // lecture fraîche : le token peut encore lister une appartenance quittée il y a moins de 60 s sur un autre pod
         $this->membershipService->refreshCurrentUser();
-        if (null !== $user->findMembershipByCommunity($this->sandboxCommunityId)) {
+        if (null !== $user->findMembershipByCommunity($sandboxCommunityId)) {
             return;
         }
 
-        $this->api->put("communities/{$this->sandboxCommunityId}/users/{$user->getId()}", [
-            'rights' => ['ANNEX', 'BROADCAST', 'PROCESSING', 'UPLOAD'],
-        ])->await();
+        try {
+            $this->api->put("communities/$sandboxCommunityId/users/{$user->getId()}", [
+                'rights' => ['ANNEX', 'BROADCAST', 'PROCESSING', 'UPLOAD'],
+            ])->await();
+        } catch (ServiceAccountAuthenticationException $e) {
+            throw new AccessDeniedException('Compte de service non authentifié', $e);
+        }
     }
 }
