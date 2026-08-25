@@ -21,13 +21,13 @@ class User implements UserInterface
     /** @var array<mixed> */
     private array $communitiesMember = [];
 
-    private ?\DateTimeInterface $accountCreationDate;
-    private ?\DateTimeInterface $lastLoginDate;
+    private ?\DateTimeInterface $accountCreationDate = null;
+    private ?\DateTimeInterface $lastLoginDate = null;
 
-    private ?int $documentsQuota;
-    private ?int $documentsUse;
-    private ?int $keysQuota;
-    private ?int $keysUse;
+    private ?int $documentsQuota = null;
+    private ?int $documentsUse = null;
+    private ?int $keysQuota = null;
+    private ?int $keysUse = null;
 
     /**
      * @param array<mixed> $keycloakUserInfo
