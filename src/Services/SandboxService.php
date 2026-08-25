@@ -68,10 +68,12 @@ class SandboxService
         }
 
         if (!$this->sandboxDatastoreIdResolved) {
-            $this->sandboxDatastoreId = $this->cache->get("community-{$this->sandboxCommunityId}-datastore-id", function (ItemInterface $item): ?string {
+            $this->sandboxDatastoreId = $this->cache->get("community-{$this->sandboxCommunityId}-datastore-id", function (ItemInterface $item): string {
                 $item->expiresAfter(86400);
 
-                return $this->communityApiService->get($this->sandboxCommunityId)->array()['datastore']['_id'] ?? null;
+                // une communauté sandbox sans datastore est une erreur de configuration : ne pas la mettre en cache
+                return $this->communityApiService->get($this->sandboxCommunityId)->array()['datastore']['_id']
+                    ?? throw new \RuntimeException("La communauté sandbox {$this->sandboxCommunityId} n'a pas de datastore");
             });
             $this->sandboxDatastoreIdResolved = true;
         }
