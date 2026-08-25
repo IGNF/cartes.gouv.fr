@@ -6,6 +6,7 @@ use App\ApiClient\ApiClient;
 use App\ApiClient\PaginatedPromise;
 use App\ApiClient\PaginatedResponse;
 use App\ApiClient\ResponsePromise;
+use App\Services\MembershipService;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -15,7 +16,20 @@ final class AnnexeApiService
         #[Autowire(service: 'app.api_client.entrepot')]
         public readonly ApiClient $api,
         private readonly Filesystem $filesystem,
+        private readonly MembershipService $membershipService,
+        #[Autowire('%annexes_url%')]
+        private readonly string $annexesUrl,
     ) {
+    }
+
+    /**
+     * URL publique d'une annexe ; le nom technique du datastore vient de l'appartenance de l'utilisateur.
+     *
+     * @param array<mixed> $annexe
+     */
+    public function getAbsoluteUrl(string $datastoreId, array $annexe): string
+    {
+        return $this->annexesUrl.'/'.$this->membershipService->getDatastoreIdentity($datastoreId)->technicalName.$annexe['paths'][0];
     }
 
     /**

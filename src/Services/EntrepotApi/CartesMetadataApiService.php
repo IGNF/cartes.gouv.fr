@@ -16,7 +16,6 @@ use App\Entity\CswMetadata\CswStyleFile;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
-use App\Services\MembershipService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -37,7 +36,6 @@ class CartesMetadataApiService
         private CswMetadataHelper $cswMetadataHelper,
         private CartesStylesApiService $cartesStylesApiService,
         private StoredDataApiService $storedDataApiService,
-        private MembershipService $membershipService,
     ) {
     }
 
@@ -72,11 +70,7 @@ class CartesMetadataApiService
             return null;
         }
 
-        $datastoreTechnicalName = $this->membershipService->getDatastoreTechnicalName($datastoreId);
-
-        $annexeUrl = $this->parameterBag->get('annexes_url');
-
-        return $annexeUrl.'/'.$datastoreTechnicalName.$annexeList[0]['paths'][0];
+        return $this->annexeApiService->getAbsoluteUrl($datastoreId, $annexeList[0]);
     }
 
     /**

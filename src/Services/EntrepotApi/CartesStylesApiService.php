@@ -190,14 +190,6 @@ class CartesStylesApiService
     }
 
     /**
-     * @param array<mixed> $annexe
-     */
-    public function getAnnexeAbsoluteUrl(string $datastoreTechnicalName, array $annexe): string
-    {
-        return $this->parameters->get('annexes_url').'/'.$datastoreTechnicalName.$annexe['paths'][0];
-    }
-
-    /**
      * Ajout d'un fichier de style sous forme d'annexe.
      */
     public function saveStyleInAnnexe(string $datastoreId, string $datasheetName, string $styleTechnicalName, string $content, string $extension, ?string $existingAnnexeId = null): array

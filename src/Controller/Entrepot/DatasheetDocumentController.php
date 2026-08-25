@@ -7,7 +7,6 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
-use App\Services\MembershipService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -29,17 +28,14 @@ use Symfony\Component\Uid\Uuid;
 class DatasheetDocumentController extends AbstractController implements ApiControllerInterface
 {
     private string $varDataPath;
-    private string $annexesBaseUrl;
 
     public function __construct(
         private AnnexeApiService $annexeApiService,
-        private MembershipService $membershipService,
         private CartesMetadataApiService $cartesMetadataApiService,
         private Filesystem $fs,
         ParameterBagInterface $parameters,
     ) {
         $this->varDataPath = $parameters->get('datasheet_documents_path');
-        $this->annexesBaseUrl = $parameters->get('annexes_url');
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
@@ -106,10 +102,8 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
                     $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], ["datasheet_name=$datasheetName", 'type=document'], true);
 
-                    $datastoreTechnicalName = $this->membershipService->getDatastoreTechnicalName($datastoreId);
-
                     $newDocument['id'] = $fileAnnexe['_id'];
-                    $newDocument['url'] = $this->annexesBaseUrl.'/'.$datastoreTechnicalName.$fileAnnexe['paths'][0];
+                    $newDocument['url'] = $this->annexeApiService->getAbsoluteUrl($datastoreId, $fileAnnexe);
 
                     break;
             }

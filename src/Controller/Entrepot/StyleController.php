@@ -10,7 +10,6 @@ use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesStylesApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\MembershipService;
 use App\Utils;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,7 +27,6 @@ use Symfony\Component\Routing\Attribute\Route;
 class StyleController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private MembershipService $membershipService,
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
@@ -48,7 +46,6 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             /** @var array<string,mixed> */
             $styleFiles = $data['style_files'];
 
-            $datastoreTechnicalName = $this->membershipService->getDatastoreTechnicalName($datastoreId);
             $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
             $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
@@ -61,7 +58,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
                 $annexe = $this->cartesStylesApiService->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $layer['style'], 'mapbox' === $layerName ? 'json' : $layer['format']);
                 $layerData = [
                     'annexe_id' => $annexe['_id'],
-                    'url' => $this->cartesStylesApiService->getAnnexeAbsoluteUrl($datastoreTechnicalName, $annexe),
+                    'url' => $this->annexeApiService->getAbsoluteUrl($datastoreId, $annexe),
                 ];
 
                 if ('mapbox' !== $layerName) {
@@ -104,7 +101,6 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             /** @var array<string,mixed> */
             $styleFiles = $data['style_files'];
 
-            $datastoreTechnicalName = $this->membershipService->getDatastoreTechnicalName($datastoreId);
             $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
             $configId = $offering['configuration']['_id'];
             $configuration = $this->configurationApiService->get($datastoreId, $configId)->array();
@@ -126,7 +122,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             if ('mapbox' === array_key_first($styleFiles)) {
                 $mapboxLayer = &$existingStyle['layers'][0];
                 $annexe = $this->cartesStylesApiService->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $styleFiles['mapbox']['style'], 'json', $mapboxLayer['annexe_id']);
-                $mapboxLayer['url'] = $this->cartesStylesApiService->getAnnexeAbsoluteUrl($datastoreTechnicalName, $annexe);
+                $mapboxLayer['url'] = $this->annexeApiService->getAbsoluteUrl($datastoreId, $annexe);
             } else {
                 foreach ($styleFiles as $layerName => $layer) {
                     $existingStyleLayerKey = Utils::array_find_key($existingStyle['layers'], fn ($l) => $l['name'] === $layerName);
@@ -134,14 +130,14 @@ class StyleController extends AbstractController implements ApiControllerInterfa
                         // Si le layer existe, on met à jour son contenu
                         $existingStyleLayer = &$existingStyle['layers'][$existingStyleLayerKey];
                         $annexe = $this->cartesStylesApiService->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $layer['style'], $layer['format'], $existingStyleLayer['annexe_id']);
-                        $existingStyleLayer['url'] = $this->cartesStylesApiService->getAnnexeAbsoluteUrl($datastoreTechnicalName, $annexe);
+                        $existingStyleLayer['url'] = $this->annexeApiService->getAbsoluteUrl($datastoreId, $annexe);
                     } else {
                         // Si le layer n'existe pas, on l'ajoute
                         $annexe = $this->cartesStylesApiService->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $layer['style'], $layer['format']);
 
                         $layerData = [
                             'annexe_id' => $annexe['_id'],
-                            'url' => $this->cartesStylesApiService->getAnnexeAbsoluteUrl($datastoreTechnicalName, $annexe),
+                            'url' => $this->annexeApiService->getAbsoluteUrl($datastoreId, $annexe),
                             'name' => $layerName,
                         ];
 
