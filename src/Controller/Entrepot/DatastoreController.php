@@ -9,8 +9,6 @@ use App\Dto\Datastore\UpdatePermissionDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\DatastoreApiService;
-use App\Services\EntrepotApi\ServiceAccount;
-use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,25 +28,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
 {
     public function __construct(
         private DatastoreApiService $datastoreApiService,
-        private SandboxService $sandboxService,
-        private ServiceAccount $serviceAccount,
     ) {
-    }
-
-    #[Route('/sandbox', name: 'get_sandbox', methods: ['GET'])]
-    public function getSandboxDatastore(): JsonResponse
-    {
-        try {
-            $sandboxCommunity = $this->serviceAccount->getSandboxCommunity();
-            $datastore = $sandboxCommunity['datastore'];
-
-            $datastore['is_sandbox'] = true;
-            $datastore['name'] = 'Découverte';
-
-            return $this->json($datastore);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
     }
 
     #[Route('/{datastoreId}', name: 'get', methods: ['GET'])]
@@ -56,10 +36,6 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     {
         try {
             $datastore = $this->datastoreApiService->get($datastoreId);
-            $datastore['is_sandbox'] = $this->sandboxService->isSandboxDatastore($datastore['_id']);
-            if (true === $datastore['is_sandbox']) {
-                $datastore['name'] = 'Découverte';
-            }
 
             return $this->json($datastore);
         } catch (ApiException $ex) {
