@@ -1,7 +1,7 @@
 import ConfirmDialog, { ConfirmDialogModal } from "@/components/Utils/ConfirmDialog";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { useTranslation } from "@/i18n/i18n";
-import RQKeys from "@/modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";

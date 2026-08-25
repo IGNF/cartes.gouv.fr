@@ -7,15 +7,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 
 import { DatasheetDetailed, DatasheetStoredDataItem, Service, StoredDataTypeEnum } from "@/@types/app";
-import LoadingIcon from "@/components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "@/components/Utils/LoadingText";
-import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
-import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
-import useStoredDataUseProcessings from "@/hooks/queries/useStoredDataUseProcessings";
+import useDataUsesQuery from "@/entrepot/hooks/queries/useDataUsesQuery";
+import useStoredDataUseProcessings from "@/entrepot/hooks/queries/useStoredDataUseProcessings";
 import { useTranslation } from "@/i18n";
-import RQKeys from "@/modules/entrepot/RQKeys";
-import { offeringTypeDisplayName } from "@/utils";
+import RQKeys from "@/entrepot/modules/RQKeys";
+import { offeringTypeDisplayName } from "@/entrepot/utils/offering";
 
 type StoredDataDeleteConfirmDialogProps = {
     modal: ReturnType<typeof createModal>;
@@ -86,16 +85,7 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
                     severity="error"
                 />
             )}
-            {deleteStoredDataMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{tCommon("removing")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {deleteStoredDataMutation.isPending && <LoadingOverlay message={tCommon("removing")} />}
             {createPortal(
                 <modal.Component
                     title={t("confirm_delete_modal.title", { name: storedData.name, type: storedData.type })}

@@ -5,17 +5,17 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useEffect, useMemo, useState } from "react";
 
 import Main from "@/components/Layout/Main";
 import { CommunityMember, Role } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../components/Utils/LoadingText";
-import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
-import RQKeys from "../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
-import { routes } from "../../../router/router";
 import api from "../../api";
 import "../../../../assets/sass/pages/espaceco/member_invitation.scss";
 import useUserMe from "@/espaceco/hooks/useUserMe";
@@ -31,6 +31,7 @@ type ErrorMessage = {
 };
 
 const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
+    const navigate = useNavigate();
     const { data: me, isError: isMeError, error: meError } = useUserMe();
 
     const { t } = useTranslation("MemberInvitation");
@@ -93,7 +94,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
             }
             return Promise.resolve(undefined);
         },
-        onSuccess: () => routes.espaceco_community_list().push(),
+        onSuccess: () => navigate({ to: "/espace-collaboratif" }),
     });
 
     const community = useMemo(() => query.data, [query.data]);
@@ -104,22 +105,10 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
             {query.isLoading && <LoadingText as="h6" message={t("community_loading")} />}
             {query.isError && <Alert severity="error" closable title={t("community_loading_failed")} />}
             {updateRoleMutation.isError && <Alert severity="error" closable title={updateRoleMutation.error.message} />}
-            {updateRoleMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("inviting")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {updateRoleMutation.isPending && <LoadingOverlay message={t("inviting")} />}
 
             {removeMemberMutation.isError && <Alert severity="error" closable title={removeMemberMutation.error.message} />}
-            {removeMemberMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("rejecting")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {removeMemberMutation.isPending && <LoadingOverlay message={t("rejecting")} />}
 
             {errorMessage ? (
                 <Alert severity={errorMessage.type} closable title={errorMessage.message} />

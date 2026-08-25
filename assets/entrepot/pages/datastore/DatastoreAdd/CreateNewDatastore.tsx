@@ -10,6 +10,7 @@ import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -17,13 +18,11 @@ import { useForm } from "react-hook-form";
 import { useStyles } from "tss-react";
 import * as yup from "yup";
 
-import LoadingIcon from "@/components/Utils/LoadingIcon";
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "@/i18n";
 import { ComponentKey } from "@/i18n/types";
 import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
-import { routes } from "@/router/router";
 import { removeDiacritics } from "@/utils";
 import { externalLink } from "@/router/externalUrls";
 
@@ -53,6 +52,8 @@ export default function CreateNewDatastore({ classes }: CreateNewDatastoreProps)
 
     const { css } = useStyles();
     const { Link } = getLink();
+
+    const navigate = useNavigate();
 
     const {
         register,
@@ -100,7 +101,7 @@ export default function CreateNewDatastore({ classes }: CreateNewDatastoreProps)
     useIsModalOpen(successModal, {
         onConceal() {
             // on close
-            routes.datastore_selection().push();
+            navigate({ to: "/tableau-de-bord/entrepots" });
         },
     });
 
@@ -172,20 +173,7 @@ export default function CreateNewDatastore({ classes }: CreateNewDatastoreProps)
                 </Button>
             </form>
 
-            {datastoreRequestMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("is_sending")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {datastoreRequestMutation.isPending && <LoadingOverlay message={t("is_sending")} />}
 
             {createPortal(
                 <successModal.Component
@@ -194,7 +182,7 @@ export default function CreateNewDatastore({ classes }: CreateNewDatastoreProps)
                     buttons={[
                         {
                             children: "Fermer",
-                            linkProps: routes.datastore_selection().link,
+                            linkProps: { to: "/tableau-de-bord/entrepots" },
                         },
                     ]}
                 >

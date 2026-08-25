@@ -6,29 +6,33 @@ import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useMemo, useState } from "react";
 import { tss } from "tss-react";
 
-import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
+import DatastoreMain from "@/entrepot/components/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/entrepot/components/DatastoreTertiaryNavigation";
 import PageTitle from "@/components/Layout/PageTitle";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
-import { UserRightsResponseDto } from "../../../../@types/app";
+import { searchAwareActiveOptions } from "@/router/AppLink";
+import { Datastore, UserRightsResponseDto } from "../../../../@types/app";
+import { communityMembersQueryOptions } from "@/entrepot/hooks/queries/communityQueryOptions";
+import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import Wait from "../../../../components/Utils/Wait";
-import { useCommunity } from "../../../../contexts/community";
-import { useDatastore } from "../../../../contexts/datastore";
+import { useCommunity } from "@/entrepot/contexts/community";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import { AddMember, addMemberModal } from "../AddMember/AddMember";
 import { complete, rightTypes, UserRights } from "../UserRights";
+
+const route = getRouteApi("/_private/tableau-de-bord/communaute/$communityId/membres");
 
 type CommunityMembersProps = {
     userId?: string;
@@ -63,19 +67,16 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { t } = useTranslation({ CommunityMembers });
 
     const { data: user } = useUserQuery();
+    const navigate = useNavigate();
     // const [members, setMembers] = useState<Member[]>([]);
     const [currentMember, setCurrentMember] = useState<string | undefined>(undefined);
 
     // Data
     const community = useCommunity();
-    const { datastore } = useDatastore();
+    const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(community.datastore?._id)); // communauté possiblement sans entrepôt
 
     // Les membres de cette communauté
-    const { data: communityMembers, isLoading } = useQuery({
-        queryKey: RQKeys.community_members(community._id),
-        queryFn: ({ signal }) => api.community.getMembers(community._id, { signal }),
-        staleTime: 20000,
-    });
+    const { data: communityMembers, isLoading } = useQuery(communityMembersQueryOptions(community._id));
 
     const communitySupervisor = useMemo(() => {
         return community?.supervisor._id;
@@ -109,11 +110,9 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
         return members;
     }, [communityMembers, communitySupervisor, user?.id]);
 
-    const { params } = useRoute();
-    const page = params["page"] ? parseInt(params["page"]) : 1;
-    const limit = params["limit"] ? parseInt(params["limit"]) : 20;
+    const { page, limit, search } = route.useSearch();
 
-    const { search, searchedItems } = useSearch(members);
+    const { searchedItems } = useSearch(members, search);
     const { paginatedItems, totalPages } = usePagination(searchedItems, page, limit);
 
     useEffect(() => {
@@ -178,7 +177,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { classes, cx } = useStyles();
 
     return (
-        <DatastoreMain title="Membres" datastoreId={datastore._id} communityId={community._id}>
+        <DatastoreMain title="Membres" datastoreId={datastore?._id} communityId={community._id}>
             {isLoading && <LoadingText />}
             {!isLoading && userId && communityMemberIds.includes(userId) && (
                 <Alert
@@ -187,7 +186,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                     title={t("already_member", { userId: userId })}
                     closable
                     onClose={() => {
-                        routes.members_list({ communityId: community._id }).push();
+                        navigate({ to: "/tableau-de-bord/communaute/$communityId/membres", params: { communityId: community._id } });
                     }}
                 />
             )}
@@ -195,7 +194,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                 <>
                     <PageTitle title={t("community_members", { communityName: community?.name ?? "" })} />
 
-                    <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />
+                    {datastore && <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />}
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-2v")}>
                         <div
@@ -230,7 +229,12 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                                 label={tCommon("search")}
                                 onButtonClick={(text) => {
                                     if (!isLoading) {
-                                        routes.members_list({ communityId: community._id, userId, search: text }).replace();
+                                        navigate({
+                                            to: "/tableau-de-bord/communaute/$communityId/membres",
+                                            params: { communityId: community._id },
+                                            search: { userId, search: text },
+                                            replace: true,
+                                        });
                                     }
                                 }}
                                 allowEmptySearch={true}
@@ -326,21 +330,15 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                             count={totalPages}
                             showFirstLast={true}
                             getPageLinkProps={(pageNumber) => ({
-                                ...routes.members_list({ communityId: community._id, userId, page: pageNumber, limit: limit, search }).link,
+                                to: "/tableau-de-bord/communaute/$communityId/membres",
+                                params: { communityId: community._id },
+                                search: { userId, page: pageNumber, limit, search },
+                                activeOptions: searchAwareActiveOptions,
                             })}
                             defaultPage={page}
                         />
                     </div>
-                    {(isRemovePending || isModifyPending) && (
-                        <Wait>
-                            <div className={fr.cx("fr-container")}>
-                                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                                    <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? tCommon("removing") : tCommon("modifying")}</h6>
-                                </div>
-                            </div>
-                        </Wait>
-                    )}
+                    {(isRemovePending || isModifyPending) && <LoadingOverlay message={isRemovePending ? tCommon("removing") : tCommon("modifying")} />}
                 </>
             )}
             <AddMember communityId={community._id} communityMemberIds={communityMemberIds} userId={userId} />

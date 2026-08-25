@@ -36,7 +36,7 @@ export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCo
                 ? "Aucune affiliation en cours"
                 : "[TODO]",
     show_details: "Afficher les détails",
-    community_creation: "Création du guichet en cours ...",
+    community_creation: "Création du guichet en cours",
     create_community: "Création d'un guichet",
     append_community: "Reprendre la configuration de ce guichet",
     no_description: "Aucune description n’a été renseignée sur ce guichet",

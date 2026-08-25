@@ -4,24 +4,23 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 
-import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
-import { useDatastore } from "@/contexts/datastore";
+import ServiceFormErrors from "@/entrepot/components/ServiceFormErrors";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidRaster, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
-import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
+import useServiceQuery from "@/entrepot/hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import AccessRestrictions from "../../common/AccessRestrictions/AccessRestrictions";
 import { CommonSchemasValidation } from "../../common/common-schemas-validation";
@@ -54,7 +53,8 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
     const [currentStep, setCurrentStep] = useState(STEPS.METADATA_UPLOAD);
 
     const queryClient = useQueryClient();
-    const { datastore } = useDatastore();
+    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+    const navigate = useNavigate();
 
     const createServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
@@ -63,7 +63,11 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
         },
         onSuccess() {
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-            routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "services" }).push();
+            navigate({
+                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                params: { datastoreId, datasheetName },
+                search: { activeTab: "services" },
+            });
         },
     });
 
@@ -84,7 +88,11 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
             }
 
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-            routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "services" }).push();
+            navigate({
+                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                params: { datastoreId, datasheetName },
+                search: { activeTab: "services" },
+            });
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
         },
     });
@@ -177,7 +185,9 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
                     description={
                         <>
                             <p>{pyramidQuery.error?.message}</p>
-                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                            <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>
+                                {t("back_to_data_list")}
+                            </Button>
                         </>
                     }
                 />
@@ -189,7 +199,9 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
                     description={
                         <>
                             <p>{offeringQuery.error?.message}</p>
-                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                            <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>
+                                {t("back_to_data_list")}
+                            </Button>
                         </>
                     }
                 />
@@ -256,18 +268,7 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
             )}
 
             {(createServiceMutation.isPending || editServiceMutation.isPending) && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon largeIcon={true} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{editMode ? t("modify.in_progress") : t("publish.in_progress")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
+                <LoadingOverlay message={editMode ? t("modify.in_progress") : t("publish.in_progress")} />
             )}
         </Main>
     );

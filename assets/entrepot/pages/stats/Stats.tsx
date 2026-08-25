@@ -7,12 +7,12 @@ import { HitStatisticsDto } from "@/@types/stats";
 import DateRangePicker from "@/components/Input/DateRangePicker";
 import Main from "@/components/Layout/Main";
 import Skeleton from "@/components/Utils/Skeleton";
-import { useSandboxDatastoreQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
+import { sandboxCommunityId } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { useTranslation } from "@/i18n";
 import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
-import { routes, useRoute } from "@/router/router";
+import { findMembership } from "@/utils";
 import DynamicParamSelector from "./DynamicParamSelector";
 import type { StatsScope, StatsScopeConfig } from "./stats.types";
 import StatsBarChart from "./StatsBarChart";
@@ -33,10 +33,11 @@ function initDate(offsetMonths = 0): Date {
     return d;
 }
 
-export default function Stats() {
-    const { params } = useRoute();
-    const scope = params?.["scope"] as StatsScope;
+type StatsProps = {
+    scope: StatsScope;
+};
 
+export default function Stats({ scope }: StatsProps) {
     const { t } = useTranslation("Stats");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
@@ -56,18 +57,19 @@ export default function Stats() {
         setResolvedParams({});
     }, [scope]);
 
-    // périmètre entrepôt : détection "aucun entrepôt" et exclusion du bac à sable
+    // périmètre entrepôt : détection "aucun entrepôt" et exclusion du bac à sable (identifié par env, aucune requête)
     const isDatastoreScope = scope === "datastore";
     const userQuery = useUserQuery();
-    const sandboxQuery = useSandboxDatastoreQuery();
-    const sandboxId = sandboxQuery.data?._id;
+    const sandboxId = sandboxCommunityId !== null ? findMembership(userQuery.data, { communityId: sandboxCommunityId })?.community?.datastore : undefined;
 
     const nonSandboxDatastoreCount = useMemo(
-        () => (userQuery.data?.communities_member ?? []).filter((cm) => cm.community?.datastore && cm.community.datastore !== sandboxId).length,
+        () =>
+            (userQuery.data?.communities_member ?? []).filter(
+                (cm) => cm.community?.datastore && (sandboxId === undefined || cm.community.datastore !== sandboxId)
+            ).length,
         [userQuery.data, sandboxId]
     );
-    // fail-open : en cas d'erreur sandbox on n'exclut rien plutôt que de bloquer la page
-    const datastoreScopeReady = !isDatastoreScope || (!userQuery.isPending && (!sandboxQuery.isPending || sandboxQuery.isError));
+    const datastoreScopeReady = !isDatastoreScope || !userQuery.isPending;
     const hasNoDatastore = isDatastoreScope && datastoreScopeReady && nonSandboxDatastoreCount === 0;
 
     const currentConfig = entityTypeKey ? entities[entityTypeKey] : undefined;
@@ -129,15 +131,15 @@ export default function Stats() {
                 container: fr.cx("fr-container", "fr-mb-4v"),
             }}
             customBreadcrumbProps={{
-                homeLinkProps: routes.dashboard().link,
+                homeLinkProps: { to: "/tableau-de-bord" },
                 segments: [
                     {
                         label: tBreadcrumb("discover_publish"),
-                        linkProps: routes.discover_publish().link,
+                        linkProps: { to: "/publier-une-donnee" },
                     },
                     {
                         label: tBreadcrumb("stats_scope_selection"),
-                        linkProps: routes.stats_scope_selection().link,
+                        linkProps: { to: "/tableau-de-bord/statistiques-de-consommation" },
                     },
                 ],
                 currentPageLabel: t("scope_title", { scope }),

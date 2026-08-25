@@ -1,13 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC } from "react";
 
-import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
+import DatastoreMain from "@/entrepot/components/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/entrepot/components/DatastoreTertiaryNavigation";
 import PageTitle from "@/components/Layout/PageTitle";
-import { routes, useRoute } from "@/router/router";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
-import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import AnnexeUsage from "./storages/AnnexeUsage";
 import EndpointsUsage from "./storages/EndpointsUsage";
@@ -17,15 +19,19 @@ import S3Usage from "./storages/S3Usage";
 import StaticsUsage from "./storages/StaticsUsage";
 import UploadUsage from "./storages/UploadUsage";
 import { DatastoreManageStorageTab } from "./types";
-import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
+import useStoredDataListQuery from "@/entrepot/hooks/queries/useStoredDataListQuery";
+
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/consommation");
 
 const DatastoreManageStorage: FC = () => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
-    const { datastore, isFetching } = useDatastore();
+    const { datastoreId } = route.useParams();
+    const { data: datastore, isFetching } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+    const isSandbox = useDatastoreMembership()?.isSandbox;
 
-    const route = useRoute();
-    const currentTab = route.params?.["tab"] ?? DatastoreManageStorageTab.POSTGRESQL;
+    const navigate = useNavigate();
+    const { tab: currentTab } = route.useSearch();
 
     const hasFilesystemStorage = datastore?.storages.data?.find((data) => data.storage.type === "FILESYSTEM") !== undefined;
 
@@ -37,11 +43,11 @@ const DatastoreManageStorage: FC = () => {
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastore._id}>
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastore._id}>
             <PageTitle
                 title={
                     <>
-                        {t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })}
+                        {t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}
                         {isFetching && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon />}
                     </>
                 }
@@ -54,7 +60,14 @@ const DatastoreManageStorage: FC = () => {
                     <div className={fr.cx("fr-col-12")}>
                         <Tabs
                             selectedTabId={currentTab}
-                            onTabChange={(tabId: string) => routes.datastore_manage_storage({ datastoreId: datastore._id, tab: tabId }).replace()}
+                            onTabChange={(tabId: string) =>
+                                navigate({
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/consommation",
+                                    params: { datastoreId: datastore._id },
+                                    search: { tab: tabId },
+                                    replace: true,
+                                })
+                            }
                             tabs={[
                                 {
                                     tabId: DatastoreManageStorageTab.POSTGRESQL,

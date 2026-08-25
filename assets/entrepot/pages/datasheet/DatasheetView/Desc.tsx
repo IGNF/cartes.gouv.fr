@@ -5,7 +5,7 @@ import { symToStr } from "tsafe/symToStr";
 
 import { OfferingTypeEnum, StoredDataTypeEnum } from "../../../../@types/app";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import { offeringTypeDisplayName } from "../../../../utils";
+import { offeringTypeDisplayName } from "@/entrepot/utils/offering";
 
 interface DescProps {
     databaseNotUsed?: boolean;

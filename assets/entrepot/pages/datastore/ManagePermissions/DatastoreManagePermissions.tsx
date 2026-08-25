@@ -6,27 +6,31 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Card from "@codegouvfr/react-dsfr/Card";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import Tag from "@codegouvfr/react-dsfr/Tag";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { differenceInCalendarDays, parseISO } from "date-fns";
 import { FC, useState } from "react";
 import { useStyles } from "tss-react/mui";
 
 import { DatastorePermission } from "@/@types/app";
-import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
+import DatastoreMain from "@/entrepot/components/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/entrepot/components/DatastoreTertiaryNavigation";
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
 import Skeleton from "@/components/Utils/Skeleton";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 import { usePagination } from "@/hooks/usePagination";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import { formatDateFromISO } from "@/utils";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
-import Wait from "../../../../components/Utils/Wait";
-import { useDatastore } from "../../../../contexts/datastore";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
+
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/permissions/");
 
 type DatastoreManagePermissionsProps = {
     datastoreId: string;
@@ -38,8 +42,9 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
     const queryClient = useQueryClient();
 
-    // Le datastore
-    const { datastore, status: datastoreStatus } = useDatastore();
+    // Le datastore (le chargement initial est couvert par la Suspense de la route)
+    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+    const isSandbox = useDatastoreMembership()?.isSandbox;
 
     // Les permissions
     const {
@@ -71,31 +76,21 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
     const [currentPermission, setCurrentPermission] = useState<string | undefined>(undefined);
 
-    const { params } = useRoute();
-    const page = params["page"] ? parseInt(params["page"]) : 1;
-    const limit = params["limit"] ? parseInt(params["limit"]) : 4;
+    const navigate = useNavigate();
+    const { page, limit } = route.useSearch();
 
     const { paginatedItems, totalPages } = usePagination(permissions ?? [], page, limit);
 
     const { css } = useStyles();
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} />
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastoreId}>
+            <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} />
 
             <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
 
             {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={removeError.message} />}
-            {removeStatus === "pending" && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{tCommon("removing")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {removeStatus === "pending" && <LoadingOverlay message={tCommon("removing")} />}
 
             {permissionStatus !== "pending" && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>
@@ -111,7 +106,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                             {permissions?.length ?? 0}
                         </Badge>
                         <Button
-                            linkProps={routes.datastore_add_permission({ datastoreId: datastoreId }).link}
+                            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/permissions/ajout", params: { datastoreId } }}
                             iconId="fr-icon-add-line"
                             iconPosition="right"
                             className={fr.cx("fr-ml-auto")}
@@ -124,7 +119,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                 // TODO recherche et filtres ici
             )}
 
-            {datastoreStatus === "pending" || permissionStatus === "pending" ? (
+            {permissionStatus === "pending" ? (
                 <Skeleton count={6} rectangleHeight={200} />
             ) : permissions?.length === 0 ? (
                 <Alert className={fr.cx("fr-mb-1w")} severity={"info"} title={t("list.no_permissions")} closable />
@@ -216,10 +211,11 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                                         {
                                                             children: tCommon("modify"),
                                                             iconId: "fr-icon-edit-line",
-                                                            onClick: routes.datastore_edit_permission({
-                                                                datastoreId: datastoreId,
-                                                                permissionId: permission._id,
-                                                            }).push,
+                                                            onClick: () =>
+                                                                navigate({
+                                                                    to: "/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification",
+                                                                    params: { datastoreId, permissionId: permission._id },
+                                                                }),
                                                         },
                                                         {
                                                             children: tCommon("delete"),
@@ -247,7 +243,10 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                     count={totalPages}
                                     showFirstLast={true}
                                     getPageLinkProps={(pageNumber) => ({
-                                        ...routes.datastore_manage_permissions({ datastoreId, page: pageNumber, limit: limit }).link,
+                                        to: "/tableau-de-bord/entrepots/$datastoreId/permissions",
+                                        params: { datastoreId },
+                                        search: { page: pageNumber, limit },
+                                        activeOptions: searchAwareActiveOptions,
                                     })}
                                     defaultPage={page}
                                 />

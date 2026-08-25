@@ -5,86 +5,77 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
-import { useQuery } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { FC, Suspense } from "react";
 import { tss } from "tss-react";
 import { useToggle } from "@mantine/hooks";
 
-import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
+import DatastoreMain from "@/entrepot/components/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/entrepot/components/DatastoreTertiaryNavigation";
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
+import { datastoreSuspenseQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
+import { datasheetListQueryOptions } from "@/entrepot/hooks/queries/datasheetListQueryOptions";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Skeleton from "../../../../components/Utils/Skeleton";
-import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routes, useRoute } from "../../../../router/router";
-import api from "../../../api";
 import { SortByEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";
 import NoData from "./NoData";
 import SandboxDatastoreExplanation from "./SandboxDatastoreExplanation";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 const filterTests = {
     [FilterEnum.ENABLED]: (d: Datasheet) => d.nb_publications > 0,
     [FilterEnum.DISABLED]: (d: Datasheet) => d.nb_publications === 0,
 };
 
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/");
+
 type DatasheetListProps = {
     datastoreId: string;
 };
 const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatasheetList");
-    const { datastore } = useDatastore();
     const { t: tCommon } = useTranslation("Common");
 
-    const datasheetListQuery = useQuery({
-        queryKey: RQKeys.datastore_datasheet_list(datastoreId),
-        queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
-        staleTime: 60000,
-        enabled: datastore !== undefined,
-    });
+    const membership = useDatastoreMembership();
+    const community = membership?.community;
+    const isSandbox = membership?.isSandbox;
+    const datastoreName = tCommon("datastore_name", { name: community?.name, isSandbox });
+
+    const datasheetListQuery = useQuery(datasheetListQueryOptions(datastoreId));
     const { data: datasheetList, dataUpdatedAt, isFetching, isLoading, refetch } = datasheetListQuery;
 
-    const metadataEndpoint = useMemo(
-        () => datastore?.endpoints?.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA),
-        [datastore?.endpoints]
-    );
-
-    const datasheetCreationImpossible = Boolean(
-        metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use
-    );
-
-    const { params } = useRoute();
-    const page = params["page"] ? parseInt(params["page"]) : 1;
-    const limit = params["limit"] ? parseInt(params["limit"]) : 10;
+    const searchParams = route.useSearch();
+    const { page, limit } = searchParams;
+    const navigate = useNavigate();
 
     const [showFilters, toggleShowFilters] = useToggle();
 
     // filtre et tri
-    const { search, searchedItems } = useSearch(datasheetList ?? []);
-    const { filteredItems, filters } = useFilters(searchedItems, ["published"], filterTests);
-    const { sortBy, sortOrder, sortedItems } = useSort(filteredItems, ["name", "nb_publications"]);
+    const { search, searchedItems } = useSearch(datasheetList ?? [], searchParams.search ?? "");
+    const { filteredItems, filters } = useFilters(searchedItems, searchParams, ["published"], filterTests);
+    const { sortBy, sortOrder, sortedItems } = useSort(filteredItems, searchParams, ["name", "nb_publications"]);
     const { paginatedItems, totalPages } = usePagination(sortedItems, page, limit);
+
+    // useFilters ne produit que des valeurs scalaires pour published
+    const published = filters.published as FilterEnum;
 
     const { classes, cx } = useStyles();
 
-    const { userRights, isSupervisor } = useCommunityRights();
-
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })}>
-                {datastore?.is_sandbox === true && <SandboxDatastoreExplanation />}
-            </PageTitle>
+        <DatastoreMain title={t("title", { datastoreName })} datastoreId={datastoreId}>
+            <PageTitle title={t("title", { datastoreName })}>{isSandbox && <SandboxDatastoreExplanation />}</PageTitle>
 
-            <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
+            <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={community?._id ?? ""} />
 
             {datasheetList && datasheetList?.length > 0 && (
                 <>
@@ -100,37 +91,18 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                             <Badge severity="info" noIcon={true}>
                                 {filteredItems.length ?? 0}
                             </Badge>
-                            {(isSupervisor ||
-                                (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
-                                    userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
-                                <Button
-                                    linkProps={
-                                        datasheetCreationImpossible
-                                            ? { href: undefined, "aria-hidden": true }
-                                            : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link
-                                    }
-                                    iconId="fr-icon-add-line"
-                                    iconPosition="right"
-                                    className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
-                                >
-                                    {t("create_datasheet")}
-                                </Button>
+                            {membership?.can(CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING) && (
+                                // rendu optimiste : bouton actif tant que le quota (requête datastore différée) est inconnu
+                                <Suspense fallback={<CreateDatasheetButton datastoreId={datastoreId} />}>
+                                    <CreateDatasheetButtonWithQuota datastoreId={datastoreId} />
+                                </Suspense>
                             )}
                         </div>
                     </div>
 
-                    {metadataEndpoint && datasheetCreationImpossible && (
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                            <div className={fr.cx("fr-col")}>
-                                <Alert
-                                    severity="warning"
-                                    title={t("datasheet_creation_impossible")}
-                                    as="h2"
-                                    description={t("metadata_endpoint_quota_reached")}
-                                />
-                            </div>
-                        </div>
-                    )}
+                    <Suspense fallback={null}>
+                        <MetadataQuotaAlert datastoreId={datastoreId} />
+                    </Suspense>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-2v")}>
                         <div
@@ -145,7 +117,12 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 label={tCommon("search")}
                                 onButtonClick={(text) => {
                                     if (!isLoading) {
-                                        routes.datasheet_list({ ...filters, datastoreId, search: text, sortBy, sortOrder }).replace();
+                                        navigate({
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                            params: { datastoreId },
+                                            search: { search: text, sortBy, sortOrder, published },
+                                            replace: true,
+                                        });
                                     }
                                 }}
                                 allowEmptySearch={true}
@@ -182,19 +159,20 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                         onChange: (event) => {
                                             const value = event.target.value;
                                             if (value === FilterEnum.ALL.toString()) {
-                                                routes.datasheet_list({ datastoreId, search, sortBy, sortOrder }).replace();
+                                                navigate({
+                                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                                    params: { datastoreId },
+                                                    search: { search, sortBy, sortOrder },
+                                                    replace: true,
+                                                });
                                             } else {
-                                                const published = value === FilterEnum.ENABLED.toString() ? FilterEnum.ENABLED : FilterEnum.DISABLED;
-                                                routes
-                                                    .datasheet_list({
-                                                        ...filters,
-                                                        datastoreId,
-                                                        search,
-                                                        sortBy,
-                                                        sortOrder,
-                                                        published,
-                                                    })
-                                                    .replace();
+                                                const selectedPublished = value === FilterEnum.ENABLED.toString() ? FilterEnum.ENABLED : FilterEnum.DISABLED;
+                                                navigate({
+                                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                                    params: { datastoreId },
+                                                    search: { search, sortBy, sortOrder, published: selectedPublished },
+                                                    replace: true,
+                                                });
                                             }
                                         },
                                     }}
@@ -231,9 +209,12 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                             const selectedSortBy = selectedSort?.[0];
                                             const selectedSortOrder = Number(selectedSort?.[1]);
                                             if (!selectedSortBy || isNaN(selectedSortOrder) || selectedSortOrder === 0) return;
-                                            routes
-                                                .datasheet_list({ ...filters, datastoreId, search, sortBy: selectedSortBy, sortOrder: selectedSortOrder })
-                                                .replace();
+                                            navigate({
+                                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                                params: { datastoreId },
+                                                search: { search, sortBy: selectedSortBy, sortOrder: selectedSortOrder, published },
+                                                replace: true,
+                                            });
                                         },
                                     }}
                                     placeholder={t("sort_placeholder")}
@@ -278,8 +259,10 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                         count={totalPages}
                                         showFirstLast={true}
                                         getPageLinkProps={(pageNumber) => ({
-                                            ...routes.datasheet_list({ ...filters, datastoreId, page: pageNumber, limit: limit, search, sortBy, sortOrder })
-                                                .link,
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                            params: { datastoreId },
+                                            search: { page: pageNumber, limit, search, sortBy, sortOrder, published },
+                                            activeOptions: searchAwareActiveOptions,
                                         })}
                                         defaultPage={page}
                                     />
@@ -296,6 +279,63 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 };
 
 export default DatasheetList;
+
+/** true si le quota du point d'accès métadonnées est atteint ; suspend sur la requête datastore */
+function useDatasheetCreationImpossible(datastoreId: string): boolean {
+    const { data: datastore } = useSuspenseQuery(datastoreSuspenseQueryOptions(datastoreId));
+
+    const metadataEndpoint = datastore?.endpoints?.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA);
+
+    return Boolean(metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use);
+}
+
+type CreateDatasheetButtonProps = {
+    datastoreId: string;
+    creationImpossible?: boolean;
+};
+
+function CreateDatasheetButton({ datastoreId, creationImpossible = false }: CreateDatasheetButtonProps) {
+    const { t } = useTranslation("DatasheetList");
+
+    return (
+        <Button
+            linkProps={
+                creationImpossible
+                    ? { href: undefined, "aria-hidden": true }
+                    : {
+                          to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement" as const,
+                          params: { datastoreId },
+                      }
+            }
+            iconId="fr-icon-add-line"
+            iconPosition="right"
+            className={fr.cx("fr-ml-auto", creationImpossible && "fr-hidden")}
+        >
+            {t("create_datasheet")}
+        </Button>
+    );
+}
+
+function CreateDatasheetButtonWithQuota({ datastoreId }: { datastoreId: string }) {
+    const creationImpossible = useDatasheetCreationImpossible(datastoreId);
+
+    return <CreateDatasheetButton datastoreId={datastoreId} creationImpossible={creationImpossible} />;
+}
+
+function MetadataQuotaAlert({ datastoreId }: { datastoreId: string }) {
+    const { t } = useTranslation("DatasheetList");
+    const creationImpossible = useDatasheetCreationImpossible(datastoreId);
+
+    if (!creationImpossible) return null;
+
+    return (
+        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+            <div className={fr.cx("fr-col")}>
+                <Alert severity="warning" title={t("datasheet_creation_impossible")} as="h2" description={t("metadata_endpoint_quota_reached")} />
+            </div>
+        </div>
+    );
+}
 
 const useStyles = tss.withName({ DatasheetList }).create({
     filterRoot: {

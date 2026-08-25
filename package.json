@@ -22,10 +22,14 @@
         "@mui/material": "^7.0.0",
         "@mui/x-date-pickers": "^8.0.0",
         "@tanstack/eslint-plugin-query": "^5.91.2",
+        "@tanstack/eslint-plugin-router": "^1.162.0",
         "@tanstack/query-async-storage-persister": "^5.90.5",
         "@tanstack/react-query": "^5.90.3",
         "@tanstack/react-query-devtools": "^5.90.2",
         "@tanstack/react-query-persist-client": "^5.90.5",
+        "@tanstack/react-router": "^1.170.25",
+        "@tanstack/react-router-devtools": "^1.167.1",
+        "@tanstack/router-plugin": "^1.168.29",
         "@tiptap/extension-color": "^3.25.0",
         "@tiptap/extension-highlight": "^3.25.0",
         "@tiptap/extension-image": "^3.25.0",
@@ -83,7 +87,6 @@
         "svgo": "^4.0.0",
         "tsafe": "^1.6.5",
         "tss-react": "^4.9.12",
-        "type-route": "^1.0.1",
         "typescript": "^5.1.6",
         "typescript-eslint": "^8.46.1",
         "uuid": "^14.0.0",
@@ -93,6 +96,7 @@
         "vite-plugin-image-optimizer": "^2.0.3",
         "vite-plugin-run": "^0.6",
         "vite-plugin-symfony": "^8.0",
+        "vitest": "^4.1.10",
         "yup": "^1.2.0",
         "zustand": "^5.0.0"
     },
@@ -111,7 +115,8 @@
         "format": "prettier --check assets/",
         "format:fix": "prettier --write assets/",
         "prepare": "husky",
-        "type-check": "tsc -b"
+        "type-check": "tsc -b",
+        "test": "vitest run"
     },
     "browserslist": [
         "last 2 versions",

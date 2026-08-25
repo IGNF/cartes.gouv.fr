@@ -3,19 +3,19 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { useMutation, usePrefetchQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CartesApiException } from "@/modules/jsonFetch";
 import { type QueryParams } from "@/modules/Routing";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import { Annexe, Datastore } from "../../../../../@types/app";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
-import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { routes, useRoutePaginationParams } from "../../../../../router/router";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { decodeContentRange, delta, niceBytes, PaginatedListResponse } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
@@ -30,6 +30,9 @@ const confirmDialogModal = createModal({
     id: "confirm-delete-annexe-modal",
     isOpenedByDefault: false,
 });
+
+// Search typé de la route consommation (page parente des onglets)
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/consommation");
 
 async function fetchAnnexeList(datastoreId: string, queryParams: QueryParams = {}, signal?: AbortSignal) {
     const res = await api.annexe.getList(datastoreId, queryParams, { signal });
@@ -48,7 +51,7 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
 
-    const { page, limit } = useRoutePaginationParams();
+    const { page, limit } = route.useSearch();
 
     const annexeUsage = useMemo(() => {
         return datastore?.storages.annexes;
@@ -150,10 +153,10 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                                 datasheetName !== undefined && {
                                     iconId: "fr-icon-arrow-right-s-line",
                                     priority: "tertiary no outline",
-                                    linkProps: routes.datastore_datasheet_view({
-                                        datastoreId: datastore._id,
-                                        datasheetName: datasheetName,
-                                    }).link,
+                                    linkProps: {
+                                        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                        params: { datastoreId: datastore._id, datasheetName: datasheetName },
+                                    },
                                     children: tCommon("see_2"),
                                 },
                             ]}
@@ -165,9 +168,12 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                 <Pagination
                     defaultPage={page}
                     count={contentRange?.totalPages}
-                    getPageLinkProps={(pageNumber: number) =>
-                        routes.datastore_manage_storage({ datastoreId: datastore._id, limit, page: pageNumber, tab: DatastoreManageStorageTab.ANNEXE }).link
-                    }
+                    getPageLinkProps={(pageNumber: number) => ({
+                        to: "/tableau-de-bord/entrepots/$datastoreId/consommation",
+                        params: { datastoreId: datastore._id },
+                        search: { tab: DatastoreManageStorageTab.ANNEXE, page: pageNumber, limit },
+                        activeOptions: searchAwareActiveOptions,
+                    })}
                 />
             )}
 
@@ -195,16 +201,7 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                 document.body
             )}
 
-            {deleteAnnexeMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("storage.annexe.deletion.in_progress")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {deleteAnnexeMutation.isPending && <LoadingOverlay message={t("storage.annexe.deletion.in_progress")} />}
         </>
     );
 };

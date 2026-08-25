@@ -3,18 +3,18 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { useMutation, usePrefetchQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { FC, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CartesApiException } from "@/modules/jsonFetch";
 import { type QueryParams } from "@/modules/Routing";
-import { routes, useRoutePaginationParams } from "@/router/router";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import type { Datastore, StaticFile } from "../../../../../@types/app";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { decodeContentRange, delta, PaginatedListResponse } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
@@ -24,6 +24,9 @@ const confirmDialogModal = createModal({
     id: "confirm-delete-statics-modal",
     isOpenedByDefault: false,
 });
+
+// Search typé de la route consommation (page parente des onglets)
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/consommation");
 
 type StaticsUsageProps = {
     datastore: Datastore;
@@ -43,7 +46,7 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
 
-    const { page, limit } = useRoutePaginationParams();
+    const { page, limit } = route.useSearch();
 
     const queryParams = { page, limit };
     const staticsListQuery = useQuery<PaginatedListResponse<StaticFile>, CartesApiException>({
@@ -122,9 +125,12 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
                 <Pagination
                     defaultPage={page}
                     count={contentRange?.totalPages}
-                    getPageLinkProps={(pageNumber: number) =>
-                        routes.datastore_manage_storage({ datastoreId: datastore._id, limit, page: pageNumber, tab: DatastoreManageStorageTab.STATICS }).link
-                    }
+                    getPageLinkProps={(pageNumber: number) => ({
+                        to: "/tableau-de-bord/entrepots/$datastoreId/consommation",
+                        params: { datastoreId: datastore._id },
+                        search: { tab: DatastoreManageStorageTab.STATICS, page: pageNumber, limit },
+                        activeOptions: searchAwareActiveOptions,
+                    })}
                 />
             )}
 
@@ -152,16 +158,7 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
                 document.body
             )}
 
-            {deleteStaticMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("storage.statics.deletion.in_progress")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {deleteStaticMutation.isPending && <LoadingOverlay message={t("storage.statics.deletion.in_progress")} />}
         </>
     );
 };

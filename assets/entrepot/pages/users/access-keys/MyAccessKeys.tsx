@@ -10,8 +10,7 @@ import { PermissionWithOfferingsDetailsResponseDto, UserKeyDetailsResponseDtoUse
 import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { getTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routes } from "../../../../router/router";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../api";
 import UserKeysListTab from "../keys/UserKeysListTab/UserKeysListTab";
 import PermissionsListTab from "../permissions/PermissionsListTab";
@@ -82,12 +81,12 @@ const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
                             items={[
                                 {
                                     isActive: tab === "keys",
-                                    linkProps: routes.my_access_keys().link,
+                                    linkProps: { to: "/mes-cles" },
                                     text: t("my_access_keys"),
                                 },
                                 {
                                     isActive: tab === "permissions",
-                                    linkProps: routes.my_permissions().link,
+                                    linkProps: { to: "/mes-permissions" },
                                     text: t("my_permissions"),
                                 },
                             ]}
@@ -105,7 +104,7 @@ const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
                                         <Button
                                             iconId="fr-icon-arrow-right-s-line"
                                             iconPosition="right"
-                                            {...(canAdd ? { linkProps: routes.user_key_add().link } : { disabled: true })}
+                                            {...(canAdd ? { linkProps: { to: "/mes-cles/ajout" } } : { disabled: true })}
                                         >
                                             {t("add_access_keys")}
                                         </Button>

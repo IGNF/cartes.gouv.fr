@@ -3,19 +3,19 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
+import useStoredDataListQuery from "@/entrepot/hooks/queries/useStoredDataListQuery";
 import { usePagination } from "@/hooks/usePagination";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import { Datastore, StoredData } from "../../../../../@types/app";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
-import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { routes, useRoutePaginationParams } from "../../../../../router/router";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { niceBytes } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
@@ -26,6 +26,9 @@ const confirmDialogModal = createModal({
     isOpenedByDefault: false,
 });
 
+// Search typé de la route consommation (page parente des onglets)
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/consommation");
+
 type S3UsageProps = {
     datastore: Datastore;
 };
@@ -33,7 +36,7 @@ const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
 
-    const { page, limit } = useRoutePaginationParams();
+    const { page, limit } = route.useSearch();
 
     const s3Usage = useMemo(() => {
         return datastore?.storages.data?.find((data) => data.storage.type === "S3");
@@ -142,10 +145,10 @@ const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
                             storedData.tags.datasheet_name !== undefined && {
                                 iconId: "fr-icon-arrow-right-s-line",
                                 priority: "tertiary no outline",
-                                linkProps: routes.datastore_datasheet_view({
-                                    datastoreId: datastore._id,
-                                    datasheetName: storedData.tags.datasheet_name,
-                                }).link,
+                                linkProps: {
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                    params: { datastoreId: datastore._id, datasheetName: storedData.tags.datasheet_name },
+                                },
                                 children: tCommon("see_2"),
                             },
                         ]}
@@ -156,9 +159,12 @@ const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
                 <Pagination
                     defaultPage={page}
                     count={totalPages}
-                    getPageLinkProps={(pageNumber: number) =>
-                        routes.datastore_manage_storage({ datastoreId: datastore._id, limit, page: pageNumber, tab: DatastoreManageStorageTab.S3 }).link
-                    }
+                    getPageLinkProps={(pageNumber: number) => ({
+                        to: "/tableau-de-bord/entrepots/$datastoreId/consommation",
+                        params: { datastoreId: datastore._id },
+                        search: { tab: DatastoreManageStorageTab.S3, page: pageNumber, limit },
+                        activeOptions: searchAwareActiveOptions,
+                    })}
                 />
             )}
 
@@ -189,16 +195,7 @@ const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
                 document.body
             )}
 
-            {deleteStoredDataMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("storage.s3.deletion.in_progress")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {deleteStoredDataMutation.isPending && <LoadingOverlay message={t("storage.s3.deletion.in_progress")} />}
         </>
     );
 };

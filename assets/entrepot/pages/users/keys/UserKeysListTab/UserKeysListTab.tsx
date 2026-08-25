@@ -3,6 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useMemo, useState } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
@@ -20,11 +21,10 @@ import {
     type UserKeyResponseDto,
 } from "../../../../../@types/entrepot";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../../components/Utils/ConfirmDialog";
-import Wait from "../../../../../components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import UserKeyLink from "./UserKeyLink";
 
@@ -37,6 +37,7 @@ type UserKeysListTabProps = {
 };
 
 const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
+    const navigate = useNavigate();
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UserKeysListTab");
 
@@ -103,16 +104,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
     return (
         <>
             {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={removeError.message} />}
-            {removeStatus === "pending" && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + "frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{tCommon("removing")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {removeStatus === "pending" && <LoadingOverlay message={tCommon("removing")} />}
             {keys === undefined || keys.length === 0 ? (
                 <div className={fr.cx("fr-my-8w", "fr-mb-4w", "fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters")}>
                     <div className={fr.cx("fr-col-12", "fr-col-sm-5", "fr-col-md-4", "fr-py-0")}>
@@ -248,7 +240,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                 iconId="fr-icon-edit-line"
                                                 size="small"
                                                 onClick={() => {
-                                                    routes.user_key_edit({ keyId: accessKey._id }).push();
+                                                    navigate({ to: "/mes-cles/$keyId/modification", params: { keyId: accessKey._id } });
                                                 }}
                                             />
                                             {accessKey.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.HASH &&

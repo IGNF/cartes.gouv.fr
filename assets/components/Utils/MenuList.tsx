@@ -1,6 +1,6 @@
 import { fr, type FrIconClassName, type RiIconClassName } from "@codegouvfr/react-dsfr";
 import Button, { ButtonProps } from "@codegouvfr/react-dsfr/Button";
-import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
+import { getLink, RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import Typography from "@mui/material/Typography";
@@ -148,10 +148,11 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
                             );
 
                             if (item.linkProps && !item.disabled) {
+                                const { Link } = getLink();
                                 return (
-                                    <a key={i} {...item.linkProps}>
+                                    <Link key={i} {...item.linkProps}>
                                         {itemContent}
-                                    </a>
+                                    </Link>
                                 );
                             }
 

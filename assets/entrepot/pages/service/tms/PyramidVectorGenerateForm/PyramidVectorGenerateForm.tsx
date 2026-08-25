@@ -5,19 +5,19 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { type StoredDataRelation, type VectorDb } from "../../../../../@types/app";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
 import olDefaults from "../../../../../data/ol-defaults.json";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import TableSelection from "../../common/TableSelection/TableSelection";
 import formatForm from "../format-form";
@@ -85,6 +85,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
 
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
@@ -145,9 +146,13 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                 if (vectorDbQuery.data?.tags?.datasheet_name) {
                     queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name) });
                     queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
-                    routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "dataset" }).push();
+                    navigate({
+                        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                        params: { datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name },
+                        search: { activeTab: "dataset" },
+                    });
                 } else {
-                    routes.datasheet_list({ datastoreId }).push();
+                    navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
                 }
             })
             .catch((error) => {
@@ -169,7 +174,9 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                     severity="error"
                     closable={false}
                     title={t("stored_data.fetch_failed")}
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>}
+                    description={
+                        <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>{t("back_to_data_list")}</Button>
+                    }
                 />
             ) : (
                 <>
@@ -217,20 +224,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                     />
                 </>
             )}
-            {isSubmitting && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("pyramid_creation_launch_in_progress")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {isSubmitting && <LoadingOverlay message={t("pyramid_creation_launch_in_progress")} />}
         </Main>
     );
 };

@@ -6,28 +6,30 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import { useStyles } from "tss-react";
 import isEmail from "validator/lib/isEmail";
 import * as yup from "yup";
 
-import { Community, Datastore } from "@/@types/app";
+import { Datastore } from "@/@types/app";
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
+import DatastoreMain from "@/entrepot/components/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/entrepot/components/DatastoreTertiaryNavigation";
 import PageTitle from "@/components/Layout/PageTitle";
-import LoadingIcon from "@/components/Utils/LoadingIcon";
-import Wait from "@/components/Utils/Wait";
-import { useCommunity } from "@/contexts/community";
-import { useDatastore } from "@/contexts/datastore";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
+import { useCommunity } from "@/entrepot/contexts/community";
 import api from "@/entrepot/api";
+import { sandboxCommunityId } from "@/env";
+import { datastoreQueryOptions } from "@/entrepot/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
+import useMembership from "@/entrepot/hooks/useMembership";
+import { isSandboxCommunity } from "@/utils";
 import { getTranslation, useTranslation } from "@/i18n";
-import RQKeys from "@/modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
-import { routes } from "@/router/router";
 import DeleteCommunity from "./DeleteCommunity/DeleteCommunity";
 import { deleteCommunityModal } from "./DeleteCommunity/deleteCommunityModal";
 
@@ -72,10 +74,12 @@ export default function CommunityInfo() {
 
     const userQuery = useUserQuery();
     const { data: user } = userQuery;
-    const { datastore } = useDatastore();
-    const community: Community = useCommunity();
+    const community: CommunityDetailResponseDto = useCommunity();
+    const isSandbox = isSandboxCommunity(community, sandboxCommunityId);
+    const { data: datastore } = useQuery<Datastore, CartesApiException>(datastoreQueryOptions(community.datastore?._id)); // communauté possiblement sans entrepôt
 
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const form = useForm<CommunityInfoFormType>({
         resolver: yupResolver(schema),
@@ -99,43 +103,15 @@ export default function CommunityInfo() {
             return api.community.modify(community._id, data);
         },
         onSuccess: (newData: CommunityDetailResponseDto) => {
-            queryClient.setQueryData<[CommunityDetailResponseDto, Datastore | undefined]>(RQKeys.community(community._id), (oldData) => {
-                if (!oldData || !oldData[0]) return oldData;
-                const [oldCommunity, oldDatastore] = oldData;
-                return [
-                    { ...oldCommunity, ...newData },
-                    oldDatastore
-                        ? {
-                              ...oldDatastore,
-                              name: newData.name,
-                              description: newData.description,
-                              community: {
-                                  ...oldDatastore?.community,
-                                  ...newData,
-                              },
-                          }
-                        : undefined,
-                ] satisfies [CommunityDetailResponseDto, Datastore | undefined];
-            });
-            queryClient.setQueryData<Datastore>(RQKeys.datastore(datastore._id), (oldData) => {
+            // la réponse du PATCH fait foi pour la communauté ; le datastore est simplement invalidé
+            queryClient.setQueryData<CommunityDetailResponseDto>(RQKeys.community(community._id), (oldData) => {
                 if (!oldData) return oldData;
-                return {
-                    ...oldData,
-                    name: newData.name,
-                    description: newData.description,
-                    contact: newData.contact,
-                    public: newData.public,
-                    community: {
-                        ...oldData.community,
-                        contact: newData.contact,
-                        public: newData.public,
-                    },
-                };
+                return { ...oldData, ...newData };
             });
-
+            if (datastore) {
+                queryClient.invalidateQueries({ queryKey: RQKeys.datastore(datastore._id) });
+            }
             queryClient.refetchQueries({ queryKey: RQKeys.user_me() });
-            queryClient.refetchQueries({ queryKey: RQKeys.community(datastore.community._id) });
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore(datastore._id) });
 
             form.reset({
                 name: newData.name,
@@ -157,27 +133,29 @@ export default function CommunityInfo() {
         communityModifyMutation.mutate(data);
     }
 
+    const member = useMembership({ communityId: community._id });
     const isSupervisor = community.supervisor._id === user?.id;
-    const communityUserRights = user?.communities_member.find((member) => member.community?._id === community._id)?.rights ?? [];
-    const hasCommunityRight = communityUserRights.includes(CommunityMemberDtoRightsEnum.COMMUNITY);
-    const canModifyCommunity = isSupervisor || hasCommunityRight;
+    const canModifyCommunity = isSupervisor || (member?.can(CommunityMemberDtoRightsEnum.COMMUNITY) ?? false);
 
     const leaveCommunityMutation = useMutation({
         mutationFn: () => {
             if (!user) return Promise.reject(null);
             return api.user.leaveCommunity(community._id);
         },
-        onSuccess: () => {
-            userQuery.refetch();
-            routes.datastore_selection().push();
+        onSuccess: async () => {
+            await userQuery.refetch();
+            navigate({ to: "/tableau-de-bord/entrepots" });
         },
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastore._id}>
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} />
+        <DatastoreMain
+            title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name ?? community.name, isSandbox }) })}
+            datastoreId={datastore?._id}
+        >
+            <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name ?? community.name, isSandbox }) })} />
 
-            <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={datastore.community._id} />
+            {datastore && <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />}
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>
                 <div
@@ -190,7 +168,7 @@ export default function CommunityInfo() {
                 >
                     <strong className={fr.cx("fr-text--xl", "fr-m-0")}>{t("section_title")}</strong>
 
-                    {isSupervisor ? (
+                    {isSupervisor && datastore ? (
                         <Button priority="tertiary no outline" nativeButtonProps={deleteCommunityModal.buttonProps}>
                             {t("delete_community")}
                         </Button>
@@ -272,22 +250,10 @@ export default function CommunityInfo() {
                 </form>
             </div>
 
-            {communityModifyMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{tCommon("modifying")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {communityModifyMutation.isPending && <LoadingOverlay message={tCommon("modifying")} />}
 
-            <DeleteCommunity />
+            {/* la suppression passe par le nettoyage de l'entrepôt : sans entrepôt, pas de suppression */}
+            {datastore && <DeleteCommunity datastore={datastore} />}
 
             {/* quitter la commu */}
             {createPortal(
@@ -304,25 +270,12 @@ export default function CommunityInfo() {
                         },
                     ]}
                 >
-                    {t("leave_modal.body", { datastoreName: community.is_sandbox === true ? tCommon("sandbox") : community?.name })}
+                    {t("leave_modal.body", { datastoreName: tCommon("datastore_name", { name: community?.name, isSandbox }) })}
                 </leaveCommunityModal.Component>,
                 document.body
             )}
 
-            {leaveCommunityMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("leave_community.in_progress")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {leaveCommunityMutation.isPending && <LoadingOverlay message={t("leave_community.in_progress")} />}
         </DatastoreMain>
     );
 }

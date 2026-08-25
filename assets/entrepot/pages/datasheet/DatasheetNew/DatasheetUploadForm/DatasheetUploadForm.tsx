@@ -7,6 +7,7 @@ import { Select as SelectNext } from "@codegouvfr/react-dsfr/SelectNext";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { format as datefnsFormat } from "date-fns";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -16,16 +17,14 @@ import * as yup from "yup";
 
 import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import Main from "@/components/Layout/Main";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
-import LoadingText from "../../../../../components/Utils/LoadingText";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
-import defaultProjections from "../../../../../data/default_projections.json";
-import ignfProjections from "../../../../../data/ignf_projections.json";
+import defaultProjections from "@/entrepot/data/default_projections.json";
+import ignfProjections from "@/entrepot/data/ignf_projections.json";
 import { useTranslation } from "../../../../../i18n/i18n";
 import FileUploader from "../../../../../modules/FileUploader";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { routes, useRoute } from "../../../../../router/router";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import { delta, getFileExtension, looksLikeShapefileComponent, regex } from "../../../../../utils";
 import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
@@ -34,6 +33,8 @@ const maxFileSize = 2000000000; // 2 GB
 const fileExtensions = ["gpkg", "zip", "geojson", "csv", "sql"];
 
 const fileUploader = new FileUploader();
+
+const route = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/televersement");
 
 const getDataTechNameSuggestion = (fileName: string) => {
     let dataTechName = fileName.replace(/ /g, "_");
@@ -50,9 +51,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatasheetUploadForm");
     const { t: tCommon } = useTranslation("Common");
 
-    const route = useRoute();
-
-    const datasheetName: string | undefined = useMemo(() => route.params?.["datasheetName"], [route.params]);
+    const { datasheetName } = route.useSearch();
 
     const schema = yup
         .object({
@@ -289,8 +288,12 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     priority="tertiary no outline"
                     linkProps={
                         datasheetName === undefined
-                            ? routes.datasheet_list({ datastoreId }).link
-                            : routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "dataset" }).link
+                            ? { to: "/tableau-de-bord/entrepots/$datastoreId/donnees" as const, params: { datastoreId } }
+                            : {
+                                  to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName" as const,
+                                  params: { datastoreId, datasheetName },
+                                  search: { activeTab: "dataset" },
+                              }
                     }
                     title={t("back_to", { datasheetName: datasheetName })}
                     size="large"
@@ -402,8 +405,12 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     {
                         linkProps:
                             datasheetName === undefined
-                                ? routes.datasheet_list({ datastoreId }).link
-                                : routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "dataset" }).link,
+                                ? { to: "/tableau-de-bord/entrepots/$datastoreId/donnees" as const, params: { datastoreId } }
+                                : {
+                                      to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName" as const,
+                                      params: { datastoreId, datasheetName },
+                                      search: { activeTab: "dataset" },
+                                  },
                         children: tCommon("cancel"),
                         priority: "secondary",
                     },
@@ -420,18 +427,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 alignment="right"
                 className={fr.cx("fr-mt-2w")}
             />
-            {isValidating && (
-                <Wait>
-                    <LoadingIcon largeIcon={true} />
-                </Wait>
-            )}
-            {addUploadMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={t("datasheet.creation_running")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {isValidating && <LoadingOverlay />}
+            {addUploadMutation.isPending && <LoadingOverlay message={t("datasheet.creation_running")} />}
             {addUploadMutation.isSuccess && addUploadMutation.data?._id !== undefined && (
                 <Wait>
                     <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={addUploadMutation.data?._id} datasheetName={datasheetName} />

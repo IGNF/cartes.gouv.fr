@@ -7,7 +7,6 @@ import { symToStr } from "tsafe/symToStr";
 
 import { type Datasheet } from "../../../../@types/app";
 import { useTranslation } from "../../../../i18n/i18n";
-import { routes } from "../../../../router/router";
 
 import placeholder16x9 from "@/img/placeholder.16x9.png";
 
@@ -32,7 +31,10 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
             }
             footer={
                 <Button
-                    linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.name }).link}
+                    linkProps={{
+                        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                        params: { datastoreId, datasheetName: datasheet.name },
+                    }}
                     iconId="fr-icon-arrow-right-s-line"
                     iconPosition="right"
                 >

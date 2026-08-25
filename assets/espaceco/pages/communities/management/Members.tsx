@@ -16,13 +16,11 @@ import { FC, ReactNode, useCallback, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { CommunityMember, GetResponse, Role } from "../../../../@types/app_espaceco";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
-import LoadingIcon from "../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes } from "../../../../router/router";
 import "../../../../sass/pages/espaceco/member.scss";
 import api from "../../../api";
 import { AddMembersDialog, AddMembersDialogModal } from "./member/AddMembersDialog";
@@ -153,24 +151,6 @@ const Members: FC = () => {
         return <Alert className={"fr-my-2w"} severity={"error"} closable={false} title={title} description={error} />;
     }, []);
 
-    const displayWait = useCallback(
-        (text) => (
-            <Wait>
-                <div className={fr.cx("fr-container")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                        <div className={fr.cx("fr-col-2")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                        </div>
-                        <div className={fr.cx("fr-col-10")}>
-                            <h6 className={fr.cx("fr-h6", "fr-m-0")}>{text}</h6>
-                        </div>
-                    </div>
-                </div>
-            </Wait>
-        ),
-        []
-    );
-
     const headers = useMemo(() => [t("username_header"), t("name_header"), t("status_header"), t("grids_header"), ""], [t]);
     const pendingHeaders = useMemo(() => [t("username_header"), t("name_header"), t("date_header"), ""], [t]);
 
@@ -291,7 +271,7 @@ const Members: FC = () => {
                     description={
                         <>
                             <p>{membersQuery.error.message}</p>
-                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                            <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
                         </>
                     }
                 />
@@ -307,10 +287,10 @@ const Members: FC = () => {
             {/* LES ACTIONS EN COURS */}
             {membersQuery.isLoading && <LoadingText as={"h6"} message={t("loading_members")} />}
             {membershipRequestsQuery.isLoading && <LoadingText as={"h6"} message={t("loading_membership_requests")} />}
-            {updateRoleMutation.isPending && displayWait(t("updating_role"))}
-            {updateGridsMutation.isPending && displayWait(t("updating_grids"))}
-            {addMembersMutation.isPending && displayWait(t("adding_members"))}
-            {removeMemberMutation.isPending && displayWait(t("removing_action", { action: action }))}
+            {updateRoleMutation.isPending && <LoadingOverlay message={t("updating_role")} />}
+            {updateGridsMutation.isPending && <LoadingOverlay message={t("updating_grids")} />}
+            {addMembersMutation.isPending && <LoadingOverlay message={t("adding_members")} />}
+            {removeMemberMutation.isPending && <LoadingOverlay message={t("removing_action", { action: action })} />}
 
             {membershipRequestsQuery.data && membershipRequestsQuery.data.length > 0 && (
                 <Accordion label={t("membership_requests", { count: membershipRequestsQuery.data.length })} defaultExpanded={true}>

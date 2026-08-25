@@ -4,17 +4,15 @@ import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import RQKeys from "@/entrepot/modules/RQKeys";
 import api from "../../../../api";
-import { routes } from "../../../../../router/router";
 import { CheckStatusEnum, type DatasheetDetailed, type DatasheetUploadItem } from "../../../../../@types/app";
 import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";
 import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetView";
-import Wait from "../../../../../components/Utils/Wait";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useDatastoreMembership from "@/entrepot/hooks/useDatastoreMembership";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;
@@ -45,7 +43,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
         },
     });
 
-    const { userRights, isSupervisor } = useCommunityRights();
+    const membership = useDatastoreMembership();
 
     return (
         <>
@@ -85,37 +83,29 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                 {failureCase ? (
                                     <Button
                                         className={fr.cx("fr-mr-2w")}
-                                        linkProps={
-                                            routes.datastore_upload_details({
-                                                datastoreId,
-                                                uploadId: upload._id,
-                                                datasheetName: upload.tags.datasheet_name,
-                                            }).link
-                                        }
+                                        linkProps={{
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport",
+                                            params: { datastoreId, uploadId: upload._id },
+                                            search: { datasheetName: upload.tags.datasheet_name },
+                                        }}
                                     >
                                         {"Voir le rapport"}
                                     </Button>
                                 ) : (
-                                    (isSupervisor ||
-                                        (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
-                                            userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
+                                    membership?.can(CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING) && (
                                         <Button
                                             className={fr.cx("fr-mr-2w")}
-                                            linkProps={
-                                                routes.datastore_datasheet_upload_integration({
-                                                    datastoreId,
-                                                    uploadId: upload._id,
-                                                    datasheetName: upload.tags.datasheet_name,
-                                                }).link
-                                            }
+                                            linkProps={{
+                                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/integration",
+                                                params: { datastoreId },
+                                                search: { uploadId: upload._id, datasheetName: upload.tags.datasheet_name },
+                                            }}
                                         >
                                             {"Reprendre l'intégration"}
                                         </Button>
                                     )
                                 )}
-                                {(isSupervisor ||
-                                    (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
-                                        userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
+                                {membership?.can(CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING) && (
                                     <Button
                                         iconId="fr-icon-delete-fill"
                                         priority="secondary"
@@ -135,16 +125,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                     </div>
                 );
             })}
-            {deleteUnfinishedUpload.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("storage.upload.deletion.in_progress")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {deleteUnfinishedUpload.isPending && <LoadingOverlay message={t("storage.upload.deletion.in_progress")} />}
         </>
     );
 };

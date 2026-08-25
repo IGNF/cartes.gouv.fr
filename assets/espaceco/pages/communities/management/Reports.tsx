@@ -1,19 +1,19 @@
-import Wait from "@/components/Utils/Wait";
+import LoadingOverlay from "@/components/Utils/LoadingOverlay";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
-import { routes } from "@/router/router";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { ReportFormType } from "../../../../@types/app_espaceco";
 import { EmailPlannerDTO, ReportStatusesDTO, ReportStatusesType, SharedGeoremOptions, SharedThemesDTO, UserSharedThemesDTO } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import statuses from "../../../../data/report_statuses.json";
+import statuses from "@/espaceco/data/report_statuses.json";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/espaceco/RQKeys";
+import RQKeys from "@/espaceco/modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
 import { getReportsDefaultValues } from "../DefaultValues";
@@ -39,6 +39,7 @@ const Reports: FC = () => {
     const { t } = useTranslation("Reports");
 
     const context = useCommunityContext();
+    const navigate = useNavigate();
 
     const { mode, updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
     const community = context.community!;
@@ -243,7 +244,7 @@ const Reports: FC = () => {
         datas.attributes = formatAttributesForApi(datas.attributes);
         updateCommunity(datas, () => {
             if (mode === "creation" && !saveOnly) {
-                routes.espaceco_community_list().push();
+                navigate({ to: "/espace-collaboratif" });
             }
         });
     };
@@ -256,13 +257,7 @@ const Reports: FC = () => {
             {tablesQuery.isLoading && <LoadingText as="h6" message={t("loading_tables")} />}
             {sharedThemesQuery.isLoading && <LoadingText as="h6" message={t("loading_shared_themes")} />}
             {emailPlannersQuery.isLoading && <LoadingText as="h6" message={t("loading_email_planners")} />}
-            {isCommunityUpdating && (
-                <Wait>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
-                    </div>
-                </Wait>
-            )}
+            {isCommunityUpdating && <LoadingOverlay message={tmc("updating")} />}
             {isCommunityUpdatingError && (
                 <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
             )}

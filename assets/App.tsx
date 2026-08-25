@@ -4,11 +4,12 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { FC } from "react";
 
+import { RouterProvider } from "@tanstack/react-router";
+
 import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
-import { queryClient } from "./modules/queryClient";
-import { RouteProvider } from "./router/router";
-import RouterRenderer from "./router/RouterRenderer";
+import { isUserMeQueryKey, queryClient } from "./modules/queryClient";
+import { router } from "./router";
 import { bootstrapUser } from "./utils";
 
 import "./sass/helpers.scss";
@@ -32,21 +33,18 @@ const App: FC = () => {
                 dehydrateOptions: {
                     // ne pas persister (localstorage) les données utilisateur : elles sont rechargées depuis le serveur à chaque chargement de page
                     shouldDehydrateQuery: (query) => {
-                        const isQueryUserMe = query.queryKey.length === 2 && query.queryKey[0] === "user" && query.queryKey[1] === "me";
-                        return defaultShouldDehydrateQuery(query) && !isQueryUserMe;
+                        return defaultShouldDehydrateQuery(query) && !isUserMeQueryKey(query.queryKey);
                     },
                 },
             }}
         >
             <ReactQueryDevtools initialIsOpen={false} />
 
-            <RouteProvider>
-                <ErrorBoundary>
-                    <AlertProvider>
-                        <RouterRenderer />
-                    </AlertProvider>
-                </ErrorBoundary>
-            </RouteProvider>
+            <ErrorBoundary>
+                <AlertProvider>
+                    <RouterProvider router={router} />
+                </AlertProvider>
+            </ErrorBoundary>
         </PersistQueryClientProvider>
     );
 };
