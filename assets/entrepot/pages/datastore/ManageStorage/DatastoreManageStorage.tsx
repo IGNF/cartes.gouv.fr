@@ -5,6 +5,7 @@ import { FC } from "react";
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
 import PageTitle from "@/components/Layout/PageTitle";
+import useMembership from "@/hooks/useMembership";
 import { routes, useRoute } from "@/router/router";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import { useDatastore } from "../../../../contexts/datastore";
@@ -23,6 +24,7 @@ const DatastoreManageStorage: FC = () => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
     const { datastore, isFetching } = useDatastore();
+    const isSandbox = useMembership({ datastoreId: datastore._id })?.isSandbox === true;
 
     const route = useRoute();
     const currentTab = route.params?.["tab"] ?? DatastoreManageStorageTab.POSTGRESQL;
@@ -37,11 +39,11 @@ const DatastoreManageStorage: FC = () => {
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastore._id}>
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastore._id}>
             <PageTitle
                 title={
                     <>
-                        {t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })}
+                        {t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}
                         {isFetching && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon />}
                     </>
                 }

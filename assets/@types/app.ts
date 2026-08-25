@@ -60,13 +60,9 @@ export type CartesUser = {
 };
 
 /** datastore */
-export type Datastore = DatastoreDetailResponseDto & {
-    is_sandbox?: boolean;
-};
+export type Datastore = DatastoreDetailResponseDto;
 
-export type Community = CommunityDetailResponseDto & {
-    is_sandbox?: boolean;
-};
+export type Community = CommunityDetailResponseDto;
 
 /** fiche de donnée */
 export type Datasheet = {

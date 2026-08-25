@@ -17,6 +17,7 @@ import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNa
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
 import Skeleton from "@/components/Utils/Skeleton";
+import useMembership from "@/hooks/useMembership";
 import { usePagination } from "@/hooks/usePagination";
 import { formatDateFromISO } from "@/utils";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
@@ -40,6 +41,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
     // Le datastore
     const { datastore, status: datastoreStatus } = useDatastore();
+    const isSandbox = useMembership({ datastoreId })?.isSandbox === true;
 
     // Les permissions
     const {
@@ -80,8 +82,8 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     const { css } = useStyles();
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} />
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastoreId}>
+            <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} />
 
             <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
 
