@@ -7,12 +7,13 @@ import { HitStatisticsDto } from "@/@types/stats";
 import DateRangePicker from "@/components/Input/DateRangePicker";
 import Main from "@/components/Layout/Main";
 import Skeleton from "@/components/Utils/Skeleton";
-import { useSandboxDatastoreQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
+import { sandboxCommunityId } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { useTranslation } from "@/i18n";
 import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
 import { routes, useRoute } from "@/router/router";
+import { findMembership } from "@/utils";
 import DynamicParamSelector from "./DynamicParamSelector";
 import type { StatsScope, StatsScopeConfig } from "./stats.types";
 import StatsBarChart from "./StatsBarChart";
@@ -59,15 +60,16 @@ export default function Stats() {
     // périmètre entrepôt : détection "aucun entrepôt" et exclusion du bac à sable
     const isDatastoreScope = scope === "datastore";
     const userQuery = useUserQuery();
-    const sandboxQuery = useSandboxDatastoreQuery();
-    const sandboxId = sandboxQuery.data?._id;
+    const sandboxId = sandboxCommunityId !== null ? findMembership(userQuery.data, { communityId: sandboxCommunityId })?.community?.datastore : undefined;
 
     const nonSandboxDatastoreCount = useMemo(
-        () => (userQuery.data?.communities_member ?? []).filter((cm) => cm.community?.datastore && cm.community.datastore !== sandboxId).length,
+        () =>
+            (userQuery.data?.communities_member ?? []).filter(
+                (cm) => cm.community?.datastore && (sandboxId === undefined || cm.community.datastore !== sandboxId)
+            ).length,
         [userQuery.data, sandboxId]
     );
-    // fail-open : en cas d'erreur sandbox on n'exclut rien plutôt que de bloquer la page
-    const datastoreScopeReady = !isDatastoreScope || (!userQuery.isPending && (!sandboxQuery.isPending || sandboxQuery.isError));
+    const datastoreScopeReady = !isDatastoreScope || !userQuery.isPending;
     const hasNoDatastore = isDatastoreScope && datastoreScopeReady && nonSandboxDatastoreCount === 0;
 
     const currentConfig = entityTypeKey ? entities[entityTypeKey] : undefined;

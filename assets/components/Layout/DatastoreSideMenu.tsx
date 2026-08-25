@@ -15,7 +15,7 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
     const route = useRoute();
     const { classes, css, cx } = useStyles();
 
-    const { datastoreList, addUserToSandbox, sandboxDatastore, userMemberOfSandbox } = useDatastoreSelection();
+    const { datastoreList, addUserToSandbox } = useDatastoreSelection();
 
     return (
         <SideMenu
@@ -60,12 +60,18 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                     isActive: route.name === routes.datastore_selection().name,
                 },
                 ...datastoreList.map((datastore) => ({
-                    text: datastore._id === sandboxDatastore?._id ? tCommon("sandbox") : datastore.name,
+                    text: tCommon("datastore_name", { name: datastore.name, isSandbox: datastore.is_sandbox }),
                     linkProps:
-                        datastore.is_sandbox === true && !userMemberOfSandbox
-                            ? { href: "#", onClick: () => addUserToSandbox() }
-                            : routes.datasheet_list({ datastoreId: datastore._id }).link,
-                    isActive: datastoreId === datastore._id || communityId === datastore.community_id,
+                        datastore._id !== undefined
+                            ? routes.datasheet_list({ datastoreId: datastore._id }).link
+                            : {
+                                  href: "#",
+                                  onClick: (e) => {
+                                      e.preventDefault();
+                                      addUserToSandbox();
+                                  },
+                              },
+                    isActive: (datastore._id !== undefined && datastoreId === datastore._id) || communityId === datastore.community_id,
                 })),
             ]}
             classes={{

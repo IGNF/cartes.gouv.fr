@@ -9,11 +9,9 @@ import { tss } from "tss-react";
 
 import DatastoreSideMenu from "@/components/Layout/DatastoreSideMenu";
 import useBreadcrumb from "@/hooks/useBreadcrumb";
-import useDatastoreSelection from "@/hooks/useDatastoreSelection";
 import { routes } from "@/router/router";
-import LoadingText from "../Utils/LoadingText";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
-import Main, { type MainProps } from "./Main";
+import { type MainProps } from "./Main";
 
 export type DatastoreMainProps = PropsWithChildren<
     MainProps & {
@@ -34,15 +32,6 @@ export default function DatastoreMain(props: DatastoreMainProps) {
     const breadcrumbProps = useBreadcrumb(customBreadcrumbProps);
 
     const { classes } = useStyles();
-
-    const { sandboxDatastore } = useDatastoreSelection();
-    if (!sandboxDatastore) {
-        return (
-            <Main>
-                <LoadingText />
-            </Main>
-        );
-    }
 
     return (
         <main id="main" role="main">
