@@ -20,22 +20,6 @@ final class UserApiService
         return $this->api->get('users/me');
     }
 
-    /**
-     * @SuppressWarnings(ShortVariable)
-     */
-    public function getMyCommunityRights(string $communityId): ?array
-    {
-        $me = $this->getMe()->array();
-
-        foreach ($me['communities_member'] as $communityRights) {
-            if ($communityRights['community']['_id'] == $communityId) {
-                return $communityRights;
-            }
-        }
-
-        return null;
-    }
-
     public function getMyKey(string $keyId): ResponsePromise
     {
         return $this->api->get("users/me/keys/$keyId");

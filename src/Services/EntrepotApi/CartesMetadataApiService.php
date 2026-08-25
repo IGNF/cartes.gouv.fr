@@ -70,11 +70,7 @@ class CartesMetadataApiService
             return null;
         }
 
-        $datastore = $this->datastoreApiService->get($datastoreId);
-
-        $annexeUrl = $this->parameterBag->get('annexes_url');
-
-        return $annexeUrl.'/'.$datastore['technical_name'].$annexeList[0]['paths'][0];
+        return $this->annexeApiService->getAbsoluteUrl($datastoreId, $annexeList[0]);
     }
 
     /**

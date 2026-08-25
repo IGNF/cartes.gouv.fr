@@ -10,13 +10,11 @@ use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\RSSFeed\RSSFeed;
 use App\Utils;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,11 +36,9 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
 
     public function __construct(
         private AnnexeApiService $annexeApiService,
-        private DatastoreApiService $datastoreApiService,
         private MetadataApiService $metadataApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
         private CswMetadataHelper $metadataHelper,
-        private ParameterBagInterface $parameterBag,
         private RSSFeed $rssFeed,
     ) {
     }
@@ -160,9 +156,8 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function addThumbnail(string $datastoreId, Request $request): JsonResponse
     {
         try {
-            $datastore = $this->datastoreApiService->get($datastoreId);
+            $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
             $datasheetName = $request->request->get('datasheetName');
-            $annexeUrl = $this->parameterBag->get('annexes_url');
 
             $uuid = Uuid::v4();
 
@@ -183,7 +178,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             }
 
             $annexe = $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
-            $annexe['url'] = $annexeUrl.'/'.$datastore['technical_name'].$annexe['paths'][0];
+            $annexe['url'] = $annexesBaseUrl.$annexe['paths'][0];
 
             // Creation ou mise a jour des métadonnées
             $metadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);

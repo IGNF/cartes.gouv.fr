@@ -4,9 +4,8 @@ namespace App\Controller;
 
 use App\Exception\AppException;
 use App\Security\User;
-use App\Services\EntrepotApi\DatastoreApiService;
-use App\Services\EntrepotApi\UserApiService;
 use App\Services\MailerService;
+use App\Services\MembershipService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,7 +22,6 @@ use Symfony\Component\Routing\Attribute\Route;
 class ContactController extends AbstractController
 {
     public function __construct(
-        private UserApiService $userApiService,
         private MailerService $mailerService,
         private LoggerInterface $logger,
     ) {
@@ -63,7 +61,6 @@ class ContactController extends AbstractController
             $supportAddress = $this->getParameter('support_contact_mail');
             $now = new \DateTime();
 
-            $userApi = null;
             $supportMailParams = [
                 'userEmail' => $userEmail,
                 'firstName' => $data['first_name'],
@@ -75,8 +72,7 @@ class ContactController extends AbstractController
             ];
 
             if ($user instanceof User) {
-                $userApi = $this->userApiService->getMe()->array();
-                $supportMailParams['userId'] = $userApi['_id'];
+                $supportMailParams['userId'] = $user->getId();
             }
 
             $this->logger->info('contact.request', [
@@ -116,10 +112,9 @@ class ContactController extends AbstractController
         $supervisor = [];   // Liste des community dont l'utilisateur courant est "supervisor"
         $member = [];       // Liste des community dont l'utilisateur courant est simple membre
         if ($user instanceof User) {
-            $userApi = $this->userApiService->getMe()->array();
-            foreach ($userApi['communities_member'] as $communityMember) {
+            foreach ($user->getCommunitiesMember() as $communityMember) {
                 $community = $communityMember['community'];
-                if ($userApi['_id'] === $community['supervisor']) {
+                if ($user->getId() === $community['supervisor']) {
                     $supervisor[$community['name']] = $community['_id'];
                 } else {
                     $member[$community['name']] = $community['_id'];
@@ -289,11 +284,12 @@ class ContactController extends AbstractController
         name: 'datastore_deletion_request',
         methods: ['POST'],
     )]
-    public function datastoreDeletionRequest(Request $request, DatastoreApiService $datastoreApiService): JsonResponse
+    public function datastoreDeletionRequest(Request $request, MembershipService $membershipService): JsonResponse
     {
         try {
             $data = json_decode($request->getContent(), true);
-            $datastore = $datastoreApiService->get($data['datastoreId']);
+
+            $datastoreIdentity = $membershipService->getDatastoreIdentity($data['datastoreId']);
 
             $supportAddress = $this->getParameter('support_contact_mail');
             $now = new \DateTime();
@@ -304,9 +300,9 @@ class ContactController extends AbstractController
             $mailParams = [
                 'sendDate' => $now,
                 'data' => $data,
-                'datastore_name' => $datastore['name'],
-                'datastore_id' => $datastore['_id'],
-                'community_id' => $datastore['community']['_id'],
+                'datastore_name' => $datastoreIdentity->name,
+                'datastore_id' => $data['datastoreId'],
+                'community_id' => $datastoreIdentity->communityId,
             ];
 
             $this->logger->info('datastore.deletion.request', [
@@ -315,7 +311,7 @@ class ContactController extends AbstractController
             ]);
 
             // Envoi du mail à l'adresse du support
-            $this->mailerService->sendMail($supportAddress, sprintf("[cartes.gouv.fr] Demande de suppression de l'entrepôt %s", $datastore['name']), 'Mailer/datastore_delete_request/request.html.twig', $mailParams);
+            $this->mailerService->sendMail($supportAddress, sprintf("[cartes.gouv.fr] Demande de suppression de l'entrepôt %s", $datastoreIdentity->name), 'Mailer/datastore_delete_request/request.html.twig', $mailParams);
 
             // Envoi du mail d'accusé de réception à l'utilisateur
             $this->mailerService->sendMail($userEmail, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/datastore_delete_request/request_acknowledgement.html.twig',

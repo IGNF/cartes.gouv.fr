@@ -7,7 +7,6 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -29,17 +28,14 @@ use Symfony\Component\Uid\Uuid;
 class DatasheetDocumentController extends AbstractController implements ApiControllerInterface
 {
     private string $varDataPath;
-    private string $annexesBaseUrl;
 
     public function __construct(
         private AnnexeApiService $annexeApiService,
-        private DatastoreApiService $datastoreApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
         private Filesystem $fs,
         ParameterBagInterface $parameters,
     ) {
         $this->varDataPath = $parameters->get('datasheet_documents_path');
-        $this->annexesBaseUrl = $parameters->get('annexes_url');
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
@@ -66,8 +62,6 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             $documentDescription = $request->request->get('description');
 
             $files = $request->files;
-
-            $datastore = $this->datastoreApiService->get($datastoreId);
 
             /** @var array<mixed> $listAnnexe entité annexe de l'API entrepôt */
             $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
@@ -106,10 +100,11 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
                     $annexePath = join('/', ['documents', $datasheetName, $uuid, $file->getClientOriginalName()]);
 
+                    $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
                     $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], ["datasheet_name=$datasheetName", 'type=document'], true);
 
                     $newDocument['id'] = $fileAnnexe['_id'];
-                    $newDocument['url'] = $this->annexesBaseUrl.'/'.$datastore['technical_name'].$fileAnnexe['paths'][0];
+                    $newDocument['url'] = $annexesBaseUrl.$fileAnnexe['paths'][0];
 
                     break;
             }

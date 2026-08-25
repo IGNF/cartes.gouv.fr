@@ -2,12 +2,10 @@
 
 namespace App\Security;
 
-use App\Services\EntrepotApi\UserApiService;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use Psr\Log\LoggerInterface;
 use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\Exception\TimeoutException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
@@ -27,8 +25,7 @@ class KeycloakUserProvider implements UserProviderInterface
     public function __construct(
         private ClientRegistry $clientRegistry,
         private KeycloakTokenManager $tokenManager,
-        private ParameterBagInterface $params,
-        private UserApiService $userApiService,
+        private EntrepotUserCache $entrepotUserCache,
         private LoggerInterface $logger,
         private CacheInterface $cache,
     ) {
@@ -36,11 +33,6 @@ class KeycloakUserProvider implements UserProviderInterface
 
     public function loadUser(): User
     {
-        //  création d'un utilisateur bidon si en mode test
-        if ('test' === $this->params->get('app_env')) {
-            return User::getTestUser();
-        }
-
         /** @var KeycloakClient */
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 
@@ -62,16 +54,12 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new AuthenticationExpiredException('Failed to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
         }
 
-        $apiUser = $this->cache->get("users-{$keycloakUser->getId()}", function (ItemInterface $item) {
-            $item->expiresAfter(60);
-
-            try {
-                return $this->userApiService->getMe()->array();
-            } catch (TimeoutException $ex) {
-                $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
-                throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
-            }
-        });
+        try {
+            $apiUser = $this->entrepotUserCache->get($keycloakUser->getId());
+        } catch (TimeoutException $ex) {
+            $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
+            throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
+        }
 
         $user = new User($keycloakUser->toArray(), $apiUser);
 

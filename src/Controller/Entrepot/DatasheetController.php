@@ -12,7 +12,6 @@ use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\CartesStoredDataApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
@@ -34,7 +33,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     public function __construct(
         private UploadApiService $uploadApiService,
         private StoredDataApiService $storedDataApiService,
-        private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
         private CartesServiceApiService $cartesServiceApiService,
@@ -91,13 +89,11 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         $datasheetList = [];
 
-        $datastore = $this->datastoreApiService->get($datastoreId);
-
         $configurations = $pendingConfigurations->resolve();
         $annexes = $pendingAnnexes->resolve();
 
         foreach ($uniqueDatasheetNames as $datasheetName) {
-            $datasheetList[] = $this->getBasicInfo($datastore, $datasheetName, $configurations, $annexes);
+            $datasheetList[] = $this->getBasicInfo($datastoreId, $datasheetName, $configurations, $annexes);
         }
 
         return $this->json($datasheetList);
@@ -153,8 +149,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }
 
-        $datastore = $this->datastoreApiService->get($datastoreId);
-        $datasheet = $this->getBasicInfo($datastore, $datasheetName);
+        $datasheet = $this->getBasicInfo($datastoreId, $datasheetName);
 
         return $this->json([
             ...$datasheet,
@@ -204,11 +199,10 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     }
 
     /**
-     * @param array<mixed>         $datastore
      * @param ?array<array<mixed>> $configurations
      * @param ?array<array<mixed>> $annexes
      */
-    private function getBasicInfo(array $datastore, string $datasheetName, ?array $configurations = null, ?array $annexes = null): array
+    private function getBasicInfo(string $datastoreId, string $datasheetName, ?array $configurations = null, ?array $annexes = null): array
     {
         // recherche du nombre de services publiés à partir de $configurations si fourni, sinon requête API
         if (null !== $configurations) {
@@ -220,7 +214,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
                 return false;
             });
         } else {
-            $datasheetConfigurations = $this->configurationApiService->getAll($datastore['_id'], [
+            $datasheetConfigurations = $this->configurationApiService->getAll($datastoreId, [
                 'tags' => [
                     CommonTags::DATASHEET_NAME => $datasheetName,
                 ],
@@ -230,20 +224,19 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $nbPublications = count($datasheetConfigurations);
 
         // recherche de vignette à partir de $annexes si fourni, sinon requête API
-        $annexeUrl = $this->getParameter('annexes_url');
         if (null !== $annexes) {
             $datasheetAnnexes = array_filter($annexes, function ($annexe) use ($datasheetName) {
                 return in_array(CommonTags::DATASHEET_NAME."=$datasheetName", $annexe['labels']);
             });
             $datasheetAnnexes = array_values($datasheetAnnexes);
         } else {
-            $datasheetAnnexes = $this->annexeApiService->getAll($datastore['_id'], null, null, ["datasheet_name=$datasheetName", 'type=thumbnail'])->resolve();
+            $datasheetAnnexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", 'type=thumbnail'])->resolve();
         }
 
         $thumbnail = null;
         if (count($datasheetAnnexes) > 0) {
             $thumbnail = $datasheetAnnexes[0];
-            $thumbnail['url'] = $annexeUrl.'/'.$datastore['technical_name'].$thumbnail['paths'][0];
+            $thumbnail['url'] = $this->annexeApiService->getAbsoluteUrl($datastoreId, $thumbnail);
         }
 
         return [

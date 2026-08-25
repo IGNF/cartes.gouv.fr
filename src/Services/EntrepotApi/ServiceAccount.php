@@ -3,6 +3,9 @@
 namespace App\Services\EntrepotApi;
 
 use App\Exception\ApiException;
+use App\Security\User;
+use App\Services\MembershipService;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpClient\HttpClient;
@@ -17,9 +20,6 @@ class ServiceAccount
     private $apiClient;
 
     /** @var array<mixed> */
-    private $me;
-
-    /** @var array<mixed> */
     private $token;
 
     /** @var string */
@@ -27,7 +27,8 @@ class ServiceAccount
 
     public function __construct(
         private ParameterBagInterface $parameters,
-        private UserApiService $userApiService,
+        private Security $security,
+        private MembershipService $membershipService,
     ) {
         // L'id de la community liee au datastore "Bac à sable"
         $sandbox = $this->parameters->get('sandbox');
@@ -40,8 +41,6 @@ class ServiceAccount
             'verify_peer' => false,
             'verify_host' => false,
         ]);
-
-        $this->me = $this->userApiService->getMe()->array();
 
         // Recuperation du token du compte de service
         $this->token = $this->getAccessToken();
@@ -56,15 +55,14 @@ class ServiceAccount
             throw new AccessDeniedException();
         }
 
-        $alreadyMember = false;
-        foreach ($this->me['communities_member'] as $member) {
-            if ($this->sandBoxCommunityId == $member['community']['_id']) {
-                $alreadyMember = true;
-                break;
-            }
+        $user = $this->security->getUser();
+        if (!$user instanceof User) {
+            throw new AccessDeniedException();
         }
 
-        if ($alreadyMember) {
+        // lecture fraîche : le token peut encore lister une appartenance quittée il y a moins de 60 s sur un autre pod
+        $this->membershipService->refreshCurrentUser();
+        if (null !== $user->findMembershipByCommunity($this->sandBoxCommunityId)) {
             return;
         }
 
@@ -72,7 +70,7 @@ class ServiceAccount
             'rights' => ['ANNEX', 'BROADCAST', 'PROCESSING', 'UPLOAD'],
         ]);
 
-        $response = $this->apiClient->request('PUT', "communities/{$this->sandBoxCommunityId}/users/{$this->me['_id']}", $options);
+        $response = $this->apiClient->request('PUT', "communities/{$this->sandBoxCommunityId}/users/{$user->getId()}", $options);
         $this->handleResponse($response);
     }
 

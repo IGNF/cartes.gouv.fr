@@ -2,13 +2,16 @@
 
 namespace App\Security;
 
+use App\Utils;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 class User implements UserInterface
 {
     private string $email;
     private string $userName;
     private string $id;
+    private string $keycloakId;
 
     /** @var array<string> */
     private array $roles = [];
@@ -19,13 +22,13 @@ class User implements UserInterface
     /** @var array<mixed> */
     private array $communitiesMember = [];
 
-    private ?\DateTimeInterface $accountCreationDate;
-    private ?\DateTimeInterface $lastLoginDate;
+    private ?\DateTimeInterface $accountCreationDate = null;
+    private ?\DateTimeInterface $lastLoginDate = null;
 
-    private ?int $documentsQuota;
-    private ?int $documentsUse;
-    private ?int $keysQuota;
-    private ?int $keysUse;
+    private ?int $documentsQuota = null;
+    private ?int $documentsUse = null;
+    private ?int $keysQuota = null;
+    private ?int $keysUse = null;
 
     /**
      * @param array<mixed> $keycloakUserInfo
@@ -34,40 +37,16 @@ class User implements UserInterface
     public function __construct(array $keycloakUserInfo = [], array $apiUserInfo = [])
     {
         $this->email = $keycloakUserInfo['email'];
+        $this->keycloakId = $keycloakUserInfo['sub'];
         $this->id = $apiUserInfo['_id'];
         $this->firstName = $keycloakUserInfo['given_name'] ?? null;
         $this->lastName = $keycloakUserInfo['family_name'] ?? null;
         $this->userName = $keycloakUserInfo['preferred_username'];
-        $this->accountCreationDate = null;
-        $this->lastLoginDate = null;
-
         if (array_key_exists('creation', $apiUserInfo)) {
             $this->accountCreationDate = new \DateTime($apiUserInfo['creation']);
         }
 
-        if (array_key_exists('last_login', $apiUserInfo)) {
-            $this->lastLoginDate = new \DateTime($apiUserInfo['last_login']);
-        }
-
-        if (array_key_exists('documents_quota', $apiUserInfo)) {
-            $this->documentsQuota = $apiUserInfo['documents_quota'];
-        }
-
-        if (array_key_exists('documents_use', $apiUserInfo)) {
-            $this->documentsUse = $apiUserInfo['documents_use'];
-        }
-
-        if (array_key_exists('keys_quota', $apiUserInfo)) {
-            $this->keysQuota = $apiUserInfo['keys_quota'];
-        }
-
-        if (array_key_exists('keys_use', $apiUserInfo)) {
-            $this->keysUse = $apiUserInfo['keys_use'];
-        }
-
-        if (array_key_exists('communities_member', $apiUserInfo)) {
-            $this->communitiesMember = $apiUserInfo['communities_member'];
-        }
+        $this->updateFromApiInfo($apiUserInfo);
     }
 
     public function getEmail(): ?string
@@ -116,6 +95,12 @@ class User implements UserInterface
         return $this->id;
     }
 
+    #[Ignore]
+    public function getKeycloakId(): string
+    {
+        return $this->keycloakId;
+    }
+
     public function getFirstName(): ?string
     {
         return $this->firstName;
@@ -132,6 +117,32 @@ class User implements UserInterface
     public function getCommunitiesMember(): array
     {
         return $this->communitiesMember;
+    }
+
+    /**
+     * `community.datastore` est un id string dans users/me, absent si la communauté n'a pas de datastore.
+     *
+     * @return array<mixed>|null
+     */
+    public function findMembershipByDatastore(string $datastoreId): ?array
+    {
+        return $this->findMembership('datastore', $datastoreId);
+    }
+
+    /**
+     * @return array<mixed>|null
+     */
+    public function findMembershipByCommunity(string $communityId): ?array
+    {
+        return $this->findMembership('_id', $communityId);
+    }
+
+    /**
+     * @return array<mixed>|null
+     */
+    private function findMembership(string $communityKey, string $value): ?array
+    {
+        return Utils::array_find($this->communitiesMember, fn (array $member) => ($member['community'][$communityKey] ?? null) === $value);
     }
 
     public function getAccountCreationDate(): ?\DateTimeInterface
@@ -172,6 +183,9 @@ class User implements UserInterface
         if (array_key_exists('communities_member', $apiUserInfo)) {
             $this->communitiesMember = $apiUserInfo['communities_member'];
         }
+        if (array_key_exists('last_login', $apiUserInfo)) {
+            $this->lastLoginDate = new \DateTime($apiUserInfo['last_login']);
+        }
         if (array_key_exists('documents_quota', $apiUserInfo)) {
             $this->documentsQuota = $apiUserInfo['documents_quota'];
         }
@@ -186,34 +200,5 @@ class User implements UserInterface
         }
 
         return $this;
-    }
-
-    public static function getTestUser(): User
-    {
-        return new User([
-            'email' => 'test@test.com',
-            'given_name' => 'Test',
-            'family_name' => 'User',
-            'preferred_username' => 'test_user',
-        ], [
-            '_id' => 'fc5a7948-142a-4dae-b24e-5550fe7183f9',
-            'creation' => '2023-06-26T11:52:25.924679Z',
-            'last_login' => '2023-08-01T14:09:41.074381Z',
-            'communities_member' => [[
-                'rights' => ['ANNEX', 'BROADCAST', 'PROCESSING', 'UPLOAD'],
-                'community' => [
-                    'name' => 'cartes.gouv - dev',
-                    'technical_name' => 'cartes-gouv-dev',
-                    'datastore' => '190b714d-daa7-402b-8360-c75baa4c69cc',
-                    'supervisor' => '6b3637ed-c1cf-409c-a54c-fb77d4c16ea6',
-                    'public' => true,
-                    '_id' => 'a0f47300-4c9b-464a-b23f-639ccfa6a673',
-                ],
-            ]],
-            'documents_quota' => 50000000,
-            'documents_use' => 0,
-            'keys_quota' => 1000,
-            'keys_use' => 3,
-        ]);
     }
 }

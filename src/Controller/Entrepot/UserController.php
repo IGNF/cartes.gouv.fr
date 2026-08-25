@@ -10,6 +10,7 @@ use App\Exception\CartesApiException;
 use App\Security\User;
 use App\Services\EntrepotApi\ServiceAccount;
 use App\Services\EntrepotApi\UserApiService;
+use App\Services\MembershipService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,6 +29,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
 {
     public function __construct(
         private UserApiService $userApiService,
+        private MembershipService $membershipService,
     ) {
     }
 
@@ -40,7 +42,9 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
 
         assert($user instanceof User);
-        $user->updateFromApiInfo($this->userApiService->getMe()->array());
+
+        // rafraîchit à travers le cache serveur pour qu'il voie aussi la donnée fraîche
+        $this->membershipService->refreshCurrentUser();
 
         return $this->json($user);
     }
@@ -208,6 +212,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function addMemberToSandbox(ServiceAccount $serviceAccount): JsonResponse
     {
         $serviceAccount->addCurrentUserToSandbox();
+        $this->membershipService->invalidateCurrentUser();
 
         return new JsonResponse();
     }
@@ -217,6 +222,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     {
         try {
             $this->userApiService->leaveCommunity($communityId)->await();
+            $this->membershipService->invalidateCurrentUser();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
