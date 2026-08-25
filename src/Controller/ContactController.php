@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Exception\AppException;
 use App\Security\User;
-use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\MailerService;
 use App\Services\MembershipService;
 use Psr\Log\LoggerInterface;
@@ -285,20 +284,14 @@ class ContactController extends AbstractController
         name: 'datastore_deletion_request',
         methods: ['POST'],
     )]
-    public function datastoreDeletionRequest(Request $request, MembershipService $membershipService, DatastoreApiService $datastoreApiService): JsonResponse
+    public function datastoreDeletionRequest(Request $request, MembershipService $membershipService): JsonResponse
     {
         try {
             $data = json_decode($request->getContent(), true);
 
-            $membership = $membershipService->findByDatastore($data['datastoreId']);
-            if (null !== $membership) {
-                $datastoreName = $membership['community']['name'];
-                $communityId = $membership['community']['_id'];
-            } else {
-                $datastore = $datastoreApiService->get($data['datastoreId']);
-                $datastoreName = $datastore['name'];
-                $communityId = $datastore['community']['_id'];
-            }
+            $datastoreIdentity = $membershipService->getDatastoreIdentity($data['datastoreId']);
+            $datastoreName = $datastoreIdentity->name;
+            $communityId = $datastoreIdentity->communityId;
 
             $supportAddress = $this->getParameter('support_contact_mail');
             $now = new \DateTime();

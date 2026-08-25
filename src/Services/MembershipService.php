@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Dto\Datastore\DatastoreIdentity;
 use App\Security\EntrepotUserCache;
 use App\Security\User;
 use App\Services\EntrepotApi\DatastoreApiService;
@@ -36,29 +37,34 @@ class MembershipService
         return $this->find(fn (User $user) => $user->findMembershipByCommunity($communityId));
     }
 
-    public function getDatastoreTechnicalName(string $datastoreId): string
+    /**
+     * Nom, nom technique et communauté du datastore, depuis l'appartenance ; sinon un seul chargement du DTO Entrepôt.
+     */
+    public function getDatastoreIdentity(string $datastoreId): DatastoreIdentity
     {
         $membership = $this->findByDatastore($datastoreId);
         if (null !== $membership) {
-            return $membership['community']['technical_name'];
+            return new DatastoreIdentity(
+                $membership['community']['name'],
+                $membership['community']['technical_name'],
+                $membership['community']['_id'],
+            );
         }
 
         // non-membre : on laisse l'API Entrepôt répondre elle-même (succès ou erreur)
         $datastore = $this->datastoreApiService->get($datastoreId);
 
-        return $datastore['technical_name'];
+        return new DatastoreIdentity($datastore['name'], $datastore['technical_name'], $datastore['community']['_id']);
+    }
+
+    public function getDatastoreTechnicalName(string $datastoreId): string
+    {
+        return $this->getDatastoreIdentity($datastoreId)->technicalName;
     }
 
     public function getDatastoreCommunityId(string $datastoreId): string
     {
-        $membership = $this->findByDatastore($datastoreId);
-        if (null !== $membership) {
-            return $membership['community']['_id'];
-        }
-
-        $datastore = $this->datastoreApiService->get($datastoreId);
-
-        return $datastore['community']['_id'];
+        return $this->getDatastoreIdentity($datastoreId)->communityId;
     }
 
     /**
