@@ -69,9 +69,7 @@ final class UserApiService
      */
     public function updateKey(string $keyId, array $body): array
     {
-        $this->api->patch("users/me/keys/$keyId", $body)->await();
-
-        return $this->getMyKey($keyId)->array();
+        return $this->api->patch("users/me/keys/$keyId", $body)->array();
     }
 
     public function removeKey(string $keyId): ResponsePromise
