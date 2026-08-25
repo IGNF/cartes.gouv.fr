@@ -256,13 +256,13 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
             // suppr des services (config et offering)
             foreach ($servicesList as $offering) {
-                $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id']);
+                $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id'], $offering);
             }
 
             // suppr des uploads
             if (isset($datasheet['upload_list'])) {
                 foreach ($datasheet['upload_list'] as $upload) {
-                    $this->uploadApiService->remove($datastoreId, $upload['_id'])->await();
+                    $this->uploadApiService->remove($datastoreId, $upload['_id'], $upload)->await();
                 }
             }
 

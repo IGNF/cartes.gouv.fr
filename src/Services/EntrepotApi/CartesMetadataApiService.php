@@ -115,7 +115,10 @@ class CartesMetadataApiService
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
     }
 
-    public function updateDocuments(string $datastoreId, string $datasheetName): void
+    /**
+     * @param array<mixed> $documents liste de documents de la fiche, déjà en main chez l'appelant
+     */
+    public function updateDocuments(string $datastoreId, string $datasheetName, array $documents): void
     {
         $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
         if (!$apiMetadata) {
@@ -125,7 +128,7 @@ class CartesMetadataApiService
         $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
-        $cswMetadata->documents = $this->getDatasheetDocuments($datastoreId, $datasheetName);
+        $cswMetadata->documents = $this->toCswDocuments($documents);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -287,11 +290,10 @@ class CartesMetadataApiService
         $layers = [];
 
         foreach ($configurationsList as $configuration) {
-            $configurationOfferings = $this->configurationApiService->getConfigurationOfferings($datastoreId, $configuration['_id'])->resolve();
+            $configurationOfferings = $this->configurationApiService->getConfigurationOfferingsDetailed($datastoreId, $configuration['_id'])->resolve();
 
             if (count($configurationOfferings) > 0) {
                 $offering = $configurationOfferings[0];
-                $offering = $this->configurationApiService->getOffering($datastoreId, $offering['_id'])->array();
 
                 $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
 
@@ -474,27 +476,17 @@ class CartesMetadataApiService
     }
 
     /**
-     * @return array<CswDocument>
+     * @param array<mixed> $documents
+     *
+     * @return CswDocument[]
      */
-    private function getDatasheetDocuments(string $datastoreId, string $datasheetName): array
+    private function toCswDocuments(array $documents): array
     {
-        $labels = ["datasheet_name=$datasheetName", 'type=document-list'];
-
-        $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, $labels)->resolve();
-
-        // retourne l'annexe s'il existe
-        if (0 === count($annexeList)) {
-            return [];
-        }
-
-        $docsListJson = $this->annexeApiService->download($datastoreId, $annexeList[0]['_id'])->text();
-        $documentsList = json_decode($docsListJson, true);
-
         return array_map(fn ($doc) => new CswDocument(
             $doc['name'],
             isset($doc['description']) ? $doc['description'] : null,
             $doc['url'],
-        ), $documentsList);
+        ), $documents);
     }
 
     /**

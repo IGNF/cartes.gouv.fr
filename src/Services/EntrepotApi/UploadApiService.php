@@ -238,11 +238,13 @@ final class UploadApiService
     }
 
     /**
+     * @param array<mixed>|null $upload livraison déjà chargée par l'appelant (avec `status` et `tags`), évite un GET
+     *
      * @return array<mixed>
      */
-    public function getFileTree(string $datastoreId, string $uploadId): array
+    public function getFileTree(string $datastoreId, string $uploadId, ?array $upload = null): array
     {
-        $upload = $this->get($datastoreId, $uploadId)->array();
+        $upload ??= $this->get($datastoreId, $uploadId)->array();
         if (UploadStatuses::DELETED == $upload['status'] || UploadStatuses::OPEN == $upload['status']) {
             if (array_key_exists(UploadTags::FILE_TREE, $upload['tags'])) {
                 return json_decode($upload['tags'][UploadTags::FILE_TREE], true);
@@ -290,11 +292,14 @@ final class UploadApiService
         return $this->api->delete("datastores/$datastoreId/uploads/$uploadId/tags", ['tags' => join(',', $tags)]);
     }
 
-    public function remove(string $datastoreId, string $uploadId): ResponsePromise
+    /**
+     * @param array<mixed>|null $upload livraison déjà chargée par l'appelant (avec `status` et `tags`), évite un GET
+     */
+    public function remove(string $datastoreId, string $uploadId, ?array $upload = null): ResponsePromise
     {
         // sauvegarde dans les tags de l'arborescence de fichiers de la livraison avant de la supprimer, parce qu'une fois supprimée elle ne sera plus récupérable
         try {
-            $fileTree = $this->getFileTree($datastoreId, $uploadId);
+            $fileTree = $this->getFileTree($datastoreId, $uploadId, $upload);
             $this->addTags($datastoreId, $uploadId, [
                 UploadTags::FILE_TREE => json_encode($fileTree),
             ])->await();
