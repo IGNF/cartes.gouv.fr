@@ -199,9 +199,12 @@ class CartesServiceApiService
         return $shareUrl;
     }
 
-    public function unpublish(string $datastoreId, string $offeringId): void
+    /**
+     * @param array<mixed>|null $offering offering déjà chargée par l'appelant (avec `type` et `configuration`), évite un GET
+     */
+    public function unpublish(string $datastoreId, string $offeringId, ?array $offering = null): void
     {
-        $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+        $offering ??= $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
 
         switch ($offering['type']) {
             case OfferingTypes::WFS:
