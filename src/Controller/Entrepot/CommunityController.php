@@ -177,7 +177,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
      *
      * @return bool
      */
-    private function _allowedToModifyMembers($membership, ?string $myUserId)
+    private function _allowedToModifyMembers($membership, string $myUserId)
     {
         if ($myUserId === $membership['community']['supervisor']) {
             return true;

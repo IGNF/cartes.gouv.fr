@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Utils;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Ignore;
 
@@ -10,7 +11,7 @@ class User implements UserInterface
     private string $email;
     private string $userName;
     private string $id;
-    private ?string $keycloakId;
+    private string $keycloakId;
 
     /** @var array<string> */
     private array $roles = [];
@@ -36,41 +37,16 @@ class User implements UserInterface
     public function __construct(array $keycloakUserInfo = [], array $apiUserInfo = [])
     {
         $this->email = $keycloakUserInfo['email'];
-        $this->keycloakId = $keycloakUserInfo['sub'] ?? null;
+        $this->keycloakId = $keycloakUserInfo['sub'];
         $this->id = $apiUserInfo['_id'];
         $this->firstName = $keycloakUserInfo['given_name'] ?? null;
         $this->lastName = $keycloakUserInfo['family_name'] ?? null;
         $this->userName = $keycloakUserInfo['preferred_username'];
-        $this->accountCreationDate = null;
-        $this->lastLoginDate = null;
-
         if (array_key_exists('creation', $apiUserInfo)) {
             $this->accountCreationDate = new \DateTime($apiUserInfo['creation']);
         }
 
-        if (array_key_exists('last_login', $apiUserInfo)) {
-            $this->lastLoginDate = new \DateTime($apiUserInfo['last_login']);
-        }
-
-        if (array_key_exists('documents_quota', $apiUserInfo)) {
-            $this->documentsQuota = $apiUserInfo['documents_quota'];
-        }
-
-        if (array_key_exists('documents_use', $apiUserInfo)) {
-            $this->documentsUse = $apiUserInfo['documents_use'];
-        }
-
-        if (array_key_exists('keys_quota', $apiUserInfo)) {
-            $this->keysQuota = $apiUserInfo['keys_quota'];
-        }
-
-        if (array_key_exists('keys_use', $apiUserInfo)) {
-            $this->keysUse = $apiUserInfo['keys_use'];
-        }
-
-        if (array_key_exists('communities_member', $apiUserInfo)) {
-            $this->communitiesMember = $apiUserInfo['communities_member'];
-        }
+        $this->updateFromApiInfo($apiUserInfo);
     }
 
     public function getEmail(): ?string
@@ -120,7 +96,7 @@ class User implements UserInterface
     }
 
     #[Ignore]
-    public function getKeycloakId(): ?string
+    public function getKeycloakId(): string
     {
         return $this->keycloakId;
     }
@@ -150,13 +126,7 @@ class User implements UserInterface
      */
     public function findMembershipByDatastore(string $datastoreId): ?array
     {
-        foreach ($this->communitiesMember as $member) {
-            if (($member['community']['datastore'] ?? null) === $datastoreId) {
-                return $member;
-            }
-        }
-
-        return null;
+        return $this->findMembership('datastore', $datastoreId);
     }
 
     /**
@@ -164,13 +134,15 @@ class User implements UserInterface
      */
     public function findMembershipByCommunity(string $communityId): ?array
     {
-        foreach ($this->communitiesMember as $member) {
-            if (($member['community']['_id'] ?? null) === $communityId) {
-                return $member;
-            }
-        }
+        return $this->findMembership('_id', $communityId);
+    }
 
-        return null;
+    /**
+     * @return array<mixed>|null
+     */
+    private function findMembership(string $communityKey, string $value): ?array
+    {
+        return Utils::array_find($this->communitiesMember, fn (array $member) => ($member['community'][$communityKey] ?? null) === $value);
     }
 
     public function getAccountCreationDate(): ?\DateTimeInterface

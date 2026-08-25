@@ -290,8 +290,6 @@ class ContactController extends AbstractController
             $data = json_decode($request->getContent(), true);
 
             $datastoreIdentity = $membershipService->getDatastoreIdentity($data['datastoreId']);
-            $datastoreName = $datastoreIdentity->name;
-            $communityId = $datastoreIdentity->communityId;
 
             $supportAddress = $this->getParameter('support_contact_mail');
             $now = new \DateTime();
@@ -302,9 +300,9 @@ class ContactController extends AbstractController
             $mailParams = [
                 'sendDate' => $now,
                 'data' => $data,
-                'datastore_name' => $datastoreName,
+                'datastore_name' => $datastoreIdentity->name,
                 'datastore_id' => $data['datastoreId'],
-                'community_id' => $communityId,
+                'community_id' => $datastoreIdentity->communityId,
             ];
 
             $this->logger->info('datastore.deletion.request', [
@@ -313,7 +311,7 @@ class ContactController extends AbstractController
             ]);
 
             // Envoi du mail à l'adresse du support
-            $this->mailerService->sendMail($supportAddress, sprintf("[cartes.gouv.fr] Demande de suppression de l'entrepôt %s", $datastoreName), 'Mailer/datastore_delete_request/request.html.twig', $mailParams);
+            $this->mailerService->sendMail($supportAddress, sprintf("[cartes.gouv.fr] Demande de suppression de l'entrepôt %s", $datastoreIdentity->name), 'Mailer/datastore_delete_request/request.html.twig', $mailParams);
 
             // Envoi du mail d'accusé de réception à l'utilisateur
             $this->mailerService->sendMail($userEmail, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/datastore_delete_request/request_acknowledgement.html.twig',

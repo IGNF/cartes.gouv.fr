@@ -6,12 +6,10 @@ use App\Dto\Datastore\DatastoreIdentity;
 use App\Security\EntrepotUserCache;
 use App\Security\User;
 use App\Services\EntrepotApi\DatastoreApiService;
-use App\Services\EntrepotApi\UserApiService;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * Dérive les infos datastore/communauté de l'appartenance de l'utilisateur courant,
- * au lieu de charger le DTO datastore complet depuis l'API Entrepôt.
+ * Dérive les infos datastore/communauté de l'appartenance de l'utilisateur courant, au lieu de charger le DTO datastore complet.
  */
 class MembershipService
 {
@@ -19,7 +17,6 @@ class MembershipService
         private Security $security,
         private EntrepotUserCache $entrepotUserCache,
         private DatastoreApiService $datastoreApiService,
-        private UserApiService $userApiService,
     ) {
     }
 
@@ -59,23 +56,13 @@ class MembershipService
         return new DatastoreIdentity($datastore['name'], $datastore['technical_name'], $datastore['community']['_id']);
     }
 
-    public function getDatastoreTechnicalName(string $datastoreId): string
-    {
-        return $this->getDatastoreIdentity($datastoreId)->technicalName;
-    }
-
-    public function getDatastoreCommunityId(string $datastoreId): string
-    {
-        return $this->getDatastoreIdentity($datastoreId)->communityId;
-    }
-
     /**
      * À appeler après une mutation d'appartenance faite par l'utilisateur lui-même.
      */
     public function invalidateCurrentUser(): void
     {
         $user = $this->security->getUser();
-        if ($user instanceof User && null !== $user->getKeycloakId()) {
+        if ($user instanceof User) {
             $this->entrepotUserCache->invalidate($user->getKeycloakId());
         }
     }
@@ -90,16 +77,11 @@ class MembershipService
             return;
         }
 
-        $keycloakId = $user->getKeycloakId();
-        $apiUserInfo = null !== $keycloakId
-            ? $this->entrepotUserCache->refresh($keycloakId)
-            : $this->userApiService->getMe()->array();
-        $user->updateFromApiInfo($apiUserInfo);
+        $user->updateFromApiInfo($this->entrepotUserCache->refresh($user->getKeycloakId()));
     }
 
     /**
-     * Cherche dans le token, puis re-vérifie une fois avec des données fraîches si absent
-     * (l'appartenance a pu changer il y a moins de 60 s, le TTL du cache).
+     * Cherche dans le token, puis une fois avec des données fraîches si absent (l'appartenance a pu changer depuis moins de 60 s).
      *
      * @param callable(User): (array<mixed>|null) $lookup
      *
@@ -117,12 +99,7 @@ class MembershipService
             return $membership;
         }
 
-        $keycloakId = $user->getKeycloakId();
-        if (null === $keycloakId) {
-            return null;
-        }
-
-        $user->updateFromApiInfo($this->entrepotUserCache->refreshThrottled($keycloakId));
+        $user->updateFromApiInfo($this->entrepotUserCache->refreshThrottled($user->getKeycloakId()));
 
         return $lookup($user);
     }

@@ -579,7 +579,7 @@ class CartesServiceApiService
      */
     private function addPermissionForCurrentCommunity(string $datastoreId, array $offering): void
     {
-        $communityId = $this->membershipService->getDatastoreCommunityId($datastoreId);
+        $communityId = $this->membershipService->getDatastoreIdentity($datastoreId)->communityId;
         $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
     }
 
