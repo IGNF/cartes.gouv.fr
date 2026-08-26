@@ -440,8 +440,11 @@ class CartesServiceApiService
         foreach ($siblingServices as $siblingServiceId) {
             try {
                 // les couches de la métadonnée viennent de ces mêmes services : pas de relecture
-                $offering = $services->offeringsById[$siblingServiceId];
+                $offering = $services->offering($siblingServiceId);
                 $configuration = $services->configurationOfOffering($siblingServiceId);
+                if (null === $offering || null === $configuration) {
+                    continue;
+                }
 
                 // Mise à jour des tags seulement si nécessaire
                 if ($configTheme !== ($configuration['tags'][CommonTags::CONFIG_THEME] ?? '')) {
