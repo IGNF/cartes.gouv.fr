@@ -78,20 +78,21 @@ class UploadIntegrationWorkflow
 
     /**
      * Exécute au plus une étape à effets de bord (side-effectful), uniquement si c'est l'étape courante et qu'elle est encore en attente.
+     * Renvoie true si une action a été déclenchée (la progression doit alors être recalculée).
      *
      * @param array<mixed>         $upload
      * @param array<string,string> $progress
      */
-    public function advanceIfPossible(string $datastoreId, array $upload, array $progress): void
+    public function advanceIfPossible(string $datastoreId, array $upload, array $progress): bool
     {
         $currentStepName = $this->getCurrentStepName($progress);
         if (null === $currentStepName) {
-            return;
+            return false;
         }
 
         $currentStepStatus = $progress[$currentStepName] ?? JobStatuses::WAITING;
         if (JobStatuses::WAITING !== $currentStepStatus) {
-            return;
+            return false;
         }
 
         switch ($currentStepName) {
@@ -101,18 +102,18 @@ class UploadIntegrationWorkflow
                 }
 
                 if (in_array($upload['status'], [UploadStatuses::CLOSED, UploadStatuses::CHECKING], true)) {
-                    return;
+                    return false;
                 }
 
                 $this->uploadApiService->addFile($datastoreId, $upload['_id'], $upload['tags'][UploadTags::DATA_UPLOAD_PATH]);
 
-                return;
+                return true;
 
             case UploadTags::INT_STEP_PROCESSING:
-                $this->launchIntegrationProcessing($datastoreId, $upload);
-
-                return;
+                return $this->launchIntegrationProcessing($datastoreId, $upload);
         }
+
+        return false;
     }
 
     /**
@@ -253,14 +254,14 @@ class UploadIntegrationWorkflow
     /**
      * @param array<mixed> $upload
      */
-    private function launchIntegrationProcessing(string $datastoreId, array $upload): void
+    private function launchIntegrationProcessing(string $datastoreId, array $upload): bool
     {
         $hasProcExecId = isset($upload['tags']['proc_int_id']);
         $hasVectorDbId = isset($upload['tags']['vectordb_id']);
 
         // ne devrait pas arriver normalement, juste un garde fou
         if ($hasProcExecId || $hasVectorDbId) {
-            return;
+            return false;
         }
 
         if (!isset($upload['tags'][CommonTags::DATASHEET_NAME])) {
@@ -327,6 +328,8 @@ class UploadIntegrationWorkflow
         $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], $tags)->await();
 
         $this->processingApiService->launchExecution($datastoreId, $processingExec['_id'])->await();
+
+        return true;
     }
 
     /**

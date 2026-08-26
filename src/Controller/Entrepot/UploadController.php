@@ -153,9 +153,8 @@ class UploadController extends AbstractController implements ApiControllerInterf
             $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
             $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
 
-            if (false === $getOnlyProgress) {
-                $uploadIntegrationWorkflow->advanceIfPossible($datastoreId, $upload, $progress);
-
+            // relecture seulement si une étape a été déclenchée
+            if (false === $getOnlyProgress && $uploadIntegrationWorkflow->advanceIfPossible($datastoreId, $upload, $progress)) {
                 $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
                 $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
             }

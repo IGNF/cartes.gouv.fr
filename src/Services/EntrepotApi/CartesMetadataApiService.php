@@ -6,6 +6,7 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
+use App\Dto\Datasheet\DatasheetServices;
 use App\Entity\CswMetadata\CswCapabilitiesFile;
 use App\Entity\CswMetadata\CswDocument;
 use App\Entity\CswMetadata\CswHierarchyLevel;
@@ -32,7 +33,6 @@ class CartesMetadataApiService
         private DatastoreApiService $datastoreApiService,
         private AnnexeApiService $annexeApiService,
         private MetadataApiService $metadataApiService,
-        private ConfigurationApiService $configurationApiService,
         private CswMetadataHelper $cswMetadataHelper,
         private CartesStylesApiService $cartesStylesApiService,
         private StoredDataApiService $storedDataApiService,
@@ -76,7 +76,7 @@ class CartesMetadataApiService
     /**
      * Met à jour la liste des flux si une métadonnée existante fait référence à une fiche de données, sinon fait rien.
      */
-    public function updateLayers(string $datastoreId, string $datasheetName): void
+    public function updateLayers(string $datastoreId, string $datasheetName, DatasheetServices $services): void
     {
         $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
         if (!$apiMetadata) {
@@ -86,9 +86,9 @@ class CartesMetadataApiService
         $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
-        $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $datasheetName);
-        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
-        $cswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $datasheetName);
+        $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $services);
+        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $services->configurationsById);
+        $cswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $services);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -99,7 +99,10 @@ class CartesMetadataApiService
         }
     }
 
-    public function updateStyleFiles(string $datastoreId, string $datasheetName): void
+    /**
+     * @param array<array<mixed>> $configurations configurations détaillées de la fiche
+     */
+    public function updateStyleFiles(string $datastoreId, string $datasheetName, array $configurations): void
     {
         $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
         if (!$apiMetadata) {
@@ -109,7 +112,7 @@ class CartesMetadataApiService
         $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
-        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
+        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $configurations);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -139,7 +142,7 @@ class CartesMetadataApiService
      *
      * @param array<mixed> $formData
      */
-    public function createOrUpdate(string $datastoreId, string $datasheetName, ?array $formData = null): array
+    public function createOrUpdate(string $datastoreId, string $datasheetName, DatasheetServices $services, ?array $formData = null): array
     {
         $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
 
@@ -150,21 +153,21 @@ class CartesMetadataApiService
                 throw new AppException('formData doit être non null si création de la métadonnée', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-            return $this->createMetadata($datastoreId, $datasheetName, $formData);
+            return $this->createMetadata($datastoreId, $datasheetName, $services, $formData);
         }
         // une métadonnée existe déjà qu'on va mettre à jour
 
-        return $this->updateMetadata($datastoreId, $datasheetName, $apiMetadata, $formData);
+        return $this->updateMetadata($datastoreId, $datasheetName, $services, $apiMetadata, $formData);
     }
 
     /**
      * @param array<mixed> $formData
      */
-    private function createMetadata(string $datastoreId, string $datasheetName, array $formData): array
+    private function createMetadata(string $datastoreId, string $datasheetName, DatasheetServices $services, array $formData): array
     {
         $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
 
-        $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, null, $formData);
+        $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $services, null, $formData);
 
         // Ajout de l'etiquette si elle n'existe pas deja
         $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
@@ -190,14 +193,14 @@ class CartesMetadataApiService
      * @param array<mixed> $oldApiMetadata
      * @param array<mixed> $formData
      */
-    private function updateMetadata(string $datastoreId, string $datasheetName, array $oldApiMetadata, ?array $formData = null): array
+    private function updateMetadata(string $datastoreId, string $datasheetName, DatasheetServices $services, array $oldApiMetadata, ?array $formData = null): array
     {
         $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
 
         $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $oldApiMetadata['_id'])->text();
         $oldCswMetadata = $this->cswMetadataHelper->fromXml($oldMetadataFileXml);
 
-        $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $oldCswMetadata, $formData);
+        $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $services, $oldCswMetadata, $formData);
 
         // Mise a jour de l'etiquette
         $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
@@ -232,7 +235,7 @@ class CartesMetadataApiService
      *
      * @param ?array<mixed> $formData
      */
-    private function getNewCswMetadata(string $datastoreId, string $datasheetName, ?CswMetadata $oldCswMetadata = null, ?array $formData = null): CswMetadata
+    private function getNewCswMetadata(string $datastoreId, string $datasheetName, DatasheetServices $services, ?CswMetadata $oldCswMetadata = null, ?array $formData = null): CswMetadata
     {
         if (null === $oldCswMetadata && null === $formData) {
             throw new AppException('oldCswMetadata et formData ne peuvent pas être null à la fois', Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -240,7 +243,7 @@ class CartesMetadataApiService
 
         $newCswMetadata = null === $oldCswMetadata ? new CswMetadata() : clone $oldCswMetadata;
 
-        $layers = $this->getMetadataLayers($datastoreId, $datasheetName);
+        $layers = $this->getMetadataLayers($datastoreId, $services);
         $bbox = $this->getBbox($datastoreId, $datasheetName);
 
         if ($formData) {
@@ -267,10 +270,8 @@ class CartesMetadataApiService
             $newCswMetadata->frequencyCode = $formData['frequency_code'] ?? null;
             $newCswMetadata->layers = $layers;
             $newCswMetadata->bbox = $bbox;
-            $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
-
-            // Doit-être calculé après la récupération des layers
-            $newCswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $datasheetName);
+            $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $services->configurationsById);
+            $newCswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $services);
         }
 
         return $newCswMetadata;
@@ -279,76 +280,68 @@ class CartesMetadataApiService
     /**
      * @return array<CswMetadataLayer>
      */
-    private function getMetadataLayers(string $datastoreId, string $datasheetName): array
+    private function getMetadataLayers(string $datastoreId, DatasheetServices $services): array
     {
-        $configurationsList = $this->configurationApiService->getAll($datastoreId, [
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-        ])->resolve();
-
         $layers = [];
 
-        foreach ($configurationsList as $configuration) {
-            $configurationOfferings = $this->configurationApiService->getConfigurationOfferingsDetailed($datastoreId, $configuration['_id'])->resolve();
+        foreach ($services->configurationsById as $configuration) {
+            $offering = $services->offeringOfConfiguration($configuration['_id']);
+            if (null === $offering) {
+                continue;
+            }
 
-            if (count($configurationOfferings) > 0) {
-                $offering = $configurationOfferings[0];
+            $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
 
-                $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
+            switch ($configuration['type']) {
+                case ConfigurationTypes::WFS:
+                    $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
+                    $subLayers = $this->getWfsSubLayers($configuration, $offering, $endpointUrl);
+                    $layers = array_merge($layers, $subLayers);
 
-                switch ($configuration['type']) {
-                    case ConfigurationTypes::WFS:
-                        $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
-                        $subLayers = $this->getWfsSubLayers($datastoreId, $configuration, $offering, $endpointUrl);
-                        $layers = array_merge($layers, $subLayers);
+                    break;
 
+                case ConfigurationTypes::WMSRASTER:
+                case ConfigurationTypes::WMSVECTOR:
+                    $layerName = $offering['layer_name'];
+                    $gmdOnlineResourceProtocol = 'OGC:WMS';
+                    $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
+
+                    $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['_id'], $offering['open']);
+                    break;
+
+                case ConfigurationTypes::WMTSTMS:
+                    $layerName = $offering['layer_name'];
+
+                    if (!isset($configuration['type_infos']['used_data'][0]['stored_data'])) {
                         break;
+                    }
+                    $pyramid = $this->storedDataApiService->get($datastoreId, $configuration['type_infos']['used_data'][0]['stored_data'])->array();
 
-                    case ConfigurationTypes::WMSRASTER:
-                    case ConfigurationTypes::WMSVECTOR:
-                        $layerName = $offering['layer_name'];
-                        $gmdOnlineResourceProtocol = 'OGC:WMS';
-                        $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
+                    $gmdOnlineResourceProtocol = null;
+                    $actualType = null;
 
+                    if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramid['type']) {
+                        $gmdOnlineResourceProtocol = 'TMS';
+                        $actualType = 'TMS';
+                    } elseif (StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
+                        $gmdOnlineResourceProtocol = 'OGC:WMTS';
+                        $actualType = 'WMTS';
+                    }
+
+                    $endpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']);
+                    $endpoints = array_values($endpoints);
+
+                    if (count($endpoints) > 0) {
+                        $endpointUrl = $endpoints[0]['url'];
+                        if ('TMS' === $actualType) {
+                            $endpointUrl = $endpointUrl.'/1.0.0';
+                            // la version 1.0.0 du TMS est aussi écrite en dur
+                            // dans le composant UserKeyLink pour créer une URL de 'capabilities'
+                        }
                         $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['_id'], $offering['open']);
-                        break;
+                    }
 
-                    case ConfigurationTypes::WMTSTMS:
-                        $layerName = $offering['layer_name'];
-                        $configuration = $this->configurationApiService->get($datastoreId, $configuration['_id'])->array();
-
-                        if (!isset($configuration['type_infos']['used_data'][0]['stored_data'])) {
-                            break;
-                        }
-                        $pyramid = $this->storedDataApiService->get($datastoreId, $configuration['type_infos']['used_data'][0]['stored_data'])->array();
-
-                        $gmdOnlineResourceProtocol = null;
-                        $actualType = null;
-
-                        if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramid['type']) {
-                            $gmdOnlineResourceProtocol = 'TMS';
-                            $actualType = 'TMS';
-                        } elseif (StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
-                            $gmdOnlineResourceProtocol = 'OGC:WMTS';
-                            $actualType = 'WMTS';
-                        }
-
-                        $endpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']);
-                        $endpoints = array_values($endpoints);
-
-                        if (count($endpoints) > 0) {
-                            $endpointUrl = $endpoints[0]['url'];
-                            if ('TMS' === $actualType) {
-                                $endpointUrl = $endpointUrl.'/1.0.0';
-                                // la version 1.0.0 du TMS est aussi écrite en dur
-                                // dans le composant UserKeyLink pour créer une URL de 'capabilities'
-                            }
-                            $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['_id'], $offering['open']);
-                        }
-
-                        break;
-                }
+                    break;
             }
         }
 
@@ -356,14 +349,13 @@ class CartesMetadataApiService
     }
 
     /**
-     * @param array<mixed> $configuration
+     * @param array<mixed> $configuration configuration détaillée (type_infos)
      * @param array<mixed> $offering
      *
      * @return array<CswMetadataLayer>
      */
-    private function getWfsSubLayers(string $datastoreId, array $configuration, array $offering, string $serviceEndpointUrl): array
+    private function getWfsSubLayers(array $configuration, array $offering, string $serviceEndpointUrl): array
     {
-        $configuration = $this->configurationApiService->get($datastoreId, $configuration['_id'])->array();
         $configRelations = $configuration['type_infos']['used_data'][0]['relations'];
 
         $relationLayers = array_map(function ($relation) use ($offering, $serviceEndpointUrl) {
@@ -387,27 +379,15 @@ class CartesMetadataApiService
     /**
      * Seulement les services WFS et WMTS/WMS sont concernés par les fichiers de style.
      *
+     * @param array<array<mixed>> $configurations configurations détaillées de la fiche
+     *
      * @return array<CswStyleFile>
      */
-    private function getStyleFiles(string $datastoreId, string $datasheetName): array
+    private function getStyleFiles(string $datastoreId, array $configurations): array
     {
         $styleFiles = [];
 
-        $configurationsList = array_merge(
-            [],
-            $this->configurationApiService->getAllDetailed($datastoreId, [
-                'type' => ConfigurationTypes::WFS,
-                'tags' => [
-                    CommonTags::DATASHEET_NAME => $datasheetName,
-                ],
-            ]),
-            $this->configurationApiService->getAllDetailed($datastoreId, [
-                'type' => ConfigurationTypes::WMTSTMS,
-                'tags' => [
-                    CommonTags::DATASHEET_NAME => $datasheetName,
-                ],
-            ])
-        );
+        $configurationsList = array_filter($configurations, fn (array $configuration) => in_array($configuration['type'], [ConfigurationTypes::WFS, ConfigurationTypes::WMTSTMS], true));
 
         $configStyles = array_map(fn ($config) => $this->cartesStylesApiService->getStyles($datastoreId, $config), $configurationsList);
         $configStyles = array_filter($configStyles, fn ($stylesList) => count($stylesList) > 0);
@@ -437,18 +417,13 @@ class CartesMetadataApiService
         return $styleFiles;
     }
 
-    private function getCapabilitiesFiles(string $datastoreId, string $datasheetName): array
+    private function getCapabilitiesFiles(string $datastoreId, DatasheetServices $services): array
     {
         $datastore = $this->datastoreApiService->get($datastoreId);
         $datastoreName = $datastore['technical_name'];
 
-        $configurationsList = $this->configurationApiService->getAll($datastoreId, [
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-            'status' => ConfigurationStatuses::PUBLISHED,
-        ])->resolve();
-        $layerTypes = array_map(fn ($config) => $config['type'], $configurationsList);
+        $publishedConfigurations = array_filter($services->configurationsById, fn (array $configuration) => ConfigurationStatuses::PUBLISHED === $configuration['status']);
+        $layerTypes = array_map(fn ($config) => $config['type'], $publishedConfigurations);
         $layerTypes = array_values(array_unique($layerTypes));
 
         $annexeUrl = $this->parameterBag->get('annexes_url');

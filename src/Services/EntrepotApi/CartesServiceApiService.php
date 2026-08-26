@@ -11,6 +11,7 @@ use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\PermissionTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
+use App\Dto\Datasheet\DatasheetServices;
 use App\Dto\Services\CommonDTO;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
@@ -152,6 +153,32 @@ class CartesServiceApiService
     }
 
     /**
+     * Configurations détaillées et offerings d'une fiche de données, en une passe (listes d'offerings lancées en parallèle).
+     */
+    public function getDatasheetServices(string $datastoreId, string $datasheetName): DatasheetServices
+    {
+        $configurations = $this->configurationApiService->getAllDetailed($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
+
+        $pendingOfferingsLists = [];
+        foreach ($configurations as $configuration) {
+            $pendingOfferingsLists[] = $this->configurationApiService->getConfigurationOfferingsDetailed($datastoreId, $configuration['_id']);
+        }
+
+        $offeringsById = [];
+        foreach ($pendingOfferingsLists as $pendingOfferings) {
+            foreach ($pendingOfferings->resolve() as $offering) {
+                $offeringsById[$offering['_id']] = $offering;
+            }
+        }
+
+        return new DatasheetServices(array_column($configurations, null, '_id'), $offeringsById);
+    }
+
+    /**
      * @param array<mixed> $offering
      */
     public function getShareUrl(string $datastoreId, array $offering): ?string
@@ -200,9 +227,13 @@ class CartesServiceApiService
     }
 
     /**
+     * Renvoie la configuration supprimée (dernier état lu avant suppression).
+     *
      * @param array<mixed>|null $offering offering déjà chargée par l'appelant (avec `type` et `configuration`), évite un GET
+     *
+     * @return array<mixed>
      */
-    public function unpublish(string $datastoreId, string $offeringId, ?array $offering = null): void
+    public function unpublish(string $datastoreId, string $offeringId, ?array $offering = null): array
     {
         $offering ??= $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
 
@@ -211,8 +242,7 @@ class CartesServiceApiService
             case OfferingTypes::WMTSTMS:
             case OfferingTypes::WMSVECTOR:
             case OfferingTypes::WMSRASTER:
-                $this->unpublishOfferingAndConfiguration($datastoreId, $offering);
-                break;
+                return $this->unpublishOfferingAndConfiguration($datastoreId, $offering);
             default:
                 throw new CartesApiException('Type de service invalide pour la suppression', Response::HTTP_BAD_REQUEST, ['offering_type' => $offering['type']]);
         }
@@ -220,8 +250,10 @@ class CartesServiceApiService
 
     /**
      * @param array<mixed> $offering
+     *
+     * @return array<mixed> la configuration supprimée
      */
-    private function unpublishOfferingAndConfiguration(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
+    private function unpublishOfferingAndConfiguration(string $datastoreId, array $offering, bool $removeStyleFiles = true): array
     {
         // suppression de l'offering
         $this->configurationApiService->removeOffering($datastoreId, $offering['_id'])->await();
@@ -231,10 +263,12 @@ class CartesServiceApiService
         // suppression de la configuration
         // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
         for ($attempt = 1; $attempt <= self::UNPUBLISH_MAX_ATTEMPTS; ++$attempt) {
-            sleep(self::UNPUBLISH_RETRY_DELAY_SECONDS);
             $configuration = $this->configurationApiService->get($datastoreId, $configurationId)->array();
             if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
                 break;
+            }
+            if ($attempt < self::UNPUBLISH_MAX_ATTEMPTS) {
+                sleep(self::UNPUBLISH_RETRY_DELAY_SECONDS);
             }
         }
 
@@ -255,6 +289,8 @@ class CartesServiceApiService
         if (true === $removeStyleFiles) {
             $this->removeStyleFiles($datastoreId, $configuration);
         }
+
+        return $configuration;
     }
 
     /**
@@ -374,15 +410,18 @@ class CartesServiceApiService
             ]);
         }
 
+        // Services de la fiche (dont celui qui vient d'être écrit), chargés une fois pour la métadonnée et la synchronisation
+        $services = $this->getDatasheetServices($datastoreId, $datasheetName);
+
         // Création ou mise à jour de metadata
         $formData = json_decode(json_encode($dto), true);
-        $apiMetadata = $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
+        $apiMetadata = $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $services, $formData);
 
         // Synchronisation des autres services de la même fiche de données
         /** @var CswMetadata */
         $cswMetadata = $apiMetadata['csw_metadata'];
 
-        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::CONFIG_THEME], $cswMetadata, $dto);
+        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::CONFIG_THEME], $cswMetadata, $dto, $services);
 
         return $offering;
     }
@@ -390,7 +429,7 @@ class CartesServiceApiService
     /**
      * @param array<mixed> $offering
      */
-    private function synchroniseSiblingServices(string $datastoreId, array $offering, string $configTheme, CswMetadata $cswMetadata, CommonDTO $dto): void
+    private function synchroniseSiblingServices(string $datastoreId, array $offering, string $configTheme, CswMetadata $cswMetadata, CommonDTO $dto, DatasheetServices $services): void
     {
         $siblingServices = array_map(fn (CswMetadataLayer $layer) => $layer->offeringId, $cswMetadata->layers ?? []);
         $siblingServices = array_filter($siblingServices, fn (string $serviceId) => $serviceId !== $offering['_id']);
@@ -400,8 +439,12 @@ class CartesServiceApiService
 
         foreach ($siblingServices as $siblingServiceId) {
             try {
-                $offering = $this->configurationApiService->getOffering($datastoreId, $siblingServiceId)->array();
-                $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
+                // les couches de la métadonnée viennent de ces mêmes services : pas de relecture
+                $offering = $services->offering($siblingServiceId);
+                $configuration = $services->configurationOfOffering($siblingServiceId);
+                if (null === $offering || null === $configuration) {
+                    continue;
+                }
 
                 // Mise à jour des tags seulement si nécessaire
                 if ($configTheme !== ($configuration['tags'][CommonTags::CONFIG_THEME] ?? '')) {
