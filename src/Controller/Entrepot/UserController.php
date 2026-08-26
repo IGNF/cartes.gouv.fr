@@ -212,7 +212,6 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function addMemberToSandbox(ServiceAccount $serviceAccount): JsonResponse
     {
         $serviceAccount->addCurrentUserToSandbox();
-        $this->membershipService->invalidateCurrentUser();
 
         return new JsonResponse();
     }
@@ -221,8 +220,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function leaveCommunity(string $communityId): JsonResponse
     {
         try {
-            $this->userApiService->leaveCommunity($communityId)->await();
-            $this->membershipService->invalidateCurrentUser();
+            $this->membershipService->leaveCommunity($communityId);
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {

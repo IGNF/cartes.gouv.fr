@@ -47,9 +47,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     {
         try {
             $data = json_decode($request->getContent(), true);
-            $community = $this->communityApiService->modifyCommunity($communityId, $data)->array();
-            // le nom de la communauté fait partie des infos dérivées de l'appartenance
-            $this->membershipService->invalidateCurrentUser();
+            $community = $this->membershipService->modifyCommunity($communityId, $data);
 
             return new JsonResponse($community);
         } catch (ApiException $ex) {
@@ -104,11 +102,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
             // Verification des droits
             $this->_checkRights($rights);
 
-            $this->communityApiService->addOrModifyUserRights($communityId, $userId, ['rights' => $rights])->await();
-
-            if ($userId === $user->getId()) {
-                $this->membershipService->invalidateCurrentUser();
-            }
+            $this->membershipService->setMemberRights($communityId, $userId, $rights);
 
             return new JsonResponse([
                 'user' => $userId,
@@ -140,11 +134,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
                 throw new CartesApiException("Vous n'avez pas les droits pour supprimer un membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
-            $this->communityApiService->removeUserRights($communityId, $userId)->await();
-
-            if ($userId === $user->getId()) {
-                $this->membershipService->invalidateCurrentUser();
-            }
+            $this->membershipService->removeMember($communityId, $userId);
 
             return new JsonResponse(['user' => $userId]);
         } catch (ApiException $ex) {

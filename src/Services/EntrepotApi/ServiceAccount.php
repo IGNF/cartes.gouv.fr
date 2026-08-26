@@ -55,5 +55,7 @@ class ServiceAccount
         } catch (ServiceAccountAuthenticationException $e) {
             throw new AccessDeniedException('Compte de service non authentifié', $e);
         }
+
+        $this->membershipService->invalidateCurrentUser();
     }
 }

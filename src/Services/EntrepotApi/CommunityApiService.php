@@ -26,6 +26,8 @@ final class CommunityApiService
     }
 
     /**
+     * N'invalide pas le snapshot utilisateur : passer par MembershipService, ou appeler MembershipService::invalidateCurrentUser() après coup.
+     *
      * @param array<mixed> $data [name, public, contact]
      */
     public function modifyCommunity(string $communityId, array $data): ResponsePromise
@@ -34,6 +36,8 @@ final class CommunityApiService
     }
 
     /**
+     * N'invalide pas le snapshot utilisateur : passer par MembershipService, ou appeler MembershipService::invalidateCurrentUser() après coup.
+     *
      * @param array<mixed> $rights [community_rights, uploads_rights, processings_rights, stored_data_rights, datastore_rights, broadcast_rights]
      */
     public function addOrModifyUserRights(string $communityId, string $userId, array $rights = []): ResponsePromise
@@ -41,6 +45,9 @@ final class CommunityApiService
         return $this->api->put("communities/$communityId/users/$userId", $rights);
     }
 
+    /**
+     * N'invalide pas le snapshot utilisateur : passer par MembershipService, ou appeler MembershipService::invalidateCurrentUser() après coup.
+     */
     public function removeUserRights(string $communityId, string $userId): ResponsePromise
     {
         return $this->api->delete("communities/$communityId/users/$userId");
