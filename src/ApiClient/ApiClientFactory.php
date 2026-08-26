@@ -4,11 +4,14 @@ namespace App\ApiClient;
 
 use App\ApiClient\Auth\AuthenticatedHttpClient;
 use App\ApiClient\Auth\ServiceAccountHttpClient;
+use App\ApiClient\Auth\ServiceAccountRetryStrategy;
 use App\ApiClient\ErrorParser\EntrepotErrorParser;
 use App\ApiClient\ErrorParser\EspaceCoErrorParser;
 use App\Security\KeycloakTokenManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpClient\RetryableHttpClient;
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class ApiClientFactory
@@ -18,6 +21,7 @@ final class ApiClientFactory
         private ParameterBagInterface $parameters,
         private KeycloakTokenManager $tokenManager,
         private LoggerInterface $logger,
+        private CacheInterface $cache,
     ) {
     }
 
@@ -58,11 +62,14 @@ final class ApiClientFactory
         $authenticated = new ServiceAccountHttpClient(
             $this->scopedClient((string) $this->parameters->get('api_entrepot_url')),
             $tokenClient,
+            $this->cache,
             (string) $credentials['client_id'],
             (string) $credentials['client_secret'],
         );
+        // le retry enveloppe le décorateur : l'appel rejoué repasse par request() et prend un token neuf
+        $retrying = new RetryableHttpClient($authenticated, new ServiceAccountRetryStrategy($authenticated), 1, $this->logger);
 
-        return new ApiClient($authenticated, new EntrepotErrorParser(), $this->logger);
+        return new ApiClient($retrying, new EntrepotErrorParser(), $this->logger);
     }
 
     private function buildAuthenticatedClient(string $urlParameter): AuthenticatedHttpClient
