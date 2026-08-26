@@ -3,6 +3,7 @@
 ## Guides généraux
 
 - [Installation et configuration](install.md)
+- [Glossaire](glossaire.md)
 - [Implémentation et exécution des tests](test.md)
 - [Internationalisation](i18n.md)
 - [Explication des workflows](workflows.md)

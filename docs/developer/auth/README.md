@@ -83,6 +83,28 @@ Navigateur              Symfony
 
 ---
 
+## Snapshot utilisateur Entrepôt et cache par pod
+
+L’objet `User` est reconstruit à chaque requête à partir du JWT et de la réponse `GET users/me` de l’Entrepôt, mise en cache 60 s par identifiant Keycloak ([`EntrepotUserCache`](../../../src/Security/EntrepotUserCache.php), pool `cache.app`). Les infos datastore/communauté (nom, `technical_name`, id de communauté) sont dérivées de ce snapshot par [`MembershipService`](../../../src/Services/MembershipService.php) au lieu d’être rechargées via l’API. Vocabulaire : [glossaire](../glossaire.md).
+
+Trois mécanismes limitent la fenêtre de péremption :
+
+- **Invalidation** après une mutation d’appartenance faite par l’utilisateur lui-même (quitter une communauté, ajout au bac à sable, modification de ses droits ou de sa communauté) : l’entrée est supprimée, la requête suivante recharge.
+- **Rafraîchissement forcé** sur `GET /api/users/me` : la réponse est toujours fraîche et l’entrée du cache est réécrite.
+- **Deny-path** : quand une appartenance n’est pas trouvée, une revalidation forcée est tentée avant de conclure, au plus une fois par 10 s (`fetched_at` stocké dans l’entrée).
+
+En production, `cache.app` est APCu, donc **propre à chaque pod** ; Kubernetes exécute plusieurs réplicas sans affinité de session. Conséquences, acceptées :
+
+| Mécanisme              | Portée          | Effet avec N pods                                                                   |
+| ---------------------- | --------------- | ----------------------------------------------------------------------------------- |
+| Invalidation           | le pod mutateur | les autres pods gardent l’entrée périmée jusqu’à 60 s (seule dégradation)           |
+| Rafraîchissement forcé | le pod servant  | toujours frais quel que soit le pod, et répare le cache de ce pod                   |
+| Deny-path              | le pod servant  | une appartenance manquante est revérifiée sur n’importe quel pod (≤ 1 appel / 10 s) |
+
+Le sens « obtention d’un accès » est donc couvert sur tous les pods. Le sens « retrait d’un accès » ne l’est volontairement pas : seuls des champs dérivés (noms, ids) sont concernés, l’API Entrepôt fait autorité, et une péremption ≤ 60 s existe déjà sur un seul pod. Aucun cache partagé (Redis) n’est prévu pour cela.
+
+---
+
 ## Flux de logout
 
 ```
@@ -149,6 +171,8 @@ Quand `CookieAuthenticator` détecte un token expiré sur une requête `/api/*`,
 | [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                           | Accès centralisé au token (lecture cookie, cache requête, intent set/clear) |
 | [`src/Security/State/LoginStateSerializer.php`](../../../src/Security/State/LoginStateSerializer.php)               | Encode/décode le paramètre `state` OAuth2 signé HMAC                        |
 | [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Reconstruit l'objet `User` à partir du JWT (claims Keycloak)                |
+| [`src/Security/EntrepotUserCache.php`](../../../src/Security/EntrepotUserCache.php)                                 | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement    |
+| [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Dérivation datastore/communauté depuis l'appartenance, deny-path            |
 | [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                           | Routes `/login`, `/logout`, `/login/check`                                  |
 | [`src/Listener/LogoutSubscriber.php`](../../../src/Listener/LogoutSubscriber.php)                                   | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak              |
 | [`src/ApiClient/AuthenticatedHttpClient.php`](../../../src/ApiClient/AuthenticatedHttpClient.php)                   | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt     |
