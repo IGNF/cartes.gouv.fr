@@ -16,7 +16,6 @@ use Symfony\Contracts\HttpClient\ResponseStreamInterface;
 final class ServiceAccountHttpClient implements HttpClientInterface
 {
     private const EXPIRY_MARGIN = 60;
-    private const MIN_TTL = 30;
     private const DEFAULT_EXPIRES_IN = 300;
 
     public function __construct(
@@ -86,7 +85,8 @@ final class ServiceAccountHttpClient implements HttpClientInterface
             }
 
             $expiresIn = is_numeric($response['expires_in'] ?? null) ? (int) $response['expires_in'] : self::DEFAULT_EXPIRES_IN;
-            $item->expiresAfter(max(self::MIN_TTL, $expiresIn - self::EXPIRY_MARGIN));
+            // toujours strictement sous la durée annoncée : jamais de token périmé servi depuis le cache
+            $item->expiresAfter(max(1, $expiresIn - self::EXPIRY_MARGIN));
 
             return $accessToken;
         });
