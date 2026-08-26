@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ApiClient;
+namespace App\ApiClient\Auth;
 
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;

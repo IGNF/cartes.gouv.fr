@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ApiClient;
+namespace App\ApiClient\Auth;
 
 /**
  * Le compte de service n'a pas pu obtenir de token auprès de Keycloak.

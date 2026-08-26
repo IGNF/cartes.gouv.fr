@@ -3,7 +3,7 @@
 namespace App\Services\EntrepotApi;
 
 use App\ApiClient\ApiClient;
-use App\ApiClient\ServiceAccountAuthenticationException;
+use App\ApiClient\Auth\ServiceAccountAuthenticationException;
 use App\Security\User;
 use App\Services\MembershipService;
 use App\Services\SandboxService;

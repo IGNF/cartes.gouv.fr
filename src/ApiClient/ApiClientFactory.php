@@ -2,6 +2,8 @@
 
 namespace App\ApiClient;
 
+use App\ApiClient\Auth\AuthenticatedHttpClient;
+use App\ApiClient\Auth\ServiceAccountHttpClient;
 use App\ApiClient\ErrorParser\EntrepotErrorParser;
 use App\ApiClient\ErrorParser\EspaceCoErrorParser;
 use App\Security\KeycloakTokenManager;
