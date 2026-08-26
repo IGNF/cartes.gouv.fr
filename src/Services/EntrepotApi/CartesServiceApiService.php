@@ -258,10 +258,12 @@ class CartesServiceApiService
         // suppression de la configuration
         // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
         for ($attempt = 1; $attempt <= self::UNPUBLISH_MAX_ATTEMPTS; ++$attempt) {
-            sleep(self::UNPUBLISH_RETRY_DELAY_SECONDS);
             $configuration = $this->configurationApiService->get($datastoreId, $configurationId)->array();
             if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
                 break;
+            }
+            if ($attempt < self::UNPUBLISH_MAX_ATTEMPTS) {
+                sleep(self::UNPUBLISH_RETRY_DELAY_SECONDS);
             }
         }
 
