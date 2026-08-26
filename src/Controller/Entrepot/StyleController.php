@@ -12,6 +12,7 @@ use App\Services\EntrepotApi\CartesStylesApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Utils;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,6 +32,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         private AnnexeApiService $annexeApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
         private CartesStylesApiService $cartesStylesApiService,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -260,7 +262,13 @@ class StyleController extends AbstractController implements ApiControllerInterfa
                 ],
             ]);
             $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName, $configurations);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            $this->logger->warning('{class}: Failed to update metadata style files for datasheet {datasheetName}: {error}', [
+                'class' => self::class,
+                'datasheetName' => $datasheetName,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
