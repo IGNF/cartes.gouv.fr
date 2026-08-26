@@ -170,11 +170,21 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'fields' => 'status', // on n'a besoin que de l'_id qui est toujours présent, mais on ne peut pas demander "_id" via "fields", donc "status" parce que c'est un champ léger et qui est toujours présent
         ])->resolve();
 
-        if (0 === count($storedDataList)) {
-            return $this->json([]);
-        }
+        $offeringsById = $this->getOfferingsOfStoredData($datastoreId, $storedDataList);
+        $offeringsById = $this->cartesServiceApiService->getServicesFromOfferings($datastoreId, $offeringsById, false);
 
-        // Déclenche toutes les requêtes de la page 1 en simultané (non bloquant)
+        return $this->json(array_values($offeringsById));
+    }
+
+    /**
+     * Offerings détaillées publiées à partir des stored_data données, listes lancées en parallèle.
+     *
+     * @param array<array<mixed>> $storedDataList
+     *
+     * @return array<string,array<mixed>> clé : offeringId, valeur : offering
+     */
+    private function getOfferingsOfStoredData(string $datastoreId, array $storedDataList): array
+    {
         $pendingAllByStoredData = [];
         foreach ($storedDataList as $storedData) {
             $pendingAllByStoredData[] = $this->configurationApiService->getAllOfferingsDetailed($datastoreId, [
@@ -182,8 +192,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             ]);
         }
 
-        // Résolution — les réponses de la page 1 sont déjà en cours
-        /** @var array<mixed> $offeringsById clé : offeringId, valeur : offering */
         $offeringsById = [];
         foreach ($pendingAllByStoredData as $pendingAll) {
             foreach ($pendingAll->resolve() as $offering) {
@@ -191,11 +199,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }
 
-        $offeringsById = $this->cartesServiceApiService->getServicesFromOfferings($datastoreId, $offeringsById, false);
-
-        $services = array_values($offeringsById);
-
-        return $this->json($services);
+        return $offeringsById;
     }
 
     /**
@@ -250,48 +254,38 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     public function delete(string $datastoreId, string $datasheetName): Response
     {
         try {
-            $datasheet = json_decode($this->getDetailed($datastoreId, $datasheetName)->getContent(), true);
+            $datasheetTags = ['tags' => [CommonTags::DATASHEET_NAME => $datasheetName]];
+            $pendingUploadList = $this->uploadApiService->getAll($datastoreId, [...$datasheetTags, 'fields' => 'status,tags']);
+            $pendingStoredDataList = $this->storedDataApiService->getAll($datastoreId, [...$datasheetTags, 'fields' => 'type']);
+            $pendingMetadataList = $this->metadataApiService->getAll($datastoreId, $datasheetTags);
 
-            $servicesList = json_decode($this->getServices($datastoreId, $datasheetName)->getContent(), true);
+            $uploadList = $pendingUploadList->resolve();
+            $storedDataList = $pendingStoredDataList->resolve();
+            $metadataList = $pendingMetadataList->resolve();
+
+            if (0 === count($uploadList) && 0 === count($storedDataList) && 0 === count($metadataList)) {
+                throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
+            }
 
             // suppr des services (config et offering)
-            foreach ($servicesList as $offering) {
+            foreach ($this->getOfferingsOfStoredData($datastoreId, $storedDataList) as $offering) {
                 $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id'], $offering);
             }
 
             // suppr des uploads
-            if (isset($datasheet['upload_list'])) {
-                foreach ($datasheet['upload_list'] as $upload) {
-                    $this->uploadApiService->remove($datastoreId, $upload['_id'], $upload)->await();
+            foreach ($uploadList as $upload) {
+                $this->uploadApiService->remove($datastoreId, $upload['_id'], $upload)->await();
+            }
+
+            // suppr des stored_data (bases vecteur et pyramides)
+            $deletableTypes = [StoredDataTypes::VECTOR_DB, StoredDataTypes::ROK4_PYRAMID_VECTOR, StoredDataTypes::ROK4_PYRAMID_RASTER];
+            foreach ($storedDataList as $storedData) {
+                if (in_array($storedData['type'], $deletableTypes, true)) {
+                    $this->cartesStoredDataApiService->delete($datastoreId, $storedData['_id']);
                 }
             }
 
-            // suppr des stored_data
-            $storedDataList = [];
-
-            if (isset($datasheet['vector_db_list'])) {
-                $storedDataList = array_merge($storedDataList, $datasheet['vector_db_list']);
-            }
-
-            if (isset($datasheet['pyramid_vector_list'])) {
-                $storedDataList = array_merge($storedDataList, $datasheet['pyramid_vector_list']);
-            }
-
-            if (isset($datasheet['pyramid_raster_list'])) {
-                $storedDataList = array_merge($storedDataList, $datasheet['pyramid_raster_list']);
-            }
-
-            foreach ($storedDataList as $storedData) {
-                $this->cartesStoredDataApiService->delete($datastoreId, $storedData['_id']);
-            }
-
             // suppr des métadonnées
-            $metadataList = $this->metadataApiService->getAll($datastoreId, [
-                'tags' => [
-                    CommonTags::DATASHEET_NAME => $datasheetName,
-                ],
-            ])->resolve();
-
             if (count($metadataList) > 0) {
                 $metadata = $metadataList[0];
 
@@ -304,6 +298,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
             // TODO : autres données à supprimer
             // Suppression des annexes : vignette, documents associés à la fiche de données etc
+            // listées après la dépublication des services, qui supprime déjà les annexes de style et de capabilities
             $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"])->resolve();
             foreach ($annexes as $annexe) {
                 $this->annexeApiService->remove($datastoreId, $annexe['_id'])->await();
