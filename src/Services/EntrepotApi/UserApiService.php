@@ -103,6 +103,9 @@ final class UserApiService
         return $this->api->delete("users/me/keys/$keyId/accesses/$accessId");
     }
 
+    /**
+     * N'invalide pas le snapshot utilisateur : passer par MembershipService, ou appeler MembershipService::invalidateCurrentUser() après coup.
+     */
     public function leaveCommunity(string $communityId): ResponsePromise
     {
         return $this->api->delete("users/me/communities/$communityId");
