@@ -33,7 +33,10 @@ ApiClient                 — méthodes HTTP ; retournent toutes ResponsePromise
 ApiClientFactory          — crée les instances ApiClient préconfigurées par API :
                             createEntrepotClient(), createEspaceCoClient(), createEspaceCoStyleClient()
 
-AuthenticatedHttpClient   — décorateur qui injecte le token Bearer Keycloak sur chaque requête
+Auth/                     — décorateurs HttpClient qui injectent le token Bearer
+  AuthenticatedHttpClient      token Keycloak de l'utilisateur connecté
+  ServiceAccountHttpClient     token client_credentials du compte de service (cache par pod, TTL = expires_in - 60 s)
+  ServiceAccountRetryStrategy  rejoue une fois sur 401 après avoir jeté le token en cache
 
 ErrorParser/              — normalisation des erreurs par API -> ApiException
   EntrepotErrorParser
@@ -243,7 +246,11 @@ Le retry (max 3 tentatives, sur 500/502/503/504) est configuré au niveau du Htt
 src/ApiClient/
   ApiClient.php               — point d'entrée principal (verbes HTTP + helpers de haut niveau)
   ApiClientFactory.php        — factory : un ApiClient par API externe
-  AuthenticatedHttpClient.php — décorateur HttpClient : injecte le token Bearer
+  Auth/
+    AuthenticatedHttpClient.php             — décorateur HttpClient : token Bearer de l'utilisateur
+    ServiceAccountHttpClient.php            — décorateur HttpClient : token du compte de service
+    ServiceAccountRetryStrategy.php         — retry unique sur 401 (token jeté)
+    ServiceAccountAuthenticationException.php
   ResponsePromise.php         — wrapper lazy pour une réponse unique
   PaginatedPromise.php        — wrapper lazy pour toutes les pages
   PaginatedResponse.php       — objet valeur : contenu + headers
