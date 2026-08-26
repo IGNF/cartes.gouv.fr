@@ -1,4 +1,4 @@
-# ApiClient — Documentation
+# ApiClient - Documentation
 
 ## Pourquoi ne pas utiliser Guzzle / HTTPlug / une solution existante ?
 
@@ -6,15 +6,15 @@ La réponse courte : le `HttpClient` de Symfony fait déjà de l'asynchrone. Tou
 
 La réponse longue :
 
-**Guzzle / HTTPlug** sont d'excellents clients HTTP, mais ils dupliquent ce que `symfony/http-client` fournit déjà. Les promesses de Guzzle reposent sur `guzzlehttp/promises`, une bibliothèque de promesses indépendante avec sa propre boucle d'événements — elle n'est pas vraiment non-bloquante en PHP, elle nécessite de faire tourner la boucle manuellement, et elle ne s'intègre pas au profileur ni au middleware de retry de Symfony.
+**Guzzle / HTTPlug** sont d'excellents clients HTTP, mais ils dupliquent ce que `symfony/http-client` fournit déjà. Les promesses de Guzzle reposent sur `guzzlehttp/promises`, une bibliothèque de promesses indépendante avec sa propre boucle d'événements - elle n'est pas vraiment non-bloquante en PHP, elle nécessite de faire tourner la boucle manuellement, et elle ne s'intègre pas au profileur ni au middleware de retry de Symfony.
 
 **ReactPHP / Amp** offrent une véritable I/O asynchrone, mais impliquent un modèle de programmation entièrement différent (boucle d'événements au point d'entrée, callbacks/coroutines partout). C'est un engagement architectural complet, pas quelque chose qu'on greffe sur une application Symfony classique.
 
 **`HttpClientInterface` de Symfony** est le bon outil ici car :
 
-1. **Le streaming / multiplex est natif.** `$client->stream($responses)` traite plusieurs requêtes en parallèle via un seul `curl_multi` ou select sur socket, en livrant les chunks au fur et à mesure. C'est une vraie I/O parallèle dans une seule requête PHP — sans boucle d'événements, sans callbacks, sans configuration spéciale.
+1. **Le streaming / multiplex est natif.** `$client->stream($responses)` traite plusieurs requêtes en parallèle via un seul `curl_multi` ou select sur socket, en livrant les chunks au fur et à mesure. C'est une vraie I/O parallèle dans une seule requête PHP - sans boucle d'événements, sans callbacks, sans configuration spéciale.
 2. **Zéro dépendance supplémentaire.** Il est livré avec Symfony, déjà câblé dans le conteneur, et déjà configuré avec retry, timeout et proxy dans `config/packages/framework.yaml`.
-3. **Intégration profileur.** Chaque requête apparaît gratuitement dans la timeline du profileur Symfony — durée, statut, headers, body.
+3. **Intégration profileur.** Chaque requête apparaît gratuitement dans la timeline du profileur Symfony - durée, statut, headers, body.
 4. **Clients scopés / base URI.** `withOptions(['base_uri' => ...])` permet à chaque domaine d'API d'avoir sa propre instance préconfigurée (`ApiClientFactory`).
 
 Ce qu'on a ajouté par-dessus est une fine couche ergonomique : consommation différée (`ResponsePromise`), autopagination transparente (`PaginatedPromise`), et récupération de détails en batch (`fetchAllDetailsAsync`). Rien de tout cela ne nécessite de bibliothèque tierce.
@@ -24,21 +24,21 @@ Ce qu'on a ajouté par-dessus est une fine couche ergonomique : consommation dif
 ## Vue d'ensemble de l'architecture
 
 ```
-ApiClient                 — méthodes HTTP ; retournent toutes ResponsePromise ou PaginatedPromise
-  └── ResponsePromise     — wrapper lazy pour une réponse ; consommé via ->array(), ->text(), ->await()
-  └── PaginatedPromise    — wrapper lazy pour toutes les pages ; consommé via ->resolve()
-  └── PaginatedResponse   — objet valeur : tableau de contenu + headers (pour la pagination)
-  └── RequestOptions      — objet valeur : body, query, headers, flag fileUpload
+ApiClient                 - méthodes HTTP ; retournent toutes ResponsePromise ou PaginatedPromise
+  └── ResponsePromise     - wrapper lazy pour une réponse ; consommé via ->array(), ->text(), ->await()
+  └── PaginatedPromise    - wrapper lazy pour toutes les pages ; consommé via ->resolve()
+  └── PaginatedResponse   - objet valeur : tableau de contenu + headers (pour la pagination)
+  └── RequestOptions      - objet valeur : body, query, headers, flag fileUpload
 
-ApiClientFactory          — crée les instances ApiClient préconfigurées par API :
+ApiClientFactory          - crée les instances ApiClient préconfigurées par API :
                             createEntrepotClient(), createEspaceCoClient(), createEspaceCoStyleClient()
 
-Auth/                     — décorateurs HttpClient qui injectent le token Bearer
+Auth/                     - décorateurs HttpClient qui injectent le token Bearer
   AuthenticatedHttpClient      token Keycloak de l'utilisateur connecté
   ServiceAccountHttpClient     token client_credentials du compte de service (cache par pod, TTL = expires_in - 60 s)
   ServiceAccountRetryStrategy  rejoue une fois sur 401 après avoir jeté le token en cache
 
-ErrorParser/              — normalisation des erreurs par API -> ApiException
+ErrorParser/              - normalisation des erreurs par API -> ApiException
   EntrepotErrorParser
   EspaceCoErrorParser
 ```
@@ -47,7 +47,7 @@ Les services métier (`src/Services/EntrepotApi/`, `src/Services/EspaceCoApi/`) 
 
 ---
 
-## ResponsePromise — référence API
+## ResponsePromise - référence API
 
 Toutes les méthodes HTTP de `ApiClient` (`get`, `post`, `patch`, `put`, `delete`, `sendFile`) retournent un `ResponsePromise`. La requête HTTP sous-jacente est déjà en vol (Symfony's HttpClient la dispatche immédiatement), mais aucun octet n'a encore été lu.
 
@@ -65,7 +65,7 @@ Toutes les méthodes HTTP de `ApiClient` (`get`, `post`, `patch`, `put`, `delete
 
 ---
 
-## PaginatedPromise — référence API
+## PaginatedPromise - référence API
 
 `ApiClient::requestAll()` retourne un `PaginatedPromise`. Il déclenche la page 1 immédiatement à la construction. Les pages 2–N sont déclenchées en lots parallèles de 20 maximum lors de l'appel à `->resolve()`.
 
@@ -74,11 +74,11 @@ Toutes les méthodes HTTP de `ApiClient` (`get`, `post`, `patch`, `put`, `delete
 | `->resolve()`      | `array`            | Bloque et retourne le tableau fusionné de toutes les pages ; résultat mis en cache (idempotent)                   |
 | `->then(callable)` | `PaginatedPromise` | Enregistre une transformation lazy appliquée au tableau complet au moment du resolve ; `$transform(array): array` |
 
-`->then()` est composable et reste lazy — la transformation ne s'exécute qu'une fois, au moment du `->resolve()`.
+`->then()` est composable et reste lazy - la transformation ne s'exécute qu'une fois, au moment du `->resolve()`.
 
 ---
 
-## ApiClient — méthodes de haut niveau
+## ApiClient - méthodes de haut niveau
 
 ### `resolveAll(array $pendingsByKey, bool $continueOnError = false): array`
 
@@ -161,7 +161,7 @@ $pendingAnnexes        = $this->annexeApiService->getAll($datastoreId);
 // Cet appel synchrone s'exécute pendant que les requêtes sont sur le réseau
 $datastore = $this->datastoreApiService->get($datastoreId); // mis en cache
 
-// Consommation — la plupart des données sont probablement déjà reçues
+// Consommation - la plupart des données sont probablement déjà reçues
 $uploads        = $pendingUploads->resolve();
 $storedDataList = $pendingStoredData->resolve();
 $metadataList   = $pendingMetadata->resolve();
@@ -200,8 +200,8 @@ public function getList(string $datastoreId, array $query = []): PaginatedRespon
 
 // Contrôleur :
 $page = $this->storedDataApiService->getList($datastoreId, $request->query->all());
-// $page->content           — items de la page courante
-// $page->getPageCount(100) — nombre total de pages depuis le header Content-Range
+// $page->content           - items de la page courante
+// $page->getPageCount(100) - nombre total de pages depuis le header Content-Range
 ```
 
 ### 8. Résoudre plusieurs requêtes indépendantes sur une seule ressource en parallèle
@@ -224,7 +224,7 @@ $executions = $results['executions'];
 
 ## Ce qui ne bénéficie pas de ce pattern
 
-- **Chaînes de dépendances séquentielles.** Si l'étape B a besoin du résultat de A pour construire son URL, impossible de paralléliser — appeler `->array()` directement.
+- **Chaînes de dépendances séquentielles.** Si l'étape B a besoin du résultat de A pour construire son URL, impossible de paralléliser - appeler `->array()` directement.
 - **Mutations feu-et-oubli en boucle.** Trois `->await()` en séquence dans une boucle restent séquentiels. Collecter les promesses d'abord et utiliser `resolveAll()` pour des suppressions parallèles.
 - **Appels dans une closure mise en cache.** Si le résultat est mémoïsé de toute façon (`$cache->get(...)`), différer la consommation ne sert à rien.
 
@@ -244,17 +244,17 @@ Le retry (max 3 tentatives, sur 500/502/503/504) est configuré au niveau du Htt
 
 ```
 src/ApiClient/
-  ApiClient.php               — point d'entrée principal (verbes HTTP + helpers de haut niveau)
-  ApiClientFactory.php        — factory : un ApiClient par API externe
+  ApiClient.php               - point d'entrée principal (verbes HTTP + helpers de haut niveau)
+  ApiClientFactory.php        - factory : un ApiClient par API externe
   Auth/
-    AuthenticatedHttpClient.php             — décorateur HttpClient : token Bearer de l'utilisateur
-    ServiceAccountHttpClient.php            — décorateur HttpClient : token du compte de service
-    ServiceAccountRetryStrategy.php         — retry unique sur 401 (token jeté)
+    AuthenticatedHttpClient.php             - décorateur HttpClient : token Bearer de l'utilisateur
+    ServiceAccountHttpClient.php            - décorateur HttpClient : token du compte de service
+    ServiceAccountRetryStrategy.php         - retry unique sur 401 (token jeté)
     ServiceAccountAuthenticationException.php
-  ResponsePromise.php         — wrapper lazy pour une réponse unique
-  PaginatedPromise.php        — wrapper lazy pour toutes les pages
-  PaginatedResponse.php       — objet valeur : contenu + headers
-  RequestOptions.php          — objet valeur : paramètres de requête
+  ResponsePromise.php         - wrapper lazy pour une réponse unique
+  PaginatedPromise.php        - wrapper lazy pour toutes les pages
+  PaginatedResponse.php       - objet valeur : contenu + headers
+  RequestOptions.php          - objet valeur : paramètres de requête
   ErrorParser/
     ErrorParserInterface.php
     EntrepotErrorParser.php
