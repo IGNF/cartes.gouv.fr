@@ -57,6 +57,7 @@ Project vocabulary (membership, snapshot, grant-path...): `docs/developer/glossa
 
 - External APIs are called through `ApiClient` (`src/ApiClient/`), composed into domain services via `#[Autowire(service: 'app.api_client.*')]`. `ResponsePromise` and `PaginatedPromise` are lazy: nothing is sent until consumed (`->array()`, `->resolve()`).
 - Always handle `AuthenticationExpiredException`.
+- Authorization is delegated to the Entrepôt: every upstream call carries the user's own token, so there is no Symfony-side `access_control` or voter for datastore/community access. The single exception is the service-account client (`app.api_client.entrepot_sandbox_service_account`), used only by `SandboxService`, which checks the user's membership itself. Any new use of the service account must do its own explicit membership check and be flagged in the PR.
 - Authentication is stateless: Keycloak tokens live in the encrypted `__Host-CGAUTH` cookie; there is no PHP session.
 
 ## Commands

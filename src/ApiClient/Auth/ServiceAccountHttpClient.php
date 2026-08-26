@@ -12,6 +12,9 @@ use Symfony\Contracts\HttpClient\ResponseStreamInterface;
 /**
  * Authentifie les appels avec le token client_credentials d'un compte de service Keycloak.
  * Le token est partagé par pod dans le cache applicatif, expiré un peu avant sa fin de vie annoncée.
+ *
+ * Client privilégié : l'Entrepôt autorise le compte de service, pas l'utilisateur. Seul SandboxService l'utilise,
+ * après avoir vérifié lui-même l'appartenance de l'utilisateur. Tout nouvel usage doit faire cette vérification.
  */
 final class ServiceAccountHttpClient implements HttpClientInterface
 {

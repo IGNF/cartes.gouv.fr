@@ -35,6 +35,8 @@ services:
         class: App\ApiClient\ApiClient
         factory: ['@App\ApiClient\ApiClientFactory', "createEspaceCoStyleClient"]
 
+    # Compte de service privilégié : réservé à SandboxService, qui vérifie lui-même l'appartenance de l'utilisateur.
+    # Tout autre appel amont porte le token de l'utilisateur, l'autorisation est déléguée à l'Entrepôt (cf. AGENTS.md).
     app.api_client.entrepot_sandbox_service_account:
         class: App\ApiClient\ApiClient
         factory: ['@App\ApiClient\ApiClientFactory', "createSandboxServiceAccountClient"]
