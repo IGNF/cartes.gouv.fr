@@ -8,6 +8,7 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
+use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\CartesStylesApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Utils;
@@ -30,6 +31,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
+        private CartesServiceApiService $cartesServiceApiService,
         private CartesStylesApiService $cartesStylesApiService,
     ) {
     }
@@ -79,7 +81,8 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->cartesStylesApiService->updateStylesTmsMetadata($datastoreId, $configuration, $offeringId, $styles);
 
             try {
-                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName);
+                $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
+                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName, $services);
             } catch (\Throwable) {
                 // ne rien faire si erreur
             }
@@ -152,7 +155,8 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->cartesStylesApiService->updateStylesTmsMetadata($datastoreId, $configuration, $offeringId, $styles);
 
             try {
-                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName);
+                $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
+                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName, $services);
             } catch (\Throwable) {
                 // ne rien faire si erreur
             }
@@ -213,7 +217,8 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->cartesStylesApiService->updateStylesTmsMetadata($datastoreId, $configuration, $offeringId, $styles);
 
             try {
-                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName);
+                $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
+                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName, $services);
             } catch (\Throwable $th) {
                 //  ne rien faire si erreur
             }

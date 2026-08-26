@@ -11,6 +11,7 @@ use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\PermissionTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
+use App\Dto\Datasheet\DatasheetServices;
 use App\Dto\Services\CommonDTO;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
@@ -149,6 +150,32 @@ class CartesServiceApiService
         }
 
         return $offeringsById;
+    }
+
+    /**
+     * Configurations détaillées et offerings d'une fiche de données, en une passe (listes d'offerings lancées en parallèle).
+     */
+    public function getDatasheetServices(string $datastoreId, string $datasheetName): DatasheetServices
+    {
+        $configurations = $this->configurationApiService->getAllDetailed($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
+
+        $pendingOfferingsByConfigurationId = [];
+        foreach ($configurations as $configuration) {
+            $pendingOfferingsByConfigurationId[$configuration['_id']] = $this->configurationApiService->getConfigurationOfferingsDetailed($datastoreId, $configuration['_id']);
+        }
+
+        $offeringsById = [];
+        foreach ($pendingOfferingsByConfigurationId as $pendingOfferings) {
+            foreach ($pendingOfferings->resolve() as $offering) {
+                $offeringsById[$offering['_id']] = $offering;
+            }
+        }
+
+        return new DatasheetServices(array_column($configurations, null, '_id'), $offeringsById);
     }
 
     /**
@@ -374,9 +401,12 @@ class CartesServiceApiService
             ]);
         }
 
+        // Services de la fiche (dont celui qui vient d'être écrit), chargés une fois
+        $services = $this->getDatasheetServices($datastoreId, $datasheetName);
+
         // Création ou mise à jour de metadata
         $formData = json_decode(json_encode($dto), true);
-        $apiMetadata = $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
+        $apiMetadata = $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $services, $formData);
 
         // Synchronisation des autres services de la même fiche de données
         /** @var CswMetadata */
