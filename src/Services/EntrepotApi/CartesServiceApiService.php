@@ -227,9 +227,13 @@ class CartesServiceApiService
     }
 
     /**
+     * Renvoie la configuration supprimée (dernier état lu avant suppression).
+     *
      * @param array<mixed>|null $offering offering déjà chargée par l'appelant (avec `type` et `configuration`), évite un GET
+     *
+     * @return array<mixed>
      */
-    public function unpublish(string $datastoreId, string $offeringId, ?array $offering = null): void
+    public function unpublish(string $datastoreId, string $offeringId, ?array $offering = null): array
     {
         $offering ??= $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
 
@@ -238,8 +242,7 @@ class CartesServiceApiService
             case OfferingTypes::WMTSTMS:
             case OfferingTypes::WMSVECTOR:
             case OfferingTypes::WMSRASTER:
-                $this->unpublishOfferingAndConfiguration($datastoreId, $offering);
-                break;
+                return $this->unpublishOfferingAndConfiguration($datastoreId, $offering);
             default:
                 throw new CartesApiException('Type de service invalide pour la suppression', Response::HTTP_BAD_REQUEST, ['offering_type' => $offering['type']]);
         }
@@ -247,8 +250,10 @@ class CartesServiceApiService
 
     /**
      * @param array<mixed> $offering
+     *
+     * @return array<mixed> la configuration supprimée
      */
-    private function unpublishOfferingAndConfiguration(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
+    private function unpublishOfferingAndConfiguration(string $datastoreId, array $offering, bool $removeStyleFiles = true): array
     {
         // suppression de l'offering
         $this->configurationApiService->removeOffering($datastoreId, $offering['_id'])->await();
@@ -284,6 +289,8 @@ class CartesServiceApiService
         if (true === $removeStyleFiles) {
             $this->removeStyleFiles($datastoreId, $configuration);
         }
+
+        return $configuration;
     }
 
     /**
