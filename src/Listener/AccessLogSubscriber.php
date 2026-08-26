@@ -41,7 +41,7 @@ final class AccessLogSubscriber implements EventSubscriberInterface
         $route = $request->attributes->get('_route');
 
         // Probes de santé exclues, comme dans l'access log Caddy
-        if (AppController::HEALTH_ROUTE === $route) {
+        if (in_array($route, [AppController::HEALTH_ROUTE, AppController::READY_ROUTE], true)) {
             return;
         }
         $user = $this->security->getUser();
