@@ -5,11 +5,14 @@ namespace App\Services;
 use App\Dto\Datastore\DatastoreIdentity;
 use App\Security\EntrepotUserCache;
 use App\Security\User;
+use App\Services\EntrepotApi\CommunityApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\UserApiService;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Dérive les infos datastore/communauté de l'appartenance de l'utilisateur courant, au lieu de charger le DTO datastore complet.
+ * Porte aussi les mutations d'appartenance, pour que l'invalidation du snapshot utilisateur ne puisse pas être oubliée.
  */
 class MembershipService
 {
@@ -17,6 +20,8 @@ class MembershipService
         private Security $security,
         private EntrepotUserCache $entrepotUserCache,
         private DatastoreApiService $datastoreApiService,
+        private UserApiService $userApiService,
+        private CommunityApiService $communityApiService,
     ) {
     }
 
@@ -56,13 +61,49 @@ class MembershipService
         return new DatastoreIdentity($datastore['name'], $datastore['technical_name'], $datastore['community']['_id']);
     }
 
+    public function leaveCommunity(string $communityId): void
+    {
+        $this->userApiService->leaveCommunity($communityId)->await();
+        $this->invalidateCurrentUser();
+    }
+
     /**
-     * À appeler après une mutation d'appartenance faite par l'utilisateur lui-même.
+     * @param array<string> $rights
      */
-    public function invalidateCurrentUser(): void
+    public function setMemberRights(string $communityId, string $userId, array $rights): void
+    {
+        $this->communityApiService->addOrModifyUserRights($communityId, $userId, ['rights' => $rights])->await();
+        $this->invalidateCurrentUser($userId);
+    }
+
+    public function removeMember(string $communityId, string $userId): void
+    {
+        $this->communityApiService->removeUserRights($communityId, $userId)->await();
+        $this->invalidateCurrentUser($userId);
+    }
+
+    /**
+     * @param array<mixed> $data
+     *
+     * @return array<mixed> la communauté modifiée
+     */
+    public function modifyCommunity(string $communityId, array $data): array
+    {
+        $community = $this->communityApiService->modifyCommunity($communityId, $data)->array();
+        // le nom de la communauté fait partie des infos dérivées de l'appartenance
+        $this->invalidateCurrentUser();
+
+        return $community;
+    }
+
+    /**
+     * Invalide le snapshot de l'utilisateur courant ; avec $userId, seulement si la mutation le concerne.
+     * Public pour les mutations faites hors de ce service (compte de service).
+     */
+    public function invalidateCurrentUser(?string $userId = null): void
     {
         $user = $this->security->getUser();
-        if ($user instanceof User) {
+        if ($user instanceof User && (null === $userId || $user->getId() === $userId)) {
             $this->entrepotUserCache->invalidate($user->getKeycloakId());
         }
     }
