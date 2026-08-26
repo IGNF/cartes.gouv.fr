@@ -159,7 +159,7 @@ class CartesMetadataApiService
             $oldCswMetadata = $this->cswMetadataHelper->fromXml($oldMetadataFileXml);
         }
 
-        $newCswMetadata = $this->getNewCswMetadataFromDto($datastoreId, $datasheetName, $services, $oldCswMetadata, $dto);
+        $newCswMetadata = $this->getNewCswMetadataFromDto($datastoreId, $services, $oldCswMetadata, $dto);
 
         // La publication est gérée explicitement par l'utilisateur ; on ne publie pas automatiquement.
         return $this->persistCswMetadata($datastoreId, $datasheetName, $apiMetadata, $oldCswMetadata, $newCswMetadata, publishIfUnpublished: false);
@@ -193,7 +193,7 @@ class CartesMetadataApiService
     /**
      * Construit CswMetadata depuis le DTO de formulaire validé (champ-à-champ).
      */
-    private function getNewCswMetadataFromDto(string $datastoreId, string $datasheetName, DatasheetServices $services, ?CswMetadata $oldCswMetadata, DatasheetMetadataDTO $dto): CswMetadata
+    private function getNewCswMetadataFromDto(string $datastoreId, DatasheetServices $services, ?CswMetadata $oldCswMetadata, DatasheetMetadataDTO $dto): CswMetadata
     {
         $newCswMetadata = null === $oldCswMetadata ? new CswMetadata() : clone $oldCswMetadata;
 
