@@ -401,7 +401,7 @@ class CartesServiceApiService
             ]);
         }
 
-        // Services de la fiche (dont celui qui vient d'être écrit), chargés une fois
+        // Services de la fiche (dont celui qui vient d'être écrit), chargés une fois pour la métadonnée et la synchronisation
         $services = $this->getDatasheetServices($datastoreId, $datasheetName);
 
         // Création ou mise à jour de metadata
@@ -412,7 +412,7 @@ class CartesServiceApiService
         /** @var CswMetadata */
         $cswMetadata = $apiMetadata['csw_metadata'];
 
-        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::CONFIG_THEME], $cswMetadata, $dto);
+        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::CONFIG_THEME], $cswMetadata, $dto, $services);
 
         return $offering;
     }
@@ -420,7 +420,7 @@ class CartesServiceApiService
     /**
      * @param array<mixed> $offering
      */
-    private function synchroniseSiblingServices(string $datastoreId, array $offering, string $configTheme, CswMetadata $cswMetadata, CommonDTO $dto): void
+    private function synchroniseSiblingServices(string $datastoreId, array $offering, string $configTheme, CswMetadata $cswMetadata, CommonDTO $dto, DatasheetServices $services): void
     {
         $siblingServices = array_map(fn (CswMetadataLayer $layer) => $layer->offeringId, $cswMetadata->layers ?? []);
         $siblingServices = array_filter($siblingServices, fn (string $serviceId) => $serviceId !== $offering['_id']);
@@ -430,8 +430,9 @@ class CartesServiceApiService
 
         foreach ($siblingServices as $siblingServiceId) {
             try {
-                $offering = $this->configurationApiService->getOffering($datastoreId, $siblingServiceId)->array();
-                $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
+                // les couches de la métadonnée viennent de ces mêmes services : pas de relecture
+                $offering = $services->offeringsById[$siblingServiceId];
+                $configuration = $services->configurationOfOffering($siblingServiceId);
 
                 // Mise à jour des tags seulement si nécessaire
                 if ($configTheme !== ($configuration['tags'][CommonTags::CONFIG_THEME] ?? '')) {
