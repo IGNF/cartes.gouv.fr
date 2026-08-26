@@ -6,7 +6,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Cette classe d'exception devrait être utilisée **uniquement** dans les ApiController de cartes.gouv.fr pour remonter les erreurs au frontend react. Il suffit de lever cette exception et l'event subscriber `App\Listener\CartesApiExceptionSubscriber` se chargera de renvoyer les erreurs dans un json de façon homogène.
+ * Exception destinée au frontend react : levée dans les ApiController de cartes.gouv.fr (ou par une exception métier qui l'étend), l'event subscriber `App\Listener\CartesApiExceptionSubscriber` la renvoie dans un json homogène.
  */
 class CartesApiException extends HttpException
 {
