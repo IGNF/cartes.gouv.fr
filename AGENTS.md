@@ -11,6 +11,8 @@ External API references:
 - Entrepôt docs: https://geoplateforme.github.io/entrepot/production
 - OpenAPI: https://data.geopf.fr/api/v3/api-docs
 
+Project vocabulary (membership, snapshot, grant-path...): `docs/developer/glossaire.md`.
+
 ## Language
 
 - Code identifiers in English (file names, components, props, types, fields), even when the domain vocabulary is French (`producers`, not `producteurs`).
