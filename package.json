@@ -93,6 +93,7 @@
         "vite-plugin-image-optimizer": "^2.0.3",
         "vite-plugin-run": "^0.6",
         "vite-plugin-symfony": "^8.0",
+        "vitest": "^4.1.11",
         "yup": "^1.2.0",
         "zustand": "^5.0.0"
     },
@@ -111,7 +112,8 @@
         "format": "prettier --check assets/",
         "format:fix": "prettier --write assets/",
         "prepare": "husky",
-        "type-check": "tsc -b"
+        "type-check": "tsc -b",
+        "test": "vitest run"
     },
     "browserslist": [
         "last 2 versions",
