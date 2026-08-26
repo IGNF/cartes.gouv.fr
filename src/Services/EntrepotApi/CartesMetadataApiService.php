@@ -3,6 +3,7 @@
 namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Dto\Datasheet\DatasheetServices;
@@ -86,7 +87,7 @@ class CartesMetadataApiService
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $services);
-        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $services);
+        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $services->configurationsById);
         $cswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $services);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
@@ -98,7 +99,10 @@ class CartesMetadataApiService
         }
     }
 
-    public function updateStyleFiles(string $datastoreId, string $datasheetName, DatasheetServices $services): void
+    /**
+     * @param array<array<mixed>> $configurations configurations détaillées de la fiche
+     */
+    public function updateStyleFiles(string $datastoreId, string $datasheetName, array $configurations): void
     {
         $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
         if (!$apiMetadata) {
@@ -108,7 +112,7 @@ class CartesMetadataApiService
         $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
-        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $services);
+        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $configurations);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -266,9 +270,7 @@ class CartesMetadataApiService
             $newCswMetadata->frequencyCode = $formData['frequency_code'] ?? null;
             $newCswMetadata->layers = $layers;
             $newCswMetadata->bbox = $bbox;
-            $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $services);
-
-            // Doit-être calculé après la récupération des layers
+            $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $services->configurationsById);
             $newCswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $services);
         }
 
@@ -282,63 +284,64 @@ class CartesMetadataApiService
     {
         $layers = [];
 
-        foreach ($services->configurations() as $configuration) {
+        foreach ($services->configurationsById as $configuration) {
             $offering = $services->offeringOfConfiguration($configuration['_id']);
+            if (null === $offering) {
+                continue;
+            }
 
-            if (null !== $offering) {
-                $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
+            $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
 
-                switch ($configuration['type']) {
-                    case ConfigurationTypes::WFS:
-                        $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
-                        $subLayers = $this->getWfsSubLayers($configuration, $offering, $endpointUrl);
-                        $layers = array_merge($layers, $subLayers);
+            switch ($configuration['type']) {
+                case ConfigurationTypes::WFS:
+                    $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
+                    $subLayers = $this->getWfsSubLayers($configuration, $offering, $endpointUrl);
+                    $layers = array_merge($layers, $subLayers);
 
+                    break;
+
+                case ConfigurationTypes::WMSRASTER:
+                case ConfigurationTypes::WMSVECTOR:
+                    $layerName = $offering['layer_name'];
+                    $gmdOnlineResourceProtocol = 'OGC:WMS';
+                    $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
+
+                    $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['_id'], $offering['open']);
+                    break;
+
+                case ConfigurationTypes::WMTSTMS:
+                    $layerName = $offering['layer_name'];
+
+                    if (!isset($configuration['type_infos']['used_data'][0]['stored_data'])) {
                         break;
+                    }
+                    $pyramid = $this->storedDataApiService->get($datastoreId, $configuration['type_infos']['used_data'][0]['stored_data'])->array();
 
-                    case ConfigurationTypes::WMSRASTER:
-                    case ConfigurationTypes::WMSVECTOR:
-                        $layerName = $offering['layer_name'];
-                        $gmdOnlineResourceProtocol = 'OGC:WMS';
-                        $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
+                    $gmdOnlineResourceProtocol = null;
+                    $actualType = null;
 
+                    if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramid['type']) {
+                        $gmdOnlineResourceProtocol = 'TMS';
+                        $actualType = 'TMS';
+                    } elseif (StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
+                        $gmdOnlineResourceProtocol = 'OGC:WMTS';
+                        $actualType = 'WMTS';
+                    }
+
+                    $endpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']);
+                    $endpoints = array_values($endpoints);
+
+                    if (count($endpoints) > 0) {
+                        $endpointUrl = $endpoints[0]['url'];
+                        if ('TMS' === $actualType) {
+                            $endpointUrl = $endpointUrl.'/1.0.0';
+                            // la version 1.0.0 du TMS est aussi écrite en dur
+                            // dans le composant UserKeyLink pour créer une URL de 'capabilities'
+                        }
                         $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['_id'], $offering['open']);
-                        break;
+                    }
 
-                    case ConfigurationTypes::WMTSTMS:
-                        $layerName = $offering['layer_name'];
-
-                        if (!isset($configuration['type_infos']['used_data'][0]['stored_data'])) {
-                            break;
-                        }
-                        $pyramid = $this->storedDataApiService->get($datastoreId, $configuration['type_infos']['used_data'][0]['stored_data'])->array();
-
-                        $gmdOnlineResourceProtocol = null;
-                        $actualType = null;
-
-                        if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramid['type']) {
-                            $gmdOnlineResourceProtocol = 'TMS';
-                            $actualType = 'TMS';
-                        } elseif (StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
-                            $gmdOnlineResourceProtocol = 'OGC:WMTS';
-                            $actualType = 'WMTS';
-                        }
-
-                        $endpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']);
-                        $endpoints = array_values($endpoints);
-
-                        if (count($endpoints) > 0) {
-                            $endpointUrl = $endpoints[0]['url'];
-                            if ('TMS' === $actualType) {
-                                $endpointUrl = $endpointUrl.'/1.0.0';
-                                // la version 1.0.0 du TMS est aussi écrite en dur
-                                // dans le composant UserKeyLink pour créer une URL de 'capabilities'
-                            }
-                            $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['_id'], $offering['open']);
-                        }
-
-                        break;
-                }
+                    break;
             }
         }
 
@@ -376,13 +379,15 @@ class CartesMetadataApiService
     /**
      * Seulement les services WFS et WMTS/WMS sont concernés par les fichiers de style.
      *
+     * @param array<array<mixed>> $configurations configurations détaillées de la fiche
+     *
      * @return array<CswStyleFile>
      */
-    private function getStyleFiles(string $datastoreId, DatasheetServices $services): array
+    private function getStyleFiles(string $datastoreId, array $configurations): array
     {
         $styleFiles = [];
 
-        $configurationsList = $services->configurationsOfType(ConfigurationTypes::WFS, ConfigurationTypes::WMTSTMS);
+        $configurationsList = array_filter($configurations, fn (array $configuration) => in_array($configuration['type'], [ConfigurationTypes::WFS, ConfigurationTypes::WMTSTMS], true));
 
         $configStyles = array_map(fn ($config) => $this->cartesStylesApiService->getStyles($datastoreId, $config), $configurationsList);
         $configStyles = array_filter($configStyles, fn ($stylesList) => count($stylesList) > 0);
@@ -417,7 +422,8 @@ class CartesMetadataApiService
         $datastore = $this->datastoreApiService->get($datastoreId);
         $datastoreName = $datastore['technical_name'];
 
-        $layerTypes = array_map(fn ($config) => $config['type'], $services->publishedConfigurations());
+        $publishedConfigurations = array_filter($services->configurationsById, fn (array $configuration) => ConfigurationStatuses::PUBLISHED === $configuration['status']);
+        $layerTypes = array_map(fn ($config) => $config['type'], $publishedConfigurations);
         $layerTypes = array_values(array_unique($layerTypes));
 
         $annexeUrl = $this->parameterBag->get('annexes_url');

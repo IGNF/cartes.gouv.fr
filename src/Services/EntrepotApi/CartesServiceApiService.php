@@ -163,13 +163,13 @@ class CartesServiceApiService
             ],
         ]);
 
-        $pendingOfferingsByConfigurationId = [];
+        $pendingOfferingsLists = [];
         foreach ($configurations as $configuration) {
-            $pendingOfferingsByConfigurationId[$configuration['_id']] = $this->configurationApiService->getConfigurationOfferingsDetailed($datastoreId, $configuration['_id']);
+            $pendingOfferingsLists[] = $this->configurationApiService->getConfigurationOfferingsDetailed($datastoreId, $configuration['_id']);
         }
 
         $offeringsById = [];
-        foreach ($pendingOfferingsByConfigurationId as $pendingOfferings) {
+        foreach ($pendingOfferingsLists as $pendingOfferings) {
             foreach ($pendingOfferings->resolve() as $offering) {
                 $offeringsById[$offering['_id']] = $offering;
             }

@@ -8,7 +8,6 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
-use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\CartesStylesApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Utils;
@@ -31,7 +30,6 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
-        private CartesServiceApiService $cartesServiceApiService,
         private CartesStylesApiService $cartesStylesApiService,
     ) {
     }
@@ -80,12 +78,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->cartesStylesApiService->updateStyles($datastoreId, $configuration['_id'], $styles);
             $this->cartesStylesApiService->updateStylesTmsMetadata($datastoreId, $configuration, $offeringId, $styles);
 
-            try {
-                $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
-                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName, $services);
-            } catch (\Throwable) {
-                // ne rien faire si erreur
-            }
+            $this->refreshMetadataStyleFiles($datastoreId, $datasheetName);
 
             return new JsonResponse($styles);
         } catch (ApiException $ex) {
@@ -154,12 +147,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->cartesStylesApiService->updateStyles($datastoreId, $configuration['_id'], $styles);
             $this->cartesStylesApiService->updateStylesTmsMetadata($datastoreId, $configuration, $offeringId, $styles);
 
-            try {
-                $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
-                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName, $services);
-            } catch (\Throwable) {
-                // ne rien faire si erreur
-            }
+            $this->refreshMetadataStyleFiles($datastoreId, $datasheetName);
 
             return new JsonResponse($styles);
         } catch (ApiException $ex) {
@@ -216,12 +204,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->cartesStylesApiService->updateStyles($datastoreId, $configuration['_id'], $styles);
             $this->cartesStylesApiService->updateStylesTmsMetadata($datastoreId, $configuration, $offeringId, $styles);
 
-            try {
-                $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
-                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName, $services);
-            } catch (\Throwable $th) {
-                //  ne rien faire si erreur
-            }
+            $this->refreshMetadataStyleFiles($datastoreId, $datasheetName);
 
             return new JsonResponse($styles);
         } catch (ApiException $ex) {
@@ -262,6 +245,22 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             return new JsonResponse($styles);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * Met à jour les fichiers de style de la métadonnée ; une erreur ici ne doit pas faire échouer l'opération sur les styles.
+     */
+    private function refreshMetadataStyleFiles(string $datastoreId, string $datasheetName): void
+    {
+        try {
+            $configurations = $this->configurationApiService->getAllDetailed($datastoreId, [
+                'tags' => [
+                    CommonTags::DATASHEET_NAME => $datasheetName,
+                ],
+            ]);
+            $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName, $configurations);
+        } catch (\Throwable) {
         }
     }
 

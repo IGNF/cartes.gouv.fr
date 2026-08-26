@@ -2,7 +2,7 @@
 
 namespace App\Dto\Datasheet;
 
-use App\Constants\EntrepotApi\ConfigurationStatuses;
+use App\Utils;
 
 /**
  * Configurations (détaillées) et offerings d'une fiche de données, chargées une fois par traitement et passées explicitement.
@@ -20,27 +20,11 @@ final readonly class DatasheetServices
     }
 
     /**
-     * @return array<array<mixed>>
+     * @return array<mixed>|null
      */
-    public function configurations(): array
+    public function offering(string $offeringId): ?array
     {
-        return array_values($this->configurationsById);
-    }
-
-    /**
-     * @return array<array<mixed>>
-     */
-    public function configurationsOfType(string ...$types): array
-    {
-        return array_values(array_filter($this->configurationsById, fn (array $configuration) => in_array($configuration['type'], $types, true)));
-    }
-
-    /**
-     * @return array<array<mixed>>
-     */
-    public function publishedConfigurations(): array
-    {
-        return array_values(array_filter($this->configurationsById, fn (array $configuration) => ConfigurationStatuses::PUBLISHED === $configuration['status']));
+        return $this->offeringsById[$offeringId] ?? null;
     }
 
     /**
@@ -48,13 +32,7 @@ final readonly class DatasheetServices
      */
     public function offeringOfConfiguration(string $configurationId): ?array
     {
-        foreach ($this->offeringsById as $offering) {
-            if (($offering['configuration']['_id'] ?? null) === $configurationId) {
-                return $offering;
-            }
-        }
-
-        return null;
+        return Utils::array_find($this->offeringsById, fn (array $offering) => ($offering['configuration']['_id'] ?? null) === $configurationId);
     }
 
     /**
@@ -62,7 +40,7 @@ final readonly class DatasheetServices
      */
     public function configurationOfOffering(string $offeringId): ?array
     {
-        $configurationId = $this->offeringsById[$offeringId]['configuration']['_id'] ?? null;
+        $configurationId = $this->offering($offeringId)['configuration']['_id'] ?? null;
 
         return null === $configurationId ? null : ($this->configurationsById[$configurationId] ?? null);
     }
