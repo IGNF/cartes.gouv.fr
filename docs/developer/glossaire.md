@@ -18,4 +18,4 @@ Termes du projet dont le sens n’est pas évident à la lecture du code. Les m�
 
 **Site MIXED** : appel d’API dont la suppression ne ferait rien gagner, parce que la même requête recharge de toute façon la même ressource par un autre chemin (par exemple un DTO datastore rechargé via `getEndpoint*`). Laissé tel quel, par choix.
 
-**Compte de service** : client Entrepôt authentifié en `client_credentials` (et non avec le token de l’utilisateur), utilisé pour les actions que l’utilisateur ne peut pas faire lui-même, comme s’ajouter au bac à sable.
+**Compte de service** : client Entrepôt authentifié en `client_credentials` (et non avec le token de l’utilisateur), utilisé pour les actions que l’utilisateur ne peut pas faire lui-même, comme s’ajouter au bac à sable, et pour résoudre le datastore du bac à sable. Son token est mis en cache par pod (clé `service-account-token-{client_id}`, durée `expires_in` moins 60 s) et jeté sur un 401, l’appel étant alors rejoué une fois.

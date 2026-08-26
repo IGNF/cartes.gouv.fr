@@ -88,7 +88,7 @@
 	redir @indexphp /{re.idx.1}{?query} 301
 
 	# Probes de santé jamais loggées ; filet si le log_skip @phpHandled est retiré (rollback)
-	@health path_regexp ^/tableau-de-bord/health/?$
+	@health path_regexp ^/tableau-de-bord/(health|ready)/?$
 	log_skip @health
 
 	# Requêtes dynamiques loggées par Symfony (docs/developer/logs.md), Caddy ne logge que ce qu'il sert lui-même

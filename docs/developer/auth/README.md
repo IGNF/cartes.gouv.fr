@@ -175,7 +175,7 @@ Quand `CookieAuthenticator` détecte un token expiré sur une requête `/api/*`,
 | [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Dérivation datastore/communauté depuis l'appartenance, deny-path            |
 | [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                           | Routes `/login`, `/logout`, `/login/check`                                  |
 | [`src/Listener/LogoutSubscriber.php`](../../../src/Listener/LogoutSubscriber.php)                                   | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak              |
-| [`src/ApiClient/AuthenticatedHttpClient.php`](../../../src/ApiClient/AuthenticatedHttpClient.php)                   | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt     |
+| [`src/ApiClient/Auth/AuthenticatedHttpClient.php`](../../../src/ApiClient/Auth/AuthenticatedHttpClient.php)         | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt     |
 | [`assets/modules/jsonFetch.ts`](../../../assets/modules/jsonFetch.ts)                                               | Détecte le 401 `session_expired` et notifie l'AuthStore                     |
 | [`config/packages/security.yaml`](../../../config/packages/security.yaml)                                           | Firewall `stateless: true`, ordre des authenticators                        |
 

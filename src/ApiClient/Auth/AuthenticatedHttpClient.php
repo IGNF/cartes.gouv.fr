@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ApiClient;
+namespace App\ApiClient\Auth;
 
 use App\Security\KeycloakTokenManager;
 use League\OAuth2\Client\Token\AccessToken;
