@@ -20,6 +20,7 @@ import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
+import { isOfferingUnavailable } from "../../../../utils";
 import "../../../../sass/pages/permission.scss";
 import api from "../../../api";
 import CommunityListForm from "./CommunityListForm";
@@ -94,7 +95,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
     }, [user, publicCommunities]);
 
     const privateOfferings = useMemo(() => {
-        return data?.filter((offering) => offering.open === false) ?? [];
+        return data?.filter((offering) => offering.open === false && !isOfferingUnavailable(offering.status)) ?? [];
     }, [data]);
 
     // Formulaire,

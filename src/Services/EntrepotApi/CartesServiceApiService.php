@@ -8,6 +8,7 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationMetadataTypes;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\OfferingStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\PermissionTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
@@ -15,6 +16,7 @@ use App\Dto\Datasheet\DatasheetServices;
 use App\Dto\Services\CommonDTO;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
 use App\Services\GeonetworkApiService;
@@ -87,7 +89,7 @@ class CartesServiceApiService
 
             // TMS
             if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $storedData['type']) {
-                // Metadatas (TMS)
+                // Metadata (TMS)
                 $urls = array_values(array_filter($offering['urls'], static function ($url) {
                     return 'TMS' == $url['type'];
                 }));
@@ -255,42 +257,144 @@ class CartesServiceApiService
      */
     private function unpublishOfferingAndConfiguration(string $datastoreId, array $offering, bool $removeStyleFiles = true): array
     {
-        // suppression de l'offering
-        $this->configurationApiService->removeOffering($datastoreId, $offering['_id'])->await();
-        $configurationId = $offering['configuration']['_id'];
-        $configuration = null;
+        $this->removeOfferingFully($datastoreId, $offering);
 
-        // suppression de la configuration
-        // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
-        for ($attempt = 1; $attempt <= self::UNPUBLISH_MAX_ATTEMPTS; ++$attempt) {
-            $configuration = $this->configurationApiService->get($datastoreId, $configurationId)->array();
-            if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
-                break;
-            }
-            if ($attempt < self::UNPUBLISH_MAX_ATTEMPTS) {
-                sleep(self::UNPUBLISH_RETRY_DELAY_SECONDS);
-            }
-        }
+        $configuration = $this->waitForConfigurationUnpublished($datastoreId, $offering['configuration']['_id']);
 
-        if (ConfigurationStatuses::UNPUBLISHED !== $configuration['status']) {
-            $timeoutSeconds = self::UNPUBLISH_MAX_ATTEMPTS * self::UNPUBLISH_RETRY_DELAY_SECONDS;
-            $this->logger->warning('{class}: Timeout waiting for offering {offeringId} unpublish before removing configuration {configurationId}', [
-                'class' => self::class,
-                'offeringId' => $offering['_id'],
-                'configurationId' => $configurationId,
-                'timeout' => $timeoutSeconds,
-            ]);
-
-            throw new CartesApiException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_REQUEST_TIMEOUT, ['offering_id' => $offering['_id'], 'configuration_id' => $configurationId, 'timeout' => $timeoutSeconds]);
-        }
-
-        $this->configurationApiService->remove($datastoreId, $configurationId)->await();
+        $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
 
         if (true === $removeStyleFiles) {
             $this->removeStyleFiles($datastoreId, $configuration);
         }
 
         return $configuration;
+    }
+
+    /**
+     * Supprime complètement une offering : dépublication (1er DELETE) puis suppression définitive (2e DELETE sur l'offering UNPUBLISHED, qui supprime aussi ses accès et permissions).
+     *
+     * @param array<mixed> $offering
+     */
+    private function removeOfferingFully(string $datastoreId, array $offering): void
+    {
+        // 1er DELETE : déclenche la dépublication, sauf reprise d'une tentative précédente déjà en cours ou terminée
+        if (!in_array($offering['status'] ?? null, [OfferingStatuses::UNPUBLISHING, OfferingStatuses::UNPUBLISHED], true)) {
+            $this->configurationApiService->removeOffering($datastoreId, $offering['_id'])->await();
+        }
+
+        $this->waitForOfferingUnpublished($datastoreId, $offering['_id']);
+
+        // 2e DELETE : suppression définitive
+        $this->configurationApiService->removeOffering($datastoreId, $offering['_id'])->await();
+
+        $this->waitForOfferingRemoved($datastoreId, $offering['_id']);
+    }
+
+    /**
+     * Attend que l'offering soit dépubliée (statut UNPUBLISHED).
+     *
+     * @return array<mixed> l'offering
+     *
+     * @throws CartesApiException avec le statut 408 si le délai d'attente est dépassé
+     */
+    public function waitForOfferingUnpublished(string $datastoreId, string $offeringId): array
+    {
+        $offering = null;
+        for ($attempt = 1; $attempt <= self::UNPUBLISH_MAX_ATTEMPTS; ++$attempt) {
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+            if (OfferingStatuses::UNPUBLISHED === $offering['status']) {
+                return $offering;
+            }
+
+            // statut terminal : la dépublication a échoué, inutile d'attendre davantage
+            if (OfferingStatuses::UNSTABLE === $offering['status']) {
+                $this->logger->warning('{class}: Offering {offeringId} became UNSTABLE while waiting for its unpublication', [
+                    'class' => self::class,
+                    'offeringId' => $offeringId,
+                ]);
+
+                throw new CartesApiException('La dépublication du service a échoué', Response::HTTP_INTERNAL_SERVER_ERROR, ['offering_id' => $offeringId, 'status' => $offering['status']]);
+            }
+
+            if ($attempt < self::UNPUBLISH_MAX_ATTEMPTS) {
+                sleep(self::UNPUBLISH_RETRY_DELAY_SECONDS);
+            }
+        }
+
+        $timeoutSeconds = self::UNPUBLISH_MAX_ATTEMPTS * self::UNPUBLISH_RETRY_DELAY_SECONDS;
+        $this->logger->warning('{class}: Timeout waiting for offering {offeringId} to reach UNPUBLISHED status (last status: {status})', [
+            'class' => self::class,
+            'offeringId' => $offeringId,
+            'status' => $offering['status'],
+            'timeout' => $timeoutSeconds,
+        ]);
+
+        throw new CartesApiException('La dépublication du service prend trop de temps, veuillez réessayer', Response::HTTP_REQUEST_TIMEOUT, ['offering_id' => $offeringId, 'status' => $offering['status'], 'timeout' => $timeoutSeconds]);
+    }
+
+    /**
+     * Attend que l'offering soit effectivement supprimée (GET renvoie 404) après le 2e DELETE.
+     *
+     * @throws CartesApiException avec le statut 408 si le délai d'attente est dépassé
+     */
+    private function waitForOfferingRemoved(string $datastoreId, string $offeringId): void
+    {
+        for ($attempt = 1; $attempt <= self::UNPUBLISH_MAX_ATTEMPTS; ++$attempt) {
+            try {
+                $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+            } catch (ApiException $e) {
+                if (Response::HTTP_NOT_FOUND === $e->getStatusCode()) {
+                    return;
+                }
+
+                throw $e;
+            }
+
+            if ($attempt < self::UNPUBLISH_MAX_ATTEMPTS) {
+                sleep(self::UNPUBLISH_RETRY_DELAY_SECONDS);
+            }
+        }
+
+        $timeoutSeconds = self::UNPUBLISH_MAX_ATTEMPTS * self::UNPUBLISH_RETRY_DELAY_SECONDS;
+        $this->logger->warning('{class}: Timeout waiting for offering {offeringId} to be actually removed after the 2nd DELETE', [
+            'class' => self::class,
+            'offeringId' => $offeringId,
+            'timeout' => $timeoutSeconds,
+        ]);
+
+        throw new CartesApiException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_REQUEST_TIMEOUT, ['offering_id' => $offeringId, 'timeout' => $timeoutSeconds]);
+    }
+
+    /**
+     * Attend que la configuration soit dépubliée (statut UNPUBLISHED), condition pour pouvoir la supprimer.
+     *
+     * @return array<mixed> la configuration
+     *
+     * @throws CartesApiException avec le statut 408 si le délai d'attente est dépassé
+     */
+    public function waitForConfigurationUnpublished(string $datastoreId, string $configurationId): array
+    {
+        $configuration = null;
+        for ($attempt = 1; $attempt <= self::UNPUBLISH_MAX_ATTEMPTS; ++$attempt) {
+            $configuration = $this->configurationApiService->get($datastoreId, $configurationId)->array();
+            if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
+                return $configuration;
+            }
+
+            if ($attempt < self::UNPUBLISH_MAX_ATTEMPTS) {
+                sleep(self::UNPUBLISH_RETRY_DELAY_SECONDS);
+            }
+        }
+
+        $timeoutSeconds = self::UNPUBLISH_MAX_ATTEMPTS * self::UNPUBLISH_RETRY_DELAY_SECONDS;
+        $this->logger->warning('{class}: Timeout waiting for configuration {configurationId} to reach UNPUBLISHED status before removal', [
+            'class' => self::class,
+            'configurationId' => $configurationId,
+            'status' => $configuration['status'],
+            'timeout' => $timeoutSeconds,
+        ]);
+
+        throw new CartesApiException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_REQUEST_TIMEOUT, ['configuration_id' => $configurationId, 'status' => $configuration['status'], 'timeout' => $timeoutSeconds]);
     }
 
     /**
@@ -362,7 +466,7 @@ class CartesServiceApiService
 
             // On recrée l'offering si changement d'endpoint, sinon demande la synchronisation
             if ($oldOffering['open'] !== $endpoint['open']) {
-                $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id'])->await();
+                $this->removeOfferingFully($datastoreId, $oldOffering);
 
                 $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open'])->array();
             } else {
