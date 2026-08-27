@@ -121,7 +121,7 @@ class PyramidRasterController extends ServiceController implements ApiController
                 ],
             ];
 
-            if (isset($data['email_notification']) && true === $data['email_notification']) {
+            if (isset($data[CommonTags::EMAIL_NOTIFICATION]) && true === $data[CommonTags::EMAIL_NOTIFICATION]) {
                 /** @var \App\Security\User */
                 $user = $this->getUser();
                 $userEmail = $user->getEmail();
