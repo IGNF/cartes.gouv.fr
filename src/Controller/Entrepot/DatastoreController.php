@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
     '/api/datastores',
     name: 'cartesgouvfr_api_datastore_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
+    // condition: 'request.isXmlHttpRequest()'
 )]
 #[OA\Tag(name: '[entrepot] datastores')]
 class DatastoreController extends AbstractController implements ApiControllerInterface
