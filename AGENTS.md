@@ -10,6 +10,7 @@ External API references:
 
 - Entrepôt docs: https://geoplateforme.github.io/entrepot/production
 - OpenAPI: https://data.geopf.fr/api/v3/api-docs
+- Stats OpenAPI (`/stats` routes, absent from the main spec): https://data.geopf.fr/api/stats/v3/api-docs
 
 Project vocabulary (membership, snapshot, grant-path...): `docs/developer/glossaire.md`.
 
