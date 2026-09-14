@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BarChartProps } from "@codegouvfr/react-dsfr/Chart/BarChart";
 
 import { HitStatisticsDto, StatsType } from "@/@types/stats";
-import { formatBarChartData, formatStats } from "@/utils/stats";
+import { aggregateByUtcDay, toBarChartData } from "@/utils/stats";
 
 export interface IUseBarChartOptions extends Omit<BarChartProps, "x" | "y"> {
     data: HitStatisticsDto;
@@ -15,8 +15,9 @@ export function useBarChart(options: IUseBarChartOptions) {
     const { data, type = StatsType.DATA_TRANSFER, startDate, endDate, ...rest } = options;
     const ref = useRef<HTMLDivElement>(null);
     const [barsize, setBarsize] = useState(24);
-    const barChartProps = useMemo(() => formatBarChartData(formatStats(data), type, startDate, endDate), [data, type, startDate, endDate]);
-    const totalItems = barChartProps.x[0].length;
+    const series = useMemo(() => aggregateByUtcDay(data, type, startDate, endDate), [data, type, startDate, endDate]);
+    const barChartProps = useMemo(() => toBarChartData(series), [series]);
+    const totalItems = series.days.length;
 
     useEffect(() => {
         const element = ref.current;
@@ -38,5 +39,5 @@ export function useBarChart(options: IUseBarChartOptions) {
         return () => observer.disconnect();
     }, [totalItems]);
 
-    return { barChartProps: { ...rest, ...barChartProps, barsize }, ref };
+    return { barChartProps: { ...rest, ...barChartProps, barsize }, series, type, ref };
 }

@@ -1,50 +1,100 @@
-import { HitStatisticsDto, IBarChartData, Stats, StatsType } from "@/@types/stats";
-import { delta } from "./delta";
-import { formatDate } from "./format";
+import { HitStatisticsDto, IBarChartData, StatsType } from "@/@types/stats";
+import { formatCount, formatDate, niceBytes } from "./format";
 
-const DAY_MS = delta.hours(24);
+/** Jour UTC au format "YYYY-MM-DD". */
+export type DayKey = string;
 
-export function formatStats(stats: HitStatisticsDto): Stats {
+export interface DaySeries {
+    days: DayKey[];
+    values: number[];
+}
+
+// ~20 ans : large pour tout usage légitime
+const MAX_RANGE_DAYS = 366 * 20;
+
+// Le sélecteur de dates fournit des Date à minuit local qui représentent un jour calendaire.
+export function calendarDayToUtc(day: Date): Date {
+    return new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()));
+}
+
+export function addCalendarDays(day: Date, n: number): Date {
+    return new Date(day.getFullYear(), day.getMonth(), day.getDate() + n);
+}
+
+export function utcDayKey(date: Date): DayKey {
+    return date.toISOString().slice(0, 10);
+}
+
+// Bornes envoyées à l’API : start inclus, end exclu, donc fin + 1 jour pour inclure le jour de fin.
+export function statsPeriodQuery(startDay: Date, endDay: Date): { start: string; end: string } {
     return {
-        total: {
-            ...stats.total,
-            begin_date: stats.total?.begin_date ? new Date(stats.total.begin_date) : undefined,
-            end_date: stats.total?.end_date ? new Date(stats.total.end_date) : undefined,
-        },
-        details:
-            stats.details?.map((detail) => ({
-                ...detail,
-                begin_date: detail.begin_date ? new Date(detail.begin_date) : undefined,
-                end_date: detail.end_date ? new Date(detail.end_date) : undefined,
-            })) ?? [],
+        start: calendarDayToUtc(startDay).toISOString(),
+        end: calendarDayToUtc(addCalendarDays(endDay, 1)).toISOString(),
     };
 }
 
-export function getDate(date: Date): number {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-}
+export function listUtcDays(startDay: Date, endDay: Date): DayKey[] {
+    const first = calendarDayToUtc(startDay);
+    const lastKey = utcDayKey(calendarDayToUtc(endDay));
+    const days: DayKey[] = [];
 
-export function formatBarChartData(data: Stats, type = StatsType.DATA_TRANSFER, startDate?: Date, endDate?: Date): IBarChartData {
-    const dataEntries: [number, number][] = data.details
-        .map((detail) => {
-            const date = detail.begin_date ? getDate(detail.begin_date) : undefined;
-            return [date, detail[type]];
-        })
-        .filter(([date, detail]) => date !== undefined && detail !== undefined) as [number, number][];
-    const dataMap = new Map(dataEntries);
-
-    const startTime = startDate ? startDate.getTime() : dataEntries.at(0)?.[0];
-    const endTime = endDate ? endDate.getTime() : dataEntries.at(-1)?.[0];
-    if (!endTime || !startTime) {
-        return { x: [[]], y: [[]] };
+    for (let i = 0; i < MAX_RANGE_DAYS; i++) {
+        const key = utcDayKey(new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth(), first.getUTCDate() + i)));
+        if (key > lastKey) break;
+        days.push(key);
     }
 
-    const MAX_RANGE_DAYS = 366 * 20; // ~20 ans : large pour tout usage légitime
-    const rawRange = (endTime - startTime) / DAY_MS + (endDate ? 0 : 1);
-    const range = Math.min(Math.max(rawRange, 0), MAX_RANGE_DAYS);
-    const dates = Array.from({ length: range }, (_, i) => new Date(startTime + i * DAY_MS));
-    const x = dates.map((date) => formatDate(date));
-    const y = dates.map((date) => dataMap.get(date.getTime()) ?? 0);
+    return days;
+}
 
-    return { x: [x], y: [y] };
+function dayKeyToLocalDate(day: DayKey): Date {
+    const [y, m, d] = day.split("-").map(Number);
+    return new Date(y, m - 1, d);
+}
+
+/**
+ * Somme les lignes par jour UTC de begin_date, quelle que soit la granularité renvoyée par l’API
+ * (tranches de quelques minutes sur les courtes périodes, une ligne par jour au-delà).
+ * Sans bornes, la série couvre du premier au dernier jour présent dans les lignes.
+ */
+export function aggregateByUtcDay(stats: HitStatisticsDto, type: StatsType, startDay?: Date, endDay?: Date): DaySeries {
+    const sums = new Map<DayKey, number>();
+    for (const row of stats.details ?? []) {
+        const value = row[type];
+        if (!row.begin_date || value === undefined) continue;
+        const key = utcDayKey(new Date(row.begin_date));
+        sums.set(key, (sums.get(key) ?? 0) + value);
+    }
+
+    const sortedKeys = [...sums.keys()].sort();
+    const start = startDay ?? (sortedKeys[0] ? dayKeyToLocalDate(sortedKeys[0]) : undefined);
+    const end = endDay ?? (sortedKeys.at(-1) ? dayKeyToLocalDate(sortedKeys.at(-1)!) : undefined);
+    if (!start || !end) {
+        return { days: [], values: [] };
+    }
+
+    const days = listUtcDays(start, end);
+    const values = days.map((day) => sums.get(day) ?? 0);
+
+    if (import.meta.env.DEV) {
+        const total = stats.total?.[type];
+        const sum = values.reduce((acc, v) => acc + v, 0);
+        if (total !== undefined && sum !== total) {
+            console.warn(`Statistiques ${type} : somme des jours ${sum} différente du total ${total}`);
+        }
+    }
+
+    return { days, values };
+}
+
+export function formatDayLabel(day: DayKey): string {
+    return formatDate(dayKeyToLocalDate(day));
+}
+
+export function toBarChartData(series: DaySeries): IBarChartData {
+    return { x: [series.days.map(formatDayLabel)], y: [series.values] };
+}
+
+export function formatStatValue(value: number, type: StatsType): string {
+    return type === StatsType.HITS ? formatCount(value) : niceBytes(String(value));
 }
