@@ -133,17 +133,25 @@ final class ApiClient
      * Tire la page 1 immédiatement (non-bloquant) ; les pages suivantes
      * sont lancées à la consommation via PaginatedPromise::resolve().
      *
-     * @param array<string,mixed> $query
-     * @param array<string,mixed> $headers
+     * Sans $merge, le corps de chaque page doit être une liste (fusion par array_merge).
+     *
+     * @param array<string,mixed>                                     $query
+     * @param array<string,mixed>                                     $headers
+     * @param callable(array<mixed>, array<mixed>): array<mixed>|null $merge   fusion (accumulé, page) => accumulé
      */
-    public function requestAll(string $url, array $query = [], array $headers = []): PaginatedPromise
+    public function requestAll(string $url, array $query = [], array $headers = [], ?callable $merge = null): PaginatedPromise
     {
         $query['page'] = 1;
         $query['limit'] = 100;
 
         $page1Pending = $this->request('GET', $url, new RequestOptions(query: $query, headers: $headers));
 
-        return new PaginatedPromise($page1Pending, function (PaginatedResponse $firstPage) use ($url, $query, $headers): array {
+        return new PaginatedPromise($page1Pending, function (PaginatedResponse $firstPage) use ($url, $query, $headers, $merge): array {
+            if (null === $merge && !array_is_list($firstPage->content)) {
+                throw new \LogicException(sprintf('requestAll(%s) : le corps n\'est pas une liste, fournir une stratégie de fusion', $url));
+            }
+            $merge ??= array_merge(...);
+
             $allResources = $firstPage->content;
 
             $pageCount = $firstPage->getPageCount((int) $query['limit']);
@@ -159,12 +167,35 @@ final class ApiClient
                     $pendingByPage[$page] = $this->request('GET', $url, new RequestOptions(query: $pageQuery, headers: $headers));
                 }
                 foreach ($this->resolveAll($pendingByPage) as $resources) {
-                    $allResources = array_merge($allResources, $resources);
+                    $allResources = $merge($allResources, $resources);
                 }
             }
 
             return $allResources;
         });
+    }
+
+    /**
+     * Pagine une route /stats : `total` est global et identique sur chaque page, seuls `details` se cumulent.
+     *
+     * @param array<string,mixed> $query
+     */
+    public function requestAllHitStatistics(string $url, array $query = []): PaginatedPromise
+    {
+        return $this->requestAll($url, $query, merge: self::mergeHitStatistics(...));
+    }
+
+    /**
+     * @param array<mixed> $accumulated
+     * @param array<mixed> $page
+     *
+     * @return array<mixed>
+     */
+    private static function mergeHitStatistics(array $accumulated, array $page): array
+    {
+        $accumulated['details'] = array_merge($accumulated['details'] ?? [], $page['details'] ?? []);
+
+        return $accumulated;
     }
 
     /**
