@@ -4,7 +4,6 @@ import autoprefixer from "autoprefixer";
 import { execSync } from "child_process";
 import { join, resolve } from "path";
 import { defineConfig, loadEnv } from "vite";
-import { imagetools } from "vite-imagetools";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 import run from "vite-plugin-run";
 import symfonyPlugin from "vite-plugin-symfony";
@@ -37,12 +36,6 @@ export default defineConfig(({ mode }) => {
             cors: true,
         },
         plugins: [
-            {
-                ...imagetools({
-                    removeMetadata: true,
-                }),
-                enforce: "pre",
-            },
             react(),
             Unhead(),
             symfonyPlugin({
