@@ -6,6 +6,7 @@
 - [Glossaire](glossaire.md)
 - [Implémentation et exécution des tests](test.md)
 - [Internationalisation](i18n.md)
+- [Optimisation des images (génération des variantes WebP)](images.md)
 - [Explication des workflows](workflows.md)
 - [Utilisation de l'API Entrepôt](./entrepot/README.md)
 
