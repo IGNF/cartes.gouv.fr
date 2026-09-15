@@ -17,8 +17,8 @@ import background800 from "@/img/discover/publish/background-800.webp";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
 
 const backgroundSrcSet = `${background800} 800w, ${background1200} 1200w, ${background1600} 1600w, ${background2160} 2160w`;
-// largeurs du .backgroundWrapper dans DiscoverPublish.module.css
-const backgroundSizes = "(min-width: 1440px) 65vw, (min-width: 1248px) 60vw, (min-width: 992px) 55vw, (min-width: 576px) 50vw, 100vw";
+// object-fit: cover sur un bloc d’au moins 600 px de haut : l’image couvre au moins 1080 px de large (ratio 1,8), sauf quand le bloc (65vw max) est plus large
+const backgroundSizes = "(min-width: 1662px) 65vw, 1080px";
 
 export default function DiscoverPublish() {
     const { params } = useRoute();
