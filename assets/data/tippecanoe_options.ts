@@ -1,17 +1,17 @@
-import simplify_forms_merged from "@/img/tippecanoe/simplify_forms_merged.jpg";
-import keep_nodes_merged from "@/img/tippecanoe/keep_nodes_merged.jpg";
-import delete_smallest_merged from "@/img/tippecanoe/delete_smallest_merged.jpg";
-import keep_cover_merged from "@/img/tippecanoe/keep_cover_merged.jpg";
-import keep_densest_delete_smallest_merged from "@/img/tippecanoe/keep_densest_delete_smallest_merged.jpg";
-import merge_same_attributes_and_simplify_merged from "@/img/tippecanoe/merge_same_attributes_and_simplify_merged.jpg";
-import keep_shared_edges_merged from "@/img/tippecanoe/keep_shared_edges_merged.jpg";
+import simplify_forms_merged from "@/img/tippecanoe/simplify_forms_merged.webp";
+import keep_nodes_merged from "@/img/tippecanoe/keep_nodes_merged.webp";
+import delete_smallest_merged from "@/img/tippecanoe/delete_smallest_merged.webp";
+import keep_cover_merged from "@/img/tippecanoe/keep_cover_merged.webp";
+import keep_densest_delete_smallest_merged from "@/img/tippecanoe/keep_densest_delete_smallest_merged.webp";
+import merge_same_attributes_and_simplify_merged from "@/img/tippecanoe/merge_same_attributes_and_simplify_merged.webp";
+import keep_shared_edges_merged from "@/img/tippecanoe/keep_shared_edges_merged.webp";
 
 export default {
     "--simplification=10": {
         value: "-S10",
         label: "Simplification de données hétérogènes",
         explain: "Toutes les formes sont simplifiées.",
-        image: simplify_forms_merged, // ou (await import("@/img/tippecanoe/simplify_forms_merged.jpg")).default
+        image: simplify_forms_merged, // ou (await import("@/img/tippecanoe/simplify_forms_merged.webp")).default
     },
     "--no-simplification-of-shared-nodes --simplification=15": {
         value: "-pn -S15",

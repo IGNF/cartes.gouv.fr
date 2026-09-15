@@ -1,5 +1,6 @@
 import Main from "@/components/Layout/Main";
 import { fr } from "@codegouvfr/react-dsfr";
+import ButtonsGroup, { ButtonsGroupProps } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useEffect } from "react";
 
 import { sandboxCommunityId } from "@/env";
@@ -9,9 +10,15 @@ import { routes, useRoute } from "@/router/router";
 
 import classes from "./DiscoverPublish.module.css";
 
-import backgroundImgUrl from "@/img/discover/publish/background.png?w=400;800;1200;1400;2160&format=png&as=srcset";
+import background1200 from "@/img/discover/publish/background-1200.webp";
+import background1600 from "@/img/discover/publish/background-1600.webp";
+import background2160 from "@/img/discover/publish/background-2160.webp";
+import background800 from "@/img/discover/publish/background-800.webp";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
-import ButtonsGroup, { ButtonsGroupProps } from "@codegouvfr/react-dsfr/ButtonsGroup";
+
+const backgroundSrcSet = `${background800} 800w, ${background1200} 1200w, ${background1600} 1600w, ${background2160} 2160w`;
+// object-fit: cover sur un bloc d’au moins 600 px de haut : l’image couvre au moins 1080 px de large (ratio 1,8), sauf quand le bloc (65vw max) est plus large
+const backgroundSizes = "(min-width: 1662px) 65vw, 1080px";
 
 export default function DiscoverPublish() {
     const { params } = useRoute();
@@ -42,7 +49,7 @@ export default function DiscoverPublish() {
         >
             <div className={classes.container}>
                 <div className={classes.backgroundWrapper}>
-                    <img srcSet={backgroundImgUrl} alt="illustration" className={classes.backgroundImage} />
+                    <img src={background1200} srcSet={backgroundSrcSet} sizes={backgroundSizes} alt="" className={classes.backgroundImage} />
                 </div>
                 <div className={classes.contentWrapper}>
                     <div className={classes.card}>
