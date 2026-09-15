@@ -35,4 +35,25 @@ npm ci
 
 Le `npm ci` final retire `sharp` de `node_modules`. Vérifier ensuite le rendu de la page et commiter les fichiers `.webp` modifiés.
 
-Pour une nouvelle image responsive, reprendre la même recette : source commitée à côté des variantes, largeurs du `srcset` alignées sur l'attribut `sizes`.
+## Illustrations tippecanoe
+
+Les sept illustrations de l’étape de généralisation TMS (`assets/img/tippecanoe/*_merged.webp`, 801 x 401, qualité WebP 80) sont affichées à leur largeur native. Les sources JPEG restent à côté, non importées.
+
+Régénération, avec le même `sharp` temporaire que ci-dessus :
+
+```bash
+node - <<'EOF'
+const sharp = require("sharp");
+const fs = require("fs");
+const dir = "assets/img/tippecanoe/";
+(async () => {
+    for (const f of fs.readdirSync(dir).filter((f) => f.endsWith("_merged.jpg"))) {
+        await sharp(dir + f).webp({ quality: 80 }).toFile(dir + f.replace(/\.jpg$/, ".webp"));
+    }
+})();
+EOF
+```
+
+## Nouvelle image
+
+Reprendre la même recette : source commitée à côté des fichiers générés et non importée, fichiers générés commités. Pour une image responsive, largeurs du `srcset` alignées sur l’attribut `sizes`.
