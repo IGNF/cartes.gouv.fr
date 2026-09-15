@@ -80,11 +80,11 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     const { userRights, isSupervisor } = useCommunityRights();
 
+    const datastoreName = tCommon("datastore_name", { name: datastore?.name, isSandbox });
+
     return (
-        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}>
-                {isSandbox && <SandboxDatastoreExplanation />}
-            </PageTitle>
+        <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })} datastoreId={datastoreId}>
+            <PageTitle title={t("title", { datastoreName })}>{isSandbox && <SandboxDatastoreExplanation />}</PageTitle>
 
             <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
 

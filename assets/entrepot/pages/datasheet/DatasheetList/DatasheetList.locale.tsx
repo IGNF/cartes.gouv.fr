@@ -9,7 +9,7 @@ import { Translations } from "../../../../i18n/types";
 import { SortByEnum } from "./DatasheetList.types";
 
 const { i18n } = declareComponentKeys<
-    | { K: "title"; P: { datastoreName?: string }; R: string | undefined }
+    | { K: "title"; P: { datastoreName?: string; page?: number }; R: string | undefined }
     | "create_datasheet"
     | "datasheet_creation_impossible"
     | "metadata_endpoint_quota_reached"
@@ -28,7 +28,7 @@ const { i18n } = declareComponentKeys<
 export type I18n = typeof i18n;
 
 export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = {
-    title: ({ datastoreName }) => datastoreName,
+    title: ({ datastoreName, page }) => (page ? `${datastoreName} (page ${page})` : datastoreName),
     create_datasheet: "Créer une fiche de données",
     datasheet_creation_impossible: "Création d’une nouvelle fiche de données impossible",
     metadata_endpoint_quota_reached: "Quota du point d’accès de métadonnées atteint",
