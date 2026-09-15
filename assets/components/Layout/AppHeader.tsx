@@ -33,7 +33,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
                     ? "https://data.geopf.fr/annexes/ressources/header/cartes-gouv-logo-dark.svg"
                     : "https://data.geopf.fr/annexes/ressources/header/cartes-gouv-logo.svg",
                 orientation: "horizontal",
-                alt: "",
+                alt: "Logo cartes.gouv.fr",
             }}
             serviceTitle={
                 <>
