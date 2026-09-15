@@ -18,7 +18,7 @@ import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
 
 const backgroundSrcSet = `${background800} 800w, ${background1200} 1200w, ${background1600} 1600w, ${background2160} 2160w`;
 // largeurs du .backgroundWrapper dans DiscoverPublish.module.css
-const backgroundSizes = "(min-width: 1248px) 60vw, (min-width: 992px) 55vw, (min-width: 576px) 50vw, 100vw";
+const backgroundSizes = "(min-width: 1440px) 65vw, (min-width: 1248px) 60vw, (min-width: 992px) 55vw, (min-width: 576px) 50vw, 100vw";
 
 export default function DiscoverPublish() {
     const { params } = useRoute();
