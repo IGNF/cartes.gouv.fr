@@ -16,16 +16,6 @@ export interface HitStatisticsDto {
 }
 // generated
 
-export interface StatsHits extends Omit<HitsDto, "begin_date" | "end_date"> {
-    begin_date?: Date;
-    end_date?: Date;
-}
-
-export interface Stats {
-    total: StatsHits;
-    details: StatsHits[];
-}
-
 export interface IBarChartData {
     x: [string[]];
     y: [number[]];

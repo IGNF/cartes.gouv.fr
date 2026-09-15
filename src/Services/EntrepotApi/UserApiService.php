@@ -53,7 +53,7 @@ final class UserApiService
      */
     public function getPermissionStats(string $permissionId, array $query = []): PaginatedPromise
     {
-        return $this->api->requestAll("users/me/permissions/$permissionId/stats", $query);
+        return $this->api->requestAllHitStatistics("users/me/permissions/$permissionId/stats", $query);
     }
 
     /**
@@ -87,7 +87,7 @@ final class UserApiService
      */
     public function getKeyStats(string $keyId, array $query = []): PaginatedPromise
     {
-        return $this->api->requestAll("users/me/keys/$keyId/stats", $query);
+        return $this->api->requestAllHitStatistics("users/me/keys/$keyId/stats", $query);
     }
 
     /**
@@ -116,6 +116,6 @@ final class UserApiService
      */
     public function getStats(array $query): PaginatedPromise
     {
-        return $this->api->requestAll('users/me/stats', $query);
+        return $this->api->requestAllHitStatistics('users/me/stats', $query);
     }
 }
