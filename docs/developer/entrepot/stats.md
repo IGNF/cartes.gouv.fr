@@ -1,6 +1,6 @@
 # Statistiques de consommation
 
-Les routes `/stats` de l’Entrepôt sont décrites dans une OpenAPI dédiée : https://data.geopf.fr/api/stats/v3/api-docs. Elles sont absentes de l’OpenAPI principale.
+Les routes `/stats` de l’Entrepôt sont décrites dans une OpenAPI dédiée : https://data.geopf.fr/api/stats/v3/api-docs. Elles sont absentes de l’OpenAPI principale. Elles sont également décrites sommairement dans l'aide : https://cartes.gouv.fr/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/statistiques
 
 ## Contrat observé (14/09/2026)
 
