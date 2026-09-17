@@ -38,7 +38,9 @@ export function ListHeader(props: IListHeaderProps) {
                     priority="tertiary no outline"
                 />
                 {dataUpdatedAt && <span className={fr.cx("fr-text--xs", "fr-mb-0", "fr-mr-2v")}>{t("last_refresh_date", { dataUpdatedAt })}</span>}
-                <p className={fr.cx("fr-text--xs", "fr-mb-0", "fr-ml-auto")}>{t("nb_results", { displayed: nbResults.displayed, total: nbResults.total })}</p>
+                <p role="status" className={fr.cx("fr-text--xs", "fr-mb-0", "fr-ml-auto")}>
+                    {t("nb_results", { displayed: nbResults.displayed, total: nbResults.total })}
+                </p>
             </div>
         </div>
     );
