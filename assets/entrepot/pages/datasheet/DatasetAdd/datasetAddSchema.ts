@@ -1,0 +1,120 @@
+import * as yup from "yup";
+
+import api from "@/entrepot/api";
+import { regex } from "@/utils";
+
+export const DATASET_NAME_MAX_LENGTH = 80;
+export const DATASET_DESCRIPTION_MAX_LENGTH = 250;
+export const PRODUCER_SHORT_MAX_LENGTH = 15;
+/** limite Entrepôt : 99 caractères max par valeur de tag (les thématiques sont jointes par « , » dans un seul tag) */
+export const THEMES_TAG_MAX_LENGTH = 99;
+
+// résolutions EPSG en cours ou réussies, partagées entre validations (le resolver yup revalide tout le schéma à chaque déclenchement)
+const epsgResolutions = new Map<string, ReturnType<typeof api.epsg.getProjFromEpsg>>();
+
+const resolveEpsgProjection = (srid: string) => {
+    let resolution = epsgResolutions.get(srid);
+    if (!resolution) {
+        resolution = api.epsg.getProjFromEpsg(srid);
+        // échec (réseau, code inconnu) : retiré du cache pour permettre une nouvelle tentative
+        resolution.catch(() => epsgResolutions.delete(srid));
+        epsgResolutions.set(srid, resolution);
+    }
+
+    return resolution;
+};
+
+type BuildDatasetAddSchemaOptions = {
+    /** projections EPSG actuellement proposées dans la liste déroulante */
+    projections: Record<string, string>;
+    /** appelé quand une projection inconnue de la liste est résolue via l’API EPSG */
+    onProjectionResolved: (srid: string, name: string) => void;
+};
+
+export function buildDatasetAddSchema({ projections, onProjectionResolved }: BuildDatasetAddSchemaOptions) {
+    return yup
+        .object({
+            data_upload_path: yup.string().required("Veuillez déposer un fichier de données"),
+            name: yup
+                .string()
+                .trim()
+                .required("Le nom du jeu de données est obligatoire")
+                .max(DATASET_NAME_MAX_LENGTH, `Le nom du jeu de données ne peut pas dépasser ${DATASET_NAME_MAX_LENGTH} caractères`)
+                // même contrainte que UploadAddDTO côté backend — garder les deux synchronisés
+                .matches(
+                    regex.public_name,
+                    "Le nom du jeu de données doit commencer par une lettre ou un underscore et ne contenir que des lettres non accentuées, chiffres, tirets, points ou underscores"
+                ),
+            description: yup
+                .string()
+                .trim()
+                .required("La description est obligatoire")
+                .max(DATASET_DESCRIPTION_MAX_LENGTH, `La description ne peut pas dépasser ${DATASET_DESCRIPTION_MAX_LENGTH} caractères`),
+            producer: yup
+                .string()
+                .trim()
+                .required("Le nom de l’organisme est obligatoire")
+                .min(2, "Le nom de l’organisme doit comporter entre 2 et 99 caractères")
+                .max(99, "Le nom de l’organisme doit comporter entre 2 et 99 caractères"),
+            producer_short: yup
+                .string()
+                .trim()
+                .uppercase()
+                .max(PRODUCER_SHORT_MAX_LENGTH, `L’acronyme ne peut pas dépasser ${PRODUCER_SHORT_MAX_LENGTH} caractères`),
+            themes: yup
+                .array()
+                .of(yup.string().required())
+                .min(1, "Sélectionnez au moins une thématique")
+                .test(
+                    "themes-tag-length",
+                    `Retirez des thématiques : la sélection dépasse la limite de ${THEMES_TAG_MAX_LENGTH} caractères`,
+                    (themes) => (themes ?? []).join(", ").length <= THEMES_TAG_MAX_LENGTH
+                )
+                .required(),
+            production_date: yup
+                .date()
+                .typeError("La date de production est invalide")
+                .required("La date de production est obligatoire")
+                .max(new Date(), "La date de production ne peut pas être dans le futur"),
+            srid: yup
+                .string()
+                .required("La projection est obligatoire")
+                .test({
+                    name: "srid-is-accepted",
+                    async test(srid, ctx) {
+                        if (srid in projections) {
+                            return true;
+                        }
+
+                        // projection absente de la liste par défaut : vérifie qu’il s’agit bien d’une projection EPSG connue
+                        try {
+                            const proj = await resolveEpsgProjection(srid);
+                            onProjectionResolved(srid, proj.name);
+
+                            return true;
+                        } catch (error) {
+                            console.error(error);
+
+                            return ctx.createError({ message: `Projection ${srid} inconnue` });
+                        }
+                    },
+                }),
+            zone: yup.string().trim().required("L’étendue spatiale est obligatoire"),
+            email_notification: yup.boolean().required(),
+        })
+        .required();
+}
+
+export type DatasetAddFormValues = yup.InferType<ReturnType<typeof buildDatasetAddSchema>>;
+
+export const datasetAddDefaultValues: Partial<DatasetAddFormValues> = {
+    data_upload_path: "",
+    name: "",
+    description: "",
+    producer: "",
+    producer_short: "",
+    themes: [],
+    srid: "EPSG:2154",
+    zone: "",
+    email_notification: true,
+};
