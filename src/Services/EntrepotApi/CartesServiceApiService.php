@@ -295,7 +295,7 @@ class CartesServiceApiService
      *
      * @return array<mixed> l'offering
      *
-     * @throws CartesApiException avec le statut 408 si le délai d'attente est dépassé
+     * @throws CartesApiException avec le statut 504 si le délai d'attente est dépassé
      */
     public function waitForOfferingUnpublished(string $datastoreId, string $offeringId): array
     {
@@ -329,13 +329,13 @@ class CartesServiceApiService
             'timeout' => $timeoutSeconds,
         ]);
 
-        throw new CartesApiException('La dépublication du service prend trop de temps, veuillez réessayer', Response::HTTP_REQUEST_TIMEOUT, ['offering_id' => $offeringId, 'status' => $offering['status'], 'timeout' => $timeoutSeconds]);
+        throw new CartesApiException('La dépublication du service prend trop de temps, veuillez réessayer', Response::HTTP_GATEWAY_TIMEOUT, ['offering_id' => $offeringId, 'status' => $offering['status'], 'timeout' => $timeoutSeconds]);
     }
 
     /**
      * Attend que l'offering soit effectivement supprimée (GET renvoie 404) après le 2e DELETE.
      *
-     * @throws CartesApiException avec le statut 408 si le délai d'attente est dépassé
+     * @throws CartesApiException avec le statut 504 si le délai d'attente est dépassé
      */
     private function waitForOfferingRemoved(string $datastoreId, string $offeringId): void
     {
@@ -362,7 +362,7 @@ class CartesServiceApiService
             'timeout' => $timeoutSeconds,
         ]);
 
-        throw new CartesApiException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_REQUEST_TIMEOUT, ['offering_id' => $offeringId, 'timeout' => $timeoutSeconds]);
+        throw new CartesApiException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_GATEWAY_TIMEOUT, ['offering_id' => $offeringId, 'timeout' => $timeoutSeconds]);
     }
 
     /**
@@ -370,7 +370,7 @@ class CartesServiceApiService
      *
      * @return array<mixed> la configuration
      *
-     * @throws CartesApiException avec le statut 408 si le délai d'attente est dépassé
+     * @throws CartesApiException avec le statut 504 si le délai d'attente est dépassé
      */
     public function waitForConfigurationUnpublished(string $datastoreId, string $configurationId): array
     {
@@ -394,7 +394,7 @@ class CartesServiceApiService
             'timeout' => $timeoutSeconds,
         ]);
 
-        throw new CartesApiException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_REQUEST_TIMEOUT, ['configuration_id' => $configurationId, 'status' => $configuration['status'], 'timeout' => $timeoutSeconds]);
+        throw new CartesApiException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_GATEWAY_TIMEOUT, ['configuration_id' => $configurationId, 'status' => $configuration['status'], 'timeout' => $timeoutSeconds]);
     }
 
     /**
