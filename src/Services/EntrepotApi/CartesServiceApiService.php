@@ -36,7 +36,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class CartesServiceApiService
 {
-    private const UNPUBLISH_MAX_ATTEMPTS = 20;
+    // les trois attentes (offering dépubliée, offering supprimée, configuration dépubliée) sont séquentielles et doivent tenir sous max_execution_time (.docker/php.ini, 120 s)
+    private const UNPUBLISH_MAX_ATTEMPTS = 6;
     private const UNPUBLISH_RETRY_DELAY_SECONDS = 5;
 
     private HttpClientInterface $httpClient;
