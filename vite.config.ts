@@ -1,33 +1,25 @@
 import react from "@vitejs/plugin-react";
 import { Unhead } from "@unhead/react/vite";
 import autoprefixer from "autoprefixer";
-import { execSync } from "child_process";
 import { join, resolve } from "path";
 import { defineConfig, loadEnv } from "vite";
 import run from "vite-plugin-run";
 import symfonyPlugin from "vite-plugin-symfony";
 
-function getGitInfo() {
-    try {
-        const branch = execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
-        const tag = execSync("git describe --tags --abbrev=0").toString().trim();
-        const commit = execSync("git rev-parse --short HEAD").toString().trim();
-        return { branch, tag, commit };
-    } catch (error) {
-        console.error("Failed to get Git info", error);
-        throw error;
-    }
-}
-
-const gitInfo = getGitInfo();
+// Renseignés par la CI (voir docker-build-publish.yml), vides en build local
+const appVersion = process.env.APP_VERSION ?? "";
+const appRevision = process.env.APP_REVISION ?? "";
+// Invalide le cache react-query persisté à chaque révision ; en local, à chaque build
+const cacheBuster = appRevision || `local-${Date.now()}`;
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd());
 
     return {
         define: {
-            __GIT_TAG__: JSON.stringify(gitInfo?.tag),
-            __GIT_COMMIT__: JSON.stringify(gitInfo?.commit),
+            __APP_VERSION__: JSON.stringify(appVersion),
+            __APP_REVISION__: JSON.stringify(appRevision),
+            __CACHE_BUSTER__: JSON.stringify(cacheBuster),
         },
         server: {
             // Required to listen on all interfaces

@@ -141,6 +141,10 @@ COPY assets assets
 # Récupération des artefacts PHP consommés par le build Vite (cf. assets/modules/Routing.ts)
 COPY --from=deps_php ${project_dir}/vendor/friendsofsymfony/jsrouting-bundle/Resources/js vendor/friendsofsymfony/jsrouting-bundle/Resources/js
 COPY --from=routing_dump ${project_dir}/var/cache/fosRoutes.json var/cache/fosRoutes.json
+
+# Version et révision de l'image passées par la CI ; vides en build local
+ARG APP_VERSION
+ARG APP_REVISION
 RUN npm run build
 
 #----------------------------------------------------------------------

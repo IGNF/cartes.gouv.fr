@@ -26,4 +26,4 @@ root.render(
     </React.StrictMode>
 );
 
-console.info(`cartes.gouv.fr: ${__GIT_TAG__}`);
+console.info(__APP_REVISION__ ? `cartes.gouv.fr ${__APP_VERSION__} (${__APP_REVISION__})` : "cartes.gouv.fr version inconnue (build local)");
