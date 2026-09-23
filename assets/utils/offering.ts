@@ -1,4 +1,12 @@
-import { OfferingTypeEnum } from "@/@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum } from "@/@types/app";
+import { OfferingStandardListResponseDtoStatusEnum } from "@/@types/entrepot";
+
+/**
+ * Indique si l'offering n'est plus diffusée (dépubliée ou en cours de dépublication) :
+ * l'API Entrepôt refuse alors la plupart des opérations (édition, styles, permissions...).
+ */
+export const isOfferingUnavailable = (status: OfferingStatusEnum | OfferingStandardListResponseDtoStatusEnum): boolean =>
+    [OfferingStatusEnum.UNPUBLISHING, OfferingStatusEnum.UNPUBLISHED].includes(status as OfferingStatusEnum);
 
 export const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
     switch (type) {

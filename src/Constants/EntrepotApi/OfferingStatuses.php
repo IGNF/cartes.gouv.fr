@@ -8,5 +8,6 @@ final class OfferingStatuses
     public const MODIFYING = 'MODIFYING';
     public const PUBLISHED = 'PUBLISHED';
     public const UNPUBLISHING = 'UNPUBLISHING';
+    public const UNPUBLISHED = 'UNPUBLISHED';
     public const UNSTABLE = 'UNSTABLE';
 }

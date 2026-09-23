@@ -9,6 +9,7 @@ import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
 import { routes } from "../../../../router/router";
+import { isOfferingUnavailable } from "../../../../utils";
 import PrivateServiceExplanation from "./PrivateServiceExplanation";
 import ServiceViewContent from "./ServiceViewContent";
 
@@ -50,6 +51,17 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                         )}
                     </div>
 
+                    {isOfferingUnavailable(serviceQuery.data.status) && (
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+                            <Alert
+                                severity="info"
+                                closable={false}
+                                title={serviceQuery.data.status === OfferingStatusEnum.UNPUBLISHED ? "Service dépublié" : "Service en cours de dépublication"}
+                                description={"Ce service n’est plus diffusé. Vous pouvez uniquement terminer sa dépublication depuis la fiche de donnée."}
+                            />
+                        </div>
+                    )}
+
                     {serviceQuery.data?.status === OfferingStatusEnum.UNSTABLE && (
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
                             <Alert
@@ -77,7 +89,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                         </div>
                     )}
 
-                    {serviceQuery.data?.open === true ? (
+                    {isOfferingUnavailable(serviceQuery.data.status) ? null : serviceQuery.data?.open === true ? (
                         <ServiceViewContent datastoreId={datastoreId} offeringId={offeringId} datasheetName={datasheetName} />
                     ) : (
                         <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
