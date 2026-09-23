@@ -1,17 +1,12 @@
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
-import { disableReactDevTools } from "@fvilers/disable-react-devtools";
 import { createHead, UnheadProvider } from "@unhead/react/client";
 import React from "react";
 import ReactDOM from "react-dom/client";
 
 import App from "@/App";
 
-// en prod
-if (import.meta.env?.APP_ENV?.toLowerCase() === "prod") {
-    disableReactDevTools();
-} else {
-    document.getElementsByClassName("sf-toolbar")?.[0]?.classList?.remove("sf-display-none");
-}
+// Contourne la barre d'outils Symfony masquée au chargement en dev (élément absent en prod)
+document.getElementsByClassName("sf-toolbar")?.[0]?.classList?.remove("sf-display-none");
 
 startReactDsfr({ defaultColorScheme: "light" });
 
