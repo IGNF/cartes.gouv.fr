@@ -27,7 +27,7 @@ const App: FC = () => {
             client={queryClient}
             persistOptions={{
                 persister,
-                buster: __GIT_COMMIT__ ?? "buster-react-query",
+                buster: __CACHE_BUSTER__,
                 maxAge,
                 dehydrateOptions: {
                     // ne pas persister (localstorage) les données utilisateur : elles sont rechargées depuis le serveur à chaque chargement de page

@@ -1,78 +1,65 @@
 import react from "@vitejs/plugin-react";
 import { Unhead } from "@unhead/react/vite";
 import autoprefixer from "autoprefixer";
-import { execSync } from "child_process";
 import { join, resolve } from "path";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 import run from "vite-plugin-run";
 import symfonyPlugin from "vite-plugin-symfony";
 
-function getGitInfo() {
-    try {
-        const branch = execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
-        const tag = execSync("git describe --tags --abbrev=0").toString().trim();
-        const commit = execSync("git rev-parse --short HEAD").toString().trim();
-        return { branch, tag, commit };
-    } catch (error) {
-        console.error("Failed to get Git info", error);
-        throw error;
-    }
-}
+// Renseignés par la CI (voir docker-build-publish.yml), vides en build local
+const appVersion = process.env.APP_VERSION ?? "";
+const appRevision = process.env.APP_REVISION ?? "";
+// Invalide le cache react-query persisté à chaque révision ; en local, à chaque build
+const cacheBuster = appRevision || `local-${Date.now()}`;
 
-const gitInfo = getGitInfo();
-
-export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, process.cwd());
-
-    return {
-        define: {
-            __GIT_TAG__: JSON.stringify(gitInfo?.tag),
-            __GIT_COMMIT__: JSON.stringify(gitInfo?.commit),
-        },
-        server: {
-            // Required to listen on all interfaces
-            host: "0.0.0.0",
-            cors: true,
-        },
-        plugins: [
-            react(),
-            Unhead(),
-            symfonyPlugin({
-                viteDevServerHostname: "localhost",
-                refresh: true,
-                sriAlgorithm: "sha384",
-                debug: env.APP_ENV === "dev",
-                exposedEnvVars: ["APP_ENV"],
-            }),
-            run([
-                {
-                    name: "fos-routing-js-dump",
-                    run: ["php", "bin/console", "fos:js-routing:dump", "--target", "./var/cache/fosRoutes.json", "--format", "json"],
-                    pattern: ["src/Controller/**.php"],
-                },
-            ]),
-        ],
-        base: env.ENCORE_PUBLIC_PATH ?? "/build/",
-        build: {
-            emptyOutDir: true,
-            outDir: resolve(join(__dirname, "public", "build")),
-            cssMinify: "esbuild",
-            rollupOptions: {
-                input: {
-                    main: resolve(join(__dirname, "./assets", "main.tsx")),
-                    dsfr: resolve(join(__dirname, "./node_modules", "@codegouvfr", "react-dsfr", "main.css")),
-                },
+export default defineConfig({
+    define: {
+        __APP_VERSION__: JSON.stringify(appVersion),
+        __APP_REVISION__: JSON.stringify(appRevision),
+        __CACHE_BUSTER__: JSON.stringify(cacheBuster),
+    },
+    server: {
+        // Required to listen on all interfaces
+        host: "0.0.0.0",
+        cors: true,
+    },
+    plugins: [
+        react(),
+        Unhead(),
+        symfonyPlugin({
+            viteDevServerHostname: "localhost",
+            refresh: true,
+            sriAlgorithm: "sha384",
+            exposedEnvVars: ["APP_ENV"],
+        }),
+        run([
+            {
+                name: "fos-routing-js-dump",
+                run: ["php", "bin/console", "fos:js-routing:dump", "--target", "./var/cache/fosRoutes.json", "--format", "json"],
+                pattern: ["src/Controller/**.php"],
+            },
+        ]),
+    ],
+    base: "/build/",
+    build: {
+        emptyOutDir: true,
+        outDir: resolve(join(__dirname, "public", "build")),
+        cssMinify: "esbuild",
+        rollupOptions: {
+            input: {
+                main: resolve(join(__dirname, "./assets", "main.tsx")),
+                dsfr: resolve(join(__dirname, "./node_modules", "@codegouvfr", "react-dsfr", "main.css")),
             },
         },
-        resolve: {
-            alias: {
-                "@": resolve(join(__dirname, "assets")),
-            },
+    },
+    resolve: {
+        alias: {
+            "@": resolve(join(__dirname, "assets")),
         },
-        css: {
-            postcss: {
-                plugins: [autoprefixer()],
-            },
+    },
+    css: {
+        postcss: {
+            plugins: [autoprefixer()],
         },
-    };
+    },
 });
