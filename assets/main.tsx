@@ -21,4 +21,6 @@ root.render(
     </React.StrictMode>
 );
 
-console.info(__APP_REVISION__ ? `cartes.gouv.fr ${__APP_VERSION__} (${__APP_REVISION__})` : "cartes.gouv.fr version inconnue (build local)");
+// Sur main, la CI fournit la révision mais pas de version
+const appVersion = __APP_VERSION__ || "version inconnue";
+console.info(__APP_REVISION__ ? `cartes.gouv.fr ${appVersion} (${__APP_REVISION__})` : "cartes.gouv.fr version inconnue (build local)");
