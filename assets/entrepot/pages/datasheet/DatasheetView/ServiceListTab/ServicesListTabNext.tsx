@@ -28,7 +28,7 @@ import { CartesApiException } from "@/modules/jsonFetch";
 import { externalUrls } from "@/router/externalUrls";
 import { routes } from "@/router/router";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
-import { editableOfferingTypes, formatDateFromISO, getServiceEditLink } from "@/utils";
+import { editableOfferingTypes, formatDateFromISO, getServiceEditLink, isOfferingUnavailable } from "@/utils";
 import DatasheetViewTab from "../../DatasheetViewTab";
 import ServiceInfoBanner from "./ServiceInfoBanner";
 
@@ -107,77 +107,85 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
     // lignes mémorisées : références stables pour que memo(MenuList) évite de re-rendre les menus de chaque ligne
     const rows = useMemo(
         () =>
-            pageServices.map((service) => [
-                <img
-                    key={`thumbnail-${service._id}`}
-                    src={placeholder1x1}
-                    alt=""
-                    className={css({ width: 40, height: 40, objectFit: "cover", borderRadius: 4, display: "block" })}
-                />,
-                service.layer_name,
-                service.configuration.last_event?.date ? formatDateFromISO(service.configuration.last_event.date) : "",
-                <Badge key={`access-${service._id}`} small noIcon className={fr.cx(service.open ? "fr-badge--blue-cumulus" : "fr-badge--purple-glycine")}>
-                    {service.open ? "Public" : "Privé"}
-                </Badge>,
-                <OfferingStatusBadge key={`status-${service._id}`} status={service.status} />,
-                <Button
-                    key={`consult-${service._id}`}
-                    priority="secondary"
-                    size="small"
-                    linkProps={routes.datastore_service_view({ datastoreId, offeringId: service._id, datasheetName }).link}
-                >
-                    Consulter
-                </Button>,
-                <MenuList
-                    key={`menu-${service._id}`}
-                    menuOpenButtonProps={{
-                        iconId: "ri-more-2-line",
-                        priority: "tertiary no outline",
-                        title: "Autres actions",
-                        size: "small",
-                    }}
-                    items={[
-                        {
-                            text: "Copier l’URL",
-                            iconId: "ri-file-copy-line",
-                            onClick: () => {
-                                if (!service.share_url) {
-                                    setMessage("URL de diffusion indisponible");
-                                } else {
-                                    setTargetService(service);
-                                    TextCopyToClipboardModal.open();
-                                }
+            pageServices.map((service) => {
+                const offeringUnavailable = isOfferingUnavailable(service.status);
+
+                return [
+                    <img
+                        key={`thumbnail-${service._id}`}
+                        src={placeholder1x1}
+                        alt=""
+                        className={css({ width: 40, height: 40, objectFit: "cover", borderRadius: 4, display: "block" })}
+                    />,
+                    service.layer_name,
+                    service.configuration.last_event?.date ? formatDateFromISO(service.configuration.last_event.date) : "",
+                    <Badge key={`access-${service._id}`} small noIcon className={fr.cx(service.open ? "fr-badge--blue-cumulus" : "fr-badge--purple-glycine")}>
+                        {service.open ? "Public" : "Privé"}
+                    </Badge>,
+                    <OfferingStatusBadge key={`status-${service._id}`} status={service.status} />,
+                    <Button
+                        key={`consult-${service._id}`}
+                        priority="secondary"
+                        size="small"
+                        {...(offeringUnavailable
+                            ? { disabled: true }
+                            : { linkProps: routes.datastore_service_view({ datastoreId, offeringId: service._id, datasheetName }).link })}
+                    >
+                        Consulter
+                    </Button>,
+                    <MenuList
+                        key={`menu-${service._id}`}
+                        menuOpenButtonProps={{
+                            iconId: "ri-more-2-line",
+                            priority: "tertiary no outline",
+                            title: "Autres actions",
+                            size: "small",
+                        }}
+                        items={[
+                            {
+                                text: "Copier l’URL",
+                                iconId: "ri-file-copy-line",
+                                disabled: offeringUnavailable,
+                                onClick: () => {
+                                    if (!service.share_url) {
+                                        setMessage("URL de diffusion indisponible");
+                                    } else {
+                                        setTargetService(service);
+                                        TextCopyToClipboardModal.open();
+                                    }
+                                },
                             },
-                        },
-                        {
-                            text: "Voir dans cartes.gouv.fr",
-                            iconId: "ri-external-link-line",
-                            disabled: true,
-                            onClick: () => {},
-                        },
-                        editableOfferingTypes.includes(service.type) &&
+                            {
+                                text: "Voir dans cartes.gouv.fr",
+                                iconId: "ri-external-link-line",
+                                disabled: true,
+                                onClick: () => {},
+                            },
+                            editableOfferingTypes.includes(service.type) &&
+                                canBroadcast && {
+                                    text: "Mettre à jour",
+                                    iconId: "ri-edit-box-line",
+                                    disabled: offeringUnavailable,
+                                    linkProps: getServiceEditLink(datastoreId, datasheetName, service),
+                                },
                             canBroadcast && {
-                                text: "Mettre à jour",
-                                iconId: "ri-edit-box-line",
-                                linkProps: getServiceEditLink(datastoreId, datasheetName, service),
+                                text: "Dépublier",
+                                iconId: "ri-arrow-go-back-line",
+                                onClick: () => {
+                                    setTargetService(service);
+                                    unpublishServiceConfirmModal.open();
+                                },
                             },
-                        canBroadcast && {
-                            text: "Dépublier",
-                            iconId: "ri-arrow-go-back-line",
-                            onClick: () => {
-                                setTargetService(service);
-                                unpublishServiceConfirmModal.open();
+                            {
+                                text: "Supprimer",
+                                iconId: "ri-delete-bin-line",
+                                disabled: true,
+                                onClick: () => {},
                             },
-                        },
-                        {
-                            text: "Supprimer",
-                            iconId: "ri-delete-bin-line",
-                            disabled: true,
-                            onClick: () => {},
-                        },
-                    ]}
-                />,
-            ]),
+                        ]}
+                    />,
+                ];
+            }),
         [pageServices, canBroadcast, datastoreId, datasheetName, css, setMessage]
     );
 
