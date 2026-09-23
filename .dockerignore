@@ -3,9 +3,9 @@
 /.env.*.local
 /.env.local.php
 
-# NE PAS ignorer : .git (vite.config.ts lit git describe/rev-parse au build),
-# .env (défauts non secrets requis au build), tsconfig*.json (lus par Vite/esbuild)
+# NE PAS ignorer : .env (défauts non secrets requis au build), tsconfig*.json (lus par Vite/esbuild)
 
+/.git
 /.vscode
 /.history
 /.github

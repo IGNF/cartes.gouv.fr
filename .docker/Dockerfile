@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1-labs@sha256:7d49dad25a050e14338ba7028b0460243f9d911dedc160a8fe20c34738fef3af
+# syntax=docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 #----------------------------------------------------------------------
 # Images épinglées par digest, tag + digest maintenus par Renovate
 #----------------------------------------------------------------------
@@ -127,15 +127,12 @@ FROM ${node_alpine_image} AS deps_nodejs_build
 ARG project_dir
 WORKDIR ${project_dir}
 
-RUN apk add --no-cache git
-
 # Couche dépendances mise en cache grâce aux fichiers package.json et package-lock.json
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci
 
 # Copie du reste du projet pour générer le build Vite (public/build)
 COPY .env vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
-COPY --exclude=index --exclude=logs --exclude=FETCH_HEAD --exclude=ORIG_HEAD .git .git
 COPY assets assets
 
 # Récupération des artefacts PHP consommés par le build Vite (cf. assets/modules/Routing.ts)
@@ -169,7 +166,7 @@ COPY --link --from=node_dist /usr/local/bin/node /usr/local/bin/node
 COPY --link --from=deps_nodejs_runtime ${project_dir}/node_modules node_modules
 COPY --link --from=deps_php ${project_dir}/vendor vendor
 COPY --link --from=deps_nodejs_build ${project_dir}/public/build public/build
-COPY --exclude=.git --exclude=var . .
+COPY . .
 
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
