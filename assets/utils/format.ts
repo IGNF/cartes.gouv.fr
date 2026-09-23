@@ -37,9 +37,6 @@ export const niceBytes = (x: string) => {
     return n.toFixed(n < 10 && l > 0 ? 2 : 0) + " " + units[l];
 };
 
-// La page Statistiques n’a pas de traduction anglaise : format français fixe.
-export const formatCount = (n: number): string => new Intl.NumberFormat("fr-FR").format(n);
-
 export const formatDate = (date: Date): string => {
     return datefnsFormat(date, "dd MMMM yyyy", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
 };

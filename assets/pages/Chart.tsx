@@ -6,24 +6,36 @@ import Table from "@codegouvfr/react-dsfr/Table";
 import { useMemo, useRef, useState } from "react";
 import { tss } from "tss-react";
 
+import { StatsType } from "@/@types/stats";
 import { IUseBarChartOptions, useBarChart } from "@/hooks/useBarChart";
 import { useTranslation } from "@/i18n";
-import { saveBlob } from "@/utils";
-import { formatDayLabel, formatStatValue } from "@/utils/stats";
+import { niceBytes, saveBlob } from "@/utils";
 
 export default function Chart(props: IUseBarChartOptions) {
-    const { barChartProps, series, type, ref: chartContainerRef } = useBarChart(props);
+    const { barChartProps, ref: chartContainerRef } = useBarChart(props);
     const chartRef = useRef<HTMLDivElement>(null);
     const [view, setView] = useState<"chart" | "table">("chart");
 
     const { t } = useTranslation("Stats");
     const { classes } = useStyles();
 
-    const tableHeaders = useMemo(() => [t("date_column"), t("data_type", { type })], [type, t]);
-    const formattedValues = useMemo(() => series.values.map((value) => formatStatValue(value, type)), [series, type]);
-    const tableData: string[][] = useMemo(() => series.days.map((day, i) => [formatDayLabel(day), formattedValues[i]]), [series, formattedValues]);
-    // Export : date ISO pour le tri dans un tableur, valeur telle qu’affichée
-    const csvData: string[][] = useMemo(() => series.days.map((day, i) => [day, formattedValues[i]]), [series, formattedValues]);
+    const tableHeaders = useMemo(() => [t("date_column"), t("data_type", { type: props.type as StatsType })], [props.type, t]);
+    const tableData: string[][] = useMemo(() => {
+        const x = barChartProps.x.flat();
+        const y = barChartProps.y.flat();
+
+        if (x.length === 0 || y.length === 0) {
+            return [];
+        }
+
+        const data: string[][] = x.reduce((acc, xValue, index) => {
+            const yValue = y[index];
+            acc.push([xValue, niceBytes(yValue.toString())]);
+            return acc;
+        }, [] as string[][]);
+
+        return data;
+    }, [barChartProps]);
 
     function handleExportChart(fileName = "chart.png") {
         const canvas = chartRef.current?.querySelector("canvas");
@@ -102,7 +114,7 @@ export default function Chart(props: IUseBarChartOptions) {
                             iconId: "ri-numbers-fill",
                             children: t("export_data"),
                             priority: "tertiary no outline",
-                            onClick: () => handleExportData(csvData),
+                            onClick: () => handleExportData(tableData),
                         },
                     ]}
                     buttonsSize="small"

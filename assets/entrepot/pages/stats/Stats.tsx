@@ -14,7 +14,6 @@ import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
 import { routes, useRoute } from "@/router/router";
 import { findMembership } from "@/utils";
-import { statsPeriodQuery } from "@/utils/stats";
 import DynamicParamSelector from "./DynamicParamSelector";
 import type { StatsScope, StatsScopeConfig } from "./stats.types";
 import StatsBarChart from "./StatsBarChart";
@@ -98,8 +97,14 @@ export default function Stats() {
 
     const allParamsResolved = !!currentConfig && allParams.every((p) => !!resolvedParams[p.key]);
 
-    // Le sélecteur fournit des jours calendaires ; conversion en bornes UTC, jour de fin inclus.
-    const dateQuery = useMemo(() => (startDate && endDate ? { ...statsPeriodQuery(startDate, endDate), details: true } : undefined), [startDate, endDate]);
+    const dateQuery = useMemo(
+        () => ({
+            start: startDate?.toISOString(),
+            end: endDate?.toISOString(),
+            details: true,
+        }),
+        [startDate, endDate]
+    );
 
     // route + params dérivés des valeurs résolues (endpoint/offering pour le param service)
     const request = currentConfig?.getStatsRequest(resolvedParams);

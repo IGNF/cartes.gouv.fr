@@ -67,12 +67,12 @@ Toutes les méthodes HTTP de `ApiClient` (`get`, `post`, `patch`, `put`, `delete
 
 ## PaginatedPromise - référence API
 
-`ApiClient::requestAll()` retourne un `PaginatedPromise`. Il déclenche la page 1 immédiatement à la construction. Les pages 2-N sont déclenchées en lots parallèles de 20 maximum lors de l'appel à `->resolve()`.
+`ApiClient::requestAll()` retourne un `PaginatedPromise`. Il déclenche la page 1 immédiatement à la construction. Les pages 2–N sont déclenchées en lots parallèles de 20 maximum lors de l'appel à `->resolve()`.
 
-| Méthode            | Retour             | Notes                                                                                                                                         |
-| ------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `->resolve()`      | `array`            | Bloque et retourne le tableau fusionné de toutes les pages (`array_merge` par défaut, listes uniquement) ; résultat mis en cache (idempotent) |
-| `->then(callable)` | `PaginatedPromise` | Enregistre une transformation lazy appliquée au tableau complet au moment du resolve ; `$transform(array): array`                             |
+| Méthode            | Retour             | Notes                                                                                                             |
+| ------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `->resolve()`      | `array`            | Bloque et retourne le tableau fusionné de toutes les pages ; résultat mis en cache (idempotent)                   |
+| `->then(callable)` | `PaginatedPromise` | Enregistre une transformation lazy appliquée au tableau complet au moment du resolve ; `$transform(array): array` |
 
 `->then()` est composable et reste lazy - la transformation ne s'exécute qu'une fois, au moment du `->resolve()`.
 
@@ -91,15 +91,9 @@ Stream plusieurs `ResponsePromise` en parallèle via `HttpClient::stream()`. Ret
 
 Enrichit une liste plate en récupérant le détail de chaque item en parallèle, par lots de 20. Le `$asyncFetcher` reçoit `(item, clé)` et doit retourner un `ResponsePromise`. Retourne le même tableau avec chaque item remplacé par son payload détaillé.
 
-### `requestAll(string $url, array $query = [], array $headers = [], ?callable $merge = null): PaginatedPromise`
+### `requestAll(string $url, array $query = [], array $headers = []): PaginatedPromise`
 
 Pagine automatiquement un endpoint GET. Toujours `limit=100`. Déclenche la page 1 immédiatement ; toutes les pages restantes sont déclenchées en parallèle lors de l'appel à `->resolve()`.
-
-Sans `$merge`, les pages sont fusionnées par `array_merge` : le corps doit être une liste, sinon `->resolve()` lève une `LogicException`. Pour un corps objet, fournir `$merge(array $accumulated, array $page): array`.
-
-### `requestAllHitStatistics(string $url, array $query = []): PaginatedPromise`
-
-Variante de `requestAll()` pour les routes `/stats` de l’[OpenAPI des statistiques](https://data.geopf.fr/api/stats/v3/api-docs), dont le corps est un objet `{ total, details[] }`. `total` est le total global de la période, identique sur chaque page : il est conservé tel quel. Seuls les `details` sont concaténés page après page.
 
 ---
 

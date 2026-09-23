@@ -122,7 +122,7 @@ final class DatastoreApiService
      */
     public function getPermissionStats(string $datastoreId, string $permissionId, array $query = []): PaginatedPromise
     {
-        return $this->api->requestAllHitStatistics("datastores/$datastoreId/permissions/$permissionId/stats", $query);
+        return $this->api->requestAll("datastores/$datastoreId/permissions/$permissionId/stats", $query);
     }
 
     /**
@@ -130,6 +130,6 @@ final class DatastoreApiService
      */
     public function getEndpointStats(string $datastoreId, string $endpointId, array $query = []): PaginatedPromise
     {
-        return $this->api->requestAllHitStatistics("datastores/$datastoreId/endpoints/$endpointId/stats", $query);
+        return $this->api->requestAll("datastores/$datastoreId/endpoints/$endpointId/stats", $query);
     }
 }
