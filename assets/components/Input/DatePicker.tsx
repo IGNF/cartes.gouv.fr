@@ -55,10 +55,15 @@ const DatePicker = (props: DatePickerProps) => {
                             ".MuiPickersInputBase-root": {
                                 paddingX: fr.spacing("4v"),
                                 backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+                                borderRadius: "0.25rem 0.25rem 0 0",
+                                boxShadow: "inset 0 -2px 0 0 var(--border-plain-grey)",
                             },
                             ".MuiPickersSectionList-root": {
                                 paddingY: fr.spacing("2v"),
                             },
+                        }}
+                        slots={{
+                            openPickerIcon: () => <span className={fr.cx("fr-icon-calendar-line", "fr-icon--sm")} />,
                         }}
                         timezone={"UTC"}
                         value={value ?? null}
