@@ -7,7 +7,7 @@
     "dependencies": {
         "jsdom": "^28.0.0",
         "prettier": "^3.0.0",
-        "undici": "^7.29.0"
+        "undici": "^7.30.0"
     },
     "devDependencies": {
         "@codegouvfr/react-dsfr": "^1.32.4",
