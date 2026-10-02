@@ -1,8 +1,6 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import MainNavigation from "@codegouvfr/react-dsfr/MainNavigation";
-
 import { routes, useRoute } from "@/router/router";
-import { tss } from "tss-react";
+
+import TertiaryNavigation from "./TertiaryNavigation";
 
 type DatastoreTertiaryNavigationProps = {
     datastoreId: string;
@@ -12,10 +10,8 @@ export default function DatastoreTertiaryNavigation(props: DatastoreTertiaryNavi
     const { datastoreId, communityId } = props;
     const { name: routeName } = useRoute();
 
-    const { classes } = useStyles();
-
     return (
-        <MainNavigation
+        <TertiaryNavigation
             items={[
                 {
                     text: "Fiches de données",
@@ -43,18 +39,6 @@ export default function DatastoreTertiaryNavigation(props: DatastoreTertiaryNavi
                     isActive: routeName === "community_info",
                 },
             ]}
-            classes={{
-                root: classes.root,
-            }}
         />
     );
 }
-
-const useStyles = tss.withName({ DatastoreTertiaryNavigation }).create({
-    root: {
-        backgroundImage: `linear-gradient(to right, ${fr.colors.decisions.border.default.grey.default}, ${fr.colors.decisions.border.default.grey.default})`,
-        backgroundPosition: "bottom",
-        backgroundRepeat: "no-repeat",
-        backgroundSize: "100% 2px",
-    },
-});

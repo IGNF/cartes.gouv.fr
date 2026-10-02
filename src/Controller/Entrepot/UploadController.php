@@ -7,6 +7,7 @@ use App\Constants\EntrepotApi\UploadTags;
 use App\Constants\EntrepotApi\UploadTypes;
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
+use App\Dto\Upload\UploadAddDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -70,49 +72,45 @@ class UploadController extends AbstractController implements ApiControllerInterf
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
-    public function add(string $datastoreId, Request $request): JsonResponse
-    {
+    public function add(
+        string $datastoreId,
+        #[MapRequestPayload] UploadAddDTO $dto,
+    ): JsonResponse {
         try {
-            $content = json_decode($request->getContent(), true);
-
-            if (!is_array($content)) {
-                throw new AppException('Corps de requête invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Corps de requête invalide']);
-            }
-
-            $dataUploadPath = $content['data_upload_path'] ?? null;
-            if (!is_string($dataUploadPath) || '' === trim($dataUploadPath)) {
-                throw new AppException('Chemin de fichier invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Chemin de fichier invalide']);
-            }
-
             // déclaration de livraison
-            $uploadData = [
-                'name' => $content['data_technical_name'],
-                'description' => $content['data_technical_name'],
+            $pendingUpload = $this->uploadApiService->add($datastoreId, [
+                'name' => $dto->name,
+                'description' => $dto->description,
                 'type' => UploadTypes::VECTOR,
-                'srs' => $content['data_srid'],
-            ];
-            $upload = $this->uploadApiService->add($datastoreId, $uploadData)->array();
+                'srs' => $dto->srid,
+            ]);
 
             // ajout tags sur la livraison
             $tags = [
-                UploadTags::DATA_UPLOAD_PATH => $dataUploadPath,
-                CommonTags::DATASHEET_NAME => $content['data_name'],
-                CommonTags::PRODUCER => $content['producer'],
-                CommonTags::PRODUCTION_YEAR => $content['production_year'],
+                UploadTags::DATA_UPLOAD_PATH => $dto->data_upload_path,
+                CommonTags::DATASHEET_NAME => $dto->datasheet_name,
+                CommonTags::PRODUCER => $dto->producer,
+                CommonTags::PRODUCTION_YEAR => $dto->getProductionYear(),
+                CommonTags::PRODUCTION_DATE => $dto->production_date,
+                CommonTags::THEME_CATEGORIES => implode(', ', $dto->themes),
+                CommonTags::ZONE => trim($dto->zone),
+                CommonTags::EMAIL_NOTIFICATION => $dto->email_notification,
             ];
 
-            if (isset($content['email_notification'])) {
-                $tags['email_notification'] = (bool) $content['email_notification'];
+            // tag optionnel
+            if (null !== $dto->producer_short && '' !== trim($dto->producer_short)) {
+                $tags[CommonTags::PRODUCER_SHORT] = trim($dto->producer_short);
             }
 
+            $upload = $pendingUpload->array();
             $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags)->array();
 
             // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB
             return $this->json($upload);
-        } catch (AppException $ex) {
-            return $this->json($ex->getDetails(), $ex->getStatusCode());
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

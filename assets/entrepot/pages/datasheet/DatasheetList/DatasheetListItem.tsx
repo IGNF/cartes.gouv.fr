@@ -31,13 +31,22 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
                 </Badge>
             }
             footer={
-                <Button
-                    linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.name }).link}
-                    iconId="fr-icon-arrow-right-s-line"
-                    iconPosition="right"
-                >
-                    Consulter
-                </Button>
+                <>
+                    <Button
+                        linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.name }).link}
+                        iconId="fr-icon-arrow-right-s-line"
+                        iconPosition="right"
+                    >
+                        Consulter
+                    </Button>
+                    <Button
+                        linkProps={routes.datastore_datasheet_view_next({ datastoreId, datasheetName: datasheet.name }).link}
+                        iconId="fr-icon-arrow-right-s-line"
+                        iconPosition="right"
+                    >
+                        Consulter next
+                    </Button>
+                </>
             }
             size="small"
         />

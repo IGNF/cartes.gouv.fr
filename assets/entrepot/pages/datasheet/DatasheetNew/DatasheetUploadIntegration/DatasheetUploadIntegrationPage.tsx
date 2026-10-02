@@ -9,8 +9,10 @@ type DatasheetUploadIntegrationPageProps = {
     datastoreId: string;
     uploadId: string;
     datasheetName: string | undefined;
+    /** variante de la vue fiche vers laquelle rediriger en fin d'intégration */
+    datasheetViewVariant?: "classic" | "next";
 };
-const DatasheetUploadIntegrationPage: FC<DatasheetUploadIntegrationPageProps> = ({ datastoreId, uploadId, datasheetName }) => {
+const DatasheetUploadIntegrationPage: FC<DatasheetUploadIntegrationPageProps> = ({ datastoreId, uploadId, datasheetName, datasheetViewVariant }) => {
     const { t } = useTranslation("DatasheetUploadIntegration");
 
     return (
@@ -19,7 +21,12 @@ const DatasheetUploadIntegrationPage: FC<DatasheetUploadIntegrationPageProps> = 
                 <h1>{t("integration_page.title")}</h1>
             </div>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--center", "fr-mt-2v")}>
-                <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} datasheetName={datasheetName} />
+                <DatasheetUploadIntegrationDialog
+                    datastoreId={datastoreId}
+                    uploadId={uploadId}
+                    datasheetName={datasheetName}
+                    datasheetViewVariant={datasheetViewVariant}
+                />
             </div>
         </Main>
     );

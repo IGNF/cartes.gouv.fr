@@ -13,6 +13,7 @@ import pyramidVector from "./pyramidVector";
 import pyramidRaster from "./pyramidRaster";
 import service from "./service";
 import epsg from "./epsg";
+import geocoding from "./geocoding";
 import annexe from "./annexe";
 import style from "./style";
 import metadata from "./metadata";
@@ -43,8 +44,9 @@ const api = {
     processing,
     statics,
     alerts,
-    // epsg.io
+    // APIs externes
     epsg,
+    geocoding,
     geonetwork,
 };
 export default api;
