@@ -145,9 +145,12 @@
 		method GET HEAD
 	}
 	route @s3Gateway {
-		# En-têtes x-amz et Via (ajouté par reverse_proxy, révèle Caddy) jamais renvoyés ; placé en tête car route garde l'ordre écrit
+		# En-têtes x-amz et Via (ajouté par reverse_proxy, révèle Caddy) jamais renvoyés ; placé en tête car route garde l'ordre écrit.
+		# sandbox : un objet HTML ou SVG ouvert directement ne peut exécuter de script sur l'origine du site ; sans effet
+		# sur les fetch et les images
 		header -Via
 		header -x-amz-*
+		header Content-Security-Policy sandbox
 
 		# 2xx = clé valide, signature dans les en-têtes X-S3-* recopiés sur la requête ; sinon la réponse PHP (404, 301) est renvoyée
 		forward_auth 127.0.0.1:8081 {

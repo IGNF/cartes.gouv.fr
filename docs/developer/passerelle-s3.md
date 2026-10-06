@@ -41,7 +41,7 @@ sequenceDiagram
 5. Sur un 2xx, Caddy recopie ces en-têtes sur la requête du client, remplace le préfixe `/files/` par le nom du bucket sans toucher à l'encodage du chemin, reconstruit la query signée, retire `Cookie`, `Authorization` et les `X-S3-*`, puis relaie vers `S3_ENDPOINT`. Sur un autre statut (404, 301), la réponse PHP est renvoyée telle quelle.
 6. Les octets transitent par Caddy, sans occuper de thread PHP.
 
-`ETag`, `Last-Modified`, `Content-Type`, `Content-Length`, les réponses 206 (`Range`) et 304 (`If-None-Match`, `If-Modified-Since`) viennent du S3 tels quels. Caddy ajoute `Cache-Control: public, max-age=3600, must-revalidate, s-maxage=3600` sur les 200, 206 et 304 uniquement, et retire `Via` et les en-têtes `x-amz-*`.
+`ETag`, `Last-Modified`, `Content-Type`, `Content-Length`, les réponses 206 (`Range`) et 304 (`If-None-Match`, `If-Modified-Since`) viennent du S3 tels quels. Caddy ajoute `Cache-Control: public, max-age=3600, must-revalidate, s-maxage=3600` sur les 200, 206 et 304 uniquement, `Content-Security-Policy: sandbox` sur toutes les réponses (un objet HTML ou SVG ouvert directement dans le navigateur ne peut exécuter de script sur l'origine du site ; sans effet sur les `fetch()` du site éditorial ni sur les images), et retire `Via` et les en-têtes `x-amz-*`.
 
 ## Statuts
 
