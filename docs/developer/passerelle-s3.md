@@ -34,7 +34,7 @@ sequenceDiagram
     end
 ```
 
-1. Caddy reçoit `GET` ou `HEAD /files/{clé}` (bloc `route @s3Gateway` de `.docker/Caddyfile`). Les autres méthodes suivent le chemin habituel vers PHP, comme avant.
+1. Caddy reçoit `GET` ou `HEAD /files/{clé}` (snippet `s3Gateway` de `.docker/s3-gateway.caddyfile`, importé par `.docker/Caddyfile`). Les autres méthodes suivent le chemin habituel vers PHP, comme avant.
 2. `forward_auth` envoie une sous-requête `GET /s3-sign/files/{clé}` au serveur interne `http://127.0.0.1:8081`, joignable uniquement en boucle locale, qui exécute `CartesS3Controller::sign()`. Ce préfixe `/s3-sign/` est la seule route Symfony de la passerelle ; le site public répond 404 dessus, Symfony ne sachant pas par quel serveur Caddy une requête arrive.
 3. Le contrôleur rejette en 404 une clé vide, de plus de 1024 octets, contenant un caractère de contrôle ou un segment `..`. Si l'URL publique brute (`X-Forwarded-Uri`) n'est pas canonique, il répond 301 vers sa forme canonique : segments vides ou `.` retirés (Flysystem les ignorait, le S3 non) et `+` brut encodé en `%2B` (le S3 le lit comme une espace).
 4. Il signe une requête S3 pour cette clé et la méthode du client (`X-Forwarded-Method`, GET ou HEAD) avec `AsyncAws\S3\S3Client`, validité 60 s. La signature est un calcul local : PHP n'appelle jamais le S3. Il répond 204 avec les paramètres signés dans des en-têtes `X-S3-*`.
@@ -69,10 +69,10 @@ PHP répond avant l'appel S3 : seul Caddy connaît le statut final. Les requête
 
 ## Prérequis d'environnement
 
-- `S3_ENDPOINT`, `S3_BUCKET_NAME`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` : lus par PHP (signature) et par Caddy (`{$S3_ENDPOINT}` et `{$S3_BUCKET_NAME}` dans le Caddyfile).
+- `S3_ENDPOINT`, `S3_BUCKET_NAME`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` : lus par PHP (signature) et par Caddy (`{$S3_ENDPOINT}` et `{$S3_BUCKET_NAME}` dans `s3-gateway.caddyfile`).
 - `HTTPS_PROXY` : Caddy respecte les mêmes variables de proxy que PHP (comportement Go standard) ; la boucle locale n'est jamais proxifiée.
 
-Le Caddyfile est embarqué dans l'image : une modification se teste en dev en le recopiant dans le conteneur (`docker exec -u root ... cp`) puis en redémarrant celui-ci (`admin off`, pas de rechargement à chaud).
+Le Caddyfile et `s3-gateway.caddyfile` sont embarqués dans l'image : une modification se teste en dev en les recopiant dans `/etc/frankenphp/` du conteneur (`docker exec -u root ... cp`) puis en redémarrant celui-ci (`admin off`, pas de rechargement à chaud).
 
 ## Vérification manuelle
 

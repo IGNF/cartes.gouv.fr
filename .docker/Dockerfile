@@ -99,7 +99,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # /etc/php-zts/conf.d est scanné par le CLI (php-zts) et par frankenphp
 #----------------------------------------------------------------------
 COPY .docker/php.ini /etc/php-zts/conf.d/99-app.ini
-COPY .docker/Caddyfile /etc/frankenphp/Caddyfile
+COPY .docker/Caddyfile .docker/s3-gateway.caddyfile /etc/frankenphp/
 
 #----------------------------------------------------------------------
 # Répertoires d'état de Caddy sous /tmp, compatibles rootfs read-only (créés au démarrage)

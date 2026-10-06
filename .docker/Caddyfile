@@ -36,6 +36,9 @@
 	order respond before redir
 }
 
+# Passerelle S3 : snippet des règles du site public et serveur interne de signature (boucle locale)
+import s3-gateway.caddyfile
+
 :8000 {
 	root * /opt/cartesgouvfr-site/public
 
@@ -131,102 +134,9 @@
 		}
 	}
 
-	# Passerelle S3 (docs/developer/passerelle-s3.md) : Caddy demande à PHP de valider la clé et de signer la requête
-	# (sous-requête /s3-sign/files/... vers le serveur interne ci-dessous), puis relaie l'URL du client telle quelle
-	# vers le S3, encodage compris (un « + » ré-encodé serait lu comme une espace par le S3). Sortie HTTPS via HTTPS_PROXY.
-	# La route de signature n'existe que pour le serveur interne : bloquée ici, Symfony ne sachant pas d'où vient l'appel
-	@s3SignPublic path /s3-sign/*
-	respond @s3SignPublic 404
-
-	# /files et /files/ (clé vide) restent hors passerelle : page React, comme toute URL inconnue
-	@s3Gateway {
-		path /files/*
-		not path /files/
-		method GET HEAD
-	}
-	route @s3Gateway {
-		# En-têtes x-amz et Via (ajouté par reverse_proxy, révèle Caddy) jamais renvoyés ; placé en tête car route garde l'ordre écrit.
-		# sandbox : un objet HTML ou SVG ouvert directement ne peut exécuter de script sur l'origine du site ; sans effet
-		# sur les fetch et les images
-		header -Via
-		header -x-amz-*
-		header Content-Security-Policy sandbox
-
-		# 2xx = clé valide, signature dans les en-têtes X-S3-* recopiés sur la requête ; sinon la réponse PHP (404, 301) est renvoyée
-		forward_auth 127.0.0.1:8081 {
-			uri /s3-sign{http.request.uri.path}
-			copy_headers X-S3-Algorithm X-S3-Credential X-S3-Date X-S3-Expires X-S3-Content-Sha256 X-S3-Signedheaders X-S3-Signature
-		}
-
-		# Chemin du client conservé (uri replace garde l'encodage brut, contrairement à rewrite) ; query signée reconstituée
-		# paramètre par paramètre, rewrite encode chaque valeur
-		uri replace /files/ /{$S3_BUCKET_NAME}/
-		rewrite * ?X-Amz-Algorithm={http.request.header.X-S3-Algorithm}&X-Amz-Credential={http.request.header.X-S3-Credential}&X-Amz-Date={http.request.header.X-S3-Date}&X-Amz-Expires={http.request.header.X-S3-Expires}&X-Amz-Content-Sha256={http.request.header.X-S3-Content-Sha256}&X-Amz-SignedHeaders={http.request.header.X-S3-Signedheaders}&X-Amz-Signature={http.request.header.X-S3-Signature}
-
-		# Cache uniquement sur les réponses réussies du S3, jamais sur une erreur ni une redirection
-		header {
-			match {
-				status 200 206 304
-			}
-			Cache-Control "public, max-age=3600, must-revalidate, s-maxage=3600"
-		}
-
-		reverse_proxy {$S3_ENDPOINT} {
-			# Host du S3 sans port, tel que signé par PHP (SigV4) ; signature et en-têtes d'authentification du navigateur
-			# jamais transmis
-			header_up Host {http.reverse_proxy.upstream.host}
-			header_up -X-S3-*
-			header_up -Cookie
-			header_up -Authorization
-
-			# S3 muet : le client n'attend pas indéfiniment les en-têtes de réponse
-			transport http {
-				response_header_timeout 30s
-			}
-
-			# Réponses d'erreur S3 renvoyées vides (pas de XML ni de nom de bucket) et jamais mises en cache.
-			# 404, 412 (If-Match, If-Unmodified-Since) et 416 (Range) gardent leur statut ; le reste,
-			# dont 403 (identifiants invalides), devient 502
-			@missing status 404
-			handle_response @missing {
-				header Cache-Control "no-cache, private"
-				respond 404
-			}
-			@precondition status 412
-			handle_response @precondition {
-				header Cache-Control "no-cache, private"
-				respond 412
-			}
-			@range status 416
-			handle_response @range {
-				header Cache-Control "no-cache, private"
-				copy_response_headers {
-					include Content-Range
-				}
-				respond 416
-			}
-			@failed status 4xx 5xx
-			handle_response @failed {
-				header Cache-Control "no-cache, private"
-				respond 502
-			}
-		}
-	}
-
-	# Erreurs générées par Caddy lui-même (amont injoignable ou muet) : réponse vide, sans en-tête Server
-	handle_errors 502 504 {
-		header -Server
-		header Cache-Control "no-cache, private"
-		respond "" {err.status_code}
-	}
+	# Passerelle S3 : règles du site public, voir s3-gateway.caddyfile
+	import s3Gateway
 
 	php_server
 }
 
-# Serveur interne de la passerelle S3 (route /s3-sign/files/...) : lié à la boucle locale, joignable uniquement par
-# forward_auth, jamais loggé. Adresse sans hôte : la sous-requête garde le Host du client
-http://:8081 {
-	bind 127.0.0.1
-	root * /opt/cartesgouvfr-site/public
-	php_server
-}

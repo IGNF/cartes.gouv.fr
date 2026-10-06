@@ -65,7 +65,7 @@ class CartesS3Controller extends AbstractController
         $input = Request::METHOD_HEAD === $method ? new HeadObjectRequest($arguments) : new GetObjectRequest($arguments);
         $signedUrl = $this->s3Client->presign($input, new \DateTimeImmutable(self::PRESIGN_TTL));
 
-        // Caddy recopie les X-S3-* sur la requête relayée vers le S3 (bloc @s3Gateway de .docker/Caddyfile)
+        // Caddy recopie les X-S3-* sur la requête relayée vers le S3 (snippet s3Gateway de .docker/s3-gateway.caddyfile)
         $response = new Response(null, Response::HTTP_NO_CONTENT);
         foreach ($this->signedQueryParameters($signedUrl) as $name => $value) {
             $response->headers->set('X-S3-'.substr($name, \strlen('X-Amz-')), $value);
