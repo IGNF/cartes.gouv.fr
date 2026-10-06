@@ -17,6 +17,7 @@
 - Explication des workflows :
     - [Workflow d'intégration d'un upload vecteur](./workflows/upload-integration-vector/README.md)
 - [Authentification](./auth/README.md)
+- [Passerelle S3 (`/files/{clé}`)](passerelle-s3.md)
 
 ## Commandes utiles
 
