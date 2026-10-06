@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ce28ef48cdf31ed9e3d47e49d30ca52d",
+    "content-hash": "ee1d8b20584fd240dbf678f1547d7ebf",
     "packages": [
         {
             "name": "async-aws/core",
-            "version": "1.28.1",
+            "version": "1.30.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/async-aws/core.git",
-                "reference": "e8b02ac30b17afaf1352cbd352dceb789d792d39"
+                "reference": "dc0c26832e44db34466dd68d450293d573e732d1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/async-aws/core/zipball/e8b02ac30b17afaf1352cbd352dceb789d792d39",
-                "reference": "e8b02ac30b17afaf1352cbd352dceb789d792d39",
+                "url": "https://api.github.com/repos/async-aws/core/zipball/dc0c26832e44db34466dd68d450293d573e732d1",
+                "reference": "dc0c26832e44db34466dd68d450293d573e732d1",
                 "shasum": ""
             },
             "require": {
@@ -43,7 +43,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.28-dev"
+                    "dev-master": "1.30-dev"
                 }
             },
             "autoload": {
@@ -64,7 +64,7 @@
                 "sts"
             ],
             "support": {
-                "source": "https://github.com/async-aws/core/tree/1.28.1"
+                "source": "https://github.com/async-aws/core/tree/1.30.0"
             },
             "funding": [
                 {
@@ -76,20 +76,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-16T10:24:54+00:00"
+            "time": "2026-09-09T11:10:02+00:00"
         },
         {
             "name": "async-aws/s3",
-            "version": "3.1.0",
+            "version": "3.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/async-aws/s3.git",
-                "reference": "68664f2db5d990b7e8863624791366d6e8925398"
+                "reference": "43b1f00d16f2c5c05b37337ccdc2aa1b1a24a18a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/async-aws/s3/zipball/68664f2db5d990b7e8863624791366d6e8925398",
-                "reference": "68664f2db5d990b7e8863624791366d6e8925398",
+                "url": "https://api.github.com/repos/async-aws/s3/zipball/43b1f00d16f2c5c05b37337ccdc2aa1b1a24a18a",
+                "reference": "43b1f00d16f2c5c05b37337ccdc2aa1b1a24a18a",
                 "shasum": ""
             },
             "require": {
@@ -108,7 +108,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.1-dev"
+                    "dev-master": "3.5-dev"
                 }
             },
             "autoload": {
@@ -129,7 +129,7 @@
                 "sdk"
             ],
             "support": {
-                "source": "https://github.com/async-aws/s3/tree/3.1.0"
+                "source": "https://github.com/async-aws/s3/tree/3.5.0"
             },
             "funding": [
                 {
@@ -141,68 +141,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-16T10:24:54+00:00"
-        },
-        {
-            "name": "async-aws/simple-s3",
-            "version": "3.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/async-aws/simple-s3.git",
-                "reference": "e51f78df03e3cb91d389962c7b71d61e1b825a37"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/async-aws/simple-s3/zipball/e51f78df03e3cb91d389962c7b71d61e1b825a37",
-                "reference": "e51f78df03e3cb91d389962c7b71d61e1b825a37",
-                "shasum": ""
-            },
-            "require": {
-                "async-aws/s3": "^3.0",
-                "php": "^8.2"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^11.5.42",
-                "symfony/error-handler": "^7.3.2 || ^8.0",
-                "symfony/phpunit-bridge": "^7.3.2 || ^8.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AsyncAws\\SimpleS3\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "A simple S3 client that are easy to work with. ",
-            "keywords": [
-                "amazon",
-                "async-aws",
-                "aws",
-                "s3",
-                "sdk"
-            ],
-            "support": {
-                "source": "https://github.com/async-aws/simple-s3/tree/3.0.1"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/jderusse",
-                    "type": "github"
-                },
-                {
-                    "url": "https://github.com/nyholm",
-                    "type": "github"
-                }
-            ],
-            "time": "2026-02-16T10:24:54+00:00"
+            "time": "2026-09-09T11:10:02+00:00"
         },
         {
             "name": "doctrine/deprecations",
@@ -929,322 +868,6 @@
                 "source": "https://github.com/knpuniversity/oauth2-client-bundle/tree/v2.20.2"
             },
             "time": "2026-02-12T17:07:18+00:00"
-        },
-        {
-            "name": "league/flysystem",
-            "version": "3.36.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thephpleague/flysystem.git",
-                "reference": "f7fb152932f30072d573510cbd4dd657d6475b25"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/f7fb152932f30072d573510cbd4dd657d6475b25",
-                "reference": "f7fb152932f30072d573510cbd4dd657d6475b25",
-                "shasum": ""
-            },
-            "require": {
-                "league/flysystem-local": "^3.0.0",
-                "league/mime-type-detection": "^1.0.0",
-                "php": "^8.0.2"
-            },
-            "conflict": {
-                "async-aws/core": "<1.19.0",
-                "async-aws/s3": "<1.14.0",
-                "aws/aws-sdk-php": "3.209.31 || 3.210.0",
-                "guzzlehttp/guzzle": "<7.0",
-                "guzzlehttp/ringphp": "<1.1.1",
-                "phpseclib/phpseclib": "3.0.15",
-                "symfony/http-client": "<5.2"
-            },
-            "require-dev": {
-                "async-aws/s3": "^1.5 || ^2.0",
-                "async-aws/simple-s3": "^1.1 || ^2.0",
-                "aws/aws-sdk-php": "^3.295.10",
-                "composer/semver": "^3.0",
-                "ext-fileinfo": "*",
-                "ext-ftp": "*",
-                "ext-mongodb": "^1.3|^2",
-                "ext-zip": "*",
-                "friendsofphp/php-cs-fixer": "^3.5",
-                "google/cloud-storage": "^1.23",
-                "guzzlehttp/psr7": "^2.6",
-                "microsoft/azure-storage-blob": "^1.1",
-                "mongodb/mongodb": "^1.2|^2",
-                "phpseclib/phpseclib": "^3.0.36",
-                "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^9.5.11|^10.0",
-                "sabre/dav": "^4.6.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "League\\Flysystem\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Frank de Jonge",
-                    "email": "info@frankdejonge.nl"
-                }
-            ],
-            "description": "File storage abstraction for PHP",
-            "keywords": [
-                "WebDAV",
-                "aws",
-                "cloud",
-                "file",
-                "files",
-                "filesystem",
-                "filesystems",
-                "ftp",
-                "s3",
-                "sftp",
-                "storage"
-            ],
-            "support": {
-                "issues": "https://github.com/thephpleague/flysystem/issues",
-                "source": "https://github.com/thephpleague/flysystem/tree/3.36.0"
-            },
-            "time": "2026-09-02T08:00:27+00:00"
-        },
-        {
-            "name": "league/flysystem-async-aws-s3",
-            "version": "3.31.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thephpleague/flysystem-async-aws-s3.git",
-                "reference": "6928568d3fe24afc4d7d583fc1844d0c1d07651b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem-async-aws-s3/zipball/6928568d3fe24afc4d7d583fc1844d0c1d07651b",
-                "reference": "6928568d3fe24afc4d7d583fc1844d0c1d07651b",
-                "shasum": ""
-            },
-            "require": {
-                "async-aws/s3": "^1.5 || ^2.0 || ^3.0",
-                "league/flysystem": "^3.10.0",
-                "league/mime-type-detection": "^1.0.0",
-                "php": "^8.0.2"
-            },
-            "conflict": {
-                "symfony/http-client": "<5.2"
-            },
-            "require-dev": {
-                "async-aws/simple-s3": "^2.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "League\\Flysystem\\AsyncAwsS3\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Frank de Jonge",
-                    "email": "info@frankdejonge.nl"
-                }
-            ],
-            "description": "AsyncAws S3 filesystem adapter for Flysystem.",
-            "keywords": [
-                "Flysystem",
-                "async-aws",
-                "aws",
-                "file",
-                "files",
-                "filesystem",
-                "s3",
-                "storage"
-            ],
-            "support": {
-                "source": "https://github.com/thephpleague/flysystem-async-aws-s3/tree/3.31.0"
-            },
-            "time": "2026-01-23T15:30:45+00:00"
-        },
-        {
-            "name": "league/flysystem-bundle",
-            "version": "3.6.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thephpleague/flysystem-bundle.git",
-                "reference": "123ab96910177751faf3b6cc85eecc360ec12a1f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem-bundle/zipball/123ab96910177751faf3b6cc85eecc360ec12a1f",
-                "reference": "123ab96910177751faf3b6cc85eecc360ec12a1f",
-                "shasum": ""
-            },
-            "require": {
-                "league/flysystem": "^3.0",
-                "php": ">=8.2",
-                "symfony/config": "^6.0 || ^7.0 || ^8.0",
-                "symfony/dependency-injection": "^6.0 || ^7.0 || ^8.0",
-                "symfony/deprecation-contracts": "^2.1 || ^3",
-                "symfony/http-kernel": "^6.0 || ^7.0 || ^8.0",
-                "symfony/options-resolver": "^6.0 || ^7.0 || ^8.0"
-            },
-            "require-dev": {
-                "doctrine/mongodb-odm": "^2.0",
-                "league/flysystem-async-aws-s3": "^3.1",
-                "league/flysystem-aws-s3-v3": "^3.1",
-                "league/flysystem-azure-blob-storage": "^3.1",
-                "league/flysystem-ftp": "^3.1",
-                "league/flysystem-google-cloud-storage": "^3.1",
-                "league/flysystem-gridfs": "^3.28",
-                "league/flysystem-memory": "^3.1",
-                "league/flysystem-read-only": "^3.15",
-                "league/flysystem-sftp-v3": "^3.1",
-                "league/flysystem-webdav": "^3.29",
-                "platformcommunity/flysystem-bunnycdn": "^3.3",
-                "symfony/dotenv": "^6.0 || ^7.0 || ^8.0",
-                "symfony/framework-bundle": "^6.0 || ^7.0 || ^8.0",
-                "symfony/phpunit-bridge": "^6.0 || ^7.0 || ^8.0",
-                "symfony/var-dumper": "^6.0 || ^7.0 || ^8.0"
-            },
-            "type": "symfony-bundle",
-            "autoload": {
-                "psr-4": {
-                    "League\\FlysystemBundle\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Titouan Galopin",
-                    "email": "galopintitouan@gmail.com"
-                }
-            ],
-            "description": "Symfony bundle integrating Flysystem into Symfony applications",
-            "keywords": [
-                "Flysystem",
-                "bundle",
-                "filesystem",
-                "symfony"
-            ],
-            "support": {
-                "issues": "https://github.com/thephpleague/flysystem-bundle/issues",
-                "source": "https://github.com/thephpleague/flysystem-bundle/tree/3.6.2"
-            },
-            "time": "2026-02-05T15:26:57+00:00"
-        },
-        {
-            "name": "league/flysystem-local",
-            "version": "3.35.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thephpleague/flysystem-local.git",
-                "reference": "a099b24dce160f3b2239043d13d47c4a1a214ea4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem-local/zipball/a099b24dce160f3b2239043d13d47c4a1a214ea4",
-                "reference": "a099b24dce160f3b2239043d13d47c4a1a214ea4",
-                "shasum": ""
-            },
-            "require": {
-                "ext-fileinfo": "*",
-                "league/flysystem": "^3.0.0",
-                "league/mime-type-detection": "^1.0.0",
-                "php": "^8.0.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "League\\Flysystem\\Local\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Frank de Jonge",
-                    "email": "info@frankdejonge.nl"
-                }
-            ],
-            "description": "Local filesystem adapter for Flysystem.",
-            "keywords": [
-                "Flysystem",
-                "file",
-                "files",
-                "filesystem",
-                "local"
-            ],
-            "support": {
-                "source": "https://github.com/thephpleague/flysystem-local/tree/3.35.3"
-            },
-            "time": "2026-08-12T13:29:21+00:00"
-        },
-        {
-            "name": "league/mime-type-detection",
-            "version": "1.17.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thephpleague/mime-type-detection.git",
-                "reference": "f5f47eff7c48ed1003069a2ca67f316fb4021c76"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/mime-type-detection/zipball/f5f47eff7c48ed1003069a2ca67f316fb4021c76",
-                "reference": "f5f47eff7c48ed1003069a2ca67f316fb4021c76",
-                "shasum": ""
-            },
-            "require": {
-                "ext-fileinfo": "*",
-                "php": "^7.4 || ^8.0"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.2",
-                "phpstan/phpstan": "^0.12.68",
-                "phpunit/phpunit": "^8.5.8 || ^9.3 || ^10.0 || ^11.0 || ^12.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "League\\MimeTypeDetection\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Frank de Jonge",
-                    "email": "info@frankdejonge.nl"
-                }
-            ],
-            "description": "Mime-type detection for Flysystem",
-            "support": {
-                "issues": "https://github.com/thephpleague/mime-type-detection/issues",
-                "source": "https://github.com/thephpleague/mime-type-detection/tree/1.17.0"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/frankdejonge",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/league/flysystem",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2026-07-09T11:49:27+00:00"
         },
         {
             "name": "league/oauth2-client",
