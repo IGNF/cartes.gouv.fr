@@ -99,7 +99,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 alignItems: "center",
                             }}
                         >
-                            <strong className={fr.cx("fr-text--xl", "fr-m-0", "fr-mr-2v")}>Fiches de données</strong>
+                            <h2 className={fr.cx("fr-text--xl", "fr-m-0", "fr-mr-2v")}>Fiches de données</h2>
                             <Badge severity="info" noIcon={true}>
                                 {filteredItems.length ?? 0}
                             </Badge>
