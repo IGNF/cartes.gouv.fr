@@ -78,6 +78,8 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                 root: classes.root,
                 inner: classes.inner,
             }}
+            // @ts-expect-error react-dsfr SideMenu ne type pas role mais le propage sur sa balise nav
+            role="navigation"
         />
     );
 }

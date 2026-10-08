@@ -154,6 +154,8 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 allowEmptySearch={true}
                                 renderInput={(props) => <input {...props} disabled={isLoading} />}
                                 defaultValue={search}
+                                // @ts-expect-error react-dsfr force role="search" mais la barre ne constitue pas une zone de recherche du site
+                                role={undefined}
                             />
                             <Button
                                 priority="secondary"
