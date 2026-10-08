@@ -35,7 +35,7 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                             alignSelf: "stretch",
                         })}
                     >
-                        <span className={fr.cx("fr-icon-database-line", "fr-icon--md")} />
+                        <span className={fr.cx("fr-icon-database-line", "fr-icon--md")} aria-hidden="true" />
                         <h1 className={fr.cx("fr-text--xl", "fr-m-0")}>Mes entrepôts</h1>
                     </div>
                     <p
