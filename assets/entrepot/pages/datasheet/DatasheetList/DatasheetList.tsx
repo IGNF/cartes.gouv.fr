@@ -6,7 +6,7 @@ import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, useId, useMemo } from "react";
 import { tss } from "tss-react";
 import { useToggle } from "@mantine/hooks";
 
@@ -69,6 +69,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const limit = params["limit"] ? parseInt(params["limit"]) : 10;
 
     const [showFilters, toggleShowFilters] = useToggle();
+    const filtersId = useId();
 
     // filtre et tri
     const { search, searchedItems } = useSearch(datasheetList ?? []);
@@ -154,14 +155,19 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 renderInput={(props) => <input {...props} disabled={isLoading} />}
                                 defaultValue={search}
                             />
-                            <Button priority="secondary" iconId="fr-icon-equalizer-line" onClick={() => toggleShowFilters()}>
+                            <Button
+                                priority="secondary"
+                                iconId="fr-icon-equalizer-line"
+                                nativeButtonProps={{ "aria-controls": filtersId, "aria-expanded": showFilters }}
+                                onClick={() => toggleShowFilters()}
+                            >
                                 Filtres
                             </Button>
                         </div>
                     </div>
 
                     {showFilters && (
-                        <div className={cx(classes.filterRoot, fr.cx("fr-my-6v"))}>
+                        <div id={filtersId} className={cx(classes.filterRoot, fr.cx("fr-my-6v"))}>
                             <div className={classes.filterSelect}>
                                 <SelectNext
                                     label={t("filter_label")}
