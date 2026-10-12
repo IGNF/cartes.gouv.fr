@@ -13,7 +13,7 @@ export default function SandboxDatastoreExplanation() {
         <div className={cx(fr.cx("fr-highlight"), classes.root)}>
             <img src={labSvgUrl} alt="" />
             <div className={classes.text}>
-                <h6 className={fr.cx("fr-m-0")}>{t("sandbox_datastore_explanation_title")}</h6>
+                <h2 className={fr.cx("fr-h6", "fr-m-0")}>{t("sandbox_datastore_explanation_title")}</h2>
                 <p>{t("sandbox_datastore_explanation_desc")}</p>
             </div>
         </div>

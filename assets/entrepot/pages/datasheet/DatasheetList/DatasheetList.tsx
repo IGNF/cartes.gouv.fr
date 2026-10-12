@@ -6,7 +6,7 @@ import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, useId, useMemo } from "react";
 import { tss } from "tss-react";
 import { useToggle } from "@mantine/hooks";
 
@@ -69,6 +69,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const limit = params["limit"] ? parseInt(params["limit"]) : 10;
 
     const [showFilters, toggleShowFilters] = useToggle();
+    const filtersId = useId();
 
     // filtre et tri
     const { search, searchedItems } = useSearch(datasheetList ?? []);
@@ -98,7 +99,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 alignItems: "center",
                             }}
                         >
-                            <strong className={fr.cx("fr-text--xl", "fr-m-0", "fr-mr-2v")}>Fiches de données</strong>
+                            <h2 className={fr.cx("fr-text--xl", "fr-m-0", "fr-mr-2v")}>Fiches de données</h2>
                             <Badge severity="info" noIcon={true}>
                                 {filteredItems.length ?? 0}
                             </Badge>
@@ -153,15 +154,22 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 allowEmptySearch={true}
                                 renderInput={(props) => <input {...props} disabled={isLoading} />}
                                 defaultValue={search}
+                                // @ts-expect-error react-dsfr force role="search" mais la barre ne constitue pas une zone de recherche du site
+                                role={undefined}
                             />
-                            <Button priority="secondary" iconId="fr-icon-equalizer-line" onClick={() => toggleShowFilters()}>
+                            <Button
+                                priority="secondary"
+                                iconId="fr-icon-equalizer-line"
+                                nativeButtonProps={{ "aria-controls": filtersId, "aria-expanded": showFilters }}
+                                onClick={() => toggleShowFilters()}
+                            >
                                 Filtres
                             </Button>
                         </div>
                     </div>
 
                     {showFilters && (
-                        <div className={cx(classes.filterRoot, fr.cx("fr-my-6v"))}>
+                        <div id={filtersId} className={cx(classes.filterRoot, fr.cx("fr-my-6v"))}>
                             <div className={classes.filterSelect}>
                                 <SelectNext
                                     label={t("filter_label")}

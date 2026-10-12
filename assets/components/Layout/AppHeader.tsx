@@ -12,7 +12,7 @@ import "../../sass/components/header.scss";
 type AppHeaderProps = {
     navItems?: MainNavigationProps.Item[];
 };
-const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
+const AppHeader: FC<AppHeaderProps> = ({ navItems }) => {
     const { isDark } = useIsDark();
 
     return (
