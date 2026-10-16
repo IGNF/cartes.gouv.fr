@@ -3,6 +3,7 @@
 namespace App\Listener;
 
 use App\Controller\AppController;
+use App\Controller\CartesS3Controller;
 use App\Monolog\RequestIdResolver;
 use App\Security\User;
 use Monolog\Attribute\WithMonologChannel;
@@ -40,8 +41,8 @@ final class AccessLogSubscriber implements EventSubscriberInterface
         $request = $event->getRequest();
         $route = $request->attributes->get('_route');
 
-        // Probes de santé exclues, comme dans l'access log Caddy
-        if (in_array($route, [AppController::HEALTH_ROUTE, AppController::READY_ROUTE], true)) {
+        // Probes de santé exclues, comme dans l'access log Caddy ; signature S3 = sous-requête interne, Caddy logge /files/*
+        if (in_array($route, [AppController::HEALTH_ROUTE, AppController::READY_ROUTE, CartesS3Controller::SIGN_ROUTE], true)) {
             return;
         }
         $user = $this->security->getUser();
