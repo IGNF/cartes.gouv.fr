@@ -439,7 +439,7 @@ const isHistoryMissingOnRemote = (error) => {
 };
 
 const pullHistoryFromS3 = async () => {
-    const args = ["copyto", RUN_HISTORY_REMOTE_FILE, RUN_HISTORY_FILE];
+    const args = ["copyto", RUN_HISTORY_REMOTE_FILE, RUN_HISTORY_FILE, "--s3-no-check-bucket"];
     const command = `rclone ${args.join(" ")}`;
 
     try {
@@ -468,7 +468,7 @@ const pullHistoryFromS3 = async () => {
 };
 
 const pushHistoryToS3 = async () => {
-    const args = ["copyto", RUN_HISTORY_FILE, RUN_HISTORY_REMOTE_FILE];
+    const args = ["copyto", RUN_HISTORY_FILE, RUN_HISTORY_REMOTE_FILE, "--s3-no-check-bucket"];
     const command = `rclone ${args.join(" ")}`;
 
     try {
