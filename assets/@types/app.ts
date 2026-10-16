@@ -125,7 +125,14 @@ export interface StoredData extends StoredDataPrivateDetailResponseDto {
     tags: {
         datasheet_name?: string;
         producer?: string;
+        producer_short?: string;
         production_year?: string;
+        /** date de production de la donnée (AAAA-MM-JJ) */
+        date?: string;
+        /** thématiques séparées par « , » */
+        theme?: string;
+        /** étendue spatiale (zone de téléchargement) */
+        zone?: string;
     };
 }
 export {
@@ -169,17 +176,14 @@ export interface PyramidRaster extends StoredData {
     type_infos?: StoredDataRok4PyramidRasterDetailsDto;
 }
 
-/** upload (livraison) */
+/** upload (livraison) — reprend les tags métier communs des données stockées */
 export type Upload = UploadPrivateDetailResponseDto & {
-    tags: {
-        datasheet_name?: string;
+    tags: StoredData["tags"] & {
         proc_int_id?: string;
         vectordb_id?: string;
         data_upload_path?: string;
         integration_progress?: string;
         integration_current_step?: string;
-        producer?: string;
-        production_year?: string;
     };
 };
 
@@ -408,29 +412,73 @@ export type CswDocument = {
     url?: string;
 };
 
+export type CswMetadataProducer = {
+    organization_name: string;
+    organization_email: string;
+    role: string;
+    address_number_and_streetname?: string | null;
+    address_postal_code?: string | null;
+    address_city?: string | null;
+};
+
+export type CswMetadataSubConstraint = {
+    type: string;
+    locked?: boolean;
+    restriction_code?: string | null;
+    limitation_code?: string | null;
+    classification_code?: string | null;
+    url?: string | null;
+    description?: string | null;
+};
+
+export type CswMetadataResourceConstraint = {
+    type: string;
+    constraints: CswMetadataSubConstraint[];
+};
+
+export type CswMetadataTerritory = {
+    id: string;
+    title: string;
+    bbox: number[];
+};
+
 export type CswMetadata = {
     file_identifier?: string;
     hierarchy_level?: MetadataHierarchyLevel;
-    resource_genealogy?: string;
     language?: LanguageType;
     charset?: string;
-    title?: string;
-    abstract?: string;
-    creation_date?: string;
-    topic_categories?: string[];
-    inspire_keywords?: string[];
-    free_keywords?: string[];
-    frequency_code?: string;
-    contact_email?: string;
-    organisation_name?: string;
-    organisation_email?: string;
+    /** Titre / intitulé de la ressource (ex-title). */
+    name?: string;
+    /** Résumé (ex-abstract). */
+    description?: string;
+    date_creation?: string;
+    /** Date de publication de la ressource sur cartes.gouv.fr (auto, posée une fois). */
+    publication_date?: string;
+    /** Date de révision de la ressource (auto, mise à jour à chaque modification). */
+    revision_date?: string;
+    resource_genealogy?: string;
+    /** Thématiques ISO (ex-topic_categories). */
+    themes?: string[];
+    /** Mots-clés INSPIRE (ex-inspire_keywords). */
+    keywords_inspire?: string[];
+    /** Mots-clés additionnels (ex-free_keywords). */
+    keywords_additional?: string[];
+    /** Fréquence de mise à jour (ex-frequency_code). */
+    update_frequency?: string;
+    /** Producteurs / contacts (ex-organisation_name + organisation_email). */
+    producers?: CswMetadataProducer[];
+    resource_constraints?: CswMetadataResourceConstraint[];
+    territories?: CswMetadataTerritory[];
     resolution?: string;
+    /** Champs dérivés serveur (couches / fichiers de distribution). */
     layers?: CswMetadataLayer[];
     bbox?: BoundingBox | null;
     style_files?: CswStyleFile[];
     capabilities_files?: CswCapabilitiesFile[];
     documents?: CswDocument[];
     thumbnail_url?: string;
+    /** Horodatage de la métadonnée (gmd:dateStamp, géré par l'API). */
+    update_date?: string;
 };
 
 export type Metadata = MetadataStandardResponseDto & {

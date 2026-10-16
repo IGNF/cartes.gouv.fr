@@ -138,9 +138,12 @@ const datastoreRoutes = {
         {
             uploadId: param.query.string,
             datasheetName: param.query.optional.string,
+            // variante de la vue fiche vers laquelle rediriger en fin d'intégration ("classic" | "next")
+            datasheetViewVariant: param.query.optional.string.default("classic"),
         },
         () => "/donnees/integration"
     ),
+    datastore_datasheet_create_next: datastoreRoute.extend("/donnees/creer"),
     datastore_datasheet_view: datastoreRoute.extend(
         {
             datasheetName: param.path.string,
@@ -148,6 +151,26 @@ const datastoreRoutes = {
         },
         (p) => `/donnees/${p.datasheetName}`
     ),
+    datastore_datasheet_view_next: datastoreRoute.extend(
+        {
+            datasheetName: param.path.string,
+            activeTab: param.query.optional.string.default("description"),
+        },
+        (p) => `/donnees/${p.datasheetName}/next`
+    ),
+    datastore_dataset_add_next: datastoreRoute.extend(
+        {
+            datasheetName: param.path.string,
+        },
+        (p) => `/donnees/${p.datasheetName}/next/ajouter`
+    ),
+    datastore_service_add_next: datastoreRoute.extend(
+        {
+            datasheetName: param.path.string,
+        },
+        (p) => `/donnees/${p.datasheetName}/next/service/ajout`
+    ),
+
     datastore_stored_data_details: datastoreRoute.extend(
         {
             storedDataId: param.path.string,
