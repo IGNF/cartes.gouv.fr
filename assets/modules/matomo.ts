@@ -4,7 +4,6 @@ import { Route } from "type-route";
 export function matomoInit() {
     var _paq = ((window as any)._paq = (window as any)._paq || []);
     (function () {
-        console.log("InitMatomo");
         var u = "https://matomo.ign.fr/";
         _paq.push(["setTrackerUrl", u + "matomo.php"]);
         _paq.push(["setSiteId", "11"]);
