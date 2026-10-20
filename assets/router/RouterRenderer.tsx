@@ -52,11 +52,8 @@ const RouterRenderer: FC = () => {
     useEffect(() => {
         //Événement Matomo
         if (!(window as any)._paq) return;
-        console.log("addMatomoEvent");
         const currentUrl = window.location.href;
         const currentTitle = matomoPageTitle(route);
-
-        console.log(currentTitle);
 
         (window as any)._paq.push(["setReferrerUrl", currentUrl]);
         (window as any)._paq.push(["setCustomUrl", currentUrl]);
