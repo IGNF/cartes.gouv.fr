@@ -10,6 +10,15 @@
             "depNameTemplate": "frankenphp",
             "datasourceTemplate": "deb",
             "registryUrlTemplate": "https://pkg.henderkes.com/api/packages/{{phpVersion}}/debian?suite=php-zts&components=main&binaryArch=amd64"
+        },
+        {
+            "customType": "regex",
+            "description": "php-zts-embed/cli (dépôt deb henderkes) : correctifs PHP de la branche extraite de php_zts_version, le bump de branche reste manuel",
+            "managerFilePatterns": ["/\\.docker/Dockerfile$/"],
+            "matchStrings": ["ARG php_zts_version=(?<currentValue>(?<phpMajor>\\d+)\\.(?<phpMinor>\\d+)\\.\\d+-\\d+)"],
+            "depNameTemplate": "php-zts-embed",
+            "datasourceTemplate": "deb",
+            "registryUrlTemplate": "https://pkg.henderkes.com/api/packages/{{phpMajor}}{{phpMinor}}/debian?suite=php-zts&components=main&binaryArch=amd64"
         }
     ],
     "packageRules": [
