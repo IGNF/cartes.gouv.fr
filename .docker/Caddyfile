@@ -36,6 +36,9 @@
 	order respond before redir
 }
 
+# Passerelle S3 : snippet des règles du site public et serveur interne de signature (boucle locale)
+import s3-gateway.caddyfile
+
 :8000 {
 	root * /opt/cartesgouvfr-site/public
 
@@ -92,9 +95,10 @@
 	log_skip @health
 
 	# Requêtes dynamiques loggées par Symfony (docs/developer/logs.md), Caddy ne logge que ce qu'il sert lui-même
+	# /files/* (passerelle S3) reste loggé ici : PHP répond avant l'appel S3, seul Caddy connaît le statut final
 	@phpHandled {
 		not file
-		not path / /faq /faq/ /a-propos /a-propos/ /nous-ecrire /nous-ecrire/ /offre /offre/ /index.php /index.php/*
+		not path / /faq /faq/ /a-propos /a-propos/ /nous-ecrire /nous-ecrire/ /offre /offre/ /index.php /index.php/* /files/*
 		not method TRACE
 	}
 	log_skip @phpHandled
@@ -130,5 +134,9 @@
 		}
 	}
 
+	# Passerelle S3 : règles du site public, voir s3-gateway.caddyfile
+	import s3Gateway
+
 	php_server
 }
+

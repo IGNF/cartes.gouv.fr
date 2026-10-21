@@ -15,6 +15,7 @@ method=GET path=/api/datastores/190b.../metadata/arbres status=200 duration_ms=2
 - `route` et `user` sont omis quand ils n'existent pas (404, requête anonyme), `referer` et `user_agent` quand les headers sont absents.
 - `referer` et `user_agent` sont des valeurs contrôlées par le client : nettoyées en tokens plats (espaces, guillemets et `=` remplacés par `_`) et tronquées, même logique anti-injection que `request_id`.
 - En prod, le handler `access` sort le message brut sur stdout ; les autres handlers excluent le canal pour éviter la double sortie. Les requêtes servies par Caddy sans PHP (fichiers statiques, redirections héritées, TRACE) restent loggées par l'access log Caddy (voir `.docker/Caddyfile`), qui saute les requêtes dynamiques (`log_skip`).
+- Passerelle S3 (`/files/*`) : Caddy sert ces requêtes et les logge lui-même ; la sous-requête interne de signature (`/s3-sign/files/*`) est ignorée par `AccessLogSubscriber` (voir `passerelle-s3.md`).
 - Limite assumée : une requête qui tue le process PHP (fatal dur, OOM) ou dont la réponse 5xx est générée par Caddy lui-même n'a pas de ligne d'accès (le `log_skip` s'évalue sur la requête, pas sur le statut), seule la trace stderr subsiste.
 
 ## Corrélation par request_id
