@@ -11,9 +11,11 @@ ARG node_alpine_image=docker.io/library/node:24.14.0-alpine@sha256:7fddd9ddeae81
 ARG node_slim_image=docker.io/library/node:24.14.0-slim@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8
 ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90
 
-# php_version pilote le tag de l'image php et le dépôt deb ; couplé à frankenphp_version (bump PHP = changer les deux)
+# php_version pilote le tag de l'image php et le dépôt deb ; couplé à frankenphp_version et php_zts_version (bump PHP = changer les trois)
 ARG php_version=8.2
 ARG frankenphp_version=1.12.4+php82-1
+# PHP chargé par le binaire frankenphp (libphp-zts) et par le CLI : la version de correctif se pilote ici
+ARG php_zts_version=8.2.35-1
 
 # Stages alias : COPY --from n'interpole pas les ARG, contrairement à FROM
 FROM ${composer_image} AS composer_bin
@@ -74,6 +76,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 #------------------------------------------------------------------------
 ARG php_version
 ARG frankenphp_version
+ARG php_zts_version
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     pkg_version=$(echo "${php_version}" | tr -d .) \
@@ -83,7 +86,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
     frankenphp=${frankenphp_version} \
-    php-zts-cli \
+    php-zts-embed=${php_zts_version} \
+    php-zts-cli=${php_zts_version} \
     php-zts-apcu \
     php-zts-intl \
     php-zts-sqlite3 \
