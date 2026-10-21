@@ -2,12 +2,9 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import api from "../../../../api";
 import { routes } from "../../../../../router/router";
-import { CheckStatusEnum, type DatasheetDetailed, type DatasheetUploadItem } from "../../../../../@types/app";
+import { CheckStatusEnum, type DatasheetUploadItem } from "../../../../../@types/app";
 import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";
 import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetView";
 import Wait from "../../../../../components/Utils/Wait";
@@ -15,6 +12,8 @@ import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useCommunityRights from "@/hooks/useCommunityRights";
+import { integrationProgressHasFailure } from "@/utils";
+import useDeleteUploadMutation from "../../../../../hooks/queries/useDeleteUploadMutation";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;
@@ -26,24 +25,11 @@ type UnfinishedUploadListProps = {
 const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList, nbPublications, datasheetName }) => {
     const { t } = useTranslation("DatastoreManageStorage");
 
-    const queryClient = useQueryClient();
-
     const isLastUpload = (uploadList: DatasheetUploadItem[]): boolean => {
         return uploadList.length === 1 && nbPublications === 0;
     };
 
-    const deleteUnfinishedUpload = useMutation({
-        mutationFn: (uploadId: string) => api.upload.remove(datastoreId, uploadId),
-        onSuccess(uploadId) {
-            queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet: DatasheetDetailed) => {
-                return {
-                    ...datasheet,
-                    upload_list: datasheet.upload_list?.filter((upload) => upload._id !== uploadId) ?? [],
-                };
-            });
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-        },
-    });
+    const deleteUnfinishedUpload = useDeleteUploadMutation(datastoreId, datasheetName);
 
     const { userRights, isSupervisor } = useCommunityRights();
 
@@ -57,15 +43,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
             </div>
 
             {uploadList.map((upload) => {
-                let failureCase = false;
-                if (upload.tags.integration_progress) {
-                    try {
-                        const progress = JSON.parse(upload.tags.integration_progress) as Record<string, string>;
-                        failureCase = Object.values(progress).includes("failed");
-                    } catch {
-                        // ignore
-                    }
-                }
+                const failureCase = integrationProgressHasFailure(upload.tags.integration_progress);
 
                 return (
                     <div key={upload._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>

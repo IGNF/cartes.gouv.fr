@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 class CartesApiExceptionSubscriber implements EventSubscriberInterface
 {
@@ -71,6 +72,22 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
 
     private function format(HttpException $e): CartesApiException
     {
-        return new CartesApiException($e->getMessage(), $e->getStatusCode());
+        $previous = $e->getPrevious();
+        $details = [];
+
+        if ($previous instanceof ValidationFailedException) {
+            $errors = [];
+            foreach ($previous->getViolations() as $violation) {
+                // La propriété peut déjà être présente si plusieurs contraintes échouent
+                // sur le même champ : on garde le premier message (le plus prioritaire).
+                $path = $violation->getPropertyPath();
+                if (!array_key_exists($path, $errors)) {
+                    $errors[$path] = $violation->getMessage();
+                }
+            }
+            $details = ['errors' => $errors];
+        }
+
+        return new CartesApiException($e->getMessage(), $e->getStatusCode(), $details);
     }
 }
