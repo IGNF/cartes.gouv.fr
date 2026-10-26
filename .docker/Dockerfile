@@ -213,7 +213,7 @@ COPY .docker/php-xdebug.ini /etc/php-zts/conf.d/99-xdebug-app.ini
 COPY --from=node_dist /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node_dist /usr/local/bin/node /usr/local/bin/node
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
-    && npm i -g npm yarn pnpm
+    && npm i -g npm
 
 ENV NPM_CONFIG_CACHE="${project_dir}/var/.npm"
 RUN mkdir -p "$NPM_CONFIG_CACHE"
