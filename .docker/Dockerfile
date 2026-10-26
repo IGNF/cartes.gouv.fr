@@ -11,7 +11,7 @@ ARG node_alpine_image=docker.io/library/node:24.14.0-alpine@sha256:7fddd9ddeae81
 ARG node_slim_image=docker.io/library/node:24.14.0-slim@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8
 ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90
 
-# php_version pilote le tag de l'image php et le dépôt deb ; couplé à frankenphp_version et php_zts_version (bump PHP = changer les trois)
+# php_version pilote le dépôt deb ; couplé à frankenphp_version et php_zts_version (bump PHP = changer les trois)
 # frankenphp_version porte le correctif PHP contre lequel le deb a été construit (+php82.35) : le bumper avec php_zts_version
 ARG php_version=8.2
 ARG frankenphp_version=1.13.3+php82.35-1
@@ -21,28 +21,6 @@ ARG php_zts_version=8.2.35-1
 # Stages alias : COPY --from n'interpole pas les ARG, contrairement à FROM
 FROM ${composer_image} AS composer_bin
 FROM ${node_slim_image} AS node_dist
-
-#----------------------------------------------------------------------
-# Installer les dépendances PHP dans une couche dédiée (aucun boot du kernel ici)
-#----------------------------------------------------------------------
-FROM docker.io/library/php:${php_version}-cli@sha256:90db578653480744d7137d42e26055bc12c75099eab0cbb38bc8da79a94b1443 AS deps_php
-COPY --from=composer_bin /composer /usr/bin/composer
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get -qq update && apt-get -qq install -y git unzip
-
-ARG project_dir
-WORKDIR ${project_dir}
-ENV COMPOSER_CACHE_DIR=/var/cache/composer
-
-# Couche dépendances composer mise en cache grâce aux fichiers composer.json, composer.lock et symfony.lock
-COPY composer.json composer.lock symfony.lock ./
-RUN --mount=type=cache,target=/var/cache/composer \
-    composer install --prefer-dist --no-dev --no-scripts --no-autoloader --no-progress
-
-# Copie du reste du projet pour générer l'autoloader optimisé (classmap de src/)
-COPY . .
-RUN composer dump-autoload --no-dev --optimize
 
 #----------------------------------------------------------------------
 # Créer l'image de base de l'application
@@ -111,6 +89,28 @@ COPY .docker/Caddyfile /etc/frankenphp/Caddyfile
 #----------------------------------------------------------------------
 ENV XDG_CONFIG_HOME=/tmp/caddy-config \
     XDG_DATA_HOME=/tmp/caddy-data
+
+#----------------------------------------------------------------------
+# Installer les dépendances PHP dans une couche dédiée, sur le PHP-ZTS du runtime (aucun boot du kernel ici)
+#----------------------------------------------------------------------
+FROM base_app AS deps_php
+COPY --from=composer_bin /composer /usr/bin/composer
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get -qq update && apt-get -qq install --no-install-recommends -y git unzip
+
+ARG project_dir
+WORKDIR ${project_dir}
+ENV COMPOSER_CACHE_DIR=/var/cache/composer
+
+# Couche dépendances composer mise en cache grâce aux fichiers composer.json, composer.lock et symfony.lock
+COPY composer.json composer.lock symfony.lock ./
+RUN --mount=type=cache,target=/var/cache/composer \
+    composer install --prefer-dist --no-dev --no-scripts --no-autoloader --no-progress
+
+# Copie du reste du projet pour générer l'autoloader optimisé (classmap de src/)
+COPY . .
+RUN composer dump-autoload --no-dev --optimize
 
 #----------------------------------------------------------------------
 # Dump des routes pour le build Vite, sur le PHP-ZTS de prod
