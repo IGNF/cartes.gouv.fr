@@ -12,8 +12,9 @@ ARG node_slim_image=docker.io/library/node:24.14.0-slim@sha256:d8e448a56fc63242f
 ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90
 
 # php_version pilote le tag de l'image php et le dépôt deb ; couplé à frankenphp_version et php_zts_version (bump PHP = changer les trois)
+# frankenphp_version porte le correctif PHP contre lequel le deb a été construit (+php82.35) : le bumper avec php_zts_version
 ARG php_version=8.2
-ARG frankenphp_version=1.12.4+php82-1
+ARG frankenphp_version=1.13.3+php82.35-1
 # PHP chargé par le binaire frankenphp (libphp-zts) et par le CLI : la version de correctif se pilote ici
 ARG php_zts_version=8.2.35-1
 
