@@ -9,7 +9,7 @@ const drawExtent = (e: MapEvent, extent: Extent) => {
 
     const ext3857 = transformExtent(extent, "EPSG:4326", "EPSG:3857");
 
-    const canvas = e.map.getViewport().querySelector("canvas");
+    const canvas = e.map.getViewport()?.querySelector("canvas");
     const context = canvas?.getContext("2d");
     if (canvas && context) {
         context.save();

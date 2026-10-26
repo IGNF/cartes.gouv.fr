@@ -424,8 +424,7 @@ export type ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent = Configur
 
 /** Ressource cible du GetFeatureInfo */
 export type ConfigurationGetFeatureInfoWmtsTmsDetailsContent =
-    | ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent
-    | ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent;
+    ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent | ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent;
 
 export type ConfigurationItineraryIsocurveDetailsContent = ConfigurationDetailsContent & {
     /** Bounding box (en degrés) */
@@ -647,8 +646,7 @@ export interface ConfigurationUsedDataSearchDetailsContent {
 
 /** Informations sur la source des données */
 export type ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent =
-    | ConfigurationUsedDataSourceAccuracyManualAltimetryDetailsContent
-    | ConfigurationUsedDataSourceAccuracyPyramidAltimetryDetailsContent;
+    ConfigurationUsedDataSourceAccuracyManualAltimetryDetailsContent | ConfigurationUsedDataSourceAccuracyPyramidAltimetryDetailsContent;
 
 export type ConfigurationUsedDataSourceAccuracyManualAltimetryDetailsContent = ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent & {
     /** Valeur unique pour la source des données */
