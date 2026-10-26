@@ -11,12 +11,10 @@ ARG node_alpine_image=docker.io/library/node:24.14.0-alpine@sha256:7fddd9ddeae81
 ARG node_slim_image=docker.io/library/node:24.14.0-slim@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8
 ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90
 
-# php_version pilote le dépôt deb ; couplé à frankenphp_version et php_zts_version (bump PHP = changer les trois)
-# frankenphp_version porte le correctif PHP contre lequel le deb a été construit (+php82.35) : le bumper avec php_zts_version
-ARG php_version=8.2
-ARG frankenphp_version=1.13.3+php82.35-1
-# PHP chargé par le binaire frankenphp (libphp-zts) et par le CLI : la version de correctif se pilote ici
-ARG php_zts_version=8.2.35-1
+# Versions amont (php.net, FrankenPHP) : le dépôt deb y ajoute un suffixe de rebuild (-N) propre à chaque paquet,
+# ignoré ici (globs apt) et par Renovate (extractVersion). La branche du dépôt (82, 85...) découle de php_zts_version.
+ARG php_zts_version=8.2.35
+ARG frankenphp_version=1.13.3
 
 # Stages alias : COPY --from n'interpole pas les ARG, contrairement à FROM
 FROM ${composer_image} AS composer_bin
@@ -52,25 +50,25 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 #------------------------------------------------------------------------
 # Installer FrankenPHP et PHP (ZTS) depuis le dépôt deb officiel (https://frankenphp.dev/)
 # curl, dom, mbstring, opcache, openssl, xml… sont déjà intégrés au binaire
+# apcu, zip (et xdebug en dev) ont leur propre version amont et ne sont pas épinglés
 #------------------------------------------------------------------------
-ARG php_version
 ARG frankenphp_version
 ARG php_zts_version
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    pkg_version=$(echo "${php_version}" | tr -d .) \
+    php_branch=$(echo "${php_zts_version}" | cut -d. -f1,2 | tr -d .) \
     && mkdir -p /etc/apt/keyrings \
-    && curl -fsSL "https://pkg.henderkes.com/api/packages/${pkg_version}/debian/repository.key" -o "/etc/apt/keyrings/static-php${pkg_version}.asc" \
-    && echo "deb [signed-by=/etc/apt/keyrings/static-php${pkg_version}.asc] https://pkg.henderkes.com/api/packages/${pkg_version}/debian php-zts main" > "/etc/apt/sources.list.d/static-php${pkg_version}.list" \
+    && curl -fsSL "https://pkg.henderkes.com/api/packages/${php_branch}/debian/repository.key" -o "/etc/apt/keyrings/static-php${php_branch}.asc" \
+    && echo "deb [signed-by=/etc/apt/keyrings/static-php${php_branch}.asc] https://pkg.henderkes.com/api/packages/${php_branch}/debian php-zts main" > "/etc/apt/sources.list.d/static-php${php_branch}.list" \
     && apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
-    frankenphp=${frankenphp_version} \
-    php-zts-embed=${php_zts_version} \
-    php-zts-cli=${php_zts_version} \
+    "frankenphp=${frankenphp_version}+php${php_branch}*" \
+    "php-zts-embed=${php_zts_version}*" \
+    "php-zts-cli=${php_zts_version}*" \
     php-zts-apcu \
-    php-zts-intl \
-    php-zts-sqlite3 \
-    php-zts-xsl \
+    "php-zts-intl=${php_zts_version}*" \
+    "php-zts-sqlite3=${php_zts_version}*" \
+    "php-zts-xsl=${php_zts_version}*" \
     php-zts-zip \
     && ln -s /usr/bin/php-zts /usr/local/bin/php \
     && rm -rf /var/lib/frankenphp/.local/share/caddy \
