@@ -26,27 +26,23 @@ FROM ${node_slim_image} AS node_dist
 FROM ${ubuntu_image} AS base_app
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG=fr_FR.UTF-8
+# C.UTF-8 est fourni par la base Ubuntu : basename()/pathinfo() restent UTF-8 sans le paquet locales
+ENV LANG=C.UTF-8
 
 # Conserver les archives apt pour les mounts de cache BuildKit
 RUN rm -f /etc/apt/apt.conf.d/docker-clean \
     && echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 #----------------------------------------------------------------------
-# Locale fr_FR.UTF-8 (https://stackoverflow.com/a/41797247) + outils communs
+# Outils communs (rclone : scraper des articles, lancé en CronJob sur cette image)
 # upgrade : correctifs Ubuntu publiés après le digest de l'image de base (avant la source henderkes, qui dépasserait les pins)
 #----------------------------------------------------------------------
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get -qq update && apt-get -qq upgrade -y && apt-get -qq install --no-install-recommends -y \
-    locales \
     ca-certificates \
-    unzip zip \
-    curl wget \
-    rclone \
-    && sed -i -e 's/# en_US.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen \
-    && dpkg-reconfigure --frontend=noninteractive locales \
-    && update-locale LANG=fr_FR.UTF-8
+    curl \
+    rclone
 
 #------------------------------------------------------------------------
 # Installer FrankenPHP et PHP (ZTS) depuis le dépôt deb officiel (https://frankenphp.dev/)
