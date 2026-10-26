@@ -121,10 +121,10 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
                 controls: controls.current,
             });
             mapRef.current?.on("loadstart", function () {
-                mapRef.current?.getTargetElement().classList.add("spinner");
+                mapRef.current?.getTargetElement()?.classList.add("spinner");
             });
             mapRef.current?.on("loadend", function () {
-                mapRef.current?.getTargetElement().classList.remove("spinner");
+                mapRef.current?.getTargetElement()?.classList.remove("spinner");
             });
         }
         mapRef.current.setTarget(mapTargetRef.current || "");

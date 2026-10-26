@@ -54,7 +54,7 @@ const CreateAlert: FC<CreateAlertProps> = (props) => {
     const { alert, isEdit, ModalComponent, onSubmit } = props;
     const { t } = useTranslation("alerts");
 
-    const methods = useForm({
+    const methods = useForm<IAlert>({
         mode: "onSubmit",
         defaultValues: alert,
         resolver: yupResolver(alertSchema),
