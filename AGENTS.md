@@ -75,3 +75,17 @@ Pitfalls:
 - A newly used `fr-icon-*` icon renders as a filled square in dev until `react-dsfr update-icons` runs (triggered by `npm run dev`) and the page is reloaded without cache.
 - Cypress E2E tests are paused: ignore them unless explicitly reactivated.
 - Symfony profiler data can be read directly from the container: see `docs/developer/profiler.md`.
+
+## Writing style
+
+Applies to all prose: chat responses, PR descriptions, commit bodies, comments, docs.
+
+- One idea per sentence. Target under 25 words per sentence.
+- Active voice. Name the actor ("the hook rejects the commit", not "the commit is rejected").
+- Use concrete verbs. Banned words: leverage, robust, seamless(ly), streamline, comprehensive, powerful, simply, easily, crucial, delve.
+- No unmeasurable adjectives. "Fast" needs a number or a comparison, or delete it.
+- One term per concept. Do not rotate synonyms for variety.
+- Define a term at first use if it is not in the codebase or a linked doc.
+- Hedging is allowed only when it carries information: "might" must mean real uncertainty, never politeness.
+- No summary paragraphs that restate what was just said. End when done.
+- If a sentence survives with nothing lost after deletion, delete it.
