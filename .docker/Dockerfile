@@ -34,10 +34,11 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean \
 
 #----------------------------------------------------------------------
 # Locale fr_FR.UTF-8 (https://stackoverflow.com/a/41797247) + outils communs
+# upgrade : correctifs Ubuntu publiés après le digest de l'image de base (avant la source henderkes, qui dépasserait les pins)
 #----------------------------------------------------------------------
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get -qq update && apt-get -qq install --no-install-recommends -y \
+    apt-get -qq update && apt-get -qq upgrade -y && apt-get -qq install --no-install-recommends -y \
     locales \
     ca-certificates \
     unzip zip \
