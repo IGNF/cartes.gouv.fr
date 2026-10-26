@@ -36,6 +36,7 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean \
 #----------------------------------------------------------------------
 # Outils communs (rclone : scraper des articles, lancé en CronJob sur cette image)
 # upgrade : correctifs Ubuntu publiés après le digest de l'image de base (avant la source henderkes, qui dépasserait les pins)
+# En CI ce stage est rebuild sans cache (no-cache-filters) : chaque build repart des paquets Ubuntu et des debs du jour
 #----------------------------------------------------------------------
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \

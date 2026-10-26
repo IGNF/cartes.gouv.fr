@@ -92,6 +92,8 @@ jobs:
                       APP_REVISION=${{ github.sha }}
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
+                  # base_app toujours rebuild : apt (upgrade Ubuntu, debs php-zts) résout au build, un cache de couche figerait les paquets
+                  no-cache-filters: base_app
 
             # Scan informatif (ne bloque pas la CI en cas d'alertes levées). Si l'image est poussée : scan par digest (même artefact);
             # sinon : scan local par image ID (insensible aux tags multiples).
