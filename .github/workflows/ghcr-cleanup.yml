@@ -149,13 +149,17 @@ jobs:
                           github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg,
                           { org: owner, package_type: "container", package_name: repo.toLowerCase(), state: "active", per_page: 100 }
                       );
-                      const present = new Set(versions.flatMap((version) => version.metadata?.container?.tags ?? []));
+                      // id de version par tag, pour le lien vers la page de l'image
+                      const versionIdByTag = new Map();
+                      for (const version of versions) {
+                          for (const tag of version.metadata?.container?.tags ?? []) versionIdByTag.set(tag, version.id);
+                      }
 
                       for (const row of rows) {
                           if (row[4] !== "SUPPRIMABLE") continue;
                           // en dry-run le verdict reste « SUPPRIMABLE » : seul le titre dit que rien n'a été supprimé
                           if (dryRun) continue;
-                          row[4] = present.has(row[0]) ? "NON SUPPRIMÉE (voir le journal)" : "SUPPRIMÉE";
+                          row[4] = versionIdByTag.has(row[0]) ? "NON SUPPRIMÉE (voir le journal)" : "SUPPRIMÉE";
                       }
 
                       const title = dryRun
@@ -163,10 +167,20 @@ jobs:
                           : `Nettoyage GHCR : état du registre après suppression (grâce : ${process.env.GRACE_DAYS} j)`;
                       core.info(title);
                       for (const row of rows) core.info(row.join(" | "));
+
+                      // liens : page de l'image dans GHCR (seulement si elle existe encore) et page de la PR
+                      const repoUrl = `${context.serverUrl}/${owner}/${repo}`;
+                      const linkedRows = rows.map(([tag, pr, state, closedAt, verdict]) => [
+                          versionIdByTag.has(tag) ? `<a href="${repoUrl}/pkgs/container/${repo.toLowerCase()}/${versionIdByTag.get(tag)}?tag=${tag}">${tag}</a>` : tag,
+                          `<a href="${repoUrl}/pull/${pr.slice(1)}">${pr}</a>`,
+                          state,
+                          closedAt,
+                          verdict,
+                      ]);
                       await core.summary
                           .addHeading(title, 3)
                           .addTable([
                               [{ data: "Tag", header: true }, { data: "PR", header: true }, { data: "État", header: true }, { data: "Fermée le", header: true }, { data: "Verdict", header: true }],
-                              ...rows,
+                              ...linkedRows,
                           ])
                           .write();
