@@ -111,17 +111,11 @@ jobs:
                           core.info(rows.at(-1).join(" | "));
                       }
 
-                      await core.summary
-                          .addHeading(`Nettoyage GHCR (dry-run : ${process.env.DRY_RUN}, grâce : ${graceDays} j)`, 3)
-                          .addTable([
-                              [{ data: "Tag", header: true }, { data: "PR", header: true }, { data: "État", header: true }, { data: "Fermée le", header: true }, { data: "Verdict", header: true }],
-                              ...rows,
-                          ])
-                          .write();
-
                       core.info(`${deletable.length} tag(s) supprimable(s)`);
                       // tags exacts, sans métacaractère wildcard : l'action les matche littéralement
                       core.setOutput("delete-tags", deletable.join(","));
+                      // le tableau récapitulatif est écrit par la dernière étape, d'après l'état constaté du registre
+                      core.setOutput("rows", JSON.stringify(rows));
 
             # Action manifest-aware : supprime aussi les manifests enfants (plateformes) et les
             # référents attestation/cosign non taggés du parent supprimé, sans orphaniser les images conservées
@@ -137,3 +131,42 @@ jobs:
                   dry-run: ${{ env.DRY_RUN }}
                   validate: true
                   log-level: info
+
+            # Tableau récapitulatif écrit en fin de workflow : l'état affiché est celui du registre relu après la suppression
+            - name: Résumé
+              if: always() && steps.verdicts.outputs.rows != ''
+              uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+              env:
+                  ROWS: ${{ steps.verdicts.outputs.rows }}
+              with:
+                  script: |
+                      const { owner, repo } = context.repo;
+                      const dryRun = process.env.DRY_RUN === "true";
+                      const rows = JSON.parse(process.env.ROWS);
+
+                      // relecture du registre : on affiche ce qui est constaté, pas ce qui était prévu
+                      const versions = await github.paginate(
+                          github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg,
+                          { org: owner, package_type: "container", package_name: repo.toLowerCase(), state: "active", per_page: 100 }
+                      );
+                      const present = new Set(versions.flatMap((version) => version.metadata?.container?.tags ?? []));
+
+                      for (const row of rows) {
+                          if (row[4] !== "SUPPRIMABLE") continue;
+                          // en dry-run le verdict reste « SUPPRIMABLE » : seul le titre dit que rien n'a été supprimé
+                          if (dryRun) continue;
+                          row[4] = present.has(row[0]) ? "NON SUPPRIMÉE (voir le journal)" : "SUPPRIMÉE";
+                      }
+
+                      const title = dryRun
+                          ? `Nettoyage GHCR en dry-run : état prévu, rien n'a été supprimé (grâce : ${process.env.GRACE_DAYS} j)`
+                          : `Nettoyage GHCR : état du registre après suppression (grâce : ${process.env.GRACE_DAYS} j)`;
+                      core.info(title);
+                      for (const row of rows) core.info(row.join(" | "));
+                      await core.summary
+                          .addHeading(title, 3)
+                          .addTable([
+                              [{ data: "Tag", header: true }, { data: "PR", header: true }, { data: "État", header: true }, { data: "Fermée le", header: true }, { data: "Verdict", header: true }],
+                              ...rows,
+                          ])
+                          .write();
