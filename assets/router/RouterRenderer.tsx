@@ -1,6 +1,7 @@
 import { FC, JSX, Suspense, useEffect, useMemo } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
+import { matomoPageTitle } from "@/modules/matomo";
 import DiscoverPublish from "@/pages/discover/publish/DiscoverPublish";
 import AppLayout from "../components/Layout/AppLayout";
 import Main from "../components/Layout/Main";
@@ -13,7 +14,6 @@ import GroupConfig from "./GroupConfig";
 import GroupDatastore from "./GroupDatastore";
 import GroupEspaceCo from "./GroupEspaceCo";
 import { groups, knownRoutes, routes, useRoute } from "./router";
-import { matomoPageTitle } from "@/modules/matomo";
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
@@ -51,16 +51,16 @@ const RouterRenderer: FC = () => {
 
     useEffect(() => {
         //Événement Matomo
-        if (!(window as any)._paq) return;
+        if (!window._paq) return;
         const currentUrl = window.location.href;
         const currentTitle = matomoPageTitle(route);
 
-        (window as any)._paq.push(["setReferrerUrl", currentUrl]);
-        (window as any)._paq.push(["setCustomUrl", currentUrl]);
-        (window as any)._paq.push(["setDocumentTitle", currentTitle]);
-        (window as any)._paq.push(["trackPageView"]);
-        (window as any)._paq.push(["setDoNotTrack", true]);
-        (window as any)._paq.push(["enableLinkTracking"]);
+        window._paq.push(["setReferrerUrl", currentUrl]);
+        window._paq.push(["setCustomUrl", currentUrl]);
+        window._paq.push(["setDocumentTitle", currentTitle]);
+        window._paq.push(["trackPageView"]);
+        window._paq.push(["setDoNotTrack", true]);
+        window._paq.push(["enableLinkTracking"]);
     }, [route]); // Se déclenche à chaque changement de route
 
     return (

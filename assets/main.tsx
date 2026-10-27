@@ -4,7 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import App from "@/App";
-import { matomoInit } from "./modules/matomo";
+import { matomoInit } from "@/modules/matomo";
 
 // Contourne la barre d'outils Symfony masquée au chargement en dev (élément absent en prod)
 document.getElementsByClassName("sf-toolbar")?.[0]?.classList?.remove("sf-display-none");

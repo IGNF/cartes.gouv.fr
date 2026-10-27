@@ -1,20 +1,23 @@
-import { routes } from "@/router/router";
 import { Route } from "type-route";
 
+import { routes } from "@/router/router";
+
+declare global {
+    interface Window {
+        _paq?: unknown[][];
+    }
+}
+
 export function matomoInit() {
-    var _paq = ((window as any)._paq = (window as any)._paq || []);
-    (function () {
-        var u = "https://matomo.ign.fr/";
-        _paq.push(["setTrackerUrl", u + "matomo.php"]);
-        _paq.push(["setSiteId", "11"]);
-        var d = document,
-            g = d.createElement("script"),
-            s = d.getElementsByTagName("script")[0];
-        g.async = true;
-        g.src = u + "matomo.js";
-        g.addEventListener("load", () => window.dispatchEvent(new Event("matomo.ready")));
-        s.parentNode?.insertBefore(g, s);
-    })();
+    const _paq = (window._paq = window._paq ?? []);
+    const u = "https://matomo.ign.fr/";
+    _paq.push(["setTrackerUrl", u + "matomo.php"]);
+    _paq.push(["setSiteId", "11"]);
+    const g = document.createElement("script");
+    const s = document.getElementsByTagName("script")[0];
+    g.async = true;
+    g.src = u + "matomo.js";
+    s.parentNode?.insertBefore(g, s);
 }
 
 const matomoPageLabels: Partial<Record<keyof typeof routes, string>> = {
