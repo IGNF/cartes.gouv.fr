@@ -94,3 +94,13 @@ npm install --global npm
 > ---
 >
 > `docker compose logs -f` permet de consulter les logs des conteneurs
+
+## Éditeur (VS Code)
+
+L’extension PHPMD recommandée (`ecodes.vscode-phpmd`) embarque un PHPMD 2 qui ne lit ni la configuration `phpmd.yml` ni le code PHP 8 du projet. Pour avoir les diagnostics dans l’éditeur, pointer l’extension vers le PHPMD 3 du projet dans les paramètres utilisateur (ce paramètre est de portée machine, il ne peut pas venir du dépôt) :
+
+```json
+"phpmd.command": "/chemin/absolu/vers/cartes.gouv.fr/vendor/bin/phpmd"
+```
+
+Le fichier de règles est déjà renseigné par `.vscode/settings.json`. Un PHP 8.2 ou plus doit être disponible sur la machine.

@@ -1,7 +1,7 @@
 {
     "prettier.requireConfig": true,
     "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
-    "phpmd.rules": "${workspaceFolder}/phpmd.xml",
+    "phpmd.rules": "${workspaceFolder}/phpmd.yml",
     "js/ts.tsdk.path": "node_modules/typescript/lib",
     "eslint.useFlatConfig": true,
     "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
