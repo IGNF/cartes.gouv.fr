@@ -88,7 +88,7 @@
         "vite": "^8.3",
         "vite-plugin-run": "^0.6",
         "vite-plugin-symfony": "^8.0",
-        "vitest": "^4.1.12",
+        "vitest": "^5.0.5",
         "yup": "^1.2.0",
         "zustand": "^5.0.0"
     },
