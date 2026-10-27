@@ -22,7 +22,7 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
     return (
         <Card
             imageUrl={datasheet?.thumbnail?.url ?? placeholder16x9}
-            imageAlt={"illustration"}
+            imageAlt=""
             horizontal={true}
             title={datasheet.name}
             start={

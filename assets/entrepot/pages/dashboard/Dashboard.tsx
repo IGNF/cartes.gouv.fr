@@ -87,7 +87,7 @@ export default function Dashboard() {
                         desc="Gérer mes entrepôts et mes fiches de données"
                         start={
                             <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
-                                <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} />
+                                <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} aria-hidden="true" />
                                 Publier
                             </Badge>
                         }

@@ -9,10 +9,11 @@ import Attribution from "ol/control/Attribution";
 import { createOrUpdate } from "ol/extent";
 import { defaults as defaultInteractions } from "ol/interaction";
 import BaseLayer from "ol/layer/Base";
+import Layer from "ol/layer/Layer";
 import TileLayer from "ol/layer/Tile";
 import { fromLonLat, transformExtent } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 import type { CartesStyle, GeostylerStyles, OfferingTypeEnum } from "../../@types/app";
 import { BoundingBox } from "../../@types/entrepot";
@@ -35,7 +36,7 @@ export interface RMapProps {
     type: OfferingTypeEnum;
     bbox?: BoundingBox;
     currentStyle?: CartesStyle | GeostylerStyles;
-    layers: BaseLayer[];
+    layers: Layer[];
 }
 
 const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
@@ -47,24 +48,28 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
 
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map | undefined>(undefined);
-    const layerSwitcherControl = useRef(
-        new LayerSwitcher({
-            options: {
-                position: "top-right",
-                collapsed: true,
-                panel: true,
-                counter: true,
-            },
-        })
+    // useState paresseux : instance unique, conservée par Fast Refresh (useMemo serait recalculé et détaché de la carte)
+    // eslint-disable-next-line react/hook-use-state
+    const [layerSwitcherControl] = useState(
+        () =>
+            new LayerSwitcher({
+                options: {
+                    position: "top-right",
+                    collapsed: true,
+                    panel: true,
+                    counter: true,
+                },
+            })
     );
-    const controls = useRef([
+    // eslint-disable-next-line react/hook-use-state
+    const [controls] = useState(() => [
         new GeoportalZoom({ position: "top-left" }),
         new Attribution({ collapsible: true, collapsed: true }),
-        layerSwitcherControl.current,
+        layerSwitcherControl,
         new ScaleLine(),
         new SearchEngine({
             collapsed: false,
-            displayAdvancedSearch: false,
+            displayButtonAdvancedSearch: false,
             apiKey: "essentiels",
             zoomTo: "auto",
         }),
@@ -96,13 +101,13 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
     /**
      * Ajout de la couche dans la carte (+ dans le layerSwitcher)
      */
-    const addLayer = (layer: BaseLayer): void => {
+    const addLayer = (layer: Layer): void => {
         if (currentStyle) {
             StyleHelper.applyStyle(layer, currentStyle);
         }
         // Ajout du layer dans la carte et dans le LayerSwitcher
         mapRef.current?.addLayer(layer);
-        layerSwitcherControl.current.addLayer(layer, {
+        layerSwitcherControl.addLayer(layer, {
             title: layer.get("title"),
             description: layer.get("abstract"),
         });
@@ -118,13 +123,13 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
                     zoom: olDefaults.zoom,
                 }),
                 interactions: defaultInteractions(),
-                controls: controls.current,
+                controls,
             });
             mapRef.current?.on("loadstart", function () {
-                mapRef.current?.getTargetElement().classList.add("spinner");
+                mapRef.current?.getTargetElement()?.classList.add("spinner");
             });
             mapRef.current?.on("loadend", function () {
-                mapRef.current?.getTargetElement().classList.remove("spinner");
+                mapRef.current?.getTargetElement()?.classList.remove("spinner");
             });
         }
         mapRef.current.setTarget(mapTargetRef.current || "");
@@ -135,7 +140,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
          * re-render.
          */
         return () => mapRef.current?.setTarget(undefined);
-    }, []);
+    }, [controls]);
 
     useEffect(() => {
         if (mapRef.current === undefined) return;

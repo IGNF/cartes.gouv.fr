@@ -39,7 +39,7 @@ const getZoomAndCenteringDefaultValues = (community: CommunityResponseDTO): Zoom
         const feature = new WKT().readFeature(community.position, {
             dataProjection: "EPSG:4326",
         });
-        p = feature.getGeometry() ? (feature.getGeometry() as Point).getCoordinates() : olDefaults.center;
+        p = feature?.getGeometry() ? (feature.getGeometry() as Point).getCoordinates() : olDefaults.center;
     } else p = olDefaults.center;
 
     return {
