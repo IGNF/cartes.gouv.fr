@@ -20,7 +20,7 @@ export function matomoInit() {
     s.parentNode?.insertBefore(g, s);
 }
 
-const matomoPageLabels: Partial<Record<keyof typeof routes, string>> = {
+const matomoPageLabels: Record<keyof typeof routes, string> = {
     discover_publish: "Publier une donnée",
     page_not_found: "Page introuvable",
     login_disabled: "Connexion momentanément désactivée",
@@ -29,7 +29,7 @@ const matomoPageLabels: Partial<Record<keyof typeof routes, string>> = {
     my_permissions: "Mes permissions",
     user_key_add: "Ajout d’une clé",
     user_key_edit: "Modification de la clé",
-    my_documents: "",
+    my_documents: "Mes documents",
     dashboard: "Tableau de bord",
     join_community: "Ajouter un entrepôt",
     accesses_request: "Demande d’accès",
@@ -45,11 +45,11 @@ const matomoPageLabels: Partial<Record<keyof typeof routes, string>> = {
     datastore_manage_storage: "Consommation entrepôt",
     datastore_manage_permissions: "Permissions entrepôt",
     datastore_add_permission: "Ajout d’une permission",
-    datastore_edit_permission: "Mise à jour d'une permission",
+    datastore_edit_permission: "Mise à jour d’une permission",
     datastore_datasheet_upload: "Créer une fiche de données",
-    datastore_datasheet_upload_integration: "Données integration",
+    datastore_datasheet_upload_integration: "Données intégration",
     datastore_stored_data_details: "Détails de donnée stockée",
-    datastore_wfs_service_new: "Publier un service TMS",
+    datastore_wfs_service_new: "Publier un service WFS",
     datastore_wfs_service_edit: "Modifier le service WFS",
     datastore_wms_vector_service_new: "Publier un service WMS-Vecteur",
     datastore_wms_vector_service_edit: "Modifier le service WMS-Vecteur",
@@ -57,18 +57,18 @@ const matomoPageLabels: Partial<Record<keyof typeof routes, string>> = {
     datastore_pyramid_vector_tms_service_edit: "Modifier le service TMS",
     datastore_pyramid_raster_wms_raster_service_new: "Publier un service WMS-Raster",
     datastore_pyramid_raster_wms_raster_service_edit: "Modifier le service WMS-Raster",
+    datastore_pyramid_raster_wmts_service_new: "Publier un service WMTS",
     datastore_pyramid_raster_wmts_service_edit: "Modifier le service WMTS",
     datastore_pyramid_raster_generate: "Générer une pyramide de tuiles raster",
     datastore_service_style_add: "Ajouter un style",
     datastore_service_style_edit: "Modifier le style",
     espaceco_community_list: "Liste des guichets",
-    espaceco_create_community: "Création d'un guichet",
+    espaceco_create_community: "Création d’un guichet",
     espaceco_manage_community: "Gérer le guichet",
     espaceco_member_invitation: "Invitation",
-
-    datastore_upload_details: "",
-    datastore_pyramid_vector_generate: "",
-    config_alerts: "",
+    datastore_upload_details: "Détails de livraison",
+    datastore_pyramid_vector_generate: "Générer une pyramide de tuiles vectorielles",
+    config_alerts: "Configuration des alertes",
 };
 
 export function matomoPageTitle(route: Route<typeof routes>): string {
@@ -76,12 +76,12 @@ export function matomoPageTitle(route: Route<typeof routes>): string {
     let label: string;
 
     if (route.name === false) {
-        label = matomoPageLabels.page_not_found!;
+        label = matomoPageLabels.page_not_found;
     } else {
         if (route.name.match("espaceco")) {
             prefix = "[Contribuer]";
         }
-        label = matomoPageLabels[route.name] ?? route.name;
+        label = matomoPageLabels[route.name];
     }
 
     return `${prefix} ${label}`;
