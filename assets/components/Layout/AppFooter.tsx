@@ -3,7 +3,6 @@ import Footer from "@codegouvfr/react-dsfr/Footer";
 import { memo } from "react";
 
 import { externalUrls } from "@/router/externalUrls";
-import { FooterConsentManagementItem, FooterPersonalDataPolicyItem } from "../../config/consentManagement";
 
 const AppFooter = () => {
     return (
@@ -29,8 +28,12 @@ const AppFooter = () => {
                     },
                     text: "Conditions générales d’utilisation",
                 },
-                <FooterPersonalDataPolicyItem key="footer-personal-data-policy-item" />,
-                <FooterConsentManagementItem key="footer-consent-management-item" />,
+                {
+                    linkProps: {
+                        href: externalUrls.personal_data,
+                    },
+                    text: "Données personnelles",
+                },
                 // Choix du thème clair/sombre
                 headerFooterDisplayItem,
             ]}
