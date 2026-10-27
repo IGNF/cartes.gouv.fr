@@ -1,0 +1,20 @@
+# PHPMD configuration, see https://phpmd.org/documentation/creating-a-ruleset.html
+name: "cartes.gouv.fr - rules"
+description: "PHPMD rules for IGNF/cartes.gouv.fr"
+rules:
+    - ref: rulesets/cleancode.xml
+      exclude:
+          - ElseExpression
+          - StaticAccess
+          - MissingImport
+          - BooleanArgumentFlag
+    # TODO activer progressivement et corriger les signalements de 'composer check-rules' :
+    # - ref: rulesets/codesize.xml
+    # - ref: rulesets/controversial.xml
+    # - ref: rulesets/design.xml
+    - ref: rulesets/naming.xml
+      exclude:
+          - ShortVariable
+          - LongVariable
+          - BooleanGetMethodName
+    - ref: rulesets/unusedcode.xml
