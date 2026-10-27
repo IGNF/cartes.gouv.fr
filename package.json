@@ -67,7 +67,7 @@
         "i18nifty": "^4.0.0",
         "intl-messageformat": "^11.0.0",
         "jiti": "^2.6.1",
-        "lint-staged": "^16.4.0",
+        "lint-staged": "^17.6.0",
         "markdown-it": "^14.3.3",
         "ol": "^10.11.0",
         "postcss": "^8.5.26",
@@ -88,7 +88,7 @@
         "vite": "^8.3",
         "vite-plugin-run": "^0.6",
         "vite-plugin-symfony": "^8.0",
-        "vitest": "^4.1.12",
+        "vitest": "^5.0.5",
         "yup": "^1.2.0",
         "zustand": "^5.0.0"
     },
