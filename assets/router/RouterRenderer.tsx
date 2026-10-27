@@ -1,4 +1,4 @@
-import { FC, JSX, Suspense, useEffect, useMemo } from "react";
+import { FC, JSX, Suspense, useEffect, useMemo, useRef } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { matomoPageTitle } from "@/modules/matomo";
@@ -49,19 +49,18 @@ const RouterRenderer: FC = () => {
         return <GroupApp route={route} />;
     }, [route, user]);
 
+    // Page vue Matomo à chaque changement de route, avec l’URL précédente comme référent
+    const previousUrl = useRef(document.referrer);
     useEffect(() => {
-        //Événement Matomo
         if (!window._paq) return;
         const currentUrl = window.location.href;
-        const currentTitle = matomoPageTitle(route);
 
-        window._paq.push(["setReferrerUrl", currentUrl]);
+        window._paq.push(["setReferrerUrl", previousUrl.current]);
         window._paq.push(["setCustomUrl", currentUrl]);
-        window._paq.push(["setDocumentTitle", currentTitle]);
+        window._paq.push(["setDocumentTitle", matomoPageTitle(route)]);
         window._paq.push(["trackPageView"]);
-        window._paq.push(["setDoNotTrack", true]);
-        window._paq.push(["enableLinkTracking"]);
-    }, [route]); // Se déclenche à chaque changement de route
+        previousUrl.current = currentUrl;
+    }, [route]);
 
     return (
         <Suspense

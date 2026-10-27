@@ -1,6 +1,6 @@
 import { Route } from "type-route";
 
-import { routes } from "@/router/router";
+import { groups, routes } from "@/router/router";
 
 declare global {
     interface Window {
@@ -13,6 +13,8 @@ export function matomoInit() {
     const u = "https://matomo.ign.fr/";
     _paq.push(["setTrackerUrl", u + "matomo.php"]);
     _paq.push(["setSiteId", "11"]);
+    _paq.push(["setDoNotTrack", true]);
+    _paq.push(["enableLinkTracking"]);
     const g = document.createElement("script");
     const s = document.getElementsByTagName("script")[0];
     g.async = true;
@@ -72,17 +74,8 @@ const matomoPageLabels: Record<keyof typeof routes, string> = {
 };
 
 export function matomoPageTitle(route: Route<typeof routes>): string {
-    let prefix = "[Publier]";
-    let label: string;
-
-    if (route.name === false) {
-        label = matomoPageLabels.page_not_found;
-    } else {
-        if (route.name.match("espaceco")) {
-            prefix = "[Contribuer]";
-        }
-        label = matomoPageLabels[route.name];
-    }
+    const prefix: "[Publier]" | "[Contribuer]" = groups.espaceco.has(route) ? "[Contribuer]" : "[Publier]";
+    const label = route.name === false ? matomoPageLabels.page_not_found : matomoPageLabels[route.name];
 
     return `${prefix} ${label}`;
 }
