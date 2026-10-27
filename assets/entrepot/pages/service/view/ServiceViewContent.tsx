@@ -6,7 +6,7 @@ import { CartesStyle, OfferingTypeEnum, StoredDataTypeEnum } from "@/@types/app"
 import RMap from "@/components/Utils/RMap";
 import useServiceQuery from "@/hooks/queries/useServiceQuery";
 import getWebService from "@/modules/WebServices/WebServices";
-import BaseLayer from "ol/layer/Base";
+import Layer from "ol/layer/Layer";
 import ServiceShareInfo from "./ServiceShareInfo";
 import StylesList from "./Style/StylesList";
 
@@ -27,7 +27,7 @@ function ServiceViewContent(props: ServiceViewContent) {
         serviceQuery.data?.type === OfferingTypeEnum.WFS ||
         (serviceQuery.data?.type === OfferingTypeEnum.WMTSTMS && serviceQuery.data.configuration.pyramid?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR);
 
-    const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
+    const [olLayers, setOlLayers] = useState<Layer[]>([]);
     useEffect(() => {
         if (!service) return;
         getWebService(service).getLayers().then(setOlLayers);

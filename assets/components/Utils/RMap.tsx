@@ -9,6 +9,7 @@ import Attribution from "ol/control/Attribution";
 import { createOrUpdate } from "ol/extent";
 import { defaults as defaultInteractions } from "ol/interaction";
 import BaseLayer from "ol/layer/Base";
+import Layer from "ol/layer/Layer";
 import TileLayer from "ol/layer/Tile";
 import { fromLonLat, transformExtent } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
@@ -35,7 +36,7 @@ export interface RMapProps {
     type: OfferingTypeEnum;
     bbox?: BoundingBox;
     currentStyle?: CartesStyle | GeostylerStyles;
-    layers: BaseLayer[];
+    layers: Layer[];
 }
 
 const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
@@ -68,7 +69,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
         new ScaleLine(),
         new SearchEngine({
             collapsed: false,
-            displayAdvancedSearch: false,
+            displayButtonAdvancedSearch: false,
             apiKey: "essentiels",
             zoomTo: "auto",
         }),
@@ -100,7 +101,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
     /**
      * Ajout de la couche dans la carte (+ dans le layerSwitcher)
      */
-    const addLayer = (layer: BaseLayer): void => {
+    const addLayer = (layer: Layer): void => {
         if (currentStyle) {
             StyleHelper.applyStyle(layer, currentStyle);
         }

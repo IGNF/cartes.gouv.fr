@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import BaseLayer from "ol/layer/Base";
+import Layer from "ol/layer/Layer";
 import { FC, useEffect, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 
@@ -24,7 +24,7 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
 
     const { isMapbox, isTms, styleFormats } = useStyleForm();
 
-    const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
+    const [olLayers, setOlLayers] = useState<Layer[]>([]);
 
     useEffect(() => {
         if (!service) return;
