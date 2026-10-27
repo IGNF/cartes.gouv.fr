@@ -14,7 +14,7 @@ ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:68ee22004a9109b44973313b0
 # Versions amont (php.net, FrankenPHP) : le dépôt deb y ajoute un suffixe de rebuild (-N) propre à chaque paquet,
 # ignoré ici (globs apt) et par Renovate (extractVersion). La branche du dépôt (82, 85...) découle de php_zts_version.
 ARG php_zts_version=8.5.12
-ARG frankenphp_version=1.13.3
+ARG frankenphp_version=1.13.4
 
 # Stages alias : COPY --from n'interpole pas les ARG, contrairement à FROM
 FROM ${composer_image} AS composer_bin
