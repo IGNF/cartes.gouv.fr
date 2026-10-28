@@ -13,8 +13,16 @@ import {
 const CREATION = "2026-10-01T10:00:00+00:00";
 const CREATION_MS = Date.parse(CREATION);
 
-function service(overrides: Partial<Service> & { pyramidType?: StoredDataTypeEnum } = {}): Service {
-    const { pyramidType, ...rest } = overrides;
+type ServiceFixture = Partial<Service> & {
+    pyramidType?: StoredDataTypeEnum;
+    /** donnée stockée diffusée (base vecteur ou pyramide) */
+    storedDataId?: string;
+    /** base vecteur moissonnée pour une pyramide raster */
+    vectorDbId?: string;
+};
+
+function service(overrides: ServiceFixture = {}): Service {
+    const { pyramidType, storedDataId, vectorDbId, ...rest } = overrides;
     return {
         _id: "offering-1",
         layer_name: "ma_couche",
@@ -22,7 +30,10 @@ function service(overrides: Partial<Service> & { pyramidType?: StoredDataTypeEnu
         status: OfferingStatusEnum.PUBLISHED,
         open: true,
         creation: CREATION,
-        configuration: { pyramid: pyramidType ? { type: pyramidType } : undefined },
+        configuration: {
+            type_infos: { used_data: [{ stored_data: storedDataId ?? "stored-data-1" }] },
+            pyramid: pyramidType ? { type: pyramidType, tags: { vectordb_id: vectorDbId } } : undefined,
+        },
         ...rest,
     } as unknown as Service;
 }
@@ -41,16 +52,43 @@ describe("getLayerBaseName", () => {
 });
 
 describe("hasWmtsSibling", () => {
-    const wms = service({ _id: "wms", layer_name: "couche_wms" });
-    const wmts = service({ _id: "wmts", layer_name: "couche_wmts", type: OfferingTypeEnum.WMTSTMS, pyramidType: StoredDataTypeEnum.ROK4PYRAMIDRASTER });
-    const tms = service({ _id: "tms", layer_name: "couche", type: OfferingTypeEnum.WMTSTMS, pyramidType: StoredDataTypeEnum.ROK4PYRAMIDVECTOR });
+    const wms = service({ _id: "wms", layer_name: "couche_wms", storedDataId: "vectordb-1" });
+    const wmtsFixture: ServiceFixture = {
+        _id: "wmts",
+        layer_name: "couche_wmts",
+        type: OfferingTypeEnum.WMTSTMS,
+        pyramidType: StoredDataTypeEnum.ROK4PYRAMIDRASTER,
+        storedDataId: "pyramid-1",
+    };
+    const wmts = service(wmtsFixture);
+    const tms = service({
+        _id: "tms",
+        layer_name: "couche",
+        type: OfferingTypeEnum.WMTSTMS,
+        pyramidType: StoredDataTypeEnum.ROK4PYRAMIDVECTOR,
+        storedDataId: "pyramid-v",
+    });
 
     it("apparie un WMS et un WMTS de même nom au suffixe près", () => {
         expect(hasWmtsSibling(wms, [wms, wmts])).toBe(true);
     });
 
-    it("ignore un TMS et le flux lui-même", () => {
+    it("apparie un WMS raster et un WMTS diffusant la même pyramide, quel que soit le nom", () => {
+        const wmsRaster = service({ _id: "wmsr", layer_name: "ortho", type: OfferingTypeEnum.WMSRASTER, storedDataId: "pyramid-1" });
+        const wmtsRenamed = service({ ...wmtsFixture, layer_name: "tuiles_ortho" });
+        expect(hasWmtsSibling(wmsRaster, [wmsRaster, wmtsRenamed])).toBe(true);
+    });
+
+    it("apparie un WMS vecteur et un WMTS dont la pyramide a été moissonnée depuis sa base vecteur", () => {
+        const wmtsHarvested = service({ ...wmtsFixture, layer_name: "autre_nom", vectorDbId: "vectordb-1" });
+        const wmtsOther = service({ ...wmtsFixture, layer_name: "autre_nom", vectorDbId: "vectordb-2" });
+        expect(hasWmtsSibling(wms, [wms, wmtsHarvested])).toBe(true);
+        expect(hasWmtsSibling(wms, [wms, wmtsOther])).toBe(false);
+    });
+
+    it("ignore un TMS, un WMTS dépublié et le flux lui-même", () => {
         expect(hasWmtsSibling(wms, [wms, tms])).toBe(false);
+        expect(hasWmtsSibling(wms, [wms, service({ ...wmtsFixture, status: OfferingStatusEnum.UNPUBLISHED })])).toBe(false);
         expect(hasWmtsSibling(wmts, [wmts])).toBe(false);
     });
 });
