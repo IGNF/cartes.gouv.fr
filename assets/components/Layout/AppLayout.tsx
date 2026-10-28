@@ -4,7 +4,6 @@ import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 import { useSeoMeta } from "@unhead/react";
 import { FC, PropsWithChildren, memo } from "react";
 
-import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
 import { useTranslation } from "../../i18n/i18n";
 import SnackbarMessage from "../Utils/SnackbarMessage";
 import AppFooter from "./AppFooter";
@@ -16,8 +15,6 @@ const HiddenElements: FC = () => {
 
     return (
         <>
-            {/* doit être le premier élément du DOM (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/gestionnaire-de-consentement */}
-            <ConsentBannerAndConsentManagement />
             {/* Lien d'evitement (skip link) */}
             <SkipLinks
                 links={[

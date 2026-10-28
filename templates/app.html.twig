@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <div id="root" data-site-title="cartes.gouv.fr"
+    <div id="root" data-site-title="cartes.gouv.fr" data-app-env="{{ app_env }}"
         {% if api_espaceco_url is defined and api_espaceco_url is not empty %}data-api-espaceco-url="{{ api_espaceco_url }}"{% endif %}
         {% if catalogue_url is defined and catalogue_url is not empty %}data-catalogue-url="{{ catalogue_url }}"{% endif %}
         {% if annexes_url is defined and annexes_url is not empty %}data-annexes-url="{{ annexes_url }}"{% endif %}

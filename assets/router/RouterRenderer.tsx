@@ -1,6 +1,7 @@
-import { FC, JSX, Suspense, useMemo } from "react";
+import { FC, JSX, Suspense, useEffect, useMemo, useRef } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
+import { matomoPageTitle } from "@/modules/analytics";
 import DiscoverPublish from "@/pages/discover/publish/DiscoverPublish";
 import AppLayout from "../components/Layout/AppLayout";
 import Main from "../components/Layout/Main";
@@ -47,6 +48,19 @@ const RouterRenderer: FC = () => {
 
         return <GroupApp route={route} />;
     }, [route, user]);
+
+    // Page vue Matomo à chaque changement de route, sans paramètres de requête, avec l’URL précédente comme référent
+    const previousUrl = useRef(document.referrer.split("?")[0]);
+    useEffect(() => {
+        if (!window._paq) return;
+        const currentUrl = window.location.origin + window.location.pathname;
+
+        window._paq.push(["setReferrerUrl", previousUrl.current]);
+        window._paq.push(["setCustomUrl", currentUrl]);
+        window._paq.push(["setDocumentTitle", matomoPageTitle(route)]);
+        window._paq.push(["trackPageView"]);
+        previousUrl.current = currentUrl;
+    }, [route]);
 
     return (
         <Suspense
