@@ -136,7 +136,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
 
         return pageServices.map((service) => {
             const offeringUnavailable = isOfferingUnavailable(service.status);
-            const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId);
+            const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId, now);
             const exploreMapsAvailability = getExploreMapsAvailability({ service, services: sortedServices, visibleOnCartesGouv, now });
             const exploreMapsLayerParam = getExploreMapsLayerParam(service);
             const exploreMapsLink =

@@ -92,17 +92,24 @@ export const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
 /** Vignette du flux, écrite dans `extra._search.url_vignette` de la configuration */
 export const getServiceThumbnailUrl = (service: Service): string | undefined => service.configuration.extra?._search?.url_vignette;
 
-/** Flux privé mais consultable par tous sur cartes.gouv.fr : une permission est accordée à la communauté cartes.gouv.fr */
+// une permission sans date de fin n’expire pas ; la liste de l’Entrepôt conserve les permissions expirées
+const isPermissionActive = (permission: DatastorePermission, now: number): boolean => !permission.end_date || Date.parse(permission.end_date) > now;
+
+/** Flux privé mais consultable par tous sur cartes.gouv.fr : une permission en cours est accordée à la communauté cartes.gouv.fr */
 export const isPrivateServiceVisibleOnCartesGouv = (
     service: Service,
     permissions: DatastorePermission[] | undefined,
-    cartesGouvCommunityId: string | null
+    cartesGouvCommunityId: string | null,
+    now: number
 ): boolean => {
     if (service.open || !cartesGouvCommunityId) {
         return false;
     }
     return (permissions ?? []).some(
-        (permission) => permission.beneficiary?._id === cartesGouvCommunityId && permission.offerings.some((offering) => offering._id === service._id)
+        (permission) =>
+            permission.beneficiary?._id === cartesGouvCommunityId &&
+            isPermissionActive(permission, now) &&
+            permission.offerings.some((offering) => offering._id === service._id)
     );
 };
 
