@@ -17,12 +17,9 @@ export default function useUnpublishServiceMutation(datastoreId: string, datashe
 
             return api.service.unpublishService(datastoreId, service._id);
         },
-        onSuccess(_, service) {
-            queryClient.setQueryData(
-                RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
-                (servicesList: Service[] | undefined): Service[] | undefined => servicesList?.filter((s) => s._id !== service._id)
-            );
-
+        onSuccess() {
+            // relecture plutôt que retrait de la ligne : une offre partiellement supprimée reste listée comme dépubliée
+            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
         },
