@@ -39,10 +39,19 @@ export const externalUrls = {
     logout: SymfonyRouting.generate("cartesgouvfr_security_logout"),
 } as const;
 
-export function externalLink(route: keyof typeof externalUrls, title?: string): RegisteredLinkProps {
+export function externalLinkToUrl(href: string, title?: string): RegisteredLinkProps {
     return {
-        href: externalUrls[route],
+        href,
         target: "_blank",
         title: title ? `${title} - ouvre une nouvelle fenêtre` : "Ouvre une nouvelle fenêtre",
     };
+}
+
+export function externalLink(route: keyof typeof externalUrls, title?: string): RegisteredLinkProps {
+    return externalLinkToUrl(externalUrls[route], title);
+}
+
+/** Explorer les cartes ouvert sur une couche, `layerParam` au format `{nom}$GEOPORTAIL:OGC:{protocole}(opacité;visible;gris)` */
+export function exploreMapsLayerUrl(layerParam: string): string {
+    return `${externalUrls.maps}?l=${encodeURIComponent(layerParam)}`;
 }
