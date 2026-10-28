@@ -252,7 +252,16 @@ export type TmsMetadata = {
 };
 
 /** configuration & offerings */
+/** Données libres de la configuration, voir docs/developer/entrepot/extra.md */
+export type ConfigurationExtra = {
+    _search?: {
+        /** vignette du flux, affichée dans la liste des flux et dans Explorer les cartes */
+        url_vignette?: string;
+    };
+};
+
 export type Configuration = ConfigurationStandardDetailResponseDto & {
+    extra?: ConfigurationExtra;
     styles?: CartesStyle[];
     tags: {
         datasheet_name?: string;

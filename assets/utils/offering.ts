@@ -1,4 +1,4 @@
-import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
+import { type DatastorePermission, OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
 import { OfferingStandardListResponseDtoStatusEnum } from "@/@types/entrepot";
 import { routes } from "@/router/router";
 
@@ -86,5 +86,101 @@ export const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
             return "Service d’altimétrie";
         default:
             return type;
+    }
+};
+
+/** Vignette du flux, écrite dans `extra._search.url_vignette` de la configuration */
+export const getServiceThumbnailUrl = (service: Service): string | undefined => service.configuration.extra?._search?.url_vignette;
+
+/** Flux privé mais consultable par tous sur cartes.gouv.fr : une permission est accordée à la communauté cartes.gouv.fr */
+export const isPrivateServiceVisibleOnCartesGouv = (
+    service: Service,
+    permissions: DatastorePermission[] | undefined,
+    cartesGouvCommunityId: string | null
+): boolean => {
+    if (service.open || !cartesGouvCommunityId) {
+        return false;
+    }
+    return (permissions ?? []).some(
+        (permission) => permission.beneficiary?._id === cartesGouvCommunityId && permission.offerings.some((offering) => offering._id === service._id)
+    );
+};
+
+/** Nom de couche sans le suffixe `_wms` ou `_wmts`, pour apparier un WMS et son WMTS */
+export const getLayerBaseName = (layerName: string): string => layerName.replace(/_(wms|wmts)$/i, "");
+
+// une offre WMTS-TMS dont le type de pyramide est inconnu est traitée comme un WMTS
+const isWmtsService = (service: Service): boolean =>
+    service.type === OfferingTypeEnum.WMTSTMS && service.configuration.pyramid?.type !== StoredDataTypeEnum.ROK4PYRAMIDVECTOR;
+
+export const hasWmtsSibling = (service: Service, services: Service[]): boolean => {
+    const baseName = getLayerBaseName(service.layer_name);
+    return services.some((other) => other._id !== service._id && isWmtsService(other) && getLayerBaseName(other.layer_name) === baseName);
+};
+
+export type ExploreMapsProtocol = "WMS" | "WMTS" | "TMS";
+
+export const getExploreMapsProtocol = (service: Service): ExploreMapsProtocol | undefined => {
+    switch (service.type) {
+        case OfferingTypeEnum.WMSVECTOR:
+        case OfferingTypeEnum.WMSRASTER:
+            return "WMS";
+        case OfferingTypeEnum.WMTSTMS:
+            return isWmtsService(service) ? "WMTS" : "TMS";
+        default:
+            return undefined;
+    }
+};
+
+/** Paramètre `l` d’Explorer les cartes : couche, protocole, puis opacité, visibilité et niveaux de gris */
+export const getExploreMapsLayerParam = (service: Service): string | undefined => {
+    const protocol = getExploreMapsProtocol(service);
+    return protocol === undefined ? undefined : `${service.layer_name}$GEOPORTAIL:OGC:${protocol}(1;1;0)`;
+};
+
+/** Délai de prise en compte d’un nouveau flux par la configuration d’Explorer les cartes, relancée toutes les heures */
+export const EXPLORE_MAPS_CONFIGURATION_DELAY_MS = 90 * 60 * 1000;
+
+export type ExploreMapsAvailability = "pending" | "available" | "unavailable";
+
+type ExploreMapsAvailabilityParams = {
+    service: Service;
+    /** tous les flux de la fiche, pour détecter un WMTS de même nom */
+    services: Service[];
+    visibleOnCartesGouv: boolean;
+    now?: number;
+};
+
+export const getExploreMapsAvailability = ({
+    service,
+    services,
+    visibleOnCartesGouv,
+    now = Date.now(),
+}: ExploreMapsAvailabilityParams): ExploreMapsAvailability => {
+    const protocol = getExploreMapsProtocol(service);
+    if (protocol === undefined || isOfferingUnavailable(service.status)) {
+        return "unavailable";
+    }
+    if (!service.open && !visibleOnCartesGouv) {
+        return "unavailable";
+    }
+    if (protocol === "WMS" && hasWmtsSibling(service, services)) {
+        return "unavailable";
+    }
+    return now - Date.parse(service.creation) < EXPLORE_MAPS_CONFIGURATION_DELAY_MS ? "pending" : "available";
+};
+
+/** Libellé court du type de flux tel qu’affiché dans les filtres (WMS-V et WMS-R confondus) */
+export const getServiceTypeLabel = (service: Service): string => {
+    switch (service.type) {
+        case OfferingTypeEnum.WFS:
+            return "WFS";
+        case OfferingTypeEnum.WMSVECTOR:
+        case OfferingTypeEnum.WMSRASTER:
+            return "WMS";
+        case OfferingTypeEnum.WMTSTMS:
+            return isWmtsService(service) ? "WMTS" : "TMS";
+        default:
+            return service.type;
     }
 };
