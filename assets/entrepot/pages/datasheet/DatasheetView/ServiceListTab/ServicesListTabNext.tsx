@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
@@ -11,7 +10,7 @@ import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useStyles } from "tss-react";
 
-import { OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
+import { type DatastorePermission, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import LoadingText from "@/components/Utils/LoadingText";
@@ -25,17 +24,29 @@ import { usePagination } from "@/hooks/usePagination";
 import placeholder1x1 from "@/img/placeholder.1x1.png";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
-import { externalUrls } from "@/router/externalUrls";
+import { exploreMapsLayerUrl, externalLinkToUrl, externalUrls } from "@/router/externalUrls";
 import { routes } from "@/router/router";
-import { useSnackbarStore } from "@/stores/SnackbarStore";
-import { editableOfferingTypes, formatDateFromISO, getServiceEditLink, isOfferingUnavailable } from "@/utils";
+import {
+    editableOfferingTypes,
+    formatDateFromISO,
+    getExploreMapsAvailability,
+    getExploreMapsLayerParam,
+    getServiceEditLink,
+    getServiceThumbnailUrl,
+    getServiceTypeLabel,
+    isOfferingUnavailable,
+    isPrivateServiceVisibleOnCartesGouv,
+} from "@/utils";
 import DatasheetViewTab from "../../DatasheetViewTab";
+import ServiceAccessBadge from "./ServiceAccessBadge";
+import ServiceExploreMapsCell from "./ServiceExploreMapsCell";
 import ServiceInfoBanner from "./ServiceInfoBanner";
+import ServiceShareUrlCell from "./ServiceShareUrlCell";
 
 const LIMIT = 10;
 
-const unpublishServiceConfirmModal = createModal({
-    id: "services-tab-next-unpublish-service-confirm-modal",
+const deleteServiceConfirmModal = createModal({
+    id: "services-tab-next-delete-service-confirm-modal",
     isOpenedByDefault: false,
 });
 
@@ -67,11 +78,10 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
     const [page, setPage] = useState(1);
     const [targetService, setTargetService] = useState<Service>();
 
-    const setMessage = useSnackbarStore((state) => state.setMessage);
     const { userRights, isSupervisor } = useCommunityRights();
     const canBroadcast = isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
 
-    // Récupération des services — dédupliquée par React Query avec la query identique du composant parent
+    // Récupération des services, dédupliquée par React Query avec la query identique du composant parent
     const serviceListQuery = useQuery<Service[], CartesApiException>({
         queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
@@ -79,11 +89,19 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
         retry: false,
     });
 
-    const unpublishServiceMutation = useUnpublishServiceMutation(datastoreId, datasheetName);
+    // permissions de l’entrepôt, pour repérer les flux privés visibles sur cartes.gouv.fr
+    const permissionsQuery = useQuery<DatastorePermission[], CartesApiException>({
+        queryKey: RQKeys.datastore_permissions(datastoreId),
+        queryFn: ({ signal }) => api.datastore.getPermissions(datastoreId, {}, { signal }),
+        staleTime: 60000,
+        retry: false,
+    });
+
+    const deleteServiceMutation = useUnpublishServiceMutation(datastoreId, datasheetName);
 
     // du plus récent au plus ancien
     const sortedServices = useMemo(
-        () => [...(serviceListQuery.data ?? [])].sort((a, b) => (b.configuration.last_event?.date ?? "").localeCompare(a.configuration.last_event?.date ?? "")),
+        () => [...(serviceListQuery.data ?? [])].sort((a, b) => (b.update ?? "").localeCompare(a.update ?? "")),
         [serviceListQuery.data]
     );
 
@@ -104,98 +122,121 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
 
     const { css, cx } = useStyles();
 
-    // lignes mémorisées : références stables pour que memo(MenuList) évite de re-rendre les menus de chaque ligne
-    const rows = useMemo(
-        () =>
-            pageServices.map((service) => {
-                const offeringUnavailable = isOfferingUnavailable(service.status);
+    const openCopyUrlDialog = (service: Service) => {
+        setTargetService(service);
+        TextCopyToClipboardModal.open();
+    };
 
-                return [
+    // instant de référence du délai « En cours » : la date de la dernière lecture de la liste, pure et rafraîchie à chaque relecture
+    const now = serviceListQuery.dataUpdatedAt;
+
+    // lignes mémorisées : références stables pour que memo(MenuList) évite de re-rendre les menus de chaque ligne
+    const rows = useMemo(() => {
+        const permissions = permissionsQuery.data;
+
+        return pageServices.map((service) => {
+            const offeringUnavailable = isOfferingUnavailable(service.status);
+            const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId);
+            const exploreMapsAvailability = getExploreMapsAvailability({ service, services: sortedServices, visibleOnCartesGouv, now });
+            const exploreMapsLayerParam = getExploreMapsLayerParam(service);
+            const exploreMapsLink =
+                exploreMapsAvailability === "available" && exploreMapsLayerParam !== undefined
+                    ? externalLinkToUrl(exploreMapsLayerUrl(exploreMapsLayerParam), "Voir dans Explorer les cartes")
+                    : undefined;
+
+            return [
+                <span key={`name-${service._id}`} className={css({ display: "flex", alignItems: "center", gap: fr.spacing("2v") })}>
                     <img
-                        key={`thumbnail-${service._id}`}
-                        src={placeholder1x1}
+                        src={getServiceThumbnailUrl(service) ?? placeholder1x1}
                         alt=""
-                        className={css({ width: 40, height: 40, objectFit: "cover", borderRadius: 4, display: "block" })}
-                    />,
-                    service.layer_name,
-                    service.configuration.last_event?.date ? formatDateFromISO(service.configuration.last_event.date) : "",
-                    <Badge key={`access-${service._id}`} small noIcon className={fr.cx(service.open ? "fr-badge--blue-cumulus" : "fr-badge--purple-glycine")}>
-                        {service.open ? "Public" : "Privé"}
-                    </Badge>,
-                    <OfferingStatusBadge key={`status-${service._id}`} status={service.status} />,
-                    <Button
-                        key={`consult-${service._id}`}
-                        priority="secondary"
-                        size="small"
-                        {...(offeringUnavailable
-                            ? { disabled: true }
-                            : { linkProps: routes.datastore_service_view({ datastoreId, offeringId: service._id, datasheetName }).link })}
-                    >
-                        Consulter
-                    </Button>,
-                    <MenuList
-                        key={`menu-${service._id}`}
-                        menuOpenButtonProps={{
-                            iconId: "ri-more-2-line",
-                            priority: "tertiary no outline",
-                            title: "Autres actions",
-                            size: "small",
-                        }}
-                        items={[
-                            {
-                                text: "Copier l’URL",
-                                iconId: "ri-file-copy-line",
-                                disabled: offeringUnavailable,
-                                onClick: () => {
-                                    if (!service.share_url) {
-                                        setMessage("URL de diffusion indisponible");
-                                    } else {
-                                        setTargetService(service);
-                                        TextCopyToClipboardModal.open();
-                                    }
-                                },
-                            },
-                            {
-                                text: "Voir dans cartes.gouv.fr",
-                                iconId: "ri-external-link-line",
-                                disabled: true,
-                                onClick: () => {},
-                            },
-                            editableOfferingTypes.includes(service.type) &&
-                                canBroadcast && {
-                                    text: "Mettre à jour",
-                                    iconId: "ri-edit-box-line",
-                                    disabled: offeringUnavailable,
-                                    linkProps: getServiceEditLink(datastoreId, datasheetName, service),
-                                },
+                        className={css({ width: 40, height: 40, objectFit: "cover", borderRadius: 4, display: "block", flexShrink: 0 })}
+                    />
+                    <span className={css({ display: "block", maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" })}>
+                        <span className={fr.cx("fr-text--bold")} title={service.configuration.name}>
+                            {service.configuration.name}
+                        </span>
+                        <br />
+                        <span className={fr.cx("fr-text--xs", "fr-m-0")} title={service.layer_name}>
+                            {getServiceTypeLabel(service)} - {service.layer_name}
+                        </span>
+                    </span>
+                </span>,
+                service.update ? formatDateFromISO(service.update) : "",
+                <OfferingStatusBadge key={`status-${service._id}`} status={service.status} />,
+                <ServiceAccessBadge key={`access-${service._id}`} service={service} visibleOnCartesGouv={visibleOnCartesGouv} />,
+                <ServiceShareUrlCell
+                    key={`url-${service._id}`}
+                    shareUrl={offeringUnavailable ? undefined : service.share_url}
+                    onCopy={() => openCopyUrlDialog(service)}
+                />,
+                <ServiceExploreMapsCell key={`explore-${service._id}`} availability={exploreMapsAvailability} layerParam={exploreMapsLayerParam} />,
+                <Button
+                    key={`consult-${service._id}`}
+                    priority="secondary"
+                    size="small"
+                    {...(offeringUnavailable
+                        ? { disabled: true }
+                        : { linkProps: routes.datastore_service_view({ datastoreId, offeringId: service._id, datasheetName }).link })}
+                >
+                    Consulter
+                </Button>,
+                <MenuList
+                    key={`menu-${service._id}`}
+                    menuOpenButtonProps={{
+                        iconId: "ri-more-2-line",
+                        priority: "tertiary no outline",
+                        title: "Autres actions",
+                        size: "small",
+                    }}
+                    items={[
+                        {
+                            text: "Copier l’URL",
+                            iconId: "ri-file-copy-line",
+                            disabled: offeringUnavailable || !service.share_url,
+                            onClick: () => openCopyUrlDialog(service),
+                        },
+                        exploreMapsLink
+                            ? {
+                                  text: "Voir dans Explorer les cartes",
+                                  iconId: "ri-external-link-line",
+                                  linkProps: exploreMapsLink,
+                              }
+                            : {
+                                  text: "Voir dans Explorer les cartes",
+                                  iconId: "ri-external-link-line",
+                                  disabled: true,
+                                  onClick: () => {},
+                              },
+                        editableOfferingTypes.includes(service.type) &&
                             canBroadcast && {
-                                text: "Dépublier",
-                                iconId: "ri-arrow-go-back-line",
-                                onClick: () => {
-                                    setTargetService(service);
-                                    unpublishServiceConfirmModal.open();
-                                },
+                                text: "Mettre à jour",
+                                iconId: "ri-edit-box-line",
+                                disabled: offeringUnavailable,
+                                linkProps: getServiceEditLink(datastoreId, datasheetName, service),
                             },
-                            {
-                                text: "Supprimer",
-                                iconId: "ri-delete-bin-line",
-                                disabled: true,
-                                onClick: () => {},
+                        canBroadcast && {
+                            text: "Supprimer",
+                            iconId: "ri-delete-bin-line",
+                            onClick: () => {
+                                setTargetService(service);
+                                deleteServiceConfirmModal.open();
                             },
-                        ]}
-                    />,
-                ];
-            }),
-        [pageServices, canBroadcast, datastoreId, datasheetName, css, setMessage]
-    );
+                        },
+                    ]}
+                />,
+            ];
+        });
+    }, [pageServices, sortedServices, permissionsQuery.data, now, canBroadcast, datastoreId, datasheetName, css]);
 
     if (serviceListQuery.isLoading) {
         return <LoadingText withSpinnerIcon={true} as="p" />;
     }
 
     if (serviceListQuery.isError) {
-        return <Alert severity="error" title="Erreur lors du chargement des services" description={serviceListQuery.error.message} closable={false} />;
+        return <Alert severity="error" title="Erreur lors du chargement des flux" description={serviceListQuery.error.message} closable={false} />;
     }
+
+    const createServiceLink = routes.datastore_service_add_next({ datastoreId, datasheetName }).link;
 
     return (
         <>
@@ -213,17 +254,30 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
                             fr.cx("fr-mt-4w", "fr-py-8w"),
                             css({
                                 display: "flex",
-                                justifyContent: "center",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: fr.spacing("2w"),
                                 border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
                             })
                         )}
                     >
-                        <Button linkProps={routes.datastore_service_add_next({ datastoreId, datasheetName }).link}>Créer un flux</Button>
+                        {canBroadcast ? (
+                            <>
+                                <Button linkProps={createServiceLink}>Créer un flux</Button>
+                                <span>OU</span>
+                                {/* TODO : référencement d’un flux existant à brancher (refonte) */}
+                                <Button priority="secondary" disabled>
+                                    Référencer un flux existant
+                                </Button>
+                            </>
+                        ) : (
+                            <p className={fr.cx("fr-m-0")}>Aucun flux</p>
+                        )}
                     </div>
                 ) : (
                     <>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-4w")}>
-                            <div className={fr.cx("fr-col")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters", "fr-mt-2w")}>
+                            <div className={cx(fr.cx("fr-col-12", "fr-col-md-7"), css({ overflowX: "auto" }))}>
                                 <SegmentedControl
                                     hideLegend
                                     legend="Filtrer par type de flux"
@@ -232,18 +286,25 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
                                         typeFilterSegment("all", "Tous"),
                                         typeFilterSegment("wfs", "WFS"),
                                         typeFilterSegment("wms", "WMS"),
-                                        typeFilterSegment("wmts", "WMTS"),
                                         typeFilterSegment("tms", "TMS"),
+                                        typeFilterSegment("wmts", "WMTS"),
                                     ]}
                                 />
                             </div>
-                            <div className={css({ marginLeft: "auto", display: "flex", gap: fr.spacing("2v") })}>
-                                {/* TODO : parcours de génération de flux à brancher (refonte) */}
-                                <Button priority="secondary" disabled>
-                                    Ajouter un flux existant
-                                </Button>
-                                <Button linkProps={routes.datastore_service_add_next({ datastoreId, datasheetName }).link}>Créer un flux</Button>
-                            </div>
+                            {canBroadcast && (
+                                <div
+                                    className={cx(
+                                        fr.cx("fr-col-12", "fr-col-md-5"),
+                                        css({ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: fr.spacing("2v") })
+                                    )}
+                                >
+                                    {/* TODO : référencement d’un flux existant à brancher (refonte) */}
+                                    <Button priority="secondary" disabled>
+                                        Référencer un flux existant
+                                    </Button>
+                                    <Button linkProps={createServiceLink}>Créer un flux</Button>
+                                </div>
+                            )}
                         </div>
 
                         <div className={cx(fr.cx("fr-mt-3w", "fr-mb-1w"), css({ display: "flex", justifyContent: "space-between" }))}>
@@ -257,7 +318,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
                             className={css({ "& table": { width: "100%" } })}
                             caption="Flux"
                             noCaption
-                            headers={["", "Flux", "Date de publication", "Accès", "Statut", "Action", ""]}
+                            headers={["Flux", "Date de modification", "Statut", "Accès", "URL", "Explorer les cartes", "Consulter", ""]}
                             data={rows}
                         />
 
@@ -281,10 +342,10 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
                 )}
             </DatasheetViewTab>
 
-            {/* Modale : Dépublier un service */}
+            {/* Modale : Supprimer un flux (offre puis configuration) */}
             {createPortal(
-                <unpublishServiceConfirmModal.Component
-                    title={`Êtes-vous sûr de dépublier le service ${targetService?.type ?? ""} ?`}
+                <deleteServiceConfirmModal.Component
+                    title={`Êtes-vous sûr de vouloir supprimer le flux ${targetService?.configuration.name ?? ""} ?`}
                     buttons={[
                         {
                             children: "Non, annuler",
@@ -292,8 +353,8 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
                             priority: "secondary",
                         },
                         {
-                            children: "Oui, dépublier",
-                            onClick: () => targetService && unpublishServiceMutation.mutate(targetService),
+                            children: "Oui, supprimer",
+                            onClick: () => targetService && deleteServiceMutation.mutate(targetService),
                             doClosesModal: true,
                             priority: "primary",
                         },
@@ -304,19 +365,19 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
                         <li>1 offre ({targetService?._id})</li>
                         <li>1 configuration ({targetService?.configuration._id})</li>
                     </ul>
-                </unpublishServiceConfirmModal.Component>,
+                </deleteServiceConfirmModal.Component>,
                 document.body
             )}
 
-            {unpublishServiceMutation.isPending && (
+            {deleteServiceMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message="En cours de dépublication" withSpinnerIcon={true} />
+                        <LoadingText as="h6" message="Suppression en cours" withSpinnerIcon={true} />
                     </div>
                 </Wait>
             )}
 
-            {unpublishServiceMutation.error && <Alert severity="error" closable title={unpublishServiceMutation.error.message} />}
+            {deleteServiceMutation.error && <Alert severity="error" closable title={deleteServiceMutation.error.message} />}
 
             <TextCopyToClipboardDialog title="Copier l’URL" label="URL de diffusion" text={targetService?.share_url ?? ""} />
         </>
