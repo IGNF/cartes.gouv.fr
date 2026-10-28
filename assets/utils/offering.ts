@@ -113,37 +113,25 @@ export const isPrivateServiceVisibleOnCartesGouv = (
     );
 };
 
-/** Nom de couche sans le suffixe `_wms` ou `_wmts`, pour apparier un WMS et son WMTS */
-export const getLayerBaseName = (layerName: string): string => layerName.replace(/_(wms|wmts)$/i, "");
+/**
+ * Nom de couche sans le suffixe `_wms`, `_wmts` ou `_wmsr`, comme `filter_specific_duplicates` du générateur
+ * geoportal-configuration (comparaison sensible à la casse) : toute évolution de sa liste de suffixes doit être reportée ici.
+ */
+export const getLayerBaseName = (layerName: string): string => layerName.replace(/_(wms|wmts|wmsr)$/, "");
 
 // une offre WMTS-TMS dont le type de pyramide est inconnu est traitée comme un WMTS
 const isWmtsService = (service: Service): boolean =>
     service.type === OfferingTypeEnum.WMTSTMS && service.configuration.pyramid?.type !== StoredDataTypeEnum.ROK4PYRAMIDVECTOR;
 
-const getUsedStoredDataId = (service: Service): string | undefined => service.configuration.type_infos?.used_data?.[0]?.stored_data;
-
-// base vecteur moissonnée pour calculer la pyramide raster (tag posé par cartes.gouv.fr à la génération)
-const getHarvestedVectorDbId = (service: Service): string | undefined => {
-    const pyramid = service.configuration.pyramid;
-    return pyramid?.type === StoredDataTypeEnum.ROK4PYRAMIDRASTER ? pyramid.tags.vectordb_id : undefined;
-};
-
 /**
- * Un WMS a un WMTS « jumeau » quand un WMTS de la fiche diffuse la même donnée : même pyramide (WMS raster),
- * pyramide moissonnée depuis la même base vecteur (WMS vecteur), ou à défaut même nom au suffixe près
- * (pyramides calculées hors cartes.gouv.fr, sans tag `vectordb_id`).
+ * Un WMS a un WMTS « jumeau » quand un WMTS publié de la fiche porte le même nom au suffixe près : le générateur
+ * geoportal-configuration retire alors la couche WMS d’Explorer les cartes, son lien n’aboutirait pas.
  */
 export const hasWmtsSibling = (service: Service, services: Service[]): boolean => {
     const baseName = getLayerBaseName(service.layer_name);
-    const storedDataId = getUsedStoredDataId(service);
-    return services.some((other) => {
-        // un WMTS dépublié n’est plus une alternative de visualisation
-        if (other._id === service._id || !isWmtsService(other) || isOfferingUnavailable(other.status)) {
-            return false;
-        }
-        const sameData = storedDataId !== undefined && (getUsedStoredDataId(other) === storedDataId || getHarvestedVectorDbId(other) === storedDataId);
-        return sameData || getLayerBaseName(other.layer_name) === baseName;
-    });
+    return services.some(
+        (other) => other._id !== service._id && isWmtsService(other) && !isOfferingUnavailable(other.status) && getLayerBaseName(other.layer_name) === baseName
+    );
 };
 
 export type ExploreMapsProtocol = "WMS" | "WMTS" | "TMS";

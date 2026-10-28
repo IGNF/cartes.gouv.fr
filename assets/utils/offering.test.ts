@@ -14,16 +14,10 @@ import {
 const CREATION = "2026-10-01T10:00:00+00:00";
 const CREATION_MS = Date.parse(CREATION);
 
-type ServiceFixture = Partial<Service> & {
-    pyramidType?: StoredDataTypeEnum;
-    /** donnée stockée diffusée (base vecteur ou pyramide) */
-    storedDataId?: string;
-    /** base vecteur moissonnée pour une pyramide raster */
-    vectorDbId?: string;
-};
+type ServiceFixture = Partial<Service> & { pyramidType?: StoredDataTypeEnum };
 
 function service(overrides: ServiceFixture = {}): Service {
-    const { pyramidType, storedDataId, vectorDbId, ...rest } = overrides;
+    const { pyramidType, ...rest } = overrides;
     return {
         _id: "offering-1",
         layer_name: "ma_couche",
@@ -31,10 +25,7 @@ function service(overrides: ServiceFixture = {}): Service {
         status: OfferingStatusEnum.PUBLISHED,
         open: true,
         creation: CREATION,
-        configuration: {
-            type_infos: { used_data: [{ stored_data: storedDataId ?? "stored-data-1" }] },
-            pyramid: pyramidType ? { type: pyramidType, tags: { vectordb_id: vectorDbId } } : undefined,
-        },
+        configuration: { pyramid: pyramidType ? { type: pyramidType } : undefined },
         ...rest,
     } as unknown as Service;
 }
@@ -46,47 +37,36 @@ function permission(beneficiaryId: string, offeringIds: string[], endDate?: stri
 const NOW = Date.parse("2026-10-28T12:00:00+00:00");
 
 describe("getLayerBaseName", () => {
-    it("retire le suffixe _wms ou _wmts", () => {
+    it("retire le suffixe _wms, _wmts ou _wmsr, en respectant la casse comme le générateur", () => {
         expect(getLayerBaseName("couche_wms")).toBe("couche");
-        expect(getLayerBaseName("couche_WMTS")).toBe("couche");
+        expect(getLayerBaseName("couche_wmts")).toBe("couche");
+        expect(getLayerBaseName("couche_wmsr")).toBe("couche");
+        expect(getLayerBaseName("couche_WMTS")).toBe("couche_WMTS");
         expect(getLayerBaseName("couche")).toBe("couche");
         expect(getLayerBaseName("couche_wms_v2")).toBe("couche_wms_v2");
     });
 });
 
 describe("hasWmtsSibling", () => {
-    const wms = service({ _id: "wms", layer_name: "couche_wms", storedDataId: "vectordb-1" });
+    const wms = service({ _id: "wms", layer_name: "couche_wms" });
     const wmtsFixture: ServiceFixture = {
         _id: "wmts",
         layer_name: "couche_wmts",
         type: OfferingTypeEnum.WMTSTMS,
         pyramidType: StoredDataTypeEnum.ROK4PYRAMIDRASTER,
-        storedDataId: "pyramid-1",
     };
     const wmts = service(wmtsFixture);
-    const tms = service({
-        _id: "tms",
-        layer_name: "couche",
-        type: OfferingTypeEnum.WMTSTMS,
-        pyramidType: StoredDataTypeEnum.ROK4PYRAMIDVECTOR,
-        storedDataId: "pyramid-v",
-    });
+    const tms = service({ _id: "tms", layer_name: "couche", type: OfferingTypeEnum.WMTSTMS, pyramidType: StoredDataTypeEnum.ROK4PYRAMIDVECTOR });
 
-    it("apparie un WMS et un WMTS de même nom au suffixe près", () => {
+    it("apparie un WMS et un WMTS de même nom au suffixe près, y compris _wmsr", () => {
         expect(hasWmtsSibling(wms, [wms, wmts])).toBe(true);
+        const wmsRaster = service({ _id: "wmsr", layer_name: "couche_wmsr", type: OfferingTypeEnum.WMSRASTER });
+        expect(hasWmtsSibling(wmsRaster, [wmsRaster, wmts])).toBe(true);
     });
 
-    it("apparie un WMS raster et un WMTS diffusant la même pyramide, quel que soit le nom", () => {
-        const wmsRaster = service({ _id: "wmsr", layer_name: "ortho", type: OfferingTypeEnum.WMSRASTER, storedDataId: "pyramid-1" });
-        const wmtsRenamed = service({ ...wmtsFixture, layer_name: "tuiles_ortho" });
-        expect(hasWmtsSibling(wmsRaster, [wmsRaster, wmtsRenamed])).toBe(true);
-    });
-
-    it("apparie un WMS vecteur et un WMTS dont la pyramide a été moissonnée depuis sa base vecteur", () => {
-        const wmtsHarvested = service({ ...wmtsFixture, layer_name: "autre_nom", vectorDbId: "vectordb-1" });
-        const wmtsOther = service({ ...wmtsFixture, layer_name: "autre_nom", vectorDbId: "vectordb-2" });
-        expect(hasWmtsSibling(wms, [wms, wmtsHarvested])).toBe(true);
-        expect(hasWmtsSibling(wms, [wms, wmtsOther])).toBe(false);
+    it("n’apparie pas des noms différents, même sur la même donnée", () => {
+        const wmtsRenamed = service({ ...wmtsFixture, layer_name: "tuiles_couche" });
+        expect(hasWmtsSibling(wms, [wms, wmtsRenamed])).toBe(false);
     });
 
     it("ignore un TMS, un WMTS dépublié et le flux lui-même", () => {
