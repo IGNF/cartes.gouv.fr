@@ -96,11 +96,6 @@ class CartesMetadataApiService
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
-
-        // dépublie la metadata (sans la supprimer) s'il n'y a plus de services publiés
-        if (0 === count($cswMetadata->layers) && isset($apiMetadata['endpoints'][0]['_id'])) {
-            $this->metadataApiService->unpublish($datastoreId, $cswMetadata->fileIdentifier, $apiMetadata['endpoints'][0]['_id'])->await();
-        }
     }
 
     /**
