@@ -6,6 +6,7 @@ import {
     getExploreMapsAvailability,
     getExploreMapsLayerParam,
     getLayerBaseName,
+    getNextExploreMapsPendingEnd,
     hasWmtsSibling,
     isPrivateServiceVisibleOnCartesGouv,
 } from "./offering";
@@ -92,6 +93,16 @@ describe("hasWmtsSibling", () => {
         expect(hasWmtsSibling(wms, [wms, tms])).toBe(false);
         expect(hasWmtsSibling(wms, [wms, service({ ...wmtsFixture, status: OfferingStatusEnum.UNPUBLISHED })])).toBe(false);
         expect(hasWmtsSibling(wmts, [wmts])).toBe(false);
+    });
+});
+
+describe("getNextExploreMapsPendingEnd", () => {
+    it("renvoie la fin du délai la plus proche encore à venir, en ignorant les WFS", () => {
+        const end = CREATION_MS + EXPLORE_MAPS_CONFIGURATION_DELAY_MS;
+        const older = service({ _id: "older", creation: "2026-09-01T10:00:00+00:00" });
+        const wfs = service({ _id: "wfs", type: OfferingTypeEnum.WFS, creation: "2026-10-01T11:00:00+00:00" });
+        expect(getNextExploreMapsPendingEnd([service(), older, wfs], CREATION_MS)).toBe(end);
+        expect(getNextExploreMapsPendingEnd([service(), older, wfs], end)).toBeUndefined();
     });
 });
 

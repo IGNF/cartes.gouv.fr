@@ -219,3 +219,12 @@ export const getServiceTypeLabel = (service: Service): string => {
             return service.type;
     }
 };
+
+/** Prochain instant où un flux de la liste sort du délai « En cours », undefined si aucun n’y est encore */
+export const getNextExploreMapsPendingEnd = (services: Service[], now: number): number | undefined => {
+    const ends = services
+        .filter((service) => getExploreMapsProtocol(service) !== undefined)
+        .map((service) => Date.parse(service.creation) + EXPLORE_MAPS_CONFIGURATION_DELAY_MS)
+        .filter((end) => !Number.isNaN(end) && end > now);
+    return ends.length > 0 ? Math.min(...ends) : undefined;
+};
