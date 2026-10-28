@@ -69,7 +69,10 @@ export default function ImageCropModal(props: ImageCropModalProps) {
     // dépendances de l'effet de synchronisation : évite de recharger/réinitialiser le crop
     // quand le parent passe accept/minResolution en littéral inline (nouvelle identité à chaque rendu).
     const constraintsRef = useRef({ accept, maxFileSizeMo, minResolution });
-    constraintsRef.current = { accept, maxFileSizeMo, minResolution };
+    // écrite après le rendu : les effets suivants et les gestionnaires lisent la valeur à jour
+    useEffect(() => {
+        constraintsRef.current = { accept, maxFileSizeMo, minResolution };
+    });
 
     // URL objet de la source courante, à révoquer au remplacement et au démontage
     const objectUrlRef = useRef<string | undefined>(undefined);
