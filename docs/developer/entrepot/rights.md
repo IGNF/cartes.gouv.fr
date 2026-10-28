@@ -37,6 +37,14 @@
 | Gérer les styles                              | ANNEX, BROADCAST   | Ne pas afficher l'action |
 | Menu WMS-V - Créer un service raster WMS/WMTS | PROCESSING         | Ne pas afficher l'action |
 
+### Onglet "Flux" (fiche de données refondue)
+
+| Action               | Droits nécessaires | En l'absence de droits    |
+| -------------------- | ------------------ | ------------------------- |
+| Créer un flux        | BROADCAST          | Ne pas afficher le bouton |
+| Menu - Mettre à jour | BROADCAST          | Ne pas afficher l'action  |
+| Menu - Supprimer     | BROADCAST          | Ne pas afficher l'action  |
+
 ### Onglet "Document"
 
 | Action                  | Droits nécessaires | En l'absence de droits    |
