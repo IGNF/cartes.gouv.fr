@@ -99,19 +99,10 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     {
         $statePayload = $request->attributes->get(self::REQUEST_ATTR_STATE, []);
 
-        $app = $statePayload['app'] ?? null;
         $sessionExpired = $statePayload['session_expired'] ?? null;
         $referer = $statePayload['referer'] ?? null;
         if (!is_string($referer) || parse_url($referer, PHP_URL_HOST) !== $request->getHost()) {
             $referer = null;
-        }
-
-        if (!is_null($app) && 'entree-carto' === $app) {
-            return $this->handleEntreeCartoLogin(true);
-        }
-
-        if (!is_null($app) && 'guichet-collaboratif' === $app) {
-            return $this->handleGuichetCollaboratifLogin(true);
         }
 
         if (!is_null($sessionExpired) && 1 === intval($sessionExpired)) {
@@ -162,23 +153,5 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
             'message' => $message,
             'details' => ['controller' => ApiControllerInterface::class, 'session_expired' => true],
         ], $code);
-    }
-
-    public function handleEntreeCartoLogin(bool $success): Response
-    {
-        $redirectUrl = $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
-        $redirectUrl .= 'explorer-les-cartes/login?';
-        $redirectUrl .= $success ? 'success=1' : 'authentication_failed=1';
-
-        return new RedirectResponse($redirectUrl);
-    }
-
-    public function handleGuichetCollaboratifLogin(bool $success): Response
-    {
-        $redirectUrl = $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
-        $redirectUrl .= 'guichet-collaboratif/login?';
-        $redirectUrl .= $success ? 'success=1' : 'authentication_failed=1';
-
-        return new RedirectResponse($redirectUrl);
     }
 }
