@@ -17,8 +17,8 @@ export default function useUnpublishServiceMutation(datastoreId: string, datashe
 
             return api.service.unpublishService(datastoreId, service._id);
         },
-        onSuccess() {
-            // relecture plutôt que retrait de la ligne : une offre partiellement supprimée reste listée comme dépubliée
+        // relecture même après un échec : le second DELETE peut échouer alors que l’offre est déjà dépubliée
+        onSettled() {
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
