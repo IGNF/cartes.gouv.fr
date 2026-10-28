@@ -6,7 +6,7 @@ import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useStyles } from "tss-react";
 
@@ -31,6 +31,7 @@ import {
     formatDateFromISO,
     getExploreMapsAvailability,
     getExploreMapsLayerParam,
+    getNextExploreMapsPendingEnd,
     getServiceEditLink,
     getServiceThumbnailUrl,
     getServiceTypeLabel,
@@ -127,8 +128,19 @@ export default function ServicesListTabNext({ datastoreId, datasheetName }: Serv
         TextCopyToClipboardModal.open();
     };
 
-    // instant de référence du délai « En cours » : la date de la dernière lecture de la liste, pure et rafraîchie à chaque relecture
-    const now = serviceListQuery.dataUpdatedAt;
+    // instant de référence du délai « En cours » : dernière lecture de la liste, ou dernier réveil du minuteur ci-dessous
+    const [clockTick, setClockTick] = useState(0);
+    const now = Math.max(serviceListQuery.dataUpdatedAt, clockTick);
+
+    // réveil à la sortie du délai du prochain flux « En cours », pour ne pas attendre une relecture
+    useEffect(() => {
+        const nextPendingEnd = getNextExploreMapsPendingEnd(sortedServices, now);
+        if (nextPendingEnd === undefined) {
+            return;
+        }
+        const timer = window.setTimeout(() => setClockTick(Date.now()), nextPendingEnd - now + 1000);
+        return () => window.clearTimeout(timer);
+    }, [sortedServices, now]);
 
     // lignes mémorisées : références stables pour que memo(MenuList) évite de re-rendre les menus de chaque ligne
     const rows = useMemo(() => {
