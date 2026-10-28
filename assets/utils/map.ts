@@ -28,7 +28,7 @@ export const bboxFromGeoJsonString = (geometry: string): number[] | undefined =>
         const parsed: unknown = JSON.parse(geometry);
         const format = new GeoJSON();
         const geom = format.readGeometry(parsed);
-        return geom.getExtent();
+        return geom?.getExtent();
     } catch {
         return undefined;
     }
