@@ -174,8 +174,8 @@ class CswMetadataHelper
                 $pointOfContact = $producers[0] ?? null;
 
                 $contactIsIdentical = null !== $pointOfContact
-                    && $rootOrgName === ($pointOfContact->organization_name ?? '')
-                    && $rootOrgEmail === ($pointOfContact->organization_email ?? '')
+                    && $rootOrgName === $pointOfContact->organization_name
+                    && $rootOrgEmail === $pointOfContact->organization_email
                     && ($rootDelivery ?: null) === $pointOfContact->address_number_and_streetname
                     && ($rootPostal ?: null) === $pointOfContact->address_postal_code
                     && ($rootCity ?: null) === $pointOfContact->address_city;
