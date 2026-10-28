@@ -39,6 +39,11 @@ jobs:
             - name: Install PHP dependencies
               run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
+            # Avis de sécurité et paquets abandonnés sur composer.lock ; une seule entrée de matrice suffit
+            - name: Audit Composer dependencies
+              if: matrix.php == '8.5'
+              run: composer audit --locked --no-interaction
+
             - name: Check PHP code rules
               run: composer check-rules
 
