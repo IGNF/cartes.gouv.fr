@@ -5,7 +5,7 @@ const { i18n } = declareComponentKeys<
     | { K: "step_title"; P: { step_name: string }; R: string }
     | { K: "step_status_text"; P: { step_status: string }; R: string }
     | "data_integration_in_progress"
-    | "long_operation_information"
+    | "integration_failed"
     | "continue_browsing_data_not_ready"
     | "view_datasheet"
     | "check_error_report"
@@ -20,7 +20,7 @@ export const DatasheetUploadIntegrationFrTranslations: Translations<"fr">["Datas
             case "send_files_api":
                 return "Chargement des fichiers";
             case "wait_checks":
-                return "Vérifications";
+                return "Vérifications des fichiers";
             case "integration_processing":
                 return "Intégration en base de données";
             default:
@@ -32,17 +32,17 @@ export const DatasheetUploadIntegrationFrTranslations: Translations<"fr">["Datas
             case "in_progress":
                 return "En cours";
             case "successful":
-                return "Succès";
+                return "Réussi";
             case "failed":
-                return "Echec";
+                return "Échec";
             case "waiting":
                 return "En attente";
             default:
                 return "Statut inconnu";
         }
     },
-    data_integration_in_progress: "Vos données vecteur sont en cours de dépôt",
-    long_operation_information: "Les opérations suivantes peuvent prendre quelques minutes. Merci pour votre patience.",
+    data_integration_in_progress: "Chargement des données",
+    integration_failed: "L’intégration de vos données a échoué",
     continue_browsing_data_not_ready: "Vous pouvez maintenant poursuivre votre navigation même si vos données ne sont pas encore prêtes.",
     view_datasheet: "Consulter la fiche de données",
     check_error_report: "Voir le rapport d’erreur",
@@ -55,7 +55,7 @@ export const DatasheetUploadIntegrationEnTranslations: Translations<"en">["Datas
     step_title: undefined,
     step_status_text: undefined,
     data_integration_in_progress: undefined,
-    long_operation_information: undefined,
+    integration_failed: undefined,
     continue_browsing_data_not_ready: undefined,
     view_datasheet: undefined,
     check_error_report: undefined,

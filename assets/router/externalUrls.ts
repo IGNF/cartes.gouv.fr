@@ -8,10 +8,13 @@ export const externalUrls = {
     help: appRoot + "/aide/",
     helpProducerGuide: appRoot + "/aide/fr/guides-producteur/",
     helpProducerGuideGeneral: appRoot + "/aide/fr/guides-producteur/presentation-producteur/generalites-producteur/",
+    helpProducerGuideChooseServiceType: appRoot + "/aide/fr/guides-producteur/publier-des-donnees-via-cartes-gouv/choisir-son-flux/",
     helpUserGuideExploreMaps: appRoot + "/aide/fr/guides-utilisateur/visualiseur-cartographique/generalites-visualiseur/",
     helpUserGuideCatalogueGeneral: appRoot + "/aide/fr/guides-utilisateur/rechercher-une-donnee/generalites-catalogue/",
     helpUserGuideGeopfServicesTutorial: appRoot + "/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/tutoriels/",
     helpProducerGuideCreateDatasheet: appRoot + "/aide/fr/guides-producteur/publier-des-donnees-via-cartes-gouv/deposer-donnees-sur-cartes-gouv/",
+    helpDeveloperGuideVectorFeed: appRoot + "/aide/fr/guides-developpeur/tutoriels/gestion-des-donnees-vecteur/alimentation-diffusion-vecteur/",
+    qgisPluginGeoplateforme: "https://geoplateforme.github.io/plugin-qgis-geoplateforme/",
     helpUserGuideCreateKeys: appRoot + "/aide/fr/guides-utilisateur/creation-des-cles-et-integration-sig/",
     catalogue: catalogueUrl ?? appRoot + "/rechercher-une-donnee",
     maps: appRoot + "/explorer-les-cartes",
@@ -36,10 +39,19 @@ export const externalUrls = {
     logout: SymfonyRouting.generate("cartesgouvfr_security_logout"),
 } as const;
 
-export function externalLink(route: keyof typeof externalUrls, title?: string): RegisteredLinkProps {
+export function externalLinkToUrl(href: string, title?: string): RegisteredLinkProps {
     return {
-        href: externalUrls[route],
+        href,
         target: "_blank",
         title: title ? `${title} - ouvre une nouvelle fenêtre` : "Ouvre une nouvelle fenêtre",
     };
+}
+
+export function externalLink(route: keyof typeof externalUrls, title?: string): RegisteredLinkProps {
+    return externalLinkToUrl(externalUrls[route], title);
+}
+
+/** Explorer les cartes ouvert sur une couche, `layerParam` au format `{nom}$GEOPORTAIL:OGC:{protocole}(opacité;visible;gris)` */
+export function exploreMapsLayerUrl(layerParam: string): string {
+    return `${externalUrls.maps}?l=${encodeURIComponent(layerParam)}`;
 }
