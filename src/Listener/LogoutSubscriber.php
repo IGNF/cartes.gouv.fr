@@ -31,16 +31,7 @@ class LogoutSubscriber implements EventSubscriberInterface
         $idToken = $this->tokenManager->getIdToken();
         $this->tokenManager->clearAccessToken();
 
-        $redirectUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);
-
-        $app = $event->getRequest()->query->get('app', null);
-        if (!is_null($app) && 'entree-carto' === $app) {
-            $redirectUrl .= 'explorer-les-cartes/logout?success=1';
-        } elseif (!is_null($app) && 'guichet-collaboratif' === $app) {
-            $redirectUrl .= 'guichet-collaboratif/logout?success=1';
-        } else {
-            $redirectUrl .= 'publier-une-donnee';
-        }
+        $redirectUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL).'publier-une-donnee';
 
         if ('test' === $this->parameters->get('app_env') || null === $idToken) {
             $response = new RedirectResponse($redirectUrl);

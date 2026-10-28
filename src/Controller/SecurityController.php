@@ -41,7 +41,6 @@ class SecurityController extends AbstractController
 
         $state = $loginStateSerializer->encode([
             'referer' => $safeReferer,
-            'app' => $request->query->get('app'),
             'session_expired' => $request->query->get('session_expired'),
         ]);
 

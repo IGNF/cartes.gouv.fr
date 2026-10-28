@@ -126,7 +126,7 @@ Navigateur              Symfony               Keycloak
 
 [`LogoutSubscriber`](../../../src/Listener/LogoutSubscriber.php) récupère l'`id_token` depuis le token manager, déclenche l'effacement du cookie via `clearAccessToken()` (intent `__clear__`), puis redirige vers le `end_session_endpoint` Keycloak avec `id_token_hint` pour invalider la session SSO côté fournisseur.
 
-Si l'utilisateur est déjà anonyme (cookie absent), `getIdToken()` retourne `null` : le `LogoutSubscriber` redirige directement vers `/decouvrir` sans appeler Keycloak.
+Si l'utilisateur est déjà anonyme (cookie absent), `getIdToken()` retourne `null` : le `LogoutSubscriber` redirige directement vers `/publier-une-donnee` sans appeler Keycloak.
 
 ---
 
@@ -137,7 +137,6 @@ Le `state` remplace le stockage de contexte en session PHP. C'est un blob `base6
 | Clé               | Contenu                                                                                                                                                                                                           |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `referer`         | URL de la page depuis laquelle le login a été déclenché, pour y rediriger après succès                                                                                                                            |
-| `app`             | Identifiant de la sous-application (`entree-carto`, `guichet-collaboratif`…) pour un redirect personnalisé post-login                                                                                             |
 | `session_expired` | `"1"` si le login a été déclenché par une expiration de session, pour afficher un message approprié                                                                                                               |
 | `nonce`           | 16 octets aléatoires en hex — entropie pour que chaque state ait une signature HMAC distincte. Il n'y a pas de nonce serveur à usage unique (design stateless) ; la fenêtre de rejeu est bornée par `exp` (5 min) |
 | `exp`             | Timestamp d'expiration Unix (+5 min) — le state ne peut pas être réutilisé indéfiniment                                                                                                                           |
