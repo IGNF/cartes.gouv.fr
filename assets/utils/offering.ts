@@ -160,10 +160,17 @@ export const getExploreMapsProtocol = (service: Service): ExploreMapsProtocol | 
     }
 };
 
-/** Paramètre `l` d’Explorer les cartes : couche, protocole, puis opacité, visibilité et niveaux de gris */
+/**
+ * Paramètre `l` d’Explorer les cartes : `{couche}$GEOPORTAIL:{famille}:{protocole}(opacité;visible;gris)`.
+ * La configuration geoportal-configuration enregistre les couches TMS sous la famille `GPP`, les WMS et WMTS sous `OGC`.
+ */
 export const getExploreMapsLayerParam = (service: Service): string | undefined => {
     const protocol = getExploreMapsProtocol(service);
-    return protocol === undefined ? undefined : `${service.layer_name}$GEOPORTAIL:OGC:${protocol}(1;1;0)`;
+    if (protocol === undefined) {
+        return undefined;
+    }
+    const family = protocol === "TMS" ? "GPP" : "OGC";
+    return `${service.layer_name}$GEOPORTAIL:${family}:${protocol}(1;1;0)`;
 };
 
 /** Délai de prise en compte d’un nouveau flux par la configuration d’Explorer les cartes, relancée toutes les heures */

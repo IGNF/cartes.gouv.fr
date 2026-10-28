@@ -125,7 +125,7 @@ describe("getExploreMapsLayerParam", () => {
             "ma_couche$GEOPORTAIL:OGC:WMTS(1;1;0)"
         );
         expect(getExploreMapsLayerParam(service({ type: OfferingTypeEnum.WMTSTMS, pyramidType: StoredDataTypeEnum.ROK4PYRAMIDVECTOR }))).toBe(
-            "ma_couche$GEOPORTAIL:OGC:TMS(1;1;0)"
+            "ma_couche$GEOPORTAIL:GPP:TMS(1;1;0)"
         );
         expect(getExploreMapsLayerParam(service({ type: OfferingTypeEnum.WFS }))).toBeUndefined();
     });
