@@ -24,7 +24,6 @@ services:
 flysystem:
     storages:
         s3.storage:
-            adapter: "asyncaws"
-            options:
+            asyncaws:
                 client: "simple_s3_client"
                 bucket: "%env(S3_BUCKET_NAME)%"
