@@ -24,7 +24,6 @@ services:
             - http_proxy=${HTTP_PROXY}
             - https_proxy=${HTTPS_PROXY}
             - APP_ENV=prod
-            - APP_ROOT_URL=https://cartesgouvfr-prod.docker.localhost
             - FRANKENPHP_NUM_THREADS=4
         # Rootfs read-only : seuls /tmp et var/data inscriptibles (cache dans l'image, logs sur stdout)
         read_only: true
