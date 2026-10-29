@@ -48,3 +48,13 @@ services:
 
 imports:
     - { resource: parameters.yaml }
+
+when@test:
+    services:
+        # Doubles des externes : Keycloak (client knpu remplacé) et API Entrepôt (voir framework.http_client.mock_response_factory)
+        knpu.oauth2.client.keycloak:
+            class: App\Tests\Double\FakeKeycloakClient
+            arguments: ["@knpu.oauth2.provider.keycloak", "@request_stack"]
+            calls: [[setAsStateless, []]] # comme use_state: false dans knpu_oauth2_client.yaml
+            public: true # le registre du bundle le charge par identifiant
+        App\Tests\Double\EntrepotMockResponseFactory: ~

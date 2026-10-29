@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- https://phpunit.readthedocs.io/en/latest/configuration.html -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         colors="true"
+         failOnDeprecation="false"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         failOnNotice="true"
+         failOnWarning="true"
+         bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+>
+    <php>
+        <ini name="display_errors" value="1" />
+        <ini name="error_reporting" value="-1" />
+        <server name="SHELL_VERBOSITY" value="-1" />
+        <!-- Dépréciations comptées mais non bloquantes jusqu’à la montée Symfony 7.4 (passer ensuite à max[self]=0&amp;max[direct]=0) -->
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak" />
+        <!-- Valeurs de test forcées dans $_ENV et $_SERVER : elles priment sur l’environnement réel du conteneur de dev, que .env.test ne peut pas écraser -->
+        <env name="APP_ENV" value="test" force="true" />
+        <server name="APP_ENV" value="test" force="true" />
+        <env name="APP_SECRET" value="$ecretf0rt3st" force="true" />
+        <server name="APP_SECRET" value="$ecretf0rt3st" force="true" />
+        <env name="TRUSTED_PROXIES" value="127.0.0.1" force="true" />
+        <server name="TRUSTED_PROXIES" value="127.0.0.1" force="true" />
+        <env name="IAM_URL" value="https://sso.test" force="true" />
+        <server name="IAM_URL" value="https://sso.test" force="true" />
+        <env name="IAM_REALM" value="test" force="true" />
+        <server name="IAM_REALM" value="test" force="true" />
+        <env name="IAM_CLIENT_ID" value="cartes-gouv-test" force="true" />
+        <server name="IAM_CLIENT_ID" value="cartes-gouv-test" force="true" />
+        <env name="IAM_CLIENT_SECRET" value="test-secret" force="true" />
+        <server name="IAM_CLIENT_SECRET" value="test-secret" force="true" />
+        <env name="IAM_LOGIN_DISABLED" value="0" force="true" />
+        <server name="IAM_LOGIN_DISABLED" value="0" force="true" />
+        <env name="API_ENTREPOT_URL" value="https://entrepot.test/api" force="true" />
+        <server name="API_ENTREPOT_URL" value="https://entrepot.test/api" force="true" />
+        <env name="ANNEXES_URL" value="https://entrepot.test/annexes" force="true" />
+        <server name="ANNEXES_URL" value="https://entrepot.test/annexes" force="true" />
+        <env name="CATALOGUE_URL" value="https://catalogue.test" force="true" />
+        <server name="CATALOGUE_URL" value="https://catalogue.test" force="true" />
+        <env name="API_ESPACE_COLLABORATIF_URL" value="https://espaceco.test/api" force="true" />
+        <server name="API_ESPACE_COLLABORATIF_URL" value="https://espaceco.test/api" force="true" />
+        <env name="SANDBOX_COMMUNITY_ID" value="sandbox-community" force="true" />
+        <server name="SANDBOX_COMMUNITY_ID" value="sandbox-community" force="true" />
+        <env name="MAILER_DSN" value="null://null" force="true" />
+        <server name="MAILER_DSN" value="null://null" force="true" />
+        <env name="HTTP_PROXY" value="" force="true" />
+        <server name="HTTP_PROXY" value="" force="true" />
+        <env name="HTTPS_PROXY" value="" force="true" />
+        <server name="HTTPS_PROXY" value="" force="true" />
+    </php>
+
+    <testsuites>
+        <testsuite name="Project Test Suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <source ignoreSuppressionOfDeprecations="true"
+            ignoreIndirectDeprecations="true"
+            restrictNotices="true"
+            restrictWarnings="true"
+    >
+        <include>
+            <directory>src</directory>
+        </include>
+
+        <deprecationTrigger>
+            <method>Doctrine\Deprecations\Deprecation::trigger</method>
+            <method>Doctrine\Deprecations\Deprecation::delegateTriggerToBackend</method>
+            <function>trigger_deprecation</function>
+        </deprecationTrigger>
+    </source>
+
+    <extensions>
+    </extensions>
+</phpunit>

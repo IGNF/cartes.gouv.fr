@@ -40,3 +40,10 @@ framework:
 when@test:
     framework:
         test: true
+        http_client:
+            mock_response_factory: App\Tests\Double\EntrepotMockResponseFactory
+        cache:
+            app: cache.adapter.array
+        # Pas de build Vite en test : asset() rend le chemin tel quel au lieu de le résoudre via manifest.json
+        assets:
+            version_strategy: null
