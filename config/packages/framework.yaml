@@ -6,6 +6,7 @@ framework:
     handle_all_throwables: true
 
     trusted_proxies: "%env(TRUSTED_PROXIES)%"
+    trusted_hosts: "%env(TRUSTED_HOSTS)%"
     trusted_headers: ["x-forwarded-for", "x-forwarded-host", "x-forwarded-proto", "x-forwarded-port"]
 
     ide: vscode
