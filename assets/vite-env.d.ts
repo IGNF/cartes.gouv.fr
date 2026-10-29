@@ -7,3 +7,8 @@ declare const __APP_VERSION__: string;
 declare const __APP_REVISION__: string;
 /** Invalidation du cache react-query persisté : commit, ou horodatage du build en local */
 declare const __CACHE_BUSTER__: string;
+
+interface ImportMetaEnv {
+    /** Chemin de base de l’installation (APP_BASE_PATH), vide à la racine */
+    readonly APP_BASE_PATH?: string;
+}
