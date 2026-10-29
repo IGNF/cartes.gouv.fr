@@ -6,7 +6,8 @@ framework:
     handle_all_throwables: true
 
     trusted_proxies: "%env(TRUSTED_PROXIES)%"
-    trusted_headers: ["x-forwarded-for", "x-forwarded-host", "x-forwarded-proto", "x-forwarded-port", "x-forwarded-prefix"]
+    # x-forwarded-prefix exclu : l’ingress le transmet tel quel depuis le client, il préfixerait toutes les URL générées
+    trusted_headers: ["x-forwarded-for", "x-forwarded-host", "x-forwarded-proto", "x-forwarded-port"]
 
     ide: vscode
 
