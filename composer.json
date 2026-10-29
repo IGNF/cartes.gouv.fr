@@ -102,7 +102,7 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-        "symfony-routing-dump": "php bin/console fos:js-routing:dump --target ./var/cache/fosRoutes.json --format json",
+        "symfony-routing-dump": "php bin/console fos:js-routing:dump --target ./assets/modules/symfony-routes.json --format json --pretty-print",
         "test": "vendor/bin/phpunit",
         "check-rules": [
             "php bin/console lint:twig templates/",

@@ -1,5 +1,6 @@
-import Routing from "../../vendor/friendsofsymfony/jsrouting-bundle/Resources/js/router";
-import routes from "../../var/cache/fosRoutes.json";
+import Routing from "fos-router";
+
+import routes from "./symfony-routes.json";
 Routing.setRoutingData(routes);
 
 const SymfonyRouting = Routing;

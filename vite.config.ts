@@ -32,11 +32,13 @@ export default defineConfig({
             sriAlgorithm: "sha384",
             exposedEnvVars: ["APP_ENV"],
         }),
+        // Régénère le fichier de routes commité (assets/modules/symfony-routes.json) en dev seulement : le build n’a pas besoin de PHP
         run([
             {
-                name: "fos-routing-js-dump",
-                run: ["php", "bin/console", "fos:js-routing:dump", "--target", "./var/cache/fosRoutes.json", "--format", "json"],
+                name: "symfony-routes-dump",
+                run: ["composer", "symfony-routing-dump"],
                 pattern: ["src/Controller/**.php"],
+                build: false,
             },
         ]),
     ],
