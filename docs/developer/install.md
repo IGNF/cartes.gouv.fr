@@ -33,7 +33,7 @@ npm install --global npm
 
 2. Cloner le dépôt dans le répertoire `C:\xampp\htdocs\cartes.gouv.fr`
 
-3. Créer à la racine du projet un fichier nommé `.env.local` pour surcharger les informations du fichier `.env`. Se référer au fichier `.env` pour le compléter.
+3. Créer à la racine du projet un fichier nommé `.env.local` pour surcharger les informations du fichier `.env`. Se référer au fichier `.env` pour le compléter. Y renseigner le chemin de l'alias : `APP_BASE_PATH=/cartes.gouv.fr`. Les assets et les URL du front en dépendent : relancer `npm run dev` ou `npm run build` après l'avoir modifié.
 
 4. Installer les dépendances php (`composer install`)
 
