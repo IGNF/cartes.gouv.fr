@@ -47,6 +47,9 @@ jobs:
             - name: Check PHP code rules
               run: composer check-rules
 
+            - name: Run PHP tests
+              run: composer test
+
     js:
         name: JavaScript
         runs-on: ubuntu-latest
