@@ -1,0 +1,31 @@
+name: Setup PHP
+description: Installe PHP et les dépendances Composer (cache de vendor sur composer.lock)
+
+inputs:
+    php-version:
+        description: Version de PHP
+        required: true
+    coverage:
+        description: Pilote de couverture (none ou pcov)
+        required: false
+        default: none
+
+runs:
+    using: composite
+    steps:
+        - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+          with:
+              php-version: ${{ inputs.php-version }}
+              coverage: ${{ inputs.coverage }}
+
+        - name: Cache Composer packages
+          uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+          with:
+              path: vendor
+              key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+              restore-keys: |
+                  ${{ runner.os }}-php-
+
+        - name: Install PHP dependencies
+          shell: bash
+          run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist

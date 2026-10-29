@@ -1,0 +1,161 @@
+# Identifiants stables (nom du workflow, identifiants et noms des jobs) : GitHub y rattache l'historique des exécutions
+name: CI
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+    # Échappatoire pour une branche sans PR
+    workflow_dispatch:
+    # Audit Composer quotidien sur main : un avis de sécurité apparaît sans commit
+    schedule:
+        - cron: "0 6 * * *"
+
+# Annule les runs obsolètes d'une même PR ; groupe unique hors PR pour ne jamais remplacer un run de main, même en attente
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+    contents: read
+
+jobs:
+    php-lint:
+        name: PHP lint ${{ matrix.php }}
+        if: github.event_name != 'schedule'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                # 8.2 tant que la prod y est : à retirer avec le passage de la plateforme Composer en 8.5
+                php: ["8.2", "8.5"]
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup PHP and Composer dependencies
+              uses: ./.github/actions/setup-php
+              with:
+                  php-version: ${{ matrix.php }}
+
+            - name: Check PHP code rules
+              run: composer check-rules
+
+            # Le fichier de routes exposées au front est commité : il doit correspondre aux contrôleurs
+            - name: Check committed front routes are up to date
+              if: matrix.php == '8.5'
+              run: composer symfony-routing-dump && git diff --exit-code -- assets/modules/symfony-routes.json
+
+    php-test:
+        name: PHP test ${{ matrix.php }}
+        if: github.event_name != 'schedule'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ["8.2", "8.5"]
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            # Couverture mesurée sur une seule entrée de matrice
+            - name: Setup PHP and Composer dependencies
+              uses: ./.github/actions/setup-php
+              with:
+                  php-version: ${{ matrix.php }}
+                  coverage: ${{ matrix.php == '8.5' && 'pcov' || 'none' }}
+
+            - name: Run PHP tests
+              if: matrix.php != '8.5'
+              run: composer test -- --log-junit var/ci/junit.xml
+
+            - name: Run PHP tests with coverage
+              if: matrix.php == '8.5'
+              run: composer test -- --log-junit var/ci/junit.xml --coverage-clover var/ci/clover.xml
+
+            # Rapport de tests dans le résumé du job (mode par défaut : pas de check run, donc aucune permission d'écriture)
+            - name: Publish test results
+              if: ${{ !cancelled() }}
+              uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+              with:
+                  name: PHPUnit ${{ matrix.php }}
+                  path: var/ci/junit.xml
+                  reporter: phpunit-junit
+                  fail-on-error: false
+
+            - name: Publish coverage summary
+              if: matrix.php == '8.5'
+              uses: k1LoW/octocov-action@a167dc0dee441b7ffc45e1b862ab55ec0d87f278 # v1.5.2
+              with:
+                  version: v0.83.4
+
+    # Sans matrice : un avis de sécurité ne doit pas rougir les autres résultats.
+    # Échappatoire sans correctif publié : audit.ignore dans composer.json, une ligne par avis avec la raison
+    php-audit:
+        name: PHP audit
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup PHP and Composer dependencies
+              uses: ./.github/actions/setup-php
+              with:
+                  php-version: "8.5"
+
+            - name: Audit Composer dependencies
+              run: composer audit --locked --no-interaction
+
+    js-lint:
+        name: JavaScript lint
+        if: github.event_name != 'schedule'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup Node.js and npm dependencies
+              uses: ./.github/actions/setup-js
+
+            - name: Lint
+              run: npm run lint
+
+            - name: Format
+              run: npm run format
+
+            - name: Type check
+              run: npm run type-check
+
+    js-test:
+        name: JavaScript test
+        if: github.event_name != 'schedule'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup Node.js and npm dependencies
+              uses: ./.github/actions/setup-js
+
+            # Rapporteurs explicites : github-actions (annotations) n'est plus ajouté automatiquement dès qu'on en déclare
+            - name: Run vitest with coverage
+              run: npm run test -- --coverage --reporter=default --reporter=github-actions --reporter=junit --outputFile.junit=coverage/junit.xml
+
+            - name: Publish test results
+              if: ${{ !cancelled() }}
+              uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+              with:
+                  name: Vitest
+                  path: coverage/junit.xml
+                  reporter: java-junit
+                  fail-on-error: false
+
+            - name: Publish coverage summary
+              uses: davelosert/vitest-coverage-report-action@8f86cfb56ed6d5613ea8cdc5259f207fbfd51ece # v2.13.1
+              with:
+                  comment-on: none
