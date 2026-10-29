@@ -78,7 +78,7 @@ class CommonDTO
     // public  string $encoding;
 
     #[Assert\Choice([
-        'choices' => ['', '200', '500', '1000', '2000', '5000', '10000', '25000', '50000', '100000', '250000', '500000', '1000000', '5000000',  '10000000'], // NOTE : doit correspondre à assets/data/md_resolutions.json
+        'choices' => ['', '100', '200', '500', '1000', '2000', '5000', '10000', '25000', '50000', '100000', '250000', '500000', '1000000', '5000000',  '10000000'], // NOTE : doit correspondre à assets/data/md_resolutions.json
         'message' => 'common.resolution_error',
     ])]
     public ?string $resolution;
