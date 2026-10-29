@@ -17,6 +17,12 @@ final class EntrepotMockResponseFactory
     {
         $path = (string) parse_url($url, PHP_URL_PATH);
 
+        // l’Entrepôt autorise par le jeton de l’utilisateur : une requête sans le jeton attendu est refusée comme en vrai
+        $authorization = $options['normalized_headers']['authorization'][0] ?? '';
+        if ('Authorization: Bearer '.FakeKeycloakClient::ACCESS_TOKEN !== $authorization) {
+            return self::json(['error' => 'Unauthorized', 'error_description' => 'Jeton absent ou inattendu'], 401);
+        }
+
         if ('GET' === $method && str_ends_with($path, '/users/me')) {
             return self::json([
                 '_id' => self::USER_ID,

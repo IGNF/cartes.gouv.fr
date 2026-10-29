@@ -12,6 +12,8 @@ use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
  */
 final class FakeKeycloakClient extends KeycloakClient
 {
+    public const ACCESS_TOKEN = 'fake-access-token';
+
     public const DEFAULT_RESOURCE_OWNER = [
         'sub' => 'kc-user-1',
         'email' => 'test@example.com',
@@ -42,7 +44,7 @@ final class FakeKeycloakClient extends KeycloakClient
     public static function createAccessToken(int $lifetimeSeconds = 3600): AccessToken
     {
         return new AccessToken([
-            'access_token' => 'fake-access-token',
+            'access_token' => self::ACCESS_TOKEN,
             'expires' => time() + $lifetimeSeconds,
             'id_token' => 'fake-id-token',
         ]);

@@ -2,12 +2,14 @@
 
 namespace App\Tests\Smoke;
 
+use App\Security\Cookie\AuthCookieCipher;
 use App\Security\Cookie\AuthCookieResponseListener;
 use App\Security\State\LoginStateSerializer;
 use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Double\FakeKeycloakClient;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\BrowserKit\Cookie;
 
 /**
  * Flux complet login / cookie / API / logout, Keycloak et Entrepôt doublés.
@@ -60,17 +62,31 @@ final class AuthenticationFlowTest extends WebTestCase
         self::assertSame(EntrepotMockResponseFactory::USER_ID, $user['id']);
     }
 
-    public function testExpiredCookieAnswersJsonUnauthorized(): void
+    public function testExpiredTokenInCookieAnswersJsonUnauthorizedAndClearsTheCookie(): void
     {
         $client = static::createClient();
-        FakeKeycloakClient::returnNextAccessToken(FakeKeycloakClient::createAccessToken(-60));
-        $this->loginCheck($client, ['referer' => null]);
+        // le cookie est posé avec une expiration navigateur future : seul le jeton qu’il contient est expiré
+        $expiredToken = FakeKeycloakClient::createAccessToken(-60);
+        $cipher = static::getContainer()->get(AuthCookieCipher::class);
+        $client->getCookieJar()->set(new Cookie(
+            AuthCookieResponseListener::COOKIE_NAME,
+            $cipher->encrypt(serialize($expiredToken)),
+            (string) (time() + 3600),
+            '/',
+            'localhost',
+            true,
+        ));
 
         $client->xmlHttpRequest('GET', self::BASE.'/api/users/me');
 
         self::assertResponseStatusCodeSame(401);
         $body = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
         self::assertTrue($body['details']['session_expired']);
+
+        $clearedCookie = $client->getResponse()->headers->getCookies()[0] ?? null;
+        self::assertNotNull($clearedCookie, 'la réponse doit effacer le cookie');
+        self::assertSame(AuthCookieResponseListener::COOKIE_NAME, $clearedCookie->getName());
+        self::assertTrue($clearedCookie->isCleared());
     }
 
     public function testFailedTokenExchangeRedirectsToPublishPage(): void
