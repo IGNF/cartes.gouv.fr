@@ -12,7 +12,7 @@ export default defineConfig({
         environment: "node",
         coverage: {
             include: ["assets/**"],
-            reporter: ["text-summary"],
+            reporter: ["text-summary", "json-summary", "json"],
         },
     },
 });
