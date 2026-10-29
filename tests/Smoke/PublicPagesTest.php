@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Tests\Smoke;
+
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+final class PublicPagesTest extends WebTestCase
+{
+    public function testHealthRouteAnswersOk(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/tableau-de-bord/health');
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('OK', $client->getResponse()->getContent());
+    }
+
+    public function testPublicPageRendersTheApplicationShell(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/publier-une-donnee');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('#root[data-app-env="test"]');
+        self::assertSelectorNotExists('#user');
+    }
+
+    public function testAnonymousApiRequestAnswersJsonUnauthorized(): void
+    {
+        $client = static::createClient();
+        $client->xmlHttpRequest('GET', '/api/users/me');
+
+        self::assertResponseStatusCodeSame(401);
+        self::assertResponseHeaderSame('content-type', 'application/json');
+
+        $body = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame(401, $body['code']);
+        self::assertSame('Unauthorized', $body['status']);
+        self::assertTrue($body['details']['session_expired']);
+    }
+}
