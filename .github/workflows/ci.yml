@@ -1,0 +1,151 @@
+# Identifiants stables (nom du workflow, identifiants et noms des jobs) : GitHub y rattache l'historique des exécutions
+name: CI
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+    # Échappatoire pour une branche sans PR
+    workflow_dispatch:
+    # Audit Composer quotidien sur main : un avis de sécurité apparaît sans commit
+    schedule:
+        - cron: "0 6 * * *"
+
+# Annule les runs obsolètes d'une même PR ; groupe unique hors PR pour ne jamais remplacer un run de main, même en attente
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+    contents: read
+
+jobs:
+    php-lint:
+        name: PHP lint ${{ matrix.php }}
+        if: github.event_name != 'schedule'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                # 8.2 tant que la prod y est : à retirer avec le passage de la plateforme Composer en 8.5
+                php: ["8.2", "8.5"]
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup PHP and Composer dependencies
+              uses: ./.github/actions/setup-php
+              with:
+                  php-version: ${{ matrix.php }}
+
+            - name: Check PHP code rules
+              run: composer check-rules
+
+            # Le fichier de routes exposées au front est commité : il doit correspondre aux contrôleurs
+            - name: Check committed front routes are up to date
+              if: matrix.php == '8.5'
+              run: composer symfony-routing-dump && git diff --exit-code -- assets/modules/symfony-routes.json
+
+    php-test:
+        name: PHP test ${{ matrix.php }}
+        if: github.event_name != 'schedule'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ["8.2", "8.5"]
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            # Couverture mesurée sur une seule entrée de matrice
+            - name: Setup PHP and Composer dependencies
+              uses: ./.github/actions/setup-php
+              with:
+                  php-version: ${{ matrix.php }}
+                  coverage: ${{ matrix.php == '8.5' && 'pcov' || 'none' }}
+
+            - name: Run PHP tests
+              if: matrix.php != '8.5'
+              run: composer test
+
+            - name: Run PHP tests with coverage
+              if: matrix.php == '8.5'
+              run: composer test -- --coverage-text="$RUNNER_TEMP/coverage.txt" --only-summary-for-coverage-text
+
+            - name: Write coverage summary
+              if: matrix.php == '8.5'
+              run: |
+                  {
+                      echo "### Couverture PHPUnit (PHP ${{ matrix.php }})"
+                      echo '```'
+                      grep -E '^\s+(Classes|Methods|Lines):' "$RUNNER_TEMP/coverage.txt"
+                      echo '```'
+                  } >> "$GITHUB_STEP_SUMMARY"
+
+    # Sans matrice : un avis de sécurité ne doit pas rougir les autres résultats.
+    # Échappatoire sans correctif publié : audit.ignore dans composer.json, une ligne par avis avec la raison
+    php-audit:
+        name: PHP audit
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup PHP and Composer dependencies
+              uses: ./.github/actions/setup-php
+              with:
+                  php-version: "8.5"
+
+            - name: Audit Composer dependencies
+              run: composer audit --locked --no-interaction
+
+    js-lint:
+        name: JavaScript lint
+        if: github.event_name != 'schedule'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup Node.js and npm dependencies
+              uses: ./.github/actions/setup-js
+
+            - name: Lint
+              run: npm run lint
+
+            - name: Format
+              run: npm run format
+
+            - name: Type check
+              run: npm run type-check
+
+    js-test:
+        name: JavaScript test
+        if: github.event_name != 'schedule'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup Node.js and npm dependencies
+              uses: ./.github/actions/setup-js
+
+            # shell: bash active pipefail : l'échec de vitest n'est pas masqué par tee
+            - name: Run vitest with coverage
+              shell: bash
+              run: npm run test -- --coverage | tee "$RUNNER_TEMP/vitest.log"
+
+            - name: Write coverage summary
+              run: |
+                  {
+                      echo "### Couverture vitest"
+                      echo '```'
+                      grep -E '^(Statements|Branches|Functions|Lines)\s*:' "$RUNNER_TEMP/vitest.log"
+                      echo '```'
+                  } >> "$GITHUB_STEP_SUMMARY"
