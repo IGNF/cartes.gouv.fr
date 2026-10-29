@@ -10,5 +10,9 @@ export default defineConfig({
     test: {
         include: ["assets/**/*.test.{ts,tsx}"],
         environment: "node",
+        coverage: {
+            include: ["assets/**"],
+            reporter: ["text-summary"],
+        },
     },
 });
