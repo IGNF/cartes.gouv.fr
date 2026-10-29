@@ -1,0 +1,11 @@
+# Couverture PHPUnit (job php-test, entrée 8.5) : résumé du job seulement, pas de commentaire de PR
+coverage:
+    paths:
+        - var/ci/clover.xml
+codeToTestRatio:
+    code:
+        - src/**/*.php
+    test:
+        - tests/**/*.php
+summary:
+    if: true

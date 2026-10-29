@@ -51,6 +51,9 @@ jobs:
         name: PHP test ${{ matrix.php }}
         if: github.event_name != 'schedule'
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            checks: write
         strategy:
             fail-fast: false
             matrix:
@@ -69,21 +72,27 @@ jobs:
 
             - name: Run PHP tests
               if: matrix.php != '8.5'
-              run: composer test
+              run: composer test -- --log-junit var/ci/junit.xml
 
             - name: Run PHP tests with coverage
               if: matrix.php == '8.5'
-              run: composer test -- --coverage-text="$RUNNER_TEMP/coverage.txt" --only-summary-for-coverage-text
+              run: composer test -- --log-junit var/ci/junit.xml --coverage-clover var/ci/clover.xml
 
-            - name: Write coverage summary
+            # Rapport de tests (check run + résumé) ; le token des PR Dependabot est en lecture seule, sans check run possible
+            - name: Publish test results
+              if: ${{ !cancelled() && github.actor != 'dependabot[bot]' }}
+              uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+              with:
+                  name: PHPUnit ${{ matrix.php }}
+                  path: var/ci/junit.xml
+                  reporter: java-junit
+                  fail-on-error: false
+
+            - name: Publish coverage summary
               if: matrix.php == '8.5'
-              run: |
-                  {
-                      echo "### Couverture PHPUnit (PHP ${{ matrix.php }})"
-                      echo '```'
-                      grep -E '^\s+(Classes|Methods|Lines):' "$RUNNER_TEMP/coverage.txt"
-                      echo '```'
-                  } >> "$GITHUB_STEP_SUMMARY"
+              uses: k1LoW/octocov-action@a167dc0dee441b7ffc45e1b862ab55ec0d87f278 # v1.5.2
+              with:
+                  version: v0.83.4
 
     # Sans matrice : un avis de sécurité ne doit pas rougir les autres résultats.
     # Échappatoire sans correctif publié : audit.ignore dans composer.json, une ligne par avis avec la raison
@@ -128,6 +137,9 @@ jobs:
         name: JavaScript test
         if: github.event_name != 'schedule'
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            checks: write
 
         steps:
             - name: Checkout repository
@@ -136,16 +148,20 @@ jobs:
             - name: Setup Node.js and npm dependencies
               uses: ./.github/actions/setup-js
 
-            # shell: bash active pipefail : l'échec de vitest n'est pas masqué par tee
+            # Rapporteurs explicites : github-actions (annotations) n'est plus ajouté automatiquement dès qu'on en déclare
             - name: Run vitest with coverage
-              shell: bash
-              run: npm run test -- --coverage | tee "$RUNNER_TEMP/vitest.log"
+              run: npm run test -- --coverage --reporter=default --reporter=github-actions --reporter=junit --outputFile.junit=coverage/junit.xml
 
-            - name: Write coverage summary
-              run: |
-                  {
-                      echo "### Couverture vitest"
-                      echo '```'
-                      grep -E '^(Statements|Branches|Functions|Lines)\s*:' "$RUNNER_TEMP/vitest.log"
-                      echo '```'
-                  } >> "$GITHUB_STEP_SUMMARY"
+            - name: Publish test results
+              if: ${{ !cancelled() && github.actor != 'dependabot[bot]' }}
+              uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+              with:
+                  name: Vitest
+                  path: coverage/junit.xml
+                  reporter: java-junit
+                  fail-on-error: false
+
+            - name: Publish coverage summary
+              uses: davelosert/vitest-coverage-report-action@8f86cfb56ed6d5613ea8cdc5259f207fbfd51ece # v2.13.1
+              with:
+                  comment-on: none
