@@ -40,3 +40,7 @@ framework:
 when@test:
     framework:
         test: true
+        http_client:
+            mock_response_factory: App\Tests\Double\EntrepotMockResponseFactory
+        cache:
+            app: cache.adapter.array
