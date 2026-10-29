@@ -51,9 +51,6 @@ jobs:
         name: PHP test ${{ matrix.php }}
         if: github.event_name != 'schedule'
         runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            checks: write
         strategy:
             fail-fast: false
             matrix:
@@ -78,14 +75,14 @@ jobs:
               if: matrix.php == '8.5'
               run: composer test -- --log-junit var/ci/junit.xml --coverage-clover var/ci/clover.xml
 
-            # Rapport de tests (check run + résumé) ; le token des PR Dependabot est en lecture seule, sans check run possible
+            # Rapport de tests dans le résumé du job (mode par défaut : pas de check run, donc aucune permission d'écriture)
             - name: Publish test results
-              if: ${{ !cancelled() && github.actor != 'dependabot[bot]' }}
+              if: ${{ !cancelled() }}
               uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
               with:
                   name: PHPUnit ${{ matrix.php }}
                   path: var/ci/junit.xml
-                  reporter: java-junit
+                  reporter: phpunit-junit
                   fail-on-error: false
 
             - name: Publish coverage summary
@@ -137,9 +134,6 @@ jobs:
         name: JavaScript test
         if: github.event_name != 'schedule'
         runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            checks: write
 
         steps:
             - name: Checkout repository
@@ -153,7 +147,7 @@ jobs:
               run: npm run test -- --coverage --reporter=default --reporter=github-actions --reporter=junit --outputFile.junit=coverage/junit.xml
 
             - name: Publish test results
-              if: ${{ !cancelled() && github.actor != 'dependabot[bot]' }}
+              if: ${{ !cancelled() }}
               uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
               with:
                   name: Vitest

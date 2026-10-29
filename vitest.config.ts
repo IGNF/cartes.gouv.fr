@@ -11,7 +11,7 @@ export default defineConfig({
         include: ["assets/**/*.test.{ts,tsx}"],
         environment: "node",
         coverage: {
-            include: ["assets/**"],
+            include: ["assets/**/*.{ts,tsx}"],
             reporter: ["text-summary", "json-summary", "json"],
         },
     },
