@@ -11,10 +11,12 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 final class EntrepotMockResponseFactory
 {
     public const USER_ID = 'entrepot-user-1';
+    private const ENTREPOT_HOST = 'entrepot.test';
 
     /** @param array<string, mixed> $options */
     public function __invoke(string $method, string $url, array $options): ResponseInterface
     {
+        $host = (string) parse_url($url, PHP_URL_HOST);
         $path = (string) parse_url($url, PHP_URL_PATH);
 
         // l’Entrepôt autorise par le jeton de l’utilisateur : une requête sans le jeton attendu est refusée comme en vrai
@@ -23,7 +25,7 @@ final class EntrepotMockResponseFactory
             return self::json(['error' => 'Unauthorized', 'error_description' => 'Jeton absent ou inattendu'], 401);
         }
 
-        if ('GET' === $method && str_ends_with($path, '/users/me')) {
+        if (self::ENTREPOT_HOST === $host && 'GET' === $method && str_ends_with($path, '/users/me')) {
             return self::json([
                 '_id' => self::USER_ID,
                 'email' => FakeKeycloakClient::DEFAULT_RESOURCE_OWNER['email'],

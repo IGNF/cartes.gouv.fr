@@ -23,22 +23,15 @@ final class FakeKeycloakClient extends KeycloakClient
     ];
 
     private static ?\Throwable $nextTokenException = null;
-    private static ?AccessToken $nextAccessToken = null;
 
     public static function reset(): void
     {
         self::$nextTokenException = null;
-        self::$nextAccessToken = null;
     }
 
     public static function failNextTokenExchange(\Throwable $exception): void
     {
         self::$nextTokenException = $exception;
-    }
-
-    public static function returnNextAccessToken(AccessToken $accessToken): void
-    {
-        self::$nextAccessToken = $accessToken;
     }
 
     public static function createAccessToken(int $lifetimeSeconds = 3600): AccessToken
@@ -58,7 +51,7 @@ final class FakeKeycloakClient extends KeycloakClient
             throw $exception;
         }
 
-        return self::$nextAccessToken ?? self::createAccessToken();
+        return self::createAccessToken();
     }
 
     public function fetchUserFromToken(AccessToken $accessToken): KeycloakResourceOwner
