@@ -47,13 +47,17 @@ jobs:
             - name: Check PHP code rules
               run: composer check-rules
 
+            # Le fichier de routes exposées au front est commité : il doit correspondre aux contrôleurs
+            - name: Check committed front routes are up to date
+              if: matrix.php == '8.5'
+              run: composer symfony-routing-dump && git diff --exit-code -- assets/modules/symfony-routes.json
+
             - name: Run PHP tests
               run: composer test
 
     js:
         name: JavaScript
         runs-on: ubuntu-latest
-        needs: php
 
         steps:
             - name: Checkout repository
@@ -64,15 +68,6 @@ jobs:
               with:
                   node-version-file: .nvmrc
                   cache: npm
-
-            - name: Get PHP composer packages
-              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-              id: composer-cache
-              with:
-                  path: vendor
-                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-php-
 
             - name: Install JavaScript dependencies
               run: npm ci

@@ -1,0 +1,5380 @@
+{
+    "base_url": "",
+    "routes": {
+        "cartesgouvfr_app_health": {
+            "tokens": [
+                [
+                    "text",
+                    "\/tableau-de-bord\/health"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [],
+            "schemes": []
+        },
+        "cartesgouvfr_app_ready": {
+            "tokens": [
+                [
+                    "text",
+                    "\/tableau-de-bord\/ready"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [],
+            "schemes": []
+        },
+        "cartesgouvfr_s3_gateway_get_content": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    ".+",
+                    "path",
+                    true
+                ],
+                [
+                    "text",
+                    "\/files"
+                ]
+            ],
+            "defaults": {
+                "path": ""
+            },
+            "requirements": {
+                "path": ".+"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_contact_contact_us": {
+            "tokens": [
+                [
+                    "text",
+                    "\/contact_us"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_contact_datastore_create_request": {
+            "tokens": [
+                [
+                    "text",
+                    "\/datastore_create_request"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_contact_join_community": {
+            "tokens": [
+                [
+                    "text",
+                    "\/join_community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_contact_accesses_request": {
+            "tokens": [
+                [
+                    "text",
+                    "\/accesses_request"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_contact_datastore_deletion_request": {
+            "tokens": [
+                [
+                    "text",
+                    "\/datastore_deletion_request"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_annexe_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/annexe"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_annexe_modify": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "annexeId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/annexe"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_annexe_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/annexe\/add"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_annexe_get_file_content": {
+            "tokens": [
+                [
+                    "text",
+                    "\/file"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "annexeId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/annexe"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "annexeId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_annexe_replace_file": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "annexeId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/annexe"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "annexeId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_annexe_thumbnail_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/annexe\/thumbnail_add"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_annexe_thumbnail_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "annexeId",
+                    true
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/annexe\/thumbnail_delete"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_annexe_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "annexeId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/annexe"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_catalogs_communities": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/catalogs\/communities"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_catalogs_organizations": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/catalogs\/organizations"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_community_get": {
+            "tokens": [
+                [
+                    "text",
+                    "\/"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_community_modify": {
+            "tokens": [
+                [
+                    "text",
+                    "\/"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_community_members": {
+            "tokens": [
+                [
+                    "text",
+                    "\/members"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_community_update_member": {
+            "tokens": [
+                [
+                    "text",
+                    "\/update_member"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PUT"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_community_remove_member": {
+            "tokens": [
+                [
+                    "text",
+                    "\/remove_member"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_get_services": {
+            "tokens": [
+                [
+                    "text",
+                    "\/services"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_document_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/documents"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_document_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/documents"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_document_edit": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/documents"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_document_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/documents"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_cleanup_get_content": {
+            "tokens": [
+                [
+                    "text",
+                    "\/cleanup\/content"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_cleanup_delete_content_stream": {
+            "tokens": [
+                [
+                    "text",
+                    "\/cleanup\/delete-stream"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_get_endpoints": {
+            "tokens": [
+                [
+                    "text",
+                    "\/endpoints"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_get_permissions": {
+            "tokens": [
+                [
+                    "text",
+                    "\/permissions"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_get_permission": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "permissionId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/permission"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_add_permission": {
+            "tokens": [
+                [
+                    "text",
+                    "\/add_permission"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_update_permission": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "permissionId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/update_permission"
+                ],
+                [
+                    "variable",
+                    "",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_remove_permission": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "permissionId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/remove_permission"
+                ],
+                [
+                    "variable",
+                    "",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_get_permission_stats": {
+            "tokens": [
+                [
+                    "text",
+                    "\/stats"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "permissionId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/permissions"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datastore_get_endpoint_stats": {
+            "tokens": [
+                [
+                    "text",
+                    "\/stats"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "endpointId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/endpoints"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_geonetwork_metadata_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "fileIdentifier",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/geonetwork\/metadata"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_metadata_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/metadata"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_metadata_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/metadata\/"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_metadata_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "metadataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/metadata"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "metadataId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_metadata_get_by_datasheet_name": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/metadata"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_metadata_get_file_content": {
+            "tokens": [
+                [
+                    "text",
+                    "\/file"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "metadataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/metadata"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_metadata_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "metadataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/metadata"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_metadata_unpublish": {
+            "tokens": [
+                [
+                    "text",
+                    "\/unpublish"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "metadataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/metadata"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_processing_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/processing"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_processing_execution_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/processing\/executions"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_raster_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/pyramid-raster\/add"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_raster_wms_raster_wmts_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/wms-raster-wmts"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "pyramidId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-raster"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_raster_wms_raster_wmts_edit": {
+            "tokens": [
+                [
+                    "text",
+                    "\/edit"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/wms-raster-wmts"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "pyramidId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-raster"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_raster_get_offerings_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/pyramid-raster"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_raster_get_service": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-raster"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_raster_get_service_stats": {
+            "tokens": [
+                [
+                    "text",
+                    "\/stats"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-raster"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_raster_unpublish_service": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-raster"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_raster_get_existing_layer_names": {
+            "tokens": [
+                [
+                    "text",
+                    "\/pyramid-raster\/layernames"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_vector_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/pyramid-vector\/add"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_vector_tms_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/tms"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "pyramidId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-vector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_vector_tms_edit": {
+            "tokens": [
+                [
+                    "text",
+                    "\/edit"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/tms"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "pyramidId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-vector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_vector_get_offerings_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/pyramid-vector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_vector_get_service": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-vector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_vector_get_service_stats": {
+            "tokens": [
+                [
+                    "text",
+                    "\/stats"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-vector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_vector_unpublish_service": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-vector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_pyramid_vector_get_existing_layer_names": {
+            "tokens": [
+                [
+                    "text",
+                    "\/pyramid-vector\/layernames"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_service_get_offerings_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/offerings"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_service_get_service": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/offerings"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_service_get_service_stats": {
+            "tokens": [
+                [
+                    "text",
+                    "\/stats"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/offerings"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_service_unpublish_service": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/offerings"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_service_get_existing_layer_names": {
+            "tokens": [
+                [
+                    "text",
+                    "\/offerings\/layernames"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_statics_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/statics"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_statics_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "staticFileId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/statics"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_statics_get_file_content": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "staticFileId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/statics"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_stored_data_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_stored_data_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_stored_data_get_uses": {
+            "tokens": [
+                [
+                    "text",
+                    "\/uses"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_stored_data_get_report_data": {
+            "tokens": [
+                [
+                    "text",
+                    "\/report"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_stored_data_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_style_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/add"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/style"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_style_modify": {
+            "tokens": [
+                [
+                    "text",
+                    "\/modify"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/style"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_style_remove": {
+            "tokens": [
+                [
+                    "text",
+                    "\/remove"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/style"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_style_setcurrent": {
+            "tokens": [
+                [
+                    "text",
+                    "\/setcurrent"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/style"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_upload_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/upload"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_upload_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/upload\/"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_upload_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "uploadId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/upload"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_upload_get_file_tree": {
+            "tokens": [
+                [
+                    "text",
+                    "\/file_tree"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "uploadId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/upload"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_upload_integration_progress": {
+            "tokens": [
+                [
+                    "text",
+                    "\/integration_progress"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "uploadId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/upload"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_upload_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "uploadId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/upload"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_upload_get_upload_report": {
+            "tokens": [
+                [
+                    "text",
+                    "\/upload-report"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "uploadId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/upload"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/users\/me"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_keys": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/users\/me\/keys"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_keys_detailed_with_accesses": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/users\/me\/keys_with_accesses"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_key_with_accesses": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "keyId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/key_with_accesses"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_permissions": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/users\/me\/permissions"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_permission": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "permissionId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/permissions"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_permission_stats": {
+            "tokens": [
+                [
+                    "text",
+                    "\/stats"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "permissionId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/permissions"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_add_key": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/users\/add_key"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_update_key": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "keyId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/update_key"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_remove_key": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "keyId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/remove_key"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_key_stats": {
+            "tokens": [
+                [
+                    "text",
+                    "\/stats"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "keyId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/keys"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_add_to_sandbox": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/users\/me\/add_to_sandbox"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PUT"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_leave_community": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/communities"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_stats": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/users\/me\/stats"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_documents_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/users\/me\/documents"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_documents_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/documents"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_documents_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/users\/me\/documents"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_documents_modify": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/documents"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_documents_replace_file": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/documents"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_documents_remove": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/documents"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_documents_download": {
+            "tokens": [
+                [
+                    "text",
+                    "\/file"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/documents"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_documents_sharings_get": {
+            "tokens": [
+                [
+                    "text",
+                    "\/sharings"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/documents"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_documents_sharings_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/sharings"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/documents"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_user_me_documents_sharings_remove": {
+            "tokens": [
+                [
+                    "text",
+                    "\/sharings"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/users\/me\/documents"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wfs_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/wfs\/"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wfs_edit": {
+            "tokens": [
+                [
+                    "text",
+                    "\/edit"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/wfs"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wfs_get_offerings_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/wfs"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wfs_get_service": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/wfs"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wfs_get_service_stats": {
+            "tokens": [
+                [
+                    "text",
+                    "\/stats"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/wfs"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wfs_unpublish_service": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/wfs"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wfs_get_existing_layer_names": {
+            "tokens": [
+                [
+                    "text",
+                    "\/wfs\/layernames"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wmsvector_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/wmsvector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wmsvector_edit": {
+            "tokens": [
+                [
+                    "text",
+                    "\/edit"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/wmsvector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wmsvector_get_offerings_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/wmsvector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wmsvector_get_service": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/wmsvector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wmsvector_get_service_stats": {
+            "tokens": [
+                [
+                    "text",
+                    "\/stats"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/wmsvector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wmsvector_unpublish_service": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/wmsvector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_wmsvector_get_existing_layer_names": {
+            "tokens": [
+                [
+                    "text",
+                    "\/wmsvector\/layernames"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_get": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/community\/get"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_get_community": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "\\d+",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "communityId": "\\d+"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_get_names": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/community\/get_names"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_get_as_member": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/community\/get_as_member"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_search": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/community\/search"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_get_members": {
+            "tokens": [
+                [
+                    "text",
+                    "\/members"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/community\/add"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_update": {
+            "tokens": [
+                [
+                    "text",
+                    "\/update"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_add_members": {
+            "tokens": [
+                [
+                    "text",
+                    "\/members"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_update_member_role": {
+            "tokens": [
+                [
+                    "text",
+                    "\/update_role"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "userId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/member"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_update_member_grids": {
+            "tokens": [
+                [
+                    "text",
+                    "\/update_grids"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "userId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/member"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_update_logo": {
+            "tokens": [
+                [
+                    "text",
+                    "\/update_logo"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_remove_logo": {
+            "tokens": [
+                [
+                    "text",
+                    "\/remove_logo"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_remove_member": {
+            "tokens": [
+                [
+                    "text",
+                    "\/remove"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "userId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/member"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_document_get_all": {
+            "tokens": [
+                [
+                    "text",
+                    "\/document\/get_all"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_document_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/document\/add"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_document_update": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/document\/update"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_document_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "documentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/document\/delete"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_layer_get_all": {
+            "tokens": [
+                [
+                    "text",
+                    "\/layer\/get_all"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_layer_get_feature_types": {
+            "tokens": [
+                [
+                    "text",
+                    "\/layer\/get_feature_types"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_community_layer_update": {
+            "tokens": [
+                [
+                    "text",
+                    "\/layer\/update"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/community"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_databases_get_all": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/databases\/"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "communityId": "\\d+"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_databases_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "\\d+",
+                    "databaseId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/databases"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "databaseId": "\\d+"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_databases_search_by": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/databases\/search_by"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_databases_get_table": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "\\d+",
+                    "tableId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/tables"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "\\d+",
+                    "databaseId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/databases"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "databaseId": "\\d+",
+                "tableId": "\\d+"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_emailplanner_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/emailplanner"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_emailplanner_add": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/emailplanner"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_emailplanner_update": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "emailPlannerId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/update"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/emailplanner"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PUT"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_emailplanner_remove": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "emailPlannerId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/remove"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/emailplanner"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_geoservice_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "geoserviceId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/geoservice\/get"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_grids_get_all": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/grids\/"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_grids_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "name",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/grids"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_permission_get_viewable_tables_by_community": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/permission\/get_viewable_tables"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_permission_get_themable_tables_by_community": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/permission\/get_themable_tables"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_permission_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/permission\/get"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_permission_update": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "communityId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/permission\/update"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_reply_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/replies"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "reportId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_reply_replace": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "replyId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/replies"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "reportId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PUT"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_reply_modify": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "replyId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/replies"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "reportId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[0-9]+",
+                    "reportId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "reportId": "[0-9]+"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_replace": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "reportId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PUT"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_modify": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "reportId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "PATCH"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "reportId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_add_attachments": {
+            "tokens": [
+                [
+                    "text",
+                    "\/attachments"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "reportId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_delete_attachment": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "attachmentId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/attachments"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "reportId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/reports"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_get_rss": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/reports\/rss"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_report_get_wfs": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/reports\/wfs"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_style_get_image": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "name",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/style\/image"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_databases_transactions_get_list": {
+            "tokens": [
+                [
+                    "text",
+                    "\/transactions"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "databaseId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/databases"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_databases_transactions_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/transactions"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "databaseId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/databases"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_databases_transactions_get": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[0-9]+",
+                    "transactionId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/transactions"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "databaseId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/databases"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "transactionId": "[0-9]+"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_user_me": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/user\/me"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_user_search": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/user\/search"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_user_shared_themes": {
+            "tokens": [
+                [
+                    "text",
+                    "\/api\/espaceco\/user\/me\/shared_themes"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_espaceco_wfs_request": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "databaseName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/espaceco\/wfs"
+                ]
+            ],
+            "defaults": {
+                "databaseName": null
+            },
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_file_uploader_upload_chunk": {
+            "tokens": [
+                [
+                    "text",
+                    "\/_file_uploader\/upload_chunk"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_file_uploader_upload_complete": {
+            "tokens": [
+                [
+                    "text",
+                    "\/_file_uploader\/upload_complete"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_rss_feed_alerts": {
+            "tokens": [
+                [
+                    "text",
+                    "\/rss\/alertes"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [],
+            "schemes": []
+        },
+        "cartesgouvfr_security_login": {
+            "tokens": [
+                [
+                    "text",
+                    "\/login"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_security_logout": {
+            "tokens": [
+                [
+                    "text",
+                    "\/logout"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_security_signup": {
+            "tokens": [
+                [
+                    "text",
+                    "\/signup"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_security_userinfo_edit": {
+            "tokens": [
+                [
+                    "text",
+                    "\/userinfo\/edit"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_app": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    ".+",
+                    "reactRouting",
+                    true
+                ]
+            ],
+            "defaults": {
+                "reactRouting": null
+            },
+            "requirements": {
+                "reactRouting": ".+"
+            },
+            "hosttokens": [],
+            "methods": [],
+            "schemes": []
+        }
+    },
+    "prefix": "",
+    "host": "localhost",
+    "port": "",
+    "scheme": "http",
+    "locale": ""
+}

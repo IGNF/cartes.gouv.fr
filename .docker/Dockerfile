@@ -109,19 +109,6 @@ COPY . .
 RUN composer dump-autoload --no-dev --optimize
 
 #----------------------------------------------------------------------
-# Dump des routes pour le build Vite, sur le PHP-ZTS de prod
-# (booter le kernel prod exige APCu : cache.system = apcu, cf. config/packages/cache.yaml)
-#----------------------------------------------------------------------
-FROM base_app AS routing_dump
-ARG project_dir
-WORKDIR ${project_dir}
-ENV APP_ENV=prod \
-    APP_DEBUG=0
-
-COPY --from=deps_php ${project_dir} ./
-RUN php bin/console fos:js-routing:dump --target ./var/cache/fosRoutes.json --format json
-
-#----------------------------------------------------------------------
 # Installer les dépendances JavaScript/nodejs dans une couche dédiée
 #----------------------------------------------------------------------
 FROM ${node_alpine_image} AS deps_nodejs_build
@@ -135,10 +122,6 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 # Copie du reste du projet pour générer le build Vite (public/build)
 COPY .env vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
 COPY assets assets
-
-# Récupération des artefacts PHP consommés par le build Vite (cf. assets/modules/Routing.ts)
-COPY --from=deps_php ${project_dir}/vendor/friendsofsymfony/jsrouting-bundle/Resources/js vendor/friendsofsymfony/jsrouting-bundle/Resources/js
-COPY --from=routing_dump ${project_dir}/var/cache/fosRoutes.json var/cache/fosRoutes.json
 
 # Version et révision de l'image passées par la CI ; vides en build local
 ARG APP_VERSION
