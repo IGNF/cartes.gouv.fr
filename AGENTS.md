@@ -67,7 +67,7 @@ Run inside the Docker container (`docker exec -it cartesgouvfr-app_dev-1 bash`):
 
 - `composer check-rules` - full PHP validation (twig/container/yaml lint, PHPMD, PHPStan)
 - `composer fix-style` - fix PHP & Twig code style
-- `composer symfony-routing-dump` - REQUIRED after adding or changing routes (regenerates `var/cache/fosRoutes.json`, used by the front to build URLs)
+- `composer symfony-routing-dump` - REQUIRED after adding or changing routes: regenerates `assets/modules/symfony-routes.json` (the routes exposed to the front, committed with the change; CI fails if it is stale)
 - `npm run lint` / `npm run type-check` / `npm run format`
 
 Pitfalls:
