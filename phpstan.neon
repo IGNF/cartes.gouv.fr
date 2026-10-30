@@ -5,7 +5,7 @@ includes:
     - vendor/phpstan/phpstan-phpunit/rules.neon
 
 parameters:
-    level: 6
+    level: 8
     # PHP cible = plateforme composer (config.platform.php), pas le PHP qui exécute l'analyse
     phpVersion: 80200
     paths:
