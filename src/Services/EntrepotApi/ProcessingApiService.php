@@ -65,6 +65,8 @@ final readonly class ProcessingApiService
 
     /**
      * @param array<mixed> $query
+     *
+     * @return array<mixed>
      */
     public function getAllExecutionsDetailed(string $datastoreId, array $query = []): array
     {

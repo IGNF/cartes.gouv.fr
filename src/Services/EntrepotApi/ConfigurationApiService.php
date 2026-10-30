@@ -42,6 +42,8 @@ final readonly class ConfigurationApiService
 
     /**
      * @param mixed[] $query
+     *
+     * @return array<mixed>
      */
     public function getAllDetailed(string $datastoreId, array $query = []): array
     {

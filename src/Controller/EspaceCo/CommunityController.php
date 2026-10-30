@@ -364,6 +364,9 @@ class CommunityController extends AbstractController implements ApiControllerInt
         $this->mailerService->sendMail($email, $subject, 'Mailer/espaceco/member_invitation.html.twig', ['community' => $community, 'link' => $url]);
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function _copyFile(UploadedFile $file): array
     {
         $uuid = Uuid::v4();
@@ -377,6 +380,8 @@ class CommunityController extends AbstractController implements ApiControllerInt
 
     /**
      * @param array<mixed> $openwithEmail
+     *
+     * @return array<mixed>|null
      */
     private function _formatOpenWithEmail(?array $openwithEmail): ?array
     {

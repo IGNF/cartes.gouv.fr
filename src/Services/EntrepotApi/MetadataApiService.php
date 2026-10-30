@@ -39,6 +39,9 @@ final readonly class MetadataApiService
         return $this->api->get("datastores/$datastoreId/metadata/$metadataId");
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function add(string $datastoreId, string $filepath, ?string $type = 'ISOAP', ?bool $openData = false): array
     {
         $response = $this->api->sendFile('POST', "datastores/$datastoreId/metadata", $filepath, [], [
@@ -51,6 +54,9 @@ final readonly class MetadataApiService
         return $response;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function replaceFile(string $datastoreId, string $metadataId, string $filepath): array
     {
         $response = $this->api->sendFile('PUT', "datastores/$datastoreId/metadata/$metadataId", $filepath)->array();

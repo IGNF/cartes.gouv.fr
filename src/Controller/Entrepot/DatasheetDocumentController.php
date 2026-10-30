@@ -204,6 +204,8 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
     /**
      * Retourne l'objet annexe qui décrit la liste des documents.
+     *
+     * @return array<mixed>
      */
     private function getListAnnexe(string $datastoreId, string $datasheetName): array
     {

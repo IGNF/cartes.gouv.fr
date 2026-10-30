@@ -81,7 +81,11 @@ final readonly class ChunkMerger
         return $finalPath;
     }
 
-    /** @param string[] $files @return string[] */
+    /**
+     * @param string[] $files
+     *
+     * @return list<string>
+     */
     private function sortFiles(array $files): array
     {
         usort($files, function (string $filename1, string $filename2): int {

@@ -47,6 +47,9 @@ class DatastoreCleanupWorkflow
     ) {
     }
 
+    /**
+     * @return array<string, int>
+     */
     public function count(string $datastoreId): array
     {
         $query = [

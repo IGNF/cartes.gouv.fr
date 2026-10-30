@@ -71,6 +71,8 @@ class CartesServiceApiService
     /**
      * @param array<mixed>|null $offering
      * @param array<mixed>|null $configuration
+     *
+     * @return array<mixed>
      */
     public function getService(string $datastoreId, string $offeringId, bool $migrateStyles = true, ?array $offering = null, ?array $configuration = null): array
     {
@@ -427,6 +429,8 @@ class CartesServiceApiService
      *
      * @param array<mixed>  $configRequestBody
      * @param ?array<mixed> $oldOffering
+     *
+     * @return array<mixed>
      */
     public function saveService(
         string $datastoreId,
@@ -617,6 +621,8 @@ class CartesServiceApiService
 
     /**
      * @param array<mixed> $configMetadata
+     *
+     * @return array<mixed>
      */
     public function getNewConfigMetadata(string $fileIdentifier, array $configMetadata = []): array
     {
@@ -698,6 +704,9 @@ class CartesServiceApiService
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getEndpointByShareType(string $datastoreId, string $configType, string $shareWith): array
     {
         return $this->cache->get("datastore-{$datastoreId}-endpoint-{$configType}-{$shareWith}", function (ItemInterface $item) use ($datastoreId, $configType, $shareWith) {

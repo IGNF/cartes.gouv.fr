@@ -158,6 +158,8 @@ class ServiceController extends AbstractController implements ApiControllerInter
 
     /**
      * @param array<mixed> $pyramid
+     *
+     * @return array{bottom_level: string, top_level: string}
      */
     protected function getPyramidZoomLevels(array $pyramid): array
     {
@@ -176,6 +178,8 @@ class ServiceController extends AbstractController implements ApiControllerInter
     /**
      * @param array<mixed>  $typeInfos
      * @param ?array<mixed> $oldConfiguration
+     *
+     * @return array<mixed>
      */
     protected function getConfigRequestBody(string $type, CommonDTO $dto, array $typeInfos, ?array $oldConfiguration = null): array
     {

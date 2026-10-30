@@ -35,6 +35,8 @@ class CapabilitiesService
      * ou supprimé.
      *
      * @param array<mixed> $endpoint
+     *
+     * @return array<mixed>|null
      */
     public function createOrUpdate(string $datastoreId, array $endpoint, string $offeringUrl): ?array
     {

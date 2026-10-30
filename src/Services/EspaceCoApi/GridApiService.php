@@ -14,6 +14,9 @@ final readonly class GridApiService
     ) {
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getAll(string $text, ?string $searchBy, ?string $fields, ?string $adm, int $page, int $limit): array
     {
         $query = ['text' => $text, 'page' => $page, 'limit' => $limit];

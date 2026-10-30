@@ -19,6 +19,9 @@ final readonly class UserApiService
         return $this->api->get('users/me');
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getSharedThemes(): array
     {
         $result = $this->api->get('users/me', ['fields' => 'shared_themes'])->array();

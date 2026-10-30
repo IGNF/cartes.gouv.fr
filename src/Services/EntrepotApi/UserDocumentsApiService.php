@@ -40,6 +40,8 @@ final readonly class UserDocumentsApiService
 
     /**
      * @param array<string> $labels
+     *
+     * @return array<mixed>
      */
     public function add(string $filePath, string $name, ?string $description = null, ?array $labels = null, ?bool $publicUrl = null): array
     {
@@ -95,6 +97,9 @@ final readonly class UserDocumentsApiService
         return $this->api->patch("users/me/documents/$documentId", $body);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function replaceFile(string $documentId, string $filePath): array
     {
         $response = $this->api->sendFile('PUT', "users/me/documents/$documentId", $filePath)->array();

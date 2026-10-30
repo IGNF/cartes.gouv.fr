@@ -243,6 +243,9 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function _getUserKeyWithAccesses(string $keyId): array
     {
         $key = $this->userApiService->getMyKey($keyId)->array();

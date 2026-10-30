@@ -86,6 +86,9 @@ class WfsController extends ServiceController implements ApiControllerInterface
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getConfigTypeInfos(WfsServiceDTO $dto, string $storedDataId): array
     {
         $relations = [];

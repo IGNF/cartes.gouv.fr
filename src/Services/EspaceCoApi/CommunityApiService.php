@@ -17,6 +17,9 @@ final readonly class CommunityApiService
     ) {
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getCommunities(string $name, int $page, int $limit, string $sort): array
     {
         $response = $this->api->get('communities', ['name' => $name, 'page' => $page, 'limit' => $limit, 'sort' => $sort])->arrayWithHeaders();
@@ -52,6 +55,8 @@ final readonly class CommunityApiService
 
     /**
      * @param array<mixed> $datas
+     *
+     * @return array<mixed>
      */
     public function addCommunity(array $datas, ?string $logoFilePath): array
     {
@@ -107,6 +112,9 @@ final readonly class CommunityApiService
         return $this->api->post("communities/$communityId/members/$userId", ['user_id' => $userId]);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function updateMember(int $communityId, int $userId, string $field, mixed $value): array
     {
         $member = $this->api->patch("communities/$communityId/members/$userId", [$field => $value])->array();
@@ -122,6 +130,9 @@ final readonly class CommunityApiService
         return $this->api->delete("communities/$communityId/members/$userId");
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function updateLogo(int $communityId, string $filePath): array
     {
         return $this->api->sendFile('POST', "communities/$communityId/logo", $filePath, [], [], 'logo')->array();
@@ -135,6 +146,8 @@ final readonly class CommunityApiService
     /**
      * @param array<string> $grids
      * @param array<mixed>  $gridsRequested
+     *
+     * @return array<mixed>
      */
     private function _transformGrids(array $grids, array &$gridsRequested = []): array
     {
