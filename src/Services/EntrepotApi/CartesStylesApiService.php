@@ -98,7 +98,8 @@ class CartesStylesApiService
                     $uuid = $matches[0] ?? null;
 
                     if ($uuid) {
-                        $newFilename = $this->getAnnexeFilename($uuid, $suggestedTechName, $urlParts['extension']);
+                        $extension = $urlParts['extension'] ?? throw new \RuntimeException("Fichier de style sans extension : {$layer['url']}");
+                        $newFilename = $this->getAnnexeFilename($uuid, $suggestedTechName, $extension);
 
                         if ($originalFilename !== $newFilename) {
                             $layer['url'] = str_replace($originalFilename, $newFilename, $layer['url']);

@@ -95,7 +95,7 @@ class Utils
 
         parse_str($parsed['query'], $res);
 
-        return isset($res['version']) ? (string) $res['version'] : '';
+        return isset($res['version']) && is_string($res['version']) ? $res['version'] : '';
     }
 
     /**

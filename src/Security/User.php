@@ -61,6 +61,10 @@ class User implements UserInterface
      */
     public function getUserIdentifier(): string
     {
+        if ('' === $this->email) {
+            throw new \LogicException('Utilisateur sans adresse e-mail : identifiant indisponible');
+        }
+
         return $this->email;
     }
 

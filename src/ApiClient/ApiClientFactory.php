@@ -74,7 +74,12 @@ final readonly class ApiClientFactory
 
     private function buildAuthenticatedClient(string $urlParameter): AuthenticatedHttpClient
     {
-        return new AuthenticatedHttpClient($this->scopedClient((string) $this->parameters->get($urlParameter)), $this->tokenManager);
+        $baseUrl = $this->parameters->get($urlParameter);
+        if (!is_string($baseUrl) || '' === $baseUrl) {
+            throw new \LogicException("Paramètre $urlParameter absent ou invalide");
+        }
+
+        return new AuthenticatedHttpClient($this->scopedClient($baseUrl), $this->tokenManager);
     }
 
     private function scopedClient(string $baseUrl): HttpClientInterface
