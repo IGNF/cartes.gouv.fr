@@ -43,6 +43,7 @@ final class FakeKeycloakClient extends KeycloakClient
         ]);
     }
 
+    /** @param array<string, mixed> $options */
     public function getAccessToken(array $options = []): AccessToken
     {
         if (self::$nextTokenException instanceof \Throwable) {
