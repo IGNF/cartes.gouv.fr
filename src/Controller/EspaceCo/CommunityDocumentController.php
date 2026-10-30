@@ -56,8 +56,8 @@ class CommunityDocumentController extends AbstractController implements ApiContr
     public function addDocument(int $communityId, Request $request): JsonResponse
     {
         try {
-            $title = $request->request->get('title');
-            $description = $request->request->get('description');
+            $title = $request->request->getString('title');
+            $description = $request->request->has('description') ? $request->request->getString('description') : null;
 
             $document = $request->files->get('document');
 

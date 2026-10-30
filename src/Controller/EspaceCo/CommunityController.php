@@ -49,10 +49,10 @@ class CommunityController extends AbstractController implements ApiControllerInt
 
     #[Route('/get', name: 'get', methods: ['GET'])]
     public function get(
-        #[MapQueryParameter] ?string $name = '',
-        #[MapQueryParameter] ?int $page = 1,
-        #[MapQueryParameter] ?int $limit = 10,
-        #[MapQueryParameter] ?string $sort = 'name:DESC',
+        #[MapQueryParameter] string $name = '',
+        #[MapQueryParameter] int $page = 1,
+        #[MapQueryParameter] int $limit = 10,
+        #[MapQueryParameter] string $sort = 'name:DESC',
     ): JsonResponse {
         try {
             $response = $this->communityApiService->getCommunities($name, $page, $limit, $sort);
