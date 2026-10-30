@@ -295,9 +295,6 @@
             "config/routes/web_profiler.yaml"
         ]
     },
-    "twig/extra-bundle": {
-        "version": "v3.21.0"
-    },
     "vincentlanglet/twig-cs-fixer": {
         "version": "3.6",
         "recipe": {

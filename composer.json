@@ -23,7 +23,6 @@
         "symfony/flex": "^2.10",
         "symfony/framework-bundle": "7.4.*",
         "symfony/http-client": "7.4.*",
-        "symfony/intl": "7.4.*",
         "symfony/mailer": "7.4.*",
         "symfony/mime": "7.4.*",
         "symfony/monolog-bundle": "^4.0",
@@ -39,8 +38,6 @@
         "symfony/uid": "7.4.*",
         "symfony/validator": "7.4.*",
         "symfony/yaml": "7.4.*",
-        "twig/extra-bundle": "^3.0",
-        "twig/intl-extra": "^3.6",
         "twig/twig": "^3.0"
     },
     "require-dev": {
