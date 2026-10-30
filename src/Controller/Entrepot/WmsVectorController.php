@@ -7,6 +7,7 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
 use App\Exception\ApiException;
+use App\Exception\AppException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
@@ -174,6 +175,9 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
                 /** @var UploadedFile|null */
                 $file = $files["style_{$tableName}"] ?? null;
+                if (null === $file) {
+                    throw new AppException("Fichier de style manquant pour la table $tableName");
+                }
                 $tmpFileDir = $directory.'/'.Uuid::v4();
 
                 $file->move($tmpFileDir, $file->getClientOriginalName());

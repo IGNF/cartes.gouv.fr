@@ -74,10 +74,12 @@ class UserDocumentsController extends AbstractController implements ApiControlle
         try {
             /** @var UploadedFile */
             $file = $request->files->get('file');
-            $name = $request->request->get('name');
-            $description = $request->request->get('description');
-            $labels = $request->request->get('labels') ? explode(',', $request->request->get('labels')) : null;
-            $publicUrl = $request->request->get('public_url', false);
+            $name = $request->request->getString('name');
+            $description = $request->request->has('description') ? $request->request->getString('description') : null;
+            $labelsField = $request->request->getString('labels');
+            $labels = $labelsField ? explode(',', $labelsField) : null;
+            // case à cocher : « on » si cochée, absente sinon
+            $publicUrl = $request->request->getBoolean('public_url');
 
             $filePath = implode(DIRECTORY_SEPARATOR, [(string) $this->getParameter('var_data_path'), 'documents', Uuid::v4(), $file->getClientOriginalName()]);
             $fileDir = dirname($filePath);

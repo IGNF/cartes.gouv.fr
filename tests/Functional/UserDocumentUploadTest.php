@@ -57,6 +57,17 @@ final class UserDocumentUploadTest extends WebTestCase
         self::assertStringNotContainsString('name="labels"', $body);
     }
 
+    public function testMissingNameIsForwardedEmptyForTheEntrepotToReject(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('POST', self::DOCUMENTS_URL, [], ['file' => $this->uploadedFile()]);
+
+        self::assertResponseIsSuccessful();
+        self::assertMultipartField('name', '', $this->forwardedBody());
+    }
+
     private function uploadedFile(): UploadedFile
     {
         $path = (string) tempnam(sys_get_temp_dir(), 'doc');
