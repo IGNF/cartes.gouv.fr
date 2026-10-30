@@ -6,8 +6,6 @@ use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\Wfs\WfsServiceDTO;
 use App\Dto\Services\Wfs\WfsTableDTO;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
@@ -45,17 +43,13 @@ class WfsController extends ServiceController implements ApiControllerInterface
         string $storedDataId,
         #[MapRequestPayload] WfsServiceDTO $dto,
     ): JsonResponse {
-        try {
-            // création de requête pour la config
-            $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
-            $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos);
+        // création de requête pour la config
+        $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
+        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos);
 
-            $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody);
+        $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody);
 
-            return $this->json($offering);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($offering);
     }
 
     /**
@@ -68,22 +62,18 @@ class WfsController extends ServiceController implements ApiControllerInterface
         string $offeringId,
         #[MapRequestPayload] WfsServiceDTO $dto,
     ): JsonResponse {
-        try {
-            // récup config et offering existants
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
-            $oldOffering['configuration'] = $oldConfiguration;
+        // récup config et offering existants
+        $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+        $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
+        $oldOffering['configuration'] = $oldConfiguration;
 
-            // création de requête pour la config
-            $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
-            $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
+        // création de requête pour la config
+        $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
+        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
 
-            $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody, $oldOffering);
+        $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody, $oldOffering);
 
-            return $this->json($offering);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($offering);
     }
 
     /**

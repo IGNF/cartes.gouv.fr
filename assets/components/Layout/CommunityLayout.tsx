@@ -9,7 +9,7 @@ import { CommunityProvider } from "../../contexts/community";
 import { DatastoreProvider } from "../../contexts/datastore";
 import api from "../../entrepot/api";
 import RQKeys from "../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../modules/jsonFetch";
+import { ApiError } from "../../modules/jsonFetch";
 import Forbidden from "../../pages/error/Forbidden";
 import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
 import LoadingText from "../Utils/LoadingText";
@@ -28,7 +28,7 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     const { data: user } = useUserQuery();
     const queryClient = useQueryClient();
 
-    const { data, error, failureReason, isFetching, isLoading, status } = useQuery<[CommunityDetailResponseDto, Datastore | undefined], CartesApiException>({
+    const { data, error, failureReason, isFetching, isLoading, status } = useQuery<[CommunityDetailResponseDto, Datastore | undefined], ApiError>({
         queryKey: RQKeys.community(communityId),
         queryFn: async ({ signal }) => {
             const community = await api.community.get(communityId, { signal });
@@ -70,7 +70,7 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
         );
     }
 
-    if (error?.code === 404 || failureReason?.code === 404 || !community) {
+    if (error?.status === 404 || failureReason?.status === 404 || !community) {
         return <PageNotFoundWithLayout />;
     }
 

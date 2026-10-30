@@ -21,7 +21,8 @@ import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
 import { useTranslation } from "@/i18n";
 import { ComponentKey } from "@/i18n/types";
-import { jsonFetch } from "@/modules/jsonFetch";
+import { ApiError, jsonFetch } from "@/modules/jsonFetch";
+import { getApiErrorMessage } from "@/modules/apiError";
 import SymfonyRouting from "@/modules/Routing";
 import { routes } from "@/router/router";
 import { removeDiacritics } from "@/utils";
@@ -78,20 +79,9 @@ export default function CreateNewDatastore({ classes }: CreateNewDatastoreProps)
         return () => unsubscribe();
     }, [watch, setFormValue]);
 
-    const datastoreRequestMutation = useMutation<{ success: boolean }, string, object>({
-        mutationFn: async (values: object) => {
-            const url = SymfonyRouting.generate("cartesgouvfr_contact_datastore_create_request");
-
-            return new Promise<{ success: boolean }>((resolve, reject) => {
-                jsonFetch<{ success: boolean }>(url, { method: "POST" }, values)
-                    .then((response) => {
-                        resolve(response);
-                    })
-                    .catch((error) => {
-                        reject(error.error);
-                    });
-            });
-        },
+    const datastoreRequestMutation = useMutation<{ success: boolean }, ApiError | Error, object>({
+        mutationFn: (values: object) =>
+            jsonFetch<{ success: boolean }>(SymfonyRouting.generate("cartesgouvfr_contact_datastore_create_request"), { method: "POST" }, values),
         onSuccess() {
             successModal.open();
         },
@@ -107,7 +97,12 @@ export default function CreateNewDatastore({ classes }: CreateNewDatastoreProps)
     return (
         <>
             {datastoreRequestMutation.error && (
-                <Alert title={"Votre demande n'a pas pu être envoyée"} closable description={datastoreRequestMutation.error} severity="error" />
+                <Alert
+                    title={"Votre demande n'a pas pu être envoyée"}
+                    closable
+                    description={getApiErrorMessage(datastoreRequestMutation.error)}
+                    severity="error"
+                />
             )}
 
             <form className={cx(classes?.form)} onSubmit={handleSubmit((data) => datastoreRequestMutation.mutate(data))}>

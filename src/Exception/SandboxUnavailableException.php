@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * La communauté du bac à sable configurée est introuvable ou l'Entrepôt ne répond pas : l'application est dégradée.
  */
-final class SandboxUnavailableException extends CartesApiException
+final class SandboxUnavailableException extends AppException
 {
     public function __construct(string $reason, ?\Throwable $previous = null)
     {

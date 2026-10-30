@@ -6,7 +6,8 @@ import { useMutation, usePrefetchQuery, useQuery, useQueryClient } from "@tansta
 import { FC, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "@/modules/apiError";
 import { type QueryParams } from "@/modules/Routing";
 import { routes, useRoutePaginationParams } from "@/router/router";
 import type { Datastore, StaticFile } from "../../../../../@types/app";
@@ -46,7 +47,7 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
     const { page, limit } = useRoutePaginationParams();
 
     const queryParams = { page, limit };
-    const staticsListQuery = useQuery<PaginatedListResponse<StaticFile>, CartesApiException>({
+    const staticsListQuery = useQuery<PaginatedListResponse<StaticFile>, ApiError>({
         queryKey: RQKeys.datastore_statics_list(datastore._id, queryParams),
         queryFn: ({ signal }) => fetchStaticsList(datastore._id, queryParams, signal),
         staleTime: delta.minutes(1),
@@ -92,10 +93,26 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
 
             {staticsListQuery.isFetching && <LoadingText message={t("storage.statics.loading")} as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />}
 
-            {staticsListQuery.error && <Alert severity="error" title={staticsListQuery.error.message} as="h2" closable onClose={staticsListQuery.refetch} />}
+            {staticsListQuery.error && (
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(staticsListQuery.error)}
+                    description={getApiErrorDescription(staticsListQuery.error)}
+                    as="h2"
+                    closable
+                    onClose={staticsListQuery.refetch}
+                />
+            )}
 
             {deleteStaticMutation.error && (
-                <Alert severity="error" title={deleteStaticMutation.error.message} as="h2" closable onClose={staticsListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(deleteStaticMutation.error)}
+                    description={getApiErrorDescription(deleteStaticMutation.error)}
+                    as="h2"
+                    closable
+                    onClose={staticsListQuery.refetch}
+                />
             )}
 
             {staticsList.length > 0 &&

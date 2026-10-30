@@ -4,8 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\Community;
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
+use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\CommunityApiService;
 use App\Services\MembershipService;
@@ -33,113 +32,93 @@ class CommunityController extends AbstractController implements ApiControllerInt
     #[Route('/', name: 'get', methods: ['GET'])]
     public function get(string $communityId): JsonResponse
     {
-        try {
-            $community = $this->communityApiService->get($communityId)->array();
+        $community = $this->communityApiService->get($communityId)->array();
 
-            return new JsonResponse($community);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($community);
     }
 
     #[Route('/', name: 'modify', methods: ['PATCH'])]
     public function modify(string $communityId, Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
-            $community = $this->membershipService->modifyCommunity($communityId, $data);
+        $data = json_decode($request->getContent(), true);
+        $community = $this->membershipService->modifyCommunity($communityId, $data);
 
-            return new JsonResponse($community);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($community);
     }
 
     #[Route('/members', name: 'members', methods: ['GET'])]
     public function getMembers(string $communityId): JsonResponse
     {
-        try {
-            $members = $this->communityApiService->getMembers($communityId)->resolve();
+        $members = $this->communityApiService->getMembers($communityId)->resolve();
 
-            return new JsonResponse($members);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($members);
     }
 
     #[Route('/update_member', name: 'update_member', methods: ['PUT'])]
     public function updateMember(string $communityId, Request $request): JsonResponse
     {
-        try {
-            $user = $this->getUser();
-            assert($user instanceof User);
+        $user = $this->getUser();
+        assert($user instanceof User);
 
-            // Suis-je membre de cette communaute
-            $membership = $this->membershipService->findByCommunity($communityId);
-            if (null === $membership) {
-                throw new CartesApiException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
-            }
+        // Suis-je membre de cette communaute
+        $membership = $this->membershipService->findByCommunity($communityId);
+        if (null === $membership) {
+            throw new AppException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_FORBIDDEN);
+        }
 
-            // Ai-je le droit de modifier les membres ?
-            if (!$this->_allowedToModifyMembers($membership, $user->getId())) {
-                throw new CartesApiException("Vous n'avez pas les droits pour ajouter un utilisateur ou modifier ses permissions", JsonResponse::HTTP_BAD_REQUEST);
-            }
+        // Ai-je le droit de modifier les membres ?
+        if (!$this->_allowedToModifyMembers($membership, $user->getId())) {
+            throw new AppException("Vous n'avez pas les droits pour ajouter un utilisateur ou modifier ses permissions", JsonResponse::HTTP_FORBIDDEN);
+        }
 
-            $data = json_decode($request->getContent(), true);
-            $userId = $data['user_id'];
-            $rights = $data['user_rights'];
+        $data = json_decode($request->getContent(), true);
+        $userId = $data['user_id'];
+        $rights = $data['user_rights'];
 
-            // Si c'est une creation, on verifie qu'il n'existe pas deja
-            if (isset($data['user_creation'])) {
-                $communityMembers = $this->communityApiService->getMembers($communityId)->resolve();
-                foreach ($communityMembers as $member) {
-                    if ($member['user']['_id'] == $userId) {
-                        throw new CartesApiException("l'utilisateur $userId est déjà membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
-                    }
+        // Si c'est une creation, on verifie qu'il n'existe pas deja
+        if (isset($data['user_creation'])) {
+            $communityMembers = $this->communityApiService->getMembers($communityId)->resolve();
+            foreach ($communityMembers as $member) {
+                if ($member['user']['_id'] == $userId) {
+                    throw new AppException("l'utilisateur $userId est déjà membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
                 }
             }
-
-            // Verification des droits
-            $this->_checkRights($rights);
-
-            $this->membershipService->setMemberRights($communityId, $userId, $rights);
-
-            return new JsonResponse([
-                'user' => $userId,
-                'rights' => $rights,
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
+
+        // Verification des droits
+        $this->_checkRights($rights);
+
+        $this->membershipService->setMemberRights($communityId, $userId, $rights);
+
+        return new JsonResponse([
+            'user' => $userId,
+            'rights' => $rights,
+        ]);
     }
 
     #[Route('/remove_member', name: 'remove_member', methods: ['DELETE'])]
     public function removeMember(string $communityId, Request $request): JsonResponse
     {
-        try {
-            $user = $this->getUser();
-            assert($user instanceof User);
+        $user = $this->getUser();
+        assert($user instanceof User);
 
-            // Suis-je membre de cette communaute
-            $membership = $this->membershipService->findByCommunity($communityId);
-            if (null === $membership) {
-                throw new CartesApiException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
-            }
-
-            $data = json_decode($request->getContent(), true);
-            $userId = $data['user_id'];
-
-            // Ai-je le droit de modifier les membres ?
-            if ($user->getId() !== $userId && !$this->_allowedToModifyMembers($membership, $user->getId())) {
-                throw new CartesApiException("Vous n'avez pas les droits pour supprimer un membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
-            }
-
-            $this->membershipService->removeMember($communityId, $userId);
-
-            return new JsonResponse(['user' => $userId]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        // Suis-je membre de cette communaute
+        $membership = $this->membershipService->findByCommunity($communityId);
+        if (null === $membership) {
+            throw new AppException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_FORBIDDEN);
         }
+
+        $data = json_decode($request->getContent(), true);
+        $userId = $data['user_id'];
+
+        // Ai-je le droit de modifier les membres ?
+        if ($user->getId() !== $userId && !$this->_allowedToModifyMembers($membership, $user->getId())) {
+            throw new AppException("Vous n'avez pas les droits pour supprimer un membre de cette communauté", JsonResponse::HTTP_FORBIDDEN);
+        }
+
+        $this->membershipService->removeMember($communityId, $userId);
+
+        return new JsonResponse(['user' => $userId]);
     }
 
     /**
@@ -153,7 +132,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     {
         foreach ($userRights as $right) {
             if (!in_array($right, Community::RIGHTS)) {
-                throw new CartesApiException("Le droit $right n'existe pas", JsonResponse::HTTP_BAD_REQUEST);
+                throw new AppException("Le droit $right n'existe pas", JsonResponse::HTTP_BAD_REQUEST);
             }
         }
     }

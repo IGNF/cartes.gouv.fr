@@ -19,6 +19,7 @@ import { getEditSchema } from "./ValidationSchemas";
 import createRequestBody, { EditPermissionFormType } from "./utils";
 import Main from "../../../../components/Layout/Main";
 import { DatastorePermission } from "@/@types/app";
+import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../modules/apiError";
 
 type EditPermissionFormProps = {
     datastoreId: string;
@@ -107,13 +108,13 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                     </div>
                 </Wait>
             )}
-            {updateMutation.error && <Alert severity="warning" closable title={tCommon("error")} description={updateMutation.error.message} />}
+            {updateMutation.error && <Alert severity="warning" closable title={tCommon("error")} description={getApiErrorMessage(updateMutation.error)} />}
             {offeringsQuery.isLoading || permissionQuery.isLoading ? (
                 <LoadingText />
             ) : offeringsQuery.error ? (
-                <Alert severity="error" closable title={offeringsQuery.error?.message} />
+                <Alert severity="error" closable title={getApiErrorTitle(offeringsQuery.error)} description={getApiErrorDescription(offeringsQuery.error)} />
             ) : permissionQuery.error ? (
-                <Alert severity="error" closable title={permissionQuery.error?.message} />
+                <Alert severity="error" closable title={getApiErrorTitle(permissionQuery.error)} description={getApiErrorDescription(permissionQuery.error)} />
             ) : privateOfferings.length === 0 ? (
                 <Alert severity="error" closable title={t("add_form.no_services")} />
             ) : (

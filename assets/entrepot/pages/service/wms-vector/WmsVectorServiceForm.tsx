@@ -31,7 +31,8 @@ import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../modules/apiError";
 import { routes } from "../../../../router/router";
 import SldStyleWmsVectorValidator from "../../../../validations/sld/sldStyle";
 import api from "../../../api";
@@ -130,7 +131,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     const queryClient = useQueryClient();
     const { datastore } = useDatastore();
 
-    const createServiceMutation = useMutation<Service, CartesApiException>({
+    const createServiceMutation = useMutation<Service, ApiError>({
         mutationFn: () => {
             const formValues = getFormValues();
             const formData = createFormData(formValues);
@@ -150,7 +151,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
 
     const { mutate: createServiceMutate } = createServiceMutation;
 
-    const editServiceMutation = useMutation<Service, CartesApiException>({
+    const editServiceMutation = useMutation<Service, ApiError>({
         mutationFn: () => {
             if (offeringId === undefined) {
                 return Promise.reject();
@@ -188,7 +189,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
-    const existingLayerNamesQuery = useQuery<string[], CartesApiException>({
+    const existingLayerNamesQuery = useQuery<string[], ApiError>({
         queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WMSVECTOR),
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WMSVECTOR, { signal }),
         refetchInterval: 30000,
@@ -330,7 +331,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     title={t("stored_data.fetch_failed")}
                     description={
                         <>
-                            <p>{vectorDbQuery.error?.message}</p>
+                            <p>{getApiErrorMessage(vectorDbQuery.error)}</p>
                             <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
                         </>
                     }
@@ -342,7 +343,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     title={t("offering.fetch_failed")}
                     description={
                         <>
-                            <p>{offeringQuery.error?.message}</p>
+                            <p>{getApiErrorMessage(offeringQuery.error)}</p>
                             <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
                         </>
                     }
@@ -356,9 +357,11 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                         title={t("step.title", { stepNumber: currentStep })}
                     />
                     {createServiceMutation.error && (
-                        <Alert closable description={createServiceMutation.error.message} severity="error" title={tCommon("error")} />
+                        <Alert closable description={getApiErrorMessage(createServiceMutation.error)} severity="error" title={tCommon("error")} />
                     )}
-                    {editServiceMutation.error && <Alert closable description={editServiceMutation.error.message} severity="error" title={tCommon("error")} />}
+                    {editServiceMutation.error && (
+                        <Alert closable description={getApiErrorMessage(editServiceMutation.error)} severity="error" title={tCommon("error")} />
+                    )}
 
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
                     {currentStep === STEPS.STYLE_FILE && (

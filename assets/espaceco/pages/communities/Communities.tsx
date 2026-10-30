@@ -14,7 +14,8 @@ import Skeleton from "../../../components/Utils/Skeleton";
 import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
-import { CartesApiException } from "../../../modules/jsonFetch";
+import { ApiError } from "../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../modules/apiError";
 import { routes, useRoute } from "../../../router/router";
 import api from "../../api";
 import CommunityList from "./CommunityList";
@@ -57,14 +58,14 @@ const Communities: FC = () => {
 
     const [community, setCommunity] = useState<CommunityResponseDTO | null>(null);
 
-    const communityQuery = useQuery<GetResponse<CommunityResponseDTO>, CartesApiException>({
+    const communityQuery = useQuery<GetResponse<CommunityResponseDTO>, ApiError>({
         queryKey: RQKeys.communityList(queryParams),
         queryFn: ({ signal }) => api.community.get(queryParams, signal),
         staleTime: 3600000,
         enabled: filter === "listed",
     });
 
-    const communitiesAsMemberQuery = useQuery<GetResponse<CommunityResponseDTO>, CartesApiException>({
+    const communitiesAsMemberQuery = useQuery<GetResponse<CommunityResponseDTO>, ApiError>({
         queryKey: RQKeys.communitiesAsMember(queryParams),
         queryFn: ({ signal }) => api.community.getAsMember(queryParams, signal),
         staleTime: 3600000,
@@ -86,7 +87,7 @@ const Communities: FC = () => {
     const queryClient = useQueryClient();
 
     /* Creation du guichet */
-    const { isPending, isError, error, mutate } = useMutation<CommunityResponseDTO, CartesApiException, string>({
+    const { isPending, isError, error, mutate } = useMutation<CommunityResponseDTO, ApiError, string>({
         mutationFn: (name: string) => {
             return api.community.add({ name });
         },
@@ -123,12 +124,26 @@ const Communities: FC = () => {
                         severity="error"
                         closable
                         title={tCommon("error")}
-                        description={error.code === 400 ? tValid("description.name.unique") : error.message}
+                        description={error.status === 400 ? tValid("description.name.unique") : getApiErrorMessage(error)}
                         className={fr.cx("fr-my-3w")}
                     />
                 )}
-                {communityQuery.isError && <Alert severity="error" closable={false} title={communityQuery.error?.message} />}
-                {communitiesAsMemberQuery.isError && <Alert severity="error" closable={false} title={communitiesAsMemberQuery.error?.message} />}
+                {communityQuery.isError && (
+                    <Alert
+                        severity="error"
+                        closable={false}
+                        title={getApiErrorTitle(communityQuery.error)}
+                        description={getApiErrorDescription(communityQuery.error)}
+                    />
+                )}
+                {communitiesAsMemberQuery.isError && (
+                    <Alert
+                        severity="error"
+                        closable={false}
+                        title={getApiErrorTitle(communitiesAsMemberQuery.error)}
+                        description={getApiErrorDescription(communitiesAsMemberQuery.error)}
+                    />
+                )}
             </div>
             {hasRights && (
                 <div className={fr.cx("fr-grid-row", "fr-my-2w")}>

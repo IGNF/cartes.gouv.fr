@@ -8,6 +8,7 @@ import GridList from "./GridList";
 import Wait from "@/components/Utils/Wait";
 import LoadingText from "@/components/Utils/LoadingText";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { getApiErrorMessage } from "../../../../modules/apiError";
 
 type GridForm = {
     grids: string[];
@@ -47,7 +48,13 @@ const Grids: FC = () => {
                 </Wait>
             )}
             {isCommunityUpdatingError && (
-                <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+                <Alert
+                    className={fr.cx("fr-my-2v")}
+                    severity="error"
+                    closable
+                    title={tCommon("error")}
+                    description={getApiErrorMessage(updatingCommunityError)}
+                />
             )}
             <GridList
                 grids={community.grids}

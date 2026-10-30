@@ -17,7 +17,7 @@ import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../i18n";
 import { formatDateTime } from "../../../utils";
 import { Annexe } from "../../../@types/app";
-import { CartesApiException } from "../../../modules/jsonFetch";
+import { ApiError } from "../../../modules/jsonFetch";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { useAlertStore } from "../../../stores/AlertStore";
 import api from "../../api";
@@ -81,14 +81,14 @@ const Alerts: FC = () => {
     const { datastore } = useDatastore();
 
     // Load annex list and find annex matching the given path
-    const { data } = useQuery<Annexe[], CartesApiException>({
+    const { data } = useQuery<Annexe[], ApiError>({
         queryKey: RQKeys.datastore_annexe_list(datastore?._id),
         queryFn: ({ signal }) => api.annexe.getAll(datastore?._id, { signal }),
     });
     const annexe = useMemo(() => data?.find((annexe) => annexe.paths.includes(annexePath)), [data]);
 
     // Update alerts mutation
-    const { mutate, isPending } = useMutation<Annexe | undefined, CartesApiException, IAlert[]>({
+    const { mutate, isPending } = useMutation<Annexe | undefined, ApiError, IAlert[]>({
         mutationFn: (alerts) => {
             const data = alerts.map((alert) => ({ ...alert, date: alert.date.toISOString() }));
             const blob = new Blob([JSON.stringify(data)], {

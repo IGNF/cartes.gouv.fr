@@ -2,6 +2,7 @@
 
 namespace App\Tests\Smoke;
 
+use App\Exception\ApiErrorType;
 use App\Security\Cookie\AuthCookieCipher;
 use App\Security\Cookie\AuthCookieResponseListener;
 use App\Security\State\LoginStateSerializer;
@@ -82,7 +83,7 @@ final class AuthenticationFlowTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(401);
         $body = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        self::assertTrue($body['details']['session_expired']);
+        self::assertSame(ApiErrorType::SESSION_EXPIRED, $body['type']);
 
         $clearedCookie = $client->getResponse()->headers->getCookies()[0] ?? null;
         self::assertNotNull($clearedCookie, 'la réponse doit effacer le cookie');

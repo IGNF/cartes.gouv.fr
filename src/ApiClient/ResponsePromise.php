@@ -38,7 +38,7 @@ final readonly class ResponsePromise
 
             return $this->response->toArray();
         } catch (DecodingExceptionInterface $e) {
-            throw new ApiException(sprintf('Réponse JSON invalide: %s', $e->getMessage()), Response::HTTP_UNPROCESSABLE_ENTITY, previous: $e);
+            throw new ApiException(sprintf('Réponse JSON invalide: %s', $e->getMessage()), Response::HTTP_BAD_GATEWAY, previous: $e);
         } catch (TransportExceptionInterface $e) {
             throw new ApiException(sprintf('Erreur réseau lors de la lecture du corps: %s', $e->getMessage()), Response::HTTP_SERVICE_UNAVAILABLE, previous: $e);
         }
@@ -136,7 +136,7 @@ final readonly class ResponsePromise
 
             if ($chunk->isTimeout()) {
                 if (!$continueOnError) {
-                    throw new ApiException('Timeout de stream lors de la résolution asynchrone', Response::HTTP_SERVICE_UNAVAILABLE, ['key' => $entry['key']]);
+                    throw new ApiException('Timeout de stream lors de la résolution asynchrone', Response::HTTP_GATEWAY_TIMEOUT, ['key' => $entry['key']]);
                 }
 
                 $logger?->warning('Timeout de stream détecté lors de la résolution asynchrone', [

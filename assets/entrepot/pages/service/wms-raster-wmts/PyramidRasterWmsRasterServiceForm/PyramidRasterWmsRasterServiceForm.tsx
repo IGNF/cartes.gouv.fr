@@ -20,7 +20,8 @@ import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import AccessRestrictions from "../../common/AccessRestrictions/AccessRestrictions";
@@ -56,7 +57,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
     const queryClient = useQueryClient();
     const { datastore } = useDatastore();
 
-    const createServiceMutation = useMutation<Service, CartesApiException>({
+    const createServiceMutation = useMutation<Service, ApiError>({
         mutationFn: () => {
             const formValues = getFormValues();
             return api.pyramidRaster.publishWmsRasterWmts(datastoreId, pyramidId, ConfigurationTypeEnum.WMSRASTER, formValues);
@@ -69,7 +70,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
 
     const { mutate: createServiceMutate } = createServiceMutation;
 
-    const editServiceMutation = useMutation<Service, CartesApiException>({
+    const editServiceMutation = useMutation<Service, ApiError>({
         mutationFn: () => {
             if (offeringId === undefined) {
                 return Promise.reject();
@@ -91,14 +92,14 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
 
     const { mutate: editServiceMutate } = editServiceMutation;
 
-    const pyramidQuery = useQuery<PyramidRaster, CartesApiException>({
+    const pyramidQuery = useQuery<PyramidRaster, ApiError>({
         queryKey: RQKeys.datastore_stored_data(datastoreId, pyramidId),
         queryFn: () => api.storedData.get<PyramidRaster>(datastoreId, pyramidId),
         staleTime: Infinity,
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
-    const existingLayerNamesQuery = useQuery<string[], CartesApiException>({
+    const existingLayerNamesQuery = useQuery<string[], ApiError>({
         queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WMSRASTER),
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WMSRASTER, { signal }),
         refetchInterval: 30000,
@@ -176,7 +177,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
                     title={t("stored_data.fetch_failed")}
                     description={
                         <>
-                            <p>{pyramidQuery.error?.message}</p>
+                            <p>{getApiErrorMessage(pyramidQuery.error)}</p>
                             <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
                         </>
                     }
@@ -188,7 +189,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
                     title={t("offering.fetch_failed")}
                     description={
                         <>
-                            <p>{offeringQuery.error?.message}</p>
+                            <p>{getApiErrorMessage(offeringQuery.error)}</p>
                             <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
                         </>
                     }
@@ -204,7 +205,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
                     {createServiceMutation.error && (
                         <Alert
                             closable
-                            description={<ServiceFormErrors message={createServiceMutation.error.message} />}
+                            description={<ServiceFormErrors message={getApiErrorMessage(createServiceMutation.error)} />}
                             severity="error"
                             title={tCommon("error")}
                         />
@@ -212,7 +213,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
                     {editServiceMutation.error && (
                         <Alert
                             closable
-                            description={<ServiceFormErrors message={editServiceMutation.error.message} />}
+                            description={<ServiceFormErrors message={getApiErrorMessage(editServiceMutation.error)} />}
                             severity="error"
                             title={tCommon("error")}
                         />

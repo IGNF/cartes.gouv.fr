@@ -27,6 +27,7 @@ import CommunityListForm from "./CommunityListForm";
 import ScrollOfferingList from "./ScrollOfferingList";
 import { getAddSchema } from "./ValidationSchemas";
 import createRequestBody, { type AddPermissionFormType } from "./utils";
+import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../modules/apiError";
 
 const defaultDate = new Date(new Date().setFullYear(new Date().getFullYear() + 2));
 const defaultOnlyOauth = false;
@@ -148,13 +149,13 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                     </div>
                 </Wait>
             )}
-            {addPermissionError && <Alert severity="warning" closable title={tCommon("error")} description={addPermissionError.message} />}
+            {addPermissionError && <Alert severity="warning" closable title={tCommon("error")} description={getApiErrorMessage(addPermissionError)} />}
             {isLoading || isOfferingsLoading ? (
                 <LoadingText />
             ) : error ? (
-                <Alert severity="error" closable title={error?.message} />
+                <Alert severity="error" closable title={getApiErrorTitle(error)} description={getApiErrorDescription(error)} />
             ) : offeringsError ? (
-                <Alert severity="error" closable title={offeringsError?.message} />
+                <Alert severity="error" closable title={getApiErrorTitle(offeringsError)} description={getApiErrorDescription(offeringsError)} />
             ) : privateOfferings.length === 0 ? (
                 <Alert severity="error" closable title={t("add_form.no_services")} />
             ) : (

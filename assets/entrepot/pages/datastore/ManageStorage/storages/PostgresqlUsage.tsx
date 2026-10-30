@@ -20,6 +20,7 @@ import { niceBytes } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
 import { DatastoreManageStorageTab } from "../types";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
 
 const confirmDialogModal = createModal({
     id: "confirm-delete-pg-modal",
@@ -93,11 +94,25 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
             )}
 
             {storedDataListQuery.error && (
-                <Alert severity="error" title={storedDataListQuery.error.message} as="h2" closable onClose={storedDataListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(storedDataListQuery.error)}
+                    description={getApiErrorDescription(storedDataListQuery.error)}
+                    as="h2"
+                    closable
+                    onClose={storedDataListQuery.refetch}
+                />
             )}
 
             {deleteStoredDataMutation.error && (
-                <Alert severity="error" title={deleteStoredDataMutation.error.message} as="h2" closable onClose={storedDataListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(deleteStoredDataMutation.error)}
+                    description={getApiErrorDescription(deleteStoredDataMutation.error)}
+                    as="h2"
+                    closable
+                    onClose={storedDataListQuery.refetch}
+                />
             )}
 
             {storedDataList.length > 0 &&

@@ -13,7 +13,8 @@ import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
 import api from "../../../../api";
 import { AddEmailPlannerDialog, AddEmailPlannerDialogModal } from "./emailplanners/AddEmailPlannerDialog";
 import { EditEmailPlannerDialog, EditEmailPlannerDialogModal } from "./emailplanners/EditEmailPlannerDialog";
@@ -73,7 +74,7 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
     const queryClient = useQueryClient();
 
     // Ajout d'un email de suivi
-    const addPlannerMutation = useMutation<EmailPlannerDTO, CartesApiException, EmailPlannerAddType>({
+    const addPlannerMutation = useMutation<EmailPlannerDTO, ApiError, EmailPlannerAddType>({
         mutationFn: (data) => {
             return api.emailplanner.add(communityId, data);
         },
@@ -88,7 +89,7 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
     });
 
     // Mise à jour d'un email de suivi
-    const updatePlannerMutation = useMutation<EmailPlannerDTO, CartesApiException, EmailPlannerAddType>({
+    const updatePlannerMutation = useMutation<EmailPlannerDTO, ApiError, EmailPlannerAddType>({
         mutationFn: (data) => {
             if (currentEmailPlanner) {
                 return api.emailplanner.update(communityId, currentEmailPlanner.id, data);
@@ -106,7 +107,7 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
     });
 
     // Suppression d'un email de suivi
-    const removePlannerMutation = useMutation<{ emailplanner_id: number }, CartesApiException, number>({
+    const removePlannerMutation = useMutation<{ emailplanner_id: number }, ApiError, number>({
         mutationFn: (emailplannerId) => {
             return api.emailplanner.remove(communityId, emailplannerId!);
         },
@@ -174,9 +175,30 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
 
     return (
         <div className={fr.cx("fr-my-1w")}>
-            {addPlannerMutation.isError && <Alert severity="error" closable title={addPlannerMutation.error.message} />}
-            {updatePlannerMutation.isError && <Alert severity="error" closable title={updatePlannerMutation.error.message} />}
-            {removePlannerMutation.isError && <Alert severity="error" closable title={removePlannerMutation.error.message} />}
+            {addPlannerMutation.isError && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(addPlannerMutation.error)}
+                    description={getApiErrorDescription(addPlannerMutation.error)}
+                />
+            )}
+            {updatePlannerMutation.isError && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(updatePlannerMutation.error)}
+                    description={getApiErrorDescription(updatePlannerMutation.error)}
+                />
+            )}
+            {removePlannerMutation.isError && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(removePlannerMutation.error)}
+                    description={getApiErrorDescription(removePlannerMutation.error)}
+                />
+            )}
             {addPlannerMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>

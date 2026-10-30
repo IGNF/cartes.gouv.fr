@@ -19,6 +19,7 @@ import Members from "./management/Members";
 import Reports from "./management/Reports";
 import Tools from "./management/Tools";
 import ZoomAndCentering from "./management/ZoomAndCentering";
+import { getApiErrorMessage } from "../../../modules/apiError";
 
 const ManageCommunity: FC = () => {
     const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();
@@ -65,7 +66,7 @@ const ManageCommunity: FC = () => {
                     title={t("me_fetch_failed")}
                     description={
                         <>
-                            <p>{meError.message}</p>
+                            <p>{getApiErrorMessage(meError)}</p>
                             <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
                         </>
                     }
@@ -77,7 +78,7 @@ const ManageCommunity: FC = () => {
                     title={t("community_fetch_failed")}
                     description={
                         <>
-                            <p>{communityError?.message}</p>
+                            <p>{getApiErrorMessage(communityError)}</p>
                             <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
                         </>
                     }

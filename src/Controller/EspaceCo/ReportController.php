@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\ReportApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,86 +32,62 @@ class ReportController extends AbstractController implements ApiControllerInterf
     #[Route('/reports', name: 'get_list', methods: ['GET'])]
     public function getList(Request $request): JsonResponse
     {
-        try {
-            $page = $request->query->getInt('page', 1);
-            $limit = $request->query->getInt('limit', 10);
-            $query = $request->query->all();
+        $page = $request->query->getInt('page', 1);
+        $limit = $request->query->getInt('limit', 10);
+        $query = $request->query->all();
 
-            $result = $this->reportApiService->getList($page, $limit, $query);
-            $content = $result->content;
-            $headers = $result->headers;
+        $result = $this->reportApiService->getList($page, $limit, $query);
+        $content = $result->content;
+        $headers = $result->headers;
 
-            $response = new JsonResponse($content, Response::HTTP_PARTIAL_CONTENT);
-            $response->headers->set('Content-Range', $headers['content-range'][0]);
+        $response = new JsonResponse($content, Response::HTTP_PARTIAL_CONTENT);
+        $response->headers->set('Content-Range', $headers['content-range'][0]);
 
-            return $response;
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $response;
     }
 
     #[Route('/reports', name: 'add', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
-        try {
-            $body = json_decode($request->getContent(), true);
+        $body = json_decode($request->getContent(), true);
 
-            $report = $this->reportApiService->add($body)->array();
+        $report = $this->reportApiService->add($body)->array();
 
-            return $this->json($report);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($report);
     }
 
     #[Route('/reports/{reportId}', name: 'get', methods: ['GET'], requirements: ['reportId' => Requirement::DIGITS])]
     public function get(string $reportId): JsonResponse
     {
-        try {
-            return $this->json($this->reportApiService->get($reportId)->array());
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($this->reportApiService->get($reportId)->array());
     }
 
     #[Route('/reports/{reportId}', name: 'replace', methods: ['PUT'])]
     public function replace(string $reportId, Request $request): Response
     {
-        try {
-            $body = json_decode($request->getContent(), true);
+        $body = json_decode($request->getContent(), true);
 
-            $report = $this->reportApiService->replace($reportId, $body)->array();
+        $report = $this->reportApiService->replace($reportId, $body)->array();
 
-            return $this->json($report);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($report);
     }
 
     #[Route('/reports/{reportId}', name: 'modify', methods: ['PATCH'])]
     public function modify(string $reportId, Request $request): Response
     {
-        try {
-            $body = json_decode($request->getContent(), true);
+        $body = json_decode($request->getContent(), true);
 
-            $report = $this->reportApiService->modify($reportId, $body)->array();
+        $report = $this->reportApiService->modify($reportId, $body)->array();
 
-            return $this->json($report);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($report);
     }
 
     #[Route('/reports/{reportId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $reportId): Response
     {
-        try {
-            $report = $this->reportApiService->delete($reportId)->array();
+        $report = $this->reportApiService->delete($reportId)->array();
 
-            return $this->json($report, Response::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($report, Response::HTTP_NO_CONTENT);
     }
 
     #[Route('/reports/{reportId}/attachments', name: 'add_attachments', methods: ['POST'])]
@@ -143,67 +117,51 @@ class ReportController extends AbstractController implements ApiControllerInterf
     )]
     public function addAttachments(string $reportId, Request $request): JsonResponse
     {
-        try {
-            /** @var array<string,UploadedFile> $uploadedFiles */
-            $uploadedFiles = $request->files->all();
+        /** @var array<string,UploadedFile> $uploadedFiles */
+        $uploadedFiles = $request->files->all();
 
-            $fs = new Filesystem();
-            $fileDir = implode(DIRECTORY_SEPARATOR, [(string) $this->getParameter('var_data_path'), 'documents', Uuid::v4()]);
-            $fs->mkdir($fileDir);
+        $fs = new Filesystem();
+        $fileDir = implode(DIRECTORY_SEPARATOR, [(string) $this->getParameter('var_data_path'), 'documents', Uuid::v4()]);
+        $fs->mkdir($fileDir);
 
-            $files = [];
-            foreach ($uploadedFiles as $fieldName => $file) {
-                $filepath = implode(DIRECTORY_SEPARATOR, [$fileDir, $file->getClientOriginalName()]);
+        $files = [];
+        foreach ($uploadedFiles as $fieldName => $file) {
+            $filepath = implode(DIRECTORY_SEPARATOR, [$fileDir, $file->getClientOriginalName()]);
 
-                $file->move($fileDir, $filepath);
-                $files[$fieldName] = $filepath;
-            }
-
-            return $this->json($this->reportApiService->addAttachments($reportId, $files)->array());
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+            $file->move($fileDir, $filepath);
+            $files[$fieldName] = $filepath;
         }
+
+        return $this->json($this->reportApiService->addAttachments($reportId, $files)->array());
     }
 
     #[Route('/reports/{reportId}/attachments/{attachmentId}', name: 'delete_attachment', methods: ['DELETE'])]
     public function deleteAttachment(string $reportId, string $attachmentId): JsonResponse
     {
-        try {
-            $report = $this->reportApiService->deleteAttachment($reportId, $attachmentId)->array();
+        $report = $this->reportApiService->deleteAttachment($reportId, $attachmentId)->array();
 
-            return $this->json($report, Response::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($report, Response::HTTP_NO_CONTENT);
     }
 
     #[Route('/reports/rss', name: 'get_rss', methods: ['GET'])]
     public function getRss(): Response
     {
-        try {
-            $rss = $this->reportApiService->getRss()->text();
+        $rss = $this->reportApiService->getRss()->text();
 
-            return new Response($rss, Response::HTTP_OK, [
-                'Content-Type' => 'application/xml',
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new Response($rss, Response::HTTP_OK, [
+            'Content-Type' => 'application/xml',
+        ]);
     }
 
     #[Route('/reports/wfs', name: 'get_wfs', methods: ['GET'])]
     public function getWfs(Request $request): Response
     {
-        try {
-            $wfs = $this->reportApiService->getWfs($request->query->all())->text();
+        $wfs = $this->reportApiService->getWfs($request->query->all())->text();
 
-            $contentType = str_starts_with($wfs, '<?xml') ? 'application/xml' : 'application/json';
+        $contentType = str_starts_with($wfs, '<?xml') ? 'application/xml' : 'application/json';
 
-            return new Response($wfs, Response::HTTP_OK, [
-                'Content-Type' => $contentType,
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new Response($wfs, Response::HTTP_OK, [
+            'Content-Type' => $contentType,
+        ]);
     }
 }

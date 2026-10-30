@@ -4,7 +4,8 @@ import Wait from "@/components/Utils/Wait";
 import api from "@/espaceco/api";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/espaceco/RQKeys";
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
+import { getApiErrorMessage } from "@/modules/apiError";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
@@ -27,7 +28,7 @@ const ReuseCommunityConfig: FC<ReuseCommunityConfigProps> = ({ title, descriptio
     const [reuse, setReuse] = useState(false);
     const [communityId, setCommunityId] = useState<number>();
 
-    const query = useQuery<CommunityResponseDTO, CartesApiException>({
+    const query = useQuery<CommunityResponseDTO, ApiError>({
         queryKey: RQKeys.community(communityId ?? 0),
         queryFn: () => api.community.getCommunity(communityId!),
         enabled: !!communityId,
@@ -59,7 +60,9 @@ const ReuseCommunityConfig: FC<ReuseCommunityConfigProps> = ({ title, descriptio
                             <LoadingIcon largeIcon={true} />
                         </Wait>
                     )}
-                    {query.isError && <Alert className={fr.cx("fr-my-3w")} severity={"error"} title={tCommon("error")} description={query.error.message} />}
+                    {query.isError && (
+                        <Alert className={fr.cx("fr-my-3w")} severity={"error"} title={tCommon("error")} description={getApiErrorMessage(query.error)} />
+                    )}
                     <div className={fr.cx("fr-grid-row")}>
                         <div style={{ minWidth: "100%" }}>
                             <SearchCommunity filter={"listed"} label={t("search_community_label")} onChange={(community) => setCommunityId(community?.id)} />

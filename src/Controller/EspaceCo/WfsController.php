@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\WfsApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,16 +22,12 @@ class WfsController extends AbstractController implements ApiControllerInterface
     #[Route('/{databaseName}', name: 'request', methods: ['GET'])]
     public function request(Request $request, WfsApiService $wfsApiService, ?string $databaseName = null): Response
     {
-        try {
-            $wfs = $wfsApiService->wfsRequest($request->query->all(), $databaseName)->text();
+        $wfs = $wfsApiService->wfsRequest($request->query->all(), $databaseName)->text();
 
-            $contentType = str_starts_with($wfs, '<?xml') ? 'application/xml' : 'application/json';
+        $contentType = str_starts_with($wfs, '<?xml') ? 'application/xml' : 'application/json';
 
-            return new Response($wfs, Response::HTTP_OK, [
-                'Content-Type' => $contentType,
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new Response($wfs, Response::HTTP_OK, [
+            'Content-Type' => $contentType,
+        ]);
     }
 }

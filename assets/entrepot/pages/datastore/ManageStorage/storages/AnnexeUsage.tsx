@@ -6,7 +6,8 @@ import { useMutation, usePrefetchQuery, useQuery, useQueryClient } from "@tansta
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "@/modules/apiError";
 import { type QueryParams } from "@/modules/Routing";
 import { Annexe, Datastore } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
@@ -55,7 +56,7 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
     }, [datastore]);
 
     const queryParams = { page, limit };
-    const annexeListQuery = useQuery<PaginatedListResponse<Annexe>, CartesApiException>({
+    const annexeListQuery = useQuery<PaginatedListResponse<Annexe>, ApiError>({
         queryKey: RQKeys.datastore_annexe_list(datastore._id, queryParams),
         queryFn: ({ signal }) => fetchAnnexeList(datastore._id, queryParams, signal),
         staleTime: delta.minutes(1),
@@ -119,10 +120,26 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
 
             {annexeListQuery.isFetching && <LoadingText message={t("storage.annexe.loading")} as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />}
 
-            {annexeListQuery.error && <Alert severity="error" title={annexeListQuery.error.message} as="h2" closable onClose={annexeListQuery.refetch} />}
+            {annexeListQuery.error && (
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(annexeListQuery.error)}
+                    description={getApiErrorDescription(annexeListQuery.error)}
+                    as="h2"
+                    closable
+                    onClose={annexeListQuery.refetch}
+                />
+            )}
 
             {deleteAnnexeMutation.error && (
-                <Alert severity="error" title={deleteAnnexeMutation.error.message} as="h2" closable onClose={annexeListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(deleteAnnexeMutation.error)}
+                    description={getApiErrorDescription(deleteAnnexeMutation.error)}
+                    as="h2"
+                    closable
+                    onClose={annexeListQuery.refetch}
+                />
             )}
 
             {annexesList.length > 0 &&

@@ -17,7 +17,8 @@ import Main from "@/components/Layout/Main";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
 import RQKeys from "@/modules/entrepot/RQKeys";
-import { CartesApiException, jsonFetch } from "@/modules/jsonFetch";
+import { ApiError, jsonFetch } from "@/modules/jsonFetch";
+import { getApiErrorDescription, getApiErrorTitle } from "@/modules/apiError";
 import SymfonyRouting from "@/modules/Routing";
 import { niceBytes } from "@/utils";
 
@@ -25,7 +26,7 @@ const MyDocuments: FC = () => {
     const [filter, setFilter] = useState<object>({});
     const debouncedSetFilter = useDebouncedCallback(setFilter, 500);
 
-    const documentsQuery = useInfiniteQuery<DocumentDetailsResponseDto[], CartesApiException>({
+    const documentsQuery = useInfiniteQuery<DocumentDetailsResponseDto[], ApiError>({
         queryKey: RQKeys.my_documents(filter),
         queryFn: async ({ pageParam, signal }) => {
             const url = SymfonyRouting.generate("cartesgouvfr_api_user_me_documents_get_list", { ...filter, detailed: true, page: pageParam, limit: 10 });
@@ -41,7 +42,7 @@ const MyDocuments: FC = () => {
         },
     });
 
-    const addDocumentMutation = useMutation<DocumentDetailsResponseDto, CartesApiException, FormData>({
+    const addDocumentMutation = useMutation<DocumentDetailsResponseDto, ApiError, FormData>({
         mutationFn: async (formData: FormData) => {
             const url = SymfonyRouting.generate("cartesgouvfr_api_user_me_documents_add");
             return await jsonFetch(url, { method: "POST" }, formData, true, true);
@@ -60,7 +61,7 @@ const MyDocuments: FC = () => {
         e.currentTarget.reset();
     };
 
-    const replaceDocumentMutation = useMutation<DocumentDetailsResponseDto, CartesApiException, FormData>({
+    const replaceDocumentMutation = useMutation<DocumentDetailsResponseDto, ApiError, FormData>({
         mutationFn: async (formData: FormData) => {
             const url = SymfonyRouting.generate("cartesgouvfr_api_user_me_documents_replace_file", { documentId: currentDocumentId });
             return await jsonFetch(url, { method: "POST" }, formData, true, true);
@@ -79,7 +80,7 @@ const MyDocuments: FC = () => {
         e.currentTarget.reset();
     };
 
-    const modifyDocumentMutation = useMutation<DocumentDetailsResponseDto, CartesApiException, object>({
+    const modifyDocumentMutation = useMutation<DocumentDetailsResponseDto, ApiError, object>({
         mutationFn: async (data) => {
             const url = SymfonyRouting.generate("cartesgouvfr_api_user_me_documents_modify", { documentId: currentDocumentId });
             return await jsonFetch(url, { method: "PATCH" }, data);
@@ -121,7 +122,7 @@ const MyDocuments: FC = () => {
         e.currentTarget.reset();
     };
 
-    const deleteDocumentMutation = useMutation<void, CartesApiException, string>({
+    const deleteDocumentMutation = useMutation<void, ApiError, string>({
         mutationFn: async (documentId: string) => {
             const url = SymfonyRouting.generate("cartesgouvfr_api_user_me_documents_remove", { documentId });
             return await jsonFetch(url, { method: "DELETE" });
@@ -398,7 +399,7 @@ const MyDocuments: FC = () => {
             {(() => {
                 const error = addDocumentMutation.error ?? replaceDocumentMutation.error ?? deleteDocumentMutation.error;
                 if (error) {
-                    return <Alert title={error.message} severity="error" description={JSON.stringify(error.details)} />;
+                    return <Alert title={getApiErrorTitle(error)} severity="error" description={getApiErrorDescription(error)} />;
                 }
             })()}
 

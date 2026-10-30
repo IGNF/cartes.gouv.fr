@@ -13,7 +13,8 @@ import { FormProvider, useForm } from "react-hook-form";
 import ActionButtonsCreation from "./ActionButtonsCreation";
 import ActionButtonsEdition from "./ActionButtonsEdition";
 import DatabasePermissionList from "./databases/DatabasePermissionList";
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "@/modules/apiError";
 import { fr } from "@codegouvfr/react-dsfr";
 import Wait from "@/components/Utils/Wait";
 
@@ -34,7 +35,7 @@ const Databases: FC = () => {
         isError,
         error,
         isLoading,
-    } = useQuery<IDatabasePermission[], CartesApiException>({
+    } = useQuery<IDatabasePermission[], ApiError>({
         queryKey: RQKeys.permissions(community.id),
         queryFn: ({ signal }) => api.permission.get(community.id, signal),
         staleTime: 3600000,
@@ -45,7 +46,7 @@ const Databases: FC = () => {
         isPending: isUpdating,
         isError: isUpdatingError,
         error: updatingError,
-    } = useMutation<IDatabasePermission[], CartesApiException, object>({
+    } = useMutation<IDatabasePermission[], ApiError, object>({
         mutationFn: (datas: object) => {
             return api.permission.update(community.id, datas);
         },
@@ -96,11 +97,13 @@ const Databases: FC = () => {
                     </div>
                 </Wait>
             )}
-            {isUpdatingError && <Alert severity="error" closable title={tCommon("error")} description={updatingError.message} className={fr.cx("fr-my-3w")} />}
+            {isUpdatingError && (
+                <Alert severity="error" closable title={tCommon("error")} description={getApiErrorMessage(updatingError)} className={fr.cx("fr-my-3w")} />
+            )}
             {isLoading ? (
                 <LoadingText as={"h6"} message={t("loading_permissions")} />
             ) : isError ? (
-                <Alert severity="error" closable title={error?.message} />
+                <Alert severity="error" closable title={getApiErrorTitle(error)} description={getApiErrorDescription(error)} />
             ) : (
                 <div>
                     <h2>{tmc("database.tab.title")}</h2>

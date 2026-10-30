@@ -3,8 +3,6 @@
 namespace App\Controller\Entrepot;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Workflow\DatastoreCleanupWorkflow;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
@@ -30,15 +28,11 @@ class DatastoreCleanupController extends AbstractController implements ApiContro
     #[Route('/content', name: 'get_content', methods: ['GET'], condition: 'request.isXmlHttpRequest()')]
     public function getContentToBeDeleted(string $datastoreId): JsonResponse
     {
-        try {
-            $counts = $this->datastoreCleanupWorkflow->count($datastoreId);
+        $counts = $this->datastoreCleanupWorkflow->count($datastoreId);
 
-            return $this->json([
-                'entities' => $counts,
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json([
+            'entities' => $counts,
+        ]);
     }
 
     #[Route('/delete-stream', name: 'delete_content_stream', methods: ['GET'])]

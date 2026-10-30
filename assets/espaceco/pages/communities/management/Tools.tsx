@@ -12,7 +12,8 @@ import { arrLayerTools, arrRefLayerTools, CommunityResponseDTO, LayerTools, RefL
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../modules/apiError";
 import api from "../../../api";
 import { getFunctionalities, getToolsDefaultValues } from "../DefaultValues";
 import ActionButtonsCreation from "./ActionButtonsCreation";
@@ -43,32 +44,30 @@ const Tools: FC = () => {
         isError: isUpdatingLayersError,
         error: updatingLayersError,
         mutate,
-    } = useMutation<
-        Record<string, CommunityFeatureTypeLayer[]>,
-        CartesApiException,
-        Record<number, { tools: LayerTools[]; ref_tools: Record<RefLayerTools, number[]> }>
-    >({
-        mutationFn: (datas) => {
-            return api.communityLayers.update(community.id, datas);
-        },
-        onSuccess(response) {
-            queryClient.setQueryData<Record<string, CommunityFeatureTypeLayer[]>>(RQKeys.communityLayers(community.id), (oldLayers) => {
-                return response ? response : { ...oldLayers };
-            });
-            updateCommunity({ functionalities: getFormValues("functionalities") }, () => {
-                if (mode === "creation" && !saveOnly && !stepper?.isLastStep()) {
-                    stepper?.nextStep();
-                }
-            });
-        },
-    });
+    } = useMutation<Record<string, CommunityFeatureTypeLayer[]>, ApiError, Record<number, { tools: LayerTools[]; ref_tools: Record<RefLayerTools, number[]> }>>(
+        {
+            mutationFn: (datas) => {
+                return api.communityLayers.update(community.id, datas);
+            },
+            onSuccess(response) {
+                queryClient.setQueryData<Record<string, CommunityFeatureTypeLayer[]>>(RQKeys.communityLayers(community.id), (oldLayers) => {
+                    return response ? response : { ...oldLayers };
+                });
+                updateCommunity({ functionalities: getFormValues("functionalities") }, () => {
+                    if (mode === "creation" && !saveOnly && !stepper?.isLastStep()) {
+                        stepper?.nextStep();
+                    }
+                });
+            },
+        }
+    );
 
     const {
         data: layers,
         isError,
         error,
         isLoading,
-    } = useQuery<Record<string, CommunityFeatureTypeLayer[]>, CartesApiException>({
+    } = useQuery<Record<string, CommunityFeatureTypeLayer[]>, ApiError>({
         queryKey: RQKeys.communityLayers(community.id),
         queryFn: ({ signal }) => api.communityLayers.getFeatureTypes(community.id, signal),
         staleTime: 3600000,
@@ -168,7 +167,7 @@ const Tools: FC = () => {
     return (
         <div>
             {isLoading && <LoadingText as={"h6"} message={tLayer("loading_layers")} />}
-            {isError && <Alert severity="error" closable title={error.message} />}
+            {isError && <Alert severity="error" closable title={getApiErrorTitle(error)} description={getApiErrorDescription(error)} />}
             {isCommunityUpdating && (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>
@@ -177,10 +176,16 @@ const Tools: FC = () => {
                 </Wait>
             )}
             {isCommunityUpdatingError && (
-                <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+                <Alert
+                    className={fr.cx("fr-my-2v")}
+                    severity="error"
+                    closable
+                    title={tCommon("error")}
+                    description={getApiErrorMessage(updatingCommunityError)}
+                />
             )}
             {isUpdatingLayersError ? (
-                <Alert severity="error" closable title={updatingLayersError.message} />
+                <Alert severity="error" closable title={getApiErrorTitle(updatingLayersError)} description={getApiErrorDescription(updatingLayersError)} />
             ) : isUpdatingLayers ? (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>

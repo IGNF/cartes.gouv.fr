@@ -3,7 +3,7 @@ import { FC, PropsWithChildren, useEffect } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { IApiAlert } from "../../@types/alert";
-import { CartesApiException } from "../../modules/jsonFetch";
+import { ApiError } from "../../modules/jsonFetch";
 import RQKeys from "../../modules/entrepot/RQKeys";
 import api from "../../entrepot/api";
 import { useAlertStore } from "../../stores/AlertStore";
@@ -12,7 +12,7 @@ const AlertProvider: FC<PropsWithChildren> = (props) => {
     const { children } = props;
     const setAlerts = useAlertStore((state) => state.setAlerts);
 
-    const { data } = useQuery<IApiAlert[], CartesApiException>({
+    const { data } = useQuery<IApiAlert[], ApiError>({
         queryKey: RQKeys.alerts(),
         queryFn: ({ signal }) => api.alerts.get({ signal, cache: "no-store" }),
     });

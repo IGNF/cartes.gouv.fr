@@ -18,6 +18,7 @@ import Reports from "./management/Reports";
 import Tools from "./management/Tools";
 import ZoomAndCentering from "./management/ZoomAndCentering";
 import Layers from "./management/Layers";
+import { getApiErrorMessage } from "../../../modules/apiError";
 
 const CreateCommunity: FC = () => {
     const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();
@@ -72,7 +73,13 @@ const CreateCommunity: FC = () => {
                         </Wait>
                     )}
                     {isCommunityUpdatingError && (
-                        <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+                        <Alert
+                            className={fr.cx("fr-my-2v")}
+                            severity="error"
+                            closable
+                            title={tCommon("error")}
+                            description={getApiErrorMessage(updatingCommunityError)}
+                        />
                     )}
                     {isMeLoading ? (
                         <LoadingText as={"h6"} message={tmc("loading_me")} />
@@ -83,7 +90,7 @@ const CreateCommunity: FC = () => {
                             title={tmc("me_fetch_failed")}
                             description={
                                 <>
-                                    <p>{meError.message}</p>
+                                    <p>{getApiErrorMessage(meError)}</p>
                                     <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
                                 </>
                             }

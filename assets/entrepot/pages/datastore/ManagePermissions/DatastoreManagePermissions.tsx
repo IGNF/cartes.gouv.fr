@@ -25,7 +25,8 @@ import Wait from "../../../../components/Utils/Wait";
 import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../modules/apiError";
 import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 
@@ -62,7 +63,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
         status: removeStatus,
         error: removeError,
         mutate: mutateRemove,
-    } = useMutation<null, CartesApiException, string>({
+    } = useMutation<null, ApiError, string>({
         mutationFn: (permissionId) => api.datastore.removePermission(datastoreId, permissionId),
         onSuccess() {
             queryClient.setQueryData<DatastorePermission[]>(RQKeys.datastore_permissions(datastoreId), (permissions) => {
@@ -87,7 +88,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
             <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
 
-            {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={removeError.message} />}
+            {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={getApiErrorMessage(removeError)} />}
             {removeStatus === "pending" && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>

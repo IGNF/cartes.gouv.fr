@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\GeoserviceApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,12 +32,8 @@ class GeoserviceController extends AbstractController implements ApiControllerIn
         int $geoserviceId,
         #[MapQueryParameter] ?array $fields = [],
     ): JsonResponse {
-        try {
-            $geoservice = $this->geoserviceApiService->getGeoservice($geoserviceId, $fields)->array();
+        $geoservice = $this->geoserviceApiService->getGeoservice($geoserviceId, $fields)->array();
 
-            return new JsonResponse($geoservice);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($geoservice);
     }
 }

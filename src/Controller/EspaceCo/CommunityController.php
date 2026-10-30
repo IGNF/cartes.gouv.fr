@@ -5,7 +5,7 @@ namespace App\Controller\EspaceCo;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Espaceco\Members\AddMembersDTO;
 use App\Exception\ApiException;
-use App\Exception\CartesApiException;
+use App\Exception\AppException;
 use App\Services\EspaceCoApi\CommunityApiService;
 use App\Services\EspaceCoApi\GridApiService;
 use App\Services\EspaceCoApi\UserApiService;
@@ -17,6 +17,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -54,13 +55,9 @@ class CommunityController extends AbstractController implements ApiControllerInt
         #[MapQueryParameter] int $limit = 10,
         #[MapQueryParameter] string $sort = 'name:DESC',
     ): JsonResponse {
-        try {
-            $response = $this->communityApiService->getCommunities($name, $page, $limit, $sort);
+        $response = $this->communityApiService->getCommunities($name, $page, $limit, $sort);
 
-            return new JsonResponse($response);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($response);
     }
 
     /**
@@ -69,26 +66,18 @@ class CommunityController extends AbstractController implements ApiControllerInt
     #[Route('/{communityId}', name: 'get_community', requirements: ['communityId' => '\d+'], methods: ['GET'])]
     public function getCommunity(int $communityId, #[MapQueryParameter] ?array $fields = []): JsonResponse
     {
-        try {
-            $community = $this->communityApiService->getCommunity($communityId, $fields)->array();
-            $this->_complete($community);
+        $community = $this->communityApiService->getCommunity($communityId, $fields)->array();
+        $this->_complete($community);
 
-            return new JsonResponse($community);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($community);
     }
 
     #[Route('/get_names', name: 'get_names', methods: ['GET'])]
     public function getCommunitiesName(): JsonResponse
     {
-        try {
-            $names = $this->communityApiService->getCommunitiesName()->resolve();
+        $names = $this->communityApiService->getCommunitiesName()->resolve();
 
-            return new JsonResponse($names);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($names);
     }
 
     #[Route('/get_as_member', name: 'get_as_member', methods: ['GET'])]
@@ -97,38 +86,34 @@ class CommunityController extends AbstractController implements ApiControllerInt
         #[MapQueryParameter] ?int $page = 1,
         #[MapQueryParameter] ?int $limit = 10,
     ): JsonResponse {
-        try {
-            $me = $this->userApiService->getMe()->array();
-            $members = array_map(function ($member) {
-                return ['id' => $member['community_id'], 'name' => $member['community_name'], 'role' => $member['role']];
-            }, $me['communities_member']);
+        $me = $this->userApiService->getMe()->array();
+        $members = array_map(function ($member) {
+            return ['id' => $member['community_id'], 'name' => $member['community_name'], 'role' => $member['role']];
+        }, $me['communities_member']);
 
-            $members = array_filter($members, function ($member) use ($pending) {
-                return $pending ? 'pending' === $member['role'] : 'pending' !== $member['role'];
-            });
+        $members = array_filter($members, function ($member) use ($pending) {
+            return $pending ? 'pending' === $member['role'] : 'pending' !== $member['role'];
+        });
 
-            $this->_sortMembersByName($members);
-            $members = array_slice(array_values($members), ($page - 1) * $limit, $limit);
+        $this->_sortMembersByName($members);
+        $members = array_slice(array_values($members), ($page - 1) * $limit, $limit);
 
-            $communities = [];
-            foreach ($members as $member) {
-                $community = $this->communityApiService->getCommunity($member['id'])->array();
-                $communities[] = $community;
-            }
-
-            $totalPages = floor(count($members) / $limit) + 1;
-            $previousPage = 1 === $page ? null : $page - 1;
-            $nextPage = $page + 1 > $totalPages ? null : $page + 1;
-
-            return new JsonResponse([
-                'content' => $communities,
-                'totalPages' => $totalPages,
-                'previousPage' => $previousPage,
-                'nextPage' => $nextPage,
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        $communities = [];
+        foreach ($members as $member) {
+            $community = $this->communityApiService->getCommunity($member['id'])->array();
+            $communities[] = $community;
         }
+
+        $totalPages = floor(count($members) / $limit) + 1;
+        $previousPage = 1 === $page ? null : $page - 1;
+        $nextPage = $page + 1 > $totalPages ? null : $page + 1;
+
+        return new JsonResponse([
+            'content' => $communities,
+            'totalPages' => $totalPages,
+            'previousPage' => $previousPage,
+            'nextPage' => $nextPage,
+        ]);
     }
 
     #[Route('/search', name: 'search', methods: ['GET'])]
@@ -137,22 +122,18 @@ class CommunityController extends AbstractController implements ApiControllerInt
         #[MapQueryParameter] string $filter,
         #[MapQueryParameter] string $sort,
     ): JsonResponse {
-        try {
-            if (!in_array($filter, ['listed', 'iam_member', 'affiliation'])) {
-                throw new ApiException('Le filtre doit être listed, iam_member ou affiliation');
-            }
-
-            if ('listed' === $filter) {
-                $result = $this->communityApiService->getCommunities($name, 1, self::SEARCH_LIMIT, $sort);
-                $response = $result['content'];
-            } else {
-                $response = $this->_search($name, 'iam_member' !== $filter);
-            }
-
-            return new JsonResponse($response);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        if (!in_array($filter, ['listed', 'iam_member', 'affiliation'])) {
+            throw new AppException('Le filtre doit être listed, iam_member ou affiliation', Response::HTTP_BAD_REQUEST);
         }
+
+        if ('listed' === $filter) {
+            $result = $this->communityApiService->getCommunities($name, 1, self::SEARCH_LIMIT, $sort);
+            $response = $result['content'];
+        } else {
+            $response = $this->_search($name, 'iam_member' !== $filter);
+        }
+
+        return new JsonResponse($response);
     }
 
     /**
@@ -163,41 +144,29 @@ class CommunityController extends AbstractController implements ApiControllerInt
         int $communityId,
         #[MapQueryParameter(filter: \FILTER_VALIDATE_REGEXP, options: ['regexp' => '/^admin|member|pending$/'])] array $roles = [],
     ): JsonResponse {
-        try {
-            $response = $this->communityApiService->getCommunityMembers($communityId, $roles);
+        $response = $this->communityApiService->getCommunityMembers($communityId, $roles);
 
-            return new JsonResponse($response);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($response);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
-            $data['active'] = 'false';
+        $data = json_decode($request->getContent(), true);
+        $data['active'] = 'false';
 
-            $community = $this->communityApiService->addCommunity($data, null);
+        $community = $this->communityApiService->addCommunity($data, null);
 
-            return new JsonResponse($community);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($community);
     }
 
     #[Route('/{communityId}/update', name: 'update', methods: ['PATCH'])]
     public function update(int $communityId, Request $request): JsonResponse
     {
-        try {
-            $datas = json_decode($request->getContent(), true);
-            $community = $this->communityApiService->updateCommunity($communityId, $datas)->array();
+        $datas = json_decode($request->getContent(), true);
+        $community = $this->communityApiService->updateCommunity($communityId, $datas)->array();
 
-            return new JsonResponse($community);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($community);
     }
 
     #[Route('/{communityId}/members', name: 'add_members', methods: ['POST'])]
@@ -205,92 +174,68 @@ class CommunityController extends AbstractController implements ApiControllerInt
         int $communityId,
         #[MapRequestPayload] AddMembersDTO $dto): JsonResponse
     {
-        try {
-            $community = $this->communityApiService->getCommunity($communityId)->array();
+        $community = $this->communityApiService->getCommunity($communityId)->array();
 
-            $members = [];
-            foreach ($dto->members as $userId) {
-                $email = filter_var($userId, FILTER_VALIDATE_EMAIL);
-                $member = $this->communityApiService->addMember($communityId, $userId)->array();
-                if ($email && 'invited' === $member['role']) {
-                    $this->_sendEmail($email, $community);
-                } else {
-                    $members[] = $member;
-                }
+        $members = [];
+        foreach ($dto->members as $userId) {
+            $email = filter_var($userId, FILTER_VALIDATE_EMAIL);
+            $member = $this->communityApiService->addMember($communityId, $userId)->array();
+            if ($email && 'invited' === $member['role']) {
+                $this->_sendEmail($email, $community);
+            } else {
+                $members[] = $member;
             }
-
-            return new JsonResponse($members);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
+
+        return new JsonResponse($members);
     }
 
     #[Route('/{communityId}/member/{userId}/update_role', name: 'update_member_role', methods: ['PATCH'])]
     public function updateMemberRole(int $communityId, int $userId, Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
-            $member = $this->communityApiService->updateMember($communityId, $userId, 'role', $data['role']);
+        $data = json_decode($request->getContent(), true);
+        $member = $this->communityApiService->updateMember($communityId, $userId, 'role', $data['role']);
 
-            return new JsonResponse($member);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($member);
     }
 
     #[Route('/{communityId}/member/{userId}/update_grids', name: 'update_member_grids', methods: ['PATCH'])]
     public function updateMemberGrids(int $communityId, int $userId, Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
-            $member = $this->communityApiService->updateMember($communityId, $userId, 'grids', $data['grids']);
+        $data = json_decode($request->getContent(), true);
+        $member = $this->communityApiService->updateMember($communityId, $userId, 'grids', $data['grids']);
 
-            return new JsonResponse($member);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($member);
     }
 
     #[Route('/{communityId}/update_logo', name: 'update_logo', methods: ['POST'])]
     public function updateLogo(int $communityId, Request $request): JsonResponse
     {
-        try {
-            $logo = $request->files->get('logo');
-            [$tempFileDir, $tempFilePath] = $this->_copyFile($logo);
+        $logo = $request->files->get('logo');
+        [$tempFileDir, $tempFilePath] = $this->_copyFile($logo);
 
-            $this->communityApiService->updateLogo($communityId, $tempFilePath);
-            $this->fs->remove($tempFileDir);
+        $this->communityApiService->updateLogo($communityId, $tempFilePath);
+        $this->fs->remove($tempFileDir);
 
-            $community = $this->communityApiService->getCommunity($communityId, ['logo_url'])->array();
+        $community = $this->communityApiService->getCommunity($communityId, ['logo_url'])->array();
 
-            return new JsonResponse(['logo_url' => $community['logo_url']]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse(['logo_url' => $community['logo_url']]);
     }
 
     #[Route('/{communityId}/remove_logo', name: 'remove_logo', methods: ['DELETE'])]
     public function removeLogo(int $communityId): JsonResponse
     {
-        try {
-            $this->communityApiService->removeLogo($communityId)->await();
+        $this->communityApiService->removeLogo($communityId)->await();
 
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
     #[Route('/{communityId}/member/{userId}/remove', name: 'remove_member', methods: ['DELETE'])]
     public function removeMember(int $communityId, int $userId): JsonResponse
     {
-        try {
-            $this->communityApiService->removeMember($communityId, $userId)->await();
+        $this->communityApiService->removeMember($communityId, $userId)->await();
 
-            return new JsonResponse(['user_id' => $userId]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse(['user_id' => $userId]);
     }
 
     /**

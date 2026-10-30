@@ -16,7 +16,8 @@ import olDefaults from "../../../../../data/ol-defaults.json";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import TableSelection from "../../common/TableSelection/TableSelection";
@@ -110,7 +111,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
     const sample: SampleType | undefined = watch("sample");
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [validationError, setValidationError] = useState<CartesApiException>();
+    const [validationError, setValidationError] = useState<ApiError>();
 
     useEffect(() => {
         if (selectedTableNamesList && vectorDbQuery.data) {
@@ -151,7 +152,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                 }
             })
             .catch((error) => {
-                setValidationError(error as CartesApiException);
+                setValidationError(error as ApiError);
             })
             .finally(() => {
                 setIsSubmitting(false);
@@ -180,7 +181,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                         title={t("step.title", { stepNumber: currentStep })}
                     />
                     {validationError && (
-                        <Alert className="fr-preline" closable description={validationError.message} severity="error" title={tCommon("error")} />
+                        <Alert className="fr-preline" closable description={getApiErrorMessage(validationError)} severity="error" title={tCommon("error")} />
                     )}
                     <TableSelection filterGeometric={true} visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
                     <TableAttributeSelection visible={currentStep === STEPS.ATTRIBUTES_SELECTION} form={form} selectedTables={selectedTables} />

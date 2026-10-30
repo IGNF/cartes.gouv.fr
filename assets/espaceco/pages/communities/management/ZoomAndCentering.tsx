@@ -19,6 +19,7 @@ import DisplayExtent from "./ZoomAndCentering/DisplayExtent";
 import { ExtentDialog, ExtentDialogModal } from "./ZoomAndCentering/ExtentDialog";
 import RMap from "./ZoomAndCentering/RMap";
 import Search from "./ZoomAndCentering/Search";
+import { getApiErrorMessage } from "../../../../modules/apiError";
 
 const fields = ["position", "zoom", "minZoom", "maxZoom", "extent"];
 
@@ -96,7 +97,13 @@ const ZoomAndCentering: FC = () => {
                 </Wait>
             )}
             {isCommunityUpdatingError && (
-                <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+                <Alert
+                    className={fr.cx("fr-my-2v")}
+                    severity="error"
+                    closable
+                    title={tCommon("error")}
+                    description={getApiErrorMessage(updatingCommunityError)}
+                />
             )}
             {consistent === false && (
                 <Alert severity="warning" title={tCommon("warning")} description={tmc("zoom.consistant_error")} className={fr.cx("fr-my-2w")} />

@@ -22,6 +22,7 @@ import api from "../../../../api";
 import DocumentsListItem from "./DocumentsListItem";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useCommunityRights from "@/hooks/useCommunityRights";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
 
 const documentAddModal = createModal({
     id: "datasheet-document-add-modal",
@@ -180,7 +181,13 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
             {documentsListQuery.isLoading && <LoadingText message={t("documents_tab.documents_list.is_loading")} withSpinnerIcon={true} as="p" />}
 
             {addDocumentMutation.isError && (
-                <Alert severity="error" closable title={tCommon("error")} description={addDocumentMutation.error.message} className={fr.cx("fr-my-3w")} />
+                <Alert
+                    severity="error"
+                    closable
+                    title={tCommon("error")}
+                    description={getApiErrorMessage(addDocumentMutation.error)}
+                    className={fr.cx("fr-my-3w")}
+                />
             )}
 
             {documentsListQuery.data?.length !== undefined &&

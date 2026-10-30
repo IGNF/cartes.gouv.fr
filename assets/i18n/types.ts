@@ -17,6 +17,7 @@ export const languagesDisplayNames: Record<Language, string> = {
 export type Language = (typeof languages)[number];
 export type ComponentKey =
     | import("./Common.locale").I18n
+    | import("../modules/apiError.locale").I18n
     | import("../modules/entrepot/breadcrumbs/Breadcrumb.locale").I18n
     | import("../entrepot/pages/communities/Rights.locale").I18n
     | import("../entrepot/pages/service/view/Style/Style.locale").I18n

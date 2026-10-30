@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -62,7 +63,7 @@ class SecurityController extends AbstractController
     #[Route('/signup', name: 'signup', methods: ['GET'], options: ['expose' => true])]
     public function signup(): RedirectResponse
     {
-        throw new AppException('not yet implemented');
+        throw new AppException('not yet implemented', Response::HTTP_NOT_IMPLEMENTED);
     }
 
     #[Route('/userinfo/edit', name: 'userinfo_edit', methods: ['GET'], options: ['expose' => true])]

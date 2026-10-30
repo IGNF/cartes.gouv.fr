@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use App\Controller\ApiControllerInterface;
+use App\Exception\ApiErrorType;
 use App\Security\State\LoginStateSerializer;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
@@ -126,10 +126,6 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
         $this->logger->info(self::class, [$message]);
 
-        if ($this->isApiRequest($request)) {
-            return $this->getUnauthorizedApiResponse($message);
-        }
-
         return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?authentication_failed=1');
     }
 
@@ -140,15 +136,15 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         return is_string($route) && str_starts_with($route, self::API_ROUTE_PREFIX);
     }
 
-    private function getUnauthorizedApiResponse(string $message = 'Unauthorized'): JsonResponse
+    // point d'entrée : le pare-feu répond lui-même, hors du rendu d'erreur de Symfony
+    private function getUnauthorizedApiResponse(): JsonResponse
     {
-        $code = Response::HTTP_UNAUTHORIZED;
-
         return new JsonResponse([
-            'code' => $code,
-            'status' => 'Unauthorized',
-            'message' => $message,
-            'details' => ['controller' => ApiControllerInterface::class, 'session_expired' => true],
-        ], $code);
+            'status' => Response::HTTP_UNAUTHORIZED,
+            'title' => 'Unauthorized',
+            'detail' => 'Authentification requise',
+            'type' => ApiErrorType::ANONYMOUS,
+            'details' => [],
+        ], Response::HTTP_UNAUTHORIZED, ['Content-Type' => 'application/problem+json']);
     }
 }

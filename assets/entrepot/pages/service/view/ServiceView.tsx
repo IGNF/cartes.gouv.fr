@@ -12,6 +12,7 @@ import { routes } from "../../../../router/router";
 import { isOfferingUnavailable } from "../../../../utils";
 import PrivateServiceExplanation from "./PrivateServiceExplanation";
 import ServiceViewContent from "./ServiceViewContent";
+import { getApiErrorMessage } from "../../../../modules/apiError";
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -30,7 +31,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                 <Alert
                     severity="error"
                     closable={false}
-                    title={serviceQuery.error.message}
+                    title={getApiErrorMessage(serviceQuery.error)}
                     description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
                 />
             ) : serviceQuery.data ? (

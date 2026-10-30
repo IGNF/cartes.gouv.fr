@@ -16,6 +16,7 @@ import ColumnPermissionList from "./ColumnPermissionList";
 import AddTablePermissionDialog from "./dialogs/AddTablePermissionDialog";
 import Permission from "./Permission";
 import { getPermission } from "./PermissionUtils";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
 
 function getAvailableTables(permission: IDatabasePermission, database: DatabaseDetailedResponseDTO) {
     const permissionTables = permission.tables.map((t) => t.id);
@@ -98,7 +99,7 @@ const TablePermissionList: FC<TablePermissionListProps> = ({ databaseId }) => {
             </Button>
             {database && availableTables.length === 0 && <Alert severity={"info"} closable title={t("all_tables_have_permissions")} />}
             {isLoading && <LoadingText as={"h6"} withSpinnerIcon message={t("loading_database", { title: permission.title })} />}
-            {isError && <Alert severity="error" closable title={error.message} />}
+            {isError && <Alert severity="error" closable title={getApiErrorTitle(error)} description={getApiErrorDescription(error)} />}
             {permission.tables.length > 0 ? (
                 <Accordion label={t("tables")} titleAs={"h5"}>
                     {permission.tables.map((table) => (

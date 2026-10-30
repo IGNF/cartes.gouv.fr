@@ -10,13 +10,10 @@ import Desc from "../Desc";
 type PyramidStoredDataDescProps = {
     datastoreId: string;
     pyramid: DatasheetStoredDataItem<PyramidVector> | DatasheetStoredDataItem<PyramidRaster>;
-    dataUsesQuery: UseQueryResult<
-        {
-            stored_data_list: ProcessingExecutionStoredDataDto[];
-            offerings_list: Offering[];
-        },
-        Error
-    >;
+    dataUsesQuery: UseQueryResult<{
+        stored_data_list: ProcessingExecutionStoredDataDto[];
+        offerings_list: Offering[];
+    }>;
 };
 
 const PyramidStoredDataDesc: FC<PyramidStoredDataDescProps> = ({ datastoreId, pyramid, dataUsesQuery }) => {

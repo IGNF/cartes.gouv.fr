@@ -17,7 +17,8 @@ import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../i18n/i18n";
 import { ComponentKey } from "../../../../i18n/types";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../modules/apiError";
 import { routes } from "../../../../router/router";
 import { regex } from "../../../../utils";
 import api from "../../../api";
@@ -65,7 +66,7 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
 
     const queryClient = useQueryClient();
 
-    const addMemberMutation = useMutation<UserRightsResponseDto | undefined, CartesApiException, object>({
+    const addMemberMutation = useMutation<UserRightsResponseDto | undefined, ApiError, object>({
         mutationFn: (datas) => {
             if (communityId) return api.community.updateMember(communityId, datas);
             return Promise.resolve(undefined);
@@ -128,7 +129,7 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
             concealingBackdrop={true}
         >
             {addMemberMutation.error && (
-                <Alert severity={"error"} title={tCommon("error")} description={addMemberMutation.error?.message} className={fr.cx("fr-my-3w")} />
+                <Alert severity={"error"} title={tCommon("error")} description={getApiErrorMessage(addMemberMutation.error)} className={fr.cx("fr-my-3w")} />
             )}
             <Input
                 label={<strong>{t("user_id")}</strong>}

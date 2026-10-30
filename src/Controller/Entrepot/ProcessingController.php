@@ -3,8 +3,6 @@
 namespace App\Controller\Entrepot;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\ProcessingApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,31 +28,23 @@ class ProcessingController extends AbstractController implements ApiControllerIn
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getList(string $datastoreId, Request $request): JsonResponse
     {
-        try {
-            $query = $request->query->all();
+        $query = $request->query->all();
 
-            $uploadList = $this->processingApiService->getAll($datastoreId, $query)->resolve();
+        $uploadList = $this->processingApiService->getAll($datastoreId, $query)->resolve();
 
-            return $this->json($uploadList);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
-        }
+        return $this->json($uploadList);
     }
 
     #[Route('/executions', name: 'execution_get_list', methods: ['GET'])]
     public function getExecutionList(string $datastoreId, Request $request, #[MapQueryParameter] ?bool $detailed = false,
     ): JsonResponse {
-        try {
-            $query = $request->query->all();
-            if (isset($query['detailed'])) {
-                unset($query['detailed']);
-            }
-
-            $uploadList = $detailed ? $this->processingApiService->getAllExecutionsDetailed($datastoreId, $query) : $this->processingApiService->getAllExecutions($datastoreId, $query)->resolve();
-
-            return $this->json($uploadList);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        $query = $request->query->all();
+        if (isset($query['detailed'])) {
+            unset($query['detailed']);
         }
+
+        $uploadList = $detailed ? $this->processingApiService->getAllExecutionsDetailed($datastoreId, $query) : $this->processingApiService->getAllExecutions($datastoreId, $query)->resolve();
+
+        return $this->json($uploadList);
     }
 }

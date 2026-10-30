@@ -17,7 +17,7 @@ use App\Dto\Services\CommonDTO;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\ApiException;
-use App\Exception\CartesApiException;
+use App\Exception\AppException;
 use App\Services\CapabilitiesService;
 use App\Services\GeonetworkApiService;
 use App\Services\MembershipService;
@@ -240,7 +240,7 @@ class CartesServiceApiService
 
         return match ($offering['type']) {
             OfferingTypes::WFS, OfferingTypes::WMTSTMS, OfferingTypes::WMSVECTOR, OfferingTypes::WMSRASTER => $this->unpublishOfferingAndConfiguration($datastoreId, $offering),
-            default => throw new CartesApiException('Type de service invalide pour la suppression', Response::HTTP_BAD_REQUEST, ['offering_type' => $offering['type']]),
+            default => throw new AppException('Type de service invalide pour la suppression', Response::HTTP_BAD_REQUEST, ['offering_type' => $offering['type']]),
         };
     }
 
@@ -289,7 +289,7 @@ class CartesServiceApiService
      *
      * @return array<mixed> l'offering
      *
-     * @throws CartesApiException avec le statut 504 si le délai d'attente est dépassé
+     * @throws AppException avec le statut 503 si le délai d'attente est dépassé
      */
     public function waitForOfferingUnpublished(string $datastoreId, string $offeringId): array
     {
@@ -307,7 +307,7 @@ class CartesServiceApiService
                     'offeringId' => $offeringId,
                 ]);
 
-                throw new CartesApiException('La dépublication du service a échoué', Response::HTTP_INTERNAL_SERVER_ERROR, ['offering_id' => $offeringId, 'status' => $offering['status']]);
+                throw new AppException('La dépublication du service a échoué', Response::HTTP_INTERNAL_SERVER_ERROR, ['offering_id' => $offeringId, 'status' => $offering['status']]);
             }
 
             if ($attempt < self::UNPUBLISH_MAX_ATTEMPTS) {
@@ -323,13 +323,13 @@ class CartesServiceApiService
             'timeout' => $timeoutSeconds,
         ]);
 
-        throw new CartesApiException('La dépublication du service prend trop de temps, veuillez réessayer', Response::HTTP_GATEWAY_TIMEOUT, ['offering_id' => $offeringId, 'status' => $offering['status'], 'timeout' => $timeoutSeconds]);
+        throw new AppException('La dépublication du service prend trop de temps, veuillez réessayer', Response::HTTP_SERVICE_UNAVAILABLE, ['offering_id' => $offeringId, 'status' => $offering['status'], 'timeout' => $timeoutSeconds], headers: ['Retry-After' => (string) self::UNPUBLISH_RETRY_DELAY_SECONDS]);
     }
 
     /**
      * Attend que l'offering soit effectivement supprimée (GET renvoie 404) après le 2e DELETE.
      *
-     * @throws CartesApiException avec le statut 504 si le délai d'attente est dépassé
+     * @throws AppException avec le statut 503 si le délai d'attente est dépassé
      */
     private function waitForOfferingRemoved(string $datastoreId, string $offeringId): void
     {
@@ -356,7 +356,7 @@ class CartesServiceApiService
             'timeout' => $timeoutSeconds,
         ]);
 
-        throw new CartesApiException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_GATEWAY_TIMEOUT, ['offering_id' => $offeringId, 'timeout' => $timeoutSeconds]);
+        throw new AppException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_SERVICE_UNAVAILABLE, ['offering_id' => $offeringId, 'timeout' => $timeoutSeconds], headers: ['Retry-After' => (string) self::UNPUBLISH_RETRY_DELAY_SECONDS]);
     }
 
     /**
@@ -364,7 +364,7 @@ class CartesServiceApiService
      *
      * @return array<mixed> la configuration
      *
-     * @throws CartesApiException avec le statut 504 si le délai d'attente est dépassé
+     * @throws AppException avec le statut 503 si le délai d'attente est dépassé
      */
     public function waitForConfigurationUnpublished(string $datastoreId, string $configurationId): array
     {
@@ -388,7 +388,7 @@ class CartesServiceApiService
             'timeout' => $timeoutSeconds,
         ]);
 
-        throw new CartesApiException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_GATEWAY_TIMEOUT, ['configuration_id' => $configurationId, 'status' => $configuration['status'], 'timeout' => $timeoutSeconds]);
+        throw new AppException('La suppression du service prend trop de temps, veuillez réessayer', Response::HTTP_SERVICE_UNAVAILABLE, ['configuration_id' => $configurationId, 'status' => $configuration['status'], 'timeout' => $timeoutSeconds], headers: ['Retry-After' => (string) self::UNPUBLISH_RETRY_DELAY_SECONDS]);
     }
 
     /**
@@ -717,7 +717,7 @@ class CartesServiceApiService
             } elseif ('your_community' === $shareWith) {
                 $open = false;
             } else {
-                throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
+                throw new AppException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
             }
 
             $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
@@ -726,7 +726,7 @@ class CartesServiceApiService
             ]);
 
             if (0 === count($endpoints)) {
-                throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
+                throw new AppException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
             }
 
             return $endpoints[0]['endpoint'];

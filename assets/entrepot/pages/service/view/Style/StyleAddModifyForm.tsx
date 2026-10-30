@@ -24,7 +24,8 @@ import { decodeKeys, encodeKey, encodeKeys, getFileExtension, removeDiacritics }
 import { CartesStyle, OfferingTypeEnum, Service, StyleFormatEnum } from "../../../../../@types/app";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
 import getWebService from "../../../../../modules/WebServices/WebServices";
 import validations from "../../../../../validations";
 import api from "../../../../api";
@@ -150,7 +151,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     );
 
     const styleFilesQuery = useQueries({
-        queries: style.layers.map<UseQueryOptions<string, CartesApiException>>((layer) => ({
+        queries: style.layers.map<UseQueryOptions<string, ApiError>>((layer) => ({
             queryKey: RQKeys.datastore_annexe(datastoreId, layer.annexe_id),
             queryFn: async ({ signal }) => {
                 // return api.annexe.getFileContent(datastoreId, layer.annexe_id, { signal, cache: "no-store" });
@@ -332,7 +333,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                 <Alert
                     severity="error"
                     closable={false}
-                    title={serviceQuery.error.message}
+                    title={getApiErrorMessage(serviceQuery.error)}
                     description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
                 />
             ) : serviceQuery.data ? (
@@ -355,7 +356,9 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         )}
                     </div>
 
-                    {addModifyMutation.error && <Alert closable description={addModifyMutation.error.message} severity="error" title={tCommon("error")} />}
+                    {addModifyMutation.error && (
+                        <Alert closable description={getApiErrorMessage(addModifyMutation.error)} severity="error" title={tCommon("error")} />
+                    )}
 
                     <div className={fr.cx("fr-grid-row")}>
                         <div className={fr.cx("fr-col-4")}>

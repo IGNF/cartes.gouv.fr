@@ -20,7 +20,8 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
 import { getTranslation, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../modules/jsonFetch";
+import { ApiError } from "../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../modules/apiError";
 import api from "../../api";
 
 const { t } = getTranslation("AccessesRequest");
@@ -46,7 +47,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
 
     const { data: user } = useUserQuery();
 
-    const metadataQuery = useQuery<CswMetadata, CartesApiException>({
+    const metadataQuery = useQuery<CswMetadata, ApiError>({
         queryKey: RQKeys.accesses_request(fileIdentifier),
         queryFn: ({ signal }) => api.geonetwork.getMetadataInfos(fileIdentifier, { signal }),
         staleTime: 3600000,
@@ -109,7 +110,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                 <Alert
                     severity="error"
                     closable={false}
-                    title={metadataQuery.error.message}
+                    title={getApiErrorMessage(metadataQuery.error)}
                     description={<Button linkProps={{ href: catalogueDatasheetUrl }}>{t("back_to_catalogue")}</Button>}
                     className={fr.cx("fr-mb-6v")}
                 />
@@ -158,7 +159,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                             <Alert
                                 severity={"error"}
                                 title={tCommon("error")}
-                                description={requestMutation.error.message}
+                                description={getApiErrorMessage(requestMutation.error)}
                                 className={fr.cx("fr-my-3w")}
                                 closable
                                 onClose={() => {

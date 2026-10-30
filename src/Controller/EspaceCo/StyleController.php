@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\StyleApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,13 +26,9 @@ class StyleController extends AbstractController implements ApiControllerInterfa
     #[Route('/image/{name}', name: 'get_image', methods: ['GET'])]
     public function getImage(string $name, Request $request): Response
     {
-        try {
-            $query = $request->query->all();
-            $response = $this->styleApiService->getImage($name, $query);
+        $query = $request->query->all();
+        $response = $this->styleApiService->getImage($name, $query);
 
-            return new Response($response['content'], $response['code'], $response['headers']);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new Response($response['content'], $response['code'], $response['headers']);
     }
 }

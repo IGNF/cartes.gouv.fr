@@ -4,8 +4,6 @@ namespace App\Controller\Entrepot;
 
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\StaticApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,49 +35,35 @@ class StaticController extends AbstractController implements ApiControllerInterf
         Request $request,
         #[MapQueryParameter] ?bool $all,
     ): JsonResponse {
-        try {
-            $query = $request->query->all();
-            unset($query['all']);
+        $query = $request->query->all();
+        unset($query['all']);
 
-            if ($all) {
-                return $this->json($this->staticApiService->getAll($datastoreId, $query)->resolve());
-            }
-
-            $apiResponse = $this->staticApiService->getList($datastoreId, $query);
-            $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
-            $this->setPaginatedHeaders($response, $apiResponse->headers);
-
-            return $response;
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        if ($all) {
+            return $this->json($this->staticApiService->getAll($datastoreId, $query)->resolve());
         }
+
+        $apiResponse = $this->staticApiService->getList($datastoreId, $query);
+        $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
+        $this->setPaginatedHeaders($response, $apiResponse->headers);
+
+        return $response;
     }
 
     #[Route('/{staticFileId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $datastoreId, string $staticFileId): JsonResponse
     {
-        try {
-            $this->staticApiService->delete($datastoreId, $staticFileId)->await();
+        $this->staticApiService->delete($datastoreId, $staticFileId)->await();
 
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
     #[Route('/{staticFileId}', name: 'get_file_content', methods: ['GET'])]
     public function getFileContent(string $datastoreId, string $staticFileId): Response
     {
-        try {
-            $xmlFileContent = $this->staticApiService->downloadFile($datastoreId, $staticFileId)->text();
+        $xmlFileContent = $this->staticApiService->downloadFile($datastoreId, $staticFileId)->text();
 
-            return new Response($xmlFileContent, Response::HTTP_OK, [
-                'Content-Type' => 'application/xml',
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return new Response($xmlFileContent, Response::HTTP_OK, [
+            'Content-Type' => 'application/xml',
+        ]);
     }
 }

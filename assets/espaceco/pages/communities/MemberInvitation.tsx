@@ -14,7 +14,8 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
-import { CartesApiException } from "../../../modules/jsonFetch";
+import { ApiError } from "../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../modules/apiError";
 import { routes } from "../../../router/router";
 import api from "../../api";
 import "../../../../assets/sass/pages/espaceco/member_invitation.scss";
@@ -42,21 +43,21 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
 
     useEffect(() => {
         if (isMeError) {
-            if (meError.code === 403 && meError?.message.includes("CGU")) {
+            if (meError.status === 403 && meError.detail?.includes("CGU")) {
                 setErrorMessage({
                     message: t("espaceco_accept_cgu", { url: espaceCoUrl }),
                     type: "warning",
                 });
             } else {
                 setErrorMessage({
-                    message: meError.message,
+                    message: getApiErrorMessage(meError),
                     type: "warning",
                 });
             }
         }
     }, [espaceCoUrl, isMeError, meError, t]);
 
-    const query = useQuery<CommunityResponseDTO, CartesApiException>({
+    const query = useQuery<CommunityResponseDTO, ApiError>({
         queryKey: RQKeys.community(communityId),
         queryFn: () => api.community.getCommunity(communityId),
         staleTime: 3600000,
@@ -76,7 +77,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
     }, [me, communityId]);
 
     /* Invitation : role : "invited" => "member" */
-    const updateRoleMutation = useMutation<CommunityMember | undefined, CartesApiException>({
+    const updateRoleMutation = useMutation<CommunityMember | undefined, ApiError>({
         mutationFn: () => {
             if (me?.id) {
                 return api.community.updateMemberRole(communityId, me.id, "member");
@@ -86,7 +87,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
     });
 
     /* Suppression du membre, Mais comme il a créé son compte, il reste inscrit sur cartes.gouv. */
-    const removeMemberMutation = useMutation<{ user_id: number } | undefined, CartesApiException>({
+    const removeMemberMutation = useMutation<{ user_id: number } | undefined, ApiError>({
         mutationFn: () => {
             if (me?.id) {
                 return api.community.removeMember(communityId, me.id);
@@ -103,7 +104,14 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
             <h1>{t("document_title")}</h1>
             {query.isLoading && <LoadingText as="h6" message={t("community_loading")} />}
             {query.isError && <Alert severity="error" closable title={t("community_loading_failed")} />}
-            {updateRoleMutation.isError && <Alert severity="error" closable title={updateRoleMutation.error.message} />}
+            {updateRoleMutation.isError && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(updateRoleMutation.error)}
+                    description={getApiErrorDescription(updateRoleMutation.error)}
+                />
+            )}
             {updateRoleMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>
@@ -112,7 +120,14 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
                 </Wait>
             )}
 
-            {removeMemberMutation.isError && <Alert severity="error" closable title={removeMemberMutation.error.message} />}
+            {removeMemberMutation.isError && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(removeMemberMutation.error)}
+                    description={getApiErrorDescription(removeMemberMutation.error)}
+                />
+            )}
             {removeMemberMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>

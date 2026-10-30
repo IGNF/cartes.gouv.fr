@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\DatabaseApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,13 +30,9 @@ class DatabaseController extends AbstractController implements ApiControllerInte
     #[Route('/', name: 'get_all', requirements: ['communityId' => '\d+'], methods: ['GET'])]
     public function getAll(#[MapQueryParameter] array $fields = []): JsonResponse
     {
-        try {
-            $databases = $this->databaseApiService->getAll($fields)->resolve();
+        $databases = $this->databaseApiService->getAll($fields)->resolve();
 
-            return new JsonResponse($databases);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($databases);
     }
 
     /**
@@ -49,13 +43,9 @@ class DatabaseController extends AbstractController implements ApiControllerInte
         int $databaseId,
         #[MapQueryParameter] array $fields = []): JsonResponse
     {
-        try {
-            $database = $this->databaseApiService->getDatabase($databaseId, $fields)->array();
+        $database = $this->databaseApiService->getDatabase($databaseId, $fields)->array();
 
-            return new JsonResponse($database);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($database);
     }
 
     /**
@@ -68,13 +58,9 @@ class DatabaseController extends AbstractController implements ApiControllerInte
         #[MapQueryParameter] string $sort,
         #[MapQueryParameter] array $fields = []): JsonResponse
     {
-        try {
-            $databases = $this->databaseApiService->searchBy($field, $value, $sort, $fields)->resolve();
+        $databases = $this->databaseApiService->searchBy($field, $value, $sort, $fields)->resolve();
 
-            return new JsonResponse($databases);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($databases);
     }
 
     /**
@@ -86,12 +72,8 @@ class DatabaseController extends AbstractController implements ApiControllerInte
         int $tableId,
         #[MapQueryParameter] array $fields = []): JsonResponse
     {
-        try {
-            $table = $this->databaseApiService->getTable($databaseId, $tableId, $fields)->array();
+        $table = $this->databaseApiService->getTable($databaseId, $tableId, $fields)->array();
 
-            return new JsonResponse($table);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($table);
     }
 }

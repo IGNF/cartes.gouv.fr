@@ -4,8 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
+use App\Exception\AppException;
 use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\MetadataApiService;
 use OpenApi\Attributes as OA;
@@ -36,141 +35,103 @@ class MetadataController extends AbstractController implements ApiControllerInte
         string $datastoreId,
         Request $request,
     ): JsonResponse {
-        try {
-            $query = $request->query->all();
+        $query = $request->query->all();
 
-            $metadataList = $this->metadataApiService->getAll($datastoreId, $query)->resolve();
+        $metadataList = $this->metadataApiService->getAll($datastoreId, $query)->resolve();
 
-            return $this->json($metadataList);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
-        }
+        return $this->json($metadataList);
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, Request $request): JsonResponse
     {
-        try {
-            $metadataArray = json_decode($request->getContent(), true);
-            $datasheetName = $request->query->get(CommonTags::DATASHEET_NAME);
+        $metadataArray = json_decode($request->getContent(), true);
+        $datasheetName = $request->query->get(CommonTags::DATASHEET_NAME);
 
-            $cswMetadata = $this->cswMetadataHelper->fromArray($metadataArray);
-            $filePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
+        $cswMetadata = $this->cswMetadataHelper->fromArray($metadataArray);
+        $filePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
 
-            $metadata = $this->metadataApiService->add($datastoreId, $filePath);
-            $metadata['csw_metadata'] = $cswMetadata;
+        $metadata = $this->metadataApiService->add($datastoreId, $filePath);
+        $metadata['csw_metadata'] = $cswMetadata;
 
-            if (null !== $datasheetName) {
-                $metadata = $this->metadataApiService->addTags($datastoreId, $metadata['_id'], [
-                    CommonTags::DATASHEET_NAME => $datasheetName,
-                ])->array();
-            }
-
-            return $this->json($metadata);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        if (null !== $datasheetName) {
+            $metadata = $this->metadataApiService->addTags($datastoreId, $metadata['_id'], [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ])->array();
         }
+
+        return $this->json($metadata);
     }
 
     #[Route('/{metadataId}', name: 'get', methods: ['GET'], requirements: ['metadataId' => Requirement::UUID_V4])]
     public function get(string $datastoreId, string $metadataId): JsonResponse
     {
-        try {
-            $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
+        $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
 
-            $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
-            $metadata['csw_metadata'] = $this->cswMetadataHelper->fromXml($fileContent);
+        $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
+        $metadata['csw_metadata'] = $this->cswMetadataHelper->fromXml($fileContent);
 
-            return $this->json($metadata);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->json($metadata);
     }
 
     #[Route('/{datasheetName}', name: 'get_by_datasheet_name', methods: ['GET'])]
     public function getByDatasheetName(string $datastoreId, string $datasheetName): JsonResponse
     {
-        try {
-            $metadataList = $this->metadataApiService->getAll($datastoreId, [
-                'tags' => [
-                    CommonTags::DATASHEET_NAME => $datasheetName,
-                ],
-            ])->resolve();
+        $metadataList = $this->metadataApiService->getAll($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ])->resolve();
 
-            if (0 === count($metadataList)) {
-                throw new CartesApiException("Aucune métadonnée trouvée pour la fiche de données {$datasheetName}", JsonResponse::HTTP_NOT_FOUND);
-            }
-
-            $metadata = $metadataList[0];
-
-            $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
-
-            $metadata['csw_metadata'] = $this->cswMetadataHelper->fromXml($fileContent);
-
-            return $this->json($metadata);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        if (0 === count($metadataList)) {
+            throw new AppException("Aucune métadonnée trouvée pour la fiche de données {$datasheetName}", JsonResponse::HTTP_NOT_FOUND);
         }
+
+        $metadata = $metadataList[0];
+
+        $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
+
+        $metadata['csw_metadata'] = $this->cswMetadataHelper->fromXml($fileContent);
+
+        return $this->json($metadata);
     }
 
     #[Route('/{metadataId}/file', name: 'get_file_content', methods: ['GET'])]
     public function getFileContent(string $datastoreId, string $metadataId, Request $request): Response
     {
-        try {
-            $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadataId)->text();
+        $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadataId)->text();
 
-            $format = $request->query->get('format', 'xml');
+        $format = $request->query->get('format', 'xml');
 
-            if ('json' === $format) {
-                $cswMetadata = $this->cswMetadataHelper->fromXml($xmlFileContent);
+        if ('json' === $format) {
+            $cswMetadata = $this->cswMetadataHelper->fromXml($xmlFileContent);
 
-                return $this->json($cswMetadata);
-            }
-
-            return new Response($xmlFileContent, Response::HTTP_OK, [
-                'Content-Type' => 'application/xml',
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json($cswMetadata);
         }
+
+        return new Response($xmlFileContent, Response::HTTP_OK, [
+            'Content-Type' => 'application/xml',
+        ]);
     }
 
     #[Route('/{metadataId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $datastoreId, string $metadataId): JsonResponse
     {
-        try {
-            $this->metadataApiService->delete($datastoreId, $metadataId)->await();
+        $this->metadataApiService->delete($datastoreId, $metadataId)->await();
 
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
     #[Route('/{metadataId}/unpublish', name: 'unpublish', methods: ['DELETE'])]
     public function unpublish(string $datastoreId, string $metadataId): JsonResponse
     {
-        try {
-            $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
+        $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
 
-            $endpointId = $metadata['endpoints'][0]['_id'] ?? null;
-            if (null !== $endpointId) {
-                $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $endpointId)->await();
-            }
-
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        $endpointId = $metadata['endpoints'][0]['_id'] ?? null;
+        if (null !== $endpointId) {
+            $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $endpointId)->await();
         }
+
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }

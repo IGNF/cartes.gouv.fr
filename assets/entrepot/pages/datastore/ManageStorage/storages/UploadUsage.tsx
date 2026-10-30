@@ -6,7 +6,8 @@ import { useMutation, usePrefetchQuery, useQuery, useQueryClient } from "@tansta
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "@/modules/apiError";
 import { type QueryParams } from "@/modules/Routing";
 import { Datastore, Upload } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
@@ -51,7 +52,7 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
 
     type TmpUpload = Pick<Upload, "_id" | "name" | "type" | "size" | "tags">;
     const queryParams = { page, limit, fields: ["name", "type", "size", "tags"] };
-    const uploadListQuery = useQuery<PaginatedListResponse<TmpUpload>, CartesApiException>({
+    const uploadListQuery = useQuery<PaginatedListResponse<TmpUpload>, ApiError>({
         queryKey: RQKeys.datastore_upload_list(datastore._id, queryParams),
         queryFn: ({ signal }) => fetchUploadList(datastore._id, queryParams, signal),
         staleTime: delta.minutes(1),
@@ -115,10 +116,26 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
 
             {uploadListQuery.isFetching && <LoadingText message={t("storage.upload.loading")} as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />}
 
-            {uploadListQuery.error && <Alert severity="error" title={uploadListQuery.error.message} as="h2" closable onClose={uploadListQuery.refetch} />}
+            {uploadListQuery.error && (
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(uploadListQuery.error)}
+                    description={getApiErrorDescription(uploadListQuery.error)}
+                    as="h2"
+                    closable
+                    onClose={uploadListQuery.refetch}
+                />
+            )}
 
             {deleteUploadMutation.error && (
-                <Alert severity="error" title={deleteUploadMutation.error.message} as="h2" closable onClose={uploadListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(deleteUploadMutation.error)}
+                    description={getApiErrorDescription(deleteUploadMutation.error)}
+                    as="h2"
+                    closable
+                    onClose={uploadListQuery.refetch}
+                />
             )}
 
             {uploadsList.length > 0 &&

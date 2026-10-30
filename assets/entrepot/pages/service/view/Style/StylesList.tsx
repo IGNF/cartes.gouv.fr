@@ -13,7 +13,7 @@ import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
 
 import "@/sass/components/styles-list.css";
@@ -38,7 +38,7 @@ function StylesList(props: StylesListProps) {
     const queryClient = useQueryClient();
 
     // Suppression d'un style
-    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<CartesStyle[], CartesApiException, string>({
+    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<CartesStyle[], ApiError, string>({
         mutationFn: (name: string) => {
             if (service) {
                 return api.style.remove(datastoreId, service._id, { style_technical_name: name });
@@ -64,7 +64,7 @@ function StylesList(props: StylesListProps) {
     });
 
     // Changement de style par defaut
-    const { isPending: isPendingChangeCurrentStyle, mutate: mutateChangeCurrentStyle } = useMutation<CartesStyle[], CartesApiException, string>({
+    const { isPending: isPendingChangeCurrentStyle, mutate: mutateChangeCurrentStyle } = useMutation<CartesStyle[], ApiError, string>({
         mutationFn: (name: string) => {
             if (service) {
                 return api.style.setCurrent(datastoreId, service._id, { style_technical_name: name });

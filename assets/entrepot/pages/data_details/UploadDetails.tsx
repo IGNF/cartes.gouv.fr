@@ -11,7 +11,8 @@ import { useTranslation } from "@/i18n";
 import { UploadReport } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../modules/jsonFetch";
+import { ApiError } from "../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../modules/apiError";
 import { routes } from "../../../router/router";
 import api from "../../api";
 import UploadPreviewTab from "./PreviewTab/UploadPreviewTab";
@@ -31,7 +32,7 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
     const membership = useMembership({ datastoreId: datastore?._id });
     const datastoreName = tCommon("datastore_name", { name: datastore?.name, isSandbox: membership?.isSandbox });
 
-    const reportQuery = useQuery<UploadReport, CartesApiException>({
+    const reportQuery = useQuery<UploadReport, ApiError>({
         queryKey: RQKeys.datastore_upload_report(datastoreId, uploadId),
         queryFn: ({ signal }) => api.upload.getUploadReport(datastoreId, uploadId, { signal }),
     });
@@ -70,7 +71,15 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
             )}
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
-                {reportQuery.isError && <Alert severity="error" closable title={reportQuery.error.message} onClose={reportQuery.refetch} />}
+                {reportQuery.isError && (
+                    <Alert
+                        severity="error"
+                        closable
+                        title={getApiErrorTitle(reportQuery.error)}
+                        description={getApiErrorDescription(reportQuery.error)}
+                        onClose={reportQuery.refetch}
+                    />
+                )}
             </div>
 
             {reportQuery.data && (

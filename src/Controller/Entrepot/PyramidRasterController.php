@@ -8,9 +8,7 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
-use App\Exception\ApiException;
 use App\Exception\AppException;
-use App\Exception\CartesApiException;
 use App\Security\User;
 use App\Services\CapabilitiesService;
 use App\Services\EntrepotApi\AnnexeApiService;
@@ -75,110 +73,106 @@ class PyramidRasterController extends ServiceController implements ApiController
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true);
 
-            $datastore = $this->datastoreApiService->get($datastoreId);
-            $processingId = $this->sandboxService->getProcGeneratePyramidRaster($datastoreId);
+        $datastore = $this->datastoreApiService->get($datastoreId);
+        $processingId = $this->sandboxService->getProcGeneratePyramidRaster($datastoreId);
 
-            $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $data['wmsv_offering_id'])->array();
-            $wmsvConfiguration = $this->configurationApiService->get($datastoreId, $wmsvOffering['configuration']['_id'])->array();
+        $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $data['wmsv_offering_id'])->array();
+        $wmsvConfiguration = $this->configurationApiService->get($datastoreId, $wmsvOffering['configuration']['_id'])->array();
 
-            $vectorDbId = $wmsvConfiguration['type_infos']['used_data'][0]['stored_data'] ?? null;
-            if (null === $vectorDbId) {
-                throw new AppException(sprintf('Donnée stockée du type %s référencée par le service WMS-Vecteur non trouvée', StoredDataTypes::VECTOR_DB), Response::HTTP_BAD_REQUEST);
-            }
-
-            $vectordb = $this->storedDataApiService->get($datastoreId, $vectorDbId)->array();
-
-            $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $wmsvOffering['endpoint']['_id']);
-            $endpointUrlBase = $serviceEndpoint['endpoint']['urls'][0]['url'] ?? null;
-
-            if (null === $endpointUrlBase) {
-                throw new AppException('URL du service WMS-Vecteur non trouvée', Response::HTTP_BAD_REQUEST);
-            }
-
-            $zoomRange = $data['zoom_range'];
-            $harvestLevels = array_map(strval(...), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
-
-            $requestBody = [
-                'processing' => $processingId,
-                'output' => [
-                    'stored_data' => [
-                        'name' => $data['technical_name'],
-                    ],
-                ],
-                'parameters' => [
-                    'samplesperpixel' => 3,
-                    'sampleformat' => 'UINT8',
-                    'tms' => 'PM',
-                    'compression' => 'jpg',
-                    'bottom' => strval($zoomRange[1]),
-                    'harvest_levels' => $harvestLevels,
-                    'harvest_format' => 'image/jpeg',
-                    'harvest_url' => $endpointUrlBase,
-                    'harvest_layers' => $wmsvOffering['layer_name'],
-                    'harvest_area' => $data['wmsv_config_bbox'],
-                ],
-            ];
-
-            if (isset($data['email_notification']) && true === $data['email_notification']) {
-                /** @var User */
-                $user = $this->getUser();
-                $userEmail = $user->getEmail();
-                $datasheetName = $vectordb['tags'][CommonTags::DATASHEET_NAME] ?? null;
-
-                if ($userEmail && $datasheetName) {
-                    $baseUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);
-
-                    $requestBody['callback'] = [
-                        'type' => 'email',
-                        'to_address' => [$userEmail],
-                        'entity_url' => sprintf(
-                            '%stableau-de-bord/entrepots/{{ datastore }}/donnees/{{ output }}/details?datasheetName=%s',
-                            $baseUrl,
-                            urlencode($datasheetName)
-                        ),
-                    ];
-                }
-            }
-
-            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
-            $pyramidId = $processingExecution['output']['stored_data']['_id'];
-
-            $pyramidTags = [
-                CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
-                'upload_id' => $vectordb['tags']['upload_id'],
-                'proc_int_id' => $vectordb['tags']['proc_int_id'],
-                'vectordb_id' => $vectorDbId,
-                'proc_pyr_creat_id' => $processingExecution['_id'],
-            ];
-            if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
-                $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
-            }
-            if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
-                $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
-            }
-
-            $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
-            $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
-            $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
-
-            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
-            $this->storedDataApiService->modify($datastoreId, $pyramidId, [
-                'extra' => [
-                    'legend' => [
-                        'url' => $legendAnnexeUrlAbs,
-                        'annexe_id' => $legendAnnexe['_id'],
-                    ],
-                ],
-            ])->await();
-            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
-
-            return new JsonResponse();
-        } catch (ApiException|AppException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        $vectorDbId = $wmsvConfiguration['type_infos']['used_data'][0]['stored_data'] ?? null;
+        if (null === $vectorDbId) {
+            throw new AppException(sprintf('Donnée stockée du type %s référencée par le service WMS-Vecteur non trouvée', StoredDataTypes::VECTOR_DB), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+        $vectordb = $this->storedDataApiService->get($datastoreId, $vectorDbId)->array();
+
+        $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $wmsvOffering['endpoint']['_id']);
+        $endpointUrlBase = $serviceEndpoint['endpoint']['urls'][0]['url'] ?? null;
+
+        if (null === $endpointUrlBase) {
+            throw new AppException('URL du service WMS-Vecteur non trouvée', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        $zoomRange = $data['zoom_range'];
+        $harvestLevels = array_map(strval(...), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
+
+        $requestBody = [
+            'processing' => $processingId,
+            'output' => [
+                'stored_data' => [
+                    'name' => $data['technical_name'],
+                ],
+            ],
+            'parameters' => [
+                'samplesperpixel' => 3,
+                'sampleformat' => 'UINT8',
+                'tms' => 'PM',
+                'compression' => 'jpg',
+                'bottom' => strval($zoomRange[1]),
+                'harvest_levels' => $harvestLevels,
+                'harvest_format' => 'image/jpeg',
+                'harvest_url' => $endpointUrlBase,
+                'harvest_layers' => $wmsvOffering['layer_name'],
+                'harvest_area' => $data['wmsv_config_bbox'],
+            ],
+        ];
+
+        if (isset($data['email_notification']) && true === $data['email_notification']) {
+            /** @var User */
+            $user = $this->getUser();
+            $userEmail = $user->getEmail();
+            $datasheetName = $vectordb['tags'][CommonTags::DATASHEET_NAME] ?? null;
+
+            if ($userEmail && $datasheetName) {
+                $baseUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);
+
+                $requestBody['callback'] = [
+                    'type' => 'email',
+                    'to_address' => [$userEmail],
+                    'entity_url' => sprintf(
+                        '%stableau-de-bord/entrepots/{{ datastore }}/donnees/{{ output }}/details?datasheetName=%s',
+                        $baseUrl,
+                        urlencode($datasheetName)
+                    ),
+                ];
+            }
+        }
+
+        $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
+        $pyramidId = $processingExecution['output']['stored_data']['_id'];
+
+        $pyramidTags = [
+            CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
+            'upload_id' => $vectordb['tags']['upload_id'],
+            'proc_int_id' => $vectordb['tags']['proc_int_id'],
+            'vectordb_id' => $vectorDbId,
+            'proc_pyr_creat_id' => $processingExecution['_id'],
+        ];
+        if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
+            $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
+        }
+        if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
+            $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
+        }
+
+        $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
+        $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
+        $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
+
+        $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
+        $this->storedDataApiService->modify($datastoreId, $pyramidId, [
+            'extra' => [
+                'legend' => [
+                    'url' => $legendAnnexeUrlAbs,
+                    'annexe_id' => $legendAnnexe['_id'],
+                ],
+            ],
+        ])->await();
+        $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+
+        return new JsonResponse();
     }
 
     #[Route('/{pyramidId}/wms-raster-wmts', name: 'wms_raster_wmts_add', methods: ['POST'])]
@@ -188,30 +182,26 @@ class PyramidRasterController extends ServiceController implements ApiController
         #[MapQueryParameter] string $type,
         #[MapRequestPayload] CommonDTO $dto,
     ): JsonResponse {
-        try {
-            $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
-            if (!in_array($type, $acceptedTypes)) {
-                throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
-            }
-
-            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
-
-            // création de requête pour la config
-            $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type);
-            $configRequestBody = $this->getConfigRequestBody($type, $dto, $typeInfos);
-
-            $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody);
-
-            $configType = ConfigurationTypes::WMSRASTER === $type ? 'wmsr' : 'wmts';
-            $finalStyleFileName = sprintf('config_%s_style_%s', $offering['configuration']['_id'], $configType);
-            $this->staticApiService->modifyInfo($datastoreId, $typeInfos['styles'][0], [
-                'name' => $finalStyleFileName,
-            ])->await();
-
-            return $this->json($offering);
-        } catch (ApiException|AppException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
+        if (!in_array($type, $acceptedTypes)) {
+            throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
         }
+
+        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
+
+        // création de requête pour la config
+        $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type);
+        $configRequestBody = $this->getConfigRequestBody($type, $dto, $typeInfos);
+
+        $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody);
+
+        $configType = ConfigurationTypes::WMSRASTER === $type ? 'wmsr' : 'wmts';
+        $finalStyleFileName = sprintf('config_%s_style_%s', $offering['configuration']['_id'], $configType);
+        $this->staticApiService->modifyInfo($datastoreId, $typeInfos['styles'][0], [
+            'name' => $finalStyleFileName,
+        ])->await();
+
+        return $this->json($offering);
     }
 
     #[Route('/{pyramidId}/wms-raster-wmts/{offeringId}/edit', name: 'wms_raster_wmts_edit', methods: ['POST'])]
@@ -222,29 +212,25 @@ class PyramidRasterController extends ServiceController implements ApiController
         #[MapQueryParameter] string $type,
         #[MapRequestPayload] CommonDTO $dto,
     ): JsonResponse {
-        try {
-            $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
-            if (!in_array($type, $acceptedTypes)) {
-                throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
-            }
-
-            // récup config et offering existants
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
-            $oldOffering['configuration'] = $oldConfiguration;
-
-            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
-
-            // création de requête pour la config
-            $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type, $oldConfiguration['_id']);
-            $configRequestBody = $this->getConfigRequestBody($type, $dto, $typeInfos, $oldConfiguration);
-
-            $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody, $oldOffering);
-
-            return $this->json($offering);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
+        if (!in_array($type, $acceptedTypes)) {
+            throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
         }
+
+        // récup config et offering existants
+        $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+        $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
+        $oldOffering['configuration'] = $oldConfiguration;
+
+        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
+
+        // création de requête pour la config
+        $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type, $oldConfiguration['_id']);
+        $configRequestBody = $this->getConfigRequestBody($type, $dto, $typeInfos, $oldConfiguration);
+
+        $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody, $oldOffering);
+
+        return $this->json($offering);
     }
 
     /**

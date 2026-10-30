@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\DatabaseApiService;
 use App\Services\EspaceCoApi\PermissionApiService;
 use OpenApi\Attributes as OA;
@@ -39,48 +37,44 @@ class PermissionController extends AbstractController implements ApiControllerIn
     #[Route('/get_viewable_tables/{communityId}', name: 'get_viewable_tables_by_community', methods: ['GET'])]
     public function getViewableTables(int $communityId): JsonResponse
     {
-        try {
-            $tables = [];
-            $tablesToremove = [];
+        $tables = [];
+        $tablesToremove = [];
 
-            $permissions = $this->permissionApiService->getAllByCommunity($communityId)->resolve();
-            foreach ($permissions as $permission) {
-                $tableId = $permission['table'];
+        $permissions = $this->permissionApiService->getAllByCommunity($communityId)->resolve();
+        foreach ($permissions as $permission) {
+            $tableId = $permission['table'];
 
-                // On doit avoir au moins une permission en lecture et non ADMIN
-                $isOK = 'NONE' !== $permission['level'] && 'ADMIN' !== $permission['level'];
+            // On doit avoir au moins une permission en lecture et non ADMIN
+            $isOK = 'NONE' !== $permission['level'] && 'ADMIN' !== $permission['level'];
 
-                if (is_null($tableId) && $isOK) {	// Permission sur une base de données
-                    // Ajout de toutes les tables
-                    $allTables = $this->databaseApiService->getAllTables($permission['database'])->resolve();
-                    foreach ($allTables as $table) {
-                        $tables[$table['full_name']] = $table;
-                    }
-                    continue;
+            if (is_null($tableId) && $isOK) {	// Permission sur une base de données
+                // Ajout de toutes les tables
+                $allTables = $this->databaseApiService->getAllTables($permission['database'])->resolve();
+                foreach ($allTables as $table) {
+                    $tables[$table['full_name']] = $table;
                 }
-
-                if ($tableId) {
-                    $table = $this->databaseApiService->getTable($permission['database'], $tableId)->array();
-                    if ($isOK) {
-                        if (!array_key_exists($table['full_name'], $tables)) {
-                            $tables[$table['full_name']] = $table;
-                        }
-                    } elseif ('NONE' == $permission['level']) {
-                        $tablesToremove[] = $table['full_name'];
-                    }
-                }
+                continue;
             }
 
-            $tables = array_filter($tables, function ($fullName) use ($tablesToremove) {
-                return !in_array($fullName, $tablesToremove);
-            }, ARRAY_FILTER_USE_KEY);
-
-            ksort($tables);
-
-            return new JsonResponse($tables);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+            if ($tableId) {
+                $table = $this->databaseApiService->getTable($permission['database'], $tableId)->array();
+                if ($isOK) {
+                    if (!array_key_exists($table['full_name'], $tables)) {
+                        $tables[$table['full_name']] = $table;
+                    }
+                } elseif ('NONE' == $permission['level']) {
+                    $tablesToremove[] = $table['full_name'];
+                }
+            }
         }
+
+        $tables = array_filter($tables, function ($fullName) use ($tablesToremove) {
+            return !in_array($fullName, $tablesToremove);
+        }, ARRAY_FILTER_USE_KEY);
+
+        ksort($tables);
+
+        return new JsonResponse($tables);
     }
 
     /**
@@ -89,121 +83,109 @@ class PermissionController extends AbstractController implements ApiControllerIn
     #[Route('/get_themable_tables/{communityId}', name: 'get_themable_tables_by_community', methods: ['GET'])]
     public function getThemableTables(int $communityId): JsonResponse
     {
-        try {
-            $tables = [];
-            $tablesToremove = [];
+        $tables = [];
+        $tablesToremove = [];
 
-            $permissions = $this->permissionApiService->getAllByCommunity($communityId)->resolve();
-            foreach ($permissions as $permission) {
-                $tableId = $permission['table'];
+        $permissions = $this->permissionApiService->getAllByCommunity($communityId)->resolve();
+        foreach ($permissions as $permission) {
+            $tableId = $permission['table'];
 
-                // On doit avoir au moins une permission en lecture et non ADMIN
-                $isOK = 'NONE' !== $permission['level'] && 'ADMIN' !== $permission['level'];
+            // On doit avoir au moins une permission en lecture et non ADMIN
+            $isOK = 'NONE' !== $permission['level'] && 'ADMIN' !== $permission['level'];
 
-                if (is_null($tableId) && $isOK) {	// Permission sur une base de données
-                    // Ajout de toutes les tables
-                    $allTables = $this->databaseApiService->getAllTables($permission['database'], ['id', 'database_id', 'full_name'])->resolve();
-                    foreach ($allTables as $table) {
-                        $tables[] = $table['full_name'];
-                    }
-                } elseif (!is_null($tableId) && !$isOK) { // Permission sur une table non désirée
-                    $table = $this->databaseApiService->getTable($permission['database'], $tableId, ['full_name'])->array();
-                    $fullName = $table['full_name'];
-                    if (!in_array($fullName, $tablesToremove)) {
-                        $tablesToremove[] = $fullName;
-                    }
+            if (is_null($tableId) && $isOK) {	// Permission sur une base de données
+                // Ajout de toutes les tables
+                $allTables = $this->databaseApiService->getAllTables($permission['database'], ['id', 'database_id', 'full_name'])->resolve();
+                foreach ($allTables as $table) {
+                    $tables[] = $table['full_name'];
+                }
+            } elseif (!is_null($tableId) && !$isOK) { // Permission sur une table non désirée
+                $table = $this->databaseApiService->getTable($permission['database'], $tableId, ['full_name'])->array();
+                $fullName = $table['full_name'];
+                if (!in_array($fullName, $tablesToremove)) {
+                    $tablesToremove[] = $fullName;
                 }
             }
-
-            $tables = array_filter($tables, function ($fullName) use ($tablesToremove) {
-                return !in_array($fullName, $tablesToremove);
-            });
-            asort($tables);
-            $t = array_unique($tables);
-
-            return new JsonResponse(array_values($t));
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
+
+        $tables = array_filter($tables, function ($fullName) use ($tablesToremove) {
+            return !in_array($fullName, $tablesToremove);
+        });
+        asort($tables);
+        $t = array_unique($tables);
+
+        return new JsonResponse(array_values($t));
     }
 
     #[Route('/get/{communityId}', name: 'get', methods: ['GET'])]
     public function get(int $communityId): JsonResponse
     {
-        try {
-            $permissions = $this->permissionApiService->getAllByCommunity(
-                $communityId,
-                ['NONE', 'VIEW', 'EDIT', 'EXPORT'],
-                ['database', 'table', 'column', 'level', 'database_title', 'table_name', 'table_title', 'column_name', 'column_title']
-            )->resolve();
-            $groupBy = $this->_groupBy($permissions);
+        $permissions = $this->permissionApiService->getAllByCommunity(
+            $communityId,
+            ['NONE', 'VIEW', 'EDIT', 'EXPORT'],
+            ['database', 'table', 'column', 'level', 'database_title', 'table_name', 'table_title', 'column_name', 'column_title']
+        )->resolve();
+        $groupBy = $this->_groupBy($permissions);
 
-            return new JsonResponse($groupBy);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($groupBy);
     }
 
     #[Route('/update/{communityId}', name: 'update', methods: ['PATCH'])]
     public function update(int $communityId, Request $request): JsonResponse
     {
-        try {
-            $permissions = $this->permissionApiService->getAllByCommunity(
-                $communityId,
-                ['NONE', 'VIEW', 'EDIT', 'EXPORT']
-            )->resolve();
+        $permissions = $this->permissionApiService->getAllByCommunity(
+            $communityId,
+            ['NONE', 'VIEW', 'EDIT', 'EXPORT']
+        )->resolve();
 
-            $oldPermissionsByKey = [];
+        $oldPermissionsByKey = [];
 
-            // On regroupe par cle (database:table:column)
-            foreach ($permissions as $permission) {
-                $key = $this->_composeKey($permission);
-                $oldPermissionsByKey[$key] = ['id' => $permission['id'], 'level' => $permission['level']];
-            }
-
-            // On regroupe par cle (database:table:column)
-            $datas = json_decode($request->getContent(), true);
-            $newPermissionsByKey = $this->_groupByKey($datas);
-
-            // Les cles communes
-            $commons = array_keys(array_intersect_key($oldPermissionsByKey, $newPermissionsByKey));
-
-            if (0 !== count($commons)) {
-                // Recherche des modifications
-                foreach ($commons as $key) {
-                    $oldPermissionConfig = $oldPermissionsByKey[$key];
-                    $newPermission = $newPermissionsByKey[$key];
-                    if ($newPermission['level'] != $oldPermissionConfig['level']) {
-                        $this->permissionApiService->update($oldPermissionConfig['id'], ['level' => $newPermission['level']])->await();
-                    }
-                }
-            }
-
-            $diff = array_diff_key($oldPermissionsByKey, $newPermissionsByKey);
-            if (0 !== count($diff)) {    // Suppressions
-                foreach ($oldPermissionsByKey as $config) {
-                    $this->permissionApiService->remove($config['id'])->await();
-                }
-            }
-
-            $diff = array_diff_key($newPermissionsByKey, $oldPermissionsByKey);
-            if (0 !== count($diff)) {    // Ajouts
-                foreach ($newPermissionsByKey as $config) {
-                    $this->permissionApiService->add($config)->await();
-                }
-            }
-
-            $permissions = $this->permissionApiService->getAllByCommunity(
-                $communityId,
-                ['NONE', 'VIEW', 'EDIT', 'EXPORT'],
-                ['database', 'table', 'column', 'level', 'database_title', 'table_name', 'table_title', 'column_name', 'column_title']
-            )->resolve();
-            $groupBy = $this->_groupBy($permissions);
-
-            return new JsonResponse($groupBy);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        // On regroupe par cle (database:table:column)
+        foreach ($permissions as $permission) {
+            $key = $this->_composeKey($permission);
+            $oldPermissionsByKey[$key] = ['id' => $permission['id'], 'level' => $permission['level']];
         }
+
+        // On regroupe par cle (database:table:column)
+        $datas = json_decode($request->getContent(), true);
+        $newPermissionsByKey = $this->_groupByKey($datas);
+
+        // Les cles communes
+        $commons = array_keys(array_intersect_key($oldPermissionsByKey, $newPermissionsByKey));
+
+        if (0 !== count($commons)) {
+            // Recherche des modifications
+            foreach ($commons as $key) {
+                $oldPermissionConfig = $oldPermissionsByKey[$key];
+                $newPermission = $newPermissionsByKey[$key];
+                if ($newPermission['level'] != $oldPermissionConfig['level']) {
+                    $this->permissionApiService->update($oldPermissionConfig['id'], ['level' => $newPermission['level']])->await();
+                }
+            }
+        }
+
+        $diff = array_diff_key($oldPermissionsByKey, $newPermissionsByKey);
+        if (0 !== count($diff)) {    // Suppressions
+            foreach ($oldPermissionsByKey as $config) {
+                $this->permissionApiService->remove($config['id'])->await();
+            }
+        }
+
+        $diff = array_diff_key($newPermissionsByKey, $oldPermissionsByKey);
+        if (0 !== count($diff)) {    // Ajouts
+            foreach ($newPermissionsByKey as $config) {
+                $this->permissionApiService->add($config)->await();
+            }
+        }
+
+        $permissions = $this->permissionApiService->getAllByCommunity(
+            $communityId,
+            ['NONE', 'VIEW', 'EDIT', 'EXPORT'],
+            ['database', 'table', 'column', 'level', 'database_title', 'table_name', 'table_title', 'column_name', 'column_title']
+        )->resolve();
+        $groupBy = $this->_groupBy($permissions);
+
+        return new JsonResponse($groupBy);
     }
 
     /**

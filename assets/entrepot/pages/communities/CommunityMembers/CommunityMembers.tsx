@@ -24,7 +24,7 @@ import { useCommunity } from "../../../../contexts/community";
 import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import { AddMember, addMemberModal } from "../AddMember/AddMember";
@@ -125,7 +125,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const queryClient = useQueryClient();
 
     // Suppression d'un utilisateur
-    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<{ user: string } | undefined, CartesApiException, string>({
+    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<{ user: string } | undefined, ApiError, string>({
         mutationFn: (user_id: string) => {
             if (community._id) return api.community.removeMember(community._id, user_id);
             return Promise.resolve(undefined);
@@ -140,7 +140,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     });
 
     // Modification des droits d'un utilisateur
-    const { isPending: isModifyPending, mutate: mutateModify } = useMutation<UserRightsResponseDto | undefined, CartesApiException, updateMember>({
+    const { isPending: isModifyPending, mutate: mutateModify } = useMutation<UserRightsResponseDto | undefined, ApiError, updateMember>({
         mutationFn: (datas) => {
             if (community._id) return api.community.updateMember(community._id, datas);
             return Promise.resolve(undefined);

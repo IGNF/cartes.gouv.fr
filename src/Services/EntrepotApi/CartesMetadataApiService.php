@@ -15,7 +15,6 @@ use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Entity\CswMetadata\CswStyleFile;
 use App\Exception\AppException;
-use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -497,7 +496,7 @@ class CartesMetadataApiService
             'open' => true,
         ]);
         if (0 === count($endpointsList)) {
-            throw new CartesApiException("Point d'accès (endpoint) métadonnées n'a pas été trouvé");
+            throw new AppException("Point d'accès (endpoint) métadonnées n'a pas été trouvé", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return $endpointsList[0]['endpoint'];

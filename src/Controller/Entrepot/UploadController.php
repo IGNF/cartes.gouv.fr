@@ -9,7 +9,6 @@ use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
 use App\Exception\AppException;
-use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\UploadApiService;
 use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
@@ -43,103 +42,81 @@ class UploadController extends AbstractController implements ApiControllerInterf
         #[MapQueryParameter] ?bool $detailed = false,
         #[MapQueryParameter] ?bool $all = false,
     ): JsonResponse {
-        try {
-            $query = $request->query->all();
-            unset($query['detailed']);
-            unset($query['all']);
+        $query = $request->query->all();
+        unset($query['detailed']);
+        unset($query['all']);
 
-            if ($all) {
-                return $this->json(
-                    $detailed
-                    ? $this->uploadApiService->getAllDetailed($datastoreId, $query)
-                    : $this->uploadApiService->getAll($datastoreId, $query)->resolve()
-                );
-            }
-
-            $apiResponse = $detailed
-                ? $this->uploadApiService->getListDetailed($datastoreId, $query)
-                : $this->uploadApiService->getList($datastoreId, $query);
-
-            $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
-            $this->setPaginatedHeaders($response, $apiResponse->headers);
-
-            return $response;
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        if ($all) {
+            return $this->json(
+                $detailed
+                ? $this->uploadApiService->getAllDetailed($datastoreId, $query)
+                : $this->uploadApiService->getAll($datastoreId, $query)->resolve()
+            );
         }
+
+        $apiResponse = $detailed
+            ? $this->uploadApiService->getListDetailed($datastoreId, $query)
+            : $this->uploadApiService->getList($datastoreId, $query);
+
+        $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
+        $this->setPaginatedHeaders($response, $apiResponse->headers);
+
+        return $response;
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, Request $request): JsonResponse
     {
-        try {
-            $content = json_decode($request->getContent(), true);
+        $content = json_decode($request->getContent(), true);
 
-            if (!is_array($content)) {
-                throw new AppException('Corps de requête invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Corps de requête invalide']);
-            }
-
-            $dataUploadPath = $content['data_upload_path'] ?? null;
-            if (!is_string($dataUploadPath) || '' === trim($dataUploadPath)) {
-                throw new AppException('Chemin de fichier invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Chemin de fichier invalide']);
-            }
-
-            // déclaration de livraison
-            $uploadData = [
-                'name' => $content['data_technical_name'],
-                'description' => $content['data_technical_name'],
-                'type' => UploadTypes::VECTOR,
-                'srs' => $content['data_srid'],
-            ];
-            $upload = $this->uploadApiService->add($datastoreId, $uploadData)->array();
-
-            // ajout tags sur la livraison
-            $tags = [
-                UploadTags::DATA_UPLOAD_PATH => $dataUploadPath,
-                CommonTags::DATASHEET_NAME => $content['data_name'],
-                CommonTags::PRODUCER => $content['producer'],
-                CommonTags::PRODUCTION_YEAR => $content['production_year'],
-            ];
-
-            if (isset($content['email_notification'])) {
-                $tags['email_notification'] = (bool) $content['email_notification'];
-            }
-
-            $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags)->array();
-
-            // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB
-            return $this->json($upload);
-        } catch (AppException $ex) {
-            return $this->json($ex->getDetails(), $ex->getStatusCode());
-        } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        if (!is_array($content)) {
+            throw new AppException('Corps de requête invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Corps de requête invalide']);
         }
+
+        $dataUploadPath = $content['data_upload_path'] ?? null;
+        if (!is_string($dataUploadPath) || '' === trim($dataUploadPath)) {
+            throw new AppException('Chemin de fichier invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Chemin de fichier invalide']);
+        }
+
+        // déclaration de livraison
+        $uploadData = [
+            'name' => $content['data_technical_name'],
+            'description' => $content['data_technical_name'],
+            'type' => UploadTypes::VECTOR,
+            'srs' => $content['data_srid'],
+        ];
+        $upload = $this->uploadApiService->add($datastoreId, $uploadData)->array();
+
+        // ajout tags sur la livraison
+        $tags = [
+            UploadTags::DATA_UPLOAD_PATH => $dataUploadPath,
+            CommonTags::DATASHEET_NAME => $content['data_name'],
+            CommonTags::PRODUCER => $content['producer'],
+            CommonTags::PRODUCTION_YEAR => $content['production_year'],
+        ];
+
+        if (isset($content['email_notification'])) {
+            $tags['email_notification'] = (bool) $content['email_notification'];
+        }
+
+        $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags)->array();
+
+        // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB
+        return $this->json($upload);
     }
 
     #[Route('/{uploadId}', name: 'get', methods: ['GET'])]
     public function get(string $datastoreId, string $uploadId): JsonResponse
     {
-        try {
-            return $this->json($this->uploadApiService->get($datastoreId, $uploadId)->array());
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->json($this->uploadApiService->get($datastoreId, $uploadId)->array());
     }
 
     #[Route('/{uploadId}/file_tree', name: 'get_file_tree', methods: ['GET'])]
     public function getFileTree(string $datastoreId, string $uploadId): JsonResponse
     {
-        try {
-            $fileTree = $this->uploadApiService->getFileTree($datastoreId, $uploadId);
+        $fileTree = $this->uploadApiService->getFileTree($datastoreId, $uploadId);
 
-            return $this->json($fileTree);
-        } catch (AppException $ex) {
-            return $this->json($ex->getDetails(), $ex->getStatusCode());
-        } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->json($fileTree);
     }
 
     #[Route('/{uploadId}/integration_progress', name: 'integration_progress', methods: ['GET'])]
@@ -149,92 +126,76 @@ class UploadController extends AbstractController implements ApiControllerInterf
         UploadIntegrationWorkflow $uploadIntegrationWorkflow,
         #[MapQueryParameter] bool $getOnlyProgress = false,
     ): JsonResponse {
-        try {
+        $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
+        $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
+
+        // relecture seulement si une étape a été déclenchée
+        if (false === $getOnlyProgress && $uploadIntegrationWorkflow->advanceIfPossible($datastoreId, $upload, $progress)) {
             $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
             $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
-
-            // relecture seulement si une étape a été déclenchée
-            if (false === $getOnlyProgress && $uploadIntegrationWorkflow->advanceIfPossible($datastoreId, $upload, $progress)) {
-                $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
-                $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
-            }
-
-            $currentStepIndex = $uploadIntegrationWorkflow->getCurrentStepIndex($progress);
-
-            $progressJson = json_encode($progress);
-            $stepString = (string) $currentStepIndex;
-            $existingProgressJson = $upload['tags'][UploadTags::INTEGRATION_PROGRESS] ?? null;
-            $existingStepString = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? (string) $upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP] : null;
-
-            $uploadTags = [
-                UploadTags::INTEGRATION_PROGRESS => $progressJson,
-                UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
-            ];
-
-            // mise à jour état des étapes de l'intégration uniquement si changement
-            if ($existingProgressJson !== $progressJson || $existingStepString !== $stepString) {
-                $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags)->await();
-            }
-
-            // supprime livraison si intégration terminée
-            if (false === $getOnlyProgress && $uploadIntegrationWorkflow->isIntegrationCompleted($progress)) {
-                $this->uploadApiService->remove($datastoreId, $uploadId, $upload)->await();
-            }
-
-            // retourne l'upload complet + tags de progression pour que le frontend ait les données
-            // même après suppression de l'upload (pour avoir accès à datasheet_name, vectordb_id, etc.)
-            return $this->json([
-                'upload' => $upload,
-                UploadTags::INTEGRATION_PROGRESS => $progressJson,
-                UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
-            ]);
-        } catch (ApiException|AppException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+        $currentStepIndex = $uploadIntegrationWorkflow->getCurrentStepIndex($progress);
+
+        $progressJson = json_encode($progress);
+        $stepString = (string) $currentStepIndex;
+        $existingProgressJson = $upload['tags'][UploadTags::INTEGRATION_PROGRESS] ?? null;
+        $existingStepString = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? (string) $upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP] : null;
+
+        $uploadTags = [
+            UploadTags::INTEGRATION_PROGRESS => $progressJson,
+            UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
+        ];
+
+        // mise à jour état des étapes de l'intégration uniquement si changement
+        if ($existingProgressJson !== $progressJson || $existingStepString !== $stepString) {
+            $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags)->await();
+        }
+
+        // supprime livraison si intégration terminée
+        if (false === $getOnlyProgress && $uploadIntegrationWorkflow->isIntegrationCompleted($progress)) {
+            $this->uploadApiService->remove($datastoreId, $uploadId, $upload)->await();
+        }
+
+        // retourne l'upload complet + tags de progression pour que le frontend ait les données
+        // même après suppression de l'upload (pour avoir accès à datasheet_name, vectordb_id, etc.)
+        return $this->json([
+            'upload' => $upload,
+            UploadTags::INTEGRATION_PROGRESS => $progressJson,
+            UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
+        ]);
     }
 
     #[Route('/{uploadId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $datastoreId, string $uploadId): JsonResponse
     {
-        try {
-            $this->uploadApiService->remove($datastoreId, $uploadId)->await();
+        $this->uploadApiService->remove($datastoreId, $uploadId)->await();
 
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
     #[Route('/{uploadId}/upload-report', name: 'get_upload_report', methods: ['GET'])]
     public function getUploadReport(string $datastoreId, string $uploadId): JsonResponse
     {
-        try {
-            // Récupération des détails de l'upload ayant échoué
-            $inputUpload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
-            $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id'], $inputUpload);
-            $inputUpload['checks'] = [];
-            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
+        // Récupération des détails de l'upload ayant échoué
+        $inputUpload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
+        $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id'], $inputUpload);
+        $inputUpload['checks'] = [];
+        $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
 
-            foreach ($uploadChecks as &$checkType) {
-                foreach ($checkType as &$checkExecution) {
-                    $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->array());
-                    try {
-                        $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->array();
-                    } catch (ApiException) {
-                    }
-                    $inputUpload['checks'][] = $checkExecution;
+        foreach ($uploadChecks as &$checkType) {
+            foreach ($checkType as &$checkExecution) {
+                $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->array());
+                try {
+                    $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->array();
+                } catch (ApiException) {
                 }
+                $inputUpload['checks'][] = $checkExecution;
             }
-
-            return $this->json([
-                'input_upload' => $inputUpload,
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
+
+        return $this->json([
+            'input_upload' => $inputUpload,
+        ]);
     }
 }

@@ -5,8 +5,6 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
@@ -55,78 +53,62 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         #[MapQueryParameter] ?bool $all,
         Request $request,
     ): JsonResponse {
-        try {
-            $query = $request->query->all();
-            unset($query['all']);
+        $query = $request->query->all();
+        unset($query['all']);
 
-            if ($all) {
-                return $this->json($this->annexeApiService->getAll($datastoreId, $mimeType, $path, $labels)->resolve());
-            }
-
-            $apiResponse = $this->annexeApiService->getList($datastoreId, $query);
-            $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
-            $this->setPaginatedHeaders($response, $apiResponse->headers);
-
-            return $response;
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        if ($all) {
+            return $this->json($this->annexeApiService->getAll($datastoreId, $mimeType, $path, $labels)->resolve());
         }
+
+        $apiResponse = $this->annexeApiService->getList($datastoreId, $query);
+        $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
+        $this->setPaginatedHeaders($response, $apiResponse->headers);
+
+        return $response;
     }
 
     #[Route('/{annexeId}', name: 'modify', methods: ['PATCH'])]
     public function modify(string $datastoreId, string $annexeId, Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true);
 
-            return $this->json(
-                $this->annexeApiService->modify(
-                    $datastoreId,
-                    $annexeId,
-                    $data['paths'] ?? null,
-                    $data['labels'] ?? null,
-                    $data['published'] ?? null
-                )->array()
-            );
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
-        }
+        return $this->json(
+            $this->annexeApiService->modify(
+                $datastoreId,
+                $annexeId,
+                $data['paths'] ?? null,
+                $data['labels'] ?? null,
+                $data['published'] ?? null
+            )->array()
+        );
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, Request $request): JsonResponse
     {
-        try {
-            $file = $request->files->get('file');
-            $name = $file->getClientOriginalName();
-            $path = $request->request->getString('path');
+        $file = $request->files->get('file');
+        $name = $file->getClientOriginalName();
+        $path = $request->request->getString('path');
 
-            // Clear RSSFeed cache
-            if (str_contains($name, 'alerts.json')) {
-                $this->rssFeed->clearCache();
-            }
-
-            return new JsonResponse($this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path]));
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        // Clear RSSFeed cache
+        if (str_contains($name, 'alerts.json')) {
+            $this->rssFeed->clearCache();
         }
+
+        return new JsonResponse($this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path]));
     }
 
     #[Route('/{annexeId}/file', name: 'get_file_content', methods: ['GET'], requirements: ['annexeId' => Requirement::UUID_V4])]
     public function getFileContent(string $datastoreId, string $annexeId): Response
     {
-        try {
-            $fileContent = $this->annexeApiService->download($datastoreId, $annexeId)->text();
+        $fileContent = $this->annexeApiService->download($datastoreId, $annexeId)->text();
 
-            $response = new Response($fileContent);
-            $response->headers->set('Content-Type', Utils::guess_content_type($fileContent));
-            // $response->headers->set('Content-Disposition', 'inline; filename="'.$annexeId.'"');
-            $response->headers->set('Content-Length', ''.strlen($fileContent));
+        $response = new Response($fileContent);
+        $response->headers->set('Content-Type', Utils::guess_content_type($fileContent));
+        // $response->headers->set('Content-Disposition', 'inline; filename="'.$annexeId.'"');
+        $response->headers->set('Content-Length', ''.strlen($fileContent));
 
-            return $response;
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
-        }
+        return $response;
     }
 
     /**
@@ -135,68 +117,60 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     #[Route('/{annexeId}', name: 'replace_file', methods: ['POST'], requirements: ['annexeId' => Requirement::UUID_V4])]
     public function replaceFile(string $datastoreId, string $annexeId, Request $request): JsonResponse
     {
-        try {
-            $file = $request->files->get('file');
-            $name = $file->getClientOriginalName();
+        $file = $request->files->get('file');
+        $name = $file->getClientOriginalName();
 
-            // Clear RSSFeed cache
-            if (str_contains($name, 'alerts.json')) {
-                $this->rssFeed->clearCache();
-            }
-
-            return $this->json(
-                $this->annexeApiService->replaceFile($datastoreId, $annexeId, $file->getRealPath())
-            );
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        // Clear RSSFeed cache
+        if (str_contains($name, 'alerts.json')) {
+            $this->rssFeed->clearCache();
         }
+
+        return $this->json(
+            $this->annexeApiService->replaceFile($datastoreId, $annexeId, $file->getRealPath())
+        );
     }
 
     #[Route('/thumbnail_add', name: 'thumbnail_add', methods: ['POST'])]
     public function addThumbnail(string $datastoreId, Request $request): JsonResponse
     {
-        try {
-            $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
-            $datasheetName = $request->request->getString('datasheetName');
+        $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
+        $datasheetName = $request->request->getString('datasheetName');
 
-            $uuid = Uuid::v4();
+        $uuid = Uuid::v4();
 
-            $file = $request->files->get('file');
-            $extension = $file->getClientOriginalExtension();
-            $path = implode('/', ['thumbnail', "$uuid.$extension"]);
+        $file = $request->files->get('file');
+        $extension = $file->getClientOriginalExtension();
+        $path = implode('/', ['thumbnail', "$uuid.$extension"]);
 
-            $labels = [
-                CommonTags::DATASHEET_NAME."=$datasheetName",
-                'type=thumbnail',
-            ];
+        $labels = [
+            CommonTags::DATASHEET_NAME."=$datasheetName",
+            'type=thumbnail',
+        ];
 
-            // On regarde s'il existe deja une vignette
-            $annexes = $this->annexeApiService->getAll($datastoreId, null, null, $labels)->resolve();
+        // On regarde s'il existe deja une vignette
+        $annexes = $this->annexeApiService->getAll($datastoreId, null, null, $labels)->resolve();
 
-            if (count($annexes)) {  // Elle existe, on la supprime sinon le path ne change pas
-                $this->annexeApiService->remove($datastoreId, $annexes[0]['_id'])->await();
-            }
-
-            $annexe = $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
-            $annexe['url'] = $annexesBaseUrl.$annexe['paths'][0];
-
-            // Creation ou mise a jour des métadonnées
-            $metadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
-            if (is_null($metadata)) {
-                return new JsonResponse($annexe);
-            }
-
-            $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
-            $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
-            $cswMetadata->thumbnailUrl = $annexe['url'];
-
-            $xmlFilePath = $this->metadataHelper->saveToFile($cswMetadata);
-            $this->metadataApiService->replaceFile($datastoreId, $metadata['_id'], $xmlFilePath);
-
-            return new JsonResponse($annexe);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        if (count($annexes)) {  // Elle existe, on la supprime sinon le path ne change pas
+            $this->annexeApiService->remove($datastoreId, $annexes[0]['_id'])->await();
         }
+
+        $annexe = $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
+        $annexe['url'] = $annexesBaseUrl.$annexe['paths'][0];
+
+        // Creation ou mise a jour des métadonnées
+        $metadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
+        if (is_null($metadata)) {
+            return new JsonResponse($annexe);
+        }
+
+        $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
+        $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
+        $cswMetadata->thumbnailUrl = $annexe['url'];
+
+        $xmlFilePath = $this->metadataHelper->saveToFile($cswMetadata);
+        $this->metadataApiService->replaceFile($datastoreId, $metadata['_id'], $xmlFilePath);
+
+        return new JsonResponse($annexe);
     }
 
     #[Route('/thumbnail_delete/{datasheetName}/{annexeId}', name: 'thumbnail_delete', methods: ['DELETE'])]
@@ -223,14 +197,8 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     #[Route('/{annexeId}', name: 'delete', methods: ['DELETE'])]
     public function deleteAnnexe(string $datastoreId, string $annexeId): JsonResponse
     {
-        try {
-            $this->annexeApiService->remove($datastoreId, $annexeId)->await();
+        $this->annexeApiService->remove($datastoreId, $annexeId)->await();
 
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }

@@ -78,7 +78,7 @@ Navigateur              Symfony
 
 [`CookieAuthenticator`](../../../src/Security/Authenticator/CookieAuthenticator.php) s'active sur toute requête portant le cookie (sauf `/login/check`). En cas d'échec (cookie absent, HMAC invalide, token expiré) :
 
-- **Route `/api/*`** → JSON 401 `{ session_expired: true }` — détecté par [`jsonFetch.ts`](../../../assets/modules/jsonFetch.ts) côté frontend.
+- **Route `/api/*`** → 401 en `application/problem+json`, `type` `/errors/session-expired` (cookie présent) ou `/errors/anonymous` (pas de cookie) ; [`jsonFetch.ts`](../../../assets/modules/jsonFetch.ts) lit `type` côté frontend.
 - **Toute autre route** → redirect `GET /login?session_expired=1` + effacement du cookie.
 
 ---
@@ -149,13 +149,13 @@ La vérification HMAC avec `hash_equals` protège contre les forgeries. La clé 
 
 ## Expiration de session (UX frontend)
 
-Quand `CookieAuthenticator` détecte un token expiré sur une requête `/api/*`, il répond :
+Quand `CookieAuthenticator` détecte un token expiré sur une requête `/api/*`, il répond un 401 en Problem Details (RFC 9457) :
 
 ```json
-{ "code": 401, "details": { "controller": "App\\Controller\\ApiControllerInterface", "session_expired": true } }
+{ "status": 401, "title": "Unauthorized", "detail": "…", "type": "/errors/session-expired", "details": [] }
 ```
 
-[`jsonFetch.ts`](../../../assets/modules/jsonFetch.ts) détecte cette forme exacte (`hasSessionExpired`) et appelle `AuthStore.setSessionExpired(true)`, ce qui affiche le bandeau [`SessionExpiredAlert`](../../../assets/components/Utils/SessionExpiredAlert.tsx) invitant l'utilisateur à se reconnecter.
+[`jsonFetch.ts`](../../../assets/modules/jsonFetch.ts) appelle `AuthStore.setSessionExpired(true)` seulement pour ce `type`, ce qui affiche le bandeau [`SessionExpiredAlert`](../../../assets/components/Utils/SessionExpiredAlert.tsx) invitant l'utilisateur à se reconnecter. Sans cookie, le `type` vaut `/errors/anonymous` et le bandeau ne s'affiche pas.
 
 ---
 
@@ -175,7 +175,7 @@ Quand `CookieAuthenticator` détecte un token expiré sur une requête `/api/*`,
 | [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                           | Routes `/login`, `/logout`, `/login/check`                                  |
 | [`src/Listener/LogoutSubscriber.php`](../../../src/Listener/LogoutSubscriber.php)                                   | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak              |
 | [`src/ApiClient/Auth/AuthenticatedHttpClient.php`](../../../src/ApiClient/Auth/AuthenticatedHttpClient.php)         | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt     |
-| [`assets/modules/jsonFetch.ts`](../../../assets/modules/jsonFetch.ts)                                               | Détecte le 401 `session_expired` et notifie l'AuthStore                     |
+| [`assets/modules/jsonFetch.ts`](../../../assets/modules/jsonFetch.ts)                                               | Détecte le 401 `/errors/session-expired` et notifie l'AuthStore             |
 | [`config/packages/security.yaml`](../../../config/packages/security.yaml)                                           | Firewall `stateless: true`, ordre des authenticators                        |
 
 ---
