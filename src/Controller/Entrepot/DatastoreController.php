@@ -78,7 +78,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
         condition: 'request.isXmlHttpRequest()')]
     public function addPermission(string $datastoreId, #[MapRequestPayload] PermissionDTO $dto): JsonResponse
     {
-        $body = json_decode(json_encode($dto), true);
+        $body = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
         if (PermissionTypes::COMMUNITY === $dto->type) {
             $body['communities'] = $dto->beneficiaries;
         } else {
@@ -98,7 +98,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     public function updatePermission(string $datastoreId, string $permissionId, #[MapRequestPayload] UpdatePermissionDTO $dto): JsonResponse
     {
         try {
-            $body = json_decode(json_encode($dto), true);
+            $body = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
             $permission = $this->datastoreApiService->updatePermission($datastoreId, $permissionId, $body)->array();
 
             return $this->json($permission);

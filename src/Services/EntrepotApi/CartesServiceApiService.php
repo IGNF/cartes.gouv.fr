@@ -510,7 +510,7 @@ class CartesServiceApiService
         $services = $this->getDatasheetServices($datastoreId, $datasheetName);
 
         // Création ou mise à jour de metadata
-        $formData = json_decode(json_encode($dto), true);
+        $formData = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
         $apiMetadata = $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $services, $formData);
 
         // Synchronisation des autres services de la même fiche de données

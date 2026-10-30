@@ -217,7 +217,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         }
 
         // sinon crée et retourne un annexe vide
-        $json = json_encode([]);
+        $json = json_encode([], JSON_THROW_ON_ERROR);
         $tempFilePath = $this->varDataPath.DIRECTORY_SEPARATOR.Uuid::v4().'.json';
         $this->fs->dumpFile($tempFilePath, $json);
 
@@ -232,7 +232,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
      */
     private function updateListAnnexe(string $datastoreId, array $listAnnexe, array $content): void
     {
-        $json = json_encode($content);
+        $json = json_encode($content, JSON_THROW_ON_ERROR);
         $tempFilePath = $this->varDataPath.DIRECTORY_SEPARATOR.Uuid::v4().'.json';
         $this->fs->dumpFile($tempFilePath, $json);
 

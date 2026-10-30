@@ -16,6 +16,9 @@ final readonly class AuthCookieCipher
     public function encrypt(string $plaintext): string
     {
         $compressed = gzdeflate($plaintext, 6);
+        if (false === $compressed) {
+            throw new \RuntimeException('Compression du cookie d’authentification impossible');
+        }
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext = sodium_crypto_secretbox($compressed, $nonce, $this->key);
 

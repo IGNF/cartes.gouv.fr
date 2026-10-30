@@ -29,9 +29,9 @@ class EntrepotApiFakeService
             throw new ApiException('Resource not found', Response::HTTP_NOT_FOUND, ['url' => $url, 'method' => $method, 'query' => $query, 'status_code' => $statusCode]);
         }
 
-        $pathData = json_decode(file_get_contents($filePath), true);
+        $pathData = json_decode($this->fs->readFile($filePath), true);
 
-        $queryKey = json_encode($query);
+        $queryKey = json_encode($query, JSON_THROW_ON_ERROR);
 
         return $pathData[$queryKey][$method][$statusCode];
     }
@@ -46,11 +46,11 @@ class EntrepotApiFakeService
         $fileContent = [];
 
         if ($this->fs->exists($filePath)) {
-            $fileContent = json_decode(file_get_contents($filePath), true);
+            $fileContent = json_decode($this->fs->readFile($filePath), true);
         }
-        $queryKey = json_encode($query);
+        $queryKey = json_encode($query, JSON_THROW_ON_ERROR);
         $fileContent[$queryKey][$method][$statusCode] = $response;
 
-        $this->fs->dumpFile($filePath, json_encode($fileContent, JSON_PRETTY_PRINT));
+        $this->fs->dumpFile($filePath, json_encode($fileContent, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
     }
 }
