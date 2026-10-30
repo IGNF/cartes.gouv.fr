@@ -128,7 +128,14 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
             )}
 
             {deleteUploadMutation.error && (
-                <Alert severity="error" title={deleteUploadMutation.error.message} as="h2" closable onClose={uploadListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(deleteUploadMutation.error)}
+                    description={getApiErrorDescription(deleteUploadMutation.error)}
+                    as="h2"
+                    closable
+                    onClose={uploadListQuery.refetch}
+                />
             )}
 
             {uploadsList.length > 0 &&

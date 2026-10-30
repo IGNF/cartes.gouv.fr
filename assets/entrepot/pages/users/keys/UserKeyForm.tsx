@@ -234,7 +234,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
                     </div>
                 </Wait>
             )}
-            {addKeyError && <Alert severity="warning" closable title={tCommon("error")} description={addKeyError.message} />}
+            {addKeyError && <Alert severity="warning" closable title={tCommon("error")} description={getApiErrorMessage(addKeyError)} />}
             {updatekeyError && <Alert severity="warning" closable title={tCommon("error")} description={getApiErrorMessage(updatekeyError)} />}
             {isLoadingKey || isLoadingKeys || isLoadingPermissions ? (
                 <LoadingText />

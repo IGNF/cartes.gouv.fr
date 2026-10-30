@@ -126,7 +126,14 @@ const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
             )}
 
             {deleteStoredDataMutation.error && (
-                <Alert severity="error" title={deleteStoredDataMutation.error.message} as="h2" closable onClose={storedDataListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(deleteStoredDataMutation.error)}
+                    description={getApiErrorDescription(deleteStoredDataMutation.error)}
+                    as="h2"
+                    closable
+                    onClose={storedDataListQuery.refetch}
+                />
             )}
 
             {storedDataList.length > 0 &&

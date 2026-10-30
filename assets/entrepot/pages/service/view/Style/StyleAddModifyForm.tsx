@@ -356,7 +356,9 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         )}
                     </div>
 
-                    {addModifyMutation.error && <Alert closable description={addModifyMutation.error.message} severity="error" title={tCommon("error")} />}
+                    {addModifyMutation.error && (
+                        <Alert closable description={getApiErrorMessage(addModifyMutation.error)} severity="error" title={tCommon("error")} />
+                    )}
 
                     <div className={fr.cx("fr-grid-row")}>
                         <div className={fr.cx("fr-col-4")}>

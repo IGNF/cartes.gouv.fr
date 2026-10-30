@@ -132,7 +132,14 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
             )}
 
             {deleteAnnexeMutation.error && (
-                <Alert severity="error" title={deleteAnnexeMutation.error.message} as="h2" closable onClose={annexeListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(deleteAnnexeMutation.error)}
+                    description={getApiErrorDescription(deleteAnnexeMutation.error)}
+                    as="h2"
+                    closable
+                    onClose={annexeListQuery.refetch}
+                />
             )}
 
             {annexesList.length > 0 &&

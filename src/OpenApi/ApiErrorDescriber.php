@@ -26,7 +26,8 @@ final class ApiErrorDescriber implements DescriberInterface
         $type = Util::getProperty($schema, 'type');
         $type->type = 'string';
         $type->description = 'Présent seulement quand le front branche dessus, ex. /errors/session-expired';
-        Util::getProperty($schema, 'details')->type = 'object';
+        // forme libre : objet ou liste selon l'API amont, tableau vide sans détails
+        Util::getProperty($schema, 'details')->description = 'Détails de l’erreur, dont le corps de l’erreur amont';
         $violations = Util::getProperty($schema, 'violations');
         $violations->type = 'array';
         $violations->description = 'Erreurs de validation (422)';

@@ -124,10 +124,26 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                 />
             )}
 
-            {metadataListQuery.error && <Alert severity="error" title={metadataListQuery.error.message} as="h2" closable onClose={metadataListQuery.refetch} />}
+            {metadataListQuery.error && (
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(metadataListQuery.error)}
+                    description={getApiErrorDescription(metadataListQuery.error)}
+                    as="h2"
+                    closable
+                    onClose={metadataListQuery.refetch}
+                />
+            )}
 
             {unpublishOfferingMutation.error && (
-                <Alert severity="error" title={unpublishOfferingMutation.error.message} as="h2" closable onClose={offeringsListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(unpublishOfferingMutation.error)}
+                    description={getApiErrorDescription(unpublishOfferingMutation.error)}
+                    as="h2"
+                    closable
+                    onClose={offeringsListQuery.refetch}
+                />
             )}
 
             {endpointsUsage &&

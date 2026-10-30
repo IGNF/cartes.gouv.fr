@@ -16,6 +16,7 @@ import useStoredDataUseProcessings from "@/hooks/queries/useStoredDataUseProcess
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { offeringTypeDisplayName } from "@/utils";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
 
 type StoredDataDeleteConfirmDialogProps = {
     modal: ReturnType<typeof createModal>;
@@ -81,7 +82,7 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
                 <Alert
                     title={t("error_deleting", { name: storedData.name, type: storedData.type })}
                     closable
-                    description={deleteStoredDataMutation.error.message}
+                    description={getApiErrorMessage(deleteStoredDataMutation.error)}
                     as="h2"
                     severity="error"
                 />

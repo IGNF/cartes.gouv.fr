@@ -331,7 +331,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     title={t("stored_data.fetch_failed")}
                     description={
                         <>
-                            <p>{vectorDbQuery.error?.message}</p>
+                            <p>{getApiErrorMessage(vectorDbQuery.error)}</p>
                             <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
                         </>
                     }

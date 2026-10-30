@@ -105,7 +105,14 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
             )}
 
             {deleteStaticMutation.error && (
-                <Alert severity="error" title={deleteStaticMutation.error.message} as="h2" closable onClose={staticsListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(deleteStaticMutation.error)}
+                    description={getApiErrorDescription(deleteStaticMutation.error)}
+                    as="h2"
+                    closable
+                    onClose={staticsListQuery.refetch}
+                />
             )}
 
             {staticsList.length > 0 &&

@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { UseMutationResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
@@ -115,7 +115,8 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     const queryClient = useQueryClient();
     const { datastore } = useDatastore();
 
-    const createServiceMutation = useMutation<Service, ApiError>({
+    // type explicite : l'inférence boucle avec vectorDbQuery et donnerait any
+    const createServiceMutation: UseMutationResult<Service, ApiError, void> = useMutation<Service, ApiError, void>({
         mutationFn: () => {
             let formValues = getFormValues();
             formValues = createRequestBody(formValues);
@@ -136,7 +137,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
 
     const { mutate: createServiceMutate } = createServiceMutation;
 
-    const editServiceMutation = useMutation<Service, ApiError>({
+    const editServiceMutation: UseMutationResult<Service, ApiError, void> = useMutation<Service, ApiError, void>({
         mutationFn: () => {
             if (offeringId === undefined) {
                 return Promise.reject();
@@ -296,7 +297,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     title={t("stored_data.fetch_failed")}
                     description={
                         <>
-                            <p>{vectorDbQuery.error?.message}</p>
+                            <p>{getApiErrorMessage(vectorDbQuery.error)}</p>
                             <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
                         </>
                     }
@@ -324,7 +325,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     {createServiceMutation.error && (
                         <Alert
                             closable
-                            description={<ServiceFormErrors message={createServiceMutation.error.message} />}
+                            description={<ServiceFormErrors message={getApiErrorMessage(createServiceMutation.error)} />}
                             severity="error"
                             title={tCommon("error")}
                         />
@@ -332,7 +333,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     {editServiceMutation.error && (
                         <Alert
                             closable
-                            description={<ServiceFormErrors message={editServiceMutation.error.message} />}
+                            description={<ServiceFormErrors message={getApiErrorMessage(editServiceMutation.error)} />}
                             severity="error"
                             title={tCommon("error")}
                         />

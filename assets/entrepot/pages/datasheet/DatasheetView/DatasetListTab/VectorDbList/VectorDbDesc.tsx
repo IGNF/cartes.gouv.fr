@@ -6,13 +6,10 @@ import { ProcessingExecutionStoredDataDto } from "../../../../../../@types/entre
 import Desc from "../../Desc";
 
 type VectorDbDescProps = {
-    dataUsesQuery: UseQueryResult<
-        {
-            stored_data_list: ProcessingExecutionStoredDataDto[];
-            offerings_list: Offering[];
-        },
-        Error
-    >;
+    dataUsesQuery: UseQueryResult<{
+        stored_data_list: ProcessingExecutionStoredDataDto[];
+        offerings_list: Offering[];
+    }>;
 };
 
 const VectorDbDesc: FC<VectorDbDescProps> = ({ dataUsesQuery }) => {

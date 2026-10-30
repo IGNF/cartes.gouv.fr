@@ -159,7 +159,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                             <Alert
                                 severity={"error"}
                                 title={tCommon("error")}
-                                description={requestMutation.error.message}
+                                description={getApiErrorMessage(requestMutation.error)}
                                 className={fr.cx("fr-my-3w")}
                                 closable
                                 onClose={() => {

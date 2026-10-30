@@ -197,7 +197,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                     title={t("stored_data.fetch_failed")}
                     description={
                         <>
-                            <p>{pyramidQuery.error?.message}</p>
+                            <p>{getApiErrorMessage(pyramidQuery.error)}</p>
                             <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
                         </>
                     }

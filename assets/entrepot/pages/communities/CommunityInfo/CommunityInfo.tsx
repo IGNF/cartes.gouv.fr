@@ -214,7 +214,14 @@ export default function CommunityInfo() {
                     severity="error"
                 />
             )}
-            {leaveCommunityMutation.error && <Alert title={leaveCommunityMutation.error.message} closable severity="error" />}
+            {leaveCommunityMutation.error && (
+                <Alert
+                    title={getApiErrorTitle(leaveCommunityMutation.error)}
+                    description={getApiErrorDescription(leaveCommunityMutation.error)}
+                    closable
+                    severity="error"
+                />
+            )}
 
             {/* modification des infos de la commu */}
             <div className={fr.cx("fr-grid-row")}>

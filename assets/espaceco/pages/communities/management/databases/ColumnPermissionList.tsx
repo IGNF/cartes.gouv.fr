@@ -15,6 +15,7 @@ import { useFormContext } from "react-hook-form";
 import AddColumnPermissionDialog from "./dialogs/AddColumnPermissionDialog";
 import Permission from "./Permission";
 import { getPermission } from "./PermissionUtils";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
 
 type ColumnPermissionListProps = {
     databaseId: number;
@@ -99,7 +100,7 @@ const ColumnPermissionList: FC<ColumnPermissionListProps> = ({ databaseId, table
             </Button>
             {table && availableColumns.length === 0 && <Alert severity={"info"} closable title={t("all_columns_have_permissions")} />}
             {isLoading && <LoadingText as={"h6"} withSpinnerIcon message={t("loading_table", { title: permission.title })} />}
-            {isError && <Alert severity="error" closable title={error.message} />}
+            {isError && <Alert severity="error" closable title={getApiErrorTitle(error)} description={getApiErrorDescription(error)} />}
             {permission.columns.length > 0 ? (
                 <Accordion label={t("columns")} titleAs={"h6"}>
                     {permission.columns.map((column) => (

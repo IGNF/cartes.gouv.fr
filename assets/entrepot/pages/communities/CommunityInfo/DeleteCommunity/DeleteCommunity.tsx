@@ -12,6 +12,7 @@ import { useCommunity } from "@/contexts/community";
 import { useDatastore } from "@/contexts/datastore";
 import api from "@/entrepot/api";
 import useEventSource from "@/hooks/useEventSource";
+import { getApiErrorDescription } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { routes } from "@/router/router";
 import { deleteCommunityModal } from "./deleteCommunityModal";
@@ -99,9 +100,9 @@ export default function DeleteCommunity() {
         onSuccess: () => {
             setState("mail_sent");
         },
-        onError: (err: Error) => {
+        onError: (err) => {
             setState("error");
-            setDeletionError(err.message ?? "La suppression de l’entrepôt a échoué.");
+            setDeletionError(getApiErrorDescription(err) ?? "La suppression de l’entrepôt a échoué.");
         },
     });
 

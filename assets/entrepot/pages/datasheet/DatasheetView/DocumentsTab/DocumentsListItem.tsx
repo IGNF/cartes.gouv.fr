@@ -20,6 +20,7 @@ import api from "../../../../api";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useCommunityRights from "@/hooks/useCommunityRights";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
 
 type DocumentsListItemProps = {
     document: DatasheetDocument;
@@ -102,7 +103,7 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
                                 severity="error"
                                 closable
                                 title={tCommon("error")}
-                                description={editDocumentMutation.error.message}
+                                description={getApiErrorMessage(editDocumentMutation.error)}
                                 className={fr.cx("fr-my-3w")}
                             />
                         </div>
@@ -116,7 +117,7 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
                                 severity="error"
                                 closable
                                 title={tCommon("error")}
-                                description={deleteDocumentMutation.error.message}
+                                description={getApiErrorMessage(deleteDocumentMutation.error)}
                                 className={fr.cx("fr-my-3w")}
                             />
                         </div>
