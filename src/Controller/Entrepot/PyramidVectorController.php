@@ -198,6 +198,8 @@ class PyramidVectorController extends ServiceController implements ApiController
 
     /**
      * @param array<mixed> $pyramid
+     *
+     * @return array<mixed>
      */
     private function getConfigTypeInfos(PyramidVectorTmsServiceDTO $dto, array $pyramid): array
     {
@@ -218,6 +220,8 @@ class PyramidVectorController extends ServiceController implements ApiController
 
     /**
      * @param array<PyramidVectorCompositionDTO> $composition
+     *
+     * @return list<int>
      */
     private function getLevels($composition): array
     {

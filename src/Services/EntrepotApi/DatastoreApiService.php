@@ -20,6 +20,9 @@ final readonly class DatastoreApiService
     ) {
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function get(string $datastoreId): array
     {
         return $this->cache->get("datastore-$datastoreId", function (ItemInterface $item) use ($datastoreId) {
@@ -31,6 +34,8 @@ final readonly class DatastoreApiService
 
     /**
      * @param array<string,mixed> $query
+     *
+     * @return array<mixed>
      */
     public function getEndpointsList(string $datastoreId, array $query = []): array
     {
@@ -60,6 +65,9 @@ final readonly class DatastoreApiService
         return array_values($endpoints);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getEndpoint(string $datastoreId, string $endpointId): array
     {
         $endpoints = $this->getEndpointsList($datastoreId);

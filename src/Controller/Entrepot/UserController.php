@@ -116,7 +116,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
             }, ARRAY_FILTER_USE_BOTH);
 
             // Les adresses IP
-            if ($dto->ip_list_addresses && 0 !== count($dto->ip_list_addresses)) {
+            if ($dto->ip_list_addresses) {
                 $body[$dto->ip_list_name] = $dto->ip_list_addresses;
             }
 
@@ -161,7 +161,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
             // Les adresses IP : elles sont exclusives => soit whitelist, soit blacklist peut
             // contenir des adresses
             $body['whitelist'] = $body['blacklist'] = [];
-            if ($dto->ip_list_addresses && 0 !== count($dto->ip_list_addresses)) {
+            if ($dto->ip_list_addresses) {
                 $body[$dto->ip_list_name] = $dto->ip_list_addresses;
             }
 
@@ -243,6 +243,9 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function _getUserKeyWithAccesses(string $keyId): array
     {
         $key = $this->userApiService->getMyKey($keyId)->array();

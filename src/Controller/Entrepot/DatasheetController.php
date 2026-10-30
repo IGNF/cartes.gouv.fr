@@ -205,6 +205,8 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     /**
      * @param ?array<array<mixed>> $configurations
      * @param ?array<array<mixed>> $annexes
+     *
+     * @return array<mixed>
      */
     private function getBasicInfo(string $datastoreId, string $datasheetName, ?array $configurations = null, ?array $annexes = null): array
     {

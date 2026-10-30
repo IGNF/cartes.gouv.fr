@@ -11,9 +11,7 @@ parameters:
     paths:
         - src
         - tests
-    ignoreErrors:
-        - "#return type has no value type specified in iterable type array#"
-    treatPhpDocTypesAsCertain: false
+    treatPhpDocTypesAsCertain: true
     symfony:
         # conteneur compilé en dev, construit par check-rules (lint:twig, lint:container) avant PHPStan
         containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml

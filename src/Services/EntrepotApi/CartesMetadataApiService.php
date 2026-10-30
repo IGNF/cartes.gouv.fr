@@ -42,7 +42,7 @@ class CartesMetadataApiService
     /**
      * Récupère la métadonnée liée à la fiche de données.
      *
-     * @return array|null retourne null si aucune métadonnée liée n'a été trouvée
+     * @return array<mixed>|null retourne null si aucune métadonnée liée n'a été trouvée
      */
     public function getMetadataByDatasheetName(string $datastoreId, string $datasheetName): ?array
     {
@@ -141,6 +141,8 @@ class CartesMetadataApiService
      * Crée ou met à jour la métadonnée liée à la fiche de données.
      *
      * @param array<mixed> $formData
+     *
+     * @return array<mixed>
      */
     public function createOrUpdate(string $datastoreId, string $datasheetName, DatasheetServices $services, ?array $formData = null): array
     {
@@ -162,6 +164,8 @@ class CartesMetadataApiService
 
     /**
      * @param array<mixed> $formData
+     *
+     * @return array<mixed>
      */
     private function createMetadata(string $datastoreId, string $datasheetName, DatasheetServices $services, array $formData): array
     {
@@ -192,6 +196,8 @@ class CartesMetadataApiService
     /**
      * @param array<mixed> $oldApiMetadata
      * @param array<mixed> $formData
+     *
+     * @return array<mixed>
      */
     private function updateMetadata(string $datastoreId, string $datasheetName, DatasheetServices $services, array $oldApiMetadata, ?array $formData = null): array
     {
@@ -418,6 +424,9 @@ class CartesMetadataApiService
         return $styleFiles;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getCapabilitiesFiles(string $datastoreId, DatasheetServices $services): array
     {
         $datastore = $this->datastoreApiService->get($datastoreId);
@@ -478,6 +487,9 @@ class CartesMetadataApiService
         return (1 === count($endpoints)) ? $endpoints[0]['endpoint'] : null;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getMetadataEndpoint(string $datastoreId): array
     {
         $endpointsList = $this->datastoreApiService->getEndpointsList($datastoreId, [
@@ -491,6 +503,9 @@ class CartesMetadataApiService
         return $endpointsList[0]['endpoint'];
     }
 
+    /**
+     * @return array{west: float, south: float, east: float, north: float}
+     */
     private function getBbox(string $datastoreId, string $datasheetName): array
     {
         $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
@@ -511,6 +526,8 @@ class CartesMetadataApiService
 
     /**
      * @param array<mixed> $features
+     *
+     * @return array{west: float, south: float, east: float, north: float}
      */
     private function getBboxFromFeatures(array $features): array
     {

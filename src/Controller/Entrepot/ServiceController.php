@@ -158,10 +158,13 @@ class ServiceController extends AbstractController implements ApiControllerInter
 
     /**
      * @param array<mixed> $pyramid
+     *
+     * @return array{bottom_level: string, top_level: string}
      */
     protected function getPyramidZoomLevels(array $pyramid): array
     {
-        if (!isset($pyramid['type_infos']) || !isset($pyramid['type_infos']['levels'])) {
+        // niveaux absents ou vides : niveaux par défaut
+        if (empty($pyramid['type_infos']['levels'])) {
             return ['bottom_level' => strval(ZoomLevels::BOTTOM_LEVEL_DEFAULT), 'top_level' => strval(ZoomLevels::TOP_LEVEL_DEFAULT)];
         }
 
@@ -176,6 +179,8 @@ class ServiceController extends AbstractController implements ApiControllerInter
     /**
      * @param array<mixed>  $typeInfos
      * @param ?array<mixed> $oldConfiguration
+     *
+     * @return array<mixed>
      */
     protected function getConfigRequestBody(string $type, CommonDTO $dto, array $typeInfos, ?array $oldConfiguration = null): array
     {

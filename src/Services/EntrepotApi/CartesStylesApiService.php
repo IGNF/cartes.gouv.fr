@@ -192,6 +192,8 @@ class CartesStylesApiService
 
     /**
      * Ajout d'un fichier de style sous forme d'annexe.
+     *
+     * @return array<mixed>
      */
     public function saveStyleInAnnexe(string $datastoreId, string $datasheetName, string $styleTechnicalName, string $content, string $extension, ?string $existingAnnexeId = null): array
     {

@@ -73,6 +73,8 @@ final readonly class AnnexeApiService
     /**
      * @param array<string> $paths
      * @param array<string> $labels
+     *
+     * @return array<mixed>
      */
     public function add(string $datastoreId, string $annexeFilePath, array $paths, ?array $labels = null, bool $published = true): array
     {
@@ -113,6 +115,9 @@ final readonly class AnnexeApiService
         return $this->api->patch("datastores/$datastoreId/annexes/$annexeId", $body);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function replaceFile(string $datastoreId, string $annexeId, string $annexeFilePath): array
     {
         $response = $this->api->sendFile('PUT', "datastores/$datastoreId/annexes/$annexeId", $annexeFilePath)->array();

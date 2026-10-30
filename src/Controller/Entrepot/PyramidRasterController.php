@@ -249,6 +249,8 @@ class PyramidRasterController extends ServiceController implements ApiController
 
     /**
      * @param array<mixed> $pyramid
+     *
+     * @return array<mixed>
      */
     private function getConfigTypeInfos(CommonDTO $dto, string $datastoreId, array $pyramid, string $serviceType, ?string $configurationId = null): array
     {
@@ -303,6 +305,9 @@ class PyramidRasterController extends ServiceController implements ApiController
         return $legendFilePath;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function saveLegendInAnnexe(string $datastoreId, string $storedDataId, string $legendFilePath, string $datasheetName): array
     {
         $path = "/legend/{$storedDataId}.png";
@@ -325,6 +330,8 @@ class PyramidRasterController extends ServiceController implements ApiController
     /**
      * @param array<mixed>         $pyramid
      * @param array<string,string> $zoomLevels
+     *
+     * @return array<mixed>
      */
     private function saveLegendInStatic(string $datastoreId, array $pyramid, string $configType, array $zoomLevels, ?string $configurationId = null): array
     {

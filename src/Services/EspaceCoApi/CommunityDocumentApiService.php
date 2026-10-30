@@ -34,6 +34,9 @@ final readonly class CommunityDocumentApiService
         return $this->api->get("communities/$communityId/documents/$documentId", $query);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function addDocument(int $communityId, string $title, ?string $description, string $tempFilePath): array
     {
         $formFields = ['title' => $title];

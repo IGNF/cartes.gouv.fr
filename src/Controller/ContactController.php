@@ -37,7 +37,6 @@ class ContactController extends AbstractController
     )]
     public function contact(Request $request): JsonResponse
     {
-        /** @var User */
         $user = $this->getUser();
 
         $data = json_decode($request->getContent(), true);
@@ -107,7 +106,6 @@ class ContactController extends AbstractController
     )]
     public function datastoreCreateRequest(Request $request): JsonResponse
     {
-        /** @var User */
         $user = $this->getUser();
 
         $supervisor = [];   // Liste des community dont l'utilisateur courant est "supervisor"
@@ -168,7 +166,6 @@ class ContactController extends AbstractController
     )]
     public function joinCommunity(Request $request): JsonResponse
     {
-        /** @var User */
         $user = $this->getUser();
 
         $data = json_decode($request->getContent(), true);
@@ -223,7 +220,6 @@ class ContactController extends AbstractController
     )]
     public function accessesRequest(Request $request): JsonResponse
     {
-        /** @var User */
         $user = $this->getUser();
 
         $data = json_decode($request->getContent(), true);
@@ -294,7 +290,6 @@ class ContactController extends AbstractController
 
             $supportAddress = $this->getParameter('support_contact_mail');
             $now = new \DateTime();
-            /** @var User */
             $user = $this->getUser();
             $userEmail = $this->connectedUserEmail($user);
 

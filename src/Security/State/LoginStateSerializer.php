@@ -26,6 +26,9 @@ final readonly class LoginStateSerializer
         return $jsonB64.'.'.$sig;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function decode(string $blob): ?array
     {
         $parts = explode('.', $blob, 2);

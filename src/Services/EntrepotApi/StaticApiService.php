@@ -39,6 +39,9 @@ final readonly class StaticApiService
         return $this->api->get("datastores/$datastoreId/statics/$staticId");
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function add(string $datastoreId, string $filepath, string $name, string $type, ?string $description = null): array
     {
         $formFields = [
@@ -57,6 +60,9 @@ final readonly class StaticApiService
         return $response;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function replaceFile(string $datastoreId, string $staticId, string $filepath): array
     {
         $response = $this->api->sendFile('PUT', "datastores/$datastoreId/statics/$staticId", $filepath)->array();

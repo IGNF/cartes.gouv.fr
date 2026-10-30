@@ -86,6 +86,9 @@ class WfsController extends ServiceController implements ApiControllerInterface
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getConfigTypeInfos(WfsServiceDTO $dto, string $storedDataId): array
     {
         $relations = [];
@@ -101,7 +104,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
                 $relation['public_name'] = $table->public_name;
             }
 
-            if ($table->keywords && 0 !== count($table->keywords)) {
+            if ($table->keywords) {
                 $relation['keywords'] = $table->keywords;
             }
             $relations[] = $relation;

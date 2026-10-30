@@ -18,6 +18,9 @@ class CartesApiException extends HttpException
         parent::__construct($statusCode, $message, $previous, [], $statusCode);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getDetails(): array
     {
         return $this->details;

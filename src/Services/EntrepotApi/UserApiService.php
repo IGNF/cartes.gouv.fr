@@ -69,6 +69,8 @@ final readonly class UserApiService
      * mais la réponse réelle du PATCH omet type_infos, creation et update (constaté le 25/08/2026).
      *
      * @param array<mixed> $body
+     *
+     * @return array<mixed>
      */
     public function updateKey(string $keyId, array $body): array
     {

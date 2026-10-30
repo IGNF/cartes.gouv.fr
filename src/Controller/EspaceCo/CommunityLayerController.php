@@ -112,6 +112,8 @@ class CommunityLayerController extends AbstractController implements ApiControll
 
     /**
      * @param array<mixed> $ftLayers
+     *
+     * @return array<mixed>
      */
     private function _groupByDatabase(array $ftLayers): array
     {

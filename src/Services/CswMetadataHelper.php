@@ -26,6 +26,9 @@ class CswMetadataHelper
     ) {
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toArray(CswMetadata $metadata): array
     {
         $metadataJson = $this->toJson($metadata);
@@ -244,6 +247,8 @@ class CswMetadataHelper
 
     /**
      * @param array<mixed> $array
+     *
+     * @return array<mixed>
      */
     private function trimStringArray(array $array): array
     {
@@ -292,6 +297,8 @@ class CswMetadataHelper
 
     /**
      * @param \DOMNodeList<\DOMElement> $keywordsNodesList
+     *
+     * @return array{inspire_keywords: list<string>, free_keywords: list<string>}
      */
     private function getKeywords($keywordsNodesList): array
     {

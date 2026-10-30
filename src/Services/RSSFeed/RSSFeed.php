@@ -56,6 +56,9 @@ class RSSFeed
         ]);
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getAlerts(): array
     {
         return $this->cache->get($this->getCacheKey(), function (ItemInterface $item) {
