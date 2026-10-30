@@ -7,6 +7,10 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+# généré par Symfony à la construction du conteneur, inutile tant que la configuration reste en YAML
+/config/reference.php
+
 ###> friendsofphp/php-cs-fixer ###
 /.php-cs-fixer.php
 /.php-cs-fixer.cache
