@@ -11,12 +11,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
-final class DatastoreApiService
+final readonly class DatastoreApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        private readonly ApiClient $api,
-        private readonly CacheInterface $cache,
+        private ApiClient $api,
+        private CacheInterface $cache,
     ) {
     }
 
@@ -57,9 +57,7 @@ final class DatastoreApiService
             });
         }
 
-        $endpoints = array_values($endpoints);
-
-        return $endpoints;
+        return array_values($endpoints);
     }
 
     public function getEndpoint(string $datastoreId, string $endpointId): array
@@ -67,11 +65,7 @@ final class DatastoreApiService
         $endpoints = $this->getEndpointsList($datastoreId);
 
         $filteredEndpoints = array_filter($endpoints, function ($endpoint) use ($endpointId) {
-            if ($endpoint['endpoint']['_id'] === $endpointId) {
-                return true;
-            }
-
-            return false;
+            return $endpoint['endpoint']['_id'] === $endpointId;
         });
 
         $filteredEndpoints = array_values($filteredEndpoints);

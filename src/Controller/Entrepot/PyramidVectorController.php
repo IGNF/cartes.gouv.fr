@@ -10,6 +10,7 @@ use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
+use App\Security\User;
 use App\Services\CapabilitiesService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
@@ -35,14 +36,14 @@ class PyramidVectorController extends ServiceController implements ApiController
 {
     public function __construct(
         DatastoreApiService $datastoreApiService,
-        private ConfigurationApiService $configurationApiService,
-        private StoredDataApiService $storedDataApiService,
-        private ProcessingApiService $processingApiService,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly StoredDataApiService $storedDataApiService,
+        private readonly ProcessingApiService $processingApiService,
         SandboxService $sandboxService,
-        private CartesServiceApiService $cartesServiceApiService,
+        private readonly CartesServiceApiService $cartesServiceApiService,
         CapabilitiesService $capabilitiesService,
         CartesMetadataApiService $cartesMetadataApiService,
-        private UrlGeneratorInterface $urlGenerator,
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
@@ -94,8 +95,8 @@ class PyramidVectorController extends ServiceController implements ApiController
                 'parameters' => $parameters,
             ];
 
-            if (true === $dto->email_notification) {
-                /** @var \App\Security\User */
+            if ($dto->email_notification) {
+                /** @var User */
                 $user = $this->getUser();
                 $userEmail = $user->getEmail();
                 $datasheetName = $vectordb['tags'][CommonTags::DATASHEET_NAME] ?? null;

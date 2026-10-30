@@ -5,6 +5,7 @@ namespace App\Security\Authenticator;
 use App\Controller\ApiControllerInterface;
 use App\Security\Cookie\AuthCookieResponseListener;
 use App\Security\KeycloakTokenManager;
+use League\OAuth2\Client\Token\AccessToken;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,8 +25,8 @@ final class CookieAuthenticator extends AbstractAuthenticator
     private const LOGIN_ROUTE = 'cartesgouvfr_security_login';
 
     public function __construct(
-        private KeycloakTokenManager $tokenManager,
-        private RouterInterface $router,
+        private readonly KeycloakTokenManager $tokenManager,
+        private readonly RouterInterface $router,
     ) {
     }
 
@@ -57,7 +58,7 @@ final class CookieAuthenticator extends AbstractAuthenticator
     {
         $token = $this->tokenManager->getAccessToken();
 
-        if (null === $token || $token->hasExpired()) {
+        if (!$token instanceof AccessToken || $token->hasExpired()) {
             throw new AuthenticationException('Cookie absent, invalide ou expiré.');
         }
 

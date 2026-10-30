@@ -11,6 +11,7 @@ use App\Dto\Services\CommonDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
+use App\Security\User;
 use App\Services\CapabilitiesService;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
@@ -44,21 +45,21 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 #[OA\Tag(name: '[cartes.gouv.fr] pyramid-raster', description: 'Génération de pyramides de tuiles raster et création/modification des services associés')]
 class PyramidRasterController extends ServiceController implements ApiControllerInterface
 {
-    private HttpClientInterface $httpClient;
+    private readonly HttpClientInterface $httpClient;
 
     public function __construct(
-        private DatastoreApiService $datastoreApiService,
-        private ConfigurationApiService $configurationApiService,
-        private StoredDataApiService $storedDataApiService,
-        private ProcessingApiService $processingApiService,
+        private readonly DatastoreApiService $datastoreApiService,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly StoredDataApiService $storedDataApiService,
+        private readonly ProcessingApiService $processingApiService,
         SandboxService $sandboxService,
-        private CartesServiceApiService $cartesServiceApiService,
+        private readonly CartesServiceApiService $cartesServiceApiService,
         CapabilitiesService $capabilitiesService,
         CartesMetadataApiService $cartesMetadataApiService,
-        private UrlGeneratorInterface $urlGenerator,
-        private AnnexeApiService $annexeApiService,
-        private StaticApiService $staticApiService,
-        private Filesystem $fs,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly AnnexeApiService $annexeApiService,
+        private readonly StaticApiService $staticApiService,
+        private readonly Filesystem $fs,
         ParameterBagInterface $params,
         HttpClientInterface $httpClient,
     ) {
@@ -98,7 +99,7 @@ class PyramidRasterController extends ServiceController implements ApiController
             }
 
             $zoomRange = $data['zoom_range'];
-            $harvestLevels = array_map(fn ($v) => strval($v), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
+            $harvestLevels = array_map(strval(...), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
 
             $requestBody = [
                 'processing' => $processingId,
@@ -122,7 +123,7 @@ class PyramidRasterController extends ServiceController implements ApiController
             ];
 
             if (isset($data['email_notification']) && true === $data['email_notification']) {
-                /** @var \App\Security\User */
+                /** @var User */
                 $user = $this->getUser();
                 $userEmail = $user->getEmail();
                 $datasheetName = $vectordb['tags'][CommonTags::DATASHEET_NAME] ?? null;
@@ -190,7 +191,7 @@ class PyramidRasterController extends ServiceController implements ApiController
         try {
             $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
             if (!in_array($type, $acceptedTypes)) {
-                throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, join(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
+                throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
             }
 
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
@@ -224,7 +225,7 @@ class PyramidRasterController extends ServiceController implements ApiController
         try {
             $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
             if (!in_array($type, $acceptedTypes)) {
-                throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, join(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
+                throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
             }
 
             // récup config et offering existants

@@ -11,7 +11,7 @@ use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final class ApiClient
+final readonly class ApiClient
 {
     private const ASYNC_MAX_IN_FLIGHT = 20;
     private const FILE_UPLOAD_IDLE_TIMEOUT_SECONDS = 1200;
@@ -182,7 +182,7 @@ final class ApiClient
      */
     public function requestAllHitStatistics(string $url, array $query = []): PaginatedPromise
     {
-        return $this->requestAll($url, $query, merge: self::mergeHitStatistics(...));
+        return $this->requestAll($url, $query, merge: $this->mergeHitStatistics(...));
     }
 
     /**
@@ -191,7 +191,7 @@ final class ApiClient
      *
      * @return array<mixed>
      */
-    private static function mergeHitStatistics(array $accumulated, array $page): array
+    private function mergeHitStatistics(array $accumulated, array $page): array
     {
         $accumulated['details'] = array_merge($accumulated['details'] ?? [], $page['details'] ?? []);
 

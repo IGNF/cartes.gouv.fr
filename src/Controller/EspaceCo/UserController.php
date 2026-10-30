@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class UserController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private UserApiService $userApiService,
+        private readonly UserApiService $userApiService,
     ) {
     }
 

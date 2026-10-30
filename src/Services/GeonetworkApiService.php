@@ -10,8 +10,8 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class GeonetworkApiService
 {
-    private HttpClientInterface $geonetworkClient;
-    private string $baseUrl;
+    private readonly HttpClientInterface $geonetworkClient;
+    private readonly string $baseUrl;
 
     public function __construct(
         ParameterBagInterface $parameterBag,

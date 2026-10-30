@@ -20,8 +20,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class GeonetworkController extends AbstractController
 {
     public function __construct(
-        private CswMetadataHelper $cswMetadataHelper,
-        private GeonetworkApiService $geonetworkApiService,
+        private readonly CswMetadataHelper $cswMetadataHelper,
+        private readonly GeonetworkApiService $geonetworkApiService,
     ) {
     }
 

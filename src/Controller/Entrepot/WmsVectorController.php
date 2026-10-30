@@ -35,9 +35,9 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 {
     public function __construct(
         DatastoreApiService $datastoreApiService,
-        private ConfigurationApiService $configurationApiService,
-        private CartesServiceApiService $cartesServiceApiService,
-        private StaticApiService $staticApiService,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly CartesServiceApiService $cartesServiceApiService,
+        private readonly StaticApiService $staticApiService,
         CapabilitiesService $capabilitiesService,
         protected Filesystem $filesystem,
         CartesMetadataApiService $cartesMetadataApiService,

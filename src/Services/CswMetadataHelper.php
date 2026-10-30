@@ -19,10 +19,10 @@ use Twig\Environment as Twig;
 class CswMetadataHelper
 {
     public function __construct(
-        private Twig $twig,
-        private ParameterBagInterface $params,
-        private SerializerInterface $serializer,
-        private Filesystem $fs,
+        private readonly Twig $twig,
+        private readonly ParameterBagInterface $params,
+        private readonly SerializerInterface $serializer,
+        private readonly Filesystem $fs,
     ) {
     }
 
@@ -57,9 +57,7 @@ class CswMetadataHelper
     {
         $metadataArray = $this->toArray($metadata);
 
-        $content = $this->twig->render('metadata/metadata_dataset_iso.xml.twig', $metadataArray);
-
-        return $content;
+        return $this->twig->render('metadata/metadata_dataset_iso.xml.twig', $metadataArray);
     }
 
     public function fromXml(string $metadataXml): CswMetadata
@@ -67,7 +65,7 @@ class CswMetadataHelper
         $doc = new \DOMDocument();
         try {
             $loaded = $doc->loadXML($metadataXml);
-        } catch (\Throwable $th) {
+        } catch (\Throwable) {
             throw new AppException('Load XML failed');
         }
 

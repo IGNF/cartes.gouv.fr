@@ -22,8 +22,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class ContactController extends AbstractController
 {
     public function __construct(
-        private MailerService $mailerService,
-        private LoggerInterface $logger,
+        private readonly MailerService $mailerService,
+        private readonly LoggerInterface $logger,
     ) {
     }
 

@@ -29,13 +29,13 @@ use Symfony\Component\HttpFoundation\Response;
 class CartesMetadataApiService
 {
     public function __construct(
-        private ParameterBagInterface $parameterBag,
-        private DatastoreApiService $datastoreApiService,
-        private AnnexeApiService $annexeApiService,
-        private MetadataApiService $metadataApiService,
-        private CswMetadataHelper $cswMetadataHelper,
-        private CartesStylesApiService $cartesStylesApiService,
-        private StoredDataApiService $storedDataApiService,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly DatastoreApiService $datastoreApiService,
+        private readonly AnnexeApiService $annexeApiService,
+        private readonly MetadataApiService $metadataApiService,
+        private readonly CswMetadataHelper $cswMetadataHelper,
+        private readonly CartesStylesApiService $cartesStylesApiService,
+        private readonly StoredDataApiService $storedDataApiService,
     ) {
     }
 
@@ -237,11 +237,11 @@ class CartesMetadataApiService
      */
     private function getNewCswMetadata(string $datastoreId, string $datasheetName, DatasheetServices $services, ?CswMetadata $oldCswMetadata = null, ?array $formData = null): CswMetadata
     {
-        if (null === $oldCswMetadata && null === $formData) {
+        if (!$oldCswMetadata instanceof CswMetadata && null === $formData) {
             throw new AppException('oldCswMetadata et formData ne peuvent pas être null à la fois', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $newCswMetadata = null === $oldCswMetadata ? new CswMetadata() : clone $oldCswMetadata;
+        $newCswMetadata = $oldCswMetadata instanceof CswMetadata ? clone $oldCswMetadata : new CswMetadata();
 
         $layers = $this->getMetadataLayers($datastoreId, $services);
         $bbox = $this->getBbox($datastoreId, $datasheetName);
@@ -334,7 +334,7 @@ class CartesMetadataApiService
                     if (count($endpoints) > 0) {
                         $endpointUrl = $endpoints[0]['url'];
                         if ('TMS' === $actualType) {
-                            $endpointUrl = $endpointUrl.'/1.0.0';
+                            $endpointUrl .= '/1.0.0';
                             // la version 1.0.0 du TMS est aussi écrite en dur
                             // dans le composant UserKeyLink pour créer une URL de 'capabilities'
                         }
@@ -358,14 +358,12 @@ class CartesMetadataApiService
     {
         $configRelations = $configuration['type_infos']['used_data'][0]['relations'];
 
-        $relationLayers = array_map(function ($relation) use ($offering, $serviceEndpointUrl) {
+        return array_map(function ($relation) use ($offering, $serviceEndpointUrl) {
             $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
             $gmdOnlineResourceProtocol = 'OGC:WFS';
 
             return new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($serviceEndpointUrl), $offering['_id'], $offering['open']);
         }, $configRelations);
-
-        return $relationLayers;
     }
 
     /**
@@ -459,7 +457,7 @@ class CartesMetadataApiService
     {
         return array_map(fn ($doc) => new CswDocument(
             $doc['name'],
-            isset($doc['description']) ? $doc['description'] : null,
+            $doc['description'] ?? null,
             $doc['url'],
         ), $documents);
     }

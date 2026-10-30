@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class DatabaseController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private DatabaseApiService $databaseApiService,
+        private readonly DatabaseApiService $databaseApiService,
     ) {
     }
 

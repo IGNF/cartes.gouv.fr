@@ -25,8 +25,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class CommunityController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private CommunityApiService $communityApiService,
-        private MembershipService $membershipService,
+        private readonly CommunityApiService $communityApiService,
+        private readonly MembershipService $membershipService,
     ) {
     }
 
@@ -173,10 +173,6 @@ class CommunityController extends AbstractController implements ApiControllerInt
             return true;
         }
 
-        if (in_array('COMMUNITY', $membership['rights'])) {
-            return true;
-        }
-
-        return false;
+        return in_array('COMMUNITY', $membership['rights']);
     }
 }

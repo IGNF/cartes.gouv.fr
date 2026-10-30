@@ -10,6 +10,7 @@ use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Constants\JobStatuses;
 use App\Exception\AppException;
+use App\Security\User;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
@@ -21,12 +22,12 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class UploadIntegrationWorkflow
 {
     public function __construct(
-        private SandboxService $sandboxService,
-        private UploadApiService $uploadApiService,
-        private ProcessingApiService $processingApiService,
-        private StoredDataApiService $storedDataApiService,
-        private Security $security,
-        private UrlGeneratorInterface $urlGenerator,
+        private readonly SandboxService $sandboxService,
+        private readonly UploadApiService $uploadApiService,
+        private readonly ProcessingApiService $processingApiService,
+        private readonly StoredDataApiService $storedDataApiService,
+        private readonly Security $security,
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -284,7 +285,7 @@ class UploadIntegrationWorkflow
         ];
 
         if (isset($upload['tags']['email_notification']) && filter_var($upload['tags']['email_notification'], FILTER_VALIDATE_BOOLEAN)) {
-            /** @var \App\Security\User|null */
+            /** @var User|null */
             $user = $this->security->getUser();
             $userEmail = $user?->getEmail();
             $datasheetName = $upload['tags'][CommonTags::DATASHEET_NAME] ?? null;

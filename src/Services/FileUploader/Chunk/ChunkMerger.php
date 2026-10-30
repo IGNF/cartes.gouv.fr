@@ -7,13 +7,13 @@ use App\Services\FileUploader\Path\UploadPathResolver;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
 
-final class ChunkMerger
+final readonly class ChunkMerger
 {
     private const ERR_MERGE_FAILED = 'Merging files failed.';
 
     public function __construct(
-        private readonly UploadPathResolver $pathResolver,
-        private readonly Filesystem $filesystem,
+        private UploadPathResolver $pathResolver,
+        private Filesystem $filesystem,
     ) {
     }
 

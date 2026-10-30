@@ -17,11 +17,11 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 class ServiceAccount
 {
     public function __construct(
-        private Security $security,
-        private MembershipService $membershipService,
-        private SandboxService $sandboxService,
+        private readonly Security $security,
+        private readonly MembershipService $membershipService,
+        private readonly SandboxService $sandboxService,
         #[Autowire(service: 'app.api_client.entrepot_sandbox_service_account')]
-        private ApiClient $api,
+        private readonly ApiClient $api,
     ) {
     }
 

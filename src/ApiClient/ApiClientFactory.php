@@ -14,7 +14,7 @@ use Symfony\Component\HttpClient\RetryableHttpClient;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final class ApiClientFactory
+final readonly class ApiClientFactory
 {
     public function __construct(
         private HttpClientInterface $httpClient,

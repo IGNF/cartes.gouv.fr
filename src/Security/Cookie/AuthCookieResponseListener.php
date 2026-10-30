@@ -3,12 +3,12 @@
 namespace App\Security\Cookie;
 
 use League\OAuth2\Client\Token\AccessToken;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-final class AuthCookieResponseListener implements EventSubscriberInterface
+final readonly class AuthCookieResponseListener
 {
     public const COOKIE_NAME = '__Host-CGAUTH';
     public const REQUEST_ATTR_INTENT = '_auth_cookie_intent';
@@ -18,11 +18,7 @@ final class AuthCookieResponseListener implements EventSubscriberInterface
     {
     }
 
-    public static function getSubscribedEvents(): array
-    {
-        return [KernelEvents::RESPONSE => ['onKernelResponse', 0]];
-    }
-
+    #[AsEventListener(event: KernelEvents::RESPONSE, priority: 0)]
     public function onKernelResponse(ResponseEvent $event): void
     {
         if (!$event->isMainRequest()) {

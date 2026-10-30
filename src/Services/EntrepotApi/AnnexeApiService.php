@@ -10,15 +10,15 @@ use App\Services\MembershipService;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
-final class AnnexeApiService
+final readonly class AnnexeApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        public readonly ApiClient $api,
-        private readonly Filesystem $filesystem,
-        private readonly MembershipService $membershipService,
-        #[Autowire('%annexes_url%')]
-        private readonly string $annexesUrl,
+        public ApiClient $api,
+        private Filesystem $filesystem,
+        private MembershipService $membershipService,
+        #[Autowire(param: 'annexes_url')]
+        private string $annexesUrl,
     ) {
     }
 
@@ -77,12 +77,12 @@ final class AnnexeApiService
     public function add(string $datastoreId, string $annexeFilePath, array $paths, ?array $labels = null, bool $published = true): array
     {
         $response = $this->api->sendFile('POST', "datastores/$datastoreId/annexes", $annexeFilePath, [
-            'published' => true === $published ? 'true' : 'false',
-            'paths' => join(',', $paths), // ici on fait un join parce que c'est un FormData, qui ne gère pas bien les virgules
+            'published' => $published ? 'true' : 'false',
+            'paths' => implode(',', $paths), // ici on fait un join parce que c'est un FormData, qui ne gère pas bien les virgules
         ])->array();
 
         if (null !== $labels) {
-            $response = $this->modify($datastoreId, $response['_id'], null, $labels, null)->array();
+            $response = $this->modify($datastoreId, $response['_id'], null, $labels)->array();
         }
 
         $this->filesystem->remove($annexeFilePath);
@@ -107,7 +107,7 @@ final class AnnexeApiService
         }
 
         if (null !== $published) {
-            $body['published'] = true === $published ? 'true' : 'false';
+            $body['published'] = $published ? 'true' : 'false';
         }
 
         return $this->api->patch("datastores/$datastoreId/annexes/$annexeId", $body);

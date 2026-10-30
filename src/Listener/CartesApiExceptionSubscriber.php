@@ -4,27 +4,21 @@ namespace App\Listener;
 
 use App\Exception\CartesApiException;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-class CartesApiExceptionSubscriber implements EventSubscriberInterface
+class CartesApiExceptionSubscriber
 {
     public function __construct(
-        private LoggerInterface $logger,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::EXCEPTION => 'onCartesApiException',
-        ];
-    }
-
+    #[AsEventListener(event: KernelEvents::EXCEPTION)]
     public function onCartesApiException(ExceptionEvent $event): void
     {
         $throwable = $event->getThrowable();
@@ -62,7 +56,7 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
         $responseData['details'] = $throwable->getDetails();
 
         $this->logger->debug('Exception[{throwable}]: {message}', [
-            'throwable' => get_class($throwable),
+            'throwable' => $throwable::class,
             ...$responseData,
         ]);
 

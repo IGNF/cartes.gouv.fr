@@ -2,11 +2,11 @@
 
 namespace App\Services\FileUploader\Dto;
 
-final class UploadValidationResult
+final readonly class UploadValidationResult
 {
     public function __construct(
-        public readonly string $srid,
-        public readonly string $relativeFilename,
+        public string $srid,
+        public string $relativeFilename,
     ) {
     }
 

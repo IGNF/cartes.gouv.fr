@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class DatastoreController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private DatastoreApiService $datastoreApiService,
+        private readonly DatastoreApiService $datastoreApiService,
     ) {
     }
 

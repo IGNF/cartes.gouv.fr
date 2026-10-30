@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class GeoserviceController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private GeoserviceApiService $geoserviceApiService,
+        private readonly GeoserviceApiService $geoserviceApiService,
     ) {
     }
 

@@ -8,11 +8,11 @@ use App\ApiClient\PaginatedResponse;
 use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class ProcessingApiService
+final readonly class ProcessingApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        public readonly ApiClient $api,
+        public ApiClient $api,
     ) {
     }
 

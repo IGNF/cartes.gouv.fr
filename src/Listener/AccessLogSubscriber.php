@@ -8,7 +8,7 @@ use App\Security\User;
 use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * Voir docs/developer/logs.md pour le format et les choix de minimisation (RGPD).
  */
 #[WithMonologChannel('access')]
-final class AccessLogSubscriber implements EventSubscriberInterface
+final readonly class AccessLogSubscriber
 {
     public function __construct(
         private LoggerInterface $logger,
@@ -27,14 +27,8 @@ final class AccessLogSubscriber implements EventSubscriberInterface
     ) {
     }
 
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            // kernel.terminate : après envoi de la réponse, aucune latence ajoutée
-            KernelEvents::TERMINATE => 'onKernelTerminate',
-        ];
-    }
-
+    // kernel.terminate : après envoi de la réponse, aucune latence ajoutée
+    #[AsEventListener(event: KernelEvents::TERMINATE)]
     public function onKernelTerminate(TerminateEvent $event): void
     {
         $request = $event->getRequest();

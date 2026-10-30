@@ -22,11 +22,11 @@ final class EntrepotMockResponseFactory
         // l’Entrepôt autorise par le jeton de l’utilisateur : une requête sans le jeton attendu est refusée comme en vrai
         $authorization = $options['normalized_headers']['authorization'][0] ?? '';
         if ('Authorization: Bearer '.FakeKeycloakClient::ACCESS_TOKEN !== $authorization) {
-            return self::json(['error' => 'Unauthorized', 'error_description' => 'Jeton absent ou inattendu'], 401);
+            return $this->json(['error' => 'Unauthorized', 'error_description' => 'Jeton absent ou inattendu'], 401);
         }
 
         if (self::ENTREPOT_HOST === $host && 'GET' === $method && str_ends_with($path, '/users/me')) {
-            return self::json([
+            return $this->json([
                 '_id' => self::USER_ID,
                 'email' => FakeKeycloakClient::DEFAULT_RESOURCE_OWNER['email'],
                 'creation' => '2026-01-01T00:00:00Z',
@@ -39,11 +39,11 @@ final class EntrepotMockResponseFactory
             ]);
         }
 
-        return self::json(['error' => 'NotFound', 'error_description' => "Aucune réponse simulée pour $method $path"], 404);
+        return $this->json(['error' => 'NotFound', 'error_description' => "Aucune réponse simulée pour $method $path"], 404);
     }
 
     /** @param array<string, mixed> $body */
-    private static function json(array $body, int $status = 200): MockResponse
+    private function json(array $body, int $status = 200): MockResponse
     {
         return new MockResponse(json_encode($body, JSON_THROW_ON_ERROR), [
             'http_code' => $status,

@@ -6,18 +6,14 @@ use App\Services\FileUploader\Exception\FileUploaderException;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\Response;
 
-final class FormatHandlerRegistry
+final readonly class FormatHandlerRegistry
 {
-    /** @var iterable<UploadFormatHandlerInterface> */
-    private iterable $handlers;
-
     /**
      * @param iterable<UploadFormatHandlerInterface> $handlers
      */
     public function __construct(
-        #[AutowireIterator('cartesgouvfr.file_uploader.format_handler')] iterable $handlers,
+        #[AutowireIterator('cartesgouvfr.file_uploader.format_handler')] private iterable $handlers,
     ) {
-        $this->handlers = $handlers;
     }
 
     public function getForExtension(string $extension): UploadFormatHandlerInterface

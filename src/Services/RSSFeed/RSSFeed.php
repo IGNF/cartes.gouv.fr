@@ -12,14 +12,14 @@ use Twig\Environment as TwigEnvironment;
 
 class RSSFeed
 {
-    private string $alertsJsonUrl;
-    private HttpClientInterface $httpClient;
+    private readonly string $alertsJsonUrl;
+    private readonly HttpClientInterface $httpClient;
 
     public function __construct(
-        private RouterInterface $router,
-        private TwigEnvironment $twig,
-        private CacheInterface $cache,
-        private ParameterBagInterface $parameters,
+        private readonly RouterInterface $router,
+        private readonly TwigEnvironment $twig,
+        private readonly CacheInterface $cache,
+        private readonly ParameterBagInterface $parameters,
         HttpClientInterface $httpClient,
     ) {
         $this->httpClient = $httpClient->withOptions([

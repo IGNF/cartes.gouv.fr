@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class ReplyController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private ReplyApiService $replyApiService,
+        private readonly ReplyApiService $replyApiService,
     ) {
     }
 

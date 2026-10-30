@@ -8,7 +8,7 @@ final class PublicPagesTest extends WebTestCase
 {
     public function testHealthRouteAnswersOk(): void
     {
-        $client = static::createClient();
+        $client = self::createClient();
         $client->request('GET', '/tableau-de-bord/health');
 
         self::assertResponseIsSuccessful();
@@ -17,7 +17,7 @@ final class PublicPagesTest extends WebTestCase
 
     public function testPublicPageRendersTheApplicationShell(): void
     {
-        $client = static::createClient();
+        $client = self::createClient();
         $client->request('GET', '/publier-une-donnee');
 
         self::assertResponseIsSuccessful();
@@ -27,7 +27,7 @@ final class PublicPagesTest extends WebTestCase
 
     public function testAnonymousApiRequestAnswersJsonUnauthorized(): void
     {
-        $client = static::createClient();
+        $client = self::createClient();
         $client->xmlHttpRequest('GET', '/api/users/me');
 
         self::assertResponseStatusCodeSame(401);

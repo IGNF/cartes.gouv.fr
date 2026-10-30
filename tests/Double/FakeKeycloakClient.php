@@ -45,7 +45,7 @@ final class FakeKeycloakClient extends KeycloakClient
 
     public function getAccessToken(array $options = []): AccessToken
     {
-        if (null !== self::$nextTokenException) {
+        if (self::$nextTokenException instanceof \Throwable) {
             $exception = self::$nextTokenException;
             self::$nextTokenException = null;
             throw $exception;

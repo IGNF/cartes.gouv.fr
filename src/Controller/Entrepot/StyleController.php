@@ -28,11 +28,11 @@ use Symfony\Component\Routing\Attribute\Route;
 class StyleController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private ConfigurationApiService $configurationApiService,
-        private AnnexeApiService $annexeApiService,
-        private CartesMetadataApiService $cartesMetadataApiService,
-        private CartesStylesApiService $cartesStylesApiService,
-        private LoggerInterface $logger,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly AnnexeApiService $annexeApiService,
+        private readonly CartesMetadataApiService $cartesMetadataApiService,
+        private readonly CartesStylesApiService $cartesStylesApiService,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -178,7 +178,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $style = array_values(array_filter($styles, static function ($style) use ($styleTechnicalName) {
                 return ($style['technical_name'] ?? $style['name']) == $styleTechnicalName;
             }));
-            if (0 == count($style)) {
+            if (0 === count($style)) {
                 throw new CartesApiException("Style $styleTechnicalName does not exist", JsonResponse::HTTP_BAD_REQUEST);
             }
 
@@ -199,7 +199,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             });
 
             // Plus de style courant, on en met un (le premier)
-            if (0 == count($current) && 0 != count($styles)) {
+            if (0 === count($current) && 0 !== count($styles)) {
                 $styles[0]['current'] = true;
             }
 
@@ -233,7 +233,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $style = array_filter($styles, static function ($style) use ($styleTechnicalName) {
                 return ($style['technical_name'] ?? $style['name']) == $styleTechnicalName;
             });
-            if (0 == count($style)) {
+            if (0 === count($style)) {
                 throw new CartesApiException("Style $styleTechnicalName does not exists", JsonResponse::HTTP_BAD_REQUEST);
             }
 

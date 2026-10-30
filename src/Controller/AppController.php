@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Requirement\Requirement;
 
 class AppController extends AbstractController
 {
@@ -19,7 +20,7 @@ class AppController extends AbstractController
         name: 'cartesgouvfr_app',
         priority: -1,
         defaults: ['reactRouting' => null],
-        requirements: ['reactRouting' => '.+'],
+        requirements: ['reactRouting' => Requirement::CATCH_ALL],
         options: ['expose' => true]
     )]
     public function app(UrlGeneratorInterface $urlGenerator): Response

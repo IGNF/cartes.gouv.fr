@@ -27,7 +27,7 @@ use Symfony\Component\Uid\Uuid;
 class ReportController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private ReportApiService $reportApiService,
+        private readonly ReportApiService $reportApiService,
     ) {
     }
 
@@ -124,7 +124,6 @@ class ReportController extends AbstractController implements ApiControllerInterf
             content: new OA\MediaType(
                 mediaType: 'multipart/form-data',
                 schema: new OA\Schema(
-                    type: 'object',
                     properties: [
                         new OA\Property(
                             property: 'file1',
@@ -137,6 +136,7 @@ class ReportController extends AbstractController implements ApiControllerInterf
                             format: 'binary',
                         ),
                     ],
+                    type: 'object',
                 )
             )
         ),

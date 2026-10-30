@@ -26,7 +26,7 @@ final class AuthenticationFlowTest extends WebTestCase
 
     public function testLoginRedirectsToKeycloakWithSignedState(): void
     {
-        $client = static::createClient();
+        $client = self::createClient();
         $client->request('GET', self::BASE.'/login', server: ['HTTP_REFERER' => self::BASE.'/tableau-de-bord']);
 
         self::assertResponseRedirects();
@@ -37,14 +37,14 @@ final class AuthenticationFlowTest extends WebTestCase
         self::assertSame('cartes-gouv-test', $query['client_id']);
         self::assertSame(self::BASE.'/login/check', $query['redirect_uri']);
 
-        $state = static::getContainer()->get(LoginStateSerializer::class)->decode($query['state']);
+        $state = self::getContainer()->get(LoginStateSerializer::class)->decode($query['state']);
         self::assertNotNull($state);
         self::assertSame(self::BASE.'/tableau-de-bord', $state['referer']);
     }
 
     public function testSuccessfulLoginSetsTheCookieAndAuthenticatesApiCalls(): void
     {
-        $client = static::createClient();
+        $client = self::createClient();
         $this->loginCheck($client, ['referer' => null]);
 
         self::assertResponseRedirects(self::BASE.'/');
@@ -64,10 +64,10 @@ final class AuthenticationFlowTest extends WebTestCase
 
     public function testExpiredTokenInCookieAnswersJsonUnauthorizedAndClearsTheCookie(): void
     {
-        $client = static::createClient();
+        $client = self::createClient();
         // le cookie est posé avec une expiration navigateur future : seul le jeton qu’il contient est expiré
         $expiredToken = FakeKeycloakClient::createAccessToken(-60);
-        $cipher = static::getContainer()->get(AuthCookieCipher::class);
+        $cipher = self::getContainer()->get(AuthCookieCipher::class);
         $client->getCookieJar()->set(new Cookie(
             AuthCookieResponseListener::COOKIE_NAME,
             $cipher->encrypt(serialize($expiredToken)),
@@ -91,7 +91,7 @@ final class AuthenticationFlowTest extends WebTestCase
 
     public function testFailedTokenExchangeRedirectsToPublishPage(): void
     {
-        $client = static::createClient();
+        $client = self::createClient();
         FakeKeycloakClient::failNextTokenExchange(new \UnexpectedValueException('invalid code'));
         $this->loginCheck($client, ['referer' => null]);
 
@@ -100,7 +100,7 @@ final class AuthenticationFlowTest extends WebTestCase
 
     public function testLogoutRedirectsToPublishPage(): void
     {
-        $client = static::createClient();
+        $client = self::createClient();
         $client->request('GET', self::BASE.'/logout');
 
         self::assertResponseRedirects(self::BASE.'/publier-une-donnee');
@@ -109,7 +109,7 @@ final class AuthenticationFlowTest extends WebTestCase
     /** @param array<string, mixed> $statePayload */
     private function loginCheck(KernelBrowser $client, array $statePayload): void
     {
-        $state = static::getContainer()->get(LoginStateSerializer::class)->encode($statePayload);
+        $state = self::getContainer()->get(LoginStateSerializer::class)->encode($statePayload);
         $client->request('GET', self::BASE.'/login/check?code=fake-code&state='.urlencode($state));
     }
 }

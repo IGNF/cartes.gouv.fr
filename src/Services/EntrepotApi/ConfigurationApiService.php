@@ -9,14 +9,14 @@ use App\ApiClient\ResponsePromise;
 use App\Utils;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class ConfigurationApiService
+final readonly class ConfigurationApiService
 {
     // attributs du DTO détaillé d'une offering, identiques dans la liste et le GET unitaire
     private const OFFERING_DETAIL_FIELDS = 'open,available,layer_name,type,status,endpoint,configuration,urls,creation,extra,update,public_activity';
 
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        public readonly ApiClient $api,
+        public ApiClient $api,
     ) {
     }
 

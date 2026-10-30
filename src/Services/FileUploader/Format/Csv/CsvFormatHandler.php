@@ -40,7 +40,7 @@ final class CsvFormatHandler implements UploadFormatHandlerInterface
         }
 
         $headerColumns = $this->readHeaderColumns($upload);
-        if (empty($headerColumns)) {
+        if ([] === $headerColumns) {
             throw new FileUploaderException('CSV invalide (en-tête manquant)', Response::HTTP_BAD_REQUEST);
         }
 
@@ -48,7 +48,7 @@ final class CsvFormatHandler implements UploadFormatHandlerInterface
         $lonOk = $this->hasAnyColumn($headerColumns, self::LON_COLUMNS);
         $latOk = $this->hasAnyColumn($headerColumns, self::LAT_COLUMNS);
 
-        if (!$geomOk && !($lonOk && $latOk)) {
+        if (!$geomOk && (!$lonOk || !$latOk)) {
             throw new FileUploaderException('CSV invalide (colonnes attendues: une colonne géométrie json|geom|the_geom|wkb|wkt, ou deux colonnes coordonnées lon|x|longitude + lat|y|latitude)', Response::HTTP_BAD_REQUEST);
         }
 
@@ -103,7 +103,7 @@ final class CsvFormatHandler implements UploadFormatHandlerInterface
         }
 
         // Retirer BOM UTF-8 éventuellement présent en tout début.
-        if (0 === strncmp($line, "\xEF\xBB\xBF", 3)) {
+        if (str_starts_with($line, "\xEF\xBB\xBF")) {
             $line = substr($line, 3);
         }
 
@@ -116,7 +116,7 @@ final class CsvFormatHandler implements UploadFormatHandlerInterface
             }
 
             // BOM peut parfois se retrouver sur la première valeur selon encodage.
-            if (0 === $i && 0 === strncmp($v, "\xEF\xBB\xBF", 3)) {
+            if (0 === $i && str_starts_with($v, "\xEF\xBB\xBF")) {
                 $v = substr($v, 3);
             }
 

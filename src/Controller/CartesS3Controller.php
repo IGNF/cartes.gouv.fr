@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 
 #[Route(
     '/files',
@@ -17,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class CartesS3Controller extends AbstractController
 {
     public function __construct(
-        private FilesystemOperator $s3Storage,
+        private readonly FilesystemOperator $s3Storage,
     ) {
     }
 
@@ -25,7 +26,7 @@ class CartesS3Controller extends AbstractController
         '/{path}',
         name: 'get_content',
         methods: ['GET'],
-        requirements: ['path' => '.+'],
+        requirements: ['path' => Requirement::CATCH_ALL],
         defaults: ['path' => '']
     )]
     public function getContent(string $path, Request $request): Response

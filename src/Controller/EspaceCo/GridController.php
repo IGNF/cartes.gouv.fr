@@ -24,7 +24,7 @@ class GridController extends AbstractController implements ApiControllerInterfac
     public const SEARCH_LIMIT = 10;
 
     public function __construct(
-        private GridApiService $gridApiService,
+        private readonly GridApiService $gridApiService,
     ) {
     }
 

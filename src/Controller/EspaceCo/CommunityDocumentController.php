@@ -25,12 +25,12 @@ use Symfony\Component\Uid\Uuid;
 #[OA\Tag(name: '[espaceco] community-documents', description: 'Documents liés à une communauté')]
 class CommunityDocumentController extends AbstractController implements ApiControllerInterface
 {
-    private string $varDataPath;
+    private readonly string $varDataPath;
 
     public function __construct(
         ParameterBagInterface $parameters,
-        private Filesystem $fs,
-        private CommunityDocumentApiService $communityDocumentApiService,
+        private readonly Filesystem $fs,
+        private readonly CommunityDocumentApiService $communityDocumentApiService,
     ) {
         $this->varDataPath = $parameters->get('upload_path');
     }
@@ -62,8 +62,8 @@ class CommunityDocumentController extends AbstractController implements ApiContr
             $document = $request->files->get('document');
 
             $uuid = Uuid::v4();
-            $tempFileDir = join(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
-            $tempFilePath = join(DIRECTORY_SEPARATOR, [$tempFileDir, $document->getClientOriginalName()]);
+            $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
+            $tempFilePath = implode(DIRECTORY_SEPARATOR, [$tempFileDir, $document->getClientOriginalName()]);
 
             $document->move($tempFileDir, $document->getClientOriginalName());
 

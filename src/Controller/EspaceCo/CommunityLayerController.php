@@ -25,9 +25,9 @@ use Symfony\Component\Routing\Attribute\Route;
 class CommunityLayerController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private CommunityLayerApiService $communityLayerApiService,
-        private LayerApiService $layerApiService,
-        private DatabaseApiService $databaseApiService,
+        private readonly CommunityLayerApiService $communityLayerApiService,
+        private readonly LayerApiService $layerApiService,
+        private readonly DatabaseApiService $databaseApiService,
     ) {
     }
 

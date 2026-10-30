@@ -8,11 +8,11 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
-final class ChunkStorage
+final readonly class ChunkStorage
 {
     public function __construct(
-        private readonly UploadPathResolver $pathResolver,
-        private readonly Filesystem $filesystem,
+        private UploadPathResolver $pathResolver,
+        private Filesystem $filesystem,
     ) {
     }
 
@@ -58,7 +58,7 @@ final class ChunkStorage
                 $expectedFiles[] = $name;
             }
 
-            if (!empty($missing)) {
+            if ([] !== $missing) {
                 $preview = array_slice($missing, 0, 20);
                 $suffix = count($missing) > 20 ? '…' : '';
                 throw new FileUploaderException(sprintf('Des chunks sont manquants (%d/%d): %s%s', count($missing), $expectedTotalChunks, implode(', ', $preview), $suffix), Response::HTTP_BAD_REQUEST);
@@ -66,7 +66,7 @@ final class ChunkStorage
 
             $extra = array_values(array_diff($chunkFiles, $expectedFiles));
 
-            if (!empty($extra)) {
+            if ([] !== $extra) {
                 $preview = array_slice($extra, 0, 20);
                 $suffix = count($extra) > 20 ? '…' : '';
                 throw new FileUploaderException(sprintf('Des chunks inattendus ont été détectés (%d): %s%s', count($extra), implode(', ', $preview), $suffix), Response::HTTP_BAD_REQUEST);
@@ -75,7 +75,7 @@ final class ChunkStorage
             return $expectedFiles;
         }
 
-        if (empty($chunkFiles)) {
+        if ([] === $chunkFiles) {
             throw new FileUploaderException('Aucun chunk trouvé pour cet upload', Response::HTTP_BAD_REQUEST);
         }
 

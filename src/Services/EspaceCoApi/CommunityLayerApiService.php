@@ -6,11 +6,11 @@ use App\ApiClient\ApiClient;
 use App\ApiClient\PaginatedPromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class CommunityLayerApiService
+final readonly class CommunityLayerApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.espaceco')]
-        private readonly ApiClient $api,
+        private ApiClient $api,
     ) {
     }
 

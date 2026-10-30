@@ -31,8 +31,8 @@ class PermissionController extends AbstractController implements ApiControllerIn
     ];
 
     public function __construct(
-        private PermissionApiService $permissionApiService,
-        private DatabaseApiService $databaseApiService,
+        private readonly PermissionApiService $permissionApiService,
+        private readonly DatabaseApiService $databaseApiService,
     ) {
     }
 
@@ -168,7 +168,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
             // Les cles communes
             $commons = array_keys(array_intersect_key($oldPermissionsByKey, $newPermissionsByKey));
 
-            if (0 != count($commons)) {
+            if (0 !== count($commons)) {
                 // Recherche des modifications
                 foreach ($commons as $key) {
                     $oldPermissionConfig = $oldPermissionsByKey[$key];
@@ -180,15 +180,15 @@ class PermissionController extends AbstractController implements ApiControllerIn
             }
 
             $diff = array_diff_key($oldPermissionsByKey, $newPermissionsByKey);
-            if (0 != count($diff)) {    // Suppressions
-                foreach ($oldPermissionsByKey as $key => $config) {
+            if (0 !== count($diff)) {    // Suppressions
+                foreach ($oldPermissionsByKey as $config) {
                     $this->permissionApiService->remove($config['id'])->await();
                 }
             }
 
             $diff = array_diff_key($newPermissionsByKey, $oldPermissionsByKey);
-            if (0 != count($diff)) {    // Ajouts
-                foreach ($newPermissionsByKey as $key => $config) {
+            if (0 !== count($diff)) {    // Ajouts
+                foreach ($newPermissionsByKey as $config) {
                     $this->permissionApiService->add($config)->await();
                 }
             }
@@ -267,7 +267,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
 
         $tableIndex = $this->_findTable($table, $groupBy[$index]['tables']);
         if ($tableIndex < 0) {
-            $title = is_null($permission['table_title']) ? $permission['table_name'] : $permission['table_title'];
+            $title = $permission['table_title'] ?? $permission['table_name'];
             $groupBy[$index]['tables'][] = ['id' => $table, 'title' => $title, 'level' => 'NONE', 'columns' => []];
         } else {
             $groupBy[$index]['tables'][$tableIndex]['level'] = $level;
@@ -296,12 +296,12 @@ class PermissionController extends AbstractController implements ApiControllerIn
 
         $tableIndex = $this->_findTable($table, $groupBy[$index]['tables']);
         if ($tableIndex < 0) {
-            $title = is_null($permission['table_title']) ? $permission['table_name'] : $permission['table_title'];
+            $title = $permission['table_title'] ?? $permission['table_name'];
             $groupBy[$index]['tables'][] = ['id' => $table, 'title' => $title, 'level' => 'NONE', 'columns' => []];
             $tableIndex = $this->_findTable($table, $groupBy[$index]['tables']);
         }
 
-        $title = is_null($permission['column_title']) ? $permission['column_name'] : $permission['column_title'];
+        $title = $permission['column_title'] ?? $permission['column_name'];
         $groupBy[$index]['tables'][$tableIndex]['columns'][] = ['id' => $column, 'title' => $title, 'level' => $level];
     }
 
@@ -339,8 +339,8 @@ class PermissionController extends AbstractController implements ApiControllerIn
     private function _composeKey(array $permission): string
     {
         $values = [$permission['database']];
-        $values[] = $permission['table'] ? $permission['table'] : '';
-        $values[] = $permission['column'] ? $permission['column'] : '';
+        $values[] = $permission['table'] ?: '';
+        $values[] = $permission['column'] ?: '';
 
         return implode(':', $values);
     }

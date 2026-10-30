@@ -11,7 +11,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
  *
  * @SuppressWarnings(UnusedFormalParameter) signature imposée par l'interface
  */
-final class ServiceAccountRetryStrategy implements RetryStrategyInterface
+final readonly class ServiceAccountRetryStrategy implements RetryStrategyInterface
 {
     public function __construct(
         private ServiceAccountHttpClient $client,

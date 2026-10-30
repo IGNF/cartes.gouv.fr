@@ -120,9 +120,9 @@ final class SupportedUploadFormatsCatalog
      */
     public function detectZipFamilyFromTokens(array $tokens): string
     {
-        $tokens = array_values(array_unique(array_map('strtolower', array_filter($tokens, static fn (string $v) => '' !== $v))));
+        $tokens = array_values(array_unique(array_map(strtolower(...), array_filter($tokens, static fn (string $v) => '' !== $v))));
 
-        if (empty($tokens)) {
+        if ([] === $tokens) {
             throw new SupportedUploadFormatsCatalogException("L'archive ne contient aucun fichier acceptable");
         }
 
@@ -143,7 +143,7 @@ final class SupportedUploadFormatsCatalog
             return $candidates[0];
         }
 
-        if (empty($candidates)) {
+        if ([] === $candidates) {
             // Cas fréquent: mélange de familles, ou shapefile incomplet
             throw new SupportedUploadFormatsCatalogException("Le ZIP ne doit contenir qu'un seul format de données");
         }

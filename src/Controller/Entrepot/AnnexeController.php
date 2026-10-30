@@ -163,7 +163,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
 
             $file = $request->files->get('file');
             $extension = $file->getClientOriginalExtension();
-            $path = join('/', ['thumbnail', "$uuid.$extension"]);
+            $path = implode('/', ['thumbnail', "$uuid.$extension"]);
 
             $labels = [
                 CommonTags::DATASHEET_NAME."=$datasheetName",

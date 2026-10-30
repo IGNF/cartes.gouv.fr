@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class DatastoreCleanupController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private DatastoreCleanupWorkflow $datastoreCleanupWorkflow,
+        private readonly DatastoreCleanupWorkflow $datastoreCleanupWorkflow,
         private readonly LoggerInterface $logger,
     ) {
     }

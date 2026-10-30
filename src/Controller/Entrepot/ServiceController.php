@@ -33,11 +33,11 @@ use Symfony\Component\Routing\Requirement\Requirement;
 class ServiceController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private DatastoreApiService $datastoreApiService,
-        private ConfigurationApiService $configurationApiService,
-        private CartesServiceApiService $cartesServiceApiService,
-        private CapabilitiesService $capabilitiesService,
-        private CartesMetadataApiService $cartesMetadataApiService,
+        private readonly DatastoreApiService $datastoreApiService,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly CartesServiceApiService $cartesServiceApiService,
+        private readonly CapabilitiesService $capabilitiesService,
+        private readonly CartesMetadataApiService $cartesMetadataApiService,
         protected SandboxService $sandboxService,
     ) {
     }
@@ -46,13 +46,13 @@ class ServiceController extends AbstractController implements ApiControllerInter
     public function getOfferings(string $datastoreId, #[MapQueryParameter] bool $detailed = false, #[MapQueryParameter] bool $detailedConfiguration = false): JsonResponse
     {
         try {
-            if (true === $detailed) {
+            if ($detailed) {
                 $offerings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId)->resolve();
             } else {
                 $offerings = $this->configurationApiService->getAllOfferings($datastoreId)->resolve();
             }
 
-            if (true === $detailedConfiguration) {
+            if ($detailedConfiguration) {
                 $pendingConfigurationsById = [];
 
                 foreach ($offerings as $offering) {
@@ -115,10 +115,10 @@ class ServiceController extends AbstractController implements ApiControllerInter
                 $endpoints = array_values(array_filter($datastore['endpoints'], function ($ep) use ($offering) {
                     return $ep['endpoint']['_id'] === $offering['endpoint']['_id'];
                 }));
-                if (1 == count($endpoints)) {
+                if (1 === count($endpoints)) {
                     $this->capabilitiesService->createOrUpdate($datastoreId, $endpoints[0]['endpoint'], $offering['urls'][0]['url']);
                 }
-            } catch (\Exception $e) {
+            } catch (\Exception) {
             }
 
             if (isset($configuration['tags'][CommonTags::DATASHEET_NAME])) {

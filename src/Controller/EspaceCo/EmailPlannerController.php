@@ -24,7 +24,7 @@ class EmailPlannerController extends AbstractController implements ApiController
     public const SEARCH_LIMIT = 20;
 
     public function __construct(
-        private EmailPlannerApiService $emailPlannerApiService,
+        private readonly EmailPlannerApiService $emailPlannerApiService,
     ) {
     }
 

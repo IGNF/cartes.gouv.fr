@@ -10,9 +10,9 @@ use App\Services\FileUploader\Format\Catalog\SupportedUploadFormatsCatalogExcept
  * - GeoPackage: .gpkg
  * - GeoJSON: .geojson.
  */
-final class ZipUploadPolicy
+final readonly class ZipUploadPolicy
 {
-    public function __construct(private readonly SupportedUploadFormatsCatalog $catalog)
+    public function __construct(private SupportedUploadFormatsCatalog $catalog)
     {
     }
 

@@ -14,16 +14,16 @@ use Symfony\Contracts\Cache\ItemInterface;
 
 class SandboxService
 {
-    private ?string $sandboxCommunityId;
+    private readonly ?string $sandboxCommunityId;
     private ?string $sandboxDatastoreId = null;
 
     public function __construct(
-        private ParameterBagInterface $parameterBag,
+        private readonly ParameterBagInterface $parameterBag,
         // compte de service : la communauté sandbox est une configuration de l'application, pas un droit de l'utilisateur
         #[Autowire(service: 'app.api_client.entrepot_sandbox_service_account')]
-        private ApiClient $serviceAccountApi,
-        private CacheInterface $cache,
-        private LoggerInterface $logger,
+        private readonly ApiClient $serviceAccountApi,
+        private readonly CacheInterface $cache,
+        private readonly LoggerInterface $logger,
     ) {
         // id vide dans la config par défaut : bac à sable non configuré
         $this->sandboxCommunityId = ($this->parameterBag->get('sandbox')['community_id'] ?? null) ?: null;

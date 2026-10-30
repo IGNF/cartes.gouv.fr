@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class CatalogsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private CatalogsApiService $catalogsApiService,
+        private readonly CatalogsApiService $catalogsApiService,
     ) {
     }
 

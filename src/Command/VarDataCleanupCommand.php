@@ -25,18 +25,14 @@ class VarDataCleanupCommand extends Command
      */
     public const ARTICLES_DIR_NAME = 'articles';
 
-    private string $directory;
-    private Filesystem $fs;
+    private readonly string $directory;
+    private readonly Filesystem $fs;
 
     public function __construct(ParameterBagInterface $params)
     {
         $this->directory = $params->get('var_data_path');
         $this->fs = new Filesystem();
         parent::__construct();
-    }
-
-    protected function configure(): void
-    {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -119,7 +115,7 @@ class VarDataCleanupCommand extends Command
                 $this->fs->remove($absoluteFilePath);
                 $io->note(sprintf('%s supprimé', str_replace($this->directory, '', $absoluteFilePath)));
                 ++$deleteFileCount;
-            } catch (\Exception $ex) {
+            } catch (\Exception) {
                 $io->warning(sprintf("%s n'a pu être supprimé", str_replace($this->directory, '', $absoluteFilePath)));
             }
         }

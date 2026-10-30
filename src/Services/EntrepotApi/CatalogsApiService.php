@@ -6,11 +6,11 @@ use App\ApiClient\ApiClient;
 use App\ApiClient\PaginatedPromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class CatalogsApiService
+final readonly class CatalogsApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        private readonly ApiClient $api,
+        private ApiClient $api,
     ) {
     }
 

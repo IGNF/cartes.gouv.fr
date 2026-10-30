@@ -5,9 +5,10 @@ namespace App\Security;
 use App\Security\Cookie\AuthCookieCipher;
 use App\Security\Cookie\AuthCookieResponseListener;
 use League\OAuth2\Client\Token\AccessToken;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-final class KeycloakTokenManager
+final readonly class KeycloakTokenManager
 {
     private const REQUEST_ATTR_TOKEN = '_keycloak_token_cache';
 
@@ -20,7 +21,7 @@ final class KeycloakTokenManager
     public function getAccessToken(): ?AccessToken
     {
         $request = $this->requestStack->getCurrentRequest();
-        if (null === $request) {
+        if (!$request instanceof Request) {
             return null;
         }
 
@@ -56,7 +57,7 @@ final class KeycloakTokenManager
     public function setAccessToken(AccessToken $token): void
     {
         $request = $this->requestStack->getCurrentRequest();
-        if (null === $request) {
+        if (!$request instanceof Request) {
             throw new \RuntimeException('Impossible de persister le token Keycloak : aucune requête HTTP en cours.');
         }
 
@@ -67,7 +68,7 @@ final class KeycloakTokenManager
     public function clearAccessToken(): void
     {
         $request = $this->requestStack->getCurrentRequest();
-        if (null === $request) {
+        if (!$request instanceof Request) {
             return;
         }
 

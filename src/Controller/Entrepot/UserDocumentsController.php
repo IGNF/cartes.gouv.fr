@@ -27,7 +27,7 @@ use Symfony\Component\Uid\Uuid;
 class UserDocumentsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private UserDocumentsApiService $userDocumentsApiService,
+        private readonly UserDocumentsApiService $userDocumentsApiService,
     ) {
     }
 

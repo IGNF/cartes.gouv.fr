@@ -7,21 +7,17 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ApiException extends HttpException
 {
-    /** @var array<mixed>|string */
-    private array|string $details;
-
     /**
      * @param array<mixed>|string $details
      */
-    public function __construct(string $message, int $statusCode = Response::HTTP_BAD_REQUEST, array|string $details = [], ?\Throwable $previous = null)
+    public function __construct(string $message, int $statusCode = Response::HTTP_BAD_REQUEST, private readonly array|string $details = [], ?\Throwable $previous = null)
     {
-        $this->details = $details;
         parent::__construct($statusCode, $message, $previous, [], $statusCode);
     }
 
-    public function __toString()
+    public function __toString(): string
     {
-        return __CLASS__.": [{$this->code}]: {$this->message}\n";
+        return self::class.": [{$this->code}]: {$this->message}\n";
     }
 
     /**
