@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class PyramidVectorCompositionDTO
 {
     public function __construct(
-        #[Assert\NotBlank(['message' => 'pyramid_add.composition.table_error'])]
+        #[Assert\NotBlank(message: 'pyramid_add.composition.table_error')]
         public readonly string $table,
 
         /**

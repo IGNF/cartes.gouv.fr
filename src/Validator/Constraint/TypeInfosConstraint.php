@@ -17,14 +17,14 @@ class TypeInfosConstraint extends Compound
             new Assert\Collection(
                 fields: [
                     'login' => new Assert\Required([
-                        new Assert\NotBlank([
-                            'message' => 'user_key.login_not_blank',
-                        ]),
+                        new Assert\NotBlank(
+                            message: 'user_key.login_not_blank',
+                        ),
                     ]),
                     'password' => new Assert\Optional([
-                        new Assert\NotBlank([
-                            'message' => 'user_key.password_not_blank',
-                        ]),
+                        new Assert\NotBlank(
+                            message: 'user_key.password_not_blank',
+                        ),
                     ]),
                 ]
             ),
