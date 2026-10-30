@@ -8,12 +8,12 @@ use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
-final class UserDocumentsApiService
+final readonly class UserDocumentsApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        private readonly ApiClient $api,
-        private readonly Filesystem $filesystem,
+        private ApiClient $api,
+        private Filesystem $filesystem,
     ) {
     }
 
@@ -51,11 +51,11 @@ final class UserDocumentsApiService
         }
 
         if (null !== $labels) {
-            $formFields['labels'] = join(',', $labels);
+            $formFields['labels'] = implode(',', $labels);
         }
 
         if (null !== $publicUrl) {
-            $formFields['public_url'] = true === $publicUrl ? 'true' : 'false';
+            $formFields['public_url'] = $publicUrl ? 'true' : 'false';
         }
 
         $response = $this->api->sendFile('POST', 'users/me/documents', $filePath, $formFields)->array();
@@ -85,11 +85,11 @@ final class UserDocumentsApiService
         }
 
         if (null !== $labels) {
-            $body['labels'] = join(',', $labels);
+            $body['labels'] = implode(',', $labels);
         }
 
         if (null !== $publicUrl) {
-            $body['public_url'] = true === $publicUrl ? 'true' : 'false';
+            $body['public_url'] = $publicUrl ? 'true' : 'false';
         }
 
         return $this->api->patch("users/me/documents/$documentId", $body);

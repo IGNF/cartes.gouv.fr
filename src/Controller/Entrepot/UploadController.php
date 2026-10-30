@@ -224,7 +224,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
                     $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->array());
                     try {
                         $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->array();
-                    } catch (ApiException $ex) {
+                    } catch (ApiException) {
                     }
                     $inputUpload['checks'][] = $checkExecution;
                 }

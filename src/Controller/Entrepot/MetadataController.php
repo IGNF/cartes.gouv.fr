@@ -26,8 +26,8 @@ use Symfony\Component\Routing\Requirement\Requirement;
 class MetadataController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private MetadataApiService $metadataApiService,
-        private CswMetadataHelper $cswMetadataHelper,
+        private readonly MetadataApiService $metadataApiService,
+        private readonly CswMetadataHelper $cswMetadataHelper,
     ) {
     }
 
@@ -52,7 +52,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
     {
         try {
             $metadataArray = json_decode($request->getContent(), true);
-            $datasheetName = $request->query->get(CommonTags::DATASHEET_NAME, null);
+            $datasheetName = $request->query->get(CommonTags::DATASHEET_NAME);
 
             $cswMetadata = $this->cswMetadataHelper->fromArray($metadataArray);
             $filePath = $this->cswMetadataHelper->saveToFile($cswMetadata);

@@ -51,13 +51,13 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
         }
 
         // Certains fichiers JSON commencent par un BOM UTF-8, qui ferait échouer json_decode().
-        if (0 === strncmp($contents, "\xEF\xBB\xBF", 3)) {
+        if (str_starts_with($contents, "\xEF\xBB\xBF")) {
             $contents = substr($contents, 3);
         }
 
         try {
             $decoded = json_decode($contents, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (\JsonException) {
             throw $this->invalid('JSON non valide');
         }
 
@@ -137,7 +137,7 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
 
         $trim = ltrim($head);
         // Gestion BOM UTF-8 éventuel au tout début du fichier
-        if (0 === strncmp($trim, "\xEF\xBB\xBF", 3)) {
+        if (str_starts_with($trim, "\xEF\xBB\xBF")) {
             $trim = substr($trim, 3);
             $trim = ltrim($trim);
         }

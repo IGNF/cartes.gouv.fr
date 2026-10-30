@@ -9,11 +9,11 @@ use App\ApiClient\ResponsePromise;
 use App\Utils;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class StoredDataApiService
+final readonly class StoredDataApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        public readonly ApiClient $api,
+        public ApiClient $api,
     ) {
     }
 

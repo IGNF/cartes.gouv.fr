@@ -9,11 +9,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EntrepotApiFakeService
 {
-    private string $mockDataDir;
+    private readonly string $mockDataDir;
 
     public function __construct(
         ParameterBagInterface $parameterBag,
-        private Filesystem $fs,
+        private readonly Filesystem $fs,
     ) {
         $this->mockDataDir = $parameterBag->get('kernel.project_dir').'/tests/mock/entrepot';
     }

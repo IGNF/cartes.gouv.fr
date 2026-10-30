@@ -84,7 +84,8 @@ class StoredDataController extends AbstractController implements ApiControllerIn
         } catch (ApiException $ex) {
             if (Response::HTTP_NOT_FOUND === $ex->getStatusCode()) {
                 throw new CartesApiException("La donnée stockée [$storedDataId] n'existe pas", $ex->getStatusCode(), $ex->getDetails());
-            } elseif (Response::HTTP_BAD_REQUEST === $ex->getStatusCode()) {
+            }
+            if (Response::HTTP_BAD_REQUEST === $ex->getStatusCode()) {
                 throw new CartesApiException("L'identifiant de la donnée stockée [$storedDataId] est invalide", $ex->getStatusCode(), $ex->getDetails());
             }
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
@@ -142,7 +143,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                         $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->array());
                         try {
                             $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->array();
-                        } catch (ApiException $ex) {
+                        } catch (ApiException) {
                         }
                         $inputUpload['checks'][] = $checkExecution;
                     }
@@ -158,7 +159,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 $procIntegrationExec = $this->processingApiService->getExecution($datastoreId, $procIntegrationId)->array();
                 try {
                     $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId)->array();
-                } catch (ApiException $ex) {
+                } catch (ApiException) {
                 }
 
                 $procExections[] = $procIntegrationExec;
@@ -169,7 +170,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 $procPyramidCreationExec = $this->processingApiService->getExecution($datastoreId, $procPyramidCreationId)->array();
                 try {
                     $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId)->array();
-                } catch (ApiException $ex) {
+                } catch (ApiException) {
                 }
                 $procExections[] = $procPyramidCreationExec;
             }

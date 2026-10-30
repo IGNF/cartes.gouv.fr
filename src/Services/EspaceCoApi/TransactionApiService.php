@@ -7,11 +7,11 @@ use App\ApiClient\PaginatedResponse;
 use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class TransactionApiService
+final readonly class TransactionApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.espaceco')]
-        private readonly ApiClient $api,
+        private ApiClient $api,
     ) {
     }
 

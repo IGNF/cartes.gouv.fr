@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-final class AuthCookieResponseListener implements EventSubscriberInterface
+final readonly class AuthCookieResponseListener implements EventSubscriberInterface
 {
     public const COOKIE_NAME = '__Host-CGAUTH';
     public const REQUEST_ATTR_INTENT = '_auth_cookie_intent';

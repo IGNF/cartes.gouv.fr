@@ -20,8 +20,8 @@ class EntrepotUserCache implements ResetInterface
     private array $computedInRequest = [];
 
     public function __construct(
-        private UserApiService $userApiService,
-        private CacheInterface $cache,
+        private readonly UserApiService $userApiService,
+        private readonly CacheInterface $cache,
     ) {
     }
 

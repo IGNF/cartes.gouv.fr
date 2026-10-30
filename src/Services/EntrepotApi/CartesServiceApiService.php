@@ -40,23 +40,23 @@ class CartesServiceApiService
     private const UNPUBLISH_MAX_ATTEMPTS = 6;
     private const UNPUBLISH_RETRY_DELAY_SECONDS = 5;
 
-    private HttpClientInterface $httpClient;
+    private readonly HttpClientInterface $httpClient;
 
     public function __construct(
-        private ParameterBagInterface $params,
-        private ConfigurationApiService $configurationApiService,
-        private AnnexeApiService $annexeApiService,
-        private DatastoreApiService $datastoreApiService,
-        private StaticApiService $staticApiService,
-        private StoredDataApiService $storedDataApiService,
-        private CapabilitiesService $capabilitiesService,
-        private CartesMetadataApiService $cartesMetadataApiService,
-        private SandboxService $sandboxService,
-        private CartesStylesApiService $cartesStylesApiService,
-        private GeonetworkApiService $geonetworkApiService,
-        private MembershipService $membershipService,
-        private CacheInterface $cache,
-        private LoggerInterface $logger,
+        private readonly ParameterBagInterface $params,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly AnnexeApiService $annexeApiService,
+        private readonly DatastoreApiService $datastoreApiService,
+        private readonly StaticApiService $staticApiService,
+        private readonly StoredDataApiService $storedDataApiService,
+        private readonly CapabilitiesService $capabilitiesService,
+        private readonly CartesMetadataApiService $cartesMetadataApiService,
+        private readonly SandboxService $sandboxService,
+        private readonly CartesStylesApiService $cartesStylesApiService,
+        private readonly GeonetworkApiService $geonetworkApiService,
+        private readonly MembershipService $membershipService,
+        private readonly CacheInterface $cache,
+        private readonly LoggerInterface $logger,
         HttpClientInterface $httpClient,
         #[Autowire(service: 'app.api_client.entrepot')]
         private readonly ApiClient $entrepotApi,
@@ -74,13 +74,9 @@ class CartesServiceApiService
      */
     public function getService(string $datastoreId, string $offeringId, bool $migrateStyles = true, ?array $offering = null, ?array $configuration = null): array
     {
-        if (null === $offering) {
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
-        }
+        $offering ??= $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
 
-        if (null === $configuration) {
-            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
-        }
+        $configuration ??= $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
         $offering['configuration'] = $configuration;
 
         // traitement spécial pour WMTS-TMS
@@ -101,7 +97,7 @@ class CartesServiceApiService
                     if (Response::HTTP_OK === $response->getStatusCode()) {
                         $offering['tms_metadata'] = $response->toArray();
                     }
-                } catch (\Throwable $th) {
+                } catch (\Throwable) {
                 }
             }
         }
@@ -203,7 +199,7 @@ class CartesServiceApiService
                     $shareUrl = $this->capabilitiesService->getGetCapUrl($endpoint['endpoint']['urls'][0]['url'], $offering['urls'][0]['url'], $serviceType);
                 } else {
                     $annexeUrl = $this->params->get('annexes_url');
-                    $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
+                    $shareUrl = implode('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
                 }
                 break;
 
@@ -217,7 +213,7 @@ class CartesServiceApiService
                         $shareUrl = $this->capabilitiesService->getGetCapUrl($endpoint['endpoint']['urls'][0]['url'], $offering['urls'][0]['url'], 'WMTS');
                     } else {
                         $annexeUrl = $this->params->get('annexes_url');
-                        $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
+                        $shareUrl = implode('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
                     }
                 }
                 break;
@@ -240,15 +236,10 @@ class CartesServiceApiService
     {
         $offering ??= $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
 
-        switch ($offering['type']) {
-            case OfferingTypes::WFS:
-            case OfferingTypes::WMTSTMS:
-            case OfferingTypes::WMSVECTOR:
-            case OfferingTypes::WMSRASTER:
-                return $this->unpublishOfferingAndConfiguration($datastoreId, $offering);
-            default:
-                throw new CartesApiException('Type de service invalide pour la suppression', Response::HTTP_BAD_REQUEST, ['offering_type' => $offering['type']]);
-        }
+        return match ($offering['type']) {
+            OfferingTypes::WFS, OfferingTypes::WMTSTMS, OfferingTypes::WMSVECTOR, OfferingTypes::WMSRASTER => $this->unpublishOfferingAndConfiguration($datastoreId, $offering),
+            default => throw new CartesApiException('Type de service invalide pour la suppression', Response::HTTP_BAD_REQUEST, ['offering_type' => $offering['type']]),
+        };
     }
 
     /**
@@ -264,7 +255,7 @@ class CartesServiceApiService
 
         $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
 
-        if (true === $removeStyleFiles) {
+        if ($removeStyleFiles) {
             $this->removeStyleFiles($datastoreId, $configuration);
         }
 
@@ -633,10 +624,7 @@ class CartesServiceApiService
 
         // supprimer les anciennes métadonnées si elles existent déjà
         $configMetadata = array_filter($configMetadata, function ($md) use ($geonetworkBaseUrl, $catalogueBaseUrl) {
-            return !(
-                ('application/xml' === $md['format'] && ConfigurationMetadataTypes::ISO19115_2003 === $md['type'] && str_starts_with($md['url'], $geonetworkBaseUrl))
-                || ('text/html' === $md['format'] && ConfigurationMetadataTypes::OTHER === $md['type'] && str_starts_with($md['url'], $catalogueBaseUrl))
-            );
+            return !('application/xml' === $md['format'] && ConfigurationMetadataTypes::ISO19115_2003 === $md['type'] && str_starts_with($md['url'], $geonetworkBaseUrl)) && !('text/html' === $md['format'] && ConfigurationMetadataTypes::OTHER === $md['type'] && str_starts_with($md['url'], $catalogueBaseUrl));
         });
         $configMetadata = array_values($configMetadata);
 
@@ -703,7 +691,7 @@ class CartesServiceApiService
                 && $permission['beneficiary']['_id'] === $configCommunityId;
         });
 
-        if (!empty($existingPermission)) {
+        if ([] !== $existingPermission) {
             $permissionId = reset($existingPermission)['_id'];
             $this->datastoreApiService->removePermission($datastoreId, $permissionId)->await();
         }

@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Route(
     '/api/users',
@@ -28,8 +29,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class UserController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private UserApiService $userApiService,
-        private MembershipService $membershipService,
+        private readonly UserApiService $userApiService,
+        private readonly MembershipService $membershipService,
     ) {
     }
 
@@ -37,7 +38,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function getCurrentUser(): JsonResponse
     {
         $user = $this->getUser();
-        if (null === $user) {
+        if (!$user instanceof UserInterface) {
             return $this->json(null);
         }
 

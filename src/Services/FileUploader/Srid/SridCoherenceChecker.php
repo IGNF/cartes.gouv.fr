@@ -15,7 +15,7 @@ final class SridCoherenceChecker
         $normalized = array_values(array_filter($srids, static fn (string $srid): bool => '' !== trim($srid)));
         $unique = array_values(array_unique($normalized));
 
-        if (!empty($unique) && 1 !== count($unique)) {
+        if ([] !== $unique && 1 !== count($unique)) {
             throw new FileUploaderException('Ce fichier contient des données dans des systèmes de projection différents', Response::HTTP_BAD_REQUEST);
         }
 

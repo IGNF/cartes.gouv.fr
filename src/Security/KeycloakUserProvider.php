@@ -4,6 +4,7 @@ namespace App\Security;
 
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
+use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
 use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
 use Symfony\Component\HttpClient\Exception\TimeoutException;
@@ -23,11 +24,11 @@ use Symfony\Contracts\Cache\ItemInterface;
 class KeycloakUserProvider implements UserProviderInterface
 {
     public function __construct(
-        private ClientRegistry $clientRegistry,
-        private KeycloakTokenManager $tokenManager,
-        private EntrepotUserCache $entrepotUserCache,
-        private LoggerInterface $logger,
-        private CacheInterface $cache,
+        private readonly ClientRegistry $clientRegistry,
+        private readonly KeycloakTokenManager $tokenManager,
+        private readonly EntrepotUserCache $entrepotUserCache,
+        private readonly LoggerInterface $logger,
+        private readonly CacheInterface $cache,
     ) {
     }
 
@@ -61,9 +62,7 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
         }
 
-        $user = new User($keycloakUser->toArray(), $apiUser);
-
-        return $user;
+        return new User($keycloakUser->toArray(), $apiUser);
     }
 
     /**
@@ -104,11 +103,11 @@ class KeycloakUserProvider implements UserProviderInterface
     public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
+            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', $user::class));
         }
 
         $token = $this->tokenManager->getAccessToken();
-        if (null === $token) {
+        if (!$token instanceof AccessToken) {
             $this->logger->debug('{class}: No token found during refreshUser', ['class' => self::class]);
             throw new AuthenticationExpiredException('No token found');
         }

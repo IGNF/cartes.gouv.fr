@@ -4,6 +4,7 @@ namespace App\Monolog;
 
 use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -12,8 +13,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class RequestIdProcessor implements ProcessorInterface
 {
     public function __construct(
-        private RequestStack $requestStack,
-        private RequestIdResolver $requestIdResolver,
+        private readonly RequestStack $requestStack,
+        private readonly RequestIdResolver $requestIdResolver,
     ) {
     }
 
@@ -21,7 +22,7 @@ class RequestIdProcessor implements ProcessorInterface
     {
         // Requête principale : les sous-requêtes (rendu d'erreur, fragments) partagent son id
         $request = $this->requestStack->getMainRequest();
-        if (null !== $request) {
+        if ($request instanceof Request) {
             $record->extra['request_id'] = $this->requestIdResolver->resolve($request);
         }
 

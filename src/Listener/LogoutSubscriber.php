@@ -14,10 +14,10 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 class LogoutSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private ClientRegistry $clientRegistry,
-        private UrlGeneratorInterface $urlGenerator,
-        private ParameterBagInterface $parameters,
-        private KeycloakTokenManager $tokenManager,
+        private readonly ClientRegistry $clientRegistry,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly ParameterBagInterface $parameters,
+        private readonly KeycloakTokenManager $tokenManager,
     ) {
     }
 

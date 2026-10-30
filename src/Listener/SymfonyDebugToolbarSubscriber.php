@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 class SymfonyDebugToolbarSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private KernelInterface $kernel,
+        private readonly KernelInterface $kernel,
     ) {
     }
 

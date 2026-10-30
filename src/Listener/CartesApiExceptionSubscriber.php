@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class CartesApiExceptionSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private LoggerInterface $logger,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -62,7 +62,7 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
         $responseData['details'] = $throwable->getDetails();
 
         $this->logger->debug('Exception[{throwable}]: {message}', [
-            'throwable' => get_class($throwable),
+            'throwable' => $throwable::class,
             ...$responseData,
         ]);
 

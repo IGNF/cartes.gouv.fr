@@ -11,13 +11,13 @@ use Symfony\Component\Uid\Uuid;
 
 class CartesStylesApiService
 {
-    private string $varDataPath;
+    private readonly string $varDataPath;
 
     public function __construct(
-        private ConfigurationApiService $configurationApiService,
-        private AnnexeApiService $annexeApiService,
-        private Filesystem $fs,
-        private ParameterBagInterface $parameters,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly AnnexeApiService $annexeApiService,
+        private readonly Filesystem $fs,
+        private readonly ParameterBagInterface $parameters,
     ) {
         $this->varDataPath = $this->parameters->get('style_files_path');
     }
@@ -197,7 +197,7 @@ class CartesStylesApiService
         $uuid = Uuid::v4();
 
         $filename = $this->getAnnexeFilename($uuid, $styleTechnicalName, $extension);
-        $filePath = join('/', [$this->varDataPath, $uuid, $filename]);
+        $filePath = implode('/', [$this->varDataPath, $uuid, $filename]);
         $this->fs->mkdir(dirname($filePath));
         $this->fs->dumpFile($filePath, $content);
 
@@ -221,9 +221,8 @@ class CartesStylesApiService
     private function getAnnexePath(string $uuid, string $styleTechnicalName, string $extension): string
     {
         $filename = $this->getAnnexeFilename($uuid, $styleTechnicalName, $extension);
-        $annexePath = join('/', ['style', $filename]);
 
-        return $annexePath;
+        return implode('/', ['style', $filename]);
     }
 
     private function getAnnexeFilename(string $uuid, string $styleTechnicalName, string $extension): string

@@ -34,15 +34,15 @@ class CommunityController extends AbstractController implements ApiControllerInt
 {
     public const SEARCH_LIMIT = 20;
 
-    private string $varDataPath;
+    private readonly string $varDataPath;
 
     public function __construct(
         ParameterBagInterface $parameters,
-        private Filesystem $fs,
-        private MailerService $mailerService,
-        private UserApiService $userApiService,
-        private CommunityApiService $communityApiService,
-        private GridApiService $gridApiService,
+        private readonly Filesystem $fs,
+        private readonly MailerService $mailerService,
+        private readonly UserApiService $userApiService,
+        private readonly CommunityApiService $communityApiService,
+        private readonly GridApiService $gridApiService,
     ) {
         $this->varDataPath = $parameters->get('upload_path');
     }
@@ -142,7 +142,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
                 throw new ApiException('Le filtre doit être listed, iam_member ou affiliation');
             }
 
-            if ('listed' == $filter) {
+            if ('listed' === $filter) {
                 $result = $this->communityApiService->getCommunities($name, 1, self::SEARCH_LIMIT, $sort);
                 $response = $result['content'];
             } else {
@@ -347,11 +347,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $upM1 = mb_strtoupper($m1['name']);
             $upM2 = mb_strtoupper($m2['name']);
 
-            if ($upM1 == $upM2) {
-                return 0;
-            }
-
-            return ($upM1 < $upM2) ? -1 : 1;
+            return $upM1 <=> $upM2;
         });
     }
 
@@ -371,8 +367,8 @@ class CommunityController extends AbstractController implements ApiControllerInt
     private function _copyFile(UploadedFile $file): array
     {
         $uuid = Uuid::v4();
-        $tempFileDir = join(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
-        $tempFilePath = join(DIRECTORY_SEPARATOR, [$tempFileDir, $file->getClientOriginalName()]);
+        $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
+        $tempFilePath = implode(DIRECTORY_SEPARATOR, [$tempFileDir, $file->getClientOriginalName()]);
 
         $file->move($tempFileDir, $file->getClientOriginalName());
 
@@ -403,7 +399,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
                 if (!$grid['deleted']) {
                     $allGrids[$grid['name']] = $grid;
                 }
-            } catch (ApiException $ex) {
+            } catch (ApiException) {
                 continue;
             }
         }

@@ -5,11 +5,11 @@ namespace App\Services\EspaceCoApi;
 use App\ApiClient\ApiClient;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class StyleApiService
+final readonly class StyleApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.espaceco_style')]
-        private readonly ApiClient $api,
+        private ApiClient $api,
     ) {
     }
 

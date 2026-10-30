@@ -17,11 +17,11 @@ use Symfony\Bundle\SecurityBundle\Security;
 class MembershipService
 {
     public function __construct(
-        private Security $security,
-        private EntrepotUserCache $entrepotUserCache,
-        private DatastoreApiService $datastoreApiService,
-        private UserApiService $userApiService,
-        private CommunityApiService $communityApiService,
+        private readonly Security $security,
+        private readonly EntrepotUserCache $entrepotUserCache,
+        private readonly DatastoreApiService $datastoreApiService,
+        private readonly UserApiService $userApiService,
+        private readonly CommunityApiService $communityApiService,
     ) {
     }
 

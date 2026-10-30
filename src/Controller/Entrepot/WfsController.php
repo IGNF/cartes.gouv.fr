@@ -30,8 +30,8 @@ class WfsController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
         DatastoreApiService $datastoreApiService,
-        private ConfigurationApiService $configurationApiService,
-        private CartesServiceApiService $cartesServiceApiService,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly CartesServiceApiService $cartesServiceApiService,
         CapabilitiesService $capabilitiesService,
         CartesMetadataApiService $cartesMetadataApiService,
         SandboxService $sandboxService,

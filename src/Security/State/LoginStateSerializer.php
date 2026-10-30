@@ -4,7 +4,7 @@ namespace App\Security\State;
 
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class LoginStateSerializer
+final readonly class LoginStateSerializer
 {
     private string $hmacKey;
 

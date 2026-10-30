@@ -27,12 +27,12 @@ use Symfony\Component\Uid\Uuid;
 #[OA\Tag(name: '[cartes.gouv.fr] datasheet-document', description: 'Des documents liés à une fiche de données sur cartes.gouv.fr')]
 class DatasheetDocumentController extends AbstractController implements ApiControllerInterface
 {
-    private string $varDataPath;
+    private readonly string $varDataPath;
 
     public function __construct(
-        private AnnexeApiService $annexeApiService,
-        private CartesMetadataApiService $cartesMetadataApiService,
-        private Filesystem $fs,
+        private readonly AnnexeApiService $annexeApiService,
+        private readonly CartesMetadataApiService $cartesMetadataApiService,
+        private readonly Filesystem $fs,
         ParameterBagInterface $parameters,
     ) {
         $this->varDataPath = $parameters->get('datasheet_documents_path');
@@ -90,15 +90,15 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
                     $uuid = Uuid::v4();
 
                     if (null !== $file) {
-                        $tempFileDir = join(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
-                        $tempFilePath = join(DIRECTORY_SEPARATOR, [$tempFileDir, $file->getClientOriginalName()]);
+                        $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
+                        $tempFilePath = implode(DIRECTORY_SEPARATOR, [$tempFileDir, $file->getClientOriginalName()]);
 
                         $file->move($tempFileDir, $file->getClientOriginalName());
                     } else {
                         throw new CartesApiException('Fichier non fourni', Response::HTTP_BAD_REQUEST);
                     }
 
-                    $annexePath = join('/', ['documents', $datasheetName, $uuid, $file->getClientOriginalName()]);
+                    $annexePath = implode('/', ['documents', $datasheetName, $uuid, $file->getClientOriginalName()]);
 
                     $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
                     $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], ["datasheet_name=$datasheetName", 'type=document'], true);
@@ -184,10 +184,8 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             $newDocumentsList = array_values(array_filter($initialDocumentsList, fn ($doc) => $doc['id'] !== $documentId));
 
             if (null !== $document) {
-                switch ($document['type']) {
-                    case 'file':
-                        $this->annexeApiService->remove($datastoreId, $document['id'])->await();
-                        break;
+                if ('file' === $document['type']) {
+                    $this->annexeApiService->remove($datastoreId, $document['id'])->await();
                 }
 
                 $this->updateListAnnexe($datastoreId, $listAnnexe, $newDocumentsList);
@@ -224,9 +222,8 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         $this->fs->dumpFile($tempFilePath, $json);
 
         $annexePath = "documents/$datasheetName.json";
-        $annexe = $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], $labels, true);
 
-        return $annexe;
+        return $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], $labels, true);
     }
 
     /**

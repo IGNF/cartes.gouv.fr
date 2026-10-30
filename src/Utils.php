@@ -44,7 +44,7 @@ class Utils
             }
         }
 
-        return empty($bCopy);
+        return [] === $bCopy;
     }
 
     /**
@@ -105,7 +105,7 @@ class Utils
      */
     public static function normalize_query(?array $query): array
     {
-        $query = $query ?? [];
+        $query ??= [];
 
         if (!array_key_exists('sort', $query)) {
             $query['sort'] = 'last_event,desc';

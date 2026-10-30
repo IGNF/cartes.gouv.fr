@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class StyleController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private StyleApiService $styleApiService,
+        private readonly StyleApiService $styleApiService,
     ) {
     }
 

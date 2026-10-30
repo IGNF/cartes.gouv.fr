@@ -14,10 +14,10 @@ use Twig\Environment as TwigEnvironment;
 class MailerService
 {
     public function __construct(
-        private ParameterBagInterface $parameters,
-        private TwigEnvironment $twig,
-        private MailerInterface $mailer,
-        private LoggerInterface $logger)
+        private readonly ParameterBagInterface $parameters,
+        private readonly TwigEnvironment $twig,
+        private readonly MailerInterface $mailer,
+        private readonly LoggerInterface $logger)
     {
     }
 

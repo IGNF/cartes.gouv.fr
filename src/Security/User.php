@@ -8,16 +8,16 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 
 class User implements UserInterface
 {
-    private string $email;
-    private string $userName;
-    private string $id;
-    private string $keycloakId;
+    private readonly string $email;
+    private readonly string $userName;
+    private readonly string $id;
+    private readonly string $keycloakId;
 
     /** @var array<string> */
     private array $roles = [];
 
-    private ?string $firstName;
-    private ?string $lastName;
+    private readonly ?string $firstName;
+    private readonly ?string $lastName;
 
     /** @var array<mixed> */
     private array $communitiesMember = [];
@@ -61,7 +61,7 @@ class User implements UserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return $this->email;
     }
 
     public function getUserName(): string

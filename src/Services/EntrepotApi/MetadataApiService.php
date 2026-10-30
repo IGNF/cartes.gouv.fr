@@ -9,12 +9,12 @@ use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
-final class MetadataApiService
+final readonly class MetadataApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        public readonly ApiClient $api,
-        private readonly Filesystem $filesystem,
+        public ApiClient $api,
+        private Filesystem $filesystem,
     ) {
     }
 

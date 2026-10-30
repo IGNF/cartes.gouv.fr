@@ -10,9 +10,9 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\HttpFoundation\Response;
 
 #[AutoconfigureTag('cartesgouvfr.file_uploader.format_handler')]
-final class ShapefileFormatHandler implements UploadFormatHandlerInterface
+final readonly class ShapefileFormatHandler implements UploadFormatHandlerInterface
 {
-    public function __construct(private readonly LoggerInterface $logger)
+    public function __construct(private LoggerInterface $logger)
     {
     }
 
@@ -99,17 +99,17 @@ final class ShapefileFormatHandler implements UploadFormatHandlerInterface
 
         // Forme fréquente (ESRI) pour du WGS84 en géographique.
         if (
-            false !== strpos($upper, 'GEOGCS["GCS_WGS_1984"')
-            || false !== strpos($upper, 'DATUM["D_WGS_1984"')
-            || false !== strpos($upper, 'SPHEROID["WGS_1984"')
+            str_contains($upper, 'GEOGCS["GCS_WGS_1984"')
+            || str_contains($upper, 'DATUM["D_WGS_1984"')
+            || str_contains($upper, 'SPHEROID["WGS_1984"')
         ) {
             return 'EPSG:4326';
         }
 
         if (
-            false !== strpos($upper, 'PROJCS["RGF93_Lambert_93"')
-            || false !== strpos($upper, 'GEOGCS["GCS_RGF_1993"')
-            || false !== strpos($upper, 'DATUM["D_RGF_1993"')
+            str_contains($upper, 'PROJCS["RGF93_Lambert_93"')
+            || str_contains($upper, 'GEOGCS["GCS_RGF_1993"')
+            || str_contains($upper, 'DATUM["D_RGF_1993"')
         ) {
             return 'EPSG:2154';
         }

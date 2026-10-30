@@ -10,12 +10,12 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\HttpFoundation\Response;
 
 #[AutoconfigureTag('cartesgouvfr.file_uploader.format_handler')]
-final class GpkgFormatHandler implements UploadFormatHandlerInterface
+final readonly class GpkgFormatHandler implements UploadFormatHandlerInterface
 {
     private const TABLE_NAME_PATTERN = '/^[a-zA-Z_][ A-Za-z0-9_]*$/';
 
     public function __construct(
-        private readonly SridCoherenceChecker $sridCoherenceChecker,
+        private SridCoherenceChecker $sridCoherenceChecker,
     ) {
     }
 

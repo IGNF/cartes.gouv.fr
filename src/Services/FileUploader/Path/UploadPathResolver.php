@@ -7,9 +7,9 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\UuidV4;
 
-final class UploadPathResolver
+final readonly class UploadPathResolver
 {
-    public function __construct(private readonly ParameterBagInterface $parameterBag)
+    public function __construct(private ParameterBagInterface $parameterBag)
     {
     }
 

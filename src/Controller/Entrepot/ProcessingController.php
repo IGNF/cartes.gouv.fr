@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class ProcessingController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private ProcessingApiService $processingApiService,
+        private readonly ProcessingApiService $processingApiService,
     ) {
     }
 

@@ -7,13 +7,13 @@ use App\ApiClient\PaginatedPromise;
 use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class CommunityApiService
+final readonly class CommunityApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.espaceco')]
-        private readonly ApiClient $api,
-        private readonly UserApiService $userApiService,
-        private readonly GridApiService $gridApiService,
+        private ApiClient $api,
+        private UserApiService $userApiService,
+        private GridApiService $gridApiService,
     ) {
     }
 
@@ -56,12 +56,10 @@ final class CommunityApiService
     public function addCommunity(array $datas, ?string $logoFilePath): array
     {
         if ($logoFilePath) {
-            $response = $this->api->sendFile('POST', 'communities', $logoFilePath, $datas, [], 'logo')->array();
-        } else {
-            $response = $this->api->post('communities', $datas)->array();
+            return $this->api->sendFile('POST', 'communities', $logoFilePath, $datas, [], 'logo')->array();
         }
 
-        return $response;
+        return $this->api->post('communities', $datas)->array();
     }
 
     /**
@@ -159,7 +157,7 @@ final class CommunityApiService
             }
         }
 
-        $gridsRequested = $gridsRequested + $gridsForMember;
+        $gridsRequested += $gridsForMember;
 
         return $result;
     }

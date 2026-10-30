@@ -17,7 +17,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
 
 #[AutoconfigureTag('cartesgouvfr.file_uploader.format_handler')]
-final class ZipFormatHandler implements UploadFormatHandlerInterface
+final readonly class ZipFormatHandler implements UploadFormatHandlerInterface
 {
     private const MAX_FILES = 10000;
     private const MAX_ENTRY_SIZE_BYTES = 1000000000; // 1GB par entrée
@@ -33,14 +33,14 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
     private const ERR_ZIP_EXTRACT_FAILED = "L'extraction du fichier ZIP a échoué";
 
     public function __construct(
-        private readonly Filesystem $filesystem,
-        private readonly GpkgFormatHandler $gpkgFormatHandler,
-        private readonly GeoJsonFormatHandler $geoJsonFormatHandler,
-        private readonly CsvFormatHandler $csvFormatHandler,
-        private readonly SqlFormatHandler $sqlFormatHandler,
-        private readonly ShapefileFormatHandler $shapefileFormatHandler,
-        private readonly SridCoherenceChecker $sridCoherenceChecker,
-        private readonly ZipUploadPolicy $zipUploadPolicy,
+        private Filesystem $filesystem,
+        private GpkgFormatHandler $gpkgFormatHandler,
+        private GeoJsonFormatHandler $geoJsonFormatHandler,
+        private CsvFormatHandler $csvFormatHandler,
+        private SqlFormatHandler $sqlFormatHandler,
+        private ShapefileFormatHandler $shapefileFormatHandler,
+        private SridCoherenceChecker $sridCoherenceChecker,
+        private ZipUploadPolicy $zipUploadPolicy,
     ) {
     }
 
@@ -149,7 +149,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
             }
 
             // dossier
-            if ('/' === substr($entryName, -1)) {
+            if (str_ends_with($entryName, '/')) {
                 continue;
             }
 
@@ -192,18 +192,18 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
 
             // Précautions contre le ZipSlip path traversal (ex. https://medium.com/@ibm_ptc_security/zip-slip-attack-e3e63a13413f)
             if (
-                false !== strpos($entryName, "\0")
-                || false !== strpos($entryName, '\\')
+                str_contains($entryName, "\0")
+                || str_contains($entryName, '\\')
                 || 1 === preg_match('/^[a-zA-Z]:/', $entryName)
                 || 1 === preg_match('#(^|/)\.\.(/|$)#', $entryName)
-                || '/' === substr($entryName, 0, 1)
+                || str_starts_with($entryName, '/')
             ) {
                 $zip->close();
                 throw new FileUploaderException(self::ERR_ARCHIVE_CORRUPT, Response::HTTP_BAD_REQUEST);
             }
 
             // dossier
-            if ('/' === substr($entryName, -1)) {
+            if (str_ends_with($entryName, '/')) {
                 continue;
             }
 
@@ -440,7 +440,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
 
         try {
             $this->filesystem->mkdir($folder);
-            if (true !== $zip->extractTo($folder)) {
+            if (!$zip->extractTo($folder)) {
                 throw new FileUploaderException(self::ERR_ZIP_EXTRACT_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } finally {
@@ -458,7 +458,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
 
         if (null !== $realFolder) {
             $realPath = $entry->getRealPath();
-            if (false === $realPath || 0 !== strpos($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
+            if (false === $realPath || !str_starts_with($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
                 throw new FileUploaderException(self::ERR_ARCHIVE_CORRUPT, Response::HTTP_BAD_REQUEST);
             }
         }

@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * Voir docs/developer/logs.md pour le format et les choix de minimisation (RGPD).
  */
 #[WithMonologChannel('access')]
-final class AccessLogSubscriber implements EventSubscriberInterface
+final readonly class AccessLogSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private LoggerInterface $logger,

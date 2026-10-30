@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class CartesS3Controller extends AbstractController
 {
     public function __construct(
-        private FilesystemOperator $s3Storage,
+        private readonly FilesystemOperator $s3Storage,
     ) {
     }
 

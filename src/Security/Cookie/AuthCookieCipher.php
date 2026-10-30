@@ -4,7 +4,7 @@ namespace App\Security\Cookie;
 
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class AuthCookieCipher
+final readonly class AuthCookieCipher
 {
     private string $key;
 

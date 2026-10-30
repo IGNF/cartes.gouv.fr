@@ -31,13 +31,13 @@ use Symfony\Component\Routing\Attribute\Route;
 class DatasheetController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private UploadApiService $uploadApiService,
-        private StoredDataApiService $storedDataApiService,
-        private ConfigurationApiService $configurationApiService,
-        private AnnexeApiService $annexeApiService,
-        private CartesServiceApiService $cartesServiceApiService,
-        private MetadataApiService $metadataApiService,
-        private CartesStoredDataApiService $cartesStoredDataApiService,
+        private readonly UploadApiService $uploadApiService,
+        private readonly StoredDataApiService $storedDataApiService,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly AnnexeApiService $annexeApiService,
+        private readonly CartesServiceApiService $cartesServiceApiService,
+        private readonly MetadataApiService $metadataApiService,
+        private readonly CartesStoredDataApiService $cartesStoredDataApiService,
     ) {
     }
 

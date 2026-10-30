@@ -9,13 +9,13 @@ use App\Services\FileUploader\Format\FormatHandlerRegistry;
 use App\Services\FileUploader\Path\UploadPathResolver;
 use Symfony\Component\HttpFoundation\Response;
 
-final class UploadValidationService
+final readonly class UploadValidationService
 {
     private const MAX_UPLOAD_SIZE_BYTES = 2000000000; // 2GB
 
     public function __construct(
-        private readonly FormatHandlerRegistry $formatRegistry,
-        private readonly UploadPathResolver $pathResolver,
+        private FormatHandlerRegistry $formatRegistry,
+        private UploadPathResolver $pathResolver,
     ) {
     }
 

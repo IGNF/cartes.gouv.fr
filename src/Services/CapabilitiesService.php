@@ -13,13 +13,13 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CapabilitiesService
 {
-    private Filesystem $fs;
+    private readonly Filesystem $fs;
 
     public function __construct(
-        private ParameterBagInterface $parameterBag,
+        private readonly ParameterBagInterface $parameterBag,
         private HttpClientInterface $httpClient,
-        private AnnexeApiService $annexeApiService,
-        private ConfigurationApiService $configurationApiService,
+        private readonly AnnexeApiService $annexeApiService,
+        private readonly ConfigurationApiService $configurationApiService,
     ) {
         $this->httpClient = $httpClient->withOptions([
             'proxy' => $parameterBag->get('http_proxy'),
@@ -66,23 +66,20 @@ class CapabilitiesService
         }
 
         $uuid = uniqid();
-        $filePath = join(DIRECTORY_SEPARATOR, [realpath($capsPath), "capabilities-$uuid.xml"]);
+        $filePath = implode(DIRECTORY_SEPARATOR, [realpath($capsPath), "capabilities-$uuid.xml"]);
 
         // Creation du fichier
         file_put_contents($filePath, $xmlStr);
 
         // On regarde s'il existe deja un fichier avec ce path
-        $path = join('/', [$endpoint['technical_name'], 'capabilities.xml']);
+        $path = implode('/', [$endpoint['technical_name'], 'capabilities.xml']);
 
         $annexes = $this->annexeApiService->getAll($datastoreId, null, "/$path")->resolve();
-        $annexe = null;
         if (count($annexes)) {  // Il existe, on le met a jour
-            $annexe = $this->annexeApiService->replaceFile($datastoreId, $annexes[0]['_id'], $filePath);
-        } else {
-            $annexe = $this->annexeApiService->add($datastoreId, $filePath, [$path], ['type=capabilities']);
+            return $this->annexeApiService->replaceFile($datastoreId, $annexes[0]['_id'], $filePath);
         }
 
-        return $annexe;
+        return $this->annexeApiService->add($datastoreId, $filePath, [$path], ['type=capabilities']);
     }
 
     public function getGetCapUrl(string $endpointUrl, string $offeringUrl, string $serviceType): string
@@ -105,7 +102,7 @@ class CapabilitiesService
         $getCapUrl = $this->getGetCapUrl($endpoint['urls'][0]['url'], $offeringUrl, 'WFS');
 
         $response = $this->httpClient->request('GET', $getCapUrl);
-        if (JsonResponse::HTTP_OK != $response->getStatusCode()) {
+        if (JsonResponse::HTTP_OK !== $response->getStatusCode()) {
             throw new \Exception('Request GetCapabilities failed');
         }
 
@@ -152,7 +149,7 @@ class CapabilitiesService
         $getCapUrl = $this->getGetCapUrl($endpoint['urls'][0]['url'], $url, 'WMS');
 
         $response = $this->httpClient->request('GET', $getCapUrl);
-        if (JsonResponse::HTTP_OK != $response->getStatusCode()) {
+        if (JsonResponse::HTTP_OK !== $response->getStatusCode()) {
             throw new \Exception('Request GetCapabilities failed');
         }
 
@@ -196,7 +193,7 @@ class CapabilitiesService
         $getCapUrl = $this->getGetCapUrl($endpointUrl['url'], $url, 'WMTS');
 
         $response = $this->httpClient->request('GET', $getCapUrl);
-        if (JsonResponse::HTTP_OK != $response->getStatusCode()) {
+        if (JsonResponse::HTTP_OK !== $response->getStatusCode()) {
             throw new \Exception('Request GetCapabilities failed');
         }
 

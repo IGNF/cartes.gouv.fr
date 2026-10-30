@@ -7,11 +7,11 @@ use App\ApiClient\PaginatedPromise;
 use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class CommunityApiService
+final readonly class CommunityApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        private readonly ApiClient $api,
+        private ApiClient $api,
     ) {
     }
 

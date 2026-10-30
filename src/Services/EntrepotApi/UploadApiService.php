@@ -16,14 +16,14 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-final class UploadApiService
+final readonly class UploadApiService
 {
     public function __construct(
         #[Autowire(service: 'app.api_client.entrepot')]
-        public readonly ApiClient $api,
-        private readonly ParameterBagInterface $parameters,
-        private readonly Filesystem $filesystem,
-        private readonly ZipUploadPolicy $zipUploadPolicy,
+        public ApiClient $api,
+        private ParameterBagInterface $parameters,
+        private Filesystem $filesystem,
+        private ZipUploadPolicy $zipUploadPolicy,
     ) {
     }
 
@@ -107,7 +107,7 @@ final class UploadApiService
             throw new AppException('Fichier à envoyer introuvable', 400, ['message' => 'Fichier à envoyer introuvable']);
         }
 
-        if (0 !== strpos($filepath, $uploadRoot.DIRECTORY_SEPARATOR)) {
+        if (!str_starts_with($filepath, $uploadRoot.DIRECTORY_SEPARATOR)) {
             throw new AppException('Chemin de fichier invalide', 400, ['message' => 'Chemin de fichier invalide']);
         }
 
@@ -137,7 +137,7 @@ final class UploadApiService
                 $this->filesystem->mkdir($folder);
 
                 try {
-                    if (true !== $zip->extractTo($folder)) {
+                    if (!$zip->extractTo($folder)) {
                         throw new AppException('Décompression du fichier zip échouée');
                     }
                 } finally {
@@ -158,7 +158,7 @@ final class UploadApiService
 
                     if (null !== $realFolder) {
                         $realPath = $entry->getRealPath();
-                        if (false === $realPath || 0 !== strpos($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
+                        if (false === $realPath || !str_starts_with($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
                             throw new AppException('Archive corrompue');
                         }
                     }
@@ -289,7 +289,7 @@ final class UploadApiService
      */
     public function removeTags(string $datastoreId, string $uploadId, array $tags): ResponsePromise
     {
-        return $this->api->delete("datastores/$datastoreId/uploads/$uploadId/tags", ['tags' => join(',', $tags)]);
+        return $this->api->delete("datastores/$datastoreId/uploads/$uploadId/tags", ['tags' => implode(',', $tags)]);
     }
 
     /**
@@ -303,7 +303,7 @@ final class UploadApiService
             $this->addTags($datastoreId, $uploadId, [
                 UploadTags::FILE_TREE => json_encode($fileTree),
             ])->await();
-        } catch (ApiException $ex) {
+        } catch (ApiException) {
             // ne rien faire, tant pis si la récupération de l'arborescence a échoué
         }
 

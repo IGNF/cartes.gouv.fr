@@ -11,7 +11,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-final class ResponsePromise
+final readonly class ResponsePromise
 {
     public function __construct(
         private ResponseInterface $response,
@@ -183,10 +183,6 @@ final class ResponsePromise
         }
 
         if ($statusCode >= 200 && $statusCode < 300) {
-            if (Response::HTTP_NO_CONTENT === $statusCode) {
-                return;
-            }
-
             return;
         }
 

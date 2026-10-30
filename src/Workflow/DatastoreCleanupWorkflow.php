@@ -36,14 +36,14 @@ class DatastoreCleanupWorkflow
     ];
 
     public function __construct(
-        private ProcessingApiService $processingApiService,
-        private ConfigurationApiService $configurationApiService,
-        private CartesServiceApiService $cartesServiceApiService,
-        private MetadataApiService $metadataApiService,
-        private StaticApiService $staticApiService,
-        private AnnexeApiService $annexeApiService,
-        private UploadApiService $uploadApiService,
-        private StoredDataApiService $storedDataApiService,
+        private readonly ProcessingApiService $processingApiService,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly CartesServiceApiService $cartesServiceApiService,
+        private readonly MetadataApiService $metadataApiService,
+        private readonly StaticApiService $staticApiService,
+        private readonly AnnexeApiService $annexeApiService,
+        private readonly UploadApiService $uploadApiService,
+        private readonly StoredDataApiService $storedDataApiService,
     ) {
     }
 
@@ -197,7 +197,7 @@ class DatastoreCleanupWorkflow
                     throw new \RuntimeException(sprintf("Echec de suppression de %s (%s) de l'entrepôt %s", $entityType, $id, $datastoreId), 0, $exception);
                 }
 
-                if (true === $deleted) {
+                if ($deleted) {
                     $progress = true;
                     $counts[$entityType] = max(0, ($counts[$entityType] ?? 0) - 1);
                     $emitProgress('progress', ['entities' => $counts]);
@@ -308,36 +308,19 @@ class DatastoreCleanupWorkflow
             'limit' => $limit,
         ];
 
-        switch ($entityType) {
-            case self::ENTITY_PROCESSING_EXECUTIONS:
-                return $this->processingApiService->getExecutionList($datastoreId, [
-                    ...$query,
-                    'status' => $processingStatus,
-                ]);
-
-            case self::ENTITY_OFFERINGS:
-                return $this->configurationApiService->getOfferingsList($datastoreId, $query);
-
-            case self::ENTITY_CONFIGURATIONS:
-                return $this->configurationApiService->getList($datastoreId, $query);
-
-            case self::ENTITY_METADATA:
-                return $this->metadataApiService->getList($datastoreId, $query);
-
-            case self::ENTITY_STATICS:
-                return $this->staticApiService->getList($datastoreId, $query);
-
-            case self::ENTITY_ANNEXES:
-                return $this->annexeApiService->getList($datastoreId, $query);
-
-            case self::ENTITY_UPLOADS:
-                return $this->uploadApiService->getList($datastoreId, $query);
-
-            case self::ENTITY_STORED_DATA:
-                return $this->storedDataApiService->getList($datastoreId, $query);
-
-            default:
-                throw new \InvalidArgumentException(sprintf('Type d\'entité non supporté: %s', $entityType));
-        }
+        return match ($entityType) {
+            self::ENTITY_PROCESSING_EXECUTIONS => $this->processingApiService->getExecutionList($datastoreId, [
+                ...$query,
+                'status' => $processingStatus,
+            ]),
+            self::ENTITY_OFFERINGS => $this->configurationApiService->getOfferingsList($datastoreId, $query),
+            self::ENTITY_CONFIGURATIONS => $this->configurationApiService->getList($datastoreId, $query),
+            self::ENTITY_METADATA => $this->metadataApiService->getList($datastoreId, $query),
+            self::ENTITY_STATICS => $this->staticApiService->getList($datastoreId, $query),
+            self::ENTITY_ANNEXES => $this->annexeApiService->getList($datastoreId, $query),
+            self::ENTITY_UPLOADS => $this->uploadApiService->getList($datastoreId, $query),
+            self::ENTITY_STORED_DATA => $this->storedDataApiService->getList($datastoreId, $query),
+            default => throw new \InvalidArgumentException(sprintf('Type d\'entité non supporté: %s', $entityType)),
+        };
     }
 }

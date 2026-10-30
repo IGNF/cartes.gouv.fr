@@ -10,15 +10,11 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 class CartesApiException extends HttpException
 {
-    /** @var array<mixed> */
-    private array $details;
-
     /**
      * @param array<mixed> $details
      */
-    public function __construct(string $message, int $statusCode = Response::HTTP_BAD_REQUEST, array $details = [], ?\Throwable $previous = null)
+    public function __construct(string $message, int $statusCode = Response::HTTP_BAD_REQUEST, private readonly array $details = [], ?\Throwable $previous = null)
     {
-        $this->details = $details;
         parent::__construct($statusCode, $message, $previous, [], $statusCode);
     }
 

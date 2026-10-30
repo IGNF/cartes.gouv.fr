@@ -29,11 +29,11 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     private const REQUEST_ATTR_STATE = '_login_state';
 
     public function __construct(
-        private ClientRegistry $clientRegistry,
-        private RouterInterface $router,
-        private KeycloakTokenManager $tokenManager,
-        private LoginStateSerializer $loginStateSerializer,
-        private LoggerInterface $logger,
+        private readonly ClientRegistry $clientRegistry,
+        private readonly RouterInterface $router,
+        private readonly KeycloakTokenManager $tokenManager,
+        private readonly LoginStateSerializer $loginStateSerializer,
+        private readonly LoggerInterface $logger,
     ) {
     }
 

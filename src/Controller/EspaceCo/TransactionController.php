@@ -24,7 +24,7 @@ use Symfony\Component\Routing\Requirement\Requirement;
 class TransactionController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private TransactionApiService $transactionApiService,
+        private readonly TransactionApiService $transactionApiService,
     ) {
     }
 

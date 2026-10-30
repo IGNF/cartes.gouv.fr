@@ -7,11 +7,11 @@ use App\Constants\EntrepotApi\ProcessingStatuses;
 class CartesStoredDataApiService
 {
     public function __construct(
-        private StoredDataApiService $storedDataApiService,
-        private ProcessingApiService $processingApiService,
-        private ConfigurationApiService $configurationApiService,
-        private CartesServiceApiService $cartesServiceApiService,
-        private AnnexeApiService $annexeApiService,
+        private readonly StoredDataApiService $storedDataApiService,
+        private readonly ProcessingApiService $processingApiService,
+        private readonly ConfigurationApiService $configurationApiService,
+        private readonly CartesServiceApiService $cartesServiceApiService,
+        private readonly AnnexeApiService $annexeApiService,
     ) {
     }
 
