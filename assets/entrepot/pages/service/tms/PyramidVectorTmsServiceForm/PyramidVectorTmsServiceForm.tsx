@@ -19,7 +19,8 @@ import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import AccessRestrictions from "../../common/AccessRestrictions/AccessRestrictions";
@@ -58,7 +59,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     const queryClient = useQueryClient();
     const { datastore } = useDatastore();
 
-    const createServiceMutation = useMutation<Service, CartesApiException>({
+    const createServiceMutation = useMutation<Service, ApiError>({
         mutationFn: () => {
             const formValues = getFormValues();
             return api.pyramidVector.publish(datastoreId, pyramidId, formValues);
@@ -77,7 +78,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
 
     const { mutate: createServiceMutate } = createServiceMutation;
 
-    const editServiceMutation = useMutation<Service, CartesApiException>({
+    const editServiceMutation = useMutation<Service, ApiError>({
         mutationFn: () => {
             if (offeringId === undefined) {
                 return Promise.reject();
@@ -114,7 +115,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
-    const existingLayerNamesQuery = useQuery<string[], CartesApiException>({
+    const existingLayerNamesQuery = useQuery<string[], ApiError>({
         queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WMTSTMS),
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WMTSTMS, { signal }),
         refetchInterval: 30000,
@@ -208,7 +209,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                     title={t("offering.fetch_failed")}
                     description={
                         <>
-                            <p>{offeringQuery.error?.message}</p>
+                            <p>{getApiErrorMessage(offeringQuery.error)}</p>
                             <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
                         </>
                     }
@@ -224,7 +225,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                     {createServiceMutation.error && (
                         <Alert
                             closable
-                            description={<ServiceFormErrors message={createServiceMutation.error.message} />}
+                            description={<ServiceFormErrors message={getApiErrorMessage(createServiceMutation.error)} />}
                             severity="error"
                             title={tCommon("error")}
                         />
@@ -232,7 +233,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                     {editServiceMutation.error && (
                         <Alert
                             closable
-                            description={<ServiceFormErrors message={editServiceMutation.error.message} />}
+                            description={<ServiceFormErrors message={getApiErrorMessage(editServiceMutation.error)} />}
                             severity="error"
                             title={tCommon("error")}
                         />

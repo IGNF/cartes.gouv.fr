@@ -66,10 +66,12 @@ import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled/LoginDisa
 import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonFrTranslations } from "../Common.locale";
+import { ApiErrorFrTranslations } from "../../modules/apiError.locale";
 import type { Translations } from "../types";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
+    ApiError: ApiErrorFrTranslations,
     Breadcrumb: BreadcrumbFrTranslations,
     Rights: RightsFrTranslations,
     Style: StyleFrTranslations,

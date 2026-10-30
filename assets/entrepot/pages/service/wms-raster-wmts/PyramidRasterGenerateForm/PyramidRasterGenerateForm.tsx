@@ -23,7 +23,8 @@ import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
 import { routes } from "../../../../../router/router";
 import { bboxToWkt } from "../../../../../utils";
 import api from "../../../../api";
@@ -85,7 +86,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
 
     const zoomRange = watch("zoom_range");
 
-    const generatePyramidRasterMutation = useMutation<PyramidRaster, CartesApiException>({
+    const generatePyramidRasterMutation = useMutation<PyramidRaster, ApiError>({
         mutationFn: () => {
             const formData = {
                 ...getFormValues(),
@@ -134,7 +135,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                     title={t("wmsv-service.fetch_failed")}
                     description={
                         <>
-                            <p>{serviceQuery.error?.message}</p>
+                            <p>{getApiErrorMessage(serviceQuery.error)}</p>
                             <Button
                                 linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: DatasheetViewActiveTabEnum.Services }).link}
                             >
@@ -168,7 +169,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                     <p>{tCommon("mandatory_fields")}</p>
 
                     {generatePyramidRasterMutation.error && (
-                        <Alert closable description={generatePyramidRasterMutation.error.message} severity="error" title={tCommon("error")} />
+                        <Alert closable description={getApiErrorMessage(generatePyramidRasterMutation.error)} severity="error" title={tCommon("error")} />
                     )}
 
                     <div className={fr.cx(currentStep !== STEPS.TECHNICAL_NAME && "fr-hidden")}>

@@ -27,7 +27,8 @@ import { sandboxCommunityId } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "@/modules/apiError";
 import { routes } from "@/router/router";
 import { isSandboxCommunity } from "@/utils";
 import DeleteCommunity from "./DeleteCommunity/DeleteCommunity";
@@ -97,7 +98,7 @@ export default function CommunityInfo() {
         handleSubmit,
     } = form;
 
-    const communityModifyMutation = useMutation<CommunityDetailResponseDto, CartesApiException, object>({
+    const communityModifyMutation = useMutation<CommunityDetailResponseDto, ApiError, object>({
         mutationFn: (data: object) => {
             return api.community.modify(community._id, data);
         },
@@ -205,7 +206,14 @@ export default function CommunityInfo() {
                 </div>
             </div>
 
-            {communityModifyMutation.error && <Alert title={communityModifyMutation.error.message} closable severity="error" />}
+            {communityModifyMutation.error && (
+                <Alert
+                    title={getApiErrorTitle(communityModifyMutation.error)}
+                    description={getApiErrorDescription(communityModifyMutation.error)}
+                    closable
+                    severity="error"
+                />
+            )}
             {leaveCommunityMutation.error && <Alert title={leaveCommunityMutation.error.message} closable severity="error" />}
 
             {/* modification des infos de la commu */}

@@ -12,7 +12,8 @@ import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import DataCard from "../DataCard";
@@ -48,7 +49,7 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
 
     type OfferingWithFullConfig = Offering & { configuration: Configuration };
     const queryParams = { detailed: true, detailedConfiguration: true };
-    const offeringsListQuery = useQuery<OfferingWithFullConfig[], CartesApiException>({
+    const offeringsListQuery = useQuery<OfferingWithFullConfig[], ApiError>({
         queryKey: RQKeys.datastore_offering_list(datastore._id, queryParams),
         queryFn: ({ signal }) => api.service.getOfferings<OfferingWithFullConfig>(datastore._id, queryParams, { signal }),
         staleTime: 60000,
@@ -113,7 +114,14 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
             )}
 
             {offeringsListQuery.error && (
-                <Alert severity="error" title={offeringsListQuery.error.message} as="h2" closable onClose={offeringsListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(offeringsListQuery.error)}
+                    description={getApiErrorDescription(offeringsListQuery.error)}
+                    as="h2"
+                    closable
+                    onClose={offeringsListQuery.refetch}
+                />
             )}
 
             {metadataListQuery.error && <Alert severity="error" title={metadataListQuery.error.message} as="h2" closable onClose={metadataListQuery.refetch} />}

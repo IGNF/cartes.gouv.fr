@@ -14,7 +14,8 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import statuses from "../../../../data/report_statuses.json";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../modules/apiError";
 import api from "../../../api";
 import { getReportsDefaultValues } from "../DefaultValues";
 import ActionButtonsCreation from "./ActionButtonsCreation";
@@ -142,21 +143,21 @@ const Reports: FC = () => {
     });
 
     // Tables
-    const tablesQuery = useQuery<string[], CartesApiException>({
+    const tablesQuery = useQuery<string[], ApiError>({
         queryKey: RQKeys.tables(community.id),
         queryFn: ({ signal }) => api.permission.getThemableTables(community.id, signal),
         staleTime: 60000,
     });
 
     // Themes partagés
-    const sharedThemesQuery = useQuery<UserSharedThemesDTO[], CartesApiException>({
+    const sharedThemesQuery = useQuery<UserSharedThemesDTO[], ApiError>({
         queryKey: RQKeys.userSharedThemes(),
         queryFn: () => api.user.getSharedThemes(),
         staleTime: 3600000,
     });
 
     // Email planners
-    const emailPlannersQuery = useQuery<EmailPlannerDTO[], CartesApiException>({
+    const emailPlannersQuery = useQuery<EmailPlannerDTO[], ApiError>({
         queryKey: RQKeys.emailPlanners(community.id),
         queryFn: () => api.emailplanner.getAll(community.id),
         staleTime: 3600000,
@@ -250,9 +251,25 @@ const Reports: FC = () => {
 
     return (
         <div>
-            {tablesQuery.isError && <Alert severity="error" closable title={tablesQuery.error.message} />}
-            {sharedThemesQuery.isError && <Alert severity="error" closable title={sharedThemesQuery.error.message} />}
-            {emailPlannersQuery.isError && <Alert severity="error" closable title={emailPlannersQuery.error.message} />}
+            {tablesQuery.isError && (
+                <Alert severity="error" closable title={getApiErrorTitle(tablesQuery.error)} description={getApiErrorDescription(tablesQuery.error)} />
+            )}
+            {sharedThemesQuery.isError && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(sharedThemesQuery.error)}
+                    description={getApiErrorDescription(sharedThemesQuery.error)}
+                />
+            )}
+            {emailPlannersQuery.isError && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(emailPlannersQuery.error)}
+                    description={getApiErrorDescription(emailPlannersQuery.error)}
+                />
+            )}
             {tablesQuery.isLoading && <LoadingText as="h6" message={t("loading_tables")} />}
             {sharedThemesQuery.isLoading && <LoadingText as="h6" message={t("loading_shared_themes")} />}
             {emailPlannersQuery.isLoading && <LoadingText as="h6" message={t("loading_email_planners")} />}
@@ -264,7 +281,13 @@ const Reports: FC = () => {
                 </Wait>
             )}
             {isCommunityUpdatingError && (
-                <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+                <Alert
+                    className={fr.cx("fr-my-2v")}
+                    severity="error"
+                    closable
+                    title={tCommon("error")}
+                    description={getApiErrorMessage(updatingCommunityError)}
+                />
             )}
             {tablesQuery.data && sharedThemesQuery.data && emailPlannersQuery.data && (
                 <div>

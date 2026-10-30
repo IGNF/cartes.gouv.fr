@@ -20,6 +20,7 @@ import { niceBytes } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
 import { DatastoreManageStorageTab } from "../types";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
 
 const confirmDialogModal = createModal({
     id: "confirm-delete-s3-modal",
@@ -48,7 +49,7 @@ const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
     //         items: StoredData[];
     //         contentRange: ContentRangeType;
     //     },
-    //     CartesApiException
+    //     ApiError
     // >({
     //     queryKey: RQKeys.datastore_stored_data_list(datastore._id, queryParams),
     //     queryFn: async ({ signal }) => {
@@ -114,7 +115,14 @@ const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
             )}
 
             {storedDataListQuery.error && (
-                <Alert severity="error" title={storedDataListQuery.error.message} as="h2" closable onClose={storedDataListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(storedDataListQuery.error)}
+                    description={getApiErrorDescription(storedDataListQuery.error)}
+                    as="h2"
+                    closable
+                    onClose={storedDataListQuery.refetch}
+                />
             )}
 
             {deleteStoredDataMutation.error && (

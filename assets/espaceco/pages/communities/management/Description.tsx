@@ -23,7 +23,8 @@ import categories from "../../../../data/topic_categories.json";
 import { useTranslation } from "../../../../i18n/i18n";
 import { ComponentKey } from "../../../../i18n/types";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
-import { type CartesApiException } from "../../../../modules/jsonFetch";
+import { type ApiError } from "../../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../modules/apiError";
 import "../../../../sass/pages/espaceco/community.scss";
 import { setToNull } from "../../../../utils";
 import api from "../../../api";
@@ -54,7 +55,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
     const { mode, stepper, updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
     const community = context.community!;
 
-    const communityNamesQuery = useQuery<string[], CartesApiException>({
+    const communityNamesQuery = useQuery<string[], ApiError>({
         queryKey: RQKeys.communitiesName(),
         queryFn: () => api.community.getCommunitiesName(),
         staleTime: 3600000,
@@ -65,7 +66,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
         return communityNamesQuery.data?.filter((n) => n !== name) ?? [];
     }, [community, communityNamesQuery.data]);
 
-    const communityDocumentsQuery = useQuery<DocumentDTO[] | null, CartesApiException>({
+    const communityDocumentsQuery = useQuery<DocumentDTO[] | null, ApiError>({
         queryKey: RQKeys.communityDocuments(community?.id),
         queryFn: ({ signal }) => {
             return api.communityDocuments.getAll(community.id, [], signal);
@@ -246,11 +247,33 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
                 </Wait>
             )}
             {isCommunityUpdatingError && (
-                <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+                <Alert
+                    className={fr.cx("fr-my-2v")}
+                    severity="error"
+                    closable
+                    title={tCommon("error")}
+                    description={getApiErrorMessage(updatingCommunityError)}
+                />
             )}
             {(communityNamesQuery.isLoading || communityDocumentsQuery.isLoading) && <LoadingText as={"h6"} />}
-            {communityNamesQuery.isError && <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={communityNamesQuery.error.message} />}
-            {communityDocumentsQuery.isError && <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={communityDocumentsQuery.error.message} />}
+            {communityNamesQuery.isError && (
+                <Alert
+                    className={fr.cx("fr-my-2v")}
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(communityNamesQuery.error)}
+                    description={getApiErrorDescription(communityNamesQuery.error)}
+                />
+            )}
+            {communityDocumentsQuery.isError && (
+                <Alert
+                    className={fr.cx("fr-my-2v")}
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(communityDocumentsQuery.error)}
+                    description={getApiErrorDescription(communityDocumentsQuery.error)}
+                />
+            )}
             {communityNamesQuery.data && communityDocumentsQuery.data && (
                 <DocumentsProvider communityId={community.id} documents={communityDocumentsQuery.data}>
                     <h2>{tmc("desc.tab.title")}</h2>

@@ -20,7 +20,8 @@ import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { type CartesApiException } from "../../../../../modules/jsonFetch";
+import { type ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../../modules/apiError";
 import { routes, useRoute } from "../../../../../router/router";
 import api from "../../../../api";
 import DatasheetThumbnail from "../DatasheetThumbnail";
@@ -67,7 +68,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     const queryClient = useQueryClient();
 
-    const datasheetDeleteMutation = useMutation<null, CartesApiException>({
+    const datasheetDeleteMutation = useMutation<null, ApiError>({
         mutationFn: () => api.datasheet.remove(datastoreId, datasheetName),
         onSuccess() {
             queryClient.setQueryData<Datasheet[]>(RQKeys.datastore_datasheet_list(datastoreId), (datasheetList = []) => {
@@ -79,7 +80,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         },
     });
 
-    const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
+    const datasheetQuery = useQuery<DatasheetDetailed, ApiError>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
         staleTime: 60000,
@@ -87,7 +88,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         enabled: !datasheetDeleteMutation.isPending,
     });
 
-    const serviceListQuery = useQuery<Service[], CartesApiException>({
+    const serviceListQuery = useQuery<Service[], ApiError>({
         queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
         staleTime: 60000,
@@ -104,7 +105,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         }
     }, [serviceListQuery.data, datastoreId, queryClient]);
 
-    const metadataQuery = useQuery<Metadata, CartesApiException>({
+    const metadataQuery = useQuery<Metadata, ApiError>({
         queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
         enabled: !datasheetDeleteMutation.isPending,
@@ -171,7 +172,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         <Alert
                             severity="error"
                             closable={true}
-                            title={datasheetQuery.error.message}
+                            title={getApiErrorMessage(datasheetQuery.error)}
                             description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("datasheet.back_to_list")}</Button>}
                             onClose={datasheetQuery.refetch}
                         />
@@ -182,7 +183,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             {datasheetDeleteMutation.error && (
                 <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                     <div className={fr.cx("fr-col")}>
-                        <Alert severity="error" closable={true} title={datasheetDeleteMutation.error.message} />
+                        <Alert
+                            severity="error"
+                            closable={true}
+                            title={getApiErrorTitle(datasheetDeleteMutation.error)}
+                            description={getApiErrorDescription(datasheetDeleteMutation.error)}
+                        />
                     </div>
                 </div>
             )}

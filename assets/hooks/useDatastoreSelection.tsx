@@ -5,7 +5,7 @@ import { sandboxCommunityId } from "@/env";
 import { routes } from "@/router/router";
 import { findMembership } from "@/utils";
 import api from "../entrepot/api";
-import { CartesApiException } from "../modules/jsonFetch";
+import { ApiError } from "../modules/jsonFetch";
 import useUserQuery from "./queries/useUserQuery";
 
 type DatastoreSelectionInfo = {
@@ -22,7 +22,7 @@ const useDatastoreSelection = () => {
     const userQuery = useUserQuery();
     const { data: user } = userQuery;
 
-    const { mutate: addUserToSandbox } = useMutation<undefined, CartesApiException>({
+    const { mutate: addUserToSandbox } = useMutation<undefined, ApiError>({
         mutationFn: () => {
             return api.user.addToSandbox();
         },

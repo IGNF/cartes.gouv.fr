@@ -20,6 +20,7 @@ import { niceBytes } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
 import { DatastoreManageStorageTab } from "../types";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
 
 const confirmDialogModal = createModal({
     id: "confirm-delete-fs-modal",
@@ -93,7 +94,14 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
             )}
 
             {storedDataListQuery.error && (
-                <Alert severity="error" title={storedDataListQuery.error.message} as="h2" closable onClose={storedDataListQuery.refetch} />
+                <Alert
+                    severity="error"
+                    title={getApiErrorTitle(storedDataListQuery.error)}
+                    description={getApiErrorDescription(storedDataListQuery.error)}
+                    as="h2"
+                    closable
+                    onClose={storedDataListQuery.refetch}
+                />
             )}
 
             {deleteStoredDataMutation.error && (

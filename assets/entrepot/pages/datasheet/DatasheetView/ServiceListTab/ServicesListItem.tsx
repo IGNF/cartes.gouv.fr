@@ -11,7 +11,8 @@ import { symToStr } from "tsafe/symToStr";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import useCommunityRights from "@/hooks/useCommunityRights";
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "@/modules/apiError";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import { OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
 import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
@@ -37,7 +38,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
         isOpenedByDefault: false,
     });
 
-    const unpublishServiceMutation = useMutation<null, CartesApiException, Service>({
+    const unpublishServiceMutation = useMutation<null, ApiError, Service>({
         mutationFn: (service: Service) => {
             if (![OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WMTSTMS].includes(service.type)) {
                 console.warn(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
@@ -238,7 +239,14 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                 </Wait>
             )}
 
-            {unpublishServiceMutation.error && <Alert severity="error" closable title={unpublishServiceMutation.error.message} />}
+            {unpublishServiceMutation.error && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(unpublishServiceMutation.error)}
+                    description={getApiErrorDescription(unpublishServiceMutation.error)}
+                />
+            )}
 
             {service.share_url && <TextCopyToClipboardDialog title="Copier l'URL" label="URL de diffusion" text={service.share_url} />}
         </>

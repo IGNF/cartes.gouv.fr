@@ -5,7 +5,8 @@ import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import LoadingText from "@/components/Utils/LoadingText";
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
+import { getApiErrorMessage } from "@/modules/apiError";
 import { DatasheetDetailed, Service } from "../../../../../@types/app";
 import { useTranslation } from "../../../../../i18n";
 import ServicesListItem from "./ServicesListItem";
@@ -13,7 +14,7 @@ import ServicesListItem from "./ServicesListItem";
 type ServicesListTabProps = {
     datasheet: DatasheetDetailed;
     datastoreId: string;
-    servicesListQuery: UseQueryResult<Service[], CartesApiException>;
+    servicesListQuery: UseQueryResult<Service[], ApiError>;
 };
 const ServicesListTab: FC<ServicesListTabProps> = ({ datastoreId, datasheet, servicesListQuery }) => {
     const { t } = useTranslation("DatasheetView");
@@ -23,7 +24,7 @@ const ServicesListTab: FC<ServicesListTabProps> = ({ datastoreId, datasheet, ser
     }
 
     if (servicesListQuery.isError) {
-        return <Alert severity="error" title={t("services_tab.query.error")} description={servicesListQuery.error.message} small />;
+        return <Alert severity="error" title={t("services_tab.query.error")} description={getApiErrorMessage(servicesListQuery.error)} small />;
     }
 
     const servicesList = servicesListQuery.data ?? [];

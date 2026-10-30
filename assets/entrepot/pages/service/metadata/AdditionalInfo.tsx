@@ -50,7 +50,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ /*storedData, datastoreId,*/ 
         // setValue: setFormValue,
     } = form;
 
-    // const fileTreeQuery = useQuery<UploadTree, CartesApiException>({
+    // const fileTreeQuery = useQuery<UploadTree, ApiError>({
     //     queryKey: RQKeys.datastore_upload_file_tree(datastoreId, storedData.tags.upload_id),
     //     queryFn: () => api.upload.getFileTree(datastoreId, storedData.tags.upload_id!),
     //     staleTime: 1800000,

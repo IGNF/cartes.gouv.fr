@@ -1,7 +1,7 @@
 import { CommunityFormMode } from "@/@types/app_espaceco";
 import { CommunityResponseDTO } from "@/@types/espaceco";
 import RQKeys from "@/modules/espaceco/RQKeys";
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, ReactNode, use, useState } from "react";
 import api from "../api";
@@ -21,11 +21,11 @@ interface ICommunityContext {
     stepper: IStepper | null;
     isCommunityLoading: boolean;
     isCommunityError: boolean;
-    communityError: CartesApiException | null;
+    communityError: ApiError | null;
     updateCommunity: (datas: object, onSuccess?: () => void) => void;
     isCommunityUpdating: boolean;
     isCommunityUpdatingError: boolean;
-    updatingCommunityError: CartesApiException | null;
+    updatingCommunityError: ApiError | null;
 }
 
 // Create contexts
@@ -65,7 +65,7 @@ export const CommunityProvider = ({ children, communityId, mode }: { children: R
         isLoading: isCommunityLoading,
         isError: isCommunityError,
         error: communityError,
-    } = useQuery<CommunityResponseDTO, CartesApiException>({
+    } = useQuery<CommunityResponseDTO, ApiError>({
         queryKey: RQKeys.community(communityId),
         queryFn: () => api.community.getCommunity(communityId),
         staleTime: 3600000,
@@ -77,7 +77,7 @@ export const CommunityProvider = ({ children, communityId, mode }: { children: R
         isPending: isUpdating,
         isError: isUpdatingError,
         error: updatingError,
-    } = useMutation<CommunityResponseDTO, CartesApiException, object>({
+    } = useMutation<CommunityResponseDTO, ApiError, object>({
         mutationFn: (datas: object) => {
             return api.community.update(communityId, datas);
         },

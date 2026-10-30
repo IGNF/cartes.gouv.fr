@@ -21,7 +21,8 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../modules/apiError";
 import { routes } from "../../../../router/router";
 import "../../../../sass/pages/espaceco/member.scss";
 import api from "../../../api";
@@ -48,21 +49,21 @@ const Members: FC = () => {
     const [search, setSearch] = useState<string>("");
 
     // Les demandes d'affiliation
-    const membershipRequestsQuery = useQuery<CommunityMember[], CartesApiException>({
+    const membershipRequestsQuery = useQuery<CommunityMember[], ApiError>({
         queryKey: RQKeys.communityMembershipRequests(community.id),
         queryFn: ({ signal }) => api.community.getCommunityMembershipRequests(community.id, signal),
         staleTime: 60000,
     });
 
     // Les membres non en demande d'affiliation
-    const membersQuery = useQuery<CommunityMember[], CartesApiException>({
+    const membersQuery = useQuery<CommunityMember[], ApiError>({
         queryKey: RQKeys.communityMembers(community.id),
         queryFn: ({ signal }) => api.community.getCommunityMembers(community.id, signal),
         staleTime: 60000,
     });
 
     /* Mise a jour du role de l'utilisateur */
-    const updateRoleMutation = useMutation<CommunityMember, CartesApiException, { communityId: number; userId: number; role: Role }>({
+    const updateRoleMutation = useMutation<CommunityMember, ApiError, { communityId: number; userId: number; role: Role }>({
         mutationFn: (params) => {
             return api.community.updateMemberRole(params.communityId, params.userId, params.role);
         },
@@ -92,7 +93,7 @@ const Members: FC = () => {
     const { mutate: updateRole } = updateRoleMutation;
 
     /* Mise a jour des grids  de l'utilisateur */
-    const updateGridsMutation = useMutation<CommunityMember, CartesApiException, { communityId: number; userId: number; grids: string[] }>({
+    const updateGridsMutation = useMutation<CommunityMember, ApiError, { communityId: number; userId: number; grids: string[] }>({
         mutationFn: (params) => {
             return api.community.updateMemberGrids(params.communityId, params.userId, params.grids);
         },
@@ -112,7 +113,7 @@ const Members: FC = () => {
     });
 
     /* Suppression d'un membre */
-    const removeMemberMutation = useMutation<{ user_id: number }, CartesApiException, { communityId: number; userId: number }>({
+    const removeMemberMutation = useMutation<{ user_id: number }, ApiError, { communityId: number; userId: number }>({
         mutationFn: ({ communityId, userId }) => {
             return api.community.removeMember(communityId, userId);
         },
@@ -140,7 +141,7 @@ const Members: FC = () => {
 
     const { mutate: removeMember } = removeMemberMutation;
 
-    const addMembersMutation = useMutation<CommunityMember[], CartesApiException, { communityId: number; members: (number | string)[] }>({
+    const addMembersMutation = useMutation<CommunityMember[], ApiError, { communityId: number; members: (number | string)[] }>({
         mutationFn: ({ communityId, members }) => {
             return api.community.addMembers(communityId, members);
         },
@@ -290,7 +291,7 @@ const Members: FC = () => {
                     title={t("fetch_members_failed")}
                     description={
                         <>
-                            <p>{membersQuery.error.message}</p>
+                            <p>{getApiErrorMessage(membersQuery.error)}</p>
                             <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
                         </>
                     }
@@ -298,11 +299,11 @@ const Members: FC = () => {
             )}
 
             {/* LES ERREURS */}
-            {membershipRequestsQuery.isError && alert(t("fetch_affiliate_members_failed"), membershipRequestsQuery.error.message)}
-            {updateRoleMutation.isError && alert(t("update_role_failed"), updateRoleMutation.error.message)}
-            {updateGridsMutation.isError && alert(t("update_grids_failed"), updateGridsMutation.error.message)}
-            {addMembersMutation.isError && alert(t("add_members_failed"), addMembersMutation.error.message)}
-            {removeMemberMutation.isError && alert(t("remove_member_failed"), removeMemberMutation.error.message)}
+            {membershipRequestsQuery.isError && alert(t("fetch_affiliate_members_failed"), getApiErrorMessage(membershipRequestsQuery.error))}
+            {updateRoleMutation.isError && alert(t("update_role_failed"), getApiErrorMessage(updateRoleMutation.error))}
+            {updateGridsMutation.isError && alert(t("update_grids_failed"), getApiErrorMessage(updateGridsMutation.error))}
+            {addMembersMutation.isError && alert(t("add_members_failed"), getApiErrorMessage(addMembersMutation.error))}
+            {removeMemberMutation.isError && alert(t("remove_member_failed"), getApiErrorMessage(removeMemberMutation.error))}
 
             {/* LES ACTIONS EN COURS */}
             {membersQuery.isLoading && <LoadingText as={"h6"} message={t("loading_members")} />}

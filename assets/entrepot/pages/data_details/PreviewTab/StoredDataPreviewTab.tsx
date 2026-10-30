@@ -7,20 +7,20 @@ import { FC, Fragment, useMemo } from "react";
 import { PyramidVector, StoredDataReport, StoredDataTypeEnum, VectorDb } from "../../../../@types/app";
 import ExtentMap from "../../../../components/Utils/ExtentMap";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
 import { niceBytes } from "../../../../utils";
 import api from "../../../api";
 import ReportStatusBadge from "../ReportTab/ReportStatusBadge";
 
 type StoredDataPreviewTabProps = {
     datastoreId: string;
-    reportQuery: UseQueryResult<StoredDataReport, CartesApiException>;
+    reportQuery: UseQueryResult<StoredDataReport, ApiError>;
 };
 const StoredDataPreviewTab: FC<StoredDataPreviewTabProps> = ({ datastoreId, reportQuery }) => {
     const storedData = useMemo(() => reportQuery.data?.stored_data, [reportQuery.data?.stored_data]);
     const vectordbId = (storedData as PyramidVector | undefined)?.tags?.vectordb_id;
 
-    const vectorDbQuery = useQuery<VectorDb, CartesApiException>({
+    const vectorDbQuery = useQuery<VectorDb, ApiError>({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectordbId ?? ""),
         queryFn: ({ signal }) => api.storedData.get(datastoreId, vectordbId!, { signal }),
         enabled: Boolean(vectordbId),

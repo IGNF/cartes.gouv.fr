@@ -19,7 +19,8 @@ import * as yup from "yup";
 import { CommunityResponseDTO } from "../../../../../@types/espaceco";
 import { ComponentKey } from "../../../../../i18n/types";
 import placeholder1x1 from "../../../../../img/placeholder.1x1.png";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
 import { getFileExtension, getImageSize, ImageSize } from "../../../../../utils";
 import api from "../../../../api";
 import { logoAction } from "../../ManageCommunity.locale";
@@ -95,7 +96,7 @@ const CommunityLogo: FC = () => {
     const queryClient = useQueryClient();
 
     // Ajout/modification du logo
-    const updateLogoMutation = useMutation<{ logo_url: string }, CartesApiException>({
+    const updateLogoMutation = useMutation<{ logo_url: string }, ApiError>({
         mutationFn: () => {
             const form = new FormData();
             form.append("logo", upload);
@@ -116,7 +117,7 @@ const CommunityLogo: FC = () => {
     const { mutate: updateLogo, reset: resetUpdateLogo } = updateLogoMutation;
 
     // Suppression de la vignette
-    const removeLogoMutation = useMutation<null, CartesApiException>({
+    const removeLogoMutation = useMutation<null, ApiError>({
         mutationFn: () => api.community.removeLogo(community.id),
         onSuccess: () => {
             queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), (community) =>
@@ -217,7 +218,13 @@ const CommunityLogo: FC = () => {
                 )}
             </div>
             {removeLogoMutation.isError && (
-                <Alert severity="error" closable title={tCommon("error")} description={removeLogoMutation.error.message} className={fr.cx("fr-my-3w")} />
+                <Alert
+                    severity="error"
+                    closable
+                    title={tCommon("error")}
+                    description={getApiErrorMessage(removeLogoMutation.error)}
+                    className={fr.cx("fr-my-3w")}
+                />
             )}
             {removeLogoMutation.isPending && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
@@ -233,7 +240,7 @@ const CommunityLogo: FC = () => {
                                 severity="error"
                                 closable
                                 title={tCommon("error")}
-                                description={updateLogoMutation.error.message}
+                                description={getApiErrorMessage(updateLogoMutation.error)}
                                 className={fr.cx("fr-my-3w")}
                             />
                         )}

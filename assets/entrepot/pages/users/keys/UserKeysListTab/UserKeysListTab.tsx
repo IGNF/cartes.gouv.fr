@@ -23,7 +23,8 @@ import { ConfirmDialog, ConfirmDialogModal } from "../../../../../components/Uti
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import UserKeyLink from "./UserKeyLink";
@@ -56,7 +57,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
         status: removeStatus,
         error: removeError,
         mutate: mutateRemove,
-    } = useMutation<null, CartesApiException, string>({
+    } = useMutation<null, ApiError, string>({
         mutationFn: (keyId) => api.user.removeKey(keyId),
         onSuccess() {
             queryClient.setQueryData<UserKeyResponseDto[]>(RQKeys.my_keys(), (keys) => {
@@ -102,7 +103,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
 
     return (
         <>
-            {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={removeError.message} />}
+            {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={getApiErrorMessage(removeError)} />}
             {removeStatus === "pending" && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>

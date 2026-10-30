@@ -12,7 +12,8 @@ import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
 import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
 import api from "../../../../api";
 import { AddDocumentDialog, AddDocumentDialogModal } from "./AddDocumentDialog";
@@ -46,7 +47,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
 
     const queryClient = useQueryClient();
 
-    const addDocumentMutation = useMutation<DocumentDTO, CartesApiException, FormData>({
+    const addDocumentMutation = useMutation<DocumentDTO, ApiError, FormData>({
         mutationFn: (data) => api.communityDocuments.add(communityId, data),
         onSuccess: (document) => {
             queryClient.setQueryData<DocumentDTO[]>(RQKeys.communityDocuments(communityId), (oldDocuments) => {
@@ -57,7 +58,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
         },
     });
 
-    const updateDocumentMutation = useMutation<DocumentDTO, CartesApiException, object>({
+    const updateDocumentMutation = useMutation<DocumentDTO, ApiError, object>({
         mutationFn: (data) => {
             if (currentDocument) {
                 return api.communityDocuments.update(communityId, currentDocument.id, data);
@@ -78,7 +79,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
         onSettled: () => setCurrentDocument(undefined),
     });
 
-    const removeDocumentMutation = useMutation<DocumentDTO, CartesApiException>({
+    const removeDocumentMutation = useMutation<DocumentDTO, ApiError>({
         mutationFn: () => {
             if (currentDocument) {
                 return api.communityDocuments.remove(communityId, currentDocument.id);
@@ -153,9 +154,30 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
 
     return (
         <div>
-            {addDocumentMutation.isError && <Alert severity="error" closable title={addDocumentMutation.error.message} />}
-            {updateDocumentMutation.isError && <Alert severity="error" closable title={updateDocumentMutation.error.message} />}
-            {removeDocumentMutation.isError && <Alert severity="error" closable title={removeDocumentMutation.error.message} />}
+            {addDocumentMutation.isError && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(addDocumentMutation.error)}
+                    description={getApiErrorDescription(addDocumentMutation.error)}
+                />
+            )}
+            {updateDocumentMutation.isError && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(updateDocumentMutation.error)}
+                    description={getApiErrorDescription(updateDocumentMutation.error)}
+                />
+            )}
+            {removeDocumentMutation.isError && (
+                <Alert
+                    severity="error"
+                    closable
+                    title={getApiErrorTitle(removeDocumentMutation.error)}
+                    description={getApiErrorDescription(removeDocumentMutation.error)}
+                />
+            )}
             {addDocumentMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>

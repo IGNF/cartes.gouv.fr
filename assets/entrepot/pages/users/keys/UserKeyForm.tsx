@@ -15,7 +15,8 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { getTranslation, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../modules/apiError";
 import { routes } from "../../../../router/router";
 import "../../../../sass/pages/my_keys.scss";
 import api from "../../../api";
@@ -199,7 +200,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
         status: updatekeyStatus,
         error: updatekeyError,
         mutate: mutateUpdate,
-    } = useMutation<UserKeyWithAccessesResponseDto | null, CartesApiException, object>({
+    } = useMutation<UserKeyWithAccessesResponseDto | null, ApiError, object>({
         mutationFn: (datas) => {
             if (key) return api.user.updateKey(key._id, datas);
             return Promise.resolve(null);
@@ -234,7 +235,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
                 </Wait>
             )}
             {addKeyError && <Alert severity="warning" closable title={tCommon("error")} description={addKeyError.message} />}
-            {updatekeyError && <Alert severity="warning" closable title={tCommon("error")} description={updatekeyError.message} />}
+            {updatekeyError && <Alert severity="warning" closable title={tCommon("error")} description={getApiErrorMessage(updatekeyError)} />}
             {isLoadingKey || isLoadingKeys || isLoadingPermissions ? (
                 <LoadingText />
             ) : filteredPermissions.length === 0 ? (

@@ -19,7 +19,8 @@ import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import { ComponentKey } from "../../../../i18n/types";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../modules/apiError";
 import { getFileExtension } from "../../../../utils";
 import api from "../../../api";
 
@@ -81,7 +82,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
     const { hovered: thumbnailIsHovered, ref: thumbnailDivRef } = useHover<HTMLDivElement>();
 
     // Ajout/modification de la vignette
-    const addThumbnailMutation = useMutation<DatasheetThumbnailAnnexe, CartesApiException>({
+    const addThumbnailMutation = useMutation<DatasheetThumbnailAnnexe, ApiError>({
         mutationFn: () => {
             const form = new FormData();
             form.append("datasheetName", datasheetName);
@@ -117,7 +118,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
     const { mutate: addThumbnailMutate, reset: addThumbnailReset } = addThumbnailMutation;
 
     // Suppression de la vignette
-    const deleteThumbnailMutation = useMutation<null, CartesApiException>({
+    const deleteThumbnailMutation = useMutation<null, ApiError>({
         mutationFn: () => {
             if (datasheet?.thumbnail?._id) {
                 return api.annexe.removeThumbnail(datastoreId, datasheetName, datasheet?.thumbnail?._id);
@@ -236,7 +237,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                         severity="error"
                         closable
                         title={tCommon("error")}
-                        description={deleteThumbnailMutation.error.message}
+                        description={getApiErrorMessage(deleteThumbnailMutation.error)}
                         className={fr.cx("fr-my-3w")}
                     />
                 )}
@@ -258,7 +259,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                             severity="error"
                             closable
                             title={tCommon("error")}
-                            description={addThumbnailMutation.error.message}
+                            description={getApiErrorMessage(addThumbnailMutation.error)}
                             className={fr.cx("fr-my-3w")}
                         />
                     )}

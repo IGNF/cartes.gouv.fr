@@ -1,12 +1,20 @@
 import { useAuthStore } from "../stores/AuthStore";
 
-/** doit avoir la même structure que l'erreur renvoyée par CartesApiExceptionSubscriber de Symfony */
-export type CartesApiException = {
-    code: number;
-    status: string;
-    message: string;
+/** corps d'erreur de l'API interne (Problem Details, RFC 9457) */
+export type ApiError = {
+    status: number;
+    title: string;
+    detail?: string;
+    type?: string;
     details?: unknown;
+    violations?: { propertyPath: string; title: string; template?: string; parameters?: Record<string, string>; type?: string }[];
 };
+
+/** valeurs de `type` sur lesquelles le front branche (App\Exception\ApiErrorType côté Symfony) */
+export const ApiErrorType = {
+    SESSION_EXPIRED: "/errors/session-expired",
+    ANONYMOUS: "/errors/anonymous",
+} as const;
 
 export async function apiFetch(
     url: RequestInfo | URL,
@@ -15,7 +23,7 @@ export async function apiFetch(
     isFileUpload: boolean = false,
     isXMLHttpRequest: boolean = true
 ): Promise<Response> {
-    const defaultHeaders: HeadersInit = {};
+    const defaultHeaders: HeadersInit = { Accept: "application/json" };
 
     const fetchConfig: RequestInit = { ...config };
 
@@ -46,19 +54,18 @@ export async function apiFetch(
     }
 
     // corps non-JSON (page d'erreur proxy...) : erreur normalisée à partir du status HTTP
-    const data: Partial<CartesApiException> | null = await response.json().catch(() => null);
+    const data: Partial<ApiError> | null = await response.json().catch(() => null);
 
-    if (data !== null && hasSessionExpired(data)) {
+    if (response.status === 401 && data?.type === ApiErrorType.SESSION_EXPIRED) {
         useAuthStore.getState().setSessionExpired(true);
     }
 
-    const apiException: CartesApiException = {
+    const apiError: ApiError = {
         ...data,
-        code: typeof data?.code === "number" ? data.code : response.status,
-        status: typeof data?.status === "string" ? data.status : response.statusText,
-        message: typeof data?.message === "string" ? data.message : `${response.status} ${response.statusText}`,
+        status: typeof data?.status === "number" ? data.status : response.status,
+        title: typeof data?.title === "string" ? data.title : response.statusText,
     };
-    throw apiException;
+    throw apiError;
 }
 
 export async function jsonFetch<T>(
@@ -71,8 +78,3 @@ export async function jsonFetch<T>(
     const response = await apiFetch(url, config, body, isFileUpload, isXMLHttpRequest);
     return response.json().catch(() => ({}));
 }
-
-const hasSessionExpired = (error: Partial<CartesApiException>) => {
-    const details = error?.details as { controller?: string; session_expired?: boolean } | undefined;
-    return error.code === 401 && details?.controller === "App\\Controller\\ApiControllerInterface" && details?.session_expired === true;
-};

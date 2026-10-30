@@ -8,7 +8,7 @@ import { CommunityListResponseDto } from "@/@types/entrepot";
 import api from "@/entrepot/api";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import RQKeys from "@/modules/entrepot/RQKeys";
-import { CartesApiException } from "@/modules/jsonFetch";
+import { ApiError } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
 import { regex, removeDiacritics } from "@/utils";
 import { JoinExistingDatastoreModal } from "./JoinExistingDatastoreModal";
@@ -25,7 +25,7 @@ export default function JoinExistingDatastore() {
     // Communautes auxquelles l'utilisateur appartient
     const userCommunitiesIds = useMemo(() => user?.communities_member.map((member) => member.community?._id), [user?.communities_member]);
 
-    const communitiesQuery = useQuery<CommunityListResponseDto[], CartesApiException>({
+    const communitiesQuery = useQuery<CommunityListResponseDto[], ApiError>({
         queryKey: RQKeys.catalogs_communities(),
         queryFn: () => api.catalogs.getAllPublicCommunities(),
         refetchOnWindowFocus: false,

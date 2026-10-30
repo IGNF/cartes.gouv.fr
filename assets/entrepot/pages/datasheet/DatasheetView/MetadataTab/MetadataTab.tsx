@@ -15,7 +15,8 @@ import LoadingText from "../../../../../components/Utils/LoadingText";
 import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipboard";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { ApiError } from "../../../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
 import api from "../../../../api";
 import MetadataField from "./MetadataField";
 
@@ -25,7 +26,7 @@ const thematicCategories = getThematicCategories();
 
 type MetadataTabProps = {
     datastoreId: string;
-    metadataQuery: UseQueryResult<Metadata, CartesApiException>;
+    metadataQuery: UseQueryResult<Metadata, ApiError>;
 };
 const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
     const { t: tDatasheet } = useTranslation("DatasheetView");
@@ -69,10 +70,15 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
             {metadataQuery.isLoading && <LoadingText message={tDatasheet("metadata_tab.metadata.is_loading")} withSpinnerIcon={true} as="p" />}
 
             {metadataQuery.error &&
-                (metadataQuery.error?.code === 404 ? (
+                (metadataQuery.error?.status === 404 ? (
                     <p>{tDatasheet("metadata_tab.metadata.absent")}</p>
                 ) : (
-                    <Alert severity="error" closable={false} title={metadataQuery.error?.message} />
+                    <Alert
+                        severity="error"
+                        closable={false}
+                        title={getApiErrorTitle(metadataQuery.error)}
+                        description={getApiErrorDescription(metadataQuery.error)}
+                    />
                 ))}
 
             {metadata && (

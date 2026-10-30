@@ -22,7 +22,8 @@ import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
+import { getApiErrorMessage } from "../../../../modules/apiError";
 import { routes } from "../../../../router/router";
 import { regex, trimObject } from "../../../../utils";
 import api from "../../../api";
@@ -114,7 +115,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     const queryClient = useQueryClient();
     const { datastore } = useDatastore();
 
-    const createServiceMutation = useMutation<Service, CartesApiException>({
+    const createServiceMutation = useMutation<Service, ApiError>({
         mutationFn: () => {
             let formValues = getFormValues();
             formValues = createRequestBody(formValues);
@@ -135,7 +136,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
 
     const { mutate: createServiceMutate } = createServiceMutation;
 
-    const editServiceMutation = useMutation<Service, CartesApiException>({
+    const editServiceMutation = useMutation<Service, ApiError>({
         mutationFn: () => {
             if (offeringId === undefined) {
                 return Promise.reject();
@@ -174,7 +175,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
-    const existingLayerNamesQuery = useQuery<string[], CartesApiException>({
+    const existingLayerNamesQuery = useQuery<string[], ApiError>({
         queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WFS),
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WFS, { signal }),
         refetchInterval: 30000,
@@ -307,7 +308,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     title={t("offering.fetch_failed")}
                     description={
                         <>
-                            <p>{offeringQuery.error?.message}</p>
+                            <p>{getApiErrorMessage(offeringQuery.error)}</p>
                             <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
                         </>
                     }

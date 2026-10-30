@@ -11,7 +11,8 @@ import { useTranslation } from "@/i18n";
 import { StoredDataReport, StoredDataStatusEnum } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../modules/jsonFetch";
+import { ApiError } from "../../../modules/jsonFetch";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../modules/apiError";
 import { routes } from "../../../router/router";
 import api from "../../api";
 import StoredDataPreviewTab from "./PreviewTab/StoredDataPreviewTab";
@@ -31,7 +32,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
     const membership = useMembership({ datastoreId: datastore?._id });
     const datastoreName = tCommon("datastore_name", { name: datastore?.name, isSandbox: membership?.isSandbox });
 
-    const reportQuery = useQuery<StoredDataReport, CartesApiException>({
+    const reportQuery = useQuery<StoredDataReport, ApiError>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
         queryFn: ({ signal }) => api.storedData.getReportData(datastoreId, storedDataId, { signal }),
         refetchInterval: 30000,
@@ -81,7 +82,15 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
             )}
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
-                {reportQuery.isError && <Alert severity="error" closable title={reportQuery.error.message} onClose={reportQuery.refetch} />}
+                {reportQuery.isError && (
+                    <Alert
+                        severity="error"
+                        closable
+                        title={getApiErrorTitle(reportQuery.error)}
+                        description={getApiErrorDescription(reportQuery.error)}
+                        onClose={reportQuery.refetch}
+                    />
+                )}
             </div>
 
             {reportQuery.data && (

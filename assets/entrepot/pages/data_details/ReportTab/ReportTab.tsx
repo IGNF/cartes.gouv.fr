@@ -5,7 +5,7 @@ import { UseQueryResult } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import { CheckStatusEnum, ProcessingExecutionStatusEnum, type StoredDataReport, type UploadReport } from "../../../../@types/app";
-import { CartesApiException } from "../../../../modules/jsonFetch";
+import { ApiError } from "../../../../modules/jsonFetch";
 import { niceBytes } from "../../../../utils";
 import ProcessingExecutionReport from "./ProcessingExecutionReport";
 import ReportStatusBadge from "./ReportStatusBadge";
@@ -14,7 +14,7 @@ import UploadFileTree from "./UploadFileTree";
 
 type ReportTabProps = {
     datastoreName?: string;
-    reportQuery: UseQueryResult<StoredDataReport | UploadReport, CartesApiException>;
+    reportQuery: UseQueryResult<StoredDataReport | UploadReport, ApiError>;
 };
 
 const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
