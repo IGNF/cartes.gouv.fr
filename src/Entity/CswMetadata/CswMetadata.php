@@ -2,6 +2,8 @@
 
 namespace App\Entity\CswMetadata;
 
+use App\Exception\AppException;
+
 /**
  * Classe représentant une métadonnée du catalogue GeoNetwork.
  *
@@ -74,9 +76,16 @@ class CswMetadata
         $this->documents = [];
     }
 
+    public function requireFileIdentifier(): string
+    {
+        return $this->fileIdentifier ?? throw new AppException('Métadonnée sans identifiant de fichier (file_identifier)');
+    }
+
+    // l’énumération hierarchyLevel est immuable, seule la langue est un objet à dupliquer
     public function __clone()
     {
-        $this->hierarchyLevel = CswHierarchyLevel::tryFrom($this->hierarchyLevel->value);
-        $this->language = new CswLanguage($this->language->code, $this->language->language);
+        if ($this->language instanceof CswLanguage) {
+            $this->language = clone $this->language;
+        }
     }
 }

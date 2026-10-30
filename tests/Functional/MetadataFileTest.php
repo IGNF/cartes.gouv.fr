@@ -70,4 +70,26 @@ final class MetadataFileTest extends WebTestCase
         self::assertCount(1, $json['capabilities_files']);
         self::assertCount(1, $json['documents']);
     }
+
+    public function testMissingFileIdentifierIsReadAsNull(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('GET', self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/metadata/md-no-file-identifier/file?format=json');
+
+        self::assertResponseIsSuccessful();
+        self::assertNull($this->jsonResponse($client)['file_identifier']);
+    }
+
+    public function testMissingLanguageAnswersAnErrorNamingIt(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('GET', self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/metadata/md-no-language/file?format=json');
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertStringContainsString('langue (gmd:language) absente', (string) $client->getResponse()->getContent());
+    }
 }
