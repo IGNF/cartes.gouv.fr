@@ -21,7 +21,6 @@
         "symfony/dotenv": "7.4.*",
         "symfony/expression-language": "7.4.*",
         "symfony/flex": "^2.10",
-        "symfony/form": "7.4.*",
         "symfony/framework-bundle": "7.4.*",
         "symfony/http-client": "7.4.*",
         "symfony/intl": "7.4.*",
