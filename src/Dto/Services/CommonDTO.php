@@ -64,7 +64,7 @@ class CommonDTO
     public string $attribution_text;
 
     // #[Assert\NotBlank(message: 'common.attribution_url_mandatory_error')]
-    #[Assert\Url(message: 'common.attribution_url_error')]
+    #[Assert\Url(message: 'common.attribution_url_error', requireTld: false)]
     #[SerializedName('attribution_url')]
     public string $attribution_url;
 
