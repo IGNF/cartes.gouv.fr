@@ -51,10 +51,5 @@ yarn-error.log
 /.phpunit.cache/
 ###< phpunit/phpunit ###
 
-###> symfony/phpunit-bridge ###
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
-
 # rapports vitest (couverture, JUnit)
 /coverage/
