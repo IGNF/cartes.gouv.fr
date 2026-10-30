@@ -85,6 +85,17 @@ final class ContactFormTest extends WebTestCase
         self::assertEmailAddressContains($this->sentEmail(1), 'To', self::USER_EMAIL);
     }
 
+    public function testDatastoreCreateRequestRefusesAnAnonymousVisitor(): void
+    {
+        $client = self::createClient();
+
+        $client->xmlHttpRequest('POST', self::BASE.'/datastore_create_request', content: $this->json(['name' => 'Entrepôt test']));
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame(['error' => 'Demande réservée aux utilisateurs connectés'], $this->jsonResponse($client));
+        self::assertEmailCount(0);
+    }
+
     public function testJoinCommunityMailsTheCommunityContactAndTheUser(): void
     {
         $client = self::createClient();

@@ -49,7 +49,7 @@ class User implements UserInterface
         $this->updateFromApiInfo($apiUserInfo);
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -94,7 +94,7 @@ class User implements UserInterface
         // Encore exigée par UserInterface en 7.4, Symfony ne l’appelle plus si elle porte #[\Deprecated]
     }
 
-    public function getId(): ?string
+    public function getId(): string
     {
         return $this->id;
     }
