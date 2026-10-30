@@ -6,12 +6,12 @@ use App\Security\KeycloakTokenManager;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Stevenmaguire\OAuth2\Client\Provider\Keycloak;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-class LogoutSubscriber implements EventSubscriberInterface
+class LogoutSubscriber
 {
     public function __construct(
         private readonly ClientRegistry $clientRegistry,
@@ -21,11 +21,7 @@ class LogoutSubscriber implements EventSubscriberInterface
     ) {
     }
 
-    public static function getSubscribedEvents(): array
-    {
-        return [LogoutEvent::class => 'onLogout'];
-    }
-
+    #[AsEventListener(event: LogoutEvent::class)]
     public function onLogout(LogoutEvent $event): void
     {
         $idToken = $this->tokenManager->getIdToken();

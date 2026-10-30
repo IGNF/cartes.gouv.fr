@@ -8,12 +8,19 @@ use Rector\Config\RectorConfig;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\Php74\Rector\Property\RestoreDefaultNullToNullableTypePropertyRector;
 use Rector\Set\ValueObject\SetList;
+use Rector\Symfony\Set\SymfonySetList;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\SafeDeclareStrictTypesRector;
 
 return RectorConfig::configure()
     ->withPaths([__DIR__.'/src', __DIR__.'/tests'])
     ->withPhpSets()
-    ->withSets([SetList::DEAD_CODE, SetList::CODE_QUALITY])
+    ->withComposerBased(symfony: true)
+    ->withSets([
+        SetList::DEAD_CODE,
+        SetList::CODE_QUALITY,
+        SymfonySetList::SYMFONY_CODE_QUALITY,
+        SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION,
+    ])
     ->withImportNames(importShortClasses: false, removeUnusedImports: true)
     ->withSkip([
         // coercion implicite des valeurs API/requête, non couverte par les tests

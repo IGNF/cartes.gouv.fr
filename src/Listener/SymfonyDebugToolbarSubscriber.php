@@ -2,7 +2,7 @@
 
 namespace App\Listener;
 
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -10,20 +10,14 @@ use Symfony\Component\HttpKernel\KernelInterface;
 /**
  * @see https://symfony.com/doc/6.4/profiler.html#updating-the-web-debug-toolbar-after-ajax-requests
  */
-class SymfonyDebugToolbarSubscriber implements EventSubscriberInterface
+class SymfonyDebugToolbarSubscriber
 {
     public function __construct(
         private readonly KernelInterface $kernel,
     ) {
     }
 
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::RESPONSE => 'onKernelResponse',
-        ];
-    }
-
+    #[AsEventListener(event: KernelEvents::RESPONSE)]
     public function onKernelResponse(ResponseEvent $event): void
     {
         if (!$this->kernel->isDebug()) {

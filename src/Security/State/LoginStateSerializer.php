@@ -8,7 +8,7 @@ final readonly class LoginStateSerializer
 {
     private string $hmacKey;
 
-    public function __construct(#[Autowire('%kernel.secret%')] string $appSecret)
+    public function __construct(#[Autowire(param: 'kernel.secret')] string $appSecret)
     {
         $this->hmacKey = hash_hkdf('sha256', $appSecret, 32, 'cgfr.login-state.v1');
     }

@@ -8,7 +8,7 @@ final readonly class AuthCookieCipher
 {
     private string $key;
 
-    public function __construct(#[Autowire('%kernel.secret%')] string $appSecret)
+    public function __construct(#[Autowire(param: 'kernel.secret')] string $appSecret)
     {
         $this->key = hash_hkdf('sha256', $appSecret, SODIUM_CRYPTO_SECRETBOX_KEYBYTES, 'cgfr.auth-cookie.v1');
     }

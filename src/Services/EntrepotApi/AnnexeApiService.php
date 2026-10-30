@@ -17,7 +17,7 @@ final readonly class AnnexeApiService
         public ApiClient $api,
         private Filesystem $filesystem,
         private MembershipService $membershipService,
-        #[Autowire('%annexes_url%')]
+        #[Autowire(param: 'annexes_url')]
         private string $annexesUrl,
     ) {
     }
