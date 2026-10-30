@@ -95,7 +95,7 @@ class CartesMetadataApiService
 
         // dépublie la metadata (sans la supprimer) s'il n'y a plus de services publiés
         if (0 === count($cswMetadata->layers) && isset($apiMetadata['endpoints'][0]['_id'])) {
-            $this->metadataApiService->unpublish($datastoreId, $cswMetadata->fileIdentifier, $apiMetadata['endpoints'][0]['_id'])->await();
+            $this->metadataApiService->unpublish($datastoreId, $cswMetadata->requireFileIdentifier(), $apiMetadata['endpoints'][0]['_id'])->await();
         }
     }
 
@@ -182,7 +182,7 @@ class CartesMetadataApiService
             CommonTags::DATASHEET_NAME => $datasheetName,
         ])->array();
 
-        $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+        $this->metadataApiService->publish($datastoreId, $newCswMetadata->requireFileIdentifier(), $metadataEndpoint['_id'])->await();
 
         $newApiMetadata['csw_metadata'] = $newCswMetadata;
 
@@ -212,7 +212,7 @@ class CartesMetadataApiService
 
         // suppression et recréation de métadonnées si changement de file_identifier
         if ($oldCswMetadata->fileIdentifier !== $newCswMetadata->fileIdentifier) {
-            $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->requireFileIdentifier(), $metadataEndpoint['_id'])->await();
             $this->metadataApiService->delete($datastoreId, $oldApiMetadata['_id'])->await();
 
             $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
@@ -222,7 +222,7 @@ class CartesMetadataApiService
         $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], $oldApiMetadata['tags'])->array();
 
         if (0 === count($newApiMetadata['endpoints'])) { // la métadonnée n'est pas déjà publiée
-            $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id'])->await();
+            $this->metadataApiService->publish($datastoreId, $newCswMetadata->requireFileIdentifier(), $metadataEndpoint['_id'])->await();
         }
 
         $newApiMetadata['csw_metadata'] = $newCswMetadata;
@@ -327,6 +327,9 @@ class CartesMetadataApiService
                         $gmdOnlineResourceProtocol = 'OGC:WMTS';
                         $actualType = 'WMTS';
                     }
+                    if (null === $gmdOnlineResourceProtocol) {
+                        break;
+                    }
 
                     $endpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']);
                     $endpoints = array_values($endpoints);
@@ -371,7 +374,7 @@ class CartesMetadataApiService
      */
     private function cleanLayerUrl(string $url): string
     {
-        return preg_replace('#(?<!:)//+#', '/', $url);
+        return preg_replace('#(?<!:)//+#', '/', $url) ?? throw new \RuntimeException("Nettoyage de l’URL de couche impossible : $url");
     }
 
     /**

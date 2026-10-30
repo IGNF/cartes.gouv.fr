@@ -133,7 +133,7 @@ class CapabilitiesService
             --$index;
         }
 
-        return $doc->saveXML();
+        return $doc->saveXML() ?: throw new \RuntimeException('Export XML des capacités impossible');
     }
 
     private function filterWMSCapabilities(string $datastoreId, mixed $endpoint, string $url): string
@@ -173,7 +173,7 @@ class CapabilitiesService
             --$index;
         }
 
-        return $doc->saveXML();
+        return $doc->saveXML() ?: throw new \RuntimeException('Export XML des capacités impossible');
     }
 
     private function filterWMTSCapabilities(string $datastoreId, mixed $endpoint, string $url): string
@@ -217,6 +217,6 @@ class CapabilitiesService
             --$index;
         }
 
-        return $doc->saveXML();
+        return $doc->saveXML() ?: throw new \RuntimeException('Export XML des capacités impossible');
     }
 }

@@ -17,7 +17,10 @@ class GeonetworkApiService
         ParameterBagInterface $parameterBag,
         HttpClientInterface $httpClient,
     ) {
-        $parsedUrl = parse_url($parameterBag->get('api_entrepot_url'));
+        $parsedUrl = parse_url((string) $parameterBag->get('api_entrepot_url'));
+        if (!isset($parsedUrl['scheme'], $parsedUrl['host'])) {
+            throw new \LogicException('Paramètre api_entrepot_url invalide : schéma ou hôte absent');
+        }
         $this->baseUrl = sprintf('%s://%s', $parsedUrl['scheme'], $parsedUrl['host']);
 
         $this->geonetworkClient = $httpClient->withOptions(

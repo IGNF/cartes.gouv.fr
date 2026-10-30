@@ -1,17 +1,19 @@
-# includes:
-#     - vendor/phpstan/phpstan-phpunit/extension.neon
-#     - vendor/phpstan/phpstan-phpunit/rules.neon
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-symfony/rules.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
 
 parameters:
-    level: 6
+    level: 8
     # PHP cible = plateforme composer (config.platform.php), pas le PHP qui exécute l'analyse
     phpVersion: 80200
     paths:
         - src
+        - tests
     ignoreErrors:
         - "#return type has no value type specified in iterable type array#"
-    # excludes_analyse:
-    #     - tests/bootstrap.php
-    # bootstrapFiles:
-    #     - bin/.phpunit/phpunit/vendor/autoload.php
     treatPhpDocTypesAsCertain: false
+    symfony:
+        # conteneur compilé en dev, construit par check-rules (lint:twig, lint:container) avant PHPStan
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml

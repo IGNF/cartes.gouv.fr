@@ -166,8 +166,9 @@ final readonly class ApiClient
                     $pageQuery['page'] = $page;
                     $pendingByPage[$page] = $this->request('GET', $url, new RequestOptions(query: $pageQuery, headers: $headers));
                 }
+                // sans continueOnError, resolveAll lève une ApiException au lieu de rendre null
                 foreach ($this->resolveAll($pendingByPage) as $resources) {
-                    $allResources = $merge($allResources, $resources);
+                    $allResources = $merge($allResources, $resources ?? []);
                 }
             }
 

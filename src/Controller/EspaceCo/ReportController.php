@@ -35,8 +35,8 @@ class ReportController extends AbstractController implements ApiControllerInterf
     public function getList(Request $request): JsonResponse
     {
         try {
-            $page = $request->query->get('page', 1);
-            $limit = $request->query->get('limit', 10);
+            $page = $request->query->getInt('page', 1);
+            $limit = $request->query->getInt('limit', 10);
             $query = $request->query->all();
 
             $result = $this->reportApiService->getList($page, $limit, $query);

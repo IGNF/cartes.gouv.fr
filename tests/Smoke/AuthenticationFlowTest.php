@@ -37,6 +37,7 @@ final class AuthenticationFlowTest extends WebTestCase
         self::assertSame('cartes-gouv-test', $query['client_id']);
         self::assertSame(self::BASE.'/login/check', $query['redirect_uri']);
 
+        self::assertIsString($query['state']);
         $state = self::getContainer()->get(LoginStateSerializer::class)->decode($query['state']);
         self::assertNotNull($state);
         self::assertSame(self::BASE.'/tableau-de-bord', $state['referer']);

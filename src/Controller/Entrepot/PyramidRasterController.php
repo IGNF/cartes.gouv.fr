@@ -360,7 +360,7 @@ class PyramidRasterController extends ServiceController implements ApiController
         $styleFilePath = $styleFileDir.DIRECTORY_SEPARATOR.'rok4style_'.Uuid::v4().'.json';
 
         $this->fs->mkdir($styleFileDir);
-        $this->fs->dumpFile($styleFilePath, json_encode($rok4Style));
+        $this->fs->dumpFile($styleFilePath, json_encode($rok4Style, JSON_THROW_ON_ERROR));
 
         if (null !== $configurationId) {
             $finalStyleFileName = sprintf('config_%s_style_%s', $configurationId, $configType);

@@ -55,8 +55,13 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new AuthenticationExpiredException('Failed to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
         }
 
+        $keycloakId = $keycloakUser->getId();
+        if (null === $keycloakId) {
+            throw new \UnexpectedValueException('Utilisateur Keycloak sans identifiant (sub)');
+        }
+
         try {
-            $apiUser = $this->entrepotUserCache->get($keycloakUser->getId());
+            $apiUser = $this->entrepotUserCache->get($keycloakId);
         } catch (TimeoutException $ex) {
             $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
             throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);

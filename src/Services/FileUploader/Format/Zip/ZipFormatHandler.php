@@ -428,7 +428,7 @@ final readonly class ZipFormatHandler implements UploadFormatHandlerInterface
     private function extractZipToTempFolder(\SplFileInfo $file): string
     {
         $infos = pathinfo($file->getPathname());
-        $dirname = $infos['dirname'];
+        $dirname = dirname($file->getPathname());
         $tmpFolderName = $infos['filename'].'_tmp_'.bin2hex(random_bytes(6));
         $folder = "$dirname/$tmpFolderName";
 

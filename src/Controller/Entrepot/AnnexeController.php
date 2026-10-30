@@ -99,7 +99,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         try {
             $file = $request->files->get('file');
             $name = $file->getClientOriginalName();
-            $path = $request->request->get('path');
+            $path = $request->request->getString('path');
 
             // Clear RSSFeed cache
             if (str_contains($name, 'alerts.json')) {
@@ -157,7 +157,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     {
         try {
             $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
-            $datasheetName = $request->request->get('datasheetName');
+            $datasheetName = $request->request->getString('datasheetName');
 
             $uuid = Uuid::v4();
 

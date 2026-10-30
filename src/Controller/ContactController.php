@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Route(
     name: 'cartesgouvfr_contact_',
@@ -135,7 +136,7 @@ class ContactController extends AbstractController
                 'data' => $data,
             ];
 
-            $userEmail = $user->getEmail();
+            $userEmail = $this->connectedUserEmail($user);
 
             $this->logger->info('datastore.creation.request', [
                 'endpoint' => 'datastore_create_request',
@@ -175,7 +176,7 @@ class ContactController extends AbstractController
         try {
             $now = new \DateTime();
 
-            $userEmail = $user->getEmail();
+            $userEmail = $this->connectedUserEmail($user);
 
             $mailParams = [
                 'sendDate' => $now,
@@ -232,7 +233,7 @@ class ContactController extends AbstractController
         try {
             $now = new \DateTime();
 
-            $userEmail = $user->getEmail();
+            $userEmail = $this->connectedUserEmail($user);
 
             $mailParams = [
                 'sendDate' => $now,
@@ -295,7 +296,7 @@ class ContactController extends AbstractController
             $now = new \DateTime();
             /** @var User */
             $user = $this->getUser();
-            $userEmail = $user->getEmail();
+            $userEmail = $this->connectedUserEmail($user);
 
             $mailParams = [
                 'sendDate' => $now,
@@ -324,5 +325,14 @@ class ContactController extends AbstractController
         } catch (\Exception $e) {
             return new JsonResponse(['state' => 'error', 'message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private function connectedUserEmail(?UserInterface $user): string
+    {
+        if (!$user instanceof User) {
+            throw new AppException('Demande réservée aux utilisateurs connectés');
+        }
+
+        return $user->getEmail();
     }
 }

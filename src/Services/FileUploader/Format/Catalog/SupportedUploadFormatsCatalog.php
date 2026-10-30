@@ -95,6 +95,8 @@ final class SupportedUploadFormatsCatalog
      * Les formats multi-fichiers doivent contenir toutes les extensions obligatoires.
      *
      * @param string[] $entryNames
+     *
+     * @return self::FAMILY_*
      */
     public function detectZipFamilyFromEntryNames(array $entryNames): string
     {
@@ -117,6 +119,8 @@ final class SupportedUploadFormatsCatalog
      * Cas particulier: "shp.xml" (token dédié).
      *
      * @param string[] $tokens
+     *
+     * @return self::FAMILY_*
      */
     public function detectZipFamilyFromTokens(array $tokens): string
     {
@@ -197,7 +201,7 @@ final class SupportedUploadFormatsCatalog
     }
 
     /**
-     * @return array<string, array{allowed: string[], required: string[]}>
+     * @return array<self::FAMILY_*, array{allowed: string[], required: string[]}>
      */
     private function getZipFamilies(): array
     {

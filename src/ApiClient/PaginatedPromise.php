@@ -22,9 +22,10 @@ final class PaginatedPromise
             return $this->resolved;
         }
         $firstPage = $this->page1Pending->arrayWithHeaders();
-        $this->resolved = ($this->remainingPagesFetcher)($firstPage);
+        $resolved = ($this->remainingPagesFetcher)($firstPage);
+        $this->resolved = $resolved;
 
-        return $this->resolved;
+        return $resolved;
     }
 
     /**

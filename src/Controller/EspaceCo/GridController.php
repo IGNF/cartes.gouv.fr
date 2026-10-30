@@ -34,8 +34,8 @@ class GridController extends AbstractController implements ApiControllerInterfac
         #[MapQueryParameter] ?string $searchBy,
         #[MapQueryParameter] ?string $fields,
         #[MapQueryParameter] ?string $adm,
-        #[MapQueryParameter] ?int $page = 1,
-        #[MapQueryParameter] ?int $limit = self::SEARCH_LIMIT,
+        #[MapQueryParameter] int $page = 1,
+        #[MapQueryParameter] int $limit = self::SEARCH_LIMIT,
     ): JsonResponse {
         try {
             $response = $this->gridApiService->getAll($text, $searchBy, $fields, $adm, $page, $limit);

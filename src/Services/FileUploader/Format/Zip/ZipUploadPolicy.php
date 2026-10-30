@@ -51,6 +51,8 @@ final readonly class ZipUploadPolicy
 
     /**
      * @param array<int, string> $entryNames Noms complets des entrées (ex: dossier/roads.shp.xml)
+     *
+     * @return SupportedUploadFormatsCatalog::FAMILY_*
      */
     public function detectFamilyFromEntryNames(array $entryNames): string
     {

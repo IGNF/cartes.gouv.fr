@@ -72,12 +72,19 @@ final readonly class GpkgFormatHandler implements UploadFormatHandlerInterface
         $wkt = preg_replace_callback('/[A-Z][A-Z\d_]+\[/i', function ($matches) {
             return '["'.substr($matches[0], 0, strlen($matches[0]) - 1).'",';
         }, $definition);
+        // définition non analysable : pas d’autorité, comme pour un JSON invalide plus bas
+        if (null === $wkt) {
+            return null;
+        }
 
         $wkt = preg_replace_callback('/, ?([A-Z][A-Z\d_]+[,\]])/', function ($matches) {
             $v = substr($matches[0], 1, strlen($matches[0]) - 2);
 
             return ',"'.$v.'"]';
         }, $wkt);
+        if (null === $wkt) {
+            return null;
+        }
 
         $json = json_decode($wkt, true);
         if (!is_array($json)) {

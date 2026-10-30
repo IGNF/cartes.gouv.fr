@@ -98,7 +98,8 @@ class CartesStylesApiService
                     $uuid = $matches[0] ?? null;
 
                     if ($uuid) {
-                        $newFilename = $this->getAnnexeFilename($uuid, $suggestedTechName, $urlParts['extension']);
+                        $extension = $urlParts['extension'] ?? throw new \RuntimeException("Fichier de style sans extension : {$layer['url']}");
+                        $newFilename = $this->getAnnexeFilename($uuid, $suggestedTechName, $extension);
 
                         if ($originalFilename !== $newFilename) {
                             $layer['url'] = str_replace($originalFilename, $newFilename, $layer['url']);
@@ -233,10 +234,10 @@ class CartesStylesApiService
     private function suggestTechnicalName(string $name): string
     {
         $name = trim($name);
-        $name = iconv('UTF-8', 'ASCII//TRANSLIT', $name);
-        $name = strtolower($name);
-        $name = preg_replace('/\s+/', '_', $name);
-        $name = preg_replace('/[^a-z0-9_-]/', '', $name);
+        // un échec de conversion donne un nom vide, remplacé plus bas par un nom aléatoire
+        $name = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $name) ?: '');
+        $name = preg_replace('/\s+/', '_', $name) ?? '';
+        $name = preg_replace('/[^a-z0-9_-]/', '', $name) ?? '';
 
         if (empty($name)) {
             $name = 'style_'.bin2hex(random_bytes(2));

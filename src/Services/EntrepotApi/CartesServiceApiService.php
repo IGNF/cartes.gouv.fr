@@ -195,7 +195,7 @@ class CartesServiceApiService
             case OfferingTypes::WMSVECTOR:
             case OfferingTypes::WMSRASTER:
                 if ($isSandboxDatastore) {
-                    $serviceType = $this->getServiceType($offering);
+                    $serviceType = $this->getServiceType($offering) ?? throw new \LogicException("Type de service inconnu pour l’offre {$offering['type']}");
                     $shareUrl = $this->capabilitiesService->getGetCapUrl($endpoint['endpoint']['urls'][0]['url'], $offering['urls'][0]['url'], $serviceType);
                 } else {
                     $annexeUrl = $this->params->get('annexes_url');
@@ -437,7 +437,8 @@ class CartesServiceApiService
         ?array $oldOffering = null,
     ): array {
         $datasheetName = null;
-        $endpoint = $this->getEndpointByShareType($datastoreId, $type, $dto->share_with);
+        // valeur vide : refusée par getEndpointByShareType comme toute valeur invalide (400)
+        $endpoint = $this->getEndpointByShareType($datastoreId, $type, $dto->share_with ?? '');
 
         // Mise à jour des métadonnées de la configuration
         $configRequestBody['metadata'] = $this->getNewConfigMetadata($dto->identifier, $configRequestBody['metadata'] ?? []);
@@ -510,7 +511,7 @@ class CartesServiceApiService
         $services = $this->getDatasheetServices($datastoreId, $datasheetName);
 
         // Création ou mise à jour de metadata
-        $formData = json_decode(json_encode($dto), true);
+        $formData = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
         $apiMetadata = $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $services, $formData);
 
         // Synchronisation des autres services de la même fiche de données
