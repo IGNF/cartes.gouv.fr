@@ -4,7 +4,7 @@ Instructions for AI coding agents working on this repository. This is the single
 
 ## Project
 
-**cartes.gouv.fr** is the main portal of the French Géoplateforme: a Symfony 6.4 + React (Vite) application with a back-office for uploading data, publishing OGC services (WFS, WMS, WMTS, TMS), managing communities and configuring map styles.
+**cartes.gouv.fr** is the main portal of the French Géoplateforme: a Symfony 7.4 + React (Vite) application with a back-office for uploading data, publishing OGC services (WFS, WMS, WMTS, TMS), managing communities and configuring map styles.
 
 External API references:
 
@@ -54,7 +54,7 @@ Project vocabulary (membership, snapshot, grant-path...): `docs/developer/glossa
 - Import order: third-party, then project (`@/` aliases and relative), then static data/images, then CSS/SCSS.
 - npm dependencies go to `devDependencies` (the front is fully bundled by Vite at build time); `dependencies` is reserved for packages loaded at runtime by the Node cron jobs.
 
-## Backend (Symfony 6.4, PHP 8.2+)
+## Backend (Symfony 7.4, PHP 8.2+)
 
 - External APIs are called through `ApiClient` (`src/ApiClient/`), composed into domain services via `#[Autowire(service: 'app.api_client.*')]`. `ResponsePromise` and `PaginatedPromise` are lazy: nothing is sent until consumed (`->array()`, `->resolve()`).
 - Always handle `AuthenticationExpiredException`.

@@ -84,10 +84,10 @@ class User implements UserInterface
     /**
      * @see UserInterface
      */
+    #[\Deprecated]
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        // Encore exigée par UserInterface en 7.4, Symfony ne l’appelle plus si elle porte #[\Deprecated]
     }
 
     public function getId(): ?string

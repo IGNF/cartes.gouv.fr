@@ -3,7 +3,7 @@
 namespace App\Services\FileUploader\Format;
 
 use App\Services\FileUploader\Exception\FileUploaderException;
-use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\Response;
 
 final class FormatHandlerRegistry
@@ -15,7 +15,7 @@ final class FormatHandlerRegistry
      * @param iterable<UploadFormatHandlerInterface> $handlers
      */
     public function __construct(
-        #[TaggedIterator('cartesgouvfr.file_uploader.format_handler')] iterable $handlers,
+        #[AutowireIterator('cartesgouvfr.file_uploader.format_handler')] iterable $handlers,
     ) {
         $this->handlers = $handlers;
     }

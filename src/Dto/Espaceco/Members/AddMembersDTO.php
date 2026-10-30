@@ -13,9 +13,9 @@ class AddMembersDTO
         #[Assert\All([
             new Assert\AtLeastOneOf([
                 new Assert\Positive(),
-                new Assert\Email([
-                    'message' => 'espaceco.add_members.email_error',
-                ]),
+                new Assert\Email(
+                    message: 'espaceco.add_members.email_error',
+                ),
             ]),
         ])]
         public readonly array $members = [],
