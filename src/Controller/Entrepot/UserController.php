@@ -5,8 +5,6 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\UserKeyTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\User\UserKeyDTO;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Security\User;
 use App\Services\EntrepotApi\ServiceAccount;
 use App\Services\EntrepotApi\UserApiService;
@@ -108,37 +106,33 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/add_key', name: 'add_key', methods: ['POST'])]
     public function addKey(#[MapRequestPayload] UserKeyDTO $dto): JsonResponse
     {
-        try {
-            $filter = ['accesses', 'ip_list_name', 'ip_list_addresses'];
+        $filter = ['accesses', 'ip_list_name', 'ip_list_addresses'];
 
-            $body = array_filter((array) $dto, function ($value, $key) use ($filter) {
-                return !(null === $value || '' === $value || in_array($key, $filter));
-            }, ARRAY_FILTER_USE_BOTH);
+        $body = array_filter((array) $dto, function ($value, $key) use ($filter) {
+            return !(null === $value || '' === $value || in_array($key, $filter));
+        }, ARRAY_FILTER_USE_BOTH);
 
-            // Les adresses IP
-            if ($dto->ip_list_addresses) {
-                $body[$dto->ip_list_name] = $dto->ip_list_addresses;
-            }
-
-            if (UserKeyTypes::HASH === $dto->type || UserKeyTypes::OAUTH2 === $dto->type) {
-                $body['type_infos'] = (object) null;
-            }
-
-            // Ajout de la cle
-            $key = $this->userApiService->addKey($body)->array();
-
-            // Ajout des acces
-            foreach ($dto->accesses as $access) {
-                $accessBody = (array) $access;
-                $this->userApiService->addAccess($key['_id'], $accessBody)->await();
-            }
-
-            $keyWithAccesses = $this->_getUserKeyWithAccesses($key['_id']);
-
-            return new JsonResponse($keyWithAccesses);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        // Les adresses IP
+        if ($dto->ip_list_addresses) {
+            $body[$dto->ip_list_name] = $dto->ip_list_addresses;
         }
+
+        if (UserKeyTypes::HASH === $dto->type || UserKeyTypes::OAUTH2 === $dto->type) {
+            $body['type_infos'] = (object) null;
+        }
+
+        // Ajout de la cle
+        $key = $this->userApiService->addKey($body)->array();
+
+        // Ajout des acces
+        foreach ($dto->accesses as $access) {
+            $accessBody = (array) $access;
+            $this->userApiService->addAccess($key['_id'], $accessBody)->await();
+        }
+
+        $keyWithAccesses = $this->_getUserKeyWithAccesses($key['_id']);
+
+        return new JsonResponse($keyWithAccesses);
     }
 
     #[Route('/update_key/{keyId}', name: 'update_key', methods: ['PATCH'])]
@@ -146,58 +140,50 @@ class UserController extends AbstractController implements ApiControllerInterfac
     {
         $filter = ['type', 'type_infos', 'accesses', 'ip_list_name', 'ip_list_addresses'];
 
-        try {
-            $body = array_filter((array) $dto, function ($value, $key) use ($filter) {
-                return !(null === $value || ('' === $value && !in_array($key, ['user_agent', 'referer'])) || in_array($key, $filter));
-            }, ARRAY_FILTER_USE_BOTH);
+        $body = array_filter((array) $dto, function ($value, $key) use ($filter) {
+            return !(null === $value || ('' === $value && !in_array($key, ['user_agent', 'referer'])) || in_array($key, $filter));
+        }, ARRAY_FILTER_USE_BOTH);
 
-            $key = $this->userApiService->getMyKey($keyId)->array();
+        $key = $this->userApiService->getMyKey($keyId)->array();
 
-            // Nom identique, on supprime du body
-            if ($dto->name === $key['name']) {
-                unset($body['name']);
-            }
-
-            // Les adresses IP : elles sont exclusives => soit whitelist, soit blacklist peut
-            // contenir des adresses
-            $body['whitelist'] = $body['blacklist'] = [];
-            if ($dto->ip_list_addresses) {
-                $body[$dto->ip_list_name] = $dto->ip_list_addresses;
-            }
-
-            // Modification de la cle
-            $updatedKey = $this->userApiService->updateKey($keyId, $body);
-
-            // Suppression de tous les accces pour cette cle
-            $accesses = $this->userApiService->getKeyAccesses($keyId)->resolve();
-            foreach ($accesses as $access) {
-                $this->userApiService->removeAccess($keyId, $access['_id'])->await();
-            }
-
-            // Ajout des nouveaux access
-            foreach ($dto->accesses as $access) {
-                $accessBody = (array) $access;
-                $this->userApiService->addAccess($key['_id'], $accessBody)->await();
-            }
-
-            $updatedKey['accesses'] = $this->userApiService->getKeyAccesses($key['_id'])->resolve();
-
-            return new JsonResponse($updatedKey);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        // Nom identique, on supprime du body
+        if ($dto->name === $key['name']) {
+            unset($body['name']);
         }
+
+        // Les adresses IP : elles sont exclusives => soit whitelist, soit blacklist peut
+        // contenir des adresses
+        $body['whitelist'] = $body['blacklist'] = [];
+        if ($dto->ip_list_addresses) {
+            $body[$dto->ip_list_name] = $dto->ip_list_addresses;
+        }
+
+        // Modification de la cle
+        $updatedKey = $this->userApiService->updateKey($keyId, $body);
+
+        // Suppression de tous les accces pour cette cle
+        $accesses = $this->userApiService->getKeyAccesses($keyId)->resolve();
+        foreach ($accesses as $access) {
+            $this->userApiService->removeAccess($keyId, $access['_id'])->await();
+        }
+
+        // Ajout des nouveaux access
+        foreach ($dto->accesses as $access) {
+            $accessBody = (array) $access;
+            $this->userApiService->addAccess($key['_id'], $accessBody)->await();
+        }
+
+        $updatedKey['accesses'] = $this->userApiService->getKeyAccesses($key['_id'])->resolve();
+
+        return new JsonResponse($updatedKey);
     }
 
     #[Route('/remove_key/{keyId}', name: 'remove_key', methods: ['DELETE'])]
     public function removeKey(string $keyId): JsonResponse
     {
-        try {
-            $this->userApiService->removeKey($keyId)->await();
+        $this->userApiService->removeKey($keyId)->await();
 
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
     #[Route('/me/keys/{keyId}/stats', name: 'key_stats', methods: ['GET'])]
@@ -220,27 +206,19 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/me/communities/{communityId}', name: 'leave_community', methods: ['DELETE'])]
     public function leaveCommunity(string $communityId): JsonResponse
     {
-        try {
-            $this->membershipService->leaveCommunity($communityId);
+        $this->membershipService->leaveCommunity($communityId);
 
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
     #[Route('/me/stats', name: 'me_stats', methods: ['GET'])]
     public function getMyStats(Request $request): JsonResponse
     {
-        try {
-            $query = $request->query->all();
+        $query = $request->query->all();
 
-            $stats = $this->userApiService->getStats($query)->resolve();
+        $stats = $this->userApiService->getStats($query)->resolve();
 
-            return $this->json($stats);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($stats);
     }
 
     /**

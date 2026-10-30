@@ -2,6 +2,7 @@
 
 namespace App\Tests\Smoke;
 
+use App\Exception\ApiErrorType;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class PublicPagesTest extends WebTestCase
@@ -31,11 +32,10 @@ final class PublicPagesTest extends WebTestCase
         $client->xmlHttpRequest('GET', '/api/users/me');
 
         self::assertResponseStatusCodeSame(401);
-        self::assertResponseHeaderSame('content-type', 'application/json');
+        self::assertResponseHeaderSame('content-type', 'application/problem+json');
 
         $body = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        self::assertSame(401, $body['code']);
-        self::assertSame('Unauthorized', $body['status']);
-        self::assertTrue($body['details']['session_expired']);
+        self::assertSame(401, $body['status']);
+        self::assertSame(ApiErrorType::ANONYMOUS, $body['type']);
     }
 }

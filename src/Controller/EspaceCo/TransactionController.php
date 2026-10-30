@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\TransactionApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,42 +29,30 @@ class TransactionController extends AbstractController implements ApiControllerI
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getAll(string $databaseId, Request $request): JsonResponse
     {
-        try {
-            $query = $request->query->all();
-            $result = $this->transactionApiService->getList($databaseId, $query);
-            $content = $result->content;
-            $headers = $result->headers;
+        $query = $request->query->all();
+        $result = $this->transactionApiService->getList($databaseId, $query);
+        $content = $result->content;
+        $headers = $result->headers;
 
-            $response = new JsonResponse($content, Response::HTTP_PARTIAL_CONTENT);
-            $response->headers->set('Content-Range', $headers['content-range'][0]);
+        $response = new JsonResponse($content, Response::HTTP_PARTIAL_CONTENT);
+        $response->headers->set('Content-Range', $headers['content-range'][0]);
 
-            return $response;
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $response;
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
     public function add(string $databaseId, Request $request): JsonResponse
     {
-        try {
-            $body = json_decode($request->getContent(), true);
+        $body = json_decode($request->getContent(), true);
 
-            $report = $this->transactionApiService->add($databaseId, $body)->array();
+        $report = $this->transactionApiService->add($databaseId, $body)->array();
 
-            return $this->json($report);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($report);
     }
 
     #[Route('/{transactionId}', name: 'get', methods: ['GET'], requirements: ['transactionId' => Requirement::DIGITS])]
     public function get(string $databaseId, string $transactionId): JsonResponse
     {
-        try {
-            return $this->json($this->transactionApiService->get($databaseId, $transactionId)->array());
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($this->transactionApiService->get($databaseId, $transactionId)->array());
     }
 }

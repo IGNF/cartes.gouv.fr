@@ -15,6 +15,7 @@ use App\Utils;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Response;
 
 final readonly class UploadApiService
 {
@@ -131,7 +132,7 @@ final readonly class UploadApiService
             } else {
                 $zip = new \ZipArchive();
                 if (true !== $zip->open($filepath)) {
-                    throw new AppException('Ouverture du fichier ZIP échouée');
+                    throw new AppException('Ouverture du fichier ZIP échouée', Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
 
                 $folder = $infos['dirname'].DIRECTORY_SEPARATOR.$infos['filename'].'_'.bin2hex(random_bytes(6));
@@ -140,7 +141,7 @@ final readonly class UploadApiService
 
                 try {
                     if (!$zip->extractTo($folder)) {
-                        throw new AppException('Décompression du fichier zip échouée');
+                        throw new AppException('Décompression du fichier zip échouée', Response::HTTP_INTERNAL_SERVER_ERROR);
                     }
                 } finally {
                     $zip->close();
@@ -161,7 +162,7 @@ final readonly class UploadApiService
                     if (null !== $realFolder) {
                         $realPath = $entry->getRealPath();
                         if (false === $realPath || !str_starts_with($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
-                            throw new AppException('Archive corrompue');
+                            throw new AppException('Archive corrompue', Response::HTTP_BAD_REQUEST);
                         }
                     }
 
@@ -185,7 +186,7 @@ final readonly class UploadApiService
                 }
 
                 if (0 === count($files)) {
-                    throw new AppException('Aucun fichier valide trouvé dans le ZIP');
+                    throw new AppException('Aucun fichier valide trouvé dans le ZIP', Response::HTTP_BAD_REQUEST);
                 }
             }
 
@@ -224,13 +225,13 @@ final readonly class UploadApiService
         // calcul et envoi du md5 du fichier téléversé par l'utilisateur
         $md5 = \md5_file($pathname);
         if (false === $md5) {
-            throw new AppException('Calcul du md5 échoué');
+            throw new AppException('Calcul du md5 échoué', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $md5Line = sprintf("%s  %s\n", $md5, "data/$relativePath");
         $md5filePath = "$pathname.md5";
         if (false === \file_put_contents($md5filePath, $md5Line, \LOCK_EX)) {
-            throw new AppException('Écriture du fichier md5 échouée');
+            throw new AppException('Écriture du fichier md5 échouée', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $this->api->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/md5", $md5filePath)->await();

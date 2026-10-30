@@ -3,6 +3,7 @@
 namespace App\Entity\CswMetadata;
 
 use App\Exception\AppException;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Classe représentant une métadonnée du catalogue GeoNetwork.
@@ -78,7 +79,7 @@ class CswMetadata
 
     public function requireFileIdentifier(): string
     {
-        return $this->fileIdentifier ?? throw new AppException('Métadonnée sans identifiant de fichier (file_identifier)');
+        return $this->fileIdentifier ?? throw new AppException('Métadonnée sans identifiant de fichier (file_identifier)', Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     // l’énumération hierarchyLevel est immuable, seule la langue est un objet à dupliquer

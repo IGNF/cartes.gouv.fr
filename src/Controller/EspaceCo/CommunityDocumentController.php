@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\CommunityDocumentApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -43,62 +41,46 @@ class CommunityDocumentController extends AbstractController implements ApiContr
         int $communityId,
         #[MapQueryParameter] ?array $fields = [],
     ): JsonResponse {
-        try {
-            $response = $this->communityDocumentApiService->getDocuments($communityId, $fields)->array();
+        $response = $this->communityDocumentApiService->getDocuments($communityId, $fields)->array();
 
-            return new JsonResponse($response);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($response);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function addDocument(int $communityId, Request $request): JsonResponse
     {
-        try {
-            $title = $request->request->getString('title');
-            $description = $request->request->has('description') ? $request->request->getString('description') : null;
+        $title = $request->request->getString('title');
+        $description = $request->request->has('description') ? $request->request->getString('description') : null;
 
-            $document = $request->files->get('document');
+        $document = $request->files->get('document');
 
-            $uuid = Uuid::v4();
-            $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
-            $tempFilePath = implode(DIRECTORY_SEPARATOR, [$tempFileDir, $document->getClientOriginalName()]);
+        $uuid = Uuid::v4();
+        $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
+        $tempFilePath = implode(DIRECTORY_SEPARATOR, [$tempFileDir, $document->getClientOriginalName()]);
 
-            $document->move($tempFileDir, $document->getClientOriginalName());
+        $document->move($tempFileDir, $document->getClientOriginalName());
 
-            $response = $this->communityDocumentApiService->addDocument($communityId, $title, $description, $tempFilePath);
-            $this->fs->remove($tempFileDir);
+        $response = $this->communityDocumentApiService->addDocument($communityId, $title, $description, $tempFilePath);
+        $this->fs->remove($tempFileDir);
 
-            return new JsonResponse($response);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($response);
     }
 
     #[Route('/update/{documentId}', name: 'update', methods: ['PATCH'])]
     public function updateDocument(int $communityId, int $documentId, Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true);
 
-            $response = $this->communityDocumentApiService->updateDocument($communityId, $documentId, $data)->array();
+        $response = $this->communityDocumentApiService->updateDocument($communityId, $documentId, $data)->array();
 
-            return new JsonResponse($response);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($response);
     }
 
     #[Route('/delete/{documentId}', name: 'delete', methods: ['DELETE'])]
     public function deleteDocument(int $communityId, int $documentId): JsonResponse
     {
-        try {
-            $this->communityDocumentApiService->deleteDocument($communityId, $documentId)->await();
+        $this->communityDocumentApiService->deleteDocument($communityId, $documentId)->await();
 
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }

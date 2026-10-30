@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Exception\CartesApiException;
+use App\Exception\AppException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpOptions;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -79,6 +79,6 @@ class GeonetworkApiService
             return $response->getContent();
         }
 
-        throw new CartesApiException('Erreur dans la récupération des metadadonnées sur Geonetwork', $statusCode);
+        throw new AppException('Erreur dans la récupération des metadadonnées sur Geonetwork', $statusCode);
     }
 }

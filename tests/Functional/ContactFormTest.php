@@ -60,6 +60,10 @@ final class ContactFormTest extends WebTestCase
             'email_contact' => 'pas-une-adresse',
             'importance' => '0',
             'message' => 'x',
+            'first_name' => 'Prénom',
+            'last_name' => 'Nom',
+            'category' => 'Autre',
+            'organization' => 'Organisation test',
         ]));
 
         self::assertResponseStatusCodeSame(400);
@@ -91,8 +95,8 @@ final class ContactFormTest extends WebTestCase
 
         $client->xmlHttpRequest('POST', self::BASE.'/datastore_create_request', content: $this->json(['name' => 'Entrepôt test']));
 
-        self::assertResponseStatusCodeSame(500);
-        self::assertSame(['error' => 'Demande réservée aux utilisateurs connectés'], $this->jsonResponse($client));
+        self::assertResponseStatusCodeSame(401);
+        self::assertSame('Demande réservée aux utilisateurs connectés', $this->jsonResponse($client)['detail']);
         self::assertEmailCount(0);
     }
 

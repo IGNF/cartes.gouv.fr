@@ -2,11 +2,11 @@
 
 namespace App\Security\Authenticator;
 
-use App\Controller\ApiControllerInterface;
+use App\Exception\ApiErrorType;
+use App\Exception\AppException;
 use App\Security\Cookie\AuthCookieResponseListener;
 use App\Security\KeycloakTokenManager;
 use League\OAuth2\Client\Token\AccessToken;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -76,20 +76,15 @@ final class CookieAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
-        if ($request->cookies->has(AuthCookieResponseListener::COOKIE_NAME)) {
+        $hadCookie = $request->cookies->has(AuthCookieResponseListener::COOKIE_NAME);
+        if ($hadCookie) {
             $this->tokenManager->clearAccessToken();
         }
 
         $route = $request->attributes->get('_route');
         if (is_string($route) && str_starts_with($route, self::API_ROUTE_PREFIX)) {
-            $code = Response::HTTP_UNAUTHORIZED;
-
-            return new JsonResponse([
-                'code' => $code,
-                'status' => 'Unauthorized',
-                'message' => strtr($exception->getMessageKey(), $exception->getMessageData()),
-                'details' => ['controller' => ApiControllerInterface::class, 'session_expired' => true],
-            ], $code);
+            // sans exception précédente : le pare-feu redirigerait l'AuthenticationException vers le point d'entrée
+            throw new AppException(strtr($exception->getMessageKey(), $exception->getMessageData()), Response::HTTP_UNAUTHORIZED, type: $hadCookie ? ApiErrorType::SESSION_EXPIRED : ApiErrorType::ANONYMOUS);
         }
 
         return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE, ['session_expired' => 1]));

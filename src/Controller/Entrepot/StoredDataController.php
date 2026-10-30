@@ -7,7 +7,7 @@ use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
-use App\Exception\CartesApiException;
+use App\Exception\AppException;
 use App\Services\EntrepotApi\CartesStoredDataApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
@@ -48,30 +48,26 @@ class StoredDataController extends AbstractController implements ApiControllerIn
         #[MapQueryParameter] ?bool $detailed = false,
         #[MapQueryParameter] ?bool $all = false,
     ): JsonResponse {
-        try {
-            $query = $request->query->all();
-            unset($query['detailed']);
-            unset($query['all']);
+        $query = $request->query->all();
+        unset($query['detailed']);
+        unset($query['all']);
 
-            if ($all) {
-                return $this->json(
-                    $detailed
-                    ? $this->storedDataApiService->getAllDetailed($datastoreId, $query)
-                    : $this->storedDataApiService->getAll($datastoreId, $query)->resolve()
-                );
-            }
-
-            $apiResponse = $detailed
-                ? $this->storedDataApiService->getListDetailed($datastoreId, $query)
-                : $this->storedDataApiService->getList($datastoreId, $query);
-
-            $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
-            $this->setPaginatedHeaders($response, $apiResponse->headers);
-
-            return $response;
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        if ($all) {
+            return $this->json(
+                $detailed
+                ? $this->storedDataApiService->getAllDetailed($datastoreId, $query)
+                : $this->storedDataApiService->getAll($datastoreId, $query)->resolve()
+            );
         }
+
+        $apiResponse = $detailed
+            ? $this->storedDataApiService->getListDetailed($datastoreId, $query)
+            : $this->storedDataApiService->getList($datastoreId, $query);
+
+        $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
+        $this->setPaginatedHeaders($response, $apiResponse->headers);
+
+        return $response;
     }
 
     #[Route('/{storedDataId}', name: 'get', methods: ['GET'])]
@@ -83,119 +79,105 @@ class StoredDataController extends AbstractController implements ApiControllerIn
             return $this->json($storedData);
         } catch (ApiException $ex) {
             if (Response::HTTP_NOT_FOUND === $ex->getStatusCode()) {
-                throw new CartesApiException("La donnée stockée [$storedDataId] n'existe pas", $ex->getStatusCode(), $ex->getDetails());
+                throw new AppException("La donnée stockée [$storedDataId] n'existe pas", $ex->getStatusCode(), $ex->getDetails(), $ex);
             }
             if (Response::HTTP_BAD_REQUEST === $ex->getStatusCode()) {
-                throw new CartesApiException("L'identifiant de la donnée stockée [$storedDataId] est invalide", $ex->getStatusCode(), $ex->getDetails());
+                throw new AppException("L'identifiant de la donnée stockée [$storedDataId] est invalide", $ex->getStatusCode(), $ex->getDetails(), $ex);
             }
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+            throw $ex;
         }
     }
 
     #[Route('/{storedDataId}/uses', name: 'get_uses', methods: ['GET'])]
     public function getUses(string $datastoreId, string $storedDataId): JsonResponse
     {
-        try {
-            $storedDataList = [];
-            $offeringsList = [];
+        $storedDataList = [];
+        $offeringsList = [];
 
-            $procExecList = $this->processingApiService->getAllExecutions($datastoreId, [
-                'input_stored_data' => $storedDataId,
-            ])->resolve();
-            foreach ($procExecList as &$procExec) {
-                if (ProcessingStatuses::SUCCESS === $procExec['status']) {
-                    $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id'])->array();
+        $procExecList = $this->processingApiService->getAllExecutions($datastoreId, [
+            'input_stored_data' => $storedDataId,
+        ])->resolve();
+        foreach ($procExecList as &$procExec) {
+            if (ProcessingStatuses::SUCCESS === $procExec['status']) {
+                $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id'])->array();
 
-                    if (isset($procExec['output']['stored_data']['status']) && StoredDataStatuses::DELETED !== $procExec['output']['stored_data']['status']) {
-                        $storedDataList[] = $procExec['output']['stored_data'];
-                    }
+                if (isset($procExec['output']['stored_data']['status']) && StoredDataStatuses::DELETED !== $procExec['output']['stored_data']['status']) {
+                    $storedDataList[] = $procExec['output']['stored_data'];
                 }
             }
-
-            $offeringsList = $this->configurationApiService->getAllOfferings($datastoreId, [
-                'stored_data' => $storedDataId,
-            ])->resolve();
-
-            return $this->json([
-                'stored_data_list' => $storedDataList,
-                'offerings_list' => $offeringsList,
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
+
+        $offeringsList = $this->configurationApiService->getAllOfferings($datastoreId, [
+            'stored_data' => $storedDataId,
+        ])->resolve();
+
+        return $this->json([
+            'stored_data_list' => $storedDataList,
+            'offerings_list' => $offeringsList,
+        ]);
     }
 
     #[Route('/{storedDataId}/report', name: 'get_report_data', methods: ['GET'])]
     public function getReport(string $datastoreId, string $storedDataId): JsonResponse
     {
-        try {
-            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
+        $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
 
-            // récupération de détails sur l'upload s'il y en a un qui a servi à créer la stored_data
-            if (isset($storedData['tags']['upload_id'])) {
-                $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id'])->array();
-                $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id'], $inputUpload);
-                $inputUpload['checks'] = [];
-                $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
+        // récupération de détails sur l'upload s'il y en a un qui a servi à créer la stored_data
+        if (isset($storedData['tags']['upload_id'])) {
+            $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id'])->array();
+            $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id'], $inputUpload);
+            $inputUpload['checks'] = [];
+            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
 
-                foreach ($uploadChecks as &$checkType) {
-                    foreach ($checkType as &$checkExecution) {
-                        $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->array());
-                        try {
-                            $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->array();
-                        } catch (ApiException) {
-                        }
-                        $inputUpload['checks'][] = $checkExecution;
+            foreach ($uploadChecks as &$checkType) {
+                foreach ($checkType as &$checkExecution) {
+                    $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->array());
+                    try {
+                        $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->array();
+                    } catch (ApiException) {
                     }
+                    $inputUpload['checks'][] = $checkExecution;
                 }
             }
-
-            $procIntegrationId = $storedData['tags']['proc_int_id'] ?? null;
-            $procPyramidCreationId = $storedData['tags']['proc_pyr_creat_id'] ?? null;
-            $procExections = [];
-
-            // récupération de l'exécution de traitement d'intégration en base de données
-            if ($procIntegrationId) {
-                $procIntegrationExec = $this->processingApiService->getExecution($datastoreId, $procIntegrationId)->array();
-                try {
-                    $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId)->array();
-                } catch (ApiException) {
-                }
-
-                $procExections[] = $procIntegrationExec;
-            }
-
-            // récupération de l'exécution de traitement de création de pyramide vecteur
-            if ($procPyramidCreationId) {
-                $procPyramidCreationExec = $this->processingApiService->getExecution($datastoreId, $procPyramidCreationId)->array();
-                try {
-                    $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId)->array();
-                } catch (ApiException) {
-                }
-                $procExections[] = $procPyramidCreationExec;
-            }
-
-            return $this->json([
-                'stored_data' => $storedData,
-                'input_upload' => $inputUpload ?? null,
-                'processing_executions' => $procExections,
-            ]);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
+
+        $procIntegrationId = $storedData['tags']['proc_int_id'] ?? null;
+        $procPyramidCreationId = $storedData['tags']['proc_pyr_creat_id'] ?? null;
+        $procExections = [];
+
+        // récupération de l'exécution de traitement d'intégration en base de données
+        if ($procIntegrationId) {
+            $procIntegrationExec = $this->processingApiService->getExecution($datastoreId, $procIntegrationId)->array();
+            try {
+                $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId)->array();
+            } catch (ApiException) {
+            }
+
+            $procExections[] = $procIntegrationExec;
+        }
+
+        // récupération de l'exécution de traitement de création de pyramide vecteur
+        if ($procPyramidCreationId) {
+            $procPyramidCreationExec = $this->processingApiService->getExecution($datastoreId, $procPyramidCreationId)->array();
+            try {
+                $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId)->array();
+            } catch (ApiException) {
+            }
+            $procExections[] = $procPyramidCreationExec;
+        }
+
+        return $this->json([
+            'stored_data' => $storedData,
+            'input_upload' => $inputUpload ?? null,
+            'processing_executions' => $procExections,
+        ]);
     }
 
     #[Route('/{storedDataId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $datastoreId, string $storedDataId): JsonResponse
     {
-        try {
-            $this->cartesStoredDataApiService->delete($datastoreId, $storedDataId);
+        $this->cartesStoredDataApiService->delete($datastoreId, $storedDataId);
 
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }

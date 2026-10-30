@@ -6,9 +6,7 @@ use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
-use App\Exception\ApiException;
 use App\Exception\AppException;
-use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
@@ -21,6 +19,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
@@ -58,28 +57,24 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         $tablesNamesList = $dto->selected_tables ?? [];
 
-        try {
-            // ajout ou mise à jour des fichiers de styles SLD
-            $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files);
+        // ajout ou mise à jour des fichiers de styles SLD
+        $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files);
 
-            // création de requête pour la config
-            $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
-            $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos);
+        // création de requête pour la config
+        $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
+        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos);
 
-            $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody);
-            $configuration = $offering['configuration'];
+        $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody);
+        $configuration = $offering['configuration'];
 
-            // remplace nom temporaire des fichiers statiques
-            foreach ($styleFilesByTable as $tableName => $staticFileId) {
-                $this->staticApiService->modifyInfo($datastoreId, $staticFileId, [
-                    'name' => sprintf('config_%s_style_wmsv_%s', $configuration['_id'], $tableName),
-                ])->await();
-            }
-
-            return $this->json($offering);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        // remplace nom temporaire des fichiers statiques
+        foreach ($styleFilesByTable as $tableName => $staticFileId) {
+            $this->staticApiService->modifyInfo($datastoreId, $staticFileId, [
+                'name' => sprintf('config_%s_style_wmsv_%s', $configuration['_id'], $tableName),
+            ])->await();
         }
+
+        return $this->json($offering);
     }
 
     /**
@@ -97,27 +92,23 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         $tablesNamesList = $dto->selected_tables ?? [];
 
-        try {
-            // récup config et offering existants
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
-            $oldOffering['configuration'] = $oldConfiguration;
+        // récup config et offering existants
+        $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+        $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
+        $oldOffering['configuration'] = $oldConfiguration;
 
-            // ajout ou mise à jour des fichiers de styles SLD
-            $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $oldConfiguration);
+        // ajout ou mise à jour des fichiers de styles SLD
+        $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $oldConfiguration);
 
-            // création de requête pour la config
-            $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
-            $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos, $oldConfiguration);
+        // création de requête pour la config
+        $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
+        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos, $oldConfiguration);
 
-            $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody, $oldOffering);
+        $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody, $oldOffering);
 
-            $this->cleanUnusedStyleFiles($datastoreId, $oldConfiguration, $styleFilesByTable);
+        $this->cleanUnusedStyleFiles($datastoreId, $oldConfiguration, $styleFilesByTable);
 
-            return $this->json($offering);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($offering);
     }
 
     /**
@@ -176,7 +167,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 /** @var UploadedFile|null */
                 $file = $files["style_{$tableName}"] ?? null;
                 if (null === $file) {
-                    throw new AppException("Fichier de style manquant pour la table $tableName");
+                    throw new AppException("Fichier de style manquant pour la table $tableName", Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
                 $tmpFileDir = $directory.'/'.Uuid::v4();
 

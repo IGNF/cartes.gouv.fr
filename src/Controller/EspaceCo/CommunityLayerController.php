@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\CommunityLayerApiService;
 use App\Services\EspaceCoApi\DatabaseApiService;
 use App\Services\EspaceCoApi\LayerApiService;
@@ -39,13 +37,9 @@ class CommunityLayerController extends AbstractController implements ApiControll
         int $communityId,
         #[MapQueryParameter] ?array $fields = [],
     ): JsonResponse {
-        try {
-            $layers = $this->communityLayerApiService->getLayers($communityId, $fields)->resolve();
+        $layers = $this->communityLayerApiService->getLayers($communityId, $fields)->resolve();
 
-            return new JsonResponse($layers);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($layers);
     }
 
     /**
@@ -56,22 +50,18 @@ class CommunityLayerController extends AbstractController implements ApiControll
         int $communityId,
         #[MapQueryParameter] ?array $fields = [],
     ): JsonResponse {
-        try {
-            $layers = $this->communityLayerApiService->getLayers($communityId, $fields)->resolve();
+        $layers = $this->communityLayerApiService->getLayers($communityId, $fields)->resolve();
 
-            // On ne garde que les feature types
-            $ftLayers = array_values(array_filter($layers, fn ($layer) => (!is_null($layer['database']) && !is_null($layer['table']))));
-            foreach ($ftLayers as &$ftLayer) {
-                $this->_complete($ftLayer);
-            }
-
-            // Trier par database
-            $ftLayers = $this->_groupByDatabase($ftLayers);
-
-            return new JsonResponse($ftLayers);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        // On ne garde que les feature types
+        $ftLayers = array_values(array_filter($layers, fn ($layer) => (!is_null($layer['database']) && !is_null($layer['table']))));
+        foreach ($ftLayers as &$ftLayer) {
+            $this->_complete($ftLayer);
         }
+
+        // Trier par database
+        $ftLayers = $this->_groupByDatabase($ftLayers);
+
+        return new JsonResponse($ftLayers);
     }
 
     #[Route('/update', name: 'update', methods: ['PATCH'])]
@@ -79,16 +69,12 @@ class CommunityLayerController extends AbstractController implements ApiControll
         int $communityId,
         Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
-            foreach ($data['layer_tools'] as $layerId => $tools) {
-                $this->layerApiService->updateLayer($communityId, $layerId, $tools)->await();
-            }
-
-            return $this->getAll($communityId, $data['fields']);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        $data = json_decode($request->getContent(), true);
+        foreach ($data['layer_tools'] as $layerId => $tools) {
+            $this->layerApiService->updateLayer($communityId, $layerId, $tools)->await();
         }
+
+        return $this->getAll($communityId, $data['fields']);
     }
 
     /**

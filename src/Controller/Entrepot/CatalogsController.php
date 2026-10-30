@@ -3,8 +3,6 @@
 namespace App\Controller\Entrepot;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\CatalogsApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,28 +26,16 @@ class CatalogsController extends AbstractController implements ApiControllerInte
     #[Route('/communities', name: 'communities', methods: ['GET'])]
     public function communities(): JsonResponse
     {
-        try {
-            $response = $this->catalogsApiService->getAllCommunities()->resolve();
+        $response = $this->catalogsApiService->getAllCommunities()->resolve();
 
-            return $this->json($response);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->json($response);
     }
 
     #[Route('/organizations', name: 'organizations', methods: ['GET'])]
     public function organizations(): JsonResponse
     {
-        try {
-            $organizations = $this->catalogsApiService->getAllOrganizations()->resolve();
+        $organizations = $this->catalogsApiService->getAllOrganizations()->resolve();
 
-            return $this->json($organizations);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->json($organizations);
     }
 }

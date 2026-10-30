@@ -3,8 +3,7 @@
 namespace App\Controller\Entrepot;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
+use App\Exception\AppException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use OpenApi\Attributes as OA;
@@ -41,165 +40,149 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getDocumentList(string $datastoreId, string $datasheetName): JsonResponse
     {
-        try {
-            $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
+        $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
 
-            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
-            $documentsList = json_decode($docsListJson, true);
+        $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
+        $documentsList = json_decode($docsListJson, true);
 
-            return $this->json($documentsList);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($documentsList);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, string $datasheetName, Request $request): JsonResponse
     {
-        try {
-            $documentType = $request->request->get('type');
-            $documentName = $request->request->get('name');
-            $documentDescription = $request->request->get('description');
+        $documentType = $request->request->get('type');
+        $documentName = $request->request->get('name');
+        $documentDescription = $request->request->get('description');
 
-            $files = $request->files;
+        $files = $request->files;
 
-            /** @var array<mixed> $listAnnexe entité annexe de l'API entrepôt */
-            $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
+        /** @var array<mixed> $listAnnexe entité annexe de l'API entrepôt */
+        $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
 
-            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
-            $documentsList = json_decode($docsListJson, true);
+        $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
+        $documentsList = json_decode($docsListJson, true);
 
-            $newDocument = [
-                'type' => $documentType,
-                'name' => $documentName,
-            ];
+        $newDocument = [
+            'type' => $documentType,
+            'name' => $documentName,
+        ];
 
-            if (null !== $documentDescription) {
-                $newDocument['description'] = $documentDescription;
-            }
-
-            switch ($documentType) {
-                case 'link':
-                    $newDocument['id'] = Uuid::v4();
-                    $newDocument['url'] = $request->request->get('document');
-                    break;
-
-                case 'file':
-                    /** @var UploadedFile|null */
-                    $file = $files->get('document');
-                    $uuid = Uuid::v4();
-
-                    if (null !== $file) {
-                        $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
-                        $tempFilePath = implode(DIRECTORY_SEPARATOR, [$tempFileDir, $file->getClientOriginalName()]);
-
-                        $file->move($tempFileDir, $file->getClientOriginalName());
-                    } else {
-                        throw new CartesApiException('Fichier non fourni', Response::HTTP_BAD_REQUEST);
-                    }
-
-                    $annexePath = implode('/', ['documents', $datasheetName, $uuid, $file->getClientOriginalName()]);
-
-                    $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
-                    $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], ["datasheet_name=$datasheetName", 'type=document'], true);
-
-                    $newDocument['id'] = $fileAnnexe['_id'];
-                    $newDocument['url'] = $annexesBaseUrl.$fileAnnexe['paths'][0];
-
-                    break;
-            }
-
-            $documentsList[] = $newDocument;
-
-            $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
-
-            try {
-                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documentsList);
-            } catch (\Exception $ex) {
-            }
-
-            return $this->json($documentsList);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        if (null !== $documentDescription) {
+            $newDocument['description'] = $documentDescription;
         }
+
+        switch ($documentType) {
+            case 'link':
+                $newDocument['id'] = Uuid::v4();
+                $newDocument['url'] = $request->request->get('document');
+                break;
+
+            case 'file':
+                /** @var UploadedFile|null */
+                $file = $files->get('document');
+                $uuid = Uuid::v4();
+
+                if (null !== $file) {
+                    $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
+                    $tempFilePath = implode(DIRECTORY_SEPARATOR, [$tempFileDir, $file->getClientOriginalName()]);
+
+                    $file->move($tempFileDir, $file->getClientOriginalName());
+                } else {
+                    throw new AppException('Fichier non fourni', Response::HTTP_BAD_REQUEST);
+                }
+
+                $annexePath = implode('/', ['documents', $datasheetName, $uuid, $file->getClientOriginalName()]);
+
+                $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
+                $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], ["datasheet_name=$datasheetName", 'type=document'], true);
+
+                $newDocument['id'] = $fileAnnexe['_id'];
+                $newDocument['url'] = $annexesBaseUrl.$fileAnnexe['paths'][0];
+
+                break;
+        }
+
+        $documentsList[] = $newDocument;
+
+        $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
+
+        try {
+            $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documentsList);
+        } catch (\Exception) {
+        }
+
+        return $this->json($documentsList);
     }
 
     #[Route('/{documentId}', name: 'edit', methods: ['PATCH'])]
     public function edit(string $datastoreId, string $datasheetName, string $documentId, Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true);
 
-            $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
+        $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
 
-            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
-            $documentsList = json_decode($docsListJson, true);
+        $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
+        $documentsList = json_decode($docsListJson, true);
 
-            $documentsList = array_map(function ($document) use ($documentId, $data) {
-                if ($document['id'] === $documentId) {
-                    $document['name'] = $data['name'];
+        $documentsList = array_map(function ($document) use ($documentId, $data) {
+            if ($document['id'] === $documentId) {
+                $document['name'] = $data['name'];
 
-                    if (null !== $data['description'] && !empty($data['description'])) {
-                        $document['description'] = $data['description'];
-                    } elseif (!empty($document['description'])) {
-                        unset($document['description']);
-                    }
+                if (null !== $data['description'] && !empty($data['description'])) {
+                    $document['description'] = $data['description'];
+                } elseif (!empty($document['description'])) {
+                    unset($document['description']);
                 }
-
-                return $document;
-            }, $documentsList);
-            $documentsList = array_values($documentsList);
-
-            $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
-
-            try {
-                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documentsList);
-            } catch (\Exception $ex) {
             }
 
-            return $this->json($documentsList);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+            return $document;
+        }, $documentsList);
+        $documentsList = array_values($documentsList);
+
+        $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
+
+        try {
+            $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documentsList);
+        } catch (\Exception) {
         }
+
+        return $this->json($documentsList);
     }
 
     #[Route('/{documentId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $datastoreId, string $datasheetName, string $documentId): JsonResponse
     {
-        try {
-            $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
+        $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
 
-            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
-            $initialDocumentsList = json_decode($docsListJson, true);
+        $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
+        $initialDocumentsList = json_decode($docsListJson, true);
 
-            // document à supprimer
-            $document = null;
-            $tempDocumentsList = array_filter($initialDocumentsList, fn ($doc) => $doc['id'] === $documentId);
-            $tempDocumentsList = array_values($tempDocumentsList);
+        // document à supprimer
+        $document = null;
+        $tempDocumentsList = array_filter($initialDocumentsList, fn ($doc) => $doc['id'] === $documentId);
+        $tempDocumentsList = array_values($tempDocumentsList);
 
-            if (isset($tempDocumentsList[0])) {
-                $document = $tempDocumentsList[0];
-            }
-
-            $newDocumentsList = array_values(array_filter($initialDocumentsList, fn ($doc) => $doc['id'] !== $documentId));
-
-            if (null !== $document) {
-                if ('file' === $document['type']) {
-                    $this->annexeApiService->remove($datastoreId, $document['id'])->await();
-                }
-
-                $this->updateListAnnexe($datastoreId, $listAnnexe, $newDocumentsList);
-            }
-
-            try {
-                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $newDocumentsList);
-            } catch (\Exception $ex) {
-            }
-
-            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        if (isset($tempDocumentsList[0])) {
+            $document = $tempDocumentsList[0];
         }
+
+        $newDocumentsList = array_values(array_filter($initialDocumentsList, fn ($doc) => $doc['id'] !== $documentId));
+
+        if (null !== $document) {
+            if ('file' === $document['type']) {
+                $this->annexeApiService->remove($datastoreId, $document['id'])->await();
+            }
+
+            $this->updateListAnnexe($datastoreId, $listAnnexe, $newDocumentsList);
+        }
+
+        try {
+            $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $newDocumentsList);
+        } catch (\Exception) {
+        }
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
     /**

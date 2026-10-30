@@ -6,8 +6,6 @@ use App\Constants\EntrepotApi\PermissionTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Datastore\PermissionDTO;
 use App\Dto\Datastore\UpdatePermissionDTO;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\DatastoreApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,13 +32,9 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     #[Route('/{datastoreId}', name: 'get', methods: ['GET'])]
     public function getDatastore(string $datastoreId): JsonResponse
     {
-        try {
-            $datastore = $this->datastoreApiService->get($datastoreId);
+        $datastore = $this->datastoreApiService->get($datastoreId);
 
-            return $this->json($datastore);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($datastore);
     }
 
     #[Route('/{datastoreId}/endpoints', name: 'get_endpoints', methods: ['GET'])]
@@ -97,14 +91,10 @@ class DatastoreController extends AbstractController implements ApiControllerInt
         condition: 'request.isXmlHttpRequest()')]
     public function updatePermission(string $datastoreId, string $permissionId, #[MapRequestPayload] UpdatePermissionDTO $dto): JsonResponse
     {
-        try {
-            $body = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
-            $permission = $this->datastoreApiService->updatePermission($datastoreId, $permissionId, $body)->array();
+        $body = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
+        $permission = $this->datastoreApiService->updatePermission($datastoreId, $permissionId, $body)->array();
 
-            return $this->json($permission);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($permission);
     }
 
     #[Route('{datastoreId}/remove_permission/{permissionId}', name: 'remove_permission', methods: ['DELETE'],
@@ -112,40 +102,28 @@ class DatastoreController extends AbstractController implements ApiControllerInt
         condition: 'request.isXmlHttpRequest()')]
     public function removePermission(string $datastoreId, string $permissionId): JsonResponse
     {
-        try {
-            $this->datastoreApiService->removePermission($datastoreId, $permissionId)->await();
+        $this->datastoreApiService->removePermission($datastoreId, $permissionId)->await();
 
-            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
     #[Route('/{datastoreId}/permissions/{permissionId}/stats', name: 'get_permission_stats', methods: ['GET'])]
     public function getPermissionStats(string $datastoreId, string $permissionId, Request $request): JsonResponse
     {
-        try {
-            $query = $request->query->all();
+        $query = $request->query->all();
 
-            $stats = $this->datastoreApiService->getPermissionStats($datastoreId, $permissionId, $query)->resolve();
+        $stats = $this->datastoreApiService->getPermissionStats($datastoreId, $permissionId, $query)->resolve();
 
-            return $this->json($stats);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($stats);
     }
 
     #[Route('/{datastoreId}/endpoints/{endpointId}/stats', name: 'get_endpoint_stats', methods: ['GET'])]
     public function getEndpointStats(string $datastoreId, string $endpointId, Request $request): JsonResponse
     {
-        try {
-            $query = $request->query->all();
+        $query = $request->query->all();
 
-            $stats = $this->datastoreApiService->getEndpointStats($datastoreId, $endpointId, $query)->resolve();
+        $stats = $this->datastoreApiService->getEndpointStats($datastoreId, $endpointId, $query)->resolve();
 
-            return $this->json($stats);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($stats);
     }
 }

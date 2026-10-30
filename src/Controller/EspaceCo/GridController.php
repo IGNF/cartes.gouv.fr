@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\GridApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,13 +35,9 @@ class GridController extends AbstractController implements ApiControllerInterfac
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] int $limit = self::SEARCH_LIMIT,
     ): JsonResponse {
-        try {
-            $response = $this->gridApiService->getAll($text, $searchBy, $fields, $adm, $page, $limit);
+        $response = $this->gridApiService->getAll($text, $searchBy, $fields, $adm, $page, $limit);
 
-            return new JsonResponse($response);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($response);
     }
 
     /**
@@ -52,12 +46,8 @@ class GridController extends AbstractController implements ApiControllerInterfac
     #[Route('/{name}', name: 'get', methods: ['GET'])]
     public function get(string $name, #[MapQueryParameter] ?array $fields = []): JsonResponse
     {
-        try {
-            $response = $this->gridApiService->get($name, $fields ?? [])->array();
+        $response = $this->gridApiService->get($name, $fields ?? [])->array();
 
-            return new JsonResponse($response);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($response);
     }
 }

@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\ReplyApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,42 +27,30 @@ class ReplyController extends AbstractController implements ApiControllerInterfa
     #[Route('', name: 'add', methods: ['POST'])]
     public function add(string $reportId, Request $request): JsonResponse
     {
-        try {
-            $body = json_decode($request->getContent(), true);
+        $body = json_decode($request->getContent(), true);
 
-            $report = $this->replyApiService->add($reportId, $body)->array();
+        $report = $this->replyApiService->add($reportId, $body)->array();
 
-            return $this->json($report);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($report);
     }
 
     #[Route('/{replyId}', name: 'replace', methods: ['PUT'])]
     public function replace(string $reportId, string $replyId, Request $request): JsonResponse
     {
-        try {
-            $body = json_decode($request->getContent(), true);
+        $body = json_decode($request->getContent(), true);
 
-            $report = $this->replyApiService->replace($reportId, $replyId, $body)->array();
+        $report = $this->replyApiService->replace($reportId, $replyId, $body)->array();
 
-            return $this->json($report);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($report);
     }
 
     #[Route('/{replyId}', name: 'modify', methods: ['PATCH'])]
     public function modify(string $reportId, string $replyId, Request $request): JsonResponse
     {
-        try {
-            $body = json_decode($request->getContent(), true);
+        $body = json_decode($request->getContent(), true);
 
-            $report = $this->replyApiService->modify($reportId, $replyId, $body)->array();
+        $report = $this->replyApiService->modify($reportId, $replyId, $body)->array();
 
-            return $this->json($report);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($report);
     }
 }

@@ -6,8 +6,7 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
+use App\Exception\AppException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\CartesStoredDataApiService;
@@ -145,7 +144,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             ])->resolve();
 
             if (0 === count($metadataList)) {
-                throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
+                throw new AppException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
             }
         }
 
@@ -255,60 +254,56 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('/{datasheetName}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $datastoreId, string $datasheetName): Response
     {
-        try {
-            $datasheetTags = ['tags' => [CommonTags::DATASHEET_NAME => $datasheetName]];
-            $pendingUploadList = $this->uploadApiService->getAll($datastoreId, [...$datasheetTags, 'fields' => 'status,tags']);
-            $pendingStoredDataList = $this->storedDataApiService->getAll($datastoreId, [...$datasheetTags, 'fields' => 'type']);
-            $pendingMetadataList = $this->metadataApiService->getAll($datastoreId, $datasheetTags);
+        $datasheetTags = ['tags' => [CommonTags::DATASHEET_NAME => $datasheetName]];
+        $pendingUploadList = $this->uploadApiService->getAll($datastoreId, [...$datasheetTags, 'fields' => 'status,tags']);
+        $pendingStoredDataList = $this->storedDataApiService->getAll($datastoreId, [...$datasheetTags, 'fields' => 'type']);
+        $pendingMetadataList = $this->metadataApiService->getAll($datastoreId, $datasheetTags);
 
-            $uploadList = $pendingUploadList->resolve();
-            $storedDataList = $pendingStoredDataList->resolve();
-            $metadataList = $pendingMetadataList->resolve();
+        $uploadList = $pendingUploadList->resolve();
+        $storedDataList = $pendingStoredDataList->resolve();
+        $metadataList = $pendingMetadataList->resolve();
 
-            if (0 === count($uploadList) && 0 === count($storedDataList) && 0 === count($metadataList)) {
-                throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
-            }
-
-            // suppr des services (config et offering)
-            foreach ($this->getOfferingsOfStoredData($datastoreId, $storedDataList) as $offering) {
-                $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id'], $offering);
-            }
-
-            // suppr des uploads
-            foreach ($uploadList as $upload) {
-                $this->uploadApiService->remove($datastoreId, $upload['_id'], $upload)->await();
-            }
-
-            // suppr des stored_data (bases vecteur et pyramides)
-            $deletableTypes = [StoredDataTypes::VECTOR_DB, StoredDataTypes::ROK4_PYRAMID_VECTOR, StoredDataTypes::ROK4_PYRAMID_RASTER];
-            foreach ($storedDataList as $storedData) {
-                if (in_array($storedData['type'], $deletableTypes, true)) {
-                    $this->cartesStoredDataApiService->delete($datastoreId, $storedData['_id']);
-                }
-            }
-
-            // suppr des métadonnées
-            if (count($metadataList) > 0) {
-                $metadata = $metadataList[0];
-
-                foreach ($metadata['endpoints'] as $metadataEndpoint) {
-                    $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $metadataEndpoint['_id'])->await();
-                }
-
-                $this->metadataApiService->delete($datastoreId, $metadata['_id'])->await();
-            }
-
-            // TODO : autres données à supprimer
-            // Suppression des annexes : vignette, documents associés à la fiche de données etc
-            // listées après la dépublication des services, qui supprime déjà les annexes de style et de capabilities
-            $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"])->resolve();
-            foreach ($annexes as $annexe) {
-                $this->annexeApiService->remove($datastoreId, $annexe['_id'])->await();
-            }
-
-            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        if (0 === count($uploadList) && 0 === count($storedDataList) && 0 === count($metadataList)) {
+            throw new AppException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
         }
+
+        // suppr des services (config et offering)
+        foreach ($this->getOfferingsOfStoredData($datastoreId, $storedDataList) as $offering) {
+            $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id'], $offering);
+        }
+
+        // suppr des uploads
+        foreach ($uploadList as $upload) {
+            $this->uploadApiService->remove($datastoreId, $upload['_id'], $upload)->await();
+        }
+
+        // suppr des stored_data (bases vecteur et pyramides)
+        $deletableTypes = [StoredDataTypes::VECTOR_DB, StoredDataTypes::ROK4_PYRAMID_VECTOR, StoredDataTypes::ROK4_PYRAMID_RASTER];
+        foreach ($storedDataList as $storedData) {
+            if (in_array($storedData['type'], $deletableTypes, true)) {
+                $this->cartesStoredDataApiService->delete($datastoreId, $storedData['_id']);
+            }
+        }
+
+        // suppr des métadonnées
+        if (count($metadataList) > 0) {
+            $metadata = $metadataList[0];
+
+            foreach ($metadata['endpoints'] as $metadataEndpoint) {
+                $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $metadataEndpoint['_id'])->await();
+            }
+
+            $this->metadataApiService->delete($datastoreId, $metadata['_id'])->await();
+        }
+
+        // TODO : autres données à supprimer
+        // Suppression des annexes : vignette, documents associés à la fiche de données etc
+        // listées après la dépublication des services, qui supprime déjà les annexes de style et de capabilities
+        $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"])->resolve();
+        foreach ($annexes as $annexe) {
+            $this->annexeApiService->remove($datastoreId, $annexe['_id'])->await();
+        }
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

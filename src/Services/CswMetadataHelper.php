@@ -12,6 +12,7 @@ use App\Entity\CswMetadata\CswStyleFile;
 use App\Exception\AppException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Twig\Environment as Twig;
@@ -67,7 +68,7 @@ class CswMetadataHelper
         try {
             $loaded = $doc->loadXML($metadataXml);
         } catch (\Throwable) {
-            throw new AppException('Load XML failed');
+            throw new AppException('Load XML failed', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $xpath = new \DOMXPath($doc);
@@ -75,7 +76,7 @@ class CswMetadataHelper
         $xpath->registerNamespace('gco', 'http://www.isotc211.org/2005/gco');
 
         if (!$loaded) {
-            throw new AppException('Load XML failed');
+            throw new AppException('Load XML failed', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $cswMetadata = new CswMetadata();
@@ -155,7 +156,7 @@ class CswMetadataHelper
         $languageCode = $this->xpathText($xpath, '/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue');
         $languageName = $this->xpathText($xpath, '/gmd:MD_Metadata/gmd:language/gmd:LanguageCode');
         if (null === $languageCode || null === $languageName) {
-            throw new AppException('Métadonnée invalide : langue (gmd:language) absente');
+            throw new AppException('Métadonnée invalide : langue (gmd:language) absente', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         $cswMetadata->language = new CswLanguage($languageCode, $languageName);
 
@@ -209,7 +210,7 @@ class CswMetadataHelper
     {
         $value = $bbox->getElementsByTagName($tagName)->item(0)?->getElementsByTagName('Decimal')->item(0)?->textContent;
         if (null === $value) {
-            throw new AppException("Métadonnée invalide : coordonnée $tagName absente de l’emprise");
+            throw new AppException("Métadonnée invalide : coordonnée $tagName absente de l’emprise", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return floatval($value);

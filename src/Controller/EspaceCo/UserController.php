@@ -3,8 +3,6 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
-use App\Exception\ApiException;
-use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\UserApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,37 +27,25 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/me', name: 'me', methods: ['GET'])]
     public function getMe(): JsonResponse
     {
-        try {
-            $me = $this->userApiService->getMe()->array();
+        $me = $this->userApiService->getMe()->array();
 
-            return $this->json($me);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($me);
     }
 
     #[Route('/search', name: 'search', methods: ['GET'])]
     public function search(
         #[MapQueryParameter] string $search,
     ): JsonResponse {
-        try {
-            $users = $this->userApiService->search($search)->array();
+        $users = $this->userApiService->search($search)->array();
 
-            return new JsonResponse($users);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return new JsonResponse($users);
     }
 
     #[Route('/me/shared_themes', name: 'shared_themes', methods: ['GET'])]
     public function getSharedThemes(): JsonResponse
     {
-        try {
-            $me = $this->userApiService->getSharedThemes();
+        $me = $this->userApiService->getSharedThemes();
 
-            return $this->json($me);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
+        return $this->json($me);
     }
 }
