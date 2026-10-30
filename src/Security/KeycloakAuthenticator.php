@@ -65,10 +65,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
      */
     public function authenticate(Request $request): Passport
     {
-        $stateBlob = $request->query->get('state', '');
-        if (!is_string($stateBlob)) {
-            throw new AuthenticationException('Paramètre state OAuth2 invalide ou expiré.');
-        }
+        $stateBlob = $request->query->getString('state');
         $statePayload = $this->loginStateSerializer->decode($stateBlob);
         if (null === $statePayload) {
             throw new AuthenticationException('Paramètre state OAuth2 invalide ou expiré.');

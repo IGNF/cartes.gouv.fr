@@ -104,7 +104,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
                 $relation['public_name'] = $table->public_name;
             }
 
-            if ($table->keywords && 0 !== count($table->keywords)) {
+            if ($table->keywords) {
                 $relation['keywords'] = $table->keywords;
             }
             $relations[] = $relation;

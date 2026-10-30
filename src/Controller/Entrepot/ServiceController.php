@@ -163,7 +163,8 @@ class ServiceController extends AbstractController implements ApiControllerInter
      */
     protected function getPyramidZoomLevels(array $pyramid): array
     {
-        if (!isset($pyramid['type_infos']) || !isset($pyramid['type_infos']['levels'])) {
+        // niveaux absents ou vides : niveaux par défaut
+        if (empty($pyramid['type_infos']['levels'])) {
             return ['bottom_level' => strval(ZoomLevels::BOTTOM_LEVEL_DEFAULT), 'top_level' => strval(ZoomLevels::TOP_LEVEL_DEFAULT)];
         }
 

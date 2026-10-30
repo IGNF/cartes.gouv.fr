@@ -26,7 +26,7 @@ class SandboxService
         private readonly LoggerInterface $logger,
     ) {
         // id vide dans la config par défaut : bac à sable non configuré
-        $this->sandboxCommunityId = ($this->parameterBag->get('sandbox')['community_id'] ?? null) ?: null;
+        $this->sandboxCommunityId = $this->parameterBag->get('sandbox')['community_id'] ?: null;
     }
 
     public function getProcIntegrateVectorFilesInBase(string $datastoreId): string

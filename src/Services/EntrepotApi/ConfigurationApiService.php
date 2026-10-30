@@ -23,9 +23,9 @@ final readonly class ConfigurationApiService
     /**
      * @param array<mixed> $query
      */
-    public function getAll(string $datastoreId, $query = []): PaginatedPromise
+    public function getAll(string $datastoreId, array $query = []): PaginatedPromise
     {
-        $query = Utils::normalize_query($query ?? []);
+        $query = Utils::normalize_query($query);
 
         return $this->api->requestAll("datastores/$datastoreId/configurations", $query);
     }

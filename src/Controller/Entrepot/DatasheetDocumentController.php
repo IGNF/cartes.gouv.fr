@@ -85,7 +85,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
                     break;
 
                 case 'file':
-                    /** @var UploadedFile */
+                    /** @var UploadedFile|null */
                     $file = $files->get('document');
                     $uuid = Uuid::v4();
 

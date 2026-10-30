@@ -76,11 +76,8 @@ final readonly class ZipFormatHandler implements UploadFormatHandlerInterface
             return '';
         }
 
-        if ('shapefile' === $family) {
-            return $this->validateShapefileFromArchive($upload, $fileInfo, $baseValidExtensions);
-        }
-
-        throw new FileUploaderException(sprintf('Format ZIP non supporté: %s', $family), Response::HTTP_BAD_REQUEST);
+        // dernière famille possible (voir SupportedUploadFormatsCatalog::FAMILY_*)
+        return $this->validateShapefileFromArchive($upload, $fileInfo, $baseValidExtensions);
     }
 
     /**
@@ -223,13 +220,13 @@ final readonly class ZipFormatHandler implements UploadFormatHandlerInterface
                 $entryNames[] = $entryName;
             }
 
-            $size = $stats['size'] ?? 0;
+            $size = $stats['size'];
             if ($size > self::MAX_ENTRY_SIZE_BYTES) {
                 $zip->close();
                 throw new FileUploaderException(sprintf('La taille du fichier %s excède %s GB', $entryName, self::MAX_ENTRY_SIZE_BYTES / 1000000000), Response::HTTP_BAD_REQUEST);
             }
 
-            $compSize = $stats['comp_size'] ?? 0;
+            $compSize = $stats['comp_size'];
             if ($compSize) {
                 $factor = $size / $compSize;
                 if ($factor > $maxExpansionFactor) {

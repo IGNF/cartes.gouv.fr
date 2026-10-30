@@ -11,7 +11,7 @@ parameters:
     paths:
         - src
         - tests
-    treatPhpDocTypesAsCertain: false
+    treatPhpDocTypesAsCertain: true
     symfony:
         # conteneur compilé en dev, construit par check-rules (lint:twig, lint:container) avant PHPStan
         containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
