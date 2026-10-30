@@ -98,7 +98,7 @@ final class ChunkStorage
         }
 
         $size = $chunk->getSize();
-        if (false === $size || null === $size) {
+        if (false === $size) {
             throw new FileUploaderException('Impossible de déterminer la taille du chunk', Response::HTTP_BAD_REQUEST);
         }
 
