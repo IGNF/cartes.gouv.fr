@@ -5,7 +5,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
@@ -114,6 +114,9 @@ export type WmsVectorServiceFormValuesType = ServiceFormValuesBaseType & {
     selected_tables?: string[];
     style_files?: Record<string, string>;
 };
+
+// format SLD imposé : aucun changement à enregistrer
+const keepStyleFormats = () => {};
 
 type WmsVectorServiceFormProps = {
     datastoreId: string;
@@ -281,17 +284,11 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         compute: (value) => value?.sort(),
     });
 
-    const [styleFormats, setStyleFormats] = useState<Record<string, StyleFormatEnum>>({});
-    useEffect(() => {
-        // toujours SLD pour WMS Vector
-        if (selectedTableNamesList) {
-            const formats: Record<string, StyleFormatEnum> = {};
-            selectedTableNamesList.forEach((tableName) => {
-                formats[tableName] = StyleFormatEnum.SLD;
-            });
-            setStyleFormats(formats);
-        }
-    }, [selectedTableNamesList]);
+    // toujours SLD pour WMS Vector
+    const styleFormats = useMemo(
+        () => Object.fromEntries((selectedTableNamesList ?? []).map((tableName) => [tableName, StyleFormatEnum.SLD])),
+        [selectedTableNamesList]
+    );
 
     useScrollToTopEffect(currentStep);
 
@@ -371,7 +368,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                             serviceType={OfferingTypeEnum.WMSVECTOR}
                             isMapbox={false}
                             styleFormats={styleFormats}
-                            setStyleFormats={setStyleFormats}
+                            setStyleFormats={keepStyleFormats}
                         >
                             <FormProvider {...form}>
                                 <StyleLoader tableNames={selectedTableNamesList ?? []} form={form} />

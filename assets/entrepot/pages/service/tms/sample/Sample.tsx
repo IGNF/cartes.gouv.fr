@@ -27,19 +27,15 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
 
     const { setValue: setFormValue, getValues: getFormValues, register } = form;
 
-    const [sample, setSample] = useState<SampleType>({
-        is_sample: "false",
-        center: olDefaults.center,
-        area: undefined,
-        email_notification: true,
-    });
-
-    useEffect(() => {
-        const sample = getFormValues("sample") as SampleType | undefined;
-        if (sample) {
-            setSample(sample);
-        }
-    }, [getFormValues]);
+    const [sample, setSample] = useState<SampleType>(
+        () =>
+            (getFormValues("sample") as SampleType | undefined) ?? {
+                is_sample: "false",
+                center: olDefaults.center,
+                area: undefined,
+                email_notification: true,
+            }
+    );
 
     useEffect(() => {
         setFormValue("sample", sample);

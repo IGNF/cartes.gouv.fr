@@ -1,13 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
-import { FC, useEffect, useState } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { FC, useCallback, useEffect } from "react";
+import { UseFormReturn, useWatch } from "react-hook-form";
 
 import { StoredDataRelation } from "../../../../../@types/app";
 import ZoomRange from "../../../../../components/Utils/ZoomRange";
 import olDefaults from "../../../../../data/ol-defaults.json";
 import { useTranslation } from "../../../../../i18n";
 import { PyramidVectorGenerateFormValuesType } from "../PyramidVectorGenerateForm/PyramidVectorGenerateForm";
+
+const DEFAULT_ZOOM_LEVELS = [olDefaults.zoom_levels.TOP, olDefaults.zoom_levels.BOTTOM];
 
 type TableZoomLevelsProps = {
     visible: boolean;
@@ -18,37 +20,34 @@ type TableZoomLevelsProps = {
 const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTables }) => {
     const { t } = useTranslation("PyramidVectorGenerateForm");
 
-    const [tableZoomLevels, setTableZoomLevels] = useState<Record<string, number[]>>({});
+    const { control, setValue: setFormValue, getValues: getFormValues } = form;
+    const tableZoomLevels = useWatch({ control, name: "table_zoom_levels" }) ?? {};
 
-    const { setValue: setFormValue, getValues: getFormValues } = form;
+    const saveZoomLevels = useCallback(
+        (zoomLevels: Record<string, number[]>) => {
+            let bottomLevel = -1;
+            Object.values(zoomLevels).forEach((levels) => {
+                if (levels[1] > bottomLevel) bottomLevel = levels[1];
+            });
 
+            setFormValue("table_zoom_levels", zoomLevels);
+            setFormValue("bottom_zoom_level", bottomLevel === -1 ? olDefaults.zoom_levels.BOTTOM : bottomLevel);
+        },
+        [setFormValue]
+    );
+
+    // ne garder que les tables sélectionnées, avec les niveaux par défaut pour les nouvelles
     useEffect(() => {
         const prevTableZoomLevels = getFormValues("table_zoom_levels") ?? {};
-        const tableZoomLevels: Record<string, number[]> = {};
+        const zoomLevels: Record<string, number[]> = {};
         selectedTables.forEach((table) => {
-            tableZoomLevels[table.name] = prevTableZoomLevels[table.name] ?? [olDefaults.zoom_levels.TOP, olDefaults.zoom_levels.BOTTOM];
+            zoomLevels[table.name] = prevTableZoomLevels[table.name] ?? DEFAULT_ZOOM_LEVELS;
         });
-        setTableZoomLevels(tableZoomLevels);
-    }, [getFormValues, setFormValue, selectedTables]);
-
-    useEffect(() => {
-        const getBottomLevel = () => {
-            let level = -1;
-            Object.values(tableZoomLevels).forEach((levels) => {
-                if (levels[1] > level) level = levels[1];
-            });
-            return level === -1 ? olDefaults.zoom_levels.BOTTOM : level;
-        };
-
-        setFormValue("table_zoom_levels", tableZoomLevels);
-        setFormValue("bottom_zoom_level", getBottomLevel());
-    }, [tableZoomLevels, setFormValue]);
+        saveZoomLevels(zoomLevels);
+    }, [getFormValues, saveZoomLevels, selectedTables]);
 
     const onZoomChanged = (tableName: string, values: number[]) => {
-        const v: Record<string, number[]> = {};
-        v[tableName] = values;
-        const zoomLevels = { ...tableZoomLevels, ...v };
-        setTableZoomLevels(zoomLevels);
+        saveZoomLevels({ ...tableZoomLevels, [tableName]: values });
     };
 
     return (
@@ -62,7 +61,7 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
                         <ZoomRange
                             min={olDefaults.zoom_levels.TOP}
                             max={olDefaults.zoom_levels.BOTTOM}
-                            values={tableZoomLevels[table.name]}
+                            values={tableZoomLevels[table.name] ?? DEFAULT_ZOOM_LEVELS}
                             onChange={(values) => onZoomChanged(table.name, values)}
                         />
                     </Accordion>

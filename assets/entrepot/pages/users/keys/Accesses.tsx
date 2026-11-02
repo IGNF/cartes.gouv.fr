@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { CSSProperties, FC, useCallback, useEffect, useMemo, useState } from "react";
+import { CSSProperties, FC, useCallback, useMemo } from "react";
 import { AccessCreateDto, PermissionOfferingResponseDto, PermissionWithOfferingsDetailsResponseDto } from "../../../../@types/entrepot";
 import "../../../../sass/pages/my_keys.scss";
 import { getNewAccesses } from "./utils/AccessesManager";
@@ -25,20 +25,14 @@ const style: CSSProperties = {
 const Accesses: FC<AccessesProps> = (props) => {
     const { value = [], permissions, label, hintText, state, stateRelatedMessage, onChange } = props;
 
-    const [internal, setInternal] = useState<AccessCreateDto[]>([]);
-
-    useEffect(() => {
-        setInternal(value);
-    }, [value]);
-
     const exists = useCallback(
         (permission: string, offering: string) => {
-            const f = internal.find((v) => {
+            const f = value.find((v) => {
                 return v.permission === permission && v.offerings.includes(offering);
             });
             return f !== undefined;
         },
-        [internal]
+        [value]
     );
 
     /* Changement d'etat d'une checkbox */
@@ -46,10 +40,10 @@ const Accesses: FC<AccessesProps> = (props) => {
         (event: React.ChangeEvent<HTMLInputElement>, permissionId: string, offeringId: string) => {
             const checked = event.currentTarget.checked;
 
-            const newAccesses = getNewAccesses(internal, permissionId, offeringId, checked);
+            const newAccesses = getNewAccesses(value, permissionId, offeringId, checked);
             onChange(newAccesses);
         },
-        [internal, onChange]
+        [value, onChange]
     );
 
     /* Calcul des options */

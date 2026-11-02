@@ -3,7 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 
 import useMembership from "@/hooks/useMembership";
 import { useTranslation } from "@/i18n";
@@ -20,12 +20,13 @@ import ReportTab from "./ReportTab/ReportTab";
 import { useDatastore } from "../../../contexts/datastore";
 import Main from "../../../components/Layout/Main";
 
+const FINAL_STATUSES: (StoredDataStatusEnum | undefined)[] = [StoredDataStatusEnum.DELETED, StoredDataStatusEnum.GENERATED, StoredDataStatusEnum.UNSTABLE];
+
 type StoredDataDetailsProps = {
     datastoreId: string;
     storedDataId: string;
 };
 const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedDataId }) => {
-    const [reportQueryEnabled, setReportQueryEnabled] = useState(true);
     const { datastore } = useDatastore();
     const { t: tCommon } = useTranslation("Common");
     // le libellé « Espace Découverte » vient de l’appartenance, le DTO ne porte plus is_sandbox
@@ -36,17 +37,9 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
         queryFn: ({ signal }) => api.storedData.getReportData(datastoreId, storedDataId, { signal }),
         refetchInterval: 30000,
-        enabled: reportQueryEnabled,
+        // statut final : plus besoin de recharger le rapport
+        enabled: (query) => !FINAL_STATUSES.includes(query.state.data?.stored_data.status),
     });
-
-    useEffect(() => {
-        if (
-            reportQuery.data?.stored_data.status !== undefined &&
-            [StoredDataStatusEnum.DELETED, StoredDataStatusEnum.GENERATED, StoredDataStatusEnum.UNSTABLE].includes(reportQuery.data?.stored_data.status)
-        ) {
-            setReportQueryEnabled(false);
-        }
-    }, [reportQuery.data?.stored_data.status]);
 
     const datasheetName = useMemo(() => reportQuery?.data?.stored_data?.tags?.datasheet_name, [reportQuery?.data?.stored_data?.tags?.datasheet_name]);
 
