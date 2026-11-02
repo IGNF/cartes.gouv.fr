@@ -9,7 +9,7 @@ import Table from "@codegouvfr/react-dsfr/Table";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
-import { FC, FormEvent, useState } from "react";
+import { FC, SubmitEvent, useState } from "react";
 import { useDebouncedCallback } from "@mantine/hooks";
 
 import { DocumentDetailsResponseDto } from "@/@types/entrepot";
@@ -53,7 +53,7 @@ const MyDocuments: FC = () => {
         },
     });
 
-    const handleAddDocument = (e: FormEvent<HTMLFormElement>) => {
+    const handleAddDocument = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
 
@@ -72,7 +72,7 @@ const MyDocuments: FC = () => {
         },
     });
 
-    const handleReplaceDocument = (e: FormEvent<HTMLFormElement>) => {
+    const handleReplaceDocument = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
 
@@ -91,7 +91,7 @@ const MyDocuments: FC = () => {
         },
     });
 
-    const handleModifyDocument = (e: FormEvent<HTMLFormElement>) => {
+    const handleModifyDocument = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         console.log(e.currentTarget);

@@ -35,10 +35,9 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
             let datastore: Datastore | undefined;
             if (community.datastore !== undefined && community.datastore._id) {
                 const datastoreId = community.datastore._id;
-                datastore = await queryClient.ensureQueryData({
+                datastore = await queryClient.query({
                     queryKey: RQKeys.datastore(datastoreId),
                     queryFn: () => api.datastore.get(datastoreId, { signal }),
-                    revalidateIfStale: true,
                 });
             }
             return [community, datastore];

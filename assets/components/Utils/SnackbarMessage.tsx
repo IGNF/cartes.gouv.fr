@@ -31,7 +31,7 @@ const SnackbarMessage: FC = () => {
     }
 
     return (
-        <Snackbar key={message?.id ?? "empty"} autoHideDuration={6000} open={open} TransitionComponent={SlideTransition} onClose={handleClose}>
+        <Snackbar key={message?.id ?? "empty"} autoHideDuration={6000} open={open} slots={{ transition: SlideTransition }} onClose={handleClose}>
             {message ? (
                 <Alert
                     closable
