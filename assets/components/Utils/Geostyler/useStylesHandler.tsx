@@ -57,7 +57,7 @@ export default function useStylesHandler(props: UseStylesHandlerProps): UseStyle
             }
         };
 
-        init();
+        void init();
     }, [initialStrStyle, strStyle, format, parser]);
 
     // mettre à jour strStyle quand gsStyle change

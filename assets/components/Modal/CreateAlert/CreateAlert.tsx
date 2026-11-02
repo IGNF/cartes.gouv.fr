@@ -89,7 +89,7 @@ const CreateAlert: FC<CreateAlertProps> = (props) => {
                 {
                     doClosesModal: false,
                     children: isEdit ? t("modal.edit") : t("modal.add"),
-                    onClick: addAlert,
+                    onClick: (e) => void addAlert(e),
                 },
             ]}
             concealingBackdrop={false}

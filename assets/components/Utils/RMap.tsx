@@ -103,7 +103,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
      */
     const addLayer = (layer: Layer): void => {
         if (currentStyle) {
-            StyleHelper.applyStyle(layer, currentStyle);
+            void StyleHelper.applyStyle(layer, currentStyle);
         }
         // Ajout du layer dans la carte et dans le LayerSwitcher
         mapRef.current?.addLayer(layer);
@@ -201,7 +201,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
 
     useEffect(() => {
         const layers = mapRef.current?.getLayers().getArray() ?? [];
-        getWorkingLayers(layers).forEach((layer) => StyleHelper.applyStyle(layer, currentStyle));
+        getWorkingLayers(layers).forEach((layer) => void StyleHelper.applyStyle(layer, currentStyle));
     }, [currentStyle]);
 
     return <div className={"map-view"} ref={mapTargetRef} />;

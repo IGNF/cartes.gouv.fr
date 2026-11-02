@@ -13,7 +13,7 @@ startReactDsfr({ defaultColorScheme: "light" });
 
 const head = createHead();
 
-analyticsInit();
+void analyticsInit();
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
