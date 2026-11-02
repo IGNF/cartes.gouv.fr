@@ -39,6 +39,7 @@ describe("analyticsInit", () => {
             ["setDoNotTrack", true],
             ["enableLinkTracking"],
         ]);
+        // oxlint-disable-next-line typescript/no-unsafe-assignment -- expect.objectContaining renvoie any par conception (vitest)
         expect(eulerianStart).toHaveBeenCalledWith(expect.objectContaining({ site: expect.objectContaining({ environment: "production" }) }));
         expect(store.has("@codegouvfr/react-dsfr finalityConsent eulerianAnalytics")).toBe(false);
     });

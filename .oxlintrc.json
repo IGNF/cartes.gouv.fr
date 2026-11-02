@@ -61,6 +61,11 @@
         "typescript/prefer-find": "error",
         "typescript/prefer-return-this-type": "error",
         "typescript/related-getter-setter-pairs": "error",
+        "typescript/no-unsafe-argument": "error",
+        "typescript/no-unsafe-assignment": "error",
+        "typescript/no-unsafe-call": "error",
+        "typescript/no-unsafe-member-access": "error",
+        "typescript/no-unsafe-return": "error",
 
         // Règles correctness avec options ou sévérité différente
         "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
