@@ -68,7 +68,7 @@ const EditReportStatusDialog: FC<EditReportStatusDialogProps> = ({ status, statu
                 {
                     doClosesModal: false,
                     children: tCommon("save"),
-                    onClick: handleSubmit(onSubmit),
+                    onClick: (e) => void handleSubmit(onSubmit)(e),
                     priority: "primary",
                 },
             ]}

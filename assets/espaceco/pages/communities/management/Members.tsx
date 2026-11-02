@@ -146,7 +146,7 @@ const Members: FC = () => {
             return api.community.addMembers(communityId, members);
         },
         onSuccess() {
-            queryClient.refetchQueries({ queryKey: RQKeys.communityMembers(community.id) });
+            void queryClient.refetchQueries({ queryKey: RQKeys.communityMembers(community.id) });
         },
     });
 

@@ -39,7 +39,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
 
     const copyToClipboard = useCallback(
         (uri: string) => {
-            navigator.clipboard.writeText(uri);
+            void navigator.clipboard.writeText(uri);
             setMessage(tCommon("url_copied"));
         },
         [tCommon, setMessage]

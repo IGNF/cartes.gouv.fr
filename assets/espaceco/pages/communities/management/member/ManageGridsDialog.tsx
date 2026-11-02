@@ -88,7 +88,7 @@ const ManageGridsDialog: FC<ManageGridsDialogProps> = ({ communityGrids, userGri
                             priority: "primary",
                             children: t("add_grids"),
                             doClosesModal: false,
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                         },
                     ]}
                 >

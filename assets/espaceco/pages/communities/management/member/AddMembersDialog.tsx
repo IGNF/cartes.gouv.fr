@@ -72,7 +72,7 @@ const AddMembersDialog: FC<AddMembersDialogProps> = ({ onAdd }) => {
                             priority: "primary",
                             children: t("invite"),
                             doClosesModal: false,
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                         },
                     ]}
                 >

@@ -94,7 +94,7 @@ const SetSharedThemesDialog: FC<SetSharedThemesDialogProps> = ({ userSharedTheme
                 {
                     children: tCommon("apply"),
                     doClosesModal: false,
-                    onClick: handleSubmit(onSubmit),
+                    onClick: (e) => void handleSubmit(onSubmit)(e),
                     priority: "primary",
                 },
             ]}

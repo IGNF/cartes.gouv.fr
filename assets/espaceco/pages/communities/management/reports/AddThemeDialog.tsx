@@ -135,7 +135,7 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
                             priority: "primary",
                             children: tCommon("add"),
                             doClosesModal: false,
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                         },
                     ]}
                 >
