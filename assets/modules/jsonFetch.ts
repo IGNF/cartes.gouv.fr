@@ -54,7 +54,7 @@ export async function apiFetch(
     }
 
     // corps non-JSON (page d'erreur proxy...) : erreur normalisée à partir du status HTTP
-    const data: Partial<ApiError> | null = await response.json().catch(() => null);
+    const data = (await response.json().catch(() => null)) as Partial<ApiError> | null;
 
     if (response.status === 401 && data?.type === ApiErrorType.SESSION_EXPIRED) {
         useAuthStore.getState().setSessionExpired(true);
@@ -76,5 +76,5 @@ export async function jsonFetch<T>(
     isXMLHttpRequest: boolean = true
 ): Promise<T> {
     const response = await apiFetch(url, config, body, isFileUpload, isXMLHttpRequest);
-    return response.json().catch(() => ({}));
+    return response.json().catch(() => ({})) as Promise<T>;
 }

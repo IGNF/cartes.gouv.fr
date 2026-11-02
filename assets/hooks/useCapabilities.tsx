@@ -13,7 +13,7 @@ const useCapabilities = (key: string = "cartes") => {
             const text = await response.text();
 
             const format = new WMTSCapabilities();
-            const capabilities = format.read(text);
+            const capabilities = format.read(text) as Capabilities | null;
             if (!capabilities) {
                 throw new Error("Reading capabilities failed");
             }

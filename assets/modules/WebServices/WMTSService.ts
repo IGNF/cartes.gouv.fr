@@ -3,6 +3,7 @@ import BaseService from "./BaseService";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { getRequestInfo } from "../../utils";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
+import { Capabilities } from "../../@types/ol";
 
 class WMTSService extends BaseService {
     getLayerNames(): string[] {
@@ -25,7 +26,7 @@ class WMTSService extends BaseService {
         });
 
         if (!wmtsOptions) return [];
-        const capsLayer = capabilities.Contents.Layer.find((layer: { Identifier: string }) => layer.Identifier === this.service.layer_name) ?? null;
+        const capsLayer = capabilities.Contents.Layer?.find((layer) => layer.Identifier === this.service.layer_name) ?? null;
 
         const wmtsSource = new WMTS({
             ...wmtsOptions,
@@ -59,7 +60,7 @@ class WMTSService extends BaseService {
         const response = await fetch(getCapUrl);
         const text = await response.text();
 
-        return format.read(text);
+        return format.read(text) as Capabilities;
     }
 }
 

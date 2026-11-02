@@ -13,6 +13,8 @@ export function useKeyValue(data: Data) {
                     : Object.entries(data).map(([key, value]) => ({ key, value: value ?? "" })),
         },
         transformKeyValue: ({ useKeys, values }: KeyValuesForm): Data =>
-            useKeys ? Object.fromEntries(values.map(({ key, value }) => [key, value || null])) : values.map(({ value }) => value || null),
+            useKeys
+                ? Object.fromEntries(values.map(({ key, value }): [string, string | null] => [String(key), value || null]))
+                : values.map(({ value }) => value || null),
     };
 }

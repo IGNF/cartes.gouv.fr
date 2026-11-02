@@ -89,7 +89,13 @@ function KeyValueList(props: KeyValueListProps) {
                     control={control}
                     name={`${name}.useKeys`}
                     render={({ field: { value, onChange } }) => (
-                        <ToggleSwitch checked={value} label={t("define_keys")} inputTitle={t("define_keys")} onChange={onChange} showCheckedHint={false} />
+                        <ToggleSwitch
+                            checked={Boolean(value)}
+                            label={t("define_keys")}
+                            inputTitle={t("define_keys")}
+                            onChange={onChange}
+                            showCheckedHint={false}
+                        />
                     )}
                 />
             </div>

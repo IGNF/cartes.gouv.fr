@@ -132,7 +132,7 @@ class WFSService extends BaseService {
         const result = await fetch(getCapUrl);
 
         const xml = await result.text();
-        const xmlParsed = this.#parser.parse(xml);
+        const xmlParsed = this.#parser.parse(xml) as { "wfs:WFS_Capabilities": { FeatureTypeList: { FeatureType: FeatureType[] } } };
         this.#featureTypes = xmlParsed["wfs:WFS_Capabilities"]["FeatureTypeList"]["FeatureType"];
     }
 

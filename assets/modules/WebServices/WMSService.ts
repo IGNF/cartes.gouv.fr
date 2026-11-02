@@ -1,11 +1,17 @@
 import WMSCapabilities from "ol/format/WMSCapabilities";
 import { transformExtent } from "ol/proj";
+import { Extent } from "ol/extent";
 import { Service } from "../../@types/app";
 import olDefaults from "../../data/ol-defaults.json";
 import TileLayer from "ol/layer/Tile";
 import TileWMSSource from "ol/source/TileWMS.js";
 import BaseService from "./BaseService";
 import { getRequestInfo } from "../../utils";
+
+// Champs lus dans le GetCapabilities WMS (OpenLayers ne type pas le résultat)
+type WmsCapabilities = {
+    Capability: { Layer: { Layer: { Name?: string; Title?: string; Abstract?: string; EX_GeographicBoundingBox: Extent }[] } };
+};
 
 class WMSService extends BaseService {
     #requestInfo: Record<string, string>;
@@ -32,9 +38,9 @@ class WMSService extends BaseService {
         }
 
         const xmlString = await response.text();
-        const wmsCaps = this.#parser.read(xmlString);
+        const wmsCaps = this.#parser.read(xmlString) as WmsCapabilities;
 
-        const lays = wmsCaps.Capability.Layer.Layer.filter((layer: { Name?: string }) => {
+        const lays = wmsCaps.Capability.Layer.Layer.filter((layer) => {
             return layer.Name === this.#requestInfo.layers;
         });
         if (!lays.length) {

@@ -81,11 +81,11 @@ export const trimObject = (obj: object): object => {
     }
 
     if (Array.isArray(obj)) {
-        return obj.map((elem) => {
+        return (obj as unknown[]).map((elem) => {
             if (typeof elem === "string") {
                 return elem.trim();
             }
-            return trimObject(elem);
+            return typeof elem === "object" && elem !== null ? trimObject(elem) : elem;
         });
     }
 
