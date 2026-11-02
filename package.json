@@ -61,7 +61,7 @@
         "intl-messageformat": "^11.0.0",
         "jiti": "^2.6.1",
         "lint-staged": "^17.6.0",
-        "markdown-it": "^14.3.3",
+        "markdown-it": "^15.0.3",
         "ol": "^10.11.0",
         "oxlint": "^1.90.0",
         "oxlint-tsgolint": "^7.0.2005",
