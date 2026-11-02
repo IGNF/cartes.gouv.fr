@@ -1,7 +1,8 @@
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { createDialogControl, useEditor } from "react-dsfr-tiptap";
 import { useDialog } from "react-dsfr-tiptap/dialog";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import ExternalLinkForm, { ExternalLinkFormRef } from "./ExternalLinkForm";
 import DocumentsLinkForm, { DocumentsLinkFormRef } from "./DocumentsLinkForm";
@@ -17,8 +18,8 @@ function DescriptionLinkDialog() {
     const editor = useEditor();
     const { documents } = useDocuments();
 
-    useEffect(() => {
-        if (isOpened) {
+    useIsModalOpen(modal, {
+        onDisclose: () => {
             const { href } = editor.getAttributes("link");
             if (href) {
                 const document = documents.find((doc) => doc.download_uri === href);
@@ -30,8 +31,8 @@ function DescriptionLinkDialog() {
             } else {
                 setSelectedTabId("documents");
             }
-        }
-    }, [documents, editor, isOpened]);
+        },
+    });
 
     const onSubmit = () => {
         if (selectedTabId === "documents") {

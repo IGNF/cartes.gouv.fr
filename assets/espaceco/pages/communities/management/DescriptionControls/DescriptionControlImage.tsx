@@ -1,7 +1,8 @@
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { createDialogControl, useEditor } from "react-dsfr-tiptap";
 import { useDialog } from "react-dsfr-tiptap/dialog";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import ExternalImageForm, { ExternalImageFormRef } from "./ExternalImageForm";
 import DocumentsImageForm, { DocumentsImageFormRef } from "./DocumentsImageForm";
@@ -25,8 +26,8 @@ function DescriptionImageDialog() {
         [documents]
     );
 
-    useEffect(() => {
-        if (isOpened) {
+    useIsModalOpen(modal, {
+        onDisclose: () => {
             const { src } = editor.getAttributes("image");
             if (src) {
                 const image = images.find((img) => img.src === src);
@@ -38,8 +39,8 @@ function DescriptionImageDialog() {
             } else {
                 setSelectedTabId("documents");
             }
-        }
-    }, [editor, isOpened, images]);
+        },
+    });
 
     const onSubmit = () => {
         if (selectedTabId === "documents") {
