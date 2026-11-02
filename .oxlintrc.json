@@ -21,7 +21,6 @@
         "no-array-constructor": "error",
         "no-case-declarations": "error",
         "no-empty": "error",
-        "no-fallthrough": "error",
         "no-prototype-builtins": "error",
         "no-regex-spaces": "error",
         "no-var": "error",
@@ -52,7 +51,7 @@
         "@tanstack/query/stable-query-client": "error",
         "tss-unused-classes/unused-classes": "warn",
 
-        // Règles typées hors catégorie correctness, sans signalement sur le code actuel
+        // Règles typées hors catégorie correctness
         "typescript/consistent-type-exports": "error",
         "typescript/no-deprecated": "error",
         "typescript/no-generated-empty-object-type": "error",
@@ -69,17 +68,8 @@
         // Gestionnaires JSX async (handleSubmit de react-hook-form) : réglage recommandé pour React
         "typescript/no-misused-promises": ["error", { "checksVoidReturn": { "attributes": false } }],
 
-        // Règles correctness avec options ou sévérité différente
+        // Variables inutilisées autorisées si préfixées par _
         "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
-        "react/exhaustive-deps": "warn",
-        "jsx-a11y/interactive-supports-focus": [
-            "error",
-            { "tabbable": ["button", "checkbox", "link", "progressbar", "searchbox", "slider", "spinbutton", "switch", "textbox"] }
-        ],
-        "jsx-a11y/no-noninteractive-element-interactions": [
-            "error",
-            { "body": ["onError", "onLoad"], "iframe": ["onError", "onLoad"], "img": ["onError", "onLoad"] }
-        ],
 
         // Désactivées avant la migration : à réactiver une par une après revue
         "react/set-state-in-effect": "off",
