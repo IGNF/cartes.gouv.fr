@@ -44,11 +44,11 @@ export function stringToPath(string) {
     return result;
 }
 
-export function get(object: object, path: string): unknown | undefined {
+export function get(object: object, path: string): unknown {
     const pathArray = stringToPath(path);
     const length = pathArray.length;
     let index = 0;
-    let result: unknown | undefined = object;
+    let result: unknown = object;
     while (result !== undefined && result !== null && index < length) {
         result = result?.[pathArray[index++]];
     }

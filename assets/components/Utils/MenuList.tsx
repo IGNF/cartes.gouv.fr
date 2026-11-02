@@ -35,7 +35,7 @@ type MenuListProps = {
     disabled?: boolean;
 };
 
-const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled = false }) => {
+const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items, disabled = false }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const isMenuOpen = Boolean(anchorEl);
 

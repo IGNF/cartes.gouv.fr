@@ -26,7 +26,7 @@ type UploadStyleFileProps = {
 };
 
 const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
-    const { errors, onChange, tables = [], value, acceptedFileExtensions } = props;
+    const { errors, onChange, tables, value, acceptedFileExtensions } = props;
 
     const {
         editMode,
