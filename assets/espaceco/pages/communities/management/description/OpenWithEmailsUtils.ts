@@ -3,7 +3,7 @@ import { OpenWithEmailType } from "../../../../../@types/app_espaceco";
 const openWithEmailToApi = (openWithEmail: OpenWithEmailType[]): Record<string, string[]> | null => {
     if (!openWithEmail.length) return null;
 
-    return openWithEmail.reduce((accumulator, owe) => {
+    return openWithEmail.reduce<Record<string, string[]>>((accumulator, owe) => {
         const grids: string[] = [];
         owe.grids.reduce((acc, grid) => {
             acc.push(grid.name);

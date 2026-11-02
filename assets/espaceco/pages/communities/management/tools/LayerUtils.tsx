@@ -1,4 +1,13 @@
-import { CommunitiesLayers, CommunityFeatureTypeLayer, geometryTypes, LayerGeometryType, RefToolLayer, RefTools, ToolsFormType } from "@/@types/app_espaceco";
+import {
+    CommunitiesLayers,
+    CommunityFeatureTypeLayer,
+    CommunityLayers,
+    geometryTypes,
+    LayerGeometryType,
+    RefToolLayer,
+    RefTools,
+    ToolsFormType,
+} from "@/@types/app_espaceco";
 import { arrRefLayerTools, LayerTools, RefLayerTools } from "@/@types/espaceco";
 
 const allTypesTools: LayerTools[] = ["draw", "translate", "delete", "snap_mandatory", "copy_paste"];
@@ -33,11 +42,11 @@ const getAvailableRefTools = (geometryType: LayerGeometryType): RefLayerTools[] 
 const getRefTools = (refs: Record<number, string>, refTools: Record<RefLayerTools, number[]>, availableRefTools: RefLayerTools[]): RefTools => {
     const rt = refTools === null ? {} : typeof refTools === "string" ? JSON.parse(refTools) : Array.isArray(refTools) && refTools.length === 0 ? {} : refTools;
 
-    const result = {};
+    const result: Partial<RefTools> = {};
     arrRefLayerTools.forEach((t) => {
-        let layers = [];
+        let layers: RefToolLayer[] = [];
         if (t in rt && availableRefTools.includes(t)) {
-            layers = rt[t].reduce((acc, layerId) => {
+            layers = rt[t].reduce((acc: RefToolLayer[], layerId: number) => {
                 if (layerId in refs) {
                     acc.push({ id: layerId.toString(), name: refs[layerId] });
                 }
@@ -59,7 +68,7 @@ const getEditableLayers = (layers?: Record<string, CommunityFeatureTypeLayer[]>)
 
     // Les couches de référence
     const refs: Record<number, string> = Object.values(layers).reduce((accumulator, layers) => {
-        const lays = layers.reduce((acc, l) => {
+        const lays = layers.reduce<Record<number, string>>((acc, l) => {
             acc[l.id] = `${l.database_title}:${l.table_title}`;
             return acc;
         }, {});
@@ -67,14 +76,14 @@ const getEditableLayers = (layers?: Record<string, CommunityFeatureTypeLayer[]>)
         return accumulator;
     }, {});
 
-    const result = {};
+    const result: CommunitiesLayers = {};
     for (const [dbTitle, lays] of Object.entries(layers)) {
         const fLayers = lays.filter((l) => l.role === "edit" || l.role === "ref-edit");
         if (!fLayers.length) {
             continue;
         }
 
-        const editLayers = fLayers.reduce((accumulator, l) => {
+        const editLayers = fLayers.reduce<CommunityLayers>((accumulator, l) => {
             const availablestools = getAvailableTools(l.geometry_type);
             const availableRefTools = getAvailableRefTools(l.geometry_type);
 
@@ -119,16 +128,18 @@ const getRefLayers = (tool: RefLayerTools, layers?: Record<string, CommunityFeat
 
 const prepareLayersForApi = (values: ToolsFormType): Record<number, { tools: LayerTools[]; ref_tools: Record<RefLayerTools, number[]> }> => {
     return Object.entries(values.layer_tools).reduce((accumulator, [id, config]) => {
-        const refTools = {};
+        const refTools: Partial<Record<RefLayerTools, number[]>> = {};
         [...arrRefLayerTools].forEach((t) => {
             if (config.ref_tools[t].active && config.ref_tools[t].layers.length !== 0) {
                 refTools[t] = config.ref_tools[t].layers.map((l) => Number(l.id));
             }
         });
-        accumulator[id] = {
-            tools: config.tools.length ? config.tools : null,
-            ref_tools: Object.keys(refTools).length ? refTools : null,
-        };
+        Object.assign(accumulator, {
+            [id]: {
+                tools: config.tools.length ? config.tools : null,
+                ref_tools: Object.keys(refTools).length ? refTools : null,
+            },
+        });
         return accumulator;
     }, {});
 };

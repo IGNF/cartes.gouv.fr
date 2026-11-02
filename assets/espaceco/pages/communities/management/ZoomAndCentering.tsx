@@ -21,7 +21,7 @@ import RMap from "./ZoomAndCentering/RMap";
 import Search from "./ZoomAndCentering/Search";
 import { getApiErrorMessage } from "../../../../modules/apiError";
 
-const fields = ["position", "zoom", "minZoom", "maxZoom", "extent"];
+const fields: (keyof ZoomAndCenteringFormType)[] = ["position", "zoom", "minZoom", "maxZoom", "extent"];
 
 const ZoomAndCentering: FC = () => {
     const { t: tCommon } = useTranslation("Common");
@@ -61,7 +61,7 @@ const ZoomAndCentering: FC = () => {
             const values = getZoomAndCenteringDefaultValues(reUsedCommunity);
             fields.forEach((f) => {
                 if (f in values) {
-                    setFormValue(f as keyof ZoomAndCenteringFormType, values[f]);
+                    setFormValue(f, values[f]);
                 }
             });
         },
@@ -71,7 +71,7 @@ const ZoomAndCentering: FC = () => {
     const onSubmitForm = (saveOnly: boolean) => {
         const values = getFormValues();
 
-        const datas = {
+        const datas: Record<string, unknown> = {
             zoom: values.zoom,
             minZoom: values.minZoom,
             maxZoom: values.maxZoom,

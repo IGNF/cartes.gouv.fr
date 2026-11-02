@@ -43,7 +43,7 @@ const AddDocumentDialog: FC<AddDocumentDialogProps> = ({ onAdd }) => {
                     .required(t("description.modal.document.name.mandatory")),
                 description: yup.string(),
                 document: yup
-                    .mixed()
+                    .mixed<FileList>()
                     .test({
                         name: "exists",
                         test(files, ctx) {

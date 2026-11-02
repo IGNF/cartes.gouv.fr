@@ -13,7 +13,7 @@ export type AddOrEditAttributeFormType = {
 
 const normalizeTheme = (theme: ThemeDTO): ThemeDTO => {
     const result = { ...theme };
-    ["global", "help"].forEach((f) => {
+    (["global", "help"] as const).forEach((f) => {
         if (f in result && !result[f]) {
             delete result[f];
         }
@@ -38,7 +38,7 @@ const normalizeAttribute = (attribute: FormType): AttributeDTO => {
         result.help = attribute.help;
     }
 
-    ["mandatory", "multiple"].forEach((f) => {
+    (["mandatory", "multiple"] as const).forEach((f) => {
         if (attribute[f]) {
             result[f] = attribute[f];
         }

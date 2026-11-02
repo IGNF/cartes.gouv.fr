@@ -10,7 +10,7 @@ import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import useUserMe from "@/espaceco/hooks/useUserMe";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../i18n/i18n";
-import { routes, useRoute } from "../../../router/router";
+import { routeStringParam, routes, useRoute } from "../../../router/router";
 import Databases from "./management/Databases";
 import Description from "./management/Description";
 import Grids from "./management/Grids";
@@ -29,9 +29,9 @@ const ManageCommunity: FC = () => {
     const { community, isCommunityLoading, isCommunityError, communityError } = useCommunityContext();
 
     const route = useRoute();
-    const activeTab: ManageCommunityActiveTabEnum = Object.values(ManageCommunityActiveTabEnum).includes(route.params?.["activeTab"])
-        ? route.params?.["activeTab"]
-        : ManageCommunityActiveTabEnum.Description;
+    const tab = routeStringParam(route.params, "activeTab");
+    const activeTab: ManageCommunityActiveTabEnum =
+        Object.values(ManageCommunityActiveTabEnum).find((value) => value === tab) ?? ManageCommunityActiveTabEnum.Description;
 
     const isAdmin = useMemo(() => {
         return me?.administrator === true;

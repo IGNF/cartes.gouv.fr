@@ -4,8 +4,8 @@ import { jsonFetch } from "../../modules/jsonFetch";
 import SymfonyRouting from "../../modules/Routing";
 
 const getAll = (text: string, filters: SearchGridFilters, otherOptions: RequestInit = {}) => {
-    const queryParams = { text: `${text}%` };
-    ["searchBy", "fields"].forEach((p) => {
+    const queryParams: Record<string, string> = { text: `${text}%` };
+    (["searchBy", "fields"] as const).forEach((p) => {
         if (filters[p] !== undefined) {
             queryParams[p] = filters[p].join(",");
         }

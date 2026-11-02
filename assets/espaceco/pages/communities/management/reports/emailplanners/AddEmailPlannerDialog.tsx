@@ -5,6 +5,7 @@ import { FC, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import isEmail from "validator/lib/isEmail";
+import type { ObjectSchema } from "yup";
 import { BasicRecipientsArray, EmailPlannerAddType, EmailPlannerFormType, EmailPlannerTypes } from "../../../../../../@types/app_espaceco";
 import { ReportStatusesDTO } from "../../../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../../../components/Input/AutocompleteSelect";
@@ -30,13 +31,14 @@ const AddEmailPlannerDialog: FC<AddEmailPlannerDialogProps> = ({ themes, statuse
 
     const [type, setType] = useState<"basic" | "personal">("basic");
 
-    const schemas = {};
-    schemas["basic"] = getBasicSchema();
-    schemas["personal"] = getPersonalSchema(themes, statuses);
+    const schemas = {
+        basic: getBasicSchema(),
+        personal: getPersonalSchema(themes, statuses),
+    };
 
     const form = useForm<EmailPlannerFormType>({
         mode: "onChange",
-        resolver: yupResolver(schemas[type]),
+        resolver: yupResolver(schemas[type] as ObjectSchema<EmailPlannerFormType>),
         defaultValues: getAddDefaultValues(type),
     });
     const {

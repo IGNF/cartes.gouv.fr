@@ -70,7 +70,7 @@ const EditDocumentDialog: FC<EditDocumentDialogProps> = ({ editDocument, onModif
     const onSubmit = () => {
         const formValues = getFormValues();
 
-        const body = {};
+        const body: { title?: string; description?: string } = {};
         if (formValues.title !== originalValues.title) {
             body["title"] = formValues.title;
         }

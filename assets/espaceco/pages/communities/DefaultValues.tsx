@@ -3,6 +3,7 @@ import Point from "ol/geom/Point";
 import {
     CommunitiesLayers,
     DescriptionFormType,
+    ICommunityLayer,
     MembershipRequestType,
     ReportFormType,
     ToolsFormType,
@@ -57,7 +58,7 @@ const getFunctionalities = (functionalities: string[]) => {
 
 const getToolsDefaultValues = (community: CommunityResponseDTO, editableLayers: CommunitiesLayers): ToolsFormType => {
     const layerTools = Object.values(editableLayers).reduce((accumulator, layers) => {
-        const lays = Object.entries(layers).reduce((acc, [id, config]) => {
+        const lays = Object.entries(layers).reduce<Record<string, ICommunityLayer>>((acc, [id, config]) => {
             acc[id] = config;
             return acc;
         }, {});

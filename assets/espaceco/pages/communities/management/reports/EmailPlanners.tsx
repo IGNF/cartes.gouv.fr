@@ -60,7 +60,7 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
 
     // Les status actifs
     const activeStatuses = useMemo<ReportStatusesDTO>(() => {
-        return Object.keys(reportStatuses).reduce((accumulator, status) => {
+        return Object.keys(reportStatuses).reduce<ReportStatusesDTO>((accumulator, status) => {
             if (reportStatuses[status].active) accumulator[status] = reportStatuses[status];
             return accumulator;
         }, {});

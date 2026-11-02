@@ -36,7 +36,7 @@ const SetSharedThemesDialog: FC<SetSharedThemesDialogProps> = ({ userSharedTheme
             shared_themes: yup.lazy(() => {
                 const ret = {};
                 Object.keys(userSharedThemes).forEach((community) => {
-                    ret[community] = yup.array().of(yup.string()).required();
+                    Object.assign(ret, { [community]: yup.array().of(yup.string()).required() });
                 });
                 return yup.object().shape(ret).required();
             }),
@@ -47,10 +47,10 @@ const SetSharedThemesDialog: FC<SetSharedThemesDialogProps> = ({ userSharedTheme
         const def: formType["shared_themes"] = {};
 
         Object.keys(userSharedThemes).forEach((community) => {
-            const themes: string[] = userSharedThemes[community].themes.filter((th) => {
-                return community in sharedThemes && sharedThemes[community].includes(th);
+            const themes: string[] = userSharedThemes[Number(community)].themes.filter((th) => {
+                return community in sharedThemes && sharedThemes[Number(community)].includes(th);
             });
-            def[community] = themes;
+            def[Number(community)] = themes;
         });
         return { shared_themes: def };
     }, [userSharedThemes, sharedThemes]);
@@ -74,9 +74,9 @@ const SetSharedThemesDialog: FC<SetSharedThemesDialogProps> = ({ userSharedTheme
 
         const sharedThemes: SharedThemesDTO[] = [];
         Object.keys(values).forEach((community) => {
-            if (values[community].length) {
-                const communityName = userSharedThemes[community].communityName;
-                sharedThemes.push({ community_id: Number(community), community_name: communityName, themes: values[community] });
+            if (values[Number(community)].length) {
+                const communityName = userSharedThemes[Number(community)].communityName;
+                sharedThemes.push({ community_id: Number(community), community_name: communityName, themes: values[Number(community)] });
             }
         });
         onApply(sharedThemes);
@@ -101,11 +101,11 @@ const SetSharedThemesDialog: FC<SetSharedThemesDialogProps> = ({ userSharedTheme
         >
             <div>
                 {Object.keys(userSharedThemes).map((community) => {
-                    const options = userSharedThemes[community].themes.map((theme) => ({
+                    const options = userSharedThemes[Number(community)].themes.map((theme) => ({
                         label: theme,
                         nativeInputProps: {
                             value: theme,
-                            checked: shared[community].includes(theme),
+                            checked: shared[Number(community)].includes(theme),
                             // @ts-expect-error ???
                             ...register(`shared_themes.${community}`),
                         },
@@ -114,7 +114,7 @@ const SetSharedThemesDialog: FC<SetSharedThemesDialogProps> = ({ userSharedTheme
                         <Checkbox
                             key={community}
                             classes={{ content: fr.cx("fr-ml-8w") }}
-                            legend={userSharedThemes[community].communityName}
+                            legend={userSharedThemes[Number(community)].communityName}
                             options={options}
                         />
                     );
