@@ -6,7 +6,7 @@ import DatastoreMain from "@/components/Layout/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
 import PageTitle from "@/components/Layout/PageTitle";
 import useMembership from "@/hooks/useMembership";
-import { routes, useRoute } from "@/router/router";
+import { routeStringParam, routes, useRoute } from "@/router/router";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
@@ -27,7 +27,8 @@ const DatastoreManageStorage: FC = () => {
     const isSandbox = useMembership({ datastoreId: datastore._id })?.isSandbox === true;
 
     const route = useRoute();
-    const currentTab = route.params?.["tab"] ?? DatastoreManageStorageTab.POSTGRESQL;
+    const tabParam = routeStringParam(route.params, "tab");
+    const currentTab = Object.values(DatastoreManageStorageTab).find((tab) => tab === tabParam) ?? DatastoreManageStorageTab.POSTGRESQL;
 
     const hasFilesystemStorage = datastore?.storages.data?.find((data) => data.storage.type === "FILESYSTEM") !== undefined;
 

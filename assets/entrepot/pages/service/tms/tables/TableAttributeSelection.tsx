@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useEffect } from "react";
-import { type UseFormReturn } from "react-hook-form";
+import { type FieldError, type UseFormReturn } from "react-hook-form";
 
 import { type StoredDataRelation } from "../../../../../@types/app";
 import { useTranslation } from "../../../../../i18n";
@@ -24,10 +24,11 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
     } = form;
 
     const tableAttributes: Record<string, string[]> = getFormValues("table_attributes") ?? {};
+    const tableAttributesErrors = errors?.table_attributes as Partial<Record<string, FieldError>> | undefined;
 
     useEffect(() => {
         const prevTableAttributes = getFormValues("table_attributes") ?? {};
-        const tableAttributes = {};
+        const tableAttributes: Record<string, string[]> = {};
         selectedTables.forEach((table) => {
             tableAttributes[table.name] = prevTableAttributes[table.name] ?? [];
         });
@@ -69,8 +70,8 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
                                     onChange: () => toggleAttributes(table.name, attrName, tableAttributes[table.name]),
                                 },
                             }))}
-                        state={errors?.table_attributes?.[table.name]?.message ? "error" : "default"}
-                        stateRelatedMessage={errors?.table_attributes?.[table.name]?.message?.toString()}
+                        state={tableAttributesErrors?.[table.name]?.message ? "error" : "default"}
+                        stateRelatedMessage={tableAttributesErrors?.[table.name]?.message?.toString()}
                     />
                 </Accordion>
             ))}

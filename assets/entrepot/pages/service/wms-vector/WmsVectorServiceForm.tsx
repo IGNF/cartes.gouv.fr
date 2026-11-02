@@ -218,7 +218,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     });
 
     // Definition du schema
-    const schemas = {};
+    const schemas: Record<number, yup.AnyObjectSchema> = {};
     schemas[STEPS.TABLES_INFOS] = yup.object({
         selected_tables: yup
             .array(yup.string().trim())
@@ -232,7 +232,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                 return yup.mixed().nullable().notRequired();
             }
 
-            const styleFiles = {};
+            const styleFiles: yup.ObjectShape = {};
             selectedTableNamesList.forEach((tableName) => {
                 const encodedKey = encodeKey(tableName);
                 styleFiles[encodedKey] = yup.string().test({

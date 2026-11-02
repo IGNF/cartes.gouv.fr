@@ -89,7 +89,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
             yup
                 .object()
                 .shape(
-                    layerNames.reduce((acc, layerName) => {
+                    layerNames.reduce<Record<string, yup.StringSchema<string | undefined>>>((acc, layerName) => {
                         const encodedKey = encodeKey(layerName);
                         acc[encodedKey] = yup
                             .string()
@@ -114,7 +114,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         }
 
                         return acc;
-                    }, {})
+                    }, {}) as Record<string, yup.StringSchema<string>>
                 )
                 .test({
                     name: "at-least-one",

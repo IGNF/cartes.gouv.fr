@@ -2,11 +2,11 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { FC, useEffect } from "react";
-import { Controller, UseFormReturn } from "react-hook-form";
+import { Controller, FieldErrors, UseFormReturn } from "react-hook-form";
 
 import { StoredDataDetailsRelationDto } from "../../../../@types/entrepot";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
-import { WfsServiceFormValuesType } from "./WfsServiceForm";
+import { WfsServiceFormValuesType, WfsTableInfos } from "./WfsServiceForm";
 
 // Themes et mot cles INSPIRE
 import { useTranslation } from "../../../../i18n";
@@ -36,6 +36,7 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
     } = form;
 
     const selectedTables = watch("selected_tables") ?? [];
+    const tableInfosErrors = errors?.table_infos as Partial<Record<string, FieldErrors<WfsTableInfos>>> | undefined;
 
     // Lorsqu'on revient sur ce composant, on recupere les anciennes valeurs
     useEffect(() => {
@@ -89,8 +90,8 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                                         defaultValue: getFormValues(`table_infos.${table.name}.public_name`) ?? table.name,
                                         ...register(`table_infos.${table.name}.public_name`),
                                     }}
-                                    state={errors?.table_infos?.[table.name]?.public_name?.message ? "error" : "default"}
-                                    stateRelatedMessage={errors?.table_infos?.[table.name]?.public_name?.message}
+                                    state={tableInfosErrors?.[table.name]?.public_name?.message ? "error" : "default"}
+                                    stateRelatedMessage={tableInfosErrors?.[table.name]?.public_name?.message}
                                 />
                                 <Input
                                     label={t("tables_info_form.title.label")}
@@ -99,8 +100,8 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                                         defaultValue: getFormValues(`table_infos.${table.name}.title`),
                                         ...register(`table_infos.${table.name}.title`),
                                     }}
-                                    state={errors?.table_infos?.[table.name]?.title?.message ? "error" : "default"}
-                                    stateRelatedMessage={errors?.table_infos?.[table.name]?.title?.message}
+                                    state={tableInfosErrors?.[table.name]?.title?.message ? "error" : "default"}
+                                    stateRelatedMessage={tableInfosErrors?.[table.name]?.title?.message}
                                 />
                                 <Input
                                     label={t("tables_info_form.description.label")}
@@ -110,8 +111,8 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                                         defaultValue: getFormValues(`table_infos.${table.name}.description`),
                                         ...register(`table_infos.${table.name}.description`),
                                     }}
-                                    state={errors?.table_infos?.[table.name]?.description?.message ? "error" : "default"}
-                                    stateRelatedMessage={errors?.table_infos?.[table.name]?.description?.message}
+                                    state={tableInfosErrors?.[table.name]?.description?.message ? "error" : "default"}
+                                    stateRelatedMessage={tableInfosErrors?.[table.name]?.description?.message}
                                 />
 
                                 <Controller
@@ -128,8 +129,8 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                                                 freeSolo={true}
                                                 getOptionLabel={(option) => option}
                                                 isOptionEqualToValue={(option, value) => option === value}
-                                                state={errors.table_infos?.[table.name]?.["keywords"] ? "error" : "default"}
-                                                stateRelatedMessage={errors.table_infos?.[table.name]?.["keywords"]?.message?.toString()}
+                                                state={tableInfosErrors?.[table.name]?.["keywords"] ? "error" : "default"}
+                                                stateRelatedMessage={tableInfosErrors?.[table.name]?.["keywords"]?.message?.toString()}
                                                 onChange={(_, value) => field.onChange(value)}
                                                 multiple={true}
                                             />

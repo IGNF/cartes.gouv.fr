@@ -24,7 +24,7 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
 
     useEffect(() => {
         const prevTableZoomLevels = getFormValues("table_zoom_levels") ?? {};
-        const tableZoomLevels = {};
+        const tableZoomLevels: Record<string, number[]> = {};
         selectedTables.forEach((table) => {
             tableZoomLevels[table.name] = prevTableZoomLevels[table.name] ?? [olDefaults.zoom_levels.TOP, olDefaults.zoom_levels.BOTTOM];
         });
@@ -44,8 +44,8 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
         setFormValue("bottom_zoom_level", getBottomLevel());
     }, [tableZoomLevels, setFormValue]);
 
-    const onZoomChanged = (tableName, values: number[]) => {
-        const v = {};
+    const onZoomChanged = (tableName: string, values: number[]) => {
+        const v: Record<string, number[]> = {};
         v[tableName] = values;
         const zoomLevels = { ...tableZoomLevels, ...v };
         setTableZoomLevels(zoomLevels);

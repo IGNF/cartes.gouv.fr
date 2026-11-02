@@ -94,8 +94,7 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
 
     // Ajout de l'utilisateur
     const onSubmit = () => {
-        const values = getFormValues();
-        values["user_creation"] = true;
+        const values = Object.assign(getFormValues(), { user_creation: true });
         addMemberMutation.mutate(values);
     };
 

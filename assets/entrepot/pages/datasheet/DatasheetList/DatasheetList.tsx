@@ -24,7 +24,7 @@ import Skeleton from "../../../../components/Utils/Skeleton";
 import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routes, useRoute } from "../../../../router/router";
+import { routeNumberParam, routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import { SortByEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";
@@ -65,8 +65,8 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     );
 
     const { params } = useRoute();
-    const page = params["page"] ? parseInt(params["page"]) : 1;
-    const limit = params["limit"] ? parseInt(params["limit"]) : 10;
+    const page = routeNumberParam(params, "page") ?? 1;
+    const limit = routeNumberParam(params, "limit") ?? 10;
 
     const [showFilters, toggleShowFilters] = useToggle();
     const filtersId = useId();

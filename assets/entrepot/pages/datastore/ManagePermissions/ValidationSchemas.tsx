@@ -9,7 +9,7 @@ const types: string[] = Object.values(PermissionCreateDtoTypeEnum);
 
 const uuidTest = (t: TranslationFunction<"DatastorePermissions", ComponentKey>) => ({
     name: "is-uuid",
-    test: (values, context) => {
+    test: (values: string[] | undefined, context: yup.TestContext) => {
         if (!values || (Array.isArray(values) && values.length === 0)) return true;
 
         const errors: string[] = [];

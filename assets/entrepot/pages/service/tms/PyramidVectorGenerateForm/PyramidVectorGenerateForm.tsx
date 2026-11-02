@@ -30,6 +30,7 @@ import Main from "../../../../../components/Layout/Main";
 
 export type PyramidVectorGenerateFormValuesType = {
     selected_tables?: string[];
+    table_attributes?: Record<string, string[]>;
     bottom_zoom_level?: number;
     sample?: SampleType;
     table_zoom_levels?: Record<string, number[]>;
@@ -55,7 +56,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
     const { t: tCommon } = useTranslation("Common");
 
     // Definition du schema
-    const schema = {};
+    const schema: Record<number, yup.AnySchema> = {};
     schema[STEPS.TABLES_SELECTION] = yup.object({
         selected_tables: yup.array(yup.string()).min(1, t("step_tables.error.required")).required(t("step_tables.error.required")),
     });
@@ -65,7 +66,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                 return yup.mixed().nullable().notRequired();
             }
 
-            const tableAttributes = {};
+            const tableAttributes: yup.ObjectShape = {};
             selectedTables.forEach((table) => {
                 tableAttributes[table.name] = yup
                     .array()
@@ -94,7 +95,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
     });
 
     const form = useForm<PyramidVectorGenerateFormValuesType>({
-        resolver: yupResolver(schema[currentStep]),
+        resolver: yupResolver(schema[currentStep] as yup.AnyObjectSchema),
         mode: "onChange",
     });
     const {

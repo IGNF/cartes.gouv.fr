@@ -7,6 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { AnyObjectSchema } from "yup";
 
 import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
 import { useDatastore } from "@/contexts/datastore";
@@ -134,7 +135,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     });
 
     // Definition du schema
-    const schemas = {};
+    const schemas: Record<number, AnyObjectSchema> = {};
     schemas[STEPS.METADATA_UPLOAD] = commonValidation.getMDUploadFileSchema();
     schemas[STEPS.METADATA_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
         existingLayerNamesQuery.data,

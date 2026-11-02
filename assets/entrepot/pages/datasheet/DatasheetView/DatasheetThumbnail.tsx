@@ -38,7 +38,7 @@ export type ThumbnailAction = "add" | "modify" | "delete";
 const schema = (t: TranslationFunction<"DatasheetView", ComponentKey>) =>
     yup.object().shape({
         file: yup
-            .mixed()
+            .mixed<FileList>()
             .test("required", t("file_validation.required_error"), (files) => {
                 const file = files?.[0] ?? undefined;
                 return file !== undefined;
@@ -86,7 +86,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
         mutationFn: () => {
             const form = new FormData();
             form.append("datasheetName", datasheetName);
-            form.append("file", upload);
+            if (upload) form.append("file", upload);
             return api.annexe.addThumbnail(datastoreId, form);
         },
         onSuccess: (response) => {
@@ -157,7 +157,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
         handleSubmit,
     } = useForm({ resolver: yupResolver(schema(t)), mode: "onChange" });
 
-    const upload: File = watch("file")?.[0];
+    const upload: File | undefined = watch("file")?.[0];
     useEffect(() => {
         if (upload !== undefined) {
             const reader = new FileReader();

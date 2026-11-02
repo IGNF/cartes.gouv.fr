@@ -119,7 +119,7 @@ const Alerts: FC = () => {
     });
 
     function handleChange(index: number, visibility: "homepage" | "contact" | "map" | "serviceLevel") {
-        return (checked) => {
+        return (checked: boolean) => {
             const alerts = getValues("alerts");
             if (alerts) {
                 if (checked && (visibility === "homepage" || visibility === "contact")) {

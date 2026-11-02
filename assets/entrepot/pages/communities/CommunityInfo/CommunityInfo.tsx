@@ -152,7 +152,7 @@ export default function CommunityInfo() {
 
     function onSubmit(formData: CommunityInfoFormType) {
         // prepare data as the API expects, send only modified fields
-        const data = {};
+        const data: Partial<Record<"name" | "description" | "contact", string> & { public: boolean }> = {};
         if (formData.name !== community.name) data["name"] = formData.name;
         if (formData.description !== (community.description ?? "")) data["description"] = formData.description;
         if (formData.contact !== community.contact) data["contact"] = formData.contact;

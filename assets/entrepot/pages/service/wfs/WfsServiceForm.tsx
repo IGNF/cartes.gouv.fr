@@ -44,7 +44,7 @@ const formatTablesInfos = (selectedTables: string[] | undefined, table_infos: Ta
 
     const filteredInfos: TableInfoType = Object.keys(table_infos)
         .filter((key) => tables.includes(key))
-        .reduce((obj, key) => {
+        .reduce<TableInfoType>((obj, key) => {
             obj[key] = table_infos[key];
             return obj;
         }, {});
@@ -195,8 +195,8 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     });
 
     // Definition du schema
-    const schemas = useMemo(() => {
-        const schemas = {};
+    const schemas: Record<number, yup.AnyObjectSchema> = useMemo(() => {
+        const schemas: Record<number, yup.AnyObjectSchema> = {};
         schemas[STEPS.TABLES_INFOS] = yup.object().shape({
             selected_tables: yup.array(yup.string()).min(1, t("tables_info_form.error.required")).required(t("tables_info_form.error.required")),
             table_infos: yup.lazy((_, options) => {
@@ -205,7 +205,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                 if (!selectedTableNamesList || selectedTableNamesList.length === 0) {
                     return yup.mixed().nullable().notRequired();
                 }
-                const table_schemas = {};
+                const table_schemas: yup.ObjectShape = {};
                 selectedTableNamesList.forEach((table) => {
                     table_schemas[table] = yup.object({
                         public_name: yup

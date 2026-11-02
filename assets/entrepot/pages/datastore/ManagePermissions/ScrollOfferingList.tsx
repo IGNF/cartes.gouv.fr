@@ -45,7 +45,7 @@ const ScrollOfferingList: FC<ScrollOfferingListProps> = (props) => {
                 </span>
             ),
             nativeInputProps: {
-                onChange: (e) => handleCheckboxChange(e, offering._id),
+                onChange: (e: React.ChangeEvent<HTMLInputElement>) => handleCheckboxChange(e, offering._id),
                 value: offering._id,
                 checked: internals.includes(offering._id),
             },

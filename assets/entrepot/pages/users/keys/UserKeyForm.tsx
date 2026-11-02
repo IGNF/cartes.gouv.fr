@@ -128,7 +128,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
         SECURITY_OPTIONS: 2,
     };
 
-    const schema = {};
+    const schema: Record<number, ReturnType<typeof yup.lazy<yup.AnyObjectSchema>>> = {};
     schema[STEPS.ACCESSIBLE_SERVICES] = yup.lazy(() => {
         return getServicesSchema(editMode, keyName, keyNames);
     });
