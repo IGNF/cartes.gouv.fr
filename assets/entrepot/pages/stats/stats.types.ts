@@ -16,25 +16,23 @@ export type ServiceOption = {
     group: string;
 };
 
-type ParamDefBase = {
+type ParamDefBase<TData> = {
     key: string;
     label: (t: StatsTranslator) => string;
     queryKey: (deps: Record<string, string>) => string[];
-    // oxlint-disable-next-line typescript/no-explicit-any
-    queryFn: (deps: Record<string, string>, options?: RequestInit) => Promise<any>;
+    queryFn: (deps: Record<string, string>, options?: RequestInit) => Promise<TData>;
     dependsOn?: string[];
 };
 
-export type SelectParamDef = ParamDefBase & {
+// toOptions en syntaxe méthode : paramètre bivariant, pour ranger des ParamDef de données différentes dans ParamDef[]
+export type SelectParamDef<TData = unknown> = ParamDefBase<TData> & {
     kind: "select";
-    // oxlint-disable-next-line typescript/no-explicit-any
-    toOptions: (data: any, t: StatsTranslator) => SelectOption[];
+    toOptions(this: void, data: TData, t: StatsTranslator): SelectOption[];
 };
 
-export type ServiceParamDef = ParamDefBase & {
+export type ServiceParamDef<TData = unknown> = ParamDefBase<TData> & {
     kind: "service";
-    // oxlint-disable-next-line typescript/no-explicit-any
-    toOptions: (data: any, t: StatsTranslator) => ServiceOption[];
+    toOptions(this: void, data: TData, t: StatsTranslator): ServiceOption[];
 };
 
 export type ParamDef = SelectParamDef | ServiceParamDef;

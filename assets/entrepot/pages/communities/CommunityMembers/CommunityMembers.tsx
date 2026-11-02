@@ -161,7 +161,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
 
     // Modification d'un droit d'un utilisateur
     const handleToggleChanged = (user_id: string, right: string, checked: boolean) => {
-        const m: Member[] = JSON.parse(JSON.stringify(members)); // Vraie copie
+        const m = JSON.parse(JSON.stringify(members)) as Member[]; // Vraie copie
 
         const user = m.find((member) => member.id === user_id);
         if (!user) {

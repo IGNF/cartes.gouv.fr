@@ -80,9 +80,9 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
         style_name: yup
             .string()
             .required("Le nom du style est obligatoire.")
-            .transform((value) => (value ? value.trim() : value))
+            .transform((value: string | undefined) => (value ? value.trim() : value))
             .test("is-unique", "Le nom du style existe déjà", (_, ctx) => {
-                return editMode || !styleTechnicalNames.includes(ctx.parent.style_technical_name);
+                return editMode || !styleTechnicalNames.includes((ctx.parent as StyleAddModifyFormType).style_technical_name);
             }),
         style_technical_name: yup.string().required(),
         style_files: yup.lazy(() =>
@@ -93,7 +93,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         const encodedKey = encodeKey(layerName);
                         acc[encodedKey] = yup
                             .string()
-                            .transform((value) => value.trim())
+                            .transform((value: string) => value.trim())
                             .test({
                                 name: "is-valid",
                                 async test(value, ctx) {

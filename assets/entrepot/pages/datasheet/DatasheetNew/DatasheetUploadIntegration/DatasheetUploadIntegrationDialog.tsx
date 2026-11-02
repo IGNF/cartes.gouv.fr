@@ -37,7 +37,7 @@ const parseIntegrationProgress = (rawProgress: string | undefined): Record<strin
     }
 
     try {
-        const parsed = JSON.parse(rawProgress);
+        const parsed: unknown = JSON.parse(rawProgress);
         if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
             return parsed as Record<string, string>;
         }

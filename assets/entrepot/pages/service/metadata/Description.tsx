@@ -16,6 +16,13 @@ import { useDatastore } from "@/contexts/datastore";
 const keywords = getInspireKeywords();
 const thematicCategories = getThematicCategories();
 
+type MetadataXml = {
+    "gmd:MD_Metadata": {
+        "gmd:fileIdentifier"?: { "gco:CharacterString"?: string };
+        "gmd:hierarchyLevel": { "gmd:MD_ScopeCode"?: string };
+    };
+};
+
 type DescriptionProps = {
     visible: boolean;
     form: UseFormReturn<ServiceFormValuesBaseType>;
@@ -45,7 +52,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
             const xmlText = await metadata.text();
 
             const xmlParser = new XMLParser();
-            const parsed = xmlParser.parse(xmlText);
+            const parsed = xmlParser.parse(xmlText) as MetadataXml;
             const fileIdentifier = parsed["gmd:MD_Metadata"]?.["gmd:fileIdentifier"]?.["gco:CharacterString"] ?? "";
             const hierarchyLevel = parsed["gmd:MD_Metadata"]["gmd:hierarchyLevel"]["gmd:MD_ScopeCode"] ?? "";
 

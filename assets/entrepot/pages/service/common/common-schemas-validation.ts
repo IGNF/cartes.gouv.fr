@@ -27,7 +27,7 @@ export class CommonSchemasValidation {
                     .string()
                     .required(tValidMD("metadatas.technical_name_error"))
                     .matches(regex.technical_name, tValidMD("metadatas.technical_name_regex"))
-                    .transform((value) => value.trim())
+                    .transform((value: string) => value.trim())
                     .test({
                         name: "is-unique",
                         message: tValidMD("metadatas.technical_name_unicity_error"),
@@ -76,11 +76,11 @@ export class CommonSchemasValidation {
                 public_name: yup
                     .string()
                     .required(tValidMD("metadatas.public_name_error"))
-                    .transform((value) => value.trim()),
+                    .transform((value: string) => value.trim()),
                 service_name: yup
                     .string()
                     .required(tValidMD("metadatas.service_name_error"))
-                    .transform((value) => value.trim()),
+                    .transform((value: string) => value.trim()),
                 description: yup.string().required(tValidMD("metadatas.description_error")),
                 identifier: yup
                     .string()

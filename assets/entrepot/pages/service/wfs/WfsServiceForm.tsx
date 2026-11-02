@@ -200,7 +200,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         schemas[STEPS.TABLES_INFOS] = yup.object().shape({
             selected_tables: yup.array(yup.string()).min(1, t("tables_info_form.error.required")).required(t("tables_info_form.error.required")),
             table_infos: yup.lazy((_, options) => {
-                const selectedTableNamesList: string[] = options.parent.selected_tables;
+                const selectedTableNamesList = (options.parent as { selected_tables: string[] }).selected_tables;
 
                 if (!selectedTableNamesList || selectedTableNamesList.length === 0) {
                     return yup.mixed().nullable().notRequired();

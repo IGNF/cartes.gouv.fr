@@ -95,10 +95,9 @@ const MyDocuments: FC = () => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
 
-        const data = Object.fromEntries(formData);
+        const data: Record<string, unknown> = Object.fromEntries(formData);
         try {
-            // @ts-expect-error // TODO à corriger plus tard, c'est pas très grave
-            data["extra"] = JSON.parse(data["extra"]);
+            data["extra"] = JSON.parse(String(data["extra"]));
         } catch (_) {
             // ne rien faire
         }

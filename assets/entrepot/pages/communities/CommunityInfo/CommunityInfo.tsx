@@ -47,11 +47,11 @@ const schema: yup.ObjectSchema<CommunityInfoFormType> = yup.object({
     name: yup
         .string()
         .required(t("form.name.error.required"))
-        .transform((value) => (value ? value.trim() : value)),
+        .transform((value: string | undefined) => (value ? value.trim() : value)),
     description: yup
         .string()
         .max(300, t("form.desc.info_max_length"))
-        .transform((value) => (value ? value.trim() : value)),
+        .transform((value: string | undefined) => (value ? value.trim() : value)),
     contact: yup
         .string()
         .email(t("form.contact.error.invalid_email"))

@@ -15,11 +15,11 @@ export default class AccessesTransformer {
     }
 
     private static toMap(accesses: AccessDetailResponseDto[]): Map<string, string[]> {
-        const map = new Map();
+        const map = new Map<string, string[]>();
         accesses.forEach((access) => {
             if (!access.permission) return;
 
-            const collection = map.get(access.permission._id) as string[] | undefined;
+            const collection = map.get(access.permission._id);
             if (collection === undefined) {
                 map.set(access.permission._id, [access.offering._id]);
             } else {

@@ -11,6 +11,10 @@ import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
 import getWebService from "@/modules/WebServices/WebServices";
 import { decodeKeys } from "@/utils";
 
+type StyleFilesFormType = {
+    style_files: Record<string, string>;
+};
+
 type UploadLayerStylesProps = {
     service: Service;
     names: string[];
@@ -20,7 +24,7 @@ const tmsStyleTools = new TMSStyleTools();
 
 const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
     const { names, service } = props;
-    const { control } = useFormContext();
+    const { control } = useFormContext<StyleFilesFormType>();
 
     const { isMapbox, isTms, styleFormats } = useStyleForm();
 

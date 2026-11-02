@@ -25,8 +25,7 @@ export default function DynamicParamSelector(props: DynamicParamSelectorProps) {
 function useParamOptions<TOption>(
     param: ParamDef,
     resolvedDeps: Record<string, string>,
-    // oxlint-disable-next-line typescript/no-explicit-any
-    toOptions: (data: any, t: StatsTranslator) => TOption[],
+    toOptions: (data: unknown, t: StatsTranslator) => TOption[],
     t: StatsTranslator
 ) {
     const relevantDeps = useMemo(
@@ -35,8 +34,7 @@ function useParamOptions<TOption>(
     );
     const depsReady = !param.dependsOn || param.dependsOn.every((dep) => !!resolvedDeps[dep]);
 
-    // oxlint-disable-next-line typescript/no-explicit-any
-    const select = useCallback((data: any) => toOptions(data, t), [toOptions, t]);
+    const select = useCallback((data: unknown) => toOptions(data, t), [toOptions, t]);
 
     const { data: options = [], isLoading } = useQuery({
         queryKey: param.queryKey(relevantDeps),

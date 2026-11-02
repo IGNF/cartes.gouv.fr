@@ -1,9 +1,11 @@
 import Input from "@codegouvfr/react-dsfr/Input";
 import { FC } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { FieldErrors, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "../../../../i18n/i18n";
 import { fr } from "@codegouvfr/react-dsfr";
 import { KeyFormValuesType } from "../../../../@types/app";
+import { BasicInfoDto } from "../../../../@types/entrepot";
+import { fieldErrorMessage } from "../../../../utils";
 
 type BasicTypeInfoFormProps = {
     form: UseFormReturn<KeyFormValuesType>;
@@ -16,23 +18,20 @@ const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ form }) => {
         register,
         formState: { errors },
     } = form;
+    const typeInfosErrors = errors.type_infos as FieldErrors<BasicInfoDto> | undefined;
 
     return (
         <div className={fr.cx("fr-mb-6v")}>
             <Input
                 label={t("login")}
-                // @ts-expect-error error
-                state={errors.type_infos?.login ? "error" : "default"}
-                // @ts-expect-error error
-                stateRelatedMessage={errors.type_infos?.login?.message?.toString()}
+                state={typeInfosErrors?.login ? "error" : "default"}
+                stateRelatedMessage={fieldErrorMessage(typeInfosErrors?.login)}
                 nativeInputProps={{ ...register("type_infos.login") }}
             />
             <Input
                 label={t("password")}
-                // @ts-expect-error error
-                state={errors.type_infos?.password ? "error" : "default"}
-                // @ts-expect-error error
-                stateRelatedMessage={errors.type_infos?.password?.message?.toString()}
+                state={typeInfosErrors?.password ? "error" : "default"}
+                stateRelatedMessage={fieldErrorMessage(typeInfosErrors?.password)}
                 // nativeInputProps={{ ...register("type_infos.password"), type: editMode ? "password" : "text" }}
                 nativeInputProps={{ ...register("type_infos.password"), type: "password" }}
             />
