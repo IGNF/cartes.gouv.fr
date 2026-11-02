@@ -5,6 +5,9 @@
     "categories": {
         "correctness": "error"
     },
+    "options": {
+        "typeAware": true
+    },
     "env": {
         "builtin": true,
         "browser": true,
@@ -49,6 +52,16 @@
         "@tanstack/query/stable-query-client": "error",
         "tss-unused-classes/unused-classes": "warn",
 
+        // Règles typées hors catégorie correctness, sans signalement sur le code actuel
+        "typescript/consistent-type-exports": "error",
+        "typescript/no-deprecated": "error",
+        "typescript/no-generated-empty-object-type": "error",
+        "typescript/no-mixed-enums": "error",
+        "typescript/no-unnecessary-qualifier": "error",
+        "typescript/prefer-find": "error",
+        "typescript/prefer-return-this-type": "error",
+        "typescript/related-getter-setter-pairs": "error",
+
         // Règles correctness avec options ou sévérité différente
         "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
         "react/exhaustive-deps": "warn",
@@ -71,7 +84,15 @@
         "jsx-a11y/prefer-tag-over-role": "off",
         "unicorn/no-useless-fallback-in-spread": "off",
         "unicorn/no-useless-spread": "off",
-        "unicorn/prefer-string-starts-ends-with": "off"
+        "unicorn/prefer-string-starts-ends-with": "off",
+        "typescript/no-base-to-string": "off",
+        "typescript/no-duplicate-type-constituents": "off",
+        "typescript/no-floating-promises": "off",
+        "typescript/no-misused-spread": "off",
+        "typescript/no-redundant-type-constituents": "off",
+        "typescript/no-useless-default-assignment": "off",
+        "typescript/restrict-template-expressions": "off",
+        "typescript/unbound-method": "off"
     },
     "overrides": [
         {
