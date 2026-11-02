@@ -65,7 +65,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
 
     // définition des query
     // query qui "ping" ou "poll" et récupère le progress en boucle
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
+    // oxlint-disable-next-line @tanstack/query/exhaustive-deps
     const pingIntProgQuery = useQuery({
         queryKey: RQKeys.datastore_upload_integration(datastoreId, uploadId),
         queryFn: ({ signal }) =>

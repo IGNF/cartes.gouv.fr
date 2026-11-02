@@ -20,20 +20,20 @@ type ParamDefBase = {
     key: string;
     label: (t: StatsTranslator) => string;
     queryKey: (deps: Record<string, string>) => string[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     queryFn: (deps: Record<string, string>, options?: RequestInit) => Promise<any>;
     dependsOn?: string[];
 };
 
 export type SelectParamDef = ParamDefBase & {
     kind: "select";
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     toOptions: (data: any, t: StatsTranslator) => SelectOption[];
 };
 
 export type ServiceParamDef = ParamDefBase & {
     kind: "service";
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     toOptions: (data: any, t: StatsTranslator) => ServiceOption[];
 };
 

@@ -140,6 +140,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                             <DatePicker
                                 label={t("edit_form.expiration_date")}
                                 value={value}
+                                // oxlint-disable-next-line react/purity -- lecture de la date courante, sans effet de bord
                                 minDate={new Date()}
                                 onChange={onChange}
                                 state={errors.end_date?.message ? "error" : "default"}

@@ -155,6 +155,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 renderInput={(props) => <input {...props} disabled={isLoading} />}
                                 defaultValue={search}
                                 // @ts-expect-error react-dsfr force role="search" mais la barre ne constitue pas une zone de recherche du site
+                                // oxlint-disable-next-line jsx-a11y/aria-role -- role={undefined} retire l’attribut, ce n’est pas un rôle invalide
                                 role={undefined}
                             />
                             <Button

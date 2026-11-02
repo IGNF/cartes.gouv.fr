@@ -124,7 +124,7 @@ const useStyles = tss.withName({ DatastoreAdd }).create({
             },
         },
     },
-    // eslint-disable-next-line tss-unused-classes/unused-classes
+    // oxlint-disable-next-line tss-unused-classes/unused-classes
     form: {
         display: "flex",
         flexDirection: "column",

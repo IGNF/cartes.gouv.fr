@@ -1,0 +1,85 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["typescript", "react", "jsx-a11y", "unicorn"],
+    "jsPlugins": ["@tanstack/eslint-plugin-query", "eslint-plugin-tss-unused-classes"],
+    "categories": {
+        "correctness": "error"
+    },
+    "env": {
+        "builtin": true,
+        "browser": true,
+        "node": true
+    },
+    "ignorePatterns": ["public/build", "public/bundles", "assets/data", "vendor", "var", "assets/@types/entrepot.ts"],
+    "rules": {
+        // Règles hors catégorie correctness, reprises de l’ancienne configuration ESLint
+        "array-callback-return": "error",
+        "eqeqeq": "warn",
+        "no-array-constructor": "error",
+        "no-case-declarations": "error",
+        "no-empty": "error",
+        "no-fallthrough": "error",
+        "no-prototype-builtins": "error",
+        "no-regex-spaces": "error",
+        "no-var": "error",
+        "prefer-const": "error",
+        "prefer-rest-params": "error",
+        "prefer-spread": "error",
+        "react/display-name": "error",
+        "react/hook-use-state": "error",
+        "react/jsx-no-comment-textnodes": "error",
+        "react/jsx-no-target-blank": "error",
+        "react/no-unescaped-entities": "error",
+        "react/no-unknown-property": "error",
+        "react/rules-of-hooks": "error",
+        "react/unsupported-syntax": "warn",
+        "typescript/ban-ts-comment": "error",
+        "typescript/no-empty-object-type": "error",
+        "typescript/no-explicit-any": "error",
+        "typescript/no-namespace": "error",
+        "typescript/no-require-imports": "error",
+        "typescript/no-unnecessary-type-constraint": "error",
+        "typescript/no-unsafe-function-type": "error",
+        "@tanstack/query/exhaustive-deps": "error",
+        "@tanstack/query/infinite-query-property-order": "error",
+        "@tanstack/query/mutation-property-order": "error",
+        "@tanstack/query/no-rest-destructuring": "warn",
+        "@tanstack/query/no-unstable-deps": "error",
+        "@tanstack/query/no-void-query-fn": "error",
+        "@tanstack/query/stable-query-client": "error",
+        "tss-unused-classes/unused-classes": "warn",
+
+        // Règles correctness avec options ou sévérité différente
+        "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
+        "react/exhaustive-deps": "warn",
+        "jsx-a11y/interactive-supports-focus": [
+            "error",
+            { "tabbable": ["button", "checkbox", "link", "progressbar", "searchbox", "slider", "spinbutton", "switch", "textbox"] }
+        ],
+        "jsx-a11y/no-noninteractive-element-interactions": [
+            "error",
+            { "body": ["onError", "onLoad"], "iframe": ["onError", "onLoad"], "img": ["onError", "onLoad"] }
+        ],
+
+        // Désactivées avant la migration : à réactiver une par une après revue
+        "react/set-state-in-effect": "off",
+        "react/preserve-manual-memoization": "off",
+        "react/incompatible-library": "off",
+
+        // Nouvelles avec la catégorie correctness, signalements à corriger avant réactivation
+        "jsx-a11y/control-has-associated-label": "off",
+        "jsx-a11y/prefer-tag-over-role": "off",
+        "unicorn/no-useless-fallback-in-spread": "off",
+        "unicorn/no-useless-spread": "off",
+        "unicorn/prefer-string-starts-ends-with": "off"
+    },
+    "overrides": [
+        {
+            // Identifiants i18n utilisés uniquement pour le typage
+            "files": ["**/*.locale.ts", "**/*.locale.tsx"],
+            "rules": {
+                "no-unused-vars": ["warn", { "varsIgnorePattern": "^i18n$", "argsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }]
+            }
+        }
+    ]
+}

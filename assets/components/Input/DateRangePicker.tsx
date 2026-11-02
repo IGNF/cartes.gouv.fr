@@ -45,6 +45,7 @@ const DateRangePicker = ({ startDate, endDate, onChange }: DateRangePickerProps)
     const [selectedShortcut, setSelectedShortcut] = useState<Shortcut>("1m");
 
     const handleShortcut = (shortcut: Exclude<Shortcut, "custom">) => {
+        // oxlint-disable-next-line react/purity -- appelé depuis un gestionnaire d’événement, pas pendant le rendu
         const today = stripTime(new Date());
         const start = new Date(today);
 
@@ -88,7 +89,7 @@ const DateRangePicker = ({ startDate, endDate, onChange }: DateRangePickerProps)
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
             <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                {/* oxlint-disable-next-line jsx-a11y/label-has-associated-control */}
                 <label className={fr.cx("fr-label")}>Période</label>
                 <TagsGroup
                     tags={
