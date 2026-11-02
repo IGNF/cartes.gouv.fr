@@ -143,8 +143,10 @@ export default function DeleteCommunity() {
                 setStoredState("error");
                 setStreamError(payload.message ?? "La suppression du contenu a échoué.");
                 disconnectStream();
-                // le contenu rechargé remplace la progression du flux
-                void refetchCleanupContent().then(() => setStreamProgress(undefined));
+                // le contenu rechargé remplace la progression du flux, si le rechargement réussit
+                void refetchCleanupContent().then((result) => {
+                    if (result.isSuccess) setStreamProgress(undefined);
+                });
             },
         },
         onError: (error) => {
@@ -173,8 +175,9 @@ export default function DeleteCommunity() {
     useEffect(() => {
         return () => {
             disconnectStream();
+            queryClient.removeQueries({ queryKey: RQKeys.datastore_cleanup_content(datastore._id), exact: true });
         };
-    }, [disconnectStream]);
+    }, [datastore._id, disconnectStream, queryClient]);
 
     function proceedFromDisclaimer(): void {
         setStoredState(isCleanupContentLoading ? "loading" : "confirm");

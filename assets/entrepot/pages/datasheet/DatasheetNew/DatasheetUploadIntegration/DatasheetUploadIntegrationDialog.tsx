@@ -102,7 +102,6 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                 : api.upload.pingIntegrationProgress(datastoreId, uploadId, { signal }),
         refetchInterval: (query) => (isIntegrationFinished(query.state.data?.integration_progress) ? false : 3000),
         refetchIntervalInBackground: true,
-        enabled: (query) => !isIntegrationFinished(query.state.data?.integration_progress),
         staleTime: 0,
         refetchOnMount: "always",
     });

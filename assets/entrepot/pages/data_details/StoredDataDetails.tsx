@@ -36,9 +36,8 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
     const reportQuery = useQuery<StoredDataReport, ApiError>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
         queryFn: ({ signal }) => api.storedData.getReportData(datastoreId, storedDataId, { signal }),
-        refetchInterval: 30000,
-        // statut final : plus besoin de recharger le rapport
-        enabled: (query) => !FINAL_STATUSES.includes(query.state.data?.stored_data.status),
+        // statut final : chargé à l’ouverture, puis plus rechargé périodiquement
+        refetchInterval: (query) => (FINAL_STATUSES.includes(query.state.data?.stored_data.status) ? false : 30000),
     });
 
     const datasheetName = useMemo(() => reportQuery?.data?.stored_data?.tags?.datasheet_name, [reportQuery?.data?.stored_data?.tags?.datasheet_name]);
