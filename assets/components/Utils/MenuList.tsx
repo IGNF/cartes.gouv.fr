@@ -107,10 +107,10 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items, disabled = fa
                     }}
                 >
                     {disabled === false &&
-                        _items.map((item, i) => {
+                        _items.map((item) => {
                             const itemContent = (
                                 <MenuItem
-                                    key={i}
+                                    key={item.text}
                                     onClick={(e: MouseEvent<HTMLElement>) => {
                                         if (item.autoClose !== false) {
                                             handleClose();
@@ -149,7 +149,7 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items, disabled = fa
 
                             if (item.linkProps && !item.disabled) {
                                 return (
-                                    <a key={i} {...item.linkProps}>
+                                    <a key={item.text} {...item.linkProps}>
                                         {itemContent}
                                     </a>
                                 );
