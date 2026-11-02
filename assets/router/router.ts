@@ -361,13 +361,20 @@ export const routeStringParam = (params: object | undefined, name: string): stri
     return typeof value === "string" ? value : undefined;
 };
 
+// Entier, comme parseInt : les paramètres numériques de type-route peuvent porter des décimales
 export const routeNumberParam = (params: object | undefined, name: string): number | undefined => {
     const value = routeParam(params, name);
     const number = typeof value === "string" ? parseInt(value, 10) : value;
-    return typeof number === "number" && !Number.isNaN(number) ? number : undefined;
+    return typeof number === "number" && Number.isFinite(number) ? Math.trunc(number) : undefined;
+};
+
+// Page ou taille de page : une valeur inférieure à 1 est ignorée au profit de la valeur par défaut
+export const routePositiveIntegerParam = (params: object | undefined, name: string): number | undefined => {
+    const number = routeNumberParam(params, name);
+    return number !== undefined && number >= 1 ? number : undefined;
 };
 
 export const useRoutePaginationParams = () => {
     const { params } = useRoute();
-    return { page: routeNumberParam(params, "page") ?? 1, limit: routeNumberParam(params, "limit") ?? 10 };
+    return { page: routePositiveIntegerParam(params, "page") ?? 1, limit: routePositiveIntegerParam(params, "limit") ?? 10 };
 };

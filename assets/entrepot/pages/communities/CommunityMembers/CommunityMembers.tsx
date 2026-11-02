@@ -25,7 +25,7 @@ import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
-import { routeNumberParam, routes, useRoute } from "../../../../router/router";
+import { routePositiveIntegerParam, routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import { AddMember, addMemberModal } from "../AddMember/AddMember";
 import { complete, rightTypes, UserRights } from "../UserRights";
@@ -110,8 +110,8 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     }, [communityMembers, communitySupervisor, user?.id]);
 
     const { params } = useRoute();
-    const page = routeNumberParam(params, "page") ?? 1;
-    const limit = routeNumberParam(params, "limit") ?? 20;
+    const page = routePositiveIntegerParam(params, "page") ?? 1;
+    const limit = routePositiveIntegerParam(params, "limit") ?? 20;
 
     const { search, searchedItems } = useSearch(members);
     const { paginatedItems, totalPages } = usePagination(searchedItems, page, limit);
