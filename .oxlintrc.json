@@ -66,6 +66,8 @@
         "typescript/no-unsafe-call": "error",
         "typescript/no-unsafe-member-access": "error",
         "typescript/no-unsafe-return": "error",
+        // Gestionnaires JSX async (handleSubmit de react-hook-form) : réglage recommandé pour React
+        "typescript/no-misused-promises": ["error", { "checksVoidReturn": { "attributes": false } }],
 
         // Règles correctness avec options ou sévérité différente
         "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
@@ -89,8 +91,7 @@
         "jsx-a11y/prefer-tag-over-role": "off",
         "unicorn/no-useless-fallback-in-spread": "off",
         "unicorn/no-useless-spread": "off",
-        "unicorn/prefer-string-starts-ends-with": "off",
-        "typescript/no-floating-promises": "off"
+        "unicorn/prefer-string-starts-ends-with": "off"
     },
     "overrides": [
         {
