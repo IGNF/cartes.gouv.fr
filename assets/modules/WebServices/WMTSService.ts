@@ -32,15 +32,10 @@ class WMTSService extends BaseService {
             ...wmtsOptions,
             attributions: this.getAttribution(),
         });
-        if (capsLayer) {
-            wmtsSource.setProperties({
-                name: capsLayer.Identifier ?? null,
-                title: capsLayer.Title ?? null,
-                abstract: capsLayer.Abstract ?? null,
-            });
-        }
+        // propriétés sur la couche, où RMap les lit (comme pour WMS)
         const wmtsLayer = new TileLayer({
             source: wmtsSource,
+            properties: capsLayer ? { name: capsLayer.Identifier ?? null, title: capsLayer.Title ?? null, abstract: capsLayer.Abstract ?? null } : undefined,
         });
         return [wmtsLayer];
     }
