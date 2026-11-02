@@ -16,13 +16,13 @@ import { routeStringParam, routes, useRoute } from "@/router/router";
 import { findMembership } from "@/utils";
 import { statsPeriodQuery } from "@/utils/stats";
 import DynamicParamSelector from "./DynamicParamSelector";
-import type { StatsScope, StatsScopeConfig } from "./stats.types";
+import { statsScopes, type StatsScope, type StatsScopeConfig } from "./stats.types";
 import StatsBarChart from "./StatsBarChart";
 import { statsConfig } from "./statsConfig";
 
 // Aucune entité pré-sélectionnée, sauf si le scope n'en a qu'une (le select est alors masqué)
-function initEntityTypeKey(scope: StatsScope): string | undefined {
-    const keys = Object.keys(statsConfig[scope]?.entities ?? {});
+function initEntityTypeKey(scope: StatsScope | undefined): string | undefined {
+    const keys = Object.keys((scope && statsConfig[scope]?.entities) ?? {});
     return keys.length === 1 ? keys[0] : undefined;
 }
 
@@ -37,12 +37,13 @@ function initDate(offsetMonths = 0): Date {
 
 export default function Stats() {
     const { params } = useRoute();
-    const scope = routeStringParam(params, "scope") as StatsScope;
+    const scopeParamValue = routeStringParam(params, "scope");
+    const scope = statsScopes.find((s) => s === scopeParamValue);
 
     const { t } = useTranslation("Stats");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
-    const scopeConfig: StatsScopeConfig | undefined = statsConfig[scope];
+    const scopeConfig: StatsScopeConfig | undefined = scope ? statsConfig[scope] : undefined;
     const entities = scopeConfig?.entities ?? {};
     const entityTypeKeys = Object.keys(entities);
     const scopeParam = scopeConfig?.param ?? null;

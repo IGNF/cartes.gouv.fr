@@ -8,9 +8,9 @@ import type { StatsScope } from "./stats.types";
 
 const { i18n } = declareComponentKeys<
     | "scope_selection_title"
-    | { K: "scope_title"; P: { scope: StatsScope }; R: string }
-    | { K: "scope_desc"; P: { scope: StatsScope }; R: string }
-    | { K: "entity_select_label"; P: { scope: StatsScope }; R: string }
+    | { K: "scope_title"; P: { scope: StatsScope | undefined }; R: string }
+    | { K: "scope_desc"; P: { scope: StatsScope | undefined }; R: string }
+    | { K: "entity_select_label"; P: { scope: StatsScope | undefined }; R: string }
     | "entity_datastore_service"
     | "entity_datastore_permission"
     | "entity_user_me"
@@ -50,7 +50,7 @@ export const StatsFrTranslations: Translations<"fr">["Stats"] = {
             case "user":
                 return "Utilisateur (moi)";
             default:
-                return scope;
+                return "";
         }
     },
     scope_desc: ({ scope }) => {
@@ -60,7 +60,7 @@ export const StatsFrTranslations: Translations<"fr">["Stats"] = {
             case "user":
                 return "Mes statistiques personnelles de consommation";
             default:
-                return scope;
+                return "";
         }
     },
     entity_select_label: ({ scope }) => (scope === "datastore" ? "Suivre les…" : "Suivre mes…"),
