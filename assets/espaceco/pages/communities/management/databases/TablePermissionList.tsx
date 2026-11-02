@@ -19,8 +19,8 @@ import { getPermission } from "./PermissionUtils";
 import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
 
 function getAvailableTables(permission: IDatabasePermission, database: DatabaseDetailedResponseDTO) {
-    const permissionTables = permission.tables.map((t) => t.id);
-    return database.tables.filter((t) => !permissionTables.includes(t.id));
+    const permissionTables = new Set(permission.tables.map((t) => t.id));
+    return database.tables.filter((t) => !permissionTables.has(t.id));
 }
 
 type TablePermissionListProps = {

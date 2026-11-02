@@ -314,11 +314,9 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                 };
             });
 
-            data?.map((style) => style.layers.map((layer) => layer.annexe_id))
-                .flat()
-                .forEach((annexeId) => {
-                    queryClient.removeQueries({ queryKey: RQKeys.datastore_annexe(datastoreId, annexeId) });
-                });
+            data?.flatMap((style) => style.layers.map((layer) => layer.annexe_id)).forEach((annexeId) => {
+                queryClient.removeQueries({ queryKey: RQKeys.datastore_annexe(datastoreId, annexeId) });
+            });
 
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offeringId) });
             routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).push();

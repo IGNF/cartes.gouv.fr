@@ -20,7 +20,7 @@ import ReportTab from "./ReportTab/ReportTab";
 import { useDatastore } from "../../../contexts/datastore";
 import Main from "../../../components/Layout/Main";
 
-const FINAL_STATUSES: (StoredDataStatusEnum | undefined)[] = [StoredDataStatusEnum.DELETED, StoredDataStatusEnum.GENERATED, StoredDataStatusEnum.UNSTABLE];
+const FINAL_STATUSES = new Set<StoredDataStatusEnum | undefined>([StoredDataStatusEnum.DELETED, StoredDataStatusEnum.GENERATED, StoredDataStatusEnum.UNSTABLE]);
 
 type StoredDataDetailsProps = {
     datastoreId: string;
@@ -37,7 +37,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
         queryFn: ({ signal }) => api.storedData.getReportData(datastoreId, storedDataId, { signal }),
         // statut final : chargé à l’ouverture, puis plus rechargé périodiquement
-        refetchInterval: (query) => (FINAL_STATUSES.includes(query.state.data?.stored_data.status) ? false : 30000),
+        refetchInterval: (query) => (FINAL_STATUSES.has(query.state.data?.stored_data.status) ? false : 30000),
     });
 
     const datasheetName = useMemo(() => reportQuery?.data?.stored_data?.tags?.datasheet_name, [reportQuery?.data?.stored_data?.tags?.datasheet_name]);

@@ -77,11 +77,11 @@ const userKeyIdParam = p({
 
 // ---------- sélecteur Service fusionné (offerings + agrégats endpoint) ----------
 
-const supportedServiceTypes: string[] = [EndpointTypeEnum.WFS, EndpointTypeEnum.WMSRASTER, EndpointTypeEnum.WMSVECTOR, EndpointTypeEnum.WMTSTMS];
+const supportedServiceTypes = new Set<string>([EndpointTypeEnum.WFS, EndpointTypeEnum.WMSRASTER, EndpointTypeEnum.WMSVECTOR, EndpointTypeEnum.WMTSTMS]);
 
 // La liste "detailed" est une seule requête (fields=...), chaque offering porte type, open et endpoint {_id, name}
 export function buildServiceOptions(offerings: OfferingStandardListResponseDto[], t: StatsTranslator): ServiceOption[] {
-    const eligible = offerings.filter((o) => supportedServiceTypes.includes(o.type) && o.endpoint?._id);
+    const eligible = offerings.filter((o) => supportedServiceTypes.has(o.type) && o.endpoint?._id);
 
     // un groupe par endpoint : l'agrégat "tous les X" en 1ʳᵉ option, puis les services par ordre alphabétique
     const byEndpoint = new Map<string, OfferingStandardListResponseDto[]>();
