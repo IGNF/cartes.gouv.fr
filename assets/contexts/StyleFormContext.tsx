@@ -1,4 +1,4 @@
-import { createContext, Dispatch, PropsWithChildren, SetStateAction, use, useEffect, useState } from "react";
+import { createContext, Dispatch, PropsWithChildren, SetStateAction, use, useState } from "react";
 
 import { OfferingTypeEnum, Service, StyleFormatEnum } from "@/@types/app";
 
@@ -58,11 +58,14 @@ export function StyleFormProvider(props: PropsWithChildren<StyleFormProviderProp
 
     const [currentTable, setCurrentTable] = useState(defaultTable);
 
-    useEffect(() => {
+    // revenir à la table par défaut quand elle change
+    const [prevDefaultTable, setPrevDefaultTable] = useState(defaultTable);
+    if (defaultTable !== prevDefaultTable) {
+        setPrevDefaultTable(defaultTable);
         if (defaultTable) {
             setCurrentTable(defaultTable);
         }
-    }, [defaultTable]);
+    }
 
     const isTms = serviceType === OfferingTypeEnum.WMTSTMS;
 

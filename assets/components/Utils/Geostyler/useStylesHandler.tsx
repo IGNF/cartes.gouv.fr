@@ -1,5 +1,5 @@
 import { type Style as GsStyle, StyleParser } from "geostyler-style";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { StyleFormatEnum } from "@/@types/app";
 
@@ -11,14 +11,21 @@ type UseStylesHandlerProps = {
 };
 type UseStylesHandlerReturn = {
     gsStyle: GsStyle | undefined;
-    setGsStyle: Dispatch<SetStateAction<GsStyle | undefined>>;
+    setGsStyle: (style: GsStyle | undefined) => void;
     strStyle?: string | undefined;
 };
 export default function useStylesHandler(props: UseStylesHandlerProps): UseStylesHandlerReturn {
     const { parser, format, initialStrStyle, setError } = props;
 
     const [gsStyle, setGsStyle] = useState<GsStyle | undefined>(undefined);
-    const [strStyle, setStrStyle] = useState<string | undefined>(undefined);
+    const [writtenStrStyle, setWrittenStrStyle] = useState<string | undefined>(undefined);
+    const strStyle = gsStyle ? writtenStrStyle : undefined;
+
+    // sans style, oublier la dernière sérialisation pour ne pas la renvoyer au style suivant
+    const updateGsStyle = useCallback((style: GsStyle | undefined) => {
+        setGsStyle(style);
+        if (!style) setWrittenStrStyle(undefined);
+    }, []);
 
     const setErrorRef = useRef(setError);
     const lastInitStrRef = useRef<string | undefined>(undefined);
@@ -41,7 +48,7 @@ export default function useStylesHandler(props: UseStylesHandlerProps): UseStyle
             if (!initialStrStyle) {
                 // effacer le style si aucune valeur n'est fournie pour la couche sélectionnée
                 lastInitStrRef.current = undefined;
-                setGsStyle(undefined);
+                updateGsStyle(undefined);
                 return;
             }
             try {
@@ -58,33 +65,36 @@ export default function useStylesHandler(props: UseStylesHandlerProps): UseStyle
         };
 
         void init();
-    }, [initialStrStyle, strStyle, format, parser]);
+    }, [initialStrStyle, strStyle, format, parser, updateGsStyle]);
 
     // mettre à jour strStyle quand gsStyle change
     useEffect(() => {
-        if (gsStyle) {
-            parser
-                .writeStyle(gsStyle)
-                .then((result) => {
-                    if (result.errors && result.errors.length > 0) {
-                        console.error(result.errors);
-                        throw new Error(result.errors[0].message ?? "Erreur lors de l'écriture du style");
-                    }
-                    const content = typeof result.output === "object" ? JSON.stringify(result.output) : (result.output as string);
-                    setStrStyle(content);
-                })
-                .catch((e) => {
-                    console.error("Erreur lors de l'écriture du style :", e);
-                    setErrorRef.current("Erreur lors de l'écriture du style : " + (e as Error).message);
-                });
-        } else {
-            setStrStyle(undefined);
-        }
+        if (!gsStyle) return;
+
+        let cancelled = false;
+        parser
+            .writeStyle(gsStyle)
+            .then((result) => {
+                if (result.errors && result.errors.length > 0) {
+                    console.error(result.errors);
+                    throw new Error(result.errors[0].message ?? "Erreur lors de l'écriture du style");
+                }
+                const content = typeof result.output === "object" ? JSON.stringify(result.output) : (result.output as string);
+                if (!cancelled) setWrittenStrStyle(content);
+            })
+            .catch((e) => {
+                console.error("Erreur lors de l'écriture du style :", e);
+                setErrorRef.current("Erreur lors de l'écriture du style : " + (e as Error).message);
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, [gsStyle, parser]);
 
     return {
         gsStyle,
-        setGsStyle,
+        setGsStyle: updateGsStyle,
         strStyle,
     };
 }

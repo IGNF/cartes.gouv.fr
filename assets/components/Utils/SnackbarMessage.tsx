@@ -1,5 +1,5 @@
 import { Slide, SlideProps, Snackbar, SnackbarCloseReason } from "@mui/material";
-import { FC, memo, useEffect, useState } from "react";
+import { FC, memo, useState } from "react";
 
 import { useSnackbarStore } from "../../stores/SnackbarStore";
 import Alert from "@codegouvfr/react-dsfr/Alert";
@@ -10,15 +10,8 @@ function SlideTransition(props: SlideProps) {
 
 const SnackbarMessage: FC = () => {
     const message = useSnackbarStore((state) => state.message);
-    const [open, setOpen] = useState(false);
-
-    useEffect(() => {
-        if (message?.id) {
-            setOpen(true);
-        } else {
-            setOpen(false);
-        }
-    }, [message?.id]);
+    const [closedId, setClosedId] = useState<string>();
+    const open = !!message?.id && message.id !== closedId;
 
     function handleClose(_: unknown, reason: SnackbarCloseReason) {
         if (reason !== "clickaway") {
@@ -27,7 +20,7 @@ const SnackbarMessage: FC = () => {
     }
 
     function close() {
-        setOpen(false);
+        setClosedId(message?.id);
     }
 
     return (
