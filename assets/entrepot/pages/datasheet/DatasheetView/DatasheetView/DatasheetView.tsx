@@ -74,7 +74,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             queryClient.setQueryData<Datasheet[]>(RQKeys.datastore_datasheet_list(datastoreId), (datasheetList = []) => {
                 return datasheetList.filter((datasheet) => datasheet.name !== datasheetName);
             });
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
 
             routes.datasheet_list({ datastoreId }).push();
         },

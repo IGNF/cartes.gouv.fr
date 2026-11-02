@@ -125,7 +125,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         },
         onSuccess() {
             if (vectorDbQuery.data?.tags?.datasheet_name) {
-                queryClient.invalidateQueries({
+                void queryClient.invalidateQueries({
                     queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
                 });
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
@@ -156,11 +156,11 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
             }
 
             if (vectorDbQuery.data?.tags?.datasheet_name) {
-                queryClient.invalidateQueries({
+                void queryClient.invalidateQueries({
                     queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
                 });
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
-                queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, vectorDbQuery.data?.tags?.datasheet_name) });
+                void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, vectorDbQuery.data?.tags?.datasheet_name) });
             } else {
                 routes.datasheet_list({ datastoreId }).push();
             }
@@ -376,7 +376,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                             },
                             {
                                 children: currentStep < Object.values(STEPS).length ? t("continue") : t("publish"),
-                                onClick: nextStep,
+                                onClick: () => void nextStep(),
                             },
                         ]}
                         inlineLayoutWhen="always"

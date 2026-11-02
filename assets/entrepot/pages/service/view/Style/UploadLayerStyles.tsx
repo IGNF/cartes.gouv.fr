@@ -32,7 +32,7 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
 
     useEffect(() => {
         if (!service) return;
-        getWebService(service).getLayers().then(setOlLayers);
+        void getWebService(service).getLayers().then(setOlLayers);
     }, [service]);
 
     const styleFiles = useWatch({
@@ -80,7 +80,7 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
                 }
             }
         }
-        computeCurrentStyle();
+        void computeCurrentStyle();
         return () => {
             cancelled = true;
         };

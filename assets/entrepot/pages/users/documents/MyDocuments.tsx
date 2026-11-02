@@ -49,7 +49,7 @@ const MyDocuments: FC = () => {
         },
         onSettled: () => {
             setFilter({});
-            documentsQuery.refetch();
+            void documentsQuery.refetch();
         },
     });
 
@@ -68,7 +68,7 @@ const MyDocuments: FC = () => {
         },
         onSettled: () => {
             setFilter({});
-            documentsQuery.refetch();
+            void documentsQuery.refetch();
         },
     });
 
@@ -87,7 +87,7 @@ const MyDocuments: FC = () => {
         },
         onSettled: () => {
             setFilter({});
-            documentsQuery.refetch();
+            void documentsQuery.refetch();
         },
     });
 
@@ -123,7 +123,7 @@ const MyDocuments: FC = () => {
         },
         onSettled: () => {
             setFilter({});
-            documentsQuery.refetch();
+            void documentsQuery.refetch();
         },
     });
 

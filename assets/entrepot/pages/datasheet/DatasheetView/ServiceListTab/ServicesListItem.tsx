@@ -55,8 +55,8 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                 }
             );
 
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
+            void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
         },
     });
 
@@ -89,7 +89,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         text: "Copier l’URL de diffusion",
                         iconId: "ri-file-copy-line",
                         disabled: offeringUnavailable,
-                        onClick: async () => {
+                        onClick: () => {
                             if (!service.share_url) {
                                 setMessage("URL de diffusion indisponible");
                             } else {

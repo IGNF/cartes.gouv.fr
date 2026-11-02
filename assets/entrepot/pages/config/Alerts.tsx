@@ -103,7 +103,7 @@ const Alerts: FC = () => {
         },
         onError: (error) => {
             setNotification({ severity: "error", title: t("alerts_update_error") });
-            queryClient.refetchQueries({ queryKey: RQKeys.alerts() });
+            void queryClient.refetchQueries({ queryKey: RQKeys.alerts() });
             console.error(error);
         },
         onSuccess: () => {

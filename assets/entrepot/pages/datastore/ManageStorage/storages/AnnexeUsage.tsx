@@ -84,7 +84,7 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                       }
                     : undefined;
             });
-            queryClient.invalidateQueries({
+            void queryClient.invalidateQueries({
                 queryKey: RQKeys.datastore_annexe_list(datastore._id),
                 exact: false,
             });

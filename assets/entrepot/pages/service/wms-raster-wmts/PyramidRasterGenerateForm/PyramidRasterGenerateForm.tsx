@@ -98,8 +98,8 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
             return api.pyramidRaster.add(datastoreId, formData);
         },
         onSuccess() {
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
             routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "dataset" }).push();
         },
     });
@@ -226,7 +226,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                             },
                             {
                                 children: currentStep < Object.values(STEPS).length ? tCommon("continue") : tCommon("publish"),
-                                onClick: nextStep,
+                                onClick: () => void nextStep(),
                             },
                         ]}
                         inlineLayoutWhen="always"

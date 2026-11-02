@@ -237,8 +237,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 
         const uuid = uuidv4();
         setFileUploadInProgress(true);
-        queryClient.cancelQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
-        queryClient.cancelQueries({ queryKey: RQKeys.catalogs_organizations() });
+        void queryClient.cancelQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
+        void queryClient.cancelQueries({ queryKey: RQKeys.catalogs_organizations() });
         setProgressMax(file.size);
 
         fileUploader
@@ -417,7 +417,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         onClick: () => {
                             const dataFile = dataFileRef.current?.files?.[0];
                             validateDataFile(dataFile);
-                            handleSubmit(onSubmit)();
+                            void handleSubmit(onSubmit)();
                         },
                     },
                 ]}

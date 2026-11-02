@@ -46,7 +46,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
     const metadata: File | undefined = watch("metadata_file_content")?.[0];
 
     useEffect(() => {
-        (async () => {
+        void (async () => {
             if (!metadata) return;
 
             const xmlText = await metadata.text();

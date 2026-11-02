@@ -174,7 +174,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                                 },
                                 {
                                     children: t("edit_form.record"),
-                                    onClick: () => handleSubmit(onSubmit)(),
+                                    onClick: () => void handleSubmit(onSubmit)(),
                                 },
                             ]}
                             inlineLayoutWhen="always"

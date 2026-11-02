@@ -67,7 +67,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
         },
         onSuccess() {
             if (pyramidQuery.data?.tags?.datasheet_name) {
-                queryClient.invalidateQueries({
+                void queryClient.invalidateQueries({
                     queryKey: RQKeys.datastore_datasheet(datastoreId, pyramidQuery.data?.tags.datasheet_name),
                 });
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
@@ -96,11 +96,11 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
             }
 
             if (pyramidQuery.data?.tags?.datasheet_name) {
-                queryClient.invalidateQueries({
+                void queryClient.invalidateQueries({
                     queryKey: RQKeys.datastore_datasheet(datastoreId, pyramidQuery.data?.tags.datasheet_name),
                 });
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
-                queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, pyramidQuery.data?.tags?.datasheet_name) });
+                void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, pyramidQuery.data?.tags?.datasheet_name) });
             } else {
                 routes.datasheet_list({ datastoreId }).push();
             }
@@ -269,7 +269,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                             },
                             {
                                 children: currentStep < Object.values(STEPS).length ? tCommon("continue") : t("publish"),
-                                onClick: nextStep,
+                                onClick: () => void nextStep(),
                             },
                         ]}
                         inlineLayoutWhen="always"

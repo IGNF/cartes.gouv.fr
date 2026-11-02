@@ -41,7 +41,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                     upload_list: datasheet.upload_list?.filter((upload) => upload._id !== uploadId) ?? [],
                 };
             });
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
         },
     });
 

@@ -80,7 +80,7 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                       }
                     : undefined;
             });
-            queryClient.invalidateQueries({
+            void queryClient.invalidateQueries({
                 queryKey: RQKeys.datastore_upload_list(datastore._id),
                 exact: false,
             });

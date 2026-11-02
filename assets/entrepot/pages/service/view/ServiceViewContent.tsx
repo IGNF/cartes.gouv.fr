@@ -30,7 +30,7 @@ function ServiceViewContent(props: ServiceViewContent) {
     const [olLayers, setOlLayers] = useState<Layer[]>([]);
     useEffect(() => {
         if (!service) return;
-        getWebService(service).getLayers().then(setOlLayers);
+        void getWebService(service).getLayers().then(setOlLayers);
     }, [service]);
 
     const currentStyle: CartesStyle | undefined = (service?.configuration.styles ?? []).find((style) => style.current);
