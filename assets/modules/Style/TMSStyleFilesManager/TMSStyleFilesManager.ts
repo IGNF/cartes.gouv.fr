@@ -2,7 +2,7 @@ import MapboxParser from "geostyler-mapbox-parser";
 import QGISStyleParser from "geostyler-qgis-parser";
 import SldStyleParser from "geostyler-sld-parser";
 import { Sources } from "mapbox-gl";
-import { AnyLayer } from "mapbox-gl/index";
+import { AnyLayer, Style as MbStyle } from "mapbox-gl/index";
 import { v4 as uuidv4 } from "uuid";
 import { Service, StyleForm, StyleFormat, TmsMetadata } from "../../../@types/app";
 import { getTranslation } from "../../../i18n/i18n";
@@ -61,7 +61,7 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
         }
 
         const styleString = values.style_files["no_layer"];
-        const mapboxStyle = JSON.parse(styleString);
+        const mapboxStyle = JSON.parse(styleString) as MbStyle;
 
         mapboxStyle.sources = {
             [this.#metadata.name]: {
@@ -74,7 +74,9 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
 
         mapboxStyle.layers.forEach((layer) => {
             layer.id = uuidv4();
-            layer.source = this.#metadata?.name;
+            if (layer.type !== "custom") {
+                layer.source = this.#metadata?.name;
+            }
         });
 
         const layer = "no_layer";
@@ -87,7 +89,7 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
         return formData;
     }
 
-    async #toMapboxLayer(layerName, styleString: string) {
+    async #toMapboxLayer(layerName: string, styleString: string) {
         const parser = this.inputFormat === "sld" ? new SldStyleParser({ locale: "fr" }) : new QGISStyleParser();
 
         const { output } = await parser.readStyle(styleString);
@@ -99,8 +101,10 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
 
         const layers: AnyLayer[] = [];
         mbStyle.layers.forEach((layer) => {
-            layer["source"] = this.#metadata?.name;
-            layer["source-layer"] = layerName;
+            if (layer.type !== "custom") {
+                layer.source = this.#metadata?.name;
+                layer["source-layer"] = layerName;
+            }
             layers.push(layer);
         });
 

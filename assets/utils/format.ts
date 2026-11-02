@@ -5,8 +5,8 @@ import { fr } from "date-fns/locale";
  * Supprime les accents d'une chaine de caracteres
  * œ => OE et æ => AE
  */
-export const removeDiacritics = (str) => {
-    const removeLigature = (s) => {
+export const removeDiacritics = (str: string) => {
+    const removeLigature = (s: string) => {
         return s
             .replace(/\u0152/g, "OE")
             .replace(/\u0153/g, "oe")
@@ -14,12 +14,7 @@ export const removeDiacritics = (str) => {
             .replace(/\u00e6/g, "ae");
     };
 
-    if (typeof str === "string" || str instanceof String) {
-        let s = str.normalize("NFD");
-        s = removeLigature(s);
-        return s.replace(/[\u0300-\u036f]/g, "");
-    }
-    return str;
+    return removeLigature(str.normalize("NFD")).replace(/[\u0300-\u036f]/g, "");
 };
 
 /**
@@ -95,11 +90,11 @@ export const trimObject = (obj: object): object => {
     }
 
     const newObject = Object.keys(obj).reduce((acc, key) => {
-        let value = obj[key];
+        let value: unknown = (obj as Record<string, unknown>)[key];
 
         if (typeof value === "string") {
             value = value.trim();
-        } else if (typeof value === "object") {
+        } else if (typeof value === "object" && value !== null) {
             value = trimObject(value);
         }
         return { ...acc, [key]: value };

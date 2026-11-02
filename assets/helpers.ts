@@ -6,7 +6,7 @@ import { StoredDataDetailsRelationDto } from "./@types/entrepot";
  */
 const filterGeometricRelations = (relations: StoredDataDetailsRelationDto[], filter: boolean = false): StoredDataDetailsRelationDto[] => {
     const filtered = relations.filter((relation) => {
-        const hasGeometry = (attributes) => {
+        const hasGeometry = (attributes: Record<string, unknown>) => {
             for (const type of Object.values(attributes)) {
                 if (/^geometry\(/.test(type as string)) return true;
             }

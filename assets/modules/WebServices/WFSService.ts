@@ -141,32 +141,25 @@ class WFSService extends BaseService {
      * @returns
      */
     #getInfo(requestInfo: Record<string, string>): LayerInfo | null {
-        let featureTypeInfo;
-
-        for (const featureType of this.#featureTypes) {
-            const info: Partial<FeatureType> = {};
-            ["Name", "Title", "Abstract"].forEach((key) => {
-                info[key] = featureType[key];
-            });
-            const match = featureType["DefaultCRS"].match(/urn:ogc:def:crs:EPSG::(\d+)/);
-            info["DefaultCRS"] = match ? `EPSG:${match[1]}` : "EPSG:4326";
-
-            if (info.Name === requestInfo.typeNames) {
-                featureTypeInfo = { base_url: requestInfo.base_url, version: requestInfo.version, ...info };
-
-                let keywords = featureType["ows:Keywords"];
-                if (!Array.isArray(keywords)) {
-                    keywords = [keywords];
-                }
-                featureTypeInfo["keywords"] = keywords;
-                featureTypeInfo["extent"] = [
-                    ...featureType["ows:WGS84BoundingBox"]["ows:LowerCorner"].split(" "),
-                    ...featureType["ows:WGS84BoundingBox"]["ows:UpperCorner"].split(" "),
-                ].map(parseFloat);
-                break;
-            }
+        const featureType = this.#featureTypes.find((ft) => ft.Name === requestInfo.typeNames);
+        if (!featureType) {
+            return null;
         }
-        return featureTypeInfo;
+
+        const match = featureType.DefaultCRS.match(/urn:ogc:def:crs:EPSG::(\d+)/);
+        const keywords = featureType["ows:Keywords"];
+        const bbox = featureType["ows:WGS84BoundingBox"];
+
+        return {
+            base_url: requestInfo.base_url,
+            version: requestInfo.version,
+            Name: featureType.Name,
+            Title: featureType.Title,
+            Abstract: featureType.Abstract,
+            DefaultCRS: match ? `EPSG:${match[1]}` : "EPSG:4326",
+            keywords: Array.isArray(keywords) ? keywords : [keywords],
+            extent: [...bbox["ows:LowerCorner"].split(" "), ...bbox["ows:UpperCorner"].split(" ")].map(parseFloat),
+        };
     }
 }
 

@@ -20,7 +20,7 @@ export function useDrag(updateItems: (from: number, to: number) => void) {
     }, []);
 
     const startDrag = useCallback(
-        (event: MouseEvent, index: number) => {
+        (event: Pick<MouseEvent, "pageY">, index: number) => {
             const ref = refs.current[index];
             if (!ref) {
                 return;
@@ -40,7 +40,7 @@ export function useDrag(updateItems: (from: number, to: number) => void) {
             const position = top + height / 2;
             let { nextPosition, nextRef, prevPosition, prevRef } = getNextPrev(index, positions);
 
-            function onDrag(event) {
+            function onDrag(event: MouseEvent) {
                 const deltaY = event.pageY - startY;
                 ref.style.transform = `translateY(${deltaY}px)`;
                 const newPosition = position + deltaY;

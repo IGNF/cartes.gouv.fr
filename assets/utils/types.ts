@@ -33,13 +33,14 @@ export const getArrayRange = (start: number, stop: number, step: number = 1): nu
 
 const rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
 const reEscapeChar = /\\(\\)?/g;
-export function stringToPath(string) {
+export function stringToPath(string: string) {
     const result: string[] = [];
     if (string.charCodeAt(0) === 46 /* . */) {
         result.push("");
     }
-    string.replace(rePropName, (match, number, quote, subString) => {
+    string.replace(rePropName, (match: string, number: string | undefined, quote: string | undefined, subString: string) => {
         result.push(quote ? subString.replace(reEscapeChar, "$1") : number || match);
+        return match;
     });
     return result;
 }
@@ -50,7 +51,7 @@ export function get(object: object, path: string): unknown {
     let index = 0;
     let result: unknown = object;
     while (result !== undefined && result !== null && index < length) {
-        result = result?.[pathArray[index++]];
+        result = (result as Record<string, unknown>)[pathArray[index++]];
     }
     return index && index === length ? result : undefined;
 }

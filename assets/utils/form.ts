@@ -1,5 +1,5 @@
 // Pour des chaines non définies ou vides => null
-export const setToNull = (value) => (value === undefined || value === "" ? null : value);
+export const setToNull = <T>(value: T | undefined | ""): T | null => (value === undefined || value === "" ? null : value);
 
 // Message d’une erreur react-hook-form, y compris pour un champ tableau ou objet dont le type ne garantit pas une chaîne
 export const fieldErrorMessage = (error: { message?: unknown } | undefined): string | undefined =>

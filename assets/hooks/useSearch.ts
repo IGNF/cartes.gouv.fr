@@ -1,4 +1,4 @@
-import { useRoute } from "@/router/router";
+import { routeStringParam, useRoute } from "@/router/router";
 
 interface IUseSearchResult<T> {
     search: string;
@@ -7,9 +7,13 @@ interface IUseSearchResult<T> {
 
 export function useSearch<T>(data: T[], searchProperty = "name"): IUseSearchResult<T> {
     const { params } = useRoute();
-    const search = params["search"] ?? "";
+    const search = routeStringParam(params, "search") ?? "";
+    const matches = (item: T) => {
+        const value = (item as Record<string, unknown>)[searchProperty];
+        return typeof value === "string" && value.toLowerCase().includes(search.toLowerCase());
+    };
     return {
         search,
-        searchedItems: search ? data.filter((d) => d[searchProperty].toLowerCase().includes(search.toLowerCase())) : data,
+        searchedItems: search ? data.filter(matches) : data,
     };
 }

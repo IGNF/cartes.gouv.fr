@@ -11,7 +11,7 @@ import { StyleFormatEnum } from "@/@types/app";
 import Panels from "@/components/Layout/Panels";
 import { useStyleForm } from "@/contexts/StyleFormContext";
 import { useTranslation } from "@/i18n";
-import { encodeKey } from "@/utils";
+import { encodeKey, get } from "@/utils";
 import { getParserForFormat, getParsersForExtensions } from "@/utils/geostyler";
 import UploadStyleFile from "./UploadStyleFile";
 
@@ -27,6 +27,10 @@ type UploadStyleFileProps = {
 
 const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
     const { errors, onChange, tables, value, acceptedFileExtensions } = props;
+    const tableErrorMessage = (table: string) => {
+        const message = get(errors ?? {}, `style_files.${encodeKey(table)}.message`);
+        return typeof message === "string" ? message : undefined;
+    };
 
     const {
         editMode,
@@ -118,8 +122,8 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                                 classes={{ inputGroup: cx(fr.cx("fr-radio-rich"), "frx-rb-style-layer") }}
                                 options={sortedTables.map((table) => ({
                                     label: table,
-                                    hintText: errors?.style_files?.[encodeKey(table)]?.message ? (
-                                        <span className={fr.cx("fr-error-text", "fr-mt-1v")}>{errors?.style_files?.[encodeKey(table)]?.message}</span>
+                                    hintText: tableErrorMessage(table) ? (
+                                        <span className={fr.cx("fr-error-text", "fr-mt-1v")}>{tableErrorMessage(table)}</span>
                                     ) : null,
                                     nativeInputProps: {
                                         value: table,

@@ -20,7 +20,7 @@ const SnackbarMessage: FC = () => {
         }
     }, [message?.id]);
 
-    function handleClose(_, reason: SnackbarCloseReason) {
+    function handleClose(_: unknown, reason: SnackbarCloseReason) {
         if (reason !== "clickaway") {
             close();
         }

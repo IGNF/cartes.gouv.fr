@@ -35,16 +35,20 @@ export const useTableStyles = (editMode: boolean, datastoreId: string, staticFil
     }, []);
 
     const data = styleQueries.length
-        ? staticFiles.reduce((accumulator, staticFile, index) => {
-              const filename = staticFile.name;
-              const regex = /config_[a-z0-9-]+_style_wmsv_(\w+)/;
-              const tableName = regex.exec(filename)?.[1]; // Extract table name from filename
+        ? staticFiles.reduce(
+              (accumulator, staticFile, index) => {
+                  const filename = staticFile.name;
+                  const regex = /config_[a-z0-9-]+_style_wmsv_(\w+)/;
+                  const tableName = regex.exec(filename)?.[1]; // Extract table name from filename
 
-              if (tableName) {
-                  accumulator[tableName] = styleQueries[index].data;
-              }
-              return accumulator;
-          }, {})
+                  const style = styleQueries[index].data;
+                  if (tableName && style !== undefined) {
+                      accumulator[tableName] = style;
+                  }
+                  return accumulator;
+              },
+              {} as Record<string, string>
+          )
         : undefined;
 
     return {
