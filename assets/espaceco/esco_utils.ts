@@ -30,7 +30,7 @@ const getThumbnailFromFileName = (fileName?: string) => {
 };
 
 const getThumbnail = async (file: File): Promise<string | null> => {
-    if (/^image/.test(file.type)) {
+    if (file.type.startsWith("image")) {
         const uri = await getFileURI(file);
         return new Promise((resolve) => resolve(uri));
     }

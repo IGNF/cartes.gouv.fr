@@ -92,7 +92,7 @@ const AddTablePermissionDialog: FC<AddTablePermissionDialogProps> = ({ modal, da
                                     nativeInputProps: {
                                         checked: permission.level === p,
                                         onChange: () => {
-                                            setPermission({ ...permission, ...{ level: p } });
+                                            setPermission({ ...permission, level: p });
                                         },
                                     },
                                 }))}

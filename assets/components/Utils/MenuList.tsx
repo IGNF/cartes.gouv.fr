@@ -58,7 +58,7 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items, disabled = fa
         _props.title = menuOpenButtonProps?.title ?? "Autres actions";
         _props.iconId = menuOpenButtonProps?.iconId ?? "fr-icon-menu-2-fill";
         _props.nativeButtonProps = {
-            ...(menuOpenButtonProps?.nativeButtonProps ?? {}),
+            ...menuOpenButtonProps?.nativeButtonProps,
             "aria-controls": isMenuOpen ? otherActionsMenuId : undefined,
             "aria-haspopup": "true",
             "aria-expanded": isMenuOpen ? "true" : undefined,

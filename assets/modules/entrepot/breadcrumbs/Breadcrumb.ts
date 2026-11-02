@@ -191,16 +191,14 @@ const getBreadcrumb = (
         case "datastore_service_view":
             datastoreBaseProps.segments = [
                 ...datastoreBaseProps.segments,
-                ...[
-                    {
-                        label: route.params.datasheetName,
-                        linkProps: routes.datastore_datasheet_view({
-                            datastoreId: route.params.datastoreId,
-                            datasheetName: route.params.datasheetName,
-                            activeTab: "offeringId" in route.params ? "services" : "dataset",
-                        }).link,
-                    },
-                ],
+                {
+                    label: route.params.datasheetName,
+                    linkProps: routes.datastore_datasheet_view({
+                        datastoreId: route.params.datastoreId,
+                        datasheetName: route.params.datasheetName,
+                        activeTab: "offeringId" in route.params ? "services" : "dataset",
+                    }).link,
+                },
             ];
             return { ...datastoreBaseProps, currentPageLabel: t(route.name) };
 
@@ -208,24 +206,22 @@ const getBreadcrumb = (
         case "datastore_service_style_edit":
             datastoreBaseProps.segments = [
                 ...datastoreBaseProps.segments,
-                ...[
-                    {
-                        label: route.params.datasheetName,
-                        linkProps: routes.datastore_datasheet_view({
-                            datastoreId: route.params.datastoreId,
-                            datasheetName: route.params.datasheetName,
-                            activeTab: "offeringId" in route.params ? "services" : "dataset",
-                        }).link,
-                    },
-                    {
-                        label: t("datastore_service_view"),
-                        linkProps: routes.datastore_service_view({
-                            datastoreId: route.params.datastoreId,
-                            datasheetName: route.params.datasheetName,
-                            offeringId: route.params.offeringId,
-                        }).link,
-                    },
-                ],
+                {
+                    label: route.params.datasheetName,
+                    linkProps: routes.datastore_datasheet_view({
+                        datastoreId: route.params.datastoreId,
+                        datasheetName: route.params.datasheetName,
+                        activeTab: "offeringId" in route.params ? "services" : "dataset",
+                    }).link,
+                },
+                {
+                    label: t("datastore_service_view"),
+                    linkProps: routes.datastore_service_view({
+                        datastoreId: route.params.datastoreId,
+                        datasheetName: route.params.datasheetName,
+                        offeringId: route.params.offeringId,
+                    }).link,
+                },
             ];
             return { ...datastoreBaseProps, currentPageLabel: t(route.name) };
 

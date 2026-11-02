@@ -63,7 +63,7 @@ const AddDatabasePermissionDialog: FC<AddDatabasePermissionDialogProps> = ({ dat
                 <SearchDatabases
                     filter={databases}
                     onChange={(db) => {
-                        if (db) setPermission({ ...db, ...{ level: "NONE" } });
+                        if (db) setPermission({ ...db, level: "NONE" });
                     }}
                 />
                 {permission && (
@@ -75,7 +75,7 @@ const AddDatabasePermissionDialog: FC<AddDatabasePermissionDialogProps> = ({ dat
                             nativeInputProps: {
                                 checked: permission.level === p,
                                 onChange: () => {
-                                    setPermission({ ...permission, ...{ level: p } });
+                                    setPermission({ ...permission, level: p });
                                 },
                             },
                         }))}
