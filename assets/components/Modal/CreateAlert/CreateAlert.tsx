@@ -24,7 +24,9 @@ export const alertSchema: yup.ObjectSchema<IAlert> = yup.object({
     description: yup.string(),
     link: yup.object({
         label: yup.string(),
-        url: yup.string().test("check-url", "La chaîne doit être une url valide", (value) => value === "" || value?.startsWith("/") || isURL(value)),
+        url: yup
+            .string()
+            .test("check-url", "La chaîne doit être une url valide", (value) => value === undefined || value === "" || value.startsWith("/") || isURL(value)),
     }),
     severity: yup.string().oneOf(["info", "warning", "alert"]).required("Sévérité requise"),
     details: yup.string(),
