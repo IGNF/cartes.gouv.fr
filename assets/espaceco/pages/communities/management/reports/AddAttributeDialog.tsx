@@ -77,9 +77,7 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, on
             name: "isNotEmpty",
             message: t("dialog.attribute.empty_list_error"),
             test: (v, context) => {
-                const {
-                    parent: { type },
-                } = context;
+                const { type } = context.parent as { type?: string };
                 return type === "list" ? v.values.length > 0 : true;
             },
         }),

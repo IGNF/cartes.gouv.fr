@@ -25,6 +25,8 @@ const ExtentDialogModal = createModal({
 
 type SearchOption = "autocomplete" | "manual";
 type FieldName = "xmin" | "xmax" | "ymin" | "ymax";
+type ManualExtent = Record<FieldName, number>;
+type ExtentFormValues = Partial<ManualExtent> & { extent?: Extent };
 
 const filters: SearchGridFilters = {
     fields: ["name", "title", "extent"],
@@ -53,7 +55,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                     name: "xmin_check",
                     message: tValid("zoom.f1_less_than_f2", { field1: "xmin", field2: "xmax" }),
                     test: (value, context) => {
-                        const xmax = context.parent.xmax;
+                        const xmax = (context.parent as ManualExtent).xmax;
                         if (value) {
                             return !isNaN(xmax) ? value < xmax : true;
                         }
@@ -71,7 +73,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                     name: "ymin_check",
                     message: tValid("zoom.f1_less_than_f2", { field1: "ymin", field2: "ymax" }),
                     test: (value, context) => {
-                        const ymax = context.parent.ymax;
+                        const ymax = (context.parent as ManualExtent).ymax;
                         if (value) {
                             return !isNaN(ymax) ? value < ymax : true;
                         }
@@ -89,7 +91,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                     name: "xmax_check",
                     message: tValid("zoom.f1_more_than_f2", { field1: "xmax", field2: "xmin" }),
                     test: (value, context) => {
-                        const xmin = context.parent.xmin;
+                        const xmin = (context.parent as ManualExtent).xmin;
                         if (value) {
                             return !isNaN(xmin) ? value > xmin : true;
                         }
@@ -107,7 +109,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                     name: "ymax_check",
                     message: tValid("zoom.f1_more_than_f2", { field1: "ymax", field2: "ymin" }),
                     test: (value, context) => {
-                        const ymin = context.parent.ymin;
+                        const ymin = (context.parent as ManualExtent).ymin;
                         if (value) {
                             return !isNaN(ymin) ? value > ymin : true;
                         }
@@ -120,7 +122,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
         }),
     };
 
-    const form = useForm({
+    const form = useForm<ExtentFormValues>({
         mode: "onSubmit",
         resolver: yupResolver(schema[choice]),
     });
@@ -159,7 +161,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
         if (choice === "manual") {
             extent = [values.xmin, values.ymin, values.xmax, values.ymax].map((c) => Number(c));
         } else {
-            extent = values.extent;
+            extent = values.extent as Extent;
         }
         onApply(extent);
 

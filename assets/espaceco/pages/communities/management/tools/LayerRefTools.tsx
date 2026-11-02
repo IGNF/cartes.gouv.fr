@@ -1,4 +1,4 @@
-import { ICommunityLayer, RefToolsConfig } from "@/@types/app_espaceco";
+import { ICommunityLayer, RefToolLayer, RefToolsConfig } from "@/@types/app_espaceco";
 import { arrRefLayerTools, RefLayerTools } from "@/@types/espaceco";
 import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import { useRefLayers } from "@/espaceco/contexts/RefLayers";
@@ -19,7 +19,7 @@ const LayerRefTools: FC<LayerRefToolsProps> = ({ layer }) => {
     const refLayers = useRefLayers();
 
     const { control, register, watch } = useFormContext();
-    const refTools: Record<RefLayerTools, RefToolsConfig> = watch(`layer_tools.${layer.id}.ref_tools`);
+    const refTools = watch(`layer_tools.${layer.id}.ref_tools`) as Record<RefLayerTools, RefToolsConfig>;
 
     const availableTools = getAvailableRefTools(layer.geometry_type);
 
@@ -53,7 +53,7 @@ const LayerRefTools: FC<LayerRefToolsProps> = ({ layer }) => {
                                         control={control}
                                         name={`layer_tools.${layer.id}.ref_tools.${t}.layers`}
                                         render={({ field }) => (
-                                            <AutocompleteSelect
+                                            <AutocompleteSelect<RefToolLayer>
                                                 {...field}
                                                 label={""}
                                                 hintText={tLayer("num_layers", { num: refTools[t].layers.length })}

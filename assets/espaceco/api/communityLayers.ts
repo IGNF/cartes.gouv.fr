@@ -3,6 +3,8 @@ import { jsonFetch } from "../../modules/jsonFetch";
 import SymfonyRouting from "../../modules/Routing";
 import { LayerTools, RefLayerTools } from "@/@types/espaceco";
 
+export type LayerToolsPayload = Record<number, { tools: LayerTools[] | null; ref_tools: Partial<Record<RefLayerTools, number[]>> | null }>;
+
 const fields = ["id", "database", "table", "role", "tools", "ref_tools"];
 
 const getFeatureTypes = (communityId: number, signal: AbortSignal) => {
@@ -15,7 +17,7 @@ const getFeatureTypes = (communityId: number, signal: AbortSignal) => {
     });
 };
 
-const update = (communityId: number, layerTools: Record<number, { tools: LayerTools[]; ref_tools: Record<RefLayerTools, number[]> }>) => {
+const update = (communityId: number, layerTools: LayerToolsPayload) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_layer_update", { communityId });
     return jsonFetch<Record<string, CommunityFeatureTypeLayer[]>>(
         url,

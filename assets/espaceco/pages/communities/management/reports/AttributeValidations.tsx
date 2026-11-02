@@ -4,6 +4,9 @@ import { isInt, isFloat, isDate } from "validator";
 
 const { t } = getTranslation("Theme");
 
+// Pas de unknown[] ici : un tableau a aussi une propriété values, ce qui fausserait le test « in »
+type ListValues = { values: { value: unknown }[] } | { map: <U>(callback: (value: unknown) => U) => U[] };
+
 class AttributeValidations {
     #context: yup.TestContext<yup.AnyObject>;
 
@@ -14,9 +17,7 @@ class AttributeValidations {
     validateValue = (value?: string | null) => {
         if (value === undefined || value === null) return true;
 
-        const {
-            parent: { type },
-        } = this.#context;
+        const { type } = this.#context.parent as { type?: string };
 
         const v = value.trim();
 
@@ -65,16 +66,15 @@ class AttributeValidations {
     };
 
     #validateInList = (value: string): yup.ValidationError | boolean => {
-        const {
-            parent: { values: v },
-        } = this.#context;
+        const { values: v } = this.#context.parent as { values?: unknown };
 
         if (Array.isArray(v)) {
             if (!v.includes(value)) {
                 return this.#context.createError({ message: t("dialog.add_attribute.value_not_in_list_error") });
             }
         } else if (typeof v === "object") {
-            const list = "values" in v ? v.values.map(({ value }: { value: unknown }) => value || null) : v.map((value: unknown) => value || null);
+            const lv = v as ListValues;
+            const list = "values" in lv ? lv.values.map(({ value }) => value || null) : lv.map((value) => value || null);
             if (!list.includes(value)) {
                 return this.#context.createError({ message: t("dialog.add_attribute.value_not_in_list_error") });
             }
