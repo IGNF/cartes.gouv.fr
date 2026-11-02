@@ -35,7 +35,7 @@ class WMTSService extends BaseService {
             wmtsSource.setProperties({
                 name: capsLayer.Identifier ?? null,
                 title: capsLayer.Title ?? null,
-                abstract: capsLayer.abstract ?? null,
+                abstract: capsLayer.Abstract ?? null,
             });
         }
         const wmtsLayer = new TileLayer({
