@@ -71,8 +71,9 @@
         // Variables inutilisées autorisées si préfixées par _
         "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
 
-        // Désactivées avant la migration : à réactiver une par une après revue
+        // 17 cas à corriger avant réactivation (.scratch/lint-tooling/issues/04-set-state-in-effect.md)
         "react/set-state-in-effect": "off",
+        // React Compiler non utilisé : sans objet
         "react/preserve-manual-memoization": "off",
         "react/incompatible-library": "off"
     },
