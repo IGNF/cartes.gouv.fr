@@ -1,4 +1,5 @@
-.alerts__table thead tr:first-child th {
+// Pas de trait entre « Visible sur » et ses sous-colonnes
+.alerts__table thead th[colspan] {
     background-image: none;
 }
 
