@@ -1,8 +1,15 @@
 import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
-import Footer from "@codegouvfr/react-dsfr/Footer";
+import Footer, { FooterProps } from "@codegouvfr/react-dsfr/Footer";
 import { memo } from "react";
 
 import { externalUrls } from "@/router/externalUrls";
+
+// Le nom du partenaire sert de texte alternatif au logo et de titre au lien
+const partnerLogo = (name: string, href: string, imgFile: string): FooterProps.PartnersLogos.Logo => ({
+    alt: name,
+    imgUrl: `https://data.geopf.fr/annexes/ressources/footer/${imgFile}`,
+    linkProps: { href, title: name },
+});
 
 const AppFooter = () => {
     return (
@@ -48,27 +55,11 @@ const AppFooter = () => {
                 href: externalUrls.sitemap,
             }}
             partnersLogos={{
-                main: {
-                    alt: "IGN",
-                    href: "https://www.ign.fr",
-                    imgUrl: "https://data.geopf.fr/annexes/ressources/footer/ign.png",
-                },
+                main: partnerLogo("Institut national de l’information géographique et forestière", "https://www.ign.fr", "ign.png"),
                 sub: [
-                    {
-                        alt: "MINISTÈRE DE LA TRANSFORMATION ET DE LA FONCTION PUBLIQUES",
-                        href: "https://www.transformation.gouv.fr/",
-                        imgUrl: "https://data.geopf.fr/annexes/ressources/footer/min_fp.jpg",
-                    },
-                    {
-                        alt: "MINISTÈRE DE LA TRANSITION ÉCOLOGIQUE ET DE LA COHÉSION DES TERRITOIRES",
-                        href: "https://www.ecologie.gouv.fr/",
-                        imgUrl: "https://data.geopf.fr/annexes/ressources/footer/min_ecologie.jpg",
-                    },
-                    {
-                        alt: "Conseil National de l’Information Géolocalisée",
-                        href: "https://cnig.gouv.fr/",
-                        imgUrl: "https://data.geopf.fr/annexes/ressources/footer/rf_cnig.jpg",
-                    },
+                    partnerLogo("Ministère de la Transformation et de la Fonction publiques", "https://www.transformation.gouv.fr/", "min_fp.jpg"),
+                    partnerLogo("Ministère de la Transition écologique et de la Cohésion des territoires", "https://www.ecologie.gouv.fr/", "min_ecologie.jpg"),
+                    partnerLogo("Conseil national de l’information géolocalisée", "https://cnig.gouv.fr/", "rf_cnig.jpg"),
                 ],
             }}
         />
