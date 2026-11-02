@@ -3,9 +3,6 @@
     "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
     "phpmd.rules": "${workspaceFolder}/phpmd.yml",
     "js/ts.tsdk.path": "node_modules/typescript/lib",
-    "eslint.useFlatConfig": true,
-    "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
-    "eslint.workingDirectories": [{ "mode": "auto" }],
     "todo-tree.general.showActivityBarBadge": true,
     "todo-tree.general.tags": ["NOTE", "TODO", "FIXME", "MARK", "[ ]", "[x]"],
     "todo-tree.highlights.defaultHighlight": {
