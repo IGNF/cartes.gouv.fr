@@ -84,14 +84,7 @@
         // Désactivées avant la migration : à réactiver une par une après revue
         "react/set-state-in-effect": "off",
         "react/preserve-manual-memoization": "off",
-        "react/incompatible-library": "off",
-
-        // Nouvelles avec la catégorie correctness, signalements à corriger avant réactivation
-        "jsx-a11y/control-has-associated-label": "off",
-        "jsx-a11y/prefer-tag-over-role": "off",
-        "unicorn/no-useless-fallback-in-spread": "off",
-        "unicorn/no-useless-spread": "off",
-        "unicorn/prefer-string-starts-ends-with": "off"
+        "react/incompatible-library": "off"
     },
     "overrides": [
         {
