@@ -40,10 +40,10 @@ export async function apiFetch(
         defaultHeaders["X-Requested-With"] = "XMLHttpRequest";
     }
 
-    fetchConfig.headers = {
-        ...defaultHeaders,
-        ...config.headers,
-    };
+    // Headers accepte aussi un objet Headers ou une liste de paires, que la décomposition perdrait
+    const headers = new Headers(defaultHeaders);
+    new Headers(config.headers).forEach((value, key) => headers.set(key, value));
+    fetchConfig.headers = headers;
 
     // NOTE : les erreurs réseau et les annulations (AbortError) sont propagées telles quelles, react-query les gère
     const response = await fetch(new Request(url, fetchConfig));
