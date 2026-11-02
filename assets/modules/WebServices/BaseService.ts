@@ -15,7 +15,7 @@ abstract class BaseService {
     getAttribution(): string | undefined {
         if ("attribution" in this.service.configuration && this.service.configuration.attribution) {
             const attribution = this.service.configuration.attribution;
-            const logo = attribution.logo ? `<img src="${attribution.logo}" /> ` : "";
+            const logo = attribution.logo ? `<img src="${attribution.logo.url}" /> ` : "";
 
             return `<a href="${attribution.url}" title="${attribution.title} - ${tCommon("new_window")}" target="_blank">${logo}${attribution.title}</a>`;
         }
