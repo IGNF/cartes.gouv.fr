@@ -9,6 +9,7 @@
         "mehedidracula.php-constructor",
         "devsense.composer-php-vscode",
         "oxc.oxc-vscode",
+        "TypeScriptTeam.native-preview",
         "esbenp.prettier-vscode",
         "pflannery.vscode-versionlens",
         "yoavbls.pretty-ts-errors"

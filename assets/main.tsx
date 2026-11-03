@@ -18,7 +18,7 @@ analyticsInit();
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
     <React.StrictMode>
-        <UnheadProvider head={head}>
+        <UnheadProvider value={head}>
             <App />
         </UnheadProvider>
     </React.StrictMode>
