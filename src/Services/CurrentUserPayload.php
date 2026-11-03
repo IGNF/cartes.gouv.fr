@@ -27,7 +27,7 @@ final readonly class CurrentUserPayload
             return null;
         }
 
-        $profile = $refresh ? $this->membershipService->refreshCurrentUser() : $this->membershipService->currentUserProfile();
+        $profile = $this->membershipService->currentUserProfile($refresh);
 
         // l’identité de connexion prime sur la copie qu’en garde l’Entrepôt
         return [
@@ -36,7 +36,7 @@ final readonly class CurrentUserPayload
             'first_name' => $user->getFirstName(),
             'last_name' => $user->getLastName(),
             'roles' => $user->getRoles(),
-        ] + ($profile ?? []) + [
+        ] + $profile + [
             'session_expires_at' => $user->getSessionExpiresAt(),
         ];
     }

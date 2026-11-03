@@ -27,13 +27,19 @@ class MembershipService
     }
 
     /**
-     * @return array<mixed>|null null pour un visiteur anonyme
+     * Profil Entrepôt de l'utilisateur connecté (corps brut de GET users/me) ; `$refresh` recharge à travers le cache serveur,
+     * pour que ce pod voie aussi la donnée fraîche.
+     *
+     * @return array<mixed>
      */
-    public function currentUserProfile(): ?array
+    public function currentUserProfile(bool $refresh = false): array
     {
         $user = $this->security->getUser();
+        if (!$user instanceof User) {
+            throw new \LogicException('Aucun utilisateur connecté');
+        }
 
-        return $user instanceof User ? $this->checkedProfile($user, $this->entrepotUserCache->get($user->getId())) : null;
+        return $this->checkedProfile($user, $refresh ? $this->entrepotUserCache->refresh($user->getId()) : $this->entrepotUserCache->get($user->getId()));
     }
 
     /**
@@ -119,18 +125,6 @@ class MembershipService
         if ($user instanceof User && (null === $userId || $user->getId() === $userId)) {
             $this->entrepotUserCache->invalidate($user->getId());
         }
-    }
-
-    /**
-     * Recharge users/me à travers le cache serveur, pour que ce pod voie aussi la donnée fraîche.
-     *
-     * @return array<mixed>|null null pour un visiteur anonyme
-     */
-    public function refreshCurrentUser(): ?array
-    {
-        $user = $this->security->getUser();
-
-        return $user instanceof User ? $this->checkedProfile($user, $this->entrepotUserCache->refresh($user->getId())) : null;
     }
 
     /**

@@ -43,7 +43,7 @@ class ServiceAccount
         }
 
         // lecture fraîche : le token peut encore lister une appartenance quittée il y a moins de 60 s sur un autre pod
-        $this->membershipService->refreshCurrentUser();
+        $this->membershipService->currentUserProfile(refresh: true);
         if (null !== $this->membershipService->findByCommunity($sandboxCommunityId)) {
             return;
         }

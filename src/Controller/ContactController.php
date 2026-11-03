@@ -108,7 +108,7 @@ class ContactController extends AbstractController
         $supervisor = [];   // Liste des community dont l'utilisateur courant est "supervisor"
         $member = [];       // Liste des community dont l'utilisateur courant est simple membre
         if ($user instanceof User) {
-            $profile = $membershipService->currentUserProfile() ?? [];
+            $profile = $membershipService->currentUserProfile();
             foreach ($profile['communities_member'] ?? [] as $communityMember) {
                 $community = $communityMember['community'];
                 if ($user->getId() === $community['supervisor']) {
