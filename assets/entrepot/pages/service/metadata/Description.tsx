@@ -250,9 +250,9 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                     ...register("frequency_code"),
                 }}
             >
-                {Object.keys(frequencyCodes).map((k) => (
+                {Object.entries(frequencyCodes).map(([k, label]) => (
                     <option key={k} value={k}>
-                        {frequencyCodes[k]}
+                        {label}
                     </option>
                 ))}
             </Select>

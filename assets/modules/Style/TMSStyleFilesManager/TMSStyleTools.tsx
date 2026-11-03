@@ -11,7 +11,8 @@ export default class TMSStyleTools {
         const layers = mapboxStyle.layers.map((layer) => ({
             ...layer,
             source: service.tms_metadata?.name,
-            "source-layer": layer["source-layer"] ?? service.tms_metadata?.vector_layers?.[0].id ?? service.tms_metadata?.name,
+            "source-layer":
+                ("source-layer" in layer ? layer["source-layer"] : undefined) ?? service.tms_metadata?.vector_layers?.[0].id ?? service.tms_metadata?.name,
         }));
 
         return { ...mapboxStyle, ...emptyStyle, layers };

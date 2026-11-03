@@ -22,7 +22,7 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { type ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../../modules/apiError";
-import { routes, useRoute } from "../../../../../router/router";
+import { routeStringParam, routes, useRoute } from "../../../../../router/router";
 import api from "../../../../api";
 import DatasheetThumbnail from "../DatasheetThumbnail";
 
@@ -62,9 +62,9 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     const route = useRoute();
 
-    const activeTab: DatasheetViewActiveTabEnum = Object.values(DatasheetViewActiveTabEnum).includes(route.params?.["activeTab"])
-        ? route.params?.["activeTab"]
-        : DatasheetViewActiveTabEnum.Metadata;
+    const activeTabParam = routeStringParam(route.params, "activeTab");
+    const activeTab: DatasheetViewActiveTabEnum =
+        Object.values(DatasheetViewActiveTabEnum).find((tab) => tab === activeTabParam) ?? DatasheetViewActiveTabEnum.Metadata;
 
     const queryClient = useQueryClient();
 

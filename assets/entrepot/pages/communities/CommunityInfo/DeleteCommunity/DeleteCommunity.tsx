@@ -32,7 +32,7 @@ type DatastoreCleanupStreamEvents = {
 };
 
 const ENTITY_ORDER = ["processing_executions", "offerings", "configurations", "metadata", "statics", "annexes", "uploads", "stored_data"] as const;
-const ENTITY_LABELS: Record<(typeof ENTITY_ORDER)[number], string> = {
+const ENTITY_LABELS: Record<(typeof ENTITY_ORDER)[number], string> & Partial<Record<string, string>> = {
     processing_executions: "Traitements en attente/en cours",
     offerings: "Offres",
     configurations: "Configurations",

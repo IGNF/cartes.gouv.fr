@@ -12,7 +12,7 @@ import useUserQuery from "@/hooks/queries/useUserQuery";
 import { useTranslation } from "@/i18n";
 import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
-import { routes, useRoute } from "@/router/router";
+import { routeStringParam, routes, useRoute } from "@/router/router";
 import { findMembership } from "@/utils";
 import { statsPeriodQuery } from "@/utils/stats";
 import DynamicParamSelector from "./DynamicParamSelector";
@@ -37,7 +37,7 @@ function initDate(offsetMonths = 0): Date {
 
 export default function Stats() {
     const { params } = useRoute();
-    const scope = params?.["scope"] as StatsScope;
+    const scope = routeStringParam(params, "scope") as StatsScope;
 
     const { t } = useTranslation("Stats");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");

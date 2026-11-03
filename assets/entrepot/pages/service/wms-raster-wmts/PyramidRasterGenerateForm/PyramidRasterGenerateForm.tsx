@@ -57,7 +57,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
 
     const queryClient = useQueryClient();
 
-    const schemas = {};
+    const schemas: Record<number, yup.AnyObjectSchema> = {};
     schemas[STEPS.TECHNICAL_NAME] = yup.object({
         technical_name: yup.string().typeError(t("technical_name.error.mandatory")).required(t("technical_name.error.mandatory")),
     });

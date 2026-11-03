@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import SideMenu from "@codegouvfr/react-dsfr/SideMenu";
+import { MouseEvent } from "react";
 import { tss } from "tss-react";
 
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
@@ -66,7 +67,7 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                             ? routes.datasheet_list({ datastoreId: datastore._id }).link
                             : {
                                   href: "#",
-                                  onClick: (e) => {
+                                  onClick: (e: MouseEvent<HTMLAnchorElement>) => {
                                       e.preventDefault();
                                       addUserToSandbox();
                                   },

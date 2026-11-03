@@ -38,7 +38,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
     const [currentDocument, setCurrentDocument] = useState<DocumentDTO | undefined>();
 
     const copyToClipboard = useCallback(
-        (uri) => {
+        (uri: string) => {
             navigator.clipboard.writeText(uri);
             setMessage(tCommon("url_copied"));
         },
@@ -112,7 +112,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
                             priority={"tertiary no outline"}
                             iconId={"ri-file-copy-2-line"}
                             onClick={() => {
-                                copyToClipboard(d.uri);
+                                if (d.uri) copyToClipboard(d.uri);
                             }}
                             type="button"
                         />

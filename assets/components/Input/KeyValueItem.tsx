@@ -42,7 +42,7 @@ function KeyValueItem(props: KeyValueListProps) {
     const valueError = errorMessage("value");
 
     function handleMove(index: number) {
-        return (event) => startDrag(event, index);
+        return (event: { pageY: number }) => startDrag(event, index);
     }
 
     function handleRemove(index: number) {

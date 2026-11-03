@@ -34,7 +34,7 @@ class WMSService extends BaseService {
         const xmlString = await response.text();
         const wmsCaps = this.#parser.read(xmlString);
 
-        const lays = wmsCaps.Capability.Layer.Layer.filter((layer) => {
+        const lays = wmsCaps.Capability.Layer.Layer.filter((layer: { Name?: string }) => {
             return layer.Name === this.#requestInfo.layers;
         });
         if (!lays.length) {

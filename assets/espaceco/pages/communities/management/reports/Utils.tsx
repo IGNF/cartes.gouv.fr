@@ -2,11 +2,11 @@ import { ReportStatusesDTO } from "../../../../../@types/espaceco";
 import statuses from "../../../../../data/report_statuses.json";
 
 const getDefaultStatuses = (): ReportStatusesDTO => {
-    const result = {};
-    Object.keys(statuses).forEach((s) => {
-        result[s] = { title: statuses[s], active: true };
+    const result: ReportStatusesDTO = {};
+    Object.entries(statuses).forEach(([s, title]) => {
+        result[s] = { title, active: true };
     });
-    return result as ReportStatusesDTO;
+    return result;
 };
 
 const getMinAuthorizedStatus = (): number => {

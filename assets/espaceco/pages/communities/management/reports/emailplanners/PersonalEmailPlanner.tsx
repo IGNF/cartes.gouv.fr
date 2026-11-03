@@ -50,8 +50,8 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
     }, [resetField, event]);
 
     const options = useMemo<StatusAutocompleteOption[]>(() => {
-        const options = Object.keys(statuses).reduce((accumulator, status) => {
-            accumulator[status] = { title: statuses[status].title, status: status };
+        const options = Object.keys(statuses).reduce<Record<string, StatusAutocompleteOption>>((accumulator, status) => {
+            accumulator[status] = { title: statuses[status].title, status: status as ReportStatusesType };
             return accumulator;
         }, {});
         return Object.values(options);
@@ -61,9 +61,9 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
         (value?: string[]) => {
             if (!value) return [];
 
-            const options = Object.keys(statuses).reduce((accumulator, status) => {
+            const options = Object.keys(statuses).reduce<Record<string, StatusAutocompleteOption>>((accumulator, status) => {
                 if (value.includes(status)) {
-                    accumulator[status] = { title: statuses[status].title, status: status };
+                    accumulator[status] = { title: statuses[status].title, status: status as ReportStatusesType };
                 }
                 return accumulator;
             }, {});

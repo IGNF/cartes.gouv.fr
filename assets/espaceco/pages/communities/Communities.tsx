@@ -16,7 +16,7 @@ import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { ApiError } from "../../../modules/jsonFetch";
 import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../modules/apiError";
-import { routes, useRoute } from "../../../router/router";
+import { routeParam, routeStringParam, routes, useRoute } from "../../../router/router";
 import api from "../../api";
 import CommunityList from "./CommunityList";
 import { CreateCommunityDialog, CreateCommunityDialogModal } from "./CreateCommunityDialog";
@@ -42,12 +42,13 @@ const Communities: FC = () => {
     const { t } = useTranslation("EspaceCoCommunityList");
 
     const filter = useMemo<CommunityListFilter>(() => {
-        const f = route.params["filter"];
-        return arrCommunityListFilters.includes(f) ? f : "listed";
+        const f = routeStringParam(route.params, "filter");
+        return arrCommunityListFilters.find((filter) => filter === f) ?? "listed";
     }, [route]);
 
     const queryParams = useMemo<QueryParamsType>(() => {
-        const page = Number.isInteger(route.params["page"]) ? route.params["page"] : 1;
+        const p = routeParam(route.params, "page");
+        const page = typeof p === "number" && Number.isInteger(p) ? p : 1;
 
         const params: QueryParamsType = { page: page, limit: defaultLimit };
         if (["iam_member", "affiliation"].includes(filter)) {

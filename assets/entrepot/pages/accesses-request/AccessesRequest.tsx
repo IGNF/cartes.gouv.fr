@@ -82,14 +82,14 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
         },
     });
 
-    const onSubmit = (formData: object) => {
+    const onSubmit = (formData: yup.InferType<typeof schema>) => {
         const data = {
             file_identifier: fileIdentifier,
             email_contact: metadataQuery.data?.contact_email,
-            layers: privateLayers.filter((layer) => formData["layers"].includes(layer.name)),
-            myself: formData["beneficiaries"].includes(MYSELF),
-            beneficiaries: myCommunities.filter((c) => formData["beneficiaries"].includes(c?._id)),
-            message: formData["message"],
+            layers: privateLayers.filter((layer) => formData.layers.includes(layer.name)),
+            myself: formData.beneficiaries.includes(MYSELF),
+            beneficiaries: myCommunities.filter((c) => formData.beneficiaries.includes(c?._id)),
+            message: formData.message,
         };
 
         requestMutation.mutate(data);

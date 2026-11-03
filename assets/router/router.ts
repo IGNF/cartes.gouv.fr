@@ -353,10 +353,28 @@ export const groups = {
     espaceco: espacecoGroup,
 };
 
-export const useRoutePaginationParams = () => {
-    const route = useRoute();
-    const page = route.params?.["page"] ?? 1;
-    const limit = route.params?.["limit"] ?? 10;
+// Paramètres typés route par route : accès générique pour un composant ou un hook qui ne connaît pas sa route
+export const routeParam = (params: object | undefined, name: string): unknown => (params as Record<string, unknown> | undefined)?.[name];
 
-    return { page, limit };
+export const routeStringParam = (params: object | undefined, name: string): string | undefined => {
+    const value = routeParam(params, name);
+    return typeof value === "string" ? value : undefined;
+};
+
+// Entier, comme parseInt : les paramètres numériques de type-route peuvent porter des décimales
+export const routeNumberParam = (params: object | undefined, name: string): number | undefined => {
+    const value = routeParam(params, name);
+    const number = typeof value === "string" ? parseInt(value, 10) : value;
+    return typeof number === "number" && Number.isFinite(number) ? Math.trunc(number) : undefined;
+};
+
+// Page ou taille de page : une valeur inférieure à 1 est ignorée au profit de la valeur par défaut
+export const routePositiveIntegerParam = (params: object | undefined, name: string): number | undefined => {
+    const number = routeNumberParam(params, name);
+    return number !== undefined && number >= 1 ? number : undefined;
+};
+
+export const useRoutePaginationParams = () => {
+    const { params } = useRoute();
+    return { page: routePositiveIntegerParam(params, "page") ?? 1, limit: routePositiveIntegerParam(params, "limit") ?? 10 };
 };

@@ -1,4 +1,4 @@
-import { useRoute } from "@/router/router";
+import { routeNumberParam, useRoute } from "@/router/router";
 
 export enum FilterEnum {
     ALL = 0,
@@ -10,12 +10,16 @@ export type IFilters = Record<string, FilterEnum | FilterEnum[]>;
 
 const availableValues = Object.values(FilterEnum);
 
-const defaultTests = {
-    [FilterEnum.ENABLED]: (item, key) => Boolean(item[key]),
-    [FilterEnum.DISABLED]: (item, key) => !item[key],
+type FilterTests<T> = Record<FilterEnum.ENABLED | FilterEnum.DISABLED, (item: T, key: string) => boolean>;
+
+const valueOf = (item: unknown, key: string) => (item as Record<string, unknown>)[key];
+
+const defaultTests: FilterTests<unknown> = {
+    [FilterEnum.ENABLED]: (item, key) => Boolean(valueOf(item, key)),
+    [FilterEnum.DISABLED]: (item, key) => !valueOf(item, key),
 };
 
-function getFilteredList<T>(list: T[], filters: IFilters, tests = defaultTests): T[] {
+function getFilteredList<T>(list: T[], filters: IFilters, tests: FilterTests<T>): T[] {
     const entries = Object.entries(filters);
     if (entries.length === 0) {
         return list;
@@ -38,11 +42,11 @@ interface IUseFiltersResult<T> {
     filters: IFilters;
 }
 
-export function useFilters<T>(data: T[], availableFilters: string[], tests = defaultTests): IUseFiltersResult<T> {
+export function useFilters<T>(data: T[], availableFilters: string[], tests: FilterTests<T> = defaultTests): IUseFiltersResult<T> {
     const { params } = useRoute();
     const filters = Object.fromEntries(
         availableFilters.map((key) => {
-            const value = params[key] ? parseInt(params[key]) : FilterEnum.ALL;
+            const value = routeNumberParam(params, key) ?? FilterEnum.ALL;
             return [key, availableValues.includes(value) ? value : FilterEnum.ALL];
         })
     );

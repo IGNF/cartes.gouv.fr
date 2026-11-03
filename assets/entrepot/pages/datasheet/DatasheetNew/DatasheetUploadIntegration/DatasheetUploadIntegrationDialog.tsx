@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { UseQueryResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
 import { Upload } from "@/@types/app";
@@ -66,7 +66,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     // définition des query
     // query qui "ping" ou "poll" et récupère le progress en boucle
     // oxlint-disable-next-line @tanstack/query/exhaustive-deps
-    const pingIntProgQuery = useQuery({
+    const pingIntProgQuery: UseQueryResult<Awaited<ReturnType<typeof api.upload.getIntegrationProgress>>> = useQuery({
         queryKey: RQKeys.datastore_upload_integration(datastoreId, uploadId),
         queryFn: ({ signal }) =>
             pingIntProgQuery.data === undefined

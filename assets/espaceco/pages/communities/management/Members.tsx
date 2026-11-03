@@ -155,7 +155,7 @@ const Members: FC = () => {
     }, []);
 
     const displayWait = useCallback(
-        (text) => (
+        (text: string) => (
             <Wait>
                 <div className={fr.cx("fr-container")}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>

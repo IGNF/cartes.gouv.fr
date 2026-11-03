@@ -43,7 +43,7 @@ type DescriptionProps = {
     isAdmin: boolean;
 };
 
-const fieldsToCopy = ["description", "editorial", "keywords"];
+const fieldsToCopy: (keyof DescriptionFormType)[] = ["description", "editorial", "keywords"];
 
 const Description: FC<DescriptionProps> = ({ isAdmin }) => {
     const { t: tCommon } = useTranslation("Common");
@@ -172,12 +172,12 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
                 return;
             }
 
-            const fields = isAdmin ? [...fieldsToCopy, ...["membershipRequest", "openWithEmail"]] : [...fieldsToCopy];
+            const fields: (keyof DescriptionFormType)[] = isAdmin ? [...fieldsToCopy, ...(["membershipRequest", "openWithEmail"] as const)] : [...fieldsToCopy];
             const values = getDescriptionDefaultValues(reUsedCommunity);
 
             fields.forEach((f) => {
                 if (f in values) {
-                    setFormValue(f as keyof DescriptionFormType, values[f]);
+                    setFormValue(f, values[f]);
                 }
             });
         },
@@ -202,7 +202,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
     const onSubmitForm = (saveOnly: boolean) => {
         const values = getFormValues();
 
-        const datas = {
+        const datas: Record<string, unknown> = {
             name: values.name,
             listed: Boolean(values.listed).toString(),
             description: setToNull(values.description),
@@ -217,7 +217,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
             datas["open_without_affiliation"] = "false";
 
             if (values.membershipRequest === "partially_open") {
-                const openWithEmail = values.openWithEmail.reduce((accumulator, owe) => {
+                const openWithEmail = values.openWithEmail.reduce<Record<string, string[]>>((accumulator, owe) => {
                     const grids: string[] = [];
                     owe.grids.reduce((acc, grid) => {
                         acc.push(grid.name);

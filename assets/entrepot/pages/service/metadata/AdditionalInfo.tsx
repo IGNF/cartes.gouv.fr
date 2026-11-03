@@ -145,9 +145,9 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ /*storedData, datastoreId,*/ 
                     ...register("charset"),
                 }}
             >
-                {Object.keys(charsets).map((code) => {
+                {Object.entries(charsets).map(([code, title]) => {
                     return (
-                        <option key={code} value={code} title={charsets[code]}>
+                        <option key={code} value={code} title={title}>
                             {code}
                         </option>
                     );

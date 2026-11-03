@@ -25,7 +25,7 @@ const getThumbnailFromFileName = (fileName?: string) => {
 
     const extension = getFileExtension(fileName);
 
-    const thumbnail = extension ? (thumbnails?.[extension] ?? thumbnails.defaut) : thumbnails.defaut;
+    const thumbnail = extension ? ((thumbnails as Partial<Record<string, typeof thumbnails.defaut>>)?.[extension] ?? thumbnails.defaut) : thumbnails.defaut;
     return thumbnail.src;
 };
 

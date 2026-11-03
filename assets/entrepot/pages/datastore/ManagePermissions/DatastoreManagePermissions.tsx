@@ -27,7 +27,7 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../modules/apiError";
-import { routes, useRoute } from "../../../../router/router";
+import { routePositiveIntegerParam, routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 
 type DatastoreManagePermissionsProps = {
@@ -75,8 +75,8 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     const [currentPermission, setCurrentPermission] = useState<string | undefined>(undefined);
 
     const { params } = useRoute();
-    const page = params["page"] ? parseInt(params["page"]) : 1;
-    const limit = params["limit"] ? parseInt(params["limit"]) : 4;
+    const page = routePositiveIntegerParam(params, "page") ?? 1;
+    const limit = routePositiveIntegerParam(params, "limit") ?? 4;
 
     const { paginatedItems, totalPages } = usePagination(permissions ?? [], page, limit);
 

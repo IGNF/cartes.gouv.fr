@@ -9,7 +9,7 @@ import * as yup from "yup";
 import { ReportStatusesType, ReportStatusParams } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { getDefaultStatuses } from "./Utils";
-import { setToNull } from "../../../../../utils";
+import { fieldErrorMessage, get, setToNull } from "../../../../../utils";
 
 const EditReportParameterModal = createModal({
     id: "status-modal",
@@ -47,6 +47,8 @@ const EditReportStatusDialog: FC<EditReportStatusDialogProps> = ({ status, statu
             description: statusParams?.description ?? "",
         },
     });
+
+    const titleError = get(errors, `report_statuses.${status}.title`);
 
     const onSubmit = () => {
         const datas = { ...getFormValues() };
@@ -87,8 +89,8 @@ const EditReportStatusDialog: FC<EditReportStatusDialogProps> = ({ status, statu
                             }}
                         />
                     }
-                    state={errors?.[`report_statuses.${status}.title`] ? "error" : "default"}
-                    stateRelatedMessage={errors?.[`report_statuses.${status}.title`]?.message}
+                    state={titleError ? "error" : "default"}
+                    stateRelatedMessage={typeof titleError === "object" && titleError !== null ? fieldErrorMessage(titleError) : undefined}
                     nativeInputProps={{
                         ...register("title"),
                     }}

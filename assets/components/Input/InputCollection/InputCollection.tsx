@@ -26,7 +26,7 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("InputCollection");
 
-    const _validator: (value) => boolean = validator === "email" ? isEmail : undefined;
+    const _validator: ((value: string) => boolean) | undefined = validator === "email" ? isEmail : undefined;
 
     const schema: yup.ObjectSchema<{ text?: string }> = yup.object({
         text: yup

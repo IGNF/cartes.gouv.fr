@@ -18,7 +18,7 @@ const getTranslatedRightTypes = () => {
 };
 
 const complete = (rights: CommunityUserResponseDtoRightsEnum[] | undefined): Record<string, boolean> => {
-    const initRights = {};
+    const initRights: Record<string, boolean> = {};
     rightTypes.forEach((type) => {
         const upType = type.toUpperCase();
         initRights[upType] = false;

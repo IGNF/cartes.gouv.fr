@@ -25,7 +25,7 @@ import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
-import { routes, useRoute } from "../../../../router/router";
+import { routePositiveIntegerParam, routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import { AddMember, addMemberModal } from "../AddMember/AddMember";
 import { complete, rightTypes, UserRights } from "../UserRights";
@@ -110,8 +110,8 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     }, [communityMembers, communitySupervisor, user?.id]);
 
     const { params } = useRoute();
-    const page = params["page"] ? parseInt(params["page"]) : 1;
-    const limit = params["limit"] ? parseInt(params["limit"]) : 20;
+    const page = routePositiveIntegerParam(params, "page") ?? 1;
+    const limit = routePositiveIntegerParam(params, "limit") ?? 20;
 
     const { search, searchedItems } = useSearch(members);
     const { paginatedItems, totalPages } = usePagination(searchedItems, page, limit);
@@ -161,7 +161,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
 
     // Modification d'un droit d'un utilisateur
     const handleToggleChanged = (user_id: string, right: string, checked: boolean) => {
-        const m = JSON.parse(JSON.stringify(members)); // Vraie copie
+        const m: Member[] = JSON.parse(JSON.stringify(members)); // Vraie copie
 
         const user = m.find((member) => member.id === user_id);
         if (!user) {

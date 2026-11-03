@@ -1,3 +1,5 @@
+import type { PyramidVectorGenerateFormValuesType } from "./PyramidVectorGenerateForm/PyramidVectorGenerateForm";
+
 type CompositionType = {
     table: string;
     attributes: string[];
@@ -5,7 +7,7 @@ type CompositionType = {
     top_level: number;
 };
 
-const getComposition = (attributes, zoomLevels) => {
+const getComposition = (attributes: Record<string, string[]>, zoomLevels: Record<string, number[]>) => {
     const composition: CompositionType[] = [];
     Object.keys(attributes).forEach((table) => {
         composition.push({
@@ -18,18 +20,18 @@ const getComposition = (attributes, zoomLevels) => {
     return composition;
 };
 
-const format = (technicalName, vectorDbId, values) => {
-    const composition = getComposition(values.table_attributes, values.table_zoom_levels);
+const format = (technicalName: string, vectorDbId: string, values: PyramidVectorGenerateFormValuesType) => {
+    const composition = getComposition(values.table_attributes!, values.table_zoom_levels!);
 
-    const result = {
+    const result: Record<string, unknown> = {
         technical_name: technicalName,
         composition: composition,
         tippecanoe: values.tippecanoe,
         vectordb_id: vectorDbId,
-        email_notification: values.sample.email_notification === true,
+        email_notification: values.sample!.email_notification === true,
     };
-    if (values.sample.is_sample === "true") {
-        result["area"] = values.sample.area;
+    if (values.sample!.is_sample === "true") {
+        result["area"] = values.sample!.area;
     }
 
     return result;

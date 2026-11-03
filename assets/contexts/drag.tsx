@@ -3,7 +3,7 @@ import { createContext, PropsWithChildren, use } from "react";
 export interface IDragContext {
     dragIndex: number;
     register: (ref: HTMLElement) => void;
-    startDrag: (event: MouseEvent, index: number) => void;
+    startDrag: (event: Pick<MouseEvent, "pageY">, index: number) => void;
 }
 
 const DragContext = createContext<IDragContext | null>(null);

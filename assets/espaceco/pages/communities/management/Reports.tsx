@@ -115,10 +115,12 @@ const Reports: FC = () => {
             const rs = {};
             Object.keys(statuses).forEach((status) => {
                 const s = status as ReportStatusesType;
-                rs[s] = yup.object({
-                    title: yup.string().required(),
-                    description: yup.string().nullable(),
-                    active: yup.boolean().required(),
+                Object.assign(rs, {
+                    [s]: yup.object({
+                        title: yup.string().required(),
+                        description: yup.string().nullable(),
+                        active: yup.boolean().required(),
+                    }),
                 });
             });
             return yup
@@ -236,7 +238,7 @@ const Reports: FC = () => {
     }, []);
 
     const onSubmitForm = (saveOnly: boolean) => {
-        const datas = { ...getFormValues() };
+        const datas: ReportFormType & { active?: boolean } = { ...getFormValues() };
         if (!saveOnly) {
             datas["active"] = true;
         }

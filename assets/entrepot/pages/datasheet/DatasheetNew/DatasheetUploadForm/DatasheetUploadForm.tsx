@@ -25,7 +25,7 @@ import ignfProjections from "../../../../../data/ignf_projections.json";
 import { useTranslation } from "../../../../../i18n/i18n";
 import FileUploader from "../../../../../modules/FileUploader";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { routes, useRoute } from "../../../../../router/router";
+import { routeStringParam, routes, useRoute } from "../../../../../router/router";
 import { delta, getFileExtension, looksLikeShapefileComponent, regex } from "../../../../../utils";
 import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
@@ -43,6 +43,8 @@ const getDataTechNameSuggestion = (fileName: string) => {
     return dataTechName;
 };
 
+const ignfProjectionsBySrid: Record<string, string> = ignfProjections;
+
 type DatasheetUploadFormProps = {
     datastoreId: string;
 };
@@ -52,7 +54,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 
     const route = useRoute();
 
-    const datasheetName: string | undefined = useMemo(() => route.params?.["datasheetName"], [route.params]);
+    const datasheetName: string | undefined = useMemo(() => routeStringParam(route.params, "datasheetName"), [route.params]);
 
     const schema = yup
         .object({
@@ -135,7 +137,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     const [progressMax, setProgressMax] = useState(0);
 
     const [showDataInfos, setShowDataInfos] = useState(false);
-    const [projections, setProjections] = useState(defaultProjections);
+    const [projections, setProjections] = useState<Record<string, string>>(defaultProjections);
 
     const [dataFileError, setDataFileError] = useState<string>();
     const dataFileRef = useRef<HTMLInputElement>(null);
@@ -185,7 +187,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         }
     }, [showDataInfos, setFormValue]);
 
-    const onSubmit = async (formData) => {
+    const onSubmit = async (formData: yup.InferType<typeof schema>) => {
         const dataFile = dataFileRef.current?.files?.[0];
 
         if (isValid && validateDataFile(dataFile)) {
@@ -244,7 +246,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     .uploadComplete(uuid, file)
                     .then(async (data) => {
                         const sridRaw = data?.srid;
-                        const sridMapped = typeof sridRaw === "string" && sridRaw !== "" && sridRaw in ignfProjections ? ignfProjections[sridRaw] : sridRaw;
+                        const sridMapped =
+                            typeof sridRaw === "string" && sridRaw !== "" && sridRaw in ignfProjections ? ignfProjectionsBySrid[sridRaw] : sridRaw;
 
                         if (typeof sridMapped === "string" && sridMapped.trim() !== "") {
                             setFormValue("data_srid", sridMapped, { shouldValidate: true });

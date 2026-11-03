@@ -156,7 +156,7 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
     } = useForm({
         values: schema
             ? schema["fields"]?.reduce(
-                  (acc, field) => {
+                  (acc: Record<string, unknown>, field: { name: string }) => {
                       acc[field["name"]] = "";
                       return acc;
                   },

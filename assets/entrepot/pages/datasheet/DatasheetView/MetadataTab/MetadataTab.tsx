@@ -22,6 +22,8 @@ import MetadataField from "./MetadataField";
 
 import frequencyCodes from "../../../../../data/maintenance_frequency.json";
 
+const frequencyCodesByCode: Record<string, string> = frequencyCodes;
+
 const thematicCategories = getThematicCategories();
 
 type MetadataTabProps = {
@@ -42,7 +44,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
 
     const frequencyCode = useMemo(() => {
         const code = metadata?.csw_metadata?.frequency_code;
-        return code ? frequencyCodes[code] : frequencyCodes["unknown"];
+        return code ? frequencyCodesByCode[code] : frequencyCodes["unknown"];
     }, [metadata]);
 
     const catalogueDatasheetUrl = useMemo(() => {

@@ -98,35 +98,37 @@ const Tools: FC = () => {
             const layersSchema = {};
             Object.values(editableLayers).forEach((layers) => {
                 Object.keys(layers).forEach((id) => {
-                    layersSchema[id] = yup.object({
-                        table_title: yup.string().required(),
-                        geometry_type: yup
-                            .string()
-                            .oneOf([...geometryTypes])
-                            .required(),
-                        tools: yup
-                            .array()
-                            .of(
-                                yup
-                                    .string()
-                                    .oneOf([...arrLayerTools])
-                                    .required()
-                            )
-                            .required(),
-                        ref_tools: yup.object({
-                            snap: yup.object({
-                                active: yup.boolean().required(),
-                                layers: yup
-                                    .array()
-                                    .of(yup.object({ id: yup.string().required(), name: yup.string().required() }).required())
-                                    .required(),
-                            }),
-                            shortestpath: yup.object({
-                                active: yup.boolean().required(),
-                                layers: yup
-                                    .array()
-                                    .of(yup.object({ id: yup.string().required(), name: yup.string().required() }).required())
-                                    .required(),
+                    Object.assign(layersSchema, {
+                        [id]: yup.object({
+                            table_title: yup.string().required(),
+                            geometry_type: yup
+                                .string()
+                                .oneOf([...geometryTypes])
+                                .required(),
+                            tools: yup
+                                .array()
+                                .of(
+                                    yup
+                                        .string()
+                                        .oneOf([...arrLayerTools])
+                                        .required()
+                                )
+                                .required(),
+                            ref_tools: yup.object({
+                                snap: yup.object({
+                                    active: yup.boolean().required(),
+                                    layers: yup
+                                        .array()
+                                        .of(yup.object({ id: yup.string().required(), name: yup.string().required() }).required())
+                                        .required(),
+                                }),
+                                shortestpath: yup.object({
+                                    active: yup.boolean().required(),
+                                    layers: yup
+                                        .array()
+                                        .of(yup.object({ id: yup.string().required(), name: yup.string().required() }).required())
+                                        .required(),
+                                }),
                             }),
                         }),
                     });

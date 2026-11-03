@@ -74,7 +74,7 @@ class AttributeValidations {
                 return this.#context.createError({ message: t("dialog.add_attribute.value_not_in_list_error") });
             }
         } else if (typeof v === "object") {
-            const list = "values" in v ? v.values.map(({ value }) => value || null) : v.map((value) => value || null);
+            const list = "values" in v ? v.values.map(({ value }: { value: unknown }) => value || null) : v.map((value: unknown) => value || null);
             if (!list.includes(value)) {
                 return this.#context.createError({ message: t("dialog.add_attribute.value_not_in_list_error") });
             }

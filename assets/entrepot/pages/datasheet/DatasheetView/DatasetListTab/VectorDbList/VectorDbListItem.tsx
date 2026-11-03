@@ -145,7 +145,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
 
     const quotas = useMemo<Record<string, QuotaType[]>>(() => {
         const endpoints = endpointsQuery?.data ?? [];
-        const result = {};
+        const result: Record<string, QuotaType[]> = {};
         endpoints.forEach((e) => {
             const endpoint = e.endpoint;
 

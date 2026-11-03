@@ -35,7 +35,7 @@ const AddLogoModal = createModal({
 const schema = (t: TranslationFunction<"ManageCommunityValidations", ComponentKey>) =>
     yup.object().shape({
         logo: yup
-            .mixed()
+            .mixed<FileList>()
             .test("check-file-size", t("description.logo.size_error"), (files) => {
                 const file = files?.[0] ?? undefined;
 
@@ -99,7 +99,7 @@ const CommunityLogo: FC = () => {
     const updateLogoMutation = useMutation<{ logo_url: string }, ApiError>({
         mutationFn: () => {
             const form = new FormData();
-            form.append("logo", upload);
+            form.append("logo", upload as File);
             return api.community.updateLogo(community.id, form);
         },
         onSuccess: (response) => {
@@ -137,7 +137,7 @@ const CommunityLogo: FC = () => {
         handleSubmit,
     } = useForm({ resolver: yupResolver(schema(tValidation)), mode: "onChange" });
 
-    const upload: File = watch("logo")?.[0];
+    const upload: File | undefined = watch("logo")?.[0];
 
     useEffect(() => {
         if (upload !== undefined) {

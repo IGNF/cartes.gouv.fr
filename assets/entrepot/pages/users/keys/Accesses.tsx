@@ -32,7 +32,7 @@ const Accesses: FC<AccessesProps> = (props) => {
     }, [value]);
 
     const exists = useCallback(
-        (permission, offering) => {
+        (permission: string, offering: string) => {
             const f = internal.find((v) => {
                 return v.permission === permission && v.offerings.includes(offering);
             });
@@ -86,7 +86,7 @@ const Accesses: FC<AccessesProps> = (props) => {
                     ),
                     nativeInputProps: {
                         value: t.offering._id,
-                        onChange: (event) => handleCheckboxChange(event, t.permissionId, t.offering._id),
+                        onChange: (event: React.ChangeEvent<HTMLInputElement>) => handleCheckboxChange(event, t.permissionId, t.offering._id),
                         checked: exists(t.permissionId, t.offering._id),
                     },
                 };

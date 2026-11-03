@@ -25,7 +25,7 @@ class WMTSService extends BaseService {
         });
 
         if (!wmtsOptions) return [];
-        const capsLayer = capabilities.Contents.Layer.find((layer) => layer.Identifier === this.service.layer_name) ?? null;
+        const capsLayer = capabilities.Contents.Layer.find((layer: { Identifier: string }) => layer.Identifier === this.service.layer_name) ?? null;
 
         const wmtsSource = new WMTS({
             ...wmtsOptions,

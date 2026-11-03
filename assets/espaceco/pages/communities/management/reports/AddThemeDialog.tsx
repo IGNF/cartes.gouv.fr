@@ -31,7 +31,7 @@ type AddThemeFormType = {
 };
 
 const normalize = (theme: AddThemeFormType): ThemeDTO => {
-    const result = { ...theme };
+    const result: AddThemeFormType & Partial<ThemeDTO> = { ...theme };
 
     result["attributes"] = [];
     if (theme.fullname) {

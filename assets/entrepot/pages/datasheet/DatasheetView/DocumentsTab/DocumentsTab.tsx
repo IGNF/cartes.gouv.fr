@@ -51,7 +51,7 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
                     return yup.string().url(t("documents_tab.add_document.error.url_invalid")).required(t("documents_tab.add_document.error.url_required"));
 
                 case DatasheetDocumentTypeEnum.File:
-                    return yup.mixed().test({
+                    return yup.mixed<FileList>().test({
                         name: "is-valid-document",
                         async test(files, ctx) {
                             const file = files?.[0] ?? undefined;

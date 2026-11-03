@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { sandboxCommunityId } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { externalUrls } from "@/router/externalUrls";
-import { routes, useRoute } from "@/router/router";
+import { routeParam, routes, useRoute } from "@/router/router";
 
 import classes from "./DiscoverPublish.module.css";
 
@@ -25,11 +25,11 @@ export default function DiscoverPublish() {
     const { data: user } = useUserQuery();
 
     useEffect(() => {
-        if (params?.["authentication_failed"] !== undefined) {
+        if (routeParam(params, "authentication_failed") !== undefined) {
             routes.discover_publish().replace();
         }
 
-        if (user && params?.["session_expired_login_success"] === 1) {
+        if (user && routeParam(params, "session_expired_login_success") === 1) {
             window.close();
         }
     }, [params, user]);
