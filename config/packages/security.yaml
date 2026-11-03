@@ -7,6 +7,13 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        # routes d'API : jamais de redirection, un 401 Problem Details pour toute requête sans cookie valide
+        api:
+            pattern: "%app.api_path_pattern%"
+            stateless: true
+            custom_authenticators:
+                - App\Security\Authenticator\CookieAuthenticator
+            entry_point: App\Security\ApiAuthenticationEntryPoint
         main:
             lazy: true
             stateless: true
@@ -28,8 +35,11 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/mon-compte, roles: ROLE_USER }
-        # - { path: ^/, roles: PUBLIC_ACCESS }
+        # formulaire de contact du site de documentation, appelé sans cookie
+        - { path: ^/contact_us$, roles: PUBLIC_ACCESS }
+        # documentation OpenAPI (dev)
+        - { path: ^/api/doc(\.json)?$, roles: PUBLIC_ACCESS }
+        - { path: "%app.api_path_pattern%", roles: ROLE_USER }
 
 when@test:
     security:

@@ -3,6 +3,7 @@
 namespace App\Tests\Smoke;
 
 use App\Exception\ApiErrorType;
+use App\Security\ApiAuthenticationEntryPoint;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class PublicPagesTest extends WebTestCase
@@ -37,5 +38,11 @@ final class PublicPagesTest extends WebTestCase
         $body = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
         self::assertSame(401, $body['status']);
         self::assertSame(ApiErrorType::ANONYMOUS, $body['type']);
+        self::assertSame(ApiAuthenticationEntryPoint::DETAIL, $body['detail']);
+
+        $client->xmlHttpRequest('GET', '/api/users/me/keys');
+
+        self::assertResponseStatusCodeSame(401);
+        self::assertResponseHeaderSame('content-type', 'application/problem+json');
     }
 }

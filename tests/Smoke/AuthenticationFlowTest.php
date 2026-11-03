@@ -83,7 +83,7 @@ final class AuthenticationFlowTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(401);
         $body = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        self::assertSame(ApiErrorType::SESSION_EXPIRED, $body['type']);
+        self::assertSame(ApiErrorType::ANONYMOUS, $body['type']);
 
         $clearedCookie = $client->getResponse()->headers->getCookies()[0] ?? null;
         self::assertNotNull($clearedCookie, 'la réponse doit effacer le cookie');
