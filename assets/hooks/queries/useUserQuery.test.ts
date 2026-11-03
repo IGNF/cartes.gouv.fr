@@ -32,7 +32,6 @@ describe("userQueryOptions", () => {
         // comme après une reconnexion : tout est invalidé, seule une requête active se relance
         await queryClient.invalidateQueries();
         observer.setOptions(userQueryOptions("expired"));
-        observer.setOptions(userQueryOptions("expiring"));
         expect(fetchMock).not.toHaveBeenCalled();
 
         observer.setOptions(userQueryOptions("active"));

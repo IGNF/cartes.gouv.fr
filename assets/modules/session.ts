@@ -3,7 +3,7 @@ import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
 import SymfonyRouting from "@/modules/Routing";
-import { EXPIRING_THRESHOLD_MS, useSessionStore } from "@/stores/SessionStore";
+import { useSessionStore } from "@/stores/SessionStore";
 
 /** horloge de session et reconnexion par popup, hors React ; l’état lui-même vit dans `SessionStore` */
 
@@ -17,8 +17,7 @@ let clockStarted = false;
 let clockTimer: ReturnType<typeof setTimeout> | null = null;
 let popup: Window | null = null;
 let popupPoll: ReturnType<typeof setInterval> | null = null;
-let checkInFlight: Promise<void> | null = null;
-let checkRequested = false;
+let check: AbortController | null = null;
 
 /** charge utilisateur reçue (#user au démarrage, réponse de /api/users/me) */
 export function applyUser(user: CartesUser | null): void {
@@ -32,10 +31,9 @@ function scheduleTick(): void {
         clockTimer = null;
     }
     const { status, expiresAt } = useSessionStore.getState();
-    if (expiresAt === null || status === "expired") return;
+    if (expiresAt === null || status !== "active") return;
 
-    const boundary = status === "active" ? expiresAt - EXPIRING_THRESHOLD_MS : expiresAt;
-    const delay = Math.min(Math.max(boundary - Date.now(), 0) + 1000, MAX_TIMEOUT_MS);
+    const delay = Math.min(Math.max(expiresAt - Date.now(), 0) + 1000, MAX_TIMEOUT_MS);
     clockTimer = setTimeout(tick, delay);
 }
 
@@ -44,13 +42,10 @@ function tick(): void {
     scheduleTick();
 }
 
-// retour sur la page : horloge revérifiée (minuteries bridées en arrière-plan) et, si expirée, session relue (reconnexion faite dans un autre onglet)
+// retour sur la page : l’horloge est revérifiée, les onglets en arrière-plan bridant les minuteries
 function revalidate(): void {
     if (document.visibilityState !== "visible") return;
     tick();
-    if (useSessionStore.getState().status === "expired") {
-        void checkSession();
-    }
 }
 
 /** à appeler une fois après `bootstrapUser()`, avant le premier rendu */
@@ -67,12 +62,12 @@ export function stopSessionClock(): void {
     document.removeEventListener("visibilitychange", revalidate);
     if (clockTimer !== null) clearTimeout(clockTimer);
     if (popupPoll !== null) clearInterval(popupPoll);
+    check?.abort();
     clockStarted = false;
     clockTimer = null;
     popup = null;
     popupPoll = null;
-    checkInFlight = null;
-    checkRequested = false;
+    check = null;
 }
 
 /** ouvre la connexion Keycloak dans une popup, depuis un gestionnaire de clic (sinon le navigateur la bloque) */
@@ -82,11 +77,12 @@ export function reconnect(): void {
         return;
     }
 
-    // une interrogation encore en cours (popup fermée il y a moins de 500 ms) n’en chevauche pas une nouvelle
+    // une interrogation ou une relecture encore en cours (popup fermée à l’instant) ne chevauche pas la nouvelle
     if (popupPoll !== null) {
         clearInterval(popupPoll);
         popupPoll = null;
     }
+    check?.abort();
 
     popup = window.open(SymfonyRouting.generate("cartesgouvfr_security_login", { popup: 1 }), LOGIN_POPUP_NAME, LOGIN_POPUP_FEATURES);
     if (popup === null) {
@@ -106,29 +102,19 @@ export function reconnect(): void {
     popupPoll = poll;
 }
 
-/** relit /api/users/me ; une demande reçue pendant un appel en vol relance un appel à sa fin */
-export function checkSession(): Promise<void> {
-    if (checkInFlight !== null) {
-        checkRequested = true;
-        return checkInFlight;
-    }
-    checkInFlight = runCheck().finally(() => {
-        checkInFlight = null;
-        if (checkRequested) {
-            checkRequested = false;
-            void checkSession();
-        }
-    });
-    return checkInFlight;
-}
+/** relit /api/users/me après la fermeture de la popup */
+export async function checkSession(): Promise<void> {
+    const controller = new AbortController();
+    check = controller;
 
-async function runCheck(): Promise<void> {
     let user: CartesUser | null;
     try {
-        user = await api.user.getMe();
+        user = await api.user.getMe({ signal: controller.signal });
     } catch {
-        // 401 : déjà signalé au store par apiFetch ; erreur réseau ou amont : état inchangé, le bouton reste cliquable
+        // 401 : déjà signalé au store par apiFetch ; annulation, erreur réseau ou amont : état inchangé, le bouton reste cliquable
         return;
+    } finally {
+        if (check === controller) check = null;
     }
     if (user === null) return;
 

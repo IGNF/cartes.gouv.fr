@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { EXPIRING_THRESHOLD_MS, computeStatus, useSessionStore } from "./SessionStore";
+import { computeStatus, useSessionStore } from "./SessionStore";
 
 const NOW = 1_700_000_000_000;
 const TWELVE_HOURS = 12 * 60 * 60 * 1000;
@@ -11,12 +11,11 @@ describe("SessionStore", () => {
         useSessionStore.setState({ status: "anonymous", expiresAt: null });
     });
 
-    it("calcule le statut depuis l’expiration et les seuils", () => {
+    it("calcule le statut depuis l’expiration", () => {
         const expiresAt = NOW + TWELVE_HOURS;
         expect(computeStatus(null, NOW)).toBe("anonymous");
         expect(computeStatus(expiresAt, NOW)).toBe("active");
-        expect(computeStatus(expiresAt, expiresAt - EXPIRING_THRESHOLD_MS - 1)).toBe("active");
-        expect(computeStatus(expiresAt, expiresAt - EXPIRING_THRESHOLD_MS)).toBe("expiring");
+        expect(computeStatus(expiresAt, expiresAt - 1)).toBe("active");
         expect(computeStatus(expiresAt, expiresAt)).toBe("expired");
     });
 
@@ -37,8 +36,8 @@ describe("SessionStore", () => {
         const { applySession, tick } = useSessionStore.getState();
         applySession(expiresAtSeconds, NOW);
 
-        tick(NOW + TWELVE_HOURS - EXPIRING_THRESHOLD_MS);
-        expect(useSessionStore.getState().status).toBe("expiring");
+        tick(NOW + TWELVE_HOURS - 1);
+        expect(useSessionStore.getState().status).toBe("active");
 
         tick(NOW + TWELVE_HOURS);
         expect(useSessionStore.getState().status).toBe("expired");

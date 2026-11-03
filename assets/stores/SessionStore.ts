@@ -1,9 +1,6 @@
 import { create } from "zustand";
 
-export type SessionStatus = "anonymous" | "active" | "expiring" | "expired";
-
-/** l’alerte « session expire bientôt » s’affiche 30 minutes avant l’expiration */
-export const EXPIRING_THRESHOLD_MS = 30 * 60 * 1000;
+export type SessionStatus = "anonymous" | "active" | "expired";
 
 interface SessionStore {
     status: SessionStatus;
@@ -19,12 +16,8 @@ interface SessionStore {
 
 export function computeStatus(expiresAt: number | null, now: number): SessionStatus {
     if (expiresAt === null) return "anonymous";
-    if (now >= expiresAt) return "expired";
-    if (now >= expiresAt - EXPIRING_THRESHOLD_MS) return "expiring";
-    return "active";
+    return now >= expiresAt ? "expired" : "active";
 }
-
-const rank: Record<SessionStatus, number> = { anonymous: 0, active: 1, expiring: 2, expired: 3 };
 
 export const useSessionStore = create<SessionStore>()((set, get) => ({
     status: "anonymous",
@@ -35,9 +28,8 @@ export const useSessionStore = create<SessionStore>()((set, get) => ({
     },
     tick: (now = Date.now()) => {
         const { status, expiresAt } = get();
-        const next = computeStatus(expiresAt, now);
-        if (rank[next] > rank[status]) {
-            set({ status: next });
+        if (status === "active" && computeStatus(expiresAt, now) === "expired") {
+            set({ status: "expired" });
         }
     },
     markExpired: () => {

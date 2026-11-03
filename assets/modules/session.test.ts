@@ -10,7 +10,6 @@ import { LOGIN_POPUP_FEATURES, LOGIN_POPUP_NAME, applyUser, reconnect, startSess
 
 const NOW = new Date("2026-11-03T10:00:00Z").getTime();
 const HOUR = 60 * 60 * 1000;
-const MINUTE = 60 * 1000;
 
 function user(expiresAtMs: number): CartesUser {
     return { _id: "user-1", email: "user@example.test", user_name: "user", roles: ["ROLE_USER"], session_expires_at: expiresAtMs / 1000 } as CartesUser;
@@ -44,15 +43,15 @@ describe("session", () => {
         vi.useRealTimers();
     });
 
-    it("suit les seuils depuis la charge amorcée dans le cache", () => {
+    it("passe en expirée à l’heure portée par la charge amorcée dans le cache", () => {
         queryClient.setQueryData(RQKeys.user_me(), user(NOW + 12 * HOUR));
         startSessionClock();
         expect(useSessionStore.getState().status).toBe("active");
 
-        vi.advanceTimersByTime(11 * HOUR + 30 * MINUTE + 1000);
-        expect(useSessionStore.getState().status).toBe("expiring");
+        vi.advanceTimersByTime(12 * HOUR - 1);
+        expect(useSessionStore.getState().status).toBe("active");
 
-        vi.advanceTimersByTime(30 * MINUTE);
+        vi.advanceTimersByTime(1001);
         expect(useSessionStore.getState().status).toBe("expired");
     });
 
@@ -153,18 +152,28 @@ describe("session", () => {
         expect(useSessionStore.getState().status).toBe("expired");
     });
 
-    it("revérifie la session au retour de focus quand elle est expirée", async () => {
+    it("abandonne la relecture en cours quand une nouvelle popup s’ouvre", async () => {
         startSessionClock();
         applyUser(user(NOW - 1));
-        vi.stubGlobal(
-            "fetch",
-            vi.fn(() => Promise.resolve(jsonResponse(user(NOW + 12 * HOUR))))
+        const fetchMock = vi.fn(
+            (request: Request) =>
+                new Promise<Response>((_, reject) => request.signal.addEventListener("abort", () => reject(new DOMException("abandon", "AbortError"))))
         );
+        vi.stubGlobal("fetch", fetchMock);
+        const popup = fakePopup();
+        vi.spyOn(window, "open").mockReturnValue(popup);
 
-        window.dispatchEvent(new Event("focus"));
+        reconnect();
+        (popup as unknown as { closed: boolean }).closed = true;
+        await vi.advanceTimersByTimeAsync(500);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+
+        const second = fakePopup();
+        vi.spyOn(window, "open").mockReturnValue(second);
+        reconnect();
         await vi.advanceTimersByTimeAsync(0);
 
-        expect(fetch).toHaveBeenCalledTimes(1);
-        expect(useSessionStore.getState().status).toBe("active");
+        expect(fetchMock.mock.calls[0][0].signal.aborted).toBe(true);
+        expect(useSessionStore.getState().status).toBe("expired");
     });
 });
