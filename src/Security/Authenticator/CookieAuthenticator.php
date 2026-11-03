@@ -2,11 +2,10 @@
 
 namespace App\Security\Authenticator;
 
-use App\Exception\ApiErrorType;
-use App\Exception\AppException;
 use App\Security\Cookie\AuthCookieResponseListener;
 use App\Security\KeycloakTokenManager;
 use League\OAuth2\Client\Token\AccessToken;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,13 +19,14 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 final class CookieAuthenticator extends AbstractAuthenticator
 {
-    private const API_ROUTE_PREFIX = 'cartesgouvfr_api_';
     private const LOGIN_CHECK_ROUTE = 'cartesgouvfr_security_login_check';
     private const LOGIN_ROUTE = 'cartesgouvfr_security_login';
 
     public function __construct(
         private readonly KeycloakTokenManager $tokenManager,
         private readonly RouterInterface $router,
+        #[Autowire(param: 'app.api_path_pattern')]
+        private readonly string $apiPathPattern,
     ) {
     }
 
@@ -40,14 +40,7 @@ final class CookieAuthenticator extends AbstractAuthenticator
             return false;
         }
 
-        if ($request->cookies->has(AuthCookieResponseListener::COOKIE_NAME)) {
-            return true;
-        }
-
-        // Sans cookie, s'activer quand même sur les routes API pour pouvoir renvoyer le 401 JSON attendu.
-        $route = $request->attributes->get('_route');
-
-        return is_string($route) && str_starts_with($route, self::API_ROUTE_PREFIX);
+        return $request->cookies->has(AuthCookieResponseListener::COOKIE_NAME);
     }
 
     /**
@@ -74,17 +67,16 @@ final class CookieAuthenticator extends AbstractAuthenticator
         return null;
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
+    /**
+     * @SuppressWarnings(UnusedFormalParameter) signature imposée par l'interface
+     */
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        $hadCookie = $request->cookies->has(AuthCookieResponseListener::COOKIE_NAME);
-        if ($hadCookie) {
-            $this->tokenManager->clearAccessToken();
-        }
+        $this->tokenManager->clearAccessToken();
 
-        $route = $request->attributes->get('_route');
-        if (is_string($route) && str_starts_with($route, self::API_ROUTE_PREFIX)) {
-            // sans exception précédente : le pare-feu redirigerait l'AuthenticationException vers le point d'entrée
-            throw new AppException(strtr($exception->getMessageKey(), $exception->getMessageData()), Response::HTTP_UNAUTHORIZED, type: $hadCookie ? ApiErrorType::SESSION_EXPIRED : ApiErrorType::ANONYMOUS);
+        // route d'API : laisser le pare-feu continuer sans jeton, le contrôle d'accès appelle le point d'entrée qui produit le 401
+        if (1 === preg_match('{'.$this->apiPathPattern.'}', $request->getPathInfo())) {
+            return null;
         }
 
         return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE, ['session_expired' => 1]));

@@ -2,12 +2,10 @@
 
 namespace App\Security;
 
-use App\Exception\ApiErrorType;
 use App\Security\State\LoginStateSerializer;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +23,6 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public const LOGIN_CHECK_ROUTE = 'cartesgouvfr_security_login_check';
     public const SUCCESS_ROUTE = 'cartesgouvfr_app';
     public const HOME_ROUTE = 'cartesgouvfr_app';
-    private const API_ROUTE_PREFIX = 'cartesgouvfr_api_';
     private const REQUEST_ATTR_STATE = '_login_state';
 
     public function __construct(
@@ -43,10 +40,6 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
      */
     public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
-        if ($this->isApiRequest($request)) {
-            return $this->getUnauthorizedApiResponse();
-        }
-
         return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE), Response::HTTP_TEMPORARY_REDIRECT);
     }
 
@@ -127,24 +120,5 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         $this->logger->info(self::class, [$message]);
 
         return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?authentication_failed=1');
-    }
-
-    private function isApiRequest(Request $request): bool
-    {
-        $route = $request->attributes->get('_route');
-
-        return is_string($route) && str_starts_with($route, self::API_ROUTE_PREFIX);
-    }
-
-    // point d'entrée : le pare-feu répond lui-même, hors du rendu d'erreur de Symfony
-    private function getUnauthorizedApiResponse(): JsonResponse
-    {
-        return new JsonResponse([
-            'status' => Response::HTTP_UNAUTHORIZED,
-            'title' => 'Unauthorized',
-            'detail' => 'Authentification requise',
-            'type' => ApiErrorType::ANONYMOUS,
-            'details' => [],
-        ], Response::HTTP_UNAUTHORIZED, ['Content-Type' => 'application/problem+json']);
     }
 }

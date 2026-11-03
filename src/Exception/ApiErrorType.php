@@ -7,6 +7,5 @@ namespace App\Exception;
  */
 final class ApiErrorType
 {
-    public const SESSION_EXPIRED = '/errors/session-expired';
     public const ANONYMOUS = '/errors/anonymous';
 }

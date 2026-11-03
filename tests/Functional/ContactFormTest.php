@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional;
 
+use App\Security\ApiAuthenticationEntryPoint;
 use App\Tests\Double\FakeKeycloakClient;
 use App\Tests\Support\KeycloakLoginTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -96,7 +97,8 @@ final class ContactFormTest extends WebTestCase
         $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore_create_request', content: $this->json(['name' => 'Entrepôt test']));
 
         self::assertResponseStatusCodeSame(401);
-        self::assertSame('Demande réservée aux utilisateurs connectés', $this->jsonResponse($client)['detail']);
+        // refusé par le pare-feu, avant le contrôleur
+        self::assertSame(ApiAuthenticationEntryPoint::DETAIL, $this->jsonResponse($client)['detail']);
         self::assertEmailCount(0);
     }
 

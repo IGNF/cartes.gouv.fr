@@ -65,12 +65,12 @@ describe("jsonFetch", () => {
         expect(error).toEqual({ status: 502, title: "Bad Gateway" });
     });
 
-    it("signale la session expirée seulement pour le type session-expired", async () => {
-        stubFetch(problem({ status: 401, title: "Unauthorized", type: ApiErrorType.ANONYMOUS }, 401));
+    it("signale la session expirée sur tout 401, pas sur un autre statut", async () => {
+        stubFetch(problem({ status: 403, title: "Forbidden" }, 403));
         await caught(jsonFetch("http://localhost/api/test"));
         expect(useAuthStore.getState().sessionExpired).toBe(false);
 
-        stubFetch(problem({ status: 401, title: "Unauthorized", type: ApiErrorType.SESSION_EXPIRED }, 401));
+        stubFetch(problem({ status: 401, title: "Unauthorized", type: ApiErrorType.ANONYMOUS }, 401));
         await caught(jsonFetch("http://localhost/api/test"));
         expect(useAuthStore.getState().sessionExpired).toBe(true);
     });
