@@ -51,6 +51,18 @@ final class CurrentUserPayloadTest extends WebTestCase
         self::assertSame([], $client->getResponse()->headers->getCookies());
     }
 
+    public function testEntrepotIdDifferentFromKeycloakSubIsRefused(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+        EntrepotMockResponseFactory::answerUsersMeWithId('autre-utilisateur');
+
+        $client->xmlHttpRequest('GET', self::BASE.'/api/users/me');
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertResponseHeaderSame('content-type', 'application/problem+json');
+    }
+
     public function testAnonymousPageHasNoBootstrapAndCallsNoUpstream(): void
     {
         $client = self::createClient();

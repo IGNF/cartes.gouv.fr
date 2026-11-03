@@ -33,7 +33,7 @@ class MembershipService
     {
         $user = $this->security->getUser();
 
-        return $user instanceof User ? $this->entrepotUserCache->get($user->getId()) : null;
+        return $user instanceof User ? $this->checkedProfile($user, $this->entrepotUserCache->get($user->getId())) : null;
     }
 
     /**
@@ -130,7 +130,7 @@ class MembershipService
     {
         $user = $this->security->getUser();
 
-        return $user instanceof User ? $this->entrepotUserCache->refresh($user->getId()) : null;
+        return $user instanceof User ? $this->checkedProfile($user, $this->entrepotUserCache->refresh($user->getId())) : null;
     }
 
     /**
@@ -147,12 +147,28 @@ class MembershipService
             return null;
         }
 
-        $membership = $lookup($this->entrepotUserCache->get($user->getId()));
+        $membership = $lookup($this->checkedProfile($user, $this->entrepotUserCache->get($user->getId())));
         if (null !== $membership) {
             return $membership;
         }
 
-        return $lookup($this->entrepotUserCache->refreshThrottled($user->getId()));
+        return $lookup($this->checkedProfile($user, $this->entrepotUserCache->refreshThrottled($user->getId())));
+    }
+
+    /**
+     * Les comparaisons d'appartenance supposent que l'identifiant Entrepôt est le `sub` Keycloak : refus explicite sinon.
+     *
+     * @param array<mixed> $profile
+     *
+     * @return array<mixed>
+     */
+    private function checkedProfile(User $user, array $profile): array
+    {
+        if (($profile['_id'] ?? null) !== $user->getId()) {
+            throw new \UnexpectedValueException(sprintf('Identifiant Entrepôt « %s » différent de l’identifiant Keycloak « %s »', $profile['_id'] ?? '', $user->getId()));
+        }
+
+        return $profile;
     }
 
     /**

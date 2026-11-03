@@ -23,12 +23,20 @@ final class EntrepotMockResponseFactory
 
     private static int $usersMeCalls = 0;
     private static bool $usersMeDown = false;
+    private static ?string $usersMeId = null;
 
     public static function reset(): void
     {
         self::$writeRequests = [];
         self::$usersMeCalls = 0;
         self::$usersMeDown = false;
+        self::$usersMeId = null;
+    }
+
+    /** GET users/me répond un autre identifiant que le `sub` Keycloak */
+    public static function answerUsersMeWithId(string $id): void
+    {
+        self::$usersMeId = $id;
     }
 
     public static function usersMeCalls(): int
@@ -67,7 +75,7 @@ final class EntrepotMockResponseFactory
             }
 
             return $this->json([
-                '_id' => self::USER_ID,
+                '_id' => self::$usersMeId ?? self::USER_ID,
                 'email' => FakeKeycloakClient::ID_TOKEN_CLAIMS['email'],
                 'creation' => '2026-01-01T00:00:00Z',
                 'last_login' => '2026-10-29T08:00:00Z',
