@@ -20,8 +20,8 @@ Ce document décrit le fonctionnement général du téléversement de fichiers (
 flowchart TD
     UI[UI: formulaire upload] --> FU[Frontend: FileUploader]
 
-    FU -->|POST /_file_uploader/upload_chunk x N| Backend[Backend: FileUploaderController]
-    FU -->|POST /_file_uploader/upload_complete| Backend
+    FU -->|POST /api/file_uploader/upload_chunk x N| Backend[Backend: FileUploaderController]
+    FU -->|POST /api/file_uploader/upload_complete| Backend
 
     Backend --> Merge[Fusion des chunks]
     Merge --> Validate[Validation du fichier final<br>voir diagramme ci-dessous]-->RES
@@ -34,11 +34,11 @@ flowchart TD
 
 ## API backend
 
-- `POST /_file_uploader/upload_chunk`
+- `POST /api/file_uploader/upload_chunk`
     - Reçoit un chunk et l'enregistre sur disque.
     - Réponse: `{ "index": <n>, "numBytes": <taille_chunk> }`.
 
-- `POST /_file_uploader/upload_complete`
+- `POST /api/file_uploader/upload_complete`
     - Déclenche la fusion des chunks, puis la validation du fichier final.
     - Réponse: `{ "srid": <EPSG>, "filename": <chemin_relatif> }`.
 

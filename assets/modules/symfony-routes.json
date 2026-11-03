@@ -72,7 +72,7 @@
             "tokens": [
                 [
                     "text",
-                    "\/datastore_create_request"
+                    "\/api\/contact\/datastore_create_request"
                 ]
             ],
             "defaults": [],
@@ -87,7 +87,7 @@
             "tokens": [
                 [
                     "text",
-                    "\/join_community"
+                    "\/api\/contact\/join_community"
                 ]
             ],
             "defaults": [],
@@ -102,7 +102,7 @@
             "tokens": [
                 [
                     "text",
-                    "\/accesses_request"
+                    "\/api\/contact\/accesses_request"
                 ]
             ],
             "defaults": [],
@@ -117,7 +117,7 @@
             "tokens": [
                 [
                     "text",
-                    "\/datastore_deletion_request"
+                    "\/api\/contact\/datastore_deletion_request"
                 ]
             ],
             "defaults": [],
@@ -1162,7 +1162,7 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_geonetwork_metadata_get": {
+        "cartesgouvfr_api_geonetwork_metadata_get": {
             "tokens": [
                 [
                     "variable",
@@ -5252,7 +5252,7 @@
             "tokens": [
                 [
                     "text",
-                    "\/_file_uploader\/upload_chunk"
+                    "\/api\/file_uploader\/upload_chunk"
                 ]
             ],
             "defaults": [],
@@ -5267,7 +5267,7 @@
             "tokens": [
                 [
                     "text",
-                    "\/_file_uploader\/upload_complete"
+                    "\/api\/file_uploader\/upload_complete"
                 ]
             ],
             "defaults": [],

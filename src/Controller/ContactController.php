@@ -101,7 +101,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/datastore_create_request',
+        '/api/contact/datastore_create_request',
         name: 'datastore_create_request',
         options: ['expose' => true],
         methods: ['POST'],
@@ -155,7 +155,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/join_community',
+        '/api/contact/join_community',
         name: 'join_community',
         options: ['expose' => true],
         methods: ['POST'],
@@ -205,7 +205,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/accesses_request',
+        '/api/contact/accesses_request',
         name: 'accesses_request',
         methods: ['POST'],
     )]
@@ -262,7 +262,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/datastore_deletion_request',
+        '/api/contact/datastore_deletion_request',
         name: 'datastore_deletion_request',
         methods: ['POST'],
     )]

@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/geonetwork/metadata',
-    name: 'cartesgouvfr_geonetwork_metadata_',
+    name: 'cartesgouvfr_api_geonetwork_metadata_',
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]

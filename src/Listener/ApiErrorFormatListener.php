@@ -24,7 +24,7 @@ final readonly class ApiErrorFormatListener
     public function onKernelException(ExceptionEvent $event): void
     {
         $request = $event->getRequest();
-        if (1 === preg_match($this->apiPathPattern, $request->getPathInfo())) {
+        if (1 === preg_match('{'.$this->apiPathPattern.'}', $request->getPathInfo())) {
             $request->setRequestFormat(ApiErrorEncoder::FORMAT);
         }
     }
