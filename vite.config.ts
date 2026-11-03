@@ -14,7 +14,7 @@ const cacheBuster = appRevision || `local-${Date.now()}`;
 
 export default defineConfig(({ mode }) => {
     // Chemin de base de l’installation (alias Apache, ex. /cartes.gouv.fr), vide à la racine ; lu dans .env/.env.local
-    const basePath = (loadEnv(mode, __dirname, "").APP_BASE_PATH ?? "").replace(/\/+$/, "");
+    const basePath = (loadEnv(mode, import.meta.dirname, "").APP_BASE_PATH ?? "").replace(/\/+$/, "");
 
     return {
         base: `${basePath}/build/`,
@@ -50,18 +50,18 @@ export default defineConfig(({ mode }) => {
         ],
         build: {
             emptyOutDir: true,
-            outDir: resolve(join(__dirname, "public", "build")),
+            outDir: resolve(join(import.meta.dirname, "public", "build")),
             cssMinify: "esbuild",
-            rollupOptions: {
+            rolldownOptions: {
                 input: {
-                    main: resolve(join(__dirname, "./assets", "main.tsx")),
-                    dsfr: resolve(join(__dirname, "./node_modules", "@codegouvfr", "react-dsfr", "main.css")),
+                    main: resolve(join(import.meta.dirname, "./assets", "main.tsx")),
+                    dsfr: resolve(join(import.meta.dirname, "./node_modules", "@codegouvfr", "react-dsfr", "main.css")),
                 },
             },
         },
         resolve: {
             alias: {
-                "@": resolve(join(__dirname, "assets")),
+                "@": resolve(join(import.meta.dirname, "assets")),
             },
         },
         css: {
