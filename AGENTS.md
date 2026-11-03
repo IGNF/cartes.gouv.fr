@@ -24,9 +24,9 @@ Project vocabulary (membership, snapshot, grant-path...): `docs/developer/glossa
 
 ## Git
 
-- Commit messages: simple French, conventional-commit style (`feat:`, `fix:`, `chore:`...), one line, no body unless truly necessary.
+- Commit messages: simple French, conventional-commit style (`feat:`, `fix:`, `chore:`...), one short line, no body unless truly necessary: the PR description carries the details.
 - Small atomic commits: one logical concern per commit.
-- AI-assisted commits end with the trailer `Assisted-by: <model name and version> <noreply@anthropic.com>`, naming the model that actually generated the code (e.g. `Assisted-by: Claude Fable 5 <noreply@anthropic.com>`). Do NOT add `Co-Authored-By: Claude...` or a "Generated with..." line.
+- AI-assisted commits end with the trailer `Assisted-by: <model name and version> <noreply@anthropic.com>`, naming the model that actually generated the code (e.g. `Assisted-by: Claude Fable 5 <noreply@anthropic.com>`), instead of `Co-Authored-By: Claude...`.
 - Never commit on `main`: create a branch first. Branch names are short, in conventional-commit type/scope style, with the issue number when relevant (`feat/charts`, `fix/articles-scraper-1098-1089`).
 - Never commit, push, or post PR descriptions/comments without a human explicitly validating the content first.
 - PR titles: conventional-commit style, issue number when relevant. PR descriptions in French: concise, simple wording, no AI-sounding or corporate jargon. Don't repeat what the linked issue already says. Structure: `Closes #N`, a short "Changements" bullet list, "Validation" when relevant, and an explicit call-out for any deliberate behavior change.
