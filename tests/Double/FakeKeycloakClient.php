@@ -3,6 +3,7 @@
 namespace App\Tests\Double;
 
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
 
@@ -24,10 +25,34 @@ final class FakeKeycloakClient extends KeycloakClient
     ];
 
     private static ?\Throwable $nextTokenException = null;
+    private static bool $sessionRevoked = false;
+    private static int $userInfoCalls = 0;
+    /** @var array<string, mixed>|null */
+    private static ?array $idTokenClaims = null;
 
     public static function reset(): void
     {
         self::$nextTokenException = null;
+        self::$sessionRevoked = false;
+        self::$userInfoCalls = 0;
+        self::$idTokenClaims = null;
+    }
+
+    /** @param array<string, mixed> $claims claims de l’ID token du prochain échange de code */
+    public static function useIdTokenClaims(array $claims): void
+    {
+        self::$idTokenClaims = $claims;
+    }
+
+    /** la session Keycloak est fermée : userinfo refuse le jeton */
+    public static function revokeSession(): void
+    {
+        self::$sessionRevoked = true;
+    }
+
+    public static function userInfoCalls(): int
+    {
+        return self::$userInfoCalls;
     }
 
     public static function failNextTokenExchange(\Throwable $exception): void
@@ -66,16 +91,22 @@ final class FakeKeycloakClient extends KeycloakClient
             throw $exception;
         }
 
-        return self::createAccessToken();
+        return self::createAccessToken(idTokenClaims: self::$idTokenClaims ?? self::ID_TOKEN_CLAIMS);
     }
 
+    // contrôle de vivacité de la session seulement : la réponse n’est pas lue par l’application
     public function fetchUserFromToken(AccessToken $accessToken): KeycloakResourceOwner
     {
-        throw new \LogicException('userinfo ne doit plus être appelé : l’identité vient de l’ID token');
+        ++self::$userInfoCalls;
+        if (self::$sessionRevoked) {
+            throw new IdentityProviderException('Session fermée', 401, '');
+        }
+
+        return new KeycloakResourceOwner(['sub' => self::ID_TOKEN_CLAIMS['sub']]);
     }
 
     public function fetchUser(): KeycloakResourceOwner
     {
-        throw new \LogicException('userinfo ne doit plus être appelé : l’identité vient de l’ID token');
+        throw new \LogicException('l’identité vient de l’ID token, pas de userinfo');
     }
 }

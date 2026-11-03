@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Security\Token\JwtClaims;
+use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,14 +12,21 @@ use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @implements UserProviderInterface<User>
  */
 class KeycloakUserProvider implements UserProviderInterface
 {
+    // Keycloak fait autorité sur l’état de la session : une révocation est vue au plus tard après ce délai
+    private const SESSION_CHECK_TTL = 60;
+
     public function __construct(
         private readonly KeycloakTokenManager $tokenManager,
+        private readonly ClientRegistry $clientRegistry,
+        private readonly CacheInterface $cache,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -34,11 +42,35 @@ class KeycloakUserProvider implements UserProviderInterface
         $idToken = $accessToken->getValues()['id_token'] ?? null;
         $claims = \is_string($idToken) ? JwtClaims::fromJwt($idToken) : [];
         if ([] === $claims) {
-            $this->logger->debug('{class}: ID token absent ou illisible', ['class' => self::class]);
+            // persistant si Keycloak chiffre l’ID token : visible dans les journaux, la connexion échoue proprement
+            $this->logger->error('{class}: ID token absent ou illisible', ['class' => self::class]);
             throw new AuthenticationExpiredException('ID token absent ou illisible', Response::HTTP_UNAUTHORIZED);
         }
 
-        return new User($claims, (int) $accessToken->getExpires());
+        $this->assertSessionAlive($accessToken);
+
+        try {
+            return new User($claims, (int) $accessToken->getExpires());
+        } catch (\UnexpectedValueException $ex) {
+            $this->logger->error('{class}: {message}', ['class' => self::class, 'message' => $ex->getMessage()]);
+            throw new AuthenticationExpiredException($ex->getMessage(), Response::HTTP_UNAUTHORIZED, $ex);
+        }
+    }
+
+    // userinfo répond 401 dès que la session Keycloak est fermée ou le compte désactivé ; la réponse n’est pas lue
+    private function assertSessionAlive(AccessToken $accessToken): void
+    {
+        try {
+            $this->cache->get('keycloak-session-'.sha1((string) $accessToken), function (ItemInterface $item) use ($accessToken): bool {
+                $item->expiresAfter(self::SESSION_CHECK_TTL);
+                $this->clientRegistry->getClient('keycloak')->fetchUserFromToken($accessToken);
+
+                return true;
+            });
+        } catch (\Throwable $th) {
+            $this->logger->info('{class}: session Keycloak fermée ou injoignable', ['class' => self::class]);
+            throw new AuthenticationExpiredException('Session Keycloak fermée ou injoignable', Response::HTTP_UNAUTHORIZED, $th);
+        }
     }
 
     /**
