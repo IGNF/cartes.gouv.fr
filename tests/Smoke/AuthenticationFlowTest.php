@@ -112,10 +112,11 @@ final class AuthenticationFlowTest extends WebTestCase
         self::assertTrue($clearedCookie->isCleared());
     }
 
-    public function testUnreadableIdTokenFailsTheLoginWithoutSettingTheCookie(): void
+    public function testClosedKeycloakSessionFailsTheLoginWithoutSettingTheCookie(): void
     {
         $client = self::createClient();
-        FakeKeycloakClient::useIdTokenClaims(['sub' => 'kc-user-1']);
+        // jeton reçu, mais userinfo le refuse (compte désactivé entre-temps) : rien ne doit finir dans le cookie
+        FakeKeycloakClient::revokeSession();
         $this->loginCheck($client, ['referer' => null]);
 
         self::assertResponseRedirects('/publier-une-donnee?authentication_failed=1');

@@ -118,7 +118,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
         $this->logger->info(self::class, [$message]);
-        // un jeton déjà reçu (session Keycloak fermée, ID token illisible) ne doit pas finir dans le cookie
+        // un jeton déjà reçu puis refusé par userinfo (session Keycloak fermée) ne doit pas finir dans le cookie
         $this->tokenManager->clearAccessToken();
 
         return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?authentication_failed=1');

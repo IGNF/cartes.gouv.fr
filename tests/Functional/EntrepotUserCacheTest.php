@@ -29,7 +29,7 @@ final class EntrepotUserCacheTest extends KernelTestCase
     public function testSecondReadIsServedByTheCache(): void
     {
         $cache = self::getContainer()->get(EntrepotUserCache::class);
-        $sub = FakeKeycloakClient::ID_TOKEN_CLAIMS['sub'];
+        $sub = FakeKeycloakClient::USER_INFO['sub'];
 
         $first = $cache->get($sub);
         $second = $cache->get($sub);
@@ -42,7 +42,7 @@ final class EntrepotUserCacheTest extends KernelTestCase
     public function testRefreshCallsUpstreamAgain(): void
     {
         $cache = self::getContainer()->get(EntrepotUserCache::class);
-        $sub = FakeKeycloakClient::ID_TOKEN_CLAIMS['sub'];
+        $sub = FakeKeycloakClient::USER_INFO['sub'];
 
         $cache->get($sub);
         // le rafraîchissement n’est pas rejoué dans la requête qui vient de calculer l’entrée : requête suivante simulée

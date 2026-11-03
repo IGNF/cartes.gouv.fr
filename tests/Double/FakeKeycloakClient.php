@@ -15,8 +15,8 @@ final class FakeKeycloakClient extends KeycloakClient
 {
     public const ACCESS_TOKEN = 'fake-access-token';
 
-    /** claims de l’ID token ; `sub` est aussi l’identifiant utilisateur de l’Entrepôt */
-    public const ID_TOKEN_CLAIMS = [
+    /** réponse userinfo ; `sub` est aussi l’identifiant utilisateur de l’Entrepôt */
+    public const USER_INFO = [
         'sub' => 'kc-user-1',
         'email' => 'test@example.com',
         'preferred_username' => 'test',
@@ -27,21 +27,12 @@ final class FakeKeycloakClient extends KeycloakClient
     private static ?\Throwable $nextTokenException = null;
     private static bool $sessionRevoked = false;
     private static int $userInfoCalls = 0;
-    /** @var array<string, mixed>|null */
-    private static ?array $idTokenClaims = null;
 
     public static function reset(): void
     {
         self::$nextTokenException = null;
         self::$sessionRevoked = false;
         self::$userInfoCalls = 0;
-        self::$idTokenClaims = null;
-    }
-
-    /** @param array<string, mixed> $claims claims de l’ID token du prochain échange de code */
-    public static function useIdTokenClaims(array $claims): void
-    {
-        self::$idTokenClaims = $claims;
     }
 
     /** la session Keycloak est fermée : userinfo refuse le jeton */
@@ -60,26 +51,13 @@ final class FakeKeycloakClient extends KeycloakClient
         self::$nextTokenException = $exception;
     }
 
-    /** @param array<string, mixed> $idTokenClaims */
-    public static function createAccessToken(int $lifetimeSeconds = 3600, array $idTokenClaims = self::ID_TOKEN_CLAIMS): AccessToken
+    public static function createAccessToken(int $lifetimeSeconds = 3600): AccessToken
     {
         return new AccessToken([
             'access_token' => self::ACCESS_TOKEN,
             'expires' => time() + $lifetimeSeconds,
-            'id_token' => self::jwt($idTokenClaims),
+            'id_token' => 'fake-id-token',
         ]);
-    }
-
-    /**
-     * JWT compact non signé : l’application lit les claims sans vérifier la signature.
-     *
-     * @param array<string, mixed> $claims
-     */
-    public static function jwt(array $claims): string
-    {
-        $encode = fn (array $data): string => rtrim(strtr(base64_encode(json_encode($data, JSON_THROW_ON_ERROR)), '+/', '-_'), '=');
-
-        return $encode(['alg' => 'none', 'typ' => 'JWT']).'.'.$encode($claims).'.signature';
     }
 
     /** @param array<string, mixed> $options */
@@ -91,10 +69,9 @@ final class FakeKeycloakClient extends KeycloakClient
             throw $exception;
         }
 
-        return self::createAccessToken(idTokenClaims: self::$idTokenClaims ?? self::ID_TOKEN_CLAIMS);
+        return self::createAccessToken();
     }
 
-    // contrôle de vivacité de la session seulement : la réponse n’est pas lue par l’application
     public function fetchUserFromToken(AccessToken $accessToken): KeycloakResourceOwner
     {
         ++self::$userInfoCalls;
@@ -102,11 +79,6 @@ final class FakeKeycloakClient extends KeycloakClient
             throw new IdentityProviderException('Session fermée', 401, '');
         }
 
-        return new KeycloakResourceOwner(['sub' => self::ID_TOKEN_CLAIMS['sub']]);
-    }
-
-    public function fetchUser(): KeycloakResourceOwner
-    {
-        throw new \LogicException('l’identité vient de l’ID token, pas de userinfo');
+        return new KeycloakResourceOwner(self::USER_INFO);
     }
 }

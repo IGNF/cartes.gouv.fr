@@ -11,7 +11,7 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 final class EntrepotMockResponseFactory
 {
     /** identifiant utilisateur Entrepôt = `sub` Keycloak */
-    public const USER_ID = FakeKeycloakClient::ID_TOKEN_CLAIMS['sub'];
+    public const USER_ID = FakeKeycloakClient::USER_INFO['sub'];
     public const DATASTORE_ID = 'ds-1';
     // fichier de métadonnée dont l’Entrepôt répond 502 en texte brut
     public const METADATA_ID_UPSTREAM_DOWN = 'upstream-down';
@@ -76,7 +76,7 @@ final class EntrepotMockResponseFactory
 
             return $this->json([
                 '_id' => self::$usersMeId ?? self::USER_ID,
-                'email' => FakeKeycloakClient::ID_TOKEN_CLAIMS['email'],
+                'email' => FakeKeycloakClient::USER_INFO['email'],
                 'creation' => '2026-01-01T00:00:00Z',
                 'last_login' => '2026-10-29T08:00:00Z',
                 'communities_member' => [],

@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * Vivacité de la session Keycloak : un appel userinfo par jeton et par minute, l’identité vient de l’ID token.
+ * Identité et vivacité de la session Keycloak : un appel userinfo par jeton et par minute.
  */
 final class KeycloakSessionCheckTest extends KernelTestCase
 {
@@ -35,7 +35,7 @@ final class KeycloakSessionCheckTest extends KernelTestCase
         $first = $provider->loadUser();
         $second = $provider->loadUser();
 
-        self::assertSame(FakeKeycloakClient::ID_TOKEN_CLAIMS['sub'], $first->getId());
+        self::assertSame(FakeKeycloakClient::USER_INFO['sub'], $first->getId());
         self::assertSame($first->getEmail(), $second->getEmail());
         self::assertSame(1, FakeKeycloakClient::userInfoCalls());
     }

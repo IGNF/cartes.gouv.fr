@@ -5,7 +5,7 @@ namespace App\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Principal Keycloak, construit depuis les claims de l’ID token du cookie : aucun appel amont pour authentifier.
+ * Principal Keycloak, construit depuis la réponse userinfo (en cache 60 s par jeton, voir `KeycloakUserProvider`).
  * Le profil Entrepôt est servi à part par `App\Services\MembershipService`.
  */
 class User implements UserInterface
@@ -17,22 +17,22 @@ class User implements UserInterface
     private readonly ?string $lastName;
 
     /**
-     * @param array<string, mixed> $idTokenClaims
+     * @param array<string, mixed> $userInfo
      * @param int                  $sessionExpiresAt expiration du jeton d’accès, en secondes Unix
      */
-    public function __construct(array $idTokenClaims, private readonly int $sessionExpiresAt)
+    public function __construct(array $userInfo, private readonly int $sessionExpiresAt)
     {
-        $sub = $idTokenClaims['sub'] ?? null;
-        $email = $idTokenClaims['email'] ?? null;
+        $sub = $userInfo['sub'] ?? null;
+        $email = $userInfo['email'] ?? null;
         if (!\is_string($sub) || '' === $sub || !\is_string($email) || '' === $email) {
-            throw new \UnexpectedValueException('ID token sans identifiant (sub) ou sans adresse e-mail');
+            throw new \UnexpectedValueException('userinfo sans identifiant (sub) ou sans adresse e-mail');
         }
 
         $this->id = $sub;
         $this->email = $email;
-        $this->userName = \is_string($idTokenClaims['preferred_username'] ?? null) ? $idTokenClaims['preferred_username'] : $email;
-        $this->firstName = \is_string($idTokenClaims['given_name'] ?? null) ? $idTokenClaims['given_name'] : null;
-        $this->lastName = \is_string($idTokenClaims['family_name'] ?? null) ? $idTokenClaims['family_name'] : null;
+        $this->userName = \is_string($userInfo['preferred_username'] ?? null) ? $userInfo['preferred_username'] : $email;
+        $this->firstName = \is_string($userInfo['given_name'] ?? null) ? $userInfo['given_name'] : null;
+        $this->lastName = \is_string($userInfo['family_name'] ?? null) ? $userInfo['family_name'] : null;
     }
 
     /**
