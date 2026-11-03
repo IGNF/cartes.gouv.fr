@@ -16,7 +16,8 @@ export function userQueryOptions(sessionStatus: SessionStatus): UseQueryOptions<
         queryKey: RQKeys.user_me(),
         queryFn: async ({ signal }) => {
             const user = await api.user.getMe({ signal });
-            applyUser(user);
+            // requête annulée pendant la lecture du corps : réponse incomplète, le store n’en tient pas compte
+            if (!signal.aborted) applyUser(user);
             return user;
         },
         staleTime: delta.minutes(5),

@@ -51,7 +51,7 @@ describe("session", () => {
         vi.advanceTimersByTime(12 * HOUR - 1);
         expect(useSessionStore.getState().status).toBe("active");
 
-        vi.advanceTimersByTime(1001);
+        vi.advanceTimersByTime(1);
         expect(useSessionStore.getState().status).toBe("expired");
     });
 
@@ -175,5 +175,16 @@ describe("session", () => {
 
         expect(fetchMock.mock.calls[0][0].signal.aborted).toBe(true);
         expect(useSessionStore.getState().status).toBe("expired");
+
+        // la fermeture de la seconde popup relit la session normalement
+        vi.stubGlobal(
+            "fetch",
+            vi.fn(() => Promise.resolve(jsonResponse(user(NOW + 12 * HOUR))))
+        );
+        (second as unknown as { closed: boolean }).closed = true;
+        await vi.advanceTimersByTimeAsync(500);
+
+        expect(fetch).toHaveBeenCalledTimes(1);
+        expect(useSessionStore.getState().status).toBe("active");
     });
 });

@@ -196,7 +196,7 @@ Entrées du store :
 - l'horloge : une minuterie vers `expiresAt`, plus un recalcul sur `focus` et `visibilitychange` (les onglets en arrière-plan brident les minuteries). L'horloge ne fait qu'avancer : elle ne ramène jamais un `expired` reçu du serveur en `active` ;
 - tout 401 reçu par [`apiFetch`](../../../assets/modules/jsonFetch.ts) alors qu'un utilisateur est connu (déclencheur de secours, `markExpired`), sans effet en `anonymous`.
 
-Le module [`session.ts`](../../../assets/modules/session.ts) tient l'horloge, la popup et la vérification directe ; `startSessionClock()` est appelé une fois dans `App.tsx`, après `bootstrapUser()`. Une mutation qui a échoué sur un 401 n'est pas rejouée : l'utilisateur re-soumet après reconnexion.
+Le module [`session.ts`](../../../assets/modules/session.ts) tient l'horloge, la popup et la relecture de `/api/users/me` à sa fermeture ; `startSessionClock()` est appelé une fois dans `App.tsx`, après `bootstrapUser()`. Une mutation qui a échoué sur un 401 n'est pas rejouée : l'utilisateur re-soumet après reconnexion.
 
 ### Reconnexion par popup
 

@@ -6,6 +6,7 @@ import { CartesUser } from "@/@types/app";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
 import SymfonyRouting from "@/modules/Routing";
+import { stopSessionClock } from "@/modules/session";
 import { useSessionStore } from "@/stores/SessionStore";
 import { userQueryOptions } from "./useUserQuery";
 
@@ -19,6 +20,7 @@ describe("userQueryOptions", () => {
     });
 
     afterEach(() => {
+        stopSessionClock();
         vi.unstubAllGlobals();
     });
 

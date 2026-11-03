@@ -33,7 +33,8 @@ function scheduleTick(): void {
     const { status, expiresAt } = useSessionStore.getState();
     if (expiresAt === null || status !== "active") return;
 
-    const delay = Math.min(Math.max(expiresAt - Date.now(), 0) + 1000, MAX_TIMEOUT_MS);
+    // une minuterie partie un peu tôt est simplement reprogrammée par tick()
+    const delay = Math.min(Math.max(expiresAt - Date.now(), 0), MAX_TIMEOUT_MS);
     clockTimer = setTimeout(tick, delay);
 }
 
@@ -103,7 +104,7 @@ export function reconnect(): void {
 }
 
 /** relit /api/users/me après la fermeture de la popup */
-export async function checkSession(): Promise<void> {
+async function checkSession(): Promise<void> {
     const controller = new AbortController();
     check = controller;
 
@@ -116,7 +117,8 @@ export async function checkSession(): Promise<void> {
     } finally {
         if (check === controller) check = null;
     }
-    if (user === null) return;
+    // abandon pendant la lecture du corps : jsonFetch renvoie un objet vide, à ignorer
+    if (controller.signal.aborted || user === null) return;
 
     // dans cet ordre : la requête utilisateur se réactive sur le statut, l’invalidation ne recharge pas une requête désactivée
     queryClient.setQueryData(RQKeys.user_me(), user);
