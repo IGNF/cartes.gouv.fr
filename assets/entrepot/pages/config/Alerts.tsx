@@ -206,21 +206,27 @@ const Alerts: FC = () => {
                                             <caption>{t("table_caption")}</caption>
                                             <thead>
                                                 <tr>
-                                                    <th />
-                                                    <th />
-                                                    <th />
-                                                    <th colSpan={4}>{t("alert.visible")}</th>
-                                                    <th />
+                                                    <th scope="col" rowSpan={2}>
+                                                        {t("alert.severity")}
+                                                    </th>
+                                                    <th scope="col" rowSpan={2}>
+                                                        {t("alert.title")}
+                                                    </th>
+                                                    <th scope="col" rowSpan={2}>
+                                                        {t("alert.date")}
+                                                    </th>
+                                                    <th scope="colgroup" colSpan={4}>
+                                                        {t("alert.visible")}
+                                                    </th>
+                                                    <th scope="col" rowSpan={2}>
+                                                        {t("actions")}
+                                                    </th>
                                                 </tr>
                                                 <tr>
-                                                    <th>{t("alert.severity")}</th>
-                                                    <th>{t("alert.title")}</th>
-                                                    <th>{t("alert.date")}</th>
-                                                    <th>{t("alert.homepage")}</th>
-                                                    <th>{t("alert.contact")}</th>
-                                                    <th>{t("alert.map")}</th>
-                                                    <th>{t("alert.serviceLevel")}</th>
-                                                    <th>{t("actions")}</th>
+                                                    <th scope="col">{t("alert.homepage")}</th>
+                                                    <th scope="col">{t("alert.contact")}</th>
+                                                    <th scope="col">{t("alert.map")}</th>
+                                                    <th scope="col">{t("alert.serviceLevel")}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>

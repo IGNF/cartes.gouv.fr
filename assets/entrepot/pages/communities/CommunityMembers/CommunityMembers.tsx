@@ -265,7 +265,8 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                                                     </th>
                                                 ))}
                                                 <th scope="col">
-                                                    <span className={fr.cx("fr-icon-delete-line")} />
+                                                    <span className={fr.cx("fr-icon-delete-line")} aria-hidden="true" />
+                                                    <span className={fr.cx("fr-sr-only")}>{t("remove_column")}</span>
                                                 </th>
                                             </tr>
                                         </thead>

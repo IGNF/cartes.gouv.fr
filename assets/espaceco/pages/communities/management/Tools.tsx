@@ -80,7 +80,7 @@ const Tools: FC = () => {
     // Couches de rérérence pour les outils d'accrochage ou de plus court chemin
     const refLayers = useMemo<Record<RefLayerTools, RefToolLayer[]>>(() => {
         const ref: Record<RefLayerTools, RefToolLayer[]> = { snap: [], shortestpath: [] };
-        for (const tool of [...arrRefLayerTools]) {
+        for (const tool of arrRefLayerTools) {
             ref[tool] = getRefLayers(tool, layers);
         }
         return ref;

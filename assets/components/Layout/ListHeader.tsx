@@ -38,6 +38,7 @@ export function ListHeader(props: IListHeaderProps) {
                     priority="tertiary no outline"
                 />
                 {dataUpdatedAt && <span className={fr.cx("fr-text--xs", "fr-mb-0", "fr-mr-2v")}>{t("last_refresh_date", { dataUpdatedAt })}</span>}
+                {/* oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- role="status" explicite, mieux restitué que celui implicite d’<output> */}
                 <p role="status" className={fr.cx("fr-text--xs", "fr-mb-0", "fr-ml-auto")}>
                     {t("nb_results", { displayed: nbResults.displayed, total: nbResults.total })}
                 </p>

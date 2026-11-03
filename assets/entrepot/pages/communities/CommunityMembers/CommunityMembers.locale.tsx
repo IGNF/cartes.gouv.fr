@@ -11,6 +11,7 @@ const { i18n } = declareComponentKeys<
     | "add_member"
     | "remove_member"
     | "confirm_remove"
+    | "remove_column"
     | { K: "add_remove_right_title"; P: { right: string }; R: string }
 >()("CommunityMembers");
 export type I18n = typeof i18n;
@@ -25,6 +26,7 @@ export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMember
     add_member: "Ajouter un membre",
     remove_member: "Supprimer ce membre",
     confirm_remove: "Êtes-vous sûr de vouloir supprimer ce membre ?",
+    remove_column: "Supprimer",
     add_remove_right_title: ({ right }) => `Ajouter/supprimer le droit ${right}`,
 };
 
@@ -38,5 +40,6 @@ export const CommunityMembersEnTranslations: Translations<"en">["CommunityMember
     add_member: "Add member",
     remove_member: "Remove this member",
     confirm_remove: "Are you sure you want to delete this member?",
+    remove_column: "Remove",
     add_remove_right_title: ({ right }) => `Add/remove right ${right} to member`,
 };

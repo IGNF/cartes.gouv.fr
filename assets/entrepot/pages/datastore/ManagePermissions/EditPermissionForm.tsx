@@ -51,7 +51,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
         onSuccess(permission: DatastorePermission) {
             queryClient.setQueryData<DatastorePermission[]>(RQKeys.datastore_permissions(datastoreId), (oldPermissions) => {
                 const newPermissions = oldPermissions?.filter((p) => p._id !== permissionId) || [];
-                return [...newPermissions, ...[permission]];
+                return [...newPermissions, permission];
             });
             routes.datastore_manage_permissions({ datastoreId: datastoreId }).push();
         },

@@ -2,7 +2,8 @@ import type { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction
 
 import type { ComponentKey } from "@/i18n/types";
 
-export type StatsScope = "datastore" | "user";
+export const statsScopes = ["datastore", "user"] as const;
+export type StatsScope = (typeof statsScopes)[number];
 
 export type StatsTranslator = TranslationFunction<"Stats", ComponentKey>;
 

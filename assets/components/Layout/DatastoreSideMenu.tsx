@@ -80,6 +80,7 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                 inner: classes.inner,
             }}
             // @ts-expect-error react-dsfr SideMenu ne type pas role mais le propage sur sa balise nav
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- rendu sur un <nav>, role explicite du balisage DSFR (#1188)
             role="navigation"
         />
     );

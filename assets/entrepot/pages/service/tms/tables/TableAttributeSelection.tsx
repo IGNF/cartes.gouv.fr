@@ -59,7 +59,7 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
                     <Checkbox
                         options={Object.keys(table.attributes)
                             .filter((attrName) => {
-                                return !/^geometry/.test(table.attributes[attrName]);
+                                return !table.attributes[attrName].startsWith("geometry");
                             })
                             .sort()
                             .map((attrName) => ({

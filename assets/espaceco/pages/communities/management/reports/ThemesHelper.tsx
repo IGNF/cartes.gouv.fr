@@ -3,7 +3,7 @@ import { normalizeTheme } from "./ThemeUtils";
 
 export default class ThemesHelper {
     static addTheme(themes: ThemeDTO[], theme: ThemeDTO): ThemeDTO[] {
-        return [...themes, ...[theme]];
+        return [...themes, theme];
     }
 
     static updateTheme(name: string, newTheme: Partial<ThemeDTO>, themes: ThemeDTO[]): ThemeDTO[] {

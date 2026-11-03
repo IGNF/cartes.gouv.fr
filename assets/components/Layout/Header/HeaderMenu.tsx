@@ -64,7 +64,7 @@ export default function HeaderMenu({ openButtonProps, actionButtonProps, items, 
                 {...openButtonProps}
                 iconId={openButtonProps?.iconId ?? "fr-icon-menu-2-fill"}
                 nativeButtonProps={{
-                    ...(openButtonProps?.nativeButtonProps ?? {}),
+                    ...openButtonProps?.nativeButtonProps,
                     "aria-controls": isOpen ? menuId : undefined,
                     "aria-haspopup": "true",
                     "aria-expanded": isOpen ? "true" : undefined,
