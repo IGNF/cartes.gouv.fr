@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Dto\Datastore\DatastoreIdentity;
-use App\Security\EntrepotUserCache;
 use App\Security\User;
 use App\Services\EntrepotApi\CommunityApiService;
 use App\Services\EntrepotApi\DatastoreApiService;

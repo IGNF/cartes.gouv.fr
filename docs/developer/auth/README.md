@@ -95,7 +95,7 @@ Deux firewalls (`config/packages/security.yaml`) :
 
 ## Snapshot utilisateur Entrepôt et cache par pod
 
-L’objet `User` est reconstruit à chaque requête à partir du JWT et de la réponse `GET users/me` de l’Entrepôt, mise en cache 60 s par identifiant Keycloak ([`EntrepotUserCache`](../../../src/Security/EntrepotUserCache.php), pool `cache.app`). Les infos datastore/communauté (nom, `technical_name`, id de communauté) sont dérivées de ce snapshot par [`MembershipService`](../../../src/Services/MembershipService.php) au lieu d’être rechargées via l’API. Vocabulaire : [glossaire](../glossaire.md).
+L’objet `User` est reconstruit à chaque requête à partir du JWT et de la réponse `GET users/me` de l’Entrepôt, mise en cache 60 s par identifiant Keycloak ([`EntrepotUserCache`](../../../src/Services/EntrepotUserCache.php), pool `cache.app`). Les infos datastore/communauté (nom, `technical_name`, id de communauté) sont dérivées de ce snapshot par [`MembershipService`](../../../src/Services/MembershipService.php) au lieu d’être rechargées via l’API. Vocabulaire : [glossaire](../glossaire.md).
 
 Trois mécanismes limitent la fenêtre de péremption :
 
@@ -182,7 +182,7 @@ Le navigateur supprime le cookie en même temps que le token expire : le serveur
 | [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                           | Accès centralisé au token (lecture cookie, cache requête, intent set/clear) |
 | [`src/Security/State/LoginStateSerializer.php`](../../../src/Security/State/LoginStateSerializer.php)               | Encode/décode le paramètre `state` OAuth2 signé HMAC                        |
 | [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Reconstruit l'objet `User` à partir du JWT (claims Keycloak)                |
-| [`src/Security/EntrepotUserCache.php`](../../../src/Security/EntrepotUserCache.php)                                 | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement    |
+| [`src/Services/EntrepotUserCache.php`](../../../src/Services/EntrepotUserCache.php)                                 | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement    |
 | [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Dérivation datastore/communauté depuis l'appartenance, deny-path            |
 | [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                           | Routes `/login`, `/logout`, `/login/check`                                  |
 | [`src/Listener/LogoutSubscriber.php`](../../../src/Listener/LogoutSubscriber.php)                                   | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak              |

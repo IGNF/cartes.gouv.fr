@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Services\EntrepotUserCache;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use League\OAuth2\Client\Token\AccessToken;
