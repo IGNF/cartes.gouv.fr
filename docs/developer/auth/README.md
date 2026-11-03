@@ -180,21 +180,20 @@ Le navigateur supprime le cookie en même temps que le token expire : le serveur
 
 C'est donc le front qui connaît l'expiration, par `session_expires_at` (secondes Unix, `expires` du jeton d'accès) dans la charge utilisateur. Le cookie expire à la même heure.
 
-### États et seuils
+### États
 
-Le store [`SessionStore`](../../../assets/stores/SessionStore.ts) (zustand) porte `{ status, expiresAt }` avec quatre statuts :
+Le store [`SessionStore`](../../../assets/stores/SessionStore.ts) (zustand) porte `{ status, expiresAt }` avec trois statuts :
 
-| Statut      | Condition                                          | Effet                                                                                                                                                                |
-| ----------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `anonymous` | charge `#user` absente                             | `useUserQuery` désactivé : aucun appel à `/api/users/me` (un visiteur ne devient connecté que par une navigation complète)                                           |
-| `active`    | plus de 30 min avant `expiresAt`                   | fonctionnement normal                                                                                                                                                |
-| `expiring`  | moins de 30 min avant `expiresAt`                  | alerte `warning` « Votre session expire bientôt », page interactive ; `useUserQuery` désactivé (un `refetchQueries` sur `user_me` est ignoré jusqu'à la reconnexion) |
-| `expired`   | `expiresAt` atteint, ou 401 reçu en session connue | alerte `error` « Session expirée » ; `useUserQuery` désactivé, le dernier utilisateur reste en cache, la page reste montée (la garde du routeur ne redirige pas)     |
+| Statut      | Condition                                          | Effet                                                                                                                                                            |
+| ----------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `anonymous` | charge `#user` absente                             | `useUserQuery` désactivé : aucun appel à `/api/users/me` (un visiteur ne devient connecté que par une navigation complète)                                       |
+| `active`    | avant `expiresAt`                                  | fonctionnement normal                                                                                                                                            |
+| `expired`   | `expiresAt` atteint, ou 401 reçu en session connue | alerte `error` « Session expirée » ; `useUserQuery` désactivé, le dernier utilisateur reste en cache, la page reste montée (la garde du routeur ne redirige pas) |
 
 Entrées du store :
 
 - la charge `#user` au démarrage et chaque réponse de `/api/users/me` (`applyUser`, fixe `expiresAt` et recalcule le statut, dans un sens comme dans l'autre : la dernière réponse du serveur gagne) ;
-- l'horloge : une minuterie vers la prochaine frontière, plus un recalcul sur `focus` et `visibilitychange` (les onglets en arrière-plan brident les minuteries). L'horloge ne fait qu'avancer : elle ne ramène jamais un `expired` reçu du serveur en `active` ;
+- l'horloge : une minuterie vers `expiresAt`, plus un recalcul sur `focus` et `visibilitychange` (les onglets en arrière-plan brident les minuteries). L'horloge ne fait qu'avancer : elle ne ramène jamais un `expired` reçu du serveur en `active` ;
 - tout 401 reçu par [`apiFetch`](../../../assets/modules/jsonFetch.ts) alors qu'un utilisateur est connu (déclencheur de secours, `markExpired`), sans effet en `anonymous`.
 
 Le module [`session.ts`](../../../assets/modules/session.ts) tient l'horloge, la popup et la vérification directe ; `startSessionClock()` est appelé une fois dans `App.tsx`, après `bootstrapUser()`. Une mutation qui a échoué sur un 401 n'est pas rejouée : l'utilisateur re-soumet après reconnexion.
@@ -226,39 +225,39 @@ sequenceDiagram
 
 - `window.open` renvoie `null` (popup bloquée) : `location.assign("/login")`, connexion dans l'onglet, retour par le `referer`.
 - Popup déjà ouverte : `focus()` dessus, pas de seconde fenêtre. Mobile ou réglage navigateur ouvrant un onglet au lieu d'une fenêtre : même code.
-- À la fermeture, `checkSession()` relit `/api/users/me` : utilisateur → `setQueryData`, puis statut `active` (la requête utilisateur se réactive), puis `invalidateQueries()` sans filtre, dans cet ordre ; 401 → reste `expired`, le bouton reste cliquable (pas de compteur, pas de délai de garde) ; erreur réseau ou amont → état inchangé. Une seule vérification en vol : une demande arrivée pendant l'appel en relance un à sa fin.
+- À la fermeture, `checkSession()` relit `/api/users/me` : utilisateur → `setQueryData`, puis statut `active` (la requête utilisateur se réactive), puis `invalidateQueries()` sans filtre, dans cet ordre ; 401 → reste `expired`, le bouton reste cliquable (pas de compteur, pas de délai de garde) ; erreur réseau ou amont → état inchangé. Une relecture encore en cours est abandonnée quand une nouvelle popup s'ouvre.
 - `invalidateQueries()` marque aussi `user_me` invalide : à sa réactivation la requête se relance malgré `staleTime`, soit un second `GET /api/users/me` juste après celui de `checkSession()`, servi par le cache serveur.
-- Autres onglets : en `expired`, le retour de `focus` appelle `checkSession()` ; c'est ainsi qu'un onglet apprend la reconnexion faite dans un autre.
+- Autres onglets : un onglet qui affiche « Session expirée » le garde jusqu'à son propre clic sur « Se reconnecter » (avec un SSO vivant, sa popup se referme aussitôt). Entre-temps, ses appels d'API passent déjà avec le cookie posé par l'autre onglet : seule une réponse de `/api/users/me` ramène le store en `active`, et `useUserQuery` est désactivé en `expired`. Voulu : un clic par onglet plutôt qu'une revérification serveur au retour de focus.
 - Pas de `postMessage`, pas de `noopener` : la fermeture de la fenêtre est le signal. Un futur en-tête `Cross-Origin-Opener-Policy` devra valoir `same-origin-allow-popups`, et une CSP devra autoriser le `<script>` inline de la page de retour (nonce).
-- Décalage d'horloge : le front compare `session_expires_at` (heure serveur) à l'horloge du poste ; un poste en avance de X voit les alertes X plus tôt, la reconnexion corrige.
+- Décalage d'horloge : le front compare `session_expires_at` (heure serveur) à l'horloge du poste ; un poste en avance de X voit l'alerte X plus tôt, la reconnexion corrige.
 - `iam_login_disabled` : la popup affiche la page « connexion désactivée », voulue (maintenance du SSO).
 
 ---
 
 ## Composants clés
 
-| Fichier                                                                                                             | Rôle                                                                           |
-| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| [`src/Security/Authenticator/CookieAuthenticator.php`](../../../src/Security/Authenticator/CookieAuthenticator.php) | Authenticator principal : lit et valide le cookie sur chaque requête           |
-| [`src/Security/KeycloakAuthenticator.php`](../../../src/Security/KeycloakAuthenticator.php)                         | Authenticator OAuth2 : gère le callback `/login/check` et le flux OIDC         |
-| [`src/Security/ApiAuthenticationEntryPoint.php`](../../../src/Security/ApiAuthenticationEntryPoint.php)             | Point d'entrée du firewall `api` : l'unique 401 des routes d'API               |
-| [`src/Listener/ApiFetchMetadataGuard.php`](../../../src/Listener/ApiFetchMetadataGuard.php)                         | Garde Fetch Metadata des routes d'API (403 autre site ou navigation)           |
-| [`src/Security/Cookie/AuthCookieCipher.php`](../../../src/Security/Cookie/AuthCookieCipher.php)                     | Chiffrement/déchiffrement XSalsa20-Poly1305 + HKDF                             |
-| [`src/Security/Cookie/AuthCookieResponseListener.php`](../../../src/Security/Cookie/AuthCookieResponseListener.php) | Pose ou efface le cookie sur `kernel.response` selon l'intent                  |
-| [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                           | Accès centralisé au token (lecture cookie, cache requête, intent set/clear)    |
-| [`src/Security/State/LoginStateSerializer.php`](../../../src/Security/State/LoginStateSerializer.php)               | Encode/décode le paramètre `state` OAuth2 signé HMAC                           |
-| [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Reconstruit `User` depuis userinfo Keycloak (cache 60 s, session vérifiée)     |
-| [`src/Services/EntrepotUserCache.php`](../../../src/Services/EntrepotUserCache.php)                                 | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement       |
-| [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Seul accès au profil Entrepôt ; dérivation datastore/communauté, deny-path     |
-| [`src/Services/CurrentUserPayload.php`](../../../src/Services/CurrentUserPayload.php)                               | Charge utilisateur du front (`#user` et `/api/users/me`)                       |
-| [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                           | Routes `/login`, `/logout`, `/login/check`, `/login/popup-callback`            |
-| [`src/Listener/LogoutSubscriber.php`](../../../src/Listener/LogoutSubscriber.php)                                   | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak                 |
-| [`src/ApiClient/Auth/AuthenticatedHttpClient.php`](../../../src/ApiClient/Auth/AuthenticatedHttpClient.php)         | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt        |
-| [`assets/modules/jsonFetch.ts`](../../../assets/modules/jsonFetch.ts)                                               | Envoie `X-Requested-With`, signale les 401 au store de session                 |
-| [`assets/stores/SessionStore.ts`](../../../assets/stores/SessionStore.ts)                                           | État de session du front : anonyme, active, bientôt expirée, expirée           |
-| [`assets/modules/session.ts`](../../../assets/modules/session.ts)                                                   | Horloge de session, popup de reconnexion, relecture de `/api/users/me`         |
-| [`assets/components/Utils/SessionAlert.tsx`](../../../assets/components/Utils/SessionAlert.tsx)                     | Alerte « session expire bientôt » / « session expirée », bouton Se reconnecter |
-| [`config/packages/security.yaml`](../../../config/packages/security.yaml)                                           | Firewalls `api` et `main`, `stateless: true`, contrôle d'accès                 |
+| Fichier                                                                                                             | Rôle                                                                        |
+| ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [`src/Security/Authenticator/CookieAuthenticator.php`](../../../src/Security/Authenticator/CookieAuthenticator.php) | Authenticator principal : lit et valide le cookie sur chaque requête        |
+| [`src/Security/KeycloakAuthenticator.php`](../../../src/Security/KeycloakAuthenticator.php)                         | Authenticator OAuth2 : gère le callback `/login/check` et le flux OIDC      |
+| [`src/Security/ApiAuthenticationEntryPoint.php`](../../../src/Security/ApiAuthenticationEntryPoint.php)             | Point d'entrée du firewall `api` : l'unique 401 des routes d'API            |
+| [`src/Listener/ApiFetchMetadataGuard.php`](../../../src/Listener/ApiFetchMetadataGuard.php)                         | Garde Fetch Metadata des routes d'API (403 autre site ou navigation)        |
+| [`src/Security/Cookie/AuthCookieCipher.php`](../../../src/Security/Cookie/AuthCookieCipher.php)                     | Chiffrement/déchiffrement XSalsa20-Poly1305 + HKDF                          |
+| [`src/Security/Cookie/AuthCookieResponseListener.php`](../../../src/Security/Cookie/AuthCookieResponseListener.php) | Pose ou efface le cookie sur `kernel.response` selon l'intent               |
+| [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                           | Accès centralisé au token (lecture cookie, cache requête, intent set/clear) |
+| [`src/Security/State/LoginStateSerializer.php`](../../../src/Security/State/LoginStateSerializer.php)               | Encode/décode le paramètre `state` OAuth2 signé HMAC                        |
+| [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Reconstruit `User` depuis userinfo Keycloak (cache 60 s, session vérifiée) |
+| [`src/Services/EntrepotUserCache.php`](../../../src/Services/EntrepotUserCache.php)                                 | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement    |
+| [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Seul accès au profil Entrepôt ; dérivation datastore/communauté, deny-path  |
+| [`src/Services/CurrentUserPayload.php`](../../../src/Services/CurrentUserPayload.php)                               | Charge utilisateur du front (`#user` et `/api/users/me`)                    |
+| [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                           | Routes `/login`, `/logout`, `/login/check`, `/login/popup-callback`         |
+| [`src/Listener/LogoutSubscriber.php`](../../../src/Listener/LogoutSubscriber.php)                                   | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak              |
+| [`src/ApiClient/Auth/AuthenticatedHttpClient.php`](../../../src/ApiClient/Auth/AuthenticatedHttpClient.php)         | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt     |
+| [`assets/modules/jsonFetch.ts`](../../../assets/modules/jsonFetch.ts)                                               | Envoie `X-Requested-With`, signale les 401 au store de session              |
+| [`assets/stores/SessionStore.ts`](../../../assets/stores/SessionStore.ts)                                           | État de session du front : anonyme, active, expirée                         |
+| [`assets/modules/session.ts`](../../../assets/modules/session.ts)                                                   | Horloge de session, popup de reconnexion, relecture de `/api/users/me`      |
+| [`assets/components/Utils/SessionAlert.tsx`](../../../assets/components/Utils/SessionAlert.tsx)                     | Alerte « Session expirée », bouton Se reconnecter                           |
+| [`config/packages/security.yaml`](../../../config/packages/security.yaml)                                           | Firewalls `api` et `main`, `stateless: true`, contrôle d'accès              |
 
 ---
 
@@ -287,6 +286,6 @@ sequenceDiagram
 
 **`/contact_us` public** : seule route d'API appelable sans cookie, n'importe qui peut y déclencher l'envoi de courriels ; à restreindre.
 
-**Popup de reconnexion** : le login dans la popup partage le cookie de l'onglet d'origine. Tout changement du flux d'échec (`onAuthenticationFailure`) doit garder la règle « pas de jeton reçu, pas de cookie effacé », sinon un échec dans la popup déconnecte l'onglet d'origine 30 min avant l'heure.
+**Popup de reconnexion** : le login dans la popup partage le cookie de l'onglet d'origine. Tout changement du flux d'échec (`onAuthenticationFailure`) doit garder la règle « pas de jeton reçu, pas de cookie effacé », sinon un échec dans la popup efface un cookie encore valable : celui qu'un autre onglet vient de poser en se reconnectant (l'onglet courant garde son alerte jusqu'à son propre clic), ou celui d'un poste dont l'horloge avance.
 
 **Pas de session PHP** : le bloc `session:` est intentionnellement absent de `config/packages/framework.yaml`. Ne pas le réintroduire pour des fonctionnalités annexes (flash, CSRF, etc.) sans réévaluer l'architecture stateless.
