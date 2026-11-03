@@ -84,6 +84,20 @@ final class AuthenticationFlowTest extends WebTestCase
         self::assertSame([], $client->getResponse()->headers->getCookies());
     }
 
+    public function testRefusedTokenInThePopupClearsTheCookieOfTheOpener(): void
+    {
+        $client = self::createClient();
+        $this->setCookieWithToken($client, FakeKeycloakClient::createAccessToken(3600));
+        FakeKeycloakClient::revokeSession();
+        $this->loginCheck($client, ['referer' => null, 'popup' => true]);
+
+        self::assertResponseRedirects('/login/popup-callback');
+        // jeton reçu mais refusé par userinfo : la session Keycloak est en doute, le cookie partagé est effacé
+        $clearedCookie = $client->getResponse()->headers->getCookies()[0] ?? null;
+        self::assertNotNull($clearedCookie);
+        self::assertTrue($clearedCookie->isCleared());
+    }
+
     public function testExpiredStateStillEndsInTheCallbackWhenTheLoginWasOpenedInThePopup(): void
     {
         $client = self::createClient();

@@ -129,7 +129,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
         $this->logger->info(self::class, [$message]);
-        // jeton reçu puis refusé par userinfo : pas de cookie ; sans jeton reçu (échange de code refusé), le cookie encore valable est conservé
+        // jeton reçu puis refusé par userinfo : pas de cookie ; sans jeton reçu, le cookie encore valable de l’onglet d’origine est conservé
         if (true === $request->attributes->get(self::REQUEST_ATTR_TOKEN_RECEIVED)) {
             $this->tokenManager->clearAccessToken();
         }

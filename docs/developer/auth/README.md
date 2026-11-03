@@ -184,12 +184,12 @@ C'est donc le front qui connaît l'expiration, par `session_expires_at` (seconde
 
 Le store [`SessionStore`](../../../assets/stores/SessionStore.ts) (zustand) porte `{ status, expiresAt }` avec quatre statuts :
 
-| Statut      | Condition                                          | Effet                                                                                                                                                            |
-| ----------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `anonymous` | charge `#user` absente                             | `useUserQuery` désactivé : aucun appel à `/api/users/me` (un visiteur ne devient connecté que par une navigation complète)                                       |
-| `active`    | plus de 30 min avant `expiresAt`                   | fonctionnement normal                                                                                                                                            |
-| `expiring`  | moins de 30 min avant `expiresAt`                  | alerte `warning` « Votre session expire bientôt », page interactive                                                                                              |
-| `expired`   | `expiresAt` atteint, ou 401 reçu en session connue | alerte `error` « Session expirée » ; `useUserQuery` désactivé, le dernier utilisateur reste en cache, la page reste montée (la garde du routeur ne redirige pas) |
+| Statut      | Condition                                          | Effet                                                                                                                                                                |
+| ----------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `anonymous` | charge `#user` absente                             | `useUserQuery` désactivé : aucun appel à `/api/users/me` (un visiteur ne devient connecté que par une navigation complète)                                           |
+| `active`    | plus de 30 min avant `expiresAt`                   | fonctionnement normal                                                                                                                                                |
+| `expiring`  | moins de 30 min avant `expiresAt`                  | alerte `warning` « Votre session expire bientôt », page interactive ; `useUserQuery` désactivé (un `refetchQueries` sur `user_me` est ignoré jusqu'à la reconnexion) |
+| `expired`   | `expiresAt` atteint, ou 401 reçu en session connue | alerte `error` « Session expirée » ; `useUserQuery` désactivé, le dernier utilisateur reste en cache, la page reste montée (la garde du routeur ne redirige pas)     |
 
 Entrées du store :
 
