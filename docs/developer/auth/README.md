@@ -73,6 +73,8 @@ Navigateur              Symfony
     |                      |      → déchiffrer cookie → unserialize → AccessToken
     |                      |      → mise en cache dans request.attributes
     |                      |   → vérifier token non expiré
+    |                      | KeycloakUserProvider::loadUser()
+    |                      |   → User depuis les claims de l'ID token (aucun appel amont)
     |                      |
     |                      | Controller → AuthenticatedHttpClient
     |                      |   → getAccessToken() → header Authorization: Bearer <token>
@@ -93,25 +95,29 @@ Deux firewalls (`config/packages/security.yaml`) :
 
 ---
 
-## Snapshot utilisateur Entrepôt et cache par pod
+## Identité, profil Entrepôt et cache par pod
 
-L’objet `User` est reconstruit à chaque requête à partir du JWT et de la réponse `GET users/me` de l’Entrepôt, mise en cache 60 s par identifiant Keycloak ([`EntrepotUserCache`](../../../src/Services/EntrepotUserCache.php), pool `cache.app`). Les infos datastore/communauté (nom, `technical_name`, id de communauté) sont dérivées de ce snapshot par [`MembershipService`](../../../src/Services/MembershipService.php) au lieu d’être rechargées via l’API. Vocabulaire : [glossaire](../glossaire.md).
+[`User`](../../../src/Security/User.php) est le principal Keycloak seul : `id` (claim `sub`, identique à l'identifiant utilisateur de l'Entrepôt), e-mail, nom d'utilisateur, prénom, nom, `session_expires_at`. [`KeycloakUserProvider`](../../../src/Security/KeycloakUserProvider.php) le reconstruit à chaque requête depuis les claims de l'ID token du cookie ([`JwtClaims`](../../../src/Security/Token/JwtClaims.php), sans vérification de signature : les jetons viennent de notre échange de code et dorment dans un cookie que nous chiffrons). Authentifier ne coûte aucun appel amont ; une panne Entrepôt n'empêche ni la connexion ni les pages publiques.
 
-Trois mécanismes limitent la fenêtre de péremption :
+Le profil Entrepôt (corps brut de `GET users/me`, mis en cache 60 s par identifiant dans [`EntrepotUserCache`](../../../src/Services/EntrepotUserCache.php), pool `cache.app`) n'est lu que par [`MembershipService`](../../../src/Services/MembershipService.php), qui en dérive les infos datastore/communauté (nom, `technical_name`, id de communauté) au lieu de les recharger via l'API. Vocabulaire : [glossaire](../glossaire.md).
+
+[`CurrentUserPayload`](../../../src/Services/CurrentUserPayload.php) assemble la charge envoyée au front, identique dans la page (`#user`, amorçage de React Query) et dans `GET /api/users/me` : identité Keycloak (`email`, `user_name`, `first_name`, `last_name`, `roles`, qui priment sur la copie Entrepôt), profil Entrepôt dans la structure de l'API Entrepôt (`_id`, `communities_member`, quotas…), `session_expires_at`. Une panne Entrepôt y répond 503 (Problem Details ou page d'erreur) : pas de rendu dégradé avec une liste d'entrepôts vide.
+
+Trois mécanismes limitent la fenêtre de péremption du profil :
 
 - **Invalidation** après une mutation d’appartenance faite par l’utilisateur lui-même (quitter une communauté, ajout au bac à sable, modification de ses droits ou de sa communauté) : l’entrée est supprimée, la requête suivante recharge.
-- **Rafraîchissement forcé** sur `GET /api/users/me` : la réponse est toujours fraîche et l’entrée du cache est réécrite.
+- **Rafraîchissement explicite** sur `GET /api/users/me?refresh=1` : le front le demande juste après un changement d'appartenance (ajout au bac à sable) ; l'entrée du cache est réécrite.
 - **Deny-path** : quand une appartenance n’est pas trouvée, une revalidation forcée est tentée avant de conclure, au plus une fois par 10 s (`fetched_at` stocké dans l’entrée).
 
 En production, `cache.app` est APCu, donc **propre à chaque pod** ; Kubernetes exécute plusieurs réplicas sans affinité de session. Conséquences, acceptées :
 
-| Mécanisme              | Portée          | Effet avec N pods                                                                   |
-| ---------------------- | --------------- | ----------------------------------------------------------------------------------- |
-| Invalidation           | le pod mutateur | les autres pods gardent l’entrée périmée jusqu’à 60 s (seule dégradation)           |
-| Rafraîchissement forcé | le pod servant  | toujours frais quel que soit le pod, et répare le cache de ce pod                   |
-| Deny-path              | le pod servant  | une appartenance manquante est revérifiée sur n’importe quel pod (≤ 1 appel / 10 s) |
+| Mécanisme                  | Portée          | Effet avec N pods                                                                   |
+| -------------------------- | --------------- | ----------------------------------------------------------------------------------- |
+| Invalidation               | le pod mutateur | les autres pods gardent l’entrée périmée jusqu’à 60 s                               |
+| Rafraîchissement explicite | le pod servant  | frais quel que soit le pod, et répare le cache de ce pod                            |
+| Deny-path                  | le pod servant  | une appartenance manquante est revérifiée sur n’importe quel pod (≤ 1 appel / 10 s) |
 
-Le sens « obtention d’un accès » est donc couvert sur tous les pods. Le sens « retrait d’un accès » ne l’est volontairement pas : seuls des champs dérivés (noms, ids) sont concernés, l’API Entrepôt fait autorité, et une péremption ≤ 60 s existe déjà sur un seul pod. Aucun cache partagé (Redis) n’est prévu pour cela.
+Sans `?refresh=1`, `GET /api/users/me` sert l’entrée du pod : la liste des entrepôts peut retarder de 60 s après un changement fait sur un autre pod. Le sens « obtention d’un accès » est couvert sur tous les pods là où le front le demande. Le sens « retrait d’un accès » ne l’est volontairement pas : seuls des champs dérivés (noms, ids) sont concernés, l’API Entrepôt fait autorité, et une péremption ≤ 60 s existe déjà sur un seul pod. Aucun cache partagé (Redis) n’est prévu pour cela.
 
 ---
 
@@ -165,7 +171,7 @@ Le navigateur supprime le cookie en même temps que le token expire : le serveur
 { "title": "Unauthorized", "status": 401, "detail": "Connexion requise", "details": [], "type": "/errors/anonymous" }
 ```
 
-[`jsonFetch.ts`](../../../assets/modules/jsonFetch.ts) appelle `AuthStore.setSessionExpired(true)` sur tout 401 ; le bandeau [`SessionExpiredAlert`](../../../assets/components/Utils/SessionExpiredAlert.tsx) ne s'affiche que si un utilisateur est en cache, donc jamais pour un visiteur anonyme. Le module de session à venir (expiration connue du front, reconnexion par popup) remplace ce bandeau.
+[`jsonFetch.ts`](../../../assets/modules/jsonFetch.ts) appelle `AuthStore.setSessionExpired(true)` sur tout 401 ; le bandeau [`SessionExpiredAlert`](../../../assets/components/Utils/SessionExpiredAlert.tsx) ne s'affiche que si un utilisateur est en cache, donc jamais pour un visiteur anonyme. Le front connaît l'heure d'expiration par `session_expires_at` dans la charge utilisateur ; le module de session à venir (états actif, bientôt expiré, expiré ; reconnexion par popup) s'en servira et remplacera ce bandeau.
 
 ---
 
@@ -181,9 +187,11 @@ Le navigateur supprime le cookie en même temps que le token expire : le serveur
 | [`src/Security/Cookie/AuthCookieResponseListener.php`](../../../src/Security/Cookie/AuthCookieResponseListener.php) | Pose ou efface le cookie sur `kernel.response` selon l'intent               |
 | [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                           | Accès centralisé au token (lecture cookie, cache requête, intent set/clear) |
 | [`src/Security/State/LoginStateSerializer.php`](../../../src/Security/State/LoginStateSerializer.php)               | Encode/décode le paramètre `state` OAuth2 signé HMAC                        |
-| [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Reconstruit l'objet `User` à partir du JWT (claims Keycloak)                |
+| [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Reconstruit `User` depuis les claims de l'ID token, sans appel amont        |
+| [`src/Security/Token/JwtClaims.php`](../../../src/Security/Token/JwtClaims.php)                                     | Lit les claims d'un JWT compact (sans vérification de signature)            |
 | [`src/Services/EntrepotUserCache.php`](../../../src/Services/EntrepotUserCache.php)                                 | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement    |
-| [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Dérivation datastore/communauté depuis l'appartenance, deny-path            |
+| [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Seul accès au profil Entrepôt ; dérivation datastore/communauté, deny-path  |
+| [`src/Services/CurrentUserPayload.php`](../../../src/Services/CurrentUserPayload.php)                               | Charge utilisateur du front (`#user` et `/api/users/me`)                    |
 | [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                           | Routes `/login`, `/logout`, `/login/check`                                  |
 | [`src/Listener/LogoutSubscriber.php`](../../../src/Listener/LogoutSubscriber.php)                                   | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak              |
 | [`src/ApiClient/Auth/AuthenticatedHttpClient.php`](../../../src/ApiClient/Auth/AuthenticatedHttpClient.php)         | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt     |
