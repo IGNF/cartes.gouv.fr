@@ -7,11 +7,13 @@ use App\Security\User;
 use App\Services\EntrepotApi\CommunityApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\UserApiService;
+use App\Utils;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * Dérive les infos datastore/communauté de l'appartenance de l'utilisateur courant, au lieu de charger le DTO datastore complet.
- * Porte aussi les mutations d'appartenance, pour que l'invalidation du snapshot utilisateur ne puisse pas être oubliée.
+ * Seul accès au profil Entrepôt de l'utilisateur courant (corps brut de GET users/me, en cache serveur).
+ * Dérive les infos datastore/communauté de l'appartenance au lieu de charger le DTO datastore complet,
+ * et porte les mutations d'appartenance pour que l'invalidation du cache ne puisse pas être oubliée.
  */
 class MembershipService
 {
@@ -25,11 +27,23 @@ class MembershipService
     }
 
     /**
+     * @return array<mixed>|null null pour un visiteur anonyme
+     */
+    public function currentUserProfile(): ?array
+    {
+        $user = $this->security->getUser();
+
+        return $user instanceof User ? $this->entrepotUserCache->get($user->getKeycloakId()) : null;
+    }
+
+    /**
+     * `community.datastore` est un id string dans users/me, absent si la communauté n'a pas de datastore.
+     *
      * @return array<mixed>|null
      */
     public function findByDatastore(string $datastoreId): ?array
     {
-        return $this->find(fn (User $user) => $user->findMembershipByDatastore($datastoreId));
+        return $this->find(fn (array $profile) => $this->findMembership($profile, 'datastore', $datastoreId));
     }
 
     /**
@@ -37,7 +51,7 @@ class MembershipService
      */
     public function findByCommunity(string $communityId): ?array
     {
-        return $this->find(fn (User $user) => $user->findMembershipByCommunity($communityId));
+        return $this->find(fn (array $profile) => $this->findMembership($profile, '_id', $communityId));
     }
 
     /**
@@ -108,22 +122,21 @@ class MembershipService
     }
 
     /**
-     * Recharge users/me à travers le cache serveur et met à jour l'utilisateur du token.
+     * Recharge users/me à travers le cache serveur, pour que ce pod voie aussi la donnée fraîche.
+     *
+     * @return array<mixed>|null null pour un visiteur anonyme
      */
-    public function refreshCurrentUser(): void
+    public function refreshCurrentUser(): ?array
     {
         $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            return;
-        }
 
-        $user->updateFromApiInfo($this->entrepotUserCache->refresh($user->getKeycloakId()));
+        return $user instanceof User ? $this->entrepotUserCache->refresh($user->getKeycloakId()) : null;
     }
 
     /**
-     * Cherche dans le token, puis une fois avec des données fraîches si absent (l'appartenance a pu changer depuis moins de 60 s).
+     * Cherche dans le cache, puis une fois avec des données fraîches si absent (l'appartenance a pu changer depuis moins de 60 s).
      *
-     * @param callable(User): (array<mixed>|null) $lookup
+     * @param callable(array<mixed>): (array<mixed>|null) $lookup
      *
      * @return array<mixed>|null
      */
@@ -134,13 +147,21 @@ class MembershipService
             return null;
         }
 
-        $membership = $lookup($user);
+        $membership = $lookup($this->entrepotUserCache->get($user->getKeycloakId()));
         if (null !== $membership) {
             return $membership;
         }
 
-        $user->updateFromApiInfo($this->entrepotUserCache->refreshThrottled($user->getKeycloakId()));
+        return $lookup($this->entrepotUserCache->refreshThrottled($user->getKeycloakId()));
+    }
 
-        return $lookup($user);
+    /**
+     * @param array<mixed> $profile
+     *
+     * @return array<mixed>|null
+     */
+    private function findMembership(array $profile, string $communityKey, string $value): ?array
+    {
+        return Utils::array_find($profile['communities_member'] ?? [], fn (array $member) => ($member['community'][$communityKey] ?? null) === $value);
     }
 }
