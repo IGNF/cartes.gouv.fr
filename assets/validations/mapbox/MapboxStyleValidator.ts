@@ -1,4 +1,4 @@
-import MapboxParser from "geostyler-mapbox-parser";
+import MapboxParser, { MbStyle } from "geostyler-mapbox-parser";
 import { TestContext, ValidationError } from "yup";
 import { Service, StyleFormat } from "../../@types/app";
 import { getTranslation } from "../../i18n/i18n";
@@ -21,9 +21,9 @@ export default class MapboxStyleValidator extends StyleValidator {
             return validation;
         }
 
-        let mapboxStyle;
+        let mapboxStyle: MbStyle;
         try {
-            mapboxStyle = JSON.parse(value as string);
+            mapboxStyle = JSON.parse(value as string) as MbStyle;
         } catch (e) {
             const error = e as SyntaxError;
             return ctx.createError({ message: error.message });
@@ -68,7 +68,7 @@ export default class MapboxStyleValidator extends StyleValidator {
         return true;
     }
 
-    #checkLayers(sourceName: string, layers: []) {
+    #checkLayers(sourceName: string, layers: MbStyle["layers"]) {
         for (let i = 0; i < layers.length; ++i) {
             const layer = layers[i];
 
@@ -80,11 +80,13 @@ export default class MapboxStyleValidator extends StyleValidator {
                 throw new Error(tMapbox("source_layer_is_missing"));
             }
 
+            // présence vérifiée ci-dessus ; un JSON ne peut pas contenir undefined
+            const sourceLayer = layer["source-layer"] ?? "";
             if (layer["source"] !== sourceName) {
-                throw new Error(tMapbox("incorrect_source", { layer: layer["source-layer"], source: sourceName }));
+                throw new Error(tMapbox("incorrect_source", { layer: sourceLayer, source: sourceName }));
             }
-            if (!this.#layerNames.includes(layer["source-layer"])) {
-                throw new Error(tMapbox("source_layer_not_matching", { layer: layer["source-layer"] }));
+            if (!this.#layerNames.includes(sourceLayer)) {
+                throw new Error(tMapbox("source_layer_not_matching", { layer: sourceLayer }));
             }
         }
     }

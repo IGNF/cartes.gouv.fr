@@ -40,7 +40,7 @@ const schema = (t: TranslationFunction<"DatastoreAdd", ComponentKey>) =>
             .required(t("create_new.form.name.error.required"))
             .min(10, t("create_new.form.name.error.min_length"))
             .trim()
-            .transform((value) => (value ? value.trim() : value)),
+            .transform((value: string | undefined) => (value ? value.trim() : value)),
         technical_name: yup.string(),
         offer: yup.string().required(t("create_new.form.offer.error.required")),
         information: yup.string(),

@@ -23,11 +23,11 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
         formState: { errors },
     } = form;
 
-    const tableAttributes: Record<string, string[]> = getFormValues("table_attributes") ?? {};
+    const tableAttributes = (getFormValues("table_attributes") as Record<string, string[]> | undefined) ?? {};
     const tableAttributesErrors = errors?.table_attributes as Partial<Record<string, FieldError>> | undefined;
 
     useEffect(() => {
-        const prevTableAttributes = getFormValues("table_attributes") ?? {};
+        const prevTableAttributes = (getFormValues("table_attributes") as Record<string, string[]> | undefined) ?? {};
         const tableAttributes: Record<string, string[]> = {};
         selectedTables.forEach((table) => {
             tableAttributes[table.name] = prevTableAttributes[table.name] ?? [];

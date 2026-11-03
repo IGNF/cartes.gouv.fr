@@ -8,13 +8,14 @@ import { FC, useCallback, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { CommunitiesLayers, CommunityFeatureTypeLayer, geometryTypes, RefToolLayer, ToolsFormType } from "../../../../@types/app_espaceco";
-import { arrLayerTools, arrRefLayerTools, CommunityResponseDTO, LayerTools, RefLayerTools } from "../../../../@types/espaceco";
+import { arrLayerTools, arrRefLayerTools, CommunityResponseDTO, RefLayerTools } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
 import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../modules/apiError";
 import api from "../../../api";
+import { LayerToolsPayload } from "../../../api/communityLayers";
 import { getFunctionalities, getToolsDefaultValues } from "../DefaultValues";
 import ActionButtonsCreation from "./ActionButtonsCreation";
 import ActionButtonsEdition from "./ActionButtonsEdition";
@@ -44,23 +45,21 @@ const Tools: FC = () => {
         isError: isUpdatingLayersError,
         error: updatingLayersError,
         mutate,
-    } = useMutation<Record<string, CommunityFeatureTypeLayer[]>, ApiError, Record<number, { tools: LayerTools[]; ref_tools: Record<RefLayerTools, number[]> }>>(
-        {
-            mutationFn: (datas) => {
-                return api.communityLayers.update(community.id, datas);
-            },
-            onSuccess(response) {
-                queryClient.setQueryData<Record<string, CommunityFeatureTypeLayer[]>>(RQKeys.communityLayers(community.id), (oldLayers) => {
-                    return response ? response : { ...oldLayers };
-                });
-                updateCommunity({ functionalities: getFormValues("functionalities") }, () => {
-                    if (mode === "creation" && !saveOnly && !stepper?.isLastStep()) {
-                        stepper?.nextStep();
-                    }
-                });
-            },
-        }
-    );
+    } = useMutation<Record<string, CommunityFeatureTypeLayer[]>, ApiError, LayerToolsPayload>({
+        mutationFn: (datas) => {
+            return api.communityLayers.update(community.id, datas);
+        },
+        onSuccess(response) {
+            queryClient.setQueryData<Record<string, CommunityFeatureTypeLayer[]>>(RQKeys.communityLayers(community.id), (oldLayers) => {
+                return response ? response : { ...oldLayers };
+            });
+            updateCommunity({ functionalities: getFormValues("functionalities") }, () => {
+                if (mode === "creation" && !saveOnly && !stepper?.isLastStep()) {
+                    stepper?.nextStep();
+                }
+            });
+        },
+    });
 
     const {
         data: layers,

@@ -73,9 +73,7 @@ const Reports: FC = () => {
                                 values: yup.mixed().test({
                                     name: "check-values",
                                     test: (value, context) => {
-                                        const {
-                                            parent: { type },
-                                        } = context;
+                                        const { type } = context.parent as { type?: string };
 
                                         if (type !== "list") {
                                             return value ? false : true;

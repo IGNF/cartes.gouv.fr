@@ -56,9 +56,7 @@ const getPersonalSchema = (themes: string[], statuses: ReportStatusesDTO): yup.O
                     name: "validate-status",
                     test: (value, context) => {
                         if (!value) return true;
-                        const {
-                            parent: { event },
-                        } = context;
+                        const { event } = context.parent as { event?: string };
 
                         if (event === "georem_status_changed") {
                             if (value && value.length === 0) {
@@ -76,9 +74,7 @@ const getPersonalSchema = (themes: string[], statuses: ReportStatusesDTO): yup.O
                     name: "validate-status",
                     test: (value, context) => {
                         const v = value ?? [];
-                        const {
-                            parent: { event },
-                        } = context;
+                        const { event } = context.parent as { event?: string };
 
                         if (event === "georem_created" && v.length === 0) {
                             return context.createError({ message: t("validation.themes.mandatory") });

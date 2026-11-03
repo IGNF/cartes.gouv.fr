@@ -35,7 +35,7 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
     });
 
     useEffect(() => {
-        const sample = getFormValues("sample");
+        const sample = getFormValues("sample") as SampleType | undefined;
         if (sample) {
             setSample(sample);
         }

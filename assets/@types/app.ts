@@ -243,8 +243,7 @@ export type TmsMetadata = {
     bounds: number[];
     format: string;
     tiles: string[];
-    // oxlint-disable-next-line typescript/no-explicit-any
-    vector_layers: any[];
+    vector_layers: { id: string }[];
 };
 
 /** configuration & offerings */

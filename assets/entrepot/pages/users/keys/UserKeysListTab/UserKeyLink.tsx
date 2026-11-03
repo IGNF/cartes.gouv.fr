@@ -93,7 +93,7 @@ const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) =
                     />
                 }
                 className={fr.cx("fr-mb-4v")}
-                label={offering?.type}
+                label={offering?.type as string | undefined}
                 text={capabilitiesUrl}
                 copyLabel={"Copier l'URL"}
             />

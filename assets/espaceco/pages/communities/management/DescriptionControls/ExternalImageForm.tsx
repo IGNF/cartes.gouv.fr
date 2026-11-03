@@ -47,7 +47,7 @@ function ExternalImageForm({ isOpened, ref }: ICustomImageFormProps) {
 
     useEffect(() => {
         if (isOpened) {
-            const { src, alt, title } = editor.getAttributes("image");
+            const { src, alt, title } = editor.getAttributes("image") as { src?: string; alt?: string; title?: string };
             if (src) {
                 setValue("src", src);
                 setValue("alt", alt);

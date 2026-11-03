@@ -36,17 +36,17 @@ type UserKeyFormProps = {
 const createRequestBody = (editMode: boolean, formValues: KeyFormValuesType) => {
     // Nettoyage => trim sur toutes les chaines
     const values = JSON.parse(
-        JSON.stringify(formValues, (_, value) => {
+        JSON.stringify(formValues, (_, value: unknown) => {
             return typeof value === "string" ? value.trim() : value;
         })
-    );
+    ) as Partial<KeyFormValuesType>;
 
     // Pas de filtrage, on supprime la liste des adresses IP
     if (values["ip_list_name"] === "none") {
         delete values["ip_list_name"];
         delete values["ip_list_addresses"];
     }
-    if ([UserKeyInfoDtoTypeEnum.HASH, UserKeyInfoDtoTypeEnum.OAUTH2].includes(values["type"])) {
+    if (values["type"] !== undefined && [UserKeyInfoDtoTypeEnum.HASH, UserKeyInfoDtoTypeEnum.OAUTH2].includes(values["type"])) {
         delete values["type_infos"];
     }
 

@@ -117,7 +117,7 @@ export function buildServiceOptions(offerings: OfferingStandardListResponseDto[]
 }
 
 const serviceQuery = { detailed: true };
-const serviceParam: ServiceParamDef = {
+const serviceParam: ServiceParamDef<OfferingStandardListResponseDto[]> = {
     kind: "service",
     key: "service",
     label: (t) => t("param_service_label"),

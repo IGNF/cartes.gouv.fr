@@ -6,9 +6,6 @@ import { Service } from "../../@types/app";
 import { type TMSResponse } from "../../@types/tms";
 import BaseService from "./BaseService";
 
-type VectorLayerType = {
-    id: string;
-};
 class TMSService extends BaseService {
     constructor(service: Service) {
         super(service);
@@ -17,7 +14,7 @@ class TMSService extends BaseService {
     getLayerNames() {
         const layers: string[] = [];
         if (this.service.tms_metadata) {
-            const vectorLayers = this.service.tms_metadata?.vector_layers as VectorLayerType[];
+            const vectorLayers = this.service.tms_metadata?.vector_layers;
             vectorLayers.forEach((layer) => {
                 layers.push(layer.id);
             });
@@ -70,7 +67,7 @@ class TMSService extends BaseService {
         const xml = await response.text();
         const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
 
-        const json: TMSResponse = parser.parse(xml);
+        const json = parser.parse(xml) as TMSResponse;
         return {
             title: json.TileMap.Title,
             tileSize: [parseInt(json.TileMap.TileFormat.width, 10), parseInt(json.TileMap.TileFormat.height, 10)],

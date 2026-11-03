@@ -48,7 +48,7 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
                             .test({
                                 name: "not_empty",
                                 test: (value, context) => {
-                                    const { email } = context.parent;
+                                    const { email } = context.parent as { email: string };
                                     if (value && value.length === 0) {
                                         return context.createError({ message: tmc("modal.openwithemail.grids_not_empty_error", { domain: email }) });
                                     }

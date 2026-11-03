@@ -45,7 +45,7 @@ export default function useStylesHandler(props: UseStylesHandlerProps): UseStyle
                 return;
             }
             try {
-                const input = format === StyleFormatEnum.Mapbox ? JSON.parse(initialStrStyle) : initialStrStyle;
+                const input: unknown = format === StyleFormatEnum.Mapbox ? JSON.parse(initialStrStyle) : initialStrStyle;
                 const readResult = await parser.readStyle(input);
                 if (readResult.output) {
                     setGsStyle(readResult.output as GsStyle);

@@ -12,15 +12,18 @@ export type AddPermissionFormType = PermissionFormType & {
 
 export type EditPermissionFormType = PermissionFormType;
 
+// Les dates deviennent des chaînes après le passage par JSON
+type PermissionRequestBody = Omit<AddPermissionFormType | EditPermissionFormType, "end_date"> & { end_date?: string };
+
 const createRequestBody = (formValues: AddPermissionFormType | EditPermissionFormType): object => {
     // Nettoyage => trim sur toutes les chaines
     const values = JSON.parse(
-        JSON.stringify(formValues, (_, value) => {
+        JSON.stringify(formValues, (_, value: unknown) => {
             return typeof value === "string" ? value.trim() : value;
         })
-    );
+    ) as PermissionRequestBody;
 
-    if (!("end_date" in values)) {
+    if (values.end_date === undefined) {
         return values;
     }
 

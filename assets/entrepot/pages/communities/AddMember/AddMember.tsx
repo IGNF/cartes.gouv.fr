@@ -48,10 +48,10 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
                 .required(t("id_mandatory"))
                 .test(
                     "exists",
-                    ({ value }) => t("already_member", { userId: value }),
+                    ({ value }: { value: string }) => t("already_member", { userId: value }),
                     (value) => !communityMemberIds.includes(value)
                 ),
-            user_rights: yup.array(),
+            user_rights: yup.array<yup.AnyObject, string>(),
         });
 
     // Formulaire
@@ -94,7 +94,7 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
 
     // Ajout de l'utilisateur
     const onSubmit = () => {
-        const values = Object.assign(getFormValues(), { user_creation: true });
+        const values = { ...getFormValues(), user_creation: true };
         addMemberMutation.mutate(values);
     };
 

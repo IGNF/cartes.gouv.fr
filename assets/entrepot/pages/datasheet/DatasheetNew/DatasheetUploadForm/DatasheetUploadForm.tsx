@@ -25,6 +25,8 @@ import ignfProjections from "../../../../../data/ignf_projections.json";
 import { useTranslation } from "../../../../../i18n/i18n";
 import FileUploader from "../../../../../modules/FileUploader";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import { getApiErrorMessage } from "../../../../../modules/apiError";
+import { ApiError } from "../../../../../modules/jsonFetch";
 import { routeStringParam, routes, useRoute } from "../../../../../router/router";
 import { delta, getFileExtension, looksLikeShapefileComponent, regex } from "../../../../../utils";
 import api from "../../../../api";
@@ -63,7 +65,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 .required(t("datasheet.name_mandatory_error"))
                 .max(99, t("datasheet.name_max_length_error"))
                 .matches(regex.datasheet_name, t("datasheet.name_regex_error"))
-                .transform((value) => value.trim())
+                .transform((value: string) => value.trim())
                 .test({
                     name: "is-unique",
                     test(dataName, ctx) {
@@ -119,7 +121,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 .required(t("producer_mandatory_error"))
                 .min(2, t("producer_length_error"))
                 .max(99, t("producer_length_error"))
-                .transform((value) => (value ? value.trim() : value)),
+                .transform((value: string | undefined) => (value ? value.trim() : value)),
             production_year: yup
                 .number()
                 .required(t("production_year_mandatory_error"))
@@ -260,16 +262,16 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         setShowDataInfos(true);
                         setFileUploadInProgress(false);
                     })
-                    .catch((err) => {
+                    .catch((err: ApiError | Error) => {
                         console.error(err);
                         setFileUploadInProgress(false);
-                        setDataFileError(err?.msg);
+                        setDataFileError(getApiErrorMessage(err));
                     });
             })
-            .catch((err) => {
+            .catch((err: ApiError | Error) => {
                 console.error(err);
                 setFileUploadInProgress(false);
-                setDataFileError(err?.msg);
+                setDataFileError(getApiErrorMessage(err));
             });
     };
 

@@ -128,9 +128,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
                             return true;
                         }
 
-                        const {
-                            parent: { membershipRequest },
-                        } = context;
+                        const { membershipRequest } = context.parent as { membershipRequest?: string };
                         if (membershipRequest !== "partially_open") {
                             return true;
                         }

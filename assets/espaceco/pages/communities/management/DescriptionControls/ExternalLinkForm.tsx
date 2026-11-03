@@ -46,7 +46,7 @@ function ExternalLinkForm({ isOpened, ref }: ICustomLinkFormProps) {
 
     useEffect(() => {
         if (isOpened) {
-            const { href } = editor.getAttributes("link");
+            const { href } = editor.getAttributes("link") as { href?: string };
             if (href) {
                 setValue("href", href);
                 editor.chain().focus().extendMarkRange("link").run();

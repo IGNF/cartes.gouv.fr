@@ -38,9 +38,9 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
 
     if (!permissions) return null;
 
-    const availableTypes = Array.from(new Set((permissions ?? []).flatMap((permission) => (permission.offerings ?? []).map((offering) => offering.type)))).sort(
-        (a, b) => a.localeCompare(b, "fr", { sensitivity: "base" })
-    );
+    const availableTypes = Array.from(
+        new Set((permissions ?? []).flatMap((permission) => (permission.offerings ?? []).map((offering) => offering.type as string)))
+    ).sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" }));
 
     const filteredAndSortedPermissions = [...(permissions ?? [])]
         .map((permission) => {

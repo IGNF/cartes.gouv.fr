@@ -108,8 +108,8 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
         // Ajout du layer dans la carte et dans le LayerSwitcher
         mapRef.current?.addLayer(layer);
         layerSwitcherControl.addLayer(layer, {
-            title: layer.get("title"),
-            description: layer.get("abstract"),
+            title: layer.get("title") as string | undefined,
+            description: layer.get("abstract") as string | undefined,
         });
     };
 

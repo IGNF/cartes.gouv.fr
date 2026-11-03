@@ -33,7 +33,7 @@ function KeyValueItem(props: KeyValueListProps) {
         register,
         watch,
     } = useFormContext();
-    const useKeys = watch(`${name}.useKeys`);
+    const useKeys = Boolean(watch(`${name}.useKeys`));
     const errorMessage = (field: "key" | "value") => {
         const message = get(errors, `${name}.values.${index}.${field}.message`);
         return typeof message === "string" ? message : undefined;

@@ -19,9 +19,29 @@ import { routes } from "@/router/router";
 import { fieldErrorMessage } from "@/utils";
 import { joinModal, successModal } from "./modal";
 
+// Description d’un champ du formulaire d’adhésion (join.json publié dans les annexes de la communauté)
+type JoinSchemaField = {
+    name: string;
+    title?: string;
+    description?: string;
+    type?: string;
+    constraints?: {
+        required?: boolean;
+        minLength?: number;
+        maxLength?: number;
+        minimum?: number;
+        maximum?: number;
+        pattern?: string;
+    };
+};
+
+type JoinSchema = {
+    description?: string;
+    fields?: JoinSchemaField[];
+};
+
 function getInputProps(
-    // oxlint-disable-next-line typescript/no-explicit-any
-    field: any,
+    field: JoinSchemaField,
     register: UseFormRegister<FieldValues>,
     registerOptionsOverrides?: RegisterOptions<FieldValues>
 ): DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
@@ -46,12 +66,7 @@ function getInputProps(
     };
 }
 
-function registerField(
-    // oxlint-disable-next-line typescript/no-explicit-any
-    field: any,
-    register: UseFormRegister<FieldValues>,
-    registerOptionsOverrides?: RegisterOptions<FieldValues>
-) {
+function registerField(field: JoinSchemaField, register: UseFormRegister<FieldValues>, registerOptionsOverrides?: RegisterOptions<FieldValues>) {
     return register(field["name"], {
         required: field["constraints"]?.required ? "Ce champ est obligatoire" : false,
         minLength: field["constraints"]?.minLength
@@ -78,7 +93,7 @@ function registerField(
                   message: `Ce champ a une valeur maximale de ${field["constraints"]?.maximum}`,
               }
             : undefined,
-        validate: (value) => {
+        validate: (value: unknown) => {
             if (field["type"] === "integer") {
                 if (!Number.isInteger(Number(value))) {
                     return "Ce champ doit être un nombre entier";
@@ -91,17 +106,17 @@ function registerField(
             }
             if (field["constraints"]?.pattern) {
                 const regex = new RegExp(field["constraints"]?.pattern);
-                if (!regex.test(value)) {
+                if (!regex.test(String(value))) {
                     return "Ce champ ne correspond pas au format attendu";
                 }
             }
             return true;
         },
-        setValueAs(value) {
+        setValueAs(value: unknown) {
             if (typeof value === "string") {
                 value = value.trim();
             }
-            if (["number", "integer"].includes(field["type"])) {
+            if (field["type"] === "number" || field["type"] === "integer") {
                 return Number(value);
             }
             return value;
@@ -137,7 +152,7 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
                     if (!response.ok) {
                         return null;
                     }
-                    return await response.json();
+                    return (await response.json()) as JoinSchema;
                 } catch {
                     return null;
                 }
@@ -155,13 +170,10 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
         reset: resetForm,
     } = useForm({
         values: schema
-            ? schema["fields"]?.reduce(
-                  (acc: Record<string, unknown>, field: { name: string }) => {
-                      acc[field["name"]] = "";
-                      return acc;
-                  },
-                  {} as Record<string, unknown>
-              )
+            ? schema["fields"]?.reduce<Record<string, unknown>>((acc, field) => {
+                  acc[field["name"]] = "";
+                  return acc;
+              }, {})
             : undefined,
     });
 
@@ -252,8 +264,7 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
                                     {schema?.["description"] && <p>{renderTextWithLinks(schema["description"])}</p>}
 
                                     {schema?.["fields"] &&
-                                        // oxlint-disable-next-line typescript/no-explicit-any
-                                        schema["fields"].map((field: any, i: number) => (
+                                        schema["fields"].map((field, i) => (
                                             <Input
                                                 key={field["name"] ?? i}
                                                 label={field["title"]}

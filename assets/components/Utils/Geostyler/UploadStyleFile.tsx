@@ -30,7 +30,7 @@ type UploadStyleFileProps = {
 };
 
 function propertyNamesToLowerCase(sldContent: string) {
-    return sldContent.replace(/<(ogc:)?PropertyName>(.*?)<\/(ogc:)?PropertyName>/g, (_, p1, p2) => {
+    return sldContent.replace(/<(ogc:)?PropertyName>(.*?)<\/(ogc:)?PropertyName>/g, (_: string, p1: string | undefined, p2: string) => {
         return `<${p1 ?? ""}PropertyName>${p2.toLowerCase()}</${p1 ?? ""}PropertyName>`;
     });
 }
