@@ -23,6 +23,7 @@ final class AuthenticationFlowTest extends WebTestCase
     protected function setUp(): void
     {
         FakeKeycloakClient::reset();
+        EntrepotMockResponseFactory::reset();
     }
 
     public function testLoginRedirectsToKeycloakWithSignedState(): void

@@ -3,6 +3,7 @@
 namespace App\Tests\Functional;
 
 use App\Security\ApiAuthenticationEntryPoint;
+use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Double\FakeKeycloakClient;
 use App\Tests\Support\KeycloakLoginTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -17,6 +18,12 @@ final class ContactFormTest extends WebTestCase
 
     private const SUPPORT_EMAIL = 'support@example.test';
     private const USER_EMAIL = FakeKeycloakClient::ID_TOKEN_CLAIMS['email'];
+
+    protected function setUp(): void
+    {
+        FakeKeycloakClient::reset();
+        EntrepotMockResponseFactory::reset();
+    }
 
     public function testContactUsMailsSupportAndAcknowledgesTheVisitor(): void
     {

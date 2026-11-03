@@ -20,6 +20,13 @@ final class CurrentUserPayloadTest extends WebTestCase
         EntrepotMockResponseFactory::reset();
     }
 
+    // les doubles sont statiques : rien ne doit fuir vers la classe de test suivante
+    protected function tearDown(): void
+    {
+        EntrepotMockResponseFactory::reset();
+        parent::tearDown();
+    }
+
     public function testPageBootstrapEqualsApiPayload(): void
     {
         $client = self::createClient();
@@ -63,9 +70,10 @@ final class CurrentUserPayloadTest extends WebTestCase
         self::assertResponseHeaderSame('content-type', 'application/problem+json');
     }
 
-    public function testAnonymousPageHasNoBootstrapAndCallsNoUpstream(): void
+    public function testAnonymousPageIsServedWithoutUpstreamEvenDuringAnOutage(): void
     {
         $client = self::createClient();
+        EntrepotMockResponseFactory::failUsersMe();
 
         $client->request('GET', self::BASE.'/publier-une-donnee');
 

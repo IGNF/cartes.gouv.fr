@@ -3,6 +3,7 @@
 namespace App\Tests\Functional;
 
 use App\Tests\Double\EntrepotMockResponseFactory;
+use App\Tests\Double\FakeKeycloakClient;
 use App\Tests\Support\KeycloakLoginTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -14,6 +15,12 @@ final class UpstreamErrorResponseTest extends WebTestCase
     use KeycloakLoginTrait;
 
     private const METADATA_URL = self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/metadata';
+
+    protected function setUp(): void
+    {
+        FakeKeycloakClient::reset();
+        EntrepotMockResponseFactory::reset();
+    }
 
     public function testUpstreamJsonErrorIsRelayedWithItsDetails(): void
     {
