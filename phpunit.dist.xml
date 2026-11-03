@@ -39,6 +39,14 @@
         <server name="ANNEXES_URL" value="https://entrepot.test/annexes" force="true" />
         <env name="CATALOGUE_URL" value="https://catalogue.test" force="true" />
         <server name="CATALOGUE_URL" value="https://catalogue.test" force="true" />
+        <env name="S3_ENDPOINT" value="http://s3.test" force="true" />
+        <server name="S3_ENDPOINT" value="http://s3.test" force="true" />
+        <env name="S3_ACCESS_KEY" value="test" force="true" />
+        <server name="S3_ACCESS_KEY" value="test" force="true" />
+        <env name="S3_SECRET_KEY" value="test" force="true" />
+        <server name="S3_SECRET_KEY" value="test" force="true" />
+        <env name="S3_BUCKET_NAME" value="test" force="true" />
+        <server name="S3_BUCKET_NAME" value="test" force="true" />
         <env name="API_ESPACE_COLLABORATIF_URL" value="https://espaceco.test/api" force="true" />
         <server name="API_ESPACE_COLLABORATIF_URL" value="https://espaceco.test/api" force="true" />
         <env name="SANDBOX_COMMUNITY_ID" value="sandbox-community" force="true" />
