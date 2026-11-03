@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { useAuthStore } from "../stores/AuthStore";
+import { useSessionStore } from "../stores/SessionStore";
 import { ApiError, ApiErrorType, jsonFetch } from "./jsonFetch";
 
 function stubFetch(response: Response) {
@@ -25,7 +25,7 @@ async function caught(promise: Promise<unknown>): Promise<ApiError> {
 describe("jsonFetch", () => {
     afterEach(() => {
         vi.unstubAllGlobals();
-        useAuthStore.getState().setSessionExpired(false);
+        useSessionStore.setState({ status: "anonymous", expiresAt: null });
     });
 
     it("demande du JSON et marque l'appel comme XHR", async () => {
@@ -66,12 +66,20 @@ describe("jsonFetch", () => {
     });
 
     it("signale la session expirée sur tout 401, pas sur un autre statut", async () => {
+        useSessionStore.getState().applySession(Date.now() / 1000 + 3600);
+
         stubFetch(problem({ status: 403, title: "Forbidden" }, 403));
         await caught(jsonFetch("http://localhost/api/test"));
-        expect(useAuthStore.getState().sessionExpired).toBe(false);
+        expect(useSessionStore.getState().status).toBe("active");
 
         stubFetch(problem({ status: 401, title: "Unauthorized", type: ApiErrorType.ANONYMOUS }, 401));
         await caught(jsonFetch("http://localhost/api/test"));
-        expect(useAuthStore.getState().sessionExpired).toBe(true);
+        expect(useSessionStore.getState().status).toBe("expired");
+    });
+
+    it("laisse un visiteur anonyme anonyme sur un 401", async () => {
+        stubFetch(problem({ status: 401, title: "Unauthorized", type: ApiErrorType.ANONYMOUS }, 401));
+        await caught(jsonFetch("http://localhost/api/test"));
+        expect(useSessionStore.getState().status).toBe("anonymous");
     });
 });

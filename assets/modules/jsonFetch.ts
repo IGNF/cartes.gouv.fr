@@ -1,4 +1,4 @@
-import { useAuthStore } from "../stores/AuthStore";
+import { useSessionStore } from "../stores/SessionStore";
 
 /** corps d'erreur de l'API interne (Problem Details, RFC 9457) */
 export type ApiError = {
@@ -48,16 +48,15 @@ export async function apiFetch(
     const response = await fetch(new Request(url, fetchConfig));
 
     if (response.ok) {
-        useAuthStore.getState().setSessionExpired(false);
         return response;
     }
 
     // corps non-JSON (page d'erreur proxy...) : erreur normalisée à partir du status HTTP
     const data = (await response.json().catch(() => null)) as Partial<ApiError> | null;
 
-    // session expirée ou jamais connecté : l'alerte ne s'affiche que si un utilisateur est connu
+    // déclencheur de secours de l’expiration de session (le store ignore le 401 d’un visiteur anonyme)
     if (response.status === 401) {
-        useAuthStore.getState().setSessionExpired(true);
+        useSessionStore.getState().markExpired();
     }
 
     const apiError: ApiError = {

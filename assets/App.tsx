@@ -8,6 +8,7 @@ import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
 import { cacheBuster } from "./env";
 import { queryClient } from "./modules/queryClient";
+import { startSessionClock } from "./modules/session";
 import { RouteProvider } from "./router/router";
 import RouterRenderer from "./router/RouterRenderer";
 import { bootstrapUser } from "./utils";
@@ -21,6 +22,7 @@ const persister = createAsyncStoragePersister({
 const maxAge = 1000 * 60 * 60 * 24; // 24h
 
 bootstrapUser();
+startSessionClock();
 
 const App: FC = () => {
     return (
