@@ -2,22 +2,15 @@
 
 namespace App\Security;
 
-use App\Services\EntrepotUserCache;
-use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
-use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
+use App\Security\Token\JwtClaims;
 use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
-use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
-use Symfony\Component\HttpClient\Exception\TimeoutException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
 use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
-use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @implements UserProviderInterface<User>
@@ -25,50 +18,27 @@ use Symfony\Contracts\Cache\ItemInterface;
 class KeycloakUserProvider implements UserProviderInterface
 {
     public function __construct(
-        private readonly ClientRegistry $clientRegistry,
         private readonly KeycloakTokenManager $tokenManager,
-        private readonly EntrepotUserCache $entrepotUserCache,
         private readonly LoggerInterface $logger,
-        private readonly CacheInterface $cache,
     ) {
     }
 
     public function loadUser(): User
     {
-        /** @var KeycloakClient */
-        $keycloakClient = $this->clientRegistry->getClient('keycloak');
-
         $accessToken = $this->tokenManager->getAccessToken();
-        if (null == $accessToken) {
+        if (!$accessToken instanceof AccessToken) {
             $this->logger->debug('{class}: No token found', ['class' => self::class]);
             throw new TokenNotFoundException();
         }
 
-        try {
-            /** @var KeycloakResourceOwner */
-            $keycloakUser = $this->cache->get('keycloak-user-'.sha1((string) $accessToken), function (ItemInterface $item) use ($accessToken, $keycloakClient) {
-                $item->expiresAfter(60);
-
-                return $keycloakClient->fetchUserFromToken($accessToken);
-            });
-        } catch (\Throwable $th) {
-            $this->logger->debug('{class}: Failed to fetch user from token', ['class' => self::class]);
-            throw new AuthenticationExpiredException('Failed to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
+        $idToken = $accessToken->getValues()['id_token'] ?? null;
+        $claims = \is_string($idToken) ? JwtClaims::fromJwt($idToken) : [];
+        if ([] === $claims) {
+            $this->logger->debug('{class}: ID token absent ou illisible', ['class' => self::class]);
+            throw new AuthenticationExpiredException('ID token absent ou illisible', Response::HTTP_UNAUTHORIZED);
         }
 
-        $keycloakId = $keycloakUser->getId();
-        if (null === $keycloakId) {
-            throw new \UnexpectedValueException('Utilisateur Keycloak sans identifiant (sub)');
-        }
-
-        try {
-            $apiUser = $this->entrepotUserCache->get($keycloakId);
-        } catch (TimeoutException $ex) {
-            $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
-            throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
-        }
-
-        return new User($keycloakUser->toArray(), $apiUser);
+        return new User($claims, (int) $accessToken->getExpires());
     }
 
     /**
@@ -79,8 +49,6 @@ class KeycloakUserProvider implements UserProviderInterface
      * this method.
      *
      * {@inheritDoc}
-     *
-     * @throws UserNotFoundException if the user is not found
      */
     public function loadUserByIdentifier(string $identifier): UserInterface
     {

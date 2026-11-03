@@ -49,15 +49,15 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     const [community, datastore] = data ?? [];
 
     const isAuthorized = useMemo(() => {
-        if (!user?.id || !user?.communities_member) {
+        if (!user?._id || !user?.communities_member) {
             return false;
         }
         const communityMember = user.communities_member.find((member) => member.community?._id === communityId);
         if (!communityMember) {
             return false; // is not part of the community
         }
-        return canUserAccess(user.id, communityMember, accessRight);
-    }, [accessRight, user?.communities_member, communityId, user?.id]);
+        return canUserAccess(user._id, communityMember, accessRight);
+    }, [accessRight, user?.communities_member, communityId, user?._id]);
 
     if (isLoading) {
         return (

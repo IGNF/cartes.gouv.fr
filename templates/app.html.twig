@@ -10,8 +10,8 @@
         {% if sandbox is defined and sandbox.community_id is defined and sandbox.community_id is not empty %}data-sandbox-community-id="{{ sandbox.community_id }}"{% endif %}
     ></div>
 
-    {% if app.user is defined and app.user is not null %}
-        <div id="user" data-user="{{ app.user|serialize('json') }}"></div>
+    {% if user is not null %}
+        <div id="user" data-user="{{ user|json_encode }}"></div>
     {% endif %}
 
     <noscript>

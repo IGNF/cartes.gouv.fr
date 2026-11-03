@@ -10,7 +10,8 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  */
 final class EntrepotMockResponseFactory
 {
-    public const USER_ID = 'entrepot-user-1';
+    /** identifiant utilisateur Entrepôt = `sub` Keycloak */
+    public const USER_ID = FakeKeycloakClient::ID_TOKEN_CLAIMS['sub'];
     public const DATASTORE_ID = 'ds-1';
     // fichier de métadonnée dont l’Entrepôt répond 502 en texte brut
     public const METADATA_ID_UPSTREAM_DOWN = 'upstream-down';
@@ -20,9 +21,25 @@ final class EntrepotMockResponseFactory
     /** @var list<array{method: string, path: string, body: string}> requêtes d’écriture reçues, conservées entre redémarrages du noyau */
     private static array $writeRequests = [];
 
+    private static int $usersMeCalls = 0;
+    private static bool $usersMeDown = false;
+
     public static function reset(): void
     {
         self::$writeRequests = [];
+        self::$usersMeCalls = 0;
+        self::$usersMeDown = false;
+    }
+
+    public static function usersMeCalls(): int
+    {
+        return self::$usersMeCalls;
+    }
+
+    /** l’Entrepôt devient injoignable pour GET users/me (erreur de transport) */
+    public static function failUsersMe(): void
+    {
+        self::$usersMeDown = true;
     }
 
     /** @return list<array{method: string, path: string, body: string}> */
@@ -44,9 +61,14 @@ final class EntrepotMockResponseFactory
         }
 
         if (self::ENTREPOT_HOST === $host && 'GET' === $method && str_ends_with($path, '/users/me')) {
+            ++self::$usersMeCalls;
+            if (self::$usersMeDown) {
+                return new MockResponse('', ['error' => 'Connection refused']);
+            }
+
             return $this->json([
                 '_id' => self::USER_ID,
-                'email' => FakeKeycloakClient::DEFAULT_RESOURCE_OWNER['email'],
+                'email' => FakeKeycloakClient::ID_TOKEN_CLAIMS['email'],
                 'creation' => '2026-01-01T00:00:00Z',
                 'last_login' => '2026-10-29T08:00:00Z',
                 'communities_member' => [],

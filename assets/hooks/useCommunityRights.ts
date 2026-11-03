@@ -13,17 +13,17 @@ const useCommunityRights = () => {
     const { datastore } = useDatastore();
 
     const communityId = datastore.community._id;
-    const communityMember = user.communities_member.find((member) => member.community?._id === communityId);
+    const communityMember = (user.communities_member ?? []).find((member) => member.community?._id === communityId);
     const community = communityMember?.community;
     if (!communityMember || !community) {
         throw new Error("User is not a member of the community related to the current datastore");
     }
 
     const userRights = communityMember?.rights;
-    const isSupervisor = community?.supervisor === user.id;
+    const isSupervisor = community?.supervisor === user._id;
 
     return {
-        userId: user.id,
+        userId: user._id,
         userRights,
         isSupervisor,
         communityMember,

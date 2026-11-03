@@ -96,7 +96,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                 name: getName(member.user),
                 rights: complete(member.rights),
                 isSupervisor: member.user._id === communitySupervisor,
-                isMe: member.user._id === user?.id,
+                isMe: member.user._id === user?._id,
                 email: member.user.email,
             });
         });
@@ -107,7 +107,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
         });
 
         return members;
-    }, [communityMembers, communitySupervisor, user?.id]);
+    }, [communityMembers, communitySupervisor, user?._id]);
 
     const { params } = useRoute();
     const page = routePositiveIntegerParam(params, "page") ?? 1;

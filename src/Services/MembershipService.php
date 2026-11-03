@@ -33,7 +33,7 @@ class MembershipService
     {
         $user = $this->security->getUser();
 
-        return $user instanceof User ? $this->entrepotUserCache->get($user->getKeycloakId()) : null;
+        return $user instanceof User ? $this->entrepotUserCache->get($user->getId()) : null;
     }
 
     /**
@@ -117,7 +117,7 @@ class MembershipService
     {
         $user = $this->security->getUser();
         if ($user instanceof User && (null === $userId || $user->getId() === $userId)) {
-            $this->entrepotUserCache->invalidate($user->getKeycloakId());
+            $this->entrepotUserCache->invalidate($user->getId());
         }
     }
 
@@ -130,7 +130,7 @@ class MembershipService
     {
         $user = $this->security->getUser();
 
-        return $user instanceof User ? $this->entrepotUserCache->refresh($user->getKeycloakId()) : null;
+        return $user instanceof User ? $this->entrepotUserCache->refresh($user->getId()) : null;
     }
 
     /**
@@ -147,12 +147,12 @@ class MembershipService
             return null;
         }
 
-        $membership = $lookup($this->entrepotUserCache->get($user->getKeycloakId()));
+        $membership = $lookup($this->entrepotUserCache->get($user->getId()));
         if (null !== $membership) {
             return $membership;
         }
 
-        return $lookup($this->entrepotUserCache->refreshThrottled($user->getKeycloakId()));
+        return $lookup($this->entrepotUserCache->refreshThrottled($user->getId()));
     }
 
     /**

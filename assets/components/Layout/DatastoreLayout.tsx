@@ -30,15 +30,15 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
     });
 
     const isAuthorized = useMemo(() => {
-        if (!user?.id || !user?.communities_member) {
+        if (!user?._id || !user?.communities_member) {
             return false;
         }
         const communityMember = user.communities_member.find((member) => member.community?.datastore === datastoreId);
         if (!communityMember) {
             return false; // is not part of the community
         }
-        return canUserAccess(user.id, communityMember, accessRight);
-    }, [accessRight, user?.communities_member, datastoreId, user?.id]);
+        return canUserAccess(user._id, communityMember, accessRight);
+    }, [accessRight, user?.communities_member, datastoreId, user?._id]);
 
     if (isLoading || isPending) {
         return (

@@ -5,7 +5,7 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\UserKeyTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\User\UserKeyDTO;
-use App\Security\User;
+use App\Services\CurrentUserPayload;
 use App\Services\EntrepotApi\ServiceAccount;
 use App\Services\EntrepotApi\UserApiService;
 use App\Services\MembershipService;
@@ -13,6 +13,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -29,16 +30,13 @@ class UserController extends AbstractController implements ApiControllerInterfac
     ) {
     }
 
+    /**
+     * `?refresh=1` recharge le profil Entrepôt à travers le cache : le front le demande juste après un changement d'appartenance.
+     */
     #[Route('/me', name: 'me', methods: ['GET'])]
-    public function getCurrentUser(): JsonResponse
+    public function getCurrentUser(CurrentUserPayload $currentUserPayload, #[MapQueryParameter] bool $refresh = false): JsonResponse
     {
-        $user = $this->getUser();
-        assert($user instanceof User);
-
-        // rafraîchit à travers le cache serveur pour qu'il voie aussi la donnée fraîche
-        $this->membershipService->refreshCurrentUser();
-
-        return $this->json($user);
+        return $this->json($currentUserPayload->build($refresh));
     }
 
     #[Route('/me/keys', name: 'keys', methods: ['GET'])]

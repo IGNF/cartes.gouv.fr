@@ -47,6 +47,7 @@ final class AuthenticationFlowTest extends WebTestCase
     public function testSuccessfulLoginSetsTheCookieAndAuthenticatesApiCalls(): void
     {
         $client = self::createClient();
+        $before = time();
         $this->loginCheck($client, ['referer' => null]);
 
         self::assertResponseRedirects(self::BASE.'/');
@@ -61,7 +62,12 @@ final class AuthenticationFlowTest extends WebTestCase
         self::assertResponseIsSuccessful();
         $user = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
         self::assertSame('test@example.com', $user['email']);
-        self::assertSame(EntrepotMockResponseFactory::USER_ID, $user['id']);
+        self::assertSame('test', $user['user_name']);
+        self::assertSame(EntrepotMockResponseFactory::USER_ID, $user['_id']);
+        self::assertSame([], $user['communities_member']);
+        // expiration du jeton posé par le double (3600 s), en secondes Unix
+        self::assertGreaterThanOrEqual($before + 3600, $user['session_expires_at']);
+        self::assertLessThanOrEqual(time() + 3600, $user['session_expires_at']);
     }
 
     public function testExpiredTokenInCookieAnswersJsonUnauthorizedAndClearsTheCookie(): void

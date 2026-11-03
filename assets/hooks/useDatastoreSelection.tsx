@@ -2,6 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { sandboxCommunityId } from "@/env";
+import RQKeys from "@/modules/entrepot/RQKeys";
+import { queryClient } from "@/modules/queryClient";
 import { routes } from "@/router/router";
 import { findMembership } from "@/utils";
 import api from "../entrepot/api";
@@ -27,8 +29,9 @@ const useDatastoreSelection = () => {
             return api.user.addToSandbox();
         },
         onSuccess: async () => {
-            // attendre le rafraîchissement de user_me avant de naviguer : l’entrepôt sandbox vient de l’appartenance
-            const { data: freshUser } = await userQuery.refetch();
+            // profil rechargé côté serveur avant de naviguer : l’entrepôt sandbox vient de l’appartenance
+            const freshUser = await api.user.getMe({}, true);
+            queryClient.setQueryData(RQKeys.user_me(), freshUser);
             const datastoreId = sandboxCommunityId !== null ? findMembership(freshUser, { communityId: sandboxCommunityId })?.community?.datastore : undefined;
             if (datastoreId) {
                 routes.datasheet_list({ datastoreId }).push();

@@ -14,7 +14,8 @@ final class FakeKeycloakClient extends KeycloakClient
 {
     public const ACCESS_TOKEN = 'fake-access-token';
 
-    public const DEFAULT_RESOURCE_OWNER = [
+    /** claims de l’ID token ; `sub` est aussi l’identifiant utilisateur de l’Entrepôt */
+    public const ID_TOKEN_CLAIMS = [
         'sub' => 'kc-user-1',
         'email' => 'test@example.com',
         'preferred_username' => 'test',
@@ -34,13 +35,26 @@ final class FakeKeycloakClient extends KeycloakClient
         self::$nextTokenException = $exception;
     }
 
-    public static function createAccessToken(int $lifetimeSeconds = 3600): AccessToken
+    /** @param array<string, mixed> $idTokenClaims */
+    public static function createAccessToken(int $lifetimeSeconds = 3600, array $idTokenClaims = self::ID_TOKEN_CLAIMS): AccessToken
     {
         return new AccessToken([
             'access_token' => self::ACCESS_TOKEN,
             'expires' => time() + $lifetimeSeconds,
-            'id_token' => 'fake-id-token',
+            'id_token' => self::jwt($idTokenClaims),
         ]);
+    }
+
+    /**
+     * JWT compact non signé : l’application lit les claims sans vérifier la signature.
+     *
+     * @param array<string, mixed> $claims
+     */
+    public static function jwt(array $claims): string
+    {
+        $encode = fn (array $data): string => rtrim(strtr(base64_encode(json_encode($data, JSON_THROW_ON_ERROR)), '+/', '-_'), '=');
+
+        return $encode(['alg' => 'none', 'typ' => 'JWT']).'.'.$encode($claims).'.signature';
     }
 
     /** @param array<string, mixed> $options */
@@ -57,11 +71,11 @@ final class FakeKeycloakClient extends KeycloakClient
 
     public function fetchUserFromToken(AccessToken $accessToken): KeycloakResourceOwner
     {
-        return new KeycloakResourceOwner(self::DEFAULT_RESOURCE_OWNER);
+        throw new \LogicException('userinfo ne doit plus être appelé : l’identité vient de l’ID token');
     }
 
     public function fetchUser(): KeycloakResourceOwner
     {
-        return new KeycloakResourceOwner(self::DEFAULT_RESOURCE_OWNER);
+        throw new \LogicException('userinfo ne doit plus être appelé : l’identité vient de l’ID token');
     }
 }

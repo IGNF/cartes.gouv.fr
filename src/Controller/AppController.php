@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Exception\SandboxUnavailableException;
+use App\Services\CurrentUserPayload;
 use App\Services\SandboxService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,13 +24,14 @@ class AppController extends AbstractController
         requirements: ['reactRouting' => Requirement::CATCH_ALL],
         options: ['expose' => true]
     )]
-    public function app(UrlGeneratorInterface $urlGenerator): Response
+    public function app(UrlGeneratorInterface $urlGenerator, CurrentUserPayload $currentUserPayload): Response
     {
         $appRoot = $urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_PATH);
         $appRoot = substr($appRoot, 0, -1);
 
         return $this->render('app.html.twig', [
             'app_root' => $appRoot,
+            'user' => $currentUserPayload->build(),
         ]);
     }
 

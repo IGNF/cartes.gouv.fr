@@ -161,8 +161,8 @@ export default function CommunityInfo() {
         communityModifyMutation.mutate(data);
     }
 
-    const isSupervisor = community.supervisor._id === user?.id;
-    const communityUserRights = user?.communities_member.find((member) => member.community?._id === community._id)?.rights ?? [];
+    const isSupervisor = community.supervisor._id === user?._id;
+    const communityUserRights = (user?.communities_member ?? []).find((member) => member.community?._id === community._id)?.rights ?? [];
     const hasCommunityRight = communityUserRights.includes(CommunityMemberDtoRightsEnum.COMMUNITY);
     const canModifyCommunity = isSupervisor || hasCommunityRight;
 

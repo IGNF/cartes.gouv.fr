@@ -9,7 +9,6 @@ import {
     CheckingExecutionStandardDetailResponseDto,
     CheckingExecutionStandardDetailResponseDtoStatusEnum,
     CommunityDetailResponseDto,
-    CommunityMemberDto,
     CommunityUserResponseDtoRightsEnum,
     ConfigurationAltimetryDetailsContent,
     ConfigurationItineraryIsocurveDetailsContent,
@@ -42,21 +41,14 @@ import {
     UserKeyResponseDto,
 } from "./entrepot";
 
-/** user */
-export type CartesUser = {
-    id: string;
+/** utilisateur courant : identité Keycloak, profil Entrepôt tel que l’API le renvoie, expiration de session (secondes Unix) */
+export type CartesUser = Omit<UserDetailsResponseDto, "email" | "first_name" | "last_name"> & {
     email: string;
     user_name: string;
     first_name?: string | null;
     last_name?: string | null;
     roles: string[];
-    communities_member: CommunityMemberDto[];
-    account_creation_date?: string;
-    last_login_date?: string;
-    documents_quota?: number;
-    documents_use?: number;
-    keys_quota?: number;
-    keys_use?: number;
+    session_expires_at: number;
 };
 
 /** datastore */
@@ -193,9 +185,6 @@ export {
 } from "./entrepot";
 export { EndpointDetailResponseDtoTypeEnum as EndpointTypeEnum };
 export type UploadTree = UploadTreeElementResponseDto[];
-
-/** user, objet représentant l'utilisateur de l'API Entrepot */
-export type EntrepotUser = UserDetailsResponseDto;
 
 /** les styles */
 export type StyleLayer = {

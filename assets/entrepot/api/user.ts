@@ -4,8 +4,9 @@ import { CartesUser, UserKeyDetailedWithAccessesResponseDto, UserKeyWithAccesses
 import { PermissionWithOfferingsDetailsResponseDto, UserKeyCreateDtoUserKeyInfoDto, UserKeyResponseDto, UserKeyUpdateDto } from "../../@types/entrepot";
 import { jsonFetch } from "../../modules/jsonFetch";
 
-const getMe = (otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_user_me");
+/** refresh : recharge le profil Entrepôt à travers le cache serveur, juste après un changement d’appartenance */
+const getMe = (otherOptions: RequestInit = {}, refresh = false) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_me", refresh ? { refresh: 1 } : {});
     return jsonFetch<CartesUser | null>(url, { ...otherOptions });
 };
 

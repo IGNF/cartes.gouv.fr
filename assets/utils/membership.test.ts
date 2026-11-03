@@ -22,7 +22,7 @@ function communityMember(): CommunityMemberDto {
 }
 
 function user(members: CommunityMemberDto[]): CartesUser {
-    return { id: USER_ID, communities_member: members } as CartesUser;
+    return { _id: USER_ID, communities_member: members } as CartesUser;
 }
 
 describe("findMembership", () => {

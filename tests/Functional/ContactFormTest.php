@@ -16,7 +16,7 @@ final class ContactFormTest extends WebTestCase
     use KeycloakLoginTrait;
 
     private const SUPPORT_EMAIL = 'support@example.test';
-    private const USER_EMAIL = FakeKeycloakClient::DEFAULT_RESOURCE_OWNER['email'];
+    private const USER_EMAIL = FakeKeycloakClient::ID_TOKEN_CLAIMS['email'];
 
     public function testContactUsMailsSupportAndAcknowledgesTheVisitor(): void
     {

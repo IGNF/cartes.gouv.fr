@@ -23,8 +23,8 @@ const Me = () => {
                     <p>{t("lastname", { lastName: user?.last_name ?? "" })}</p>
                     <p>{t("username", { userName: user?.user_name ?? "" })}</p>
                     <p>{t("email", { email: user.email })}</p>
-                    {user.account_creation_date !== undefined && <p>{t("registration_date", { date: formatDateFromISO(user.account_creation_date) })}</p>}
-                    <TextCopyToClipboard className={fr.cx("fr-mb-6v")} label={t("id")} text={user.id} />
+                    <p>{t("registration_date", { date: formatDateFromISO(user.creation) })}</p>
+                    <TextCopyToClipboard className={fr.cx("fr-mb-6v")} label={t("id")} text={user._id} />
                 </>
             )}
 

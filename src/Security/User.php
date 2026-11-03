@@ -2,51 +2,53 @@
 
 namespace App\Security;
 
-use App\Utils;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Attribute\Ignore;
 
+/**
+ * Principal Keycloak, construit depuis les claims de l’ID token du cookie : aucun appel amont pour authentifier.
+ * Le profil Entrepôt est servi à part par `App\Services\MembershipService`.
+ */
 class User implements UserInterface
 {
+    private readonly string $id;
     private readonly string $email;
     private readonly string $userName;
-    private readonly string $id;
-    private readonly string $keycloakId;
-
-    /** @var array<string> */
-    private array $roles = [];
-
     private readonly ?string $firstName;
     private readonly ?string $lastName;
 
-    /** @var array<mixed> */
-    private array $communitiesMember = [];
-
-    private ?\DateTimeInterface $accountCreationDate = null;
-    private ?\DateTimeInterface $lastLoginDate = null;
-
-    private ?int $documentsQuota = null;
-    private ?int $documentsUse = null;
-    private ?int $keysQuota = null;
-    private ?int $keysUse = null;
-
     /**
-     * @param array<mixed> $keycloakUserInfo
-     * @param array<mixed> $apiUserInfo
+     * @param array<string, mixed> $idTokenClaims
+     * @param int                  $sessionExpiresAt expiration du jeton d’accès, en secondes Unix
      */
-    public function __construct(array $keycloakUserInfo = [], array $apiUserInfo = [])
+    public function __construct(array $idTokenClaims, private readonly int $sessionExpiresAt)
     {
-        $this->email = $keycloakUserInfo['email'];
-        $this->keycloakId = $keycloakUserInfo['sub'];
-        $this->id = $apiUserInfo['_id'];
-        $this->firstName = $keycloakUserInfo['given_name'] ?? null;
-        $this->lastName = $keycloakUserInfo['family_name'] ?? null;
-        $this->userName = $keycloakUserInfo['preferred_username'];
-        if (array_key_exists('creation', $apiUserInfo)) {
-            $this->accountCreationDate = new \DateTime($apiUserInfo['creation']);
+        $sub = $idTokenClaims['sub'] ?? null;
+        $email = $idTokenClaims['email'] ?? null;
+        if (!\is_string($sub) || '' === $sub || !\is_string($email) || '' === $email) {
+            throw new \UnexpectedValueException('ID token sans identifiant (sub) ou sans adresse e-mail');
         }
 
-        $this->updateFromApiInfo($apiUserInfo);
+        $this->id = $sub;
+        $this->email = $email;
+        $this->userName = \is_string($idTokenClaims['preferred_username'] ?? null) ? $idTokenClaims['preferred_username'] : $email;
+        $this->firstName = \is_string($idTokenClaims['given_name'] ?? null) ? $idTokenClaims['given_name'] : null;
+        $this->lastName = \is_string($idTokenClaims['family_name'] ?? null) ? $idTokenClaims['family_name'] : null;
+    }
+
+    /**
+     * Identifiant Keycloak (claim `sub`), identique à l’identifiant utilisateur de l’Entrepôt.
+     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return $this->id;
     }
 
     public function getEmail(): string
@@ -54,55 +56,9 @@ class User implements UserInterface
         return $this->email;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
-    public function getUserIdentifier(): string
-    {
-        if ('' === $this->email) {
-            throw new \LogicException('Utilisateur sans adresse e-mail : identifiant indisponible');
-        }
-
-        return $this->email;
-    }
-
     public function getUserName(): string
     {
         return $this->userName;
-    }
-
-    /**
-     * @see UserInterface
-     */
-    public function getRoles(): array
-    {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
-    }
-
-    /**
-     * @see UserInterface
-     */
-    #[\Deprecated]
-    public function eraseCredentials(): void
-    {
-        // Encore exigée par UserInterface en 7.4, Symfony ne l’appelle plus si elle porte #[\Deprecated]
-    }
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    #[Ignore]
-    public function getKeycloakId(): string
-    {
-        return $this->keycloakId;
     }
 
     public function getFirstName(): ?string
@@ -115,94 +71,27 @@ class User implements UserInterface
         return $this->lastName;
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function getCommunitiesMember(): array
+    public function getSessionExpiresAt(): int
     {
-        return $this->communitiesMember;
+        return $this->sessionExpiresAt;
     }
 
     /**
-     * `community.datastore` est un id string dans users/me, absent si la communauté n'a pas de datastore.
+     * Keycloak ne porte aucun rôle applicatif : les droits sont ceux de l’Entrepôt et de l’espace collaboratif.
      *
-     * @return array<mixed>|null
+     * @see UserInterface
      */
-    public function findMembershipByDatastore(string $datastoreId): ?array
+    public function getRoles(): array
     {
-        return $this->findMembership('datastore', $datastoreId);
+        return ['ROLE_USER'];
     }
 
     /**
-     * @return array<mixed>|null
+     * @see UserInterface
      */
-    public function findMembershipByCommunity(string $communityId): ?array
+    #[\Deprecated]
+    public function eraseCredentials(): void
     {
-        return $this->findMembership('_id', $communityId);
-    }
-
-    /**
-     * @return array<mixed>|null
-     */
-    private function findMembership(string $communityKey, string $value): ?array
-    {
-        return Utils::array_find($this->communitiesMember, fn (array $member) => ($member['community'][$communityKey] ?? null) === $value);
-    }
-
-    public function getAccountCreationDate(): ?\DateTimeInterface
-    {
-        return $this->accountCreationDate;
-    }
-
-    public function getLastLoginDate(): ?\DateTimeInterface
-    {
-        return $this->lastLoginDate;
-    }
-
-    public function getDocumentsQuota(): ?int
-    {
-        return $this->documentsQuota;
-    }
-
-    public function getDocumentsUse(): ?int
-    {
-        return $this->documentsUse;
-    }
-
-    public function getKeysQuota(): ?int
-    {
-        return $this->keysQuota;
-    }
-
-    public function getKeysUse(): ?int
-    {
-        return $this->keysUse;
-    }
-
-    /**
-     * @param array<mixed> $apiUserInfo
-     */
-    public function updateFromApiInfo(array $apiUserInfo): self
-    {
-        if (array_key_exists('communities_member', $apiUserInfo)) {
-            $this->communitiesMember = $apiUserInfo['communities_member'];
-        }
-        if (array_key_exists('last_login', $apiUserInfo)) {
-            $this->lastLoginDate = new \DateTime($apiUserInfo['last_login']);
-        }
-        if (array_key_exists('documents_quota', $apiUserInfo)) {
-            $this->documentsQuota = $apiUserInfo['documents_quota'];
-        }
-        if (array_key_exists('documents_use', $apiUserInfo)) {
-            $this->documentsUse = $apiUserInfo['documents_use'];
-        }
-        if (array_key_exists('keys_quota', $apiUserInfo)) {
-            $this->keysQuota = $apiUserInfo['keys_quota'];
-        }
-        if (array_key_exists('keys_use', $apiUserInfo)) {
-            $this->keysUse = $apiUserInfo['keys_use'];
-        }
-
-        return $this;
+        // Encore exigée par UserInterface en 7.4, Symfony ne l’appelle plus si elle porte #[\Deprecated]
     }
 }

@@ -23,7 +23,7 @@ export default function JoinExistingDatastore() {
     const [selectedCommunity, setSelectedCommunity] = useState<CommunityListResponseDto>();
 
     // Communautes auxquelles l'utilisateur appartient
-    const userCommunitiesIds = useMemo(() => user?.communities_member.map((member) => member.community?._id), [user?.communities_member]);
+    const userCommunitiesIds = useMemo(() => (user?.communities_member ?? []).map((member) => member.community?._id), [user?.communities_member]);
 
     const communitiesQuery = useQuery<CommunityListResponseDto[], ApiError>({
         queryKey: RQKeys.catalogs_communities(),
