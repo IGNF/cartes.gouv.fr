@@ -24,6 +24,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public const SUCCESS_ROUTE = 'cartesgouvfr_app';
     public const HOME_ROUTE = 'cartesgouvfr_app';
     private const REQUEST_ATTR_STATE = '_login_state';
+    private const REQUEST_ATTR_TOKEN_RECEIVED = '_login_token_received';
 
     public function __construct(
         private readonly ClientRegistry $clientRegistry,
@@ -77,6 +78,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         }
 
         $this->tokenManager->setAccessToken($accessToken);
+        $request->attributes->set(self::REQUEST_ATTR_TOKEN_RECEIVED, true);
 
         return new SelfValidatingPassport(new UserBadge($accessToken->getToken()));
     }
@@ -118,8 +120,10 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
         $this->logger->info(self::class, [$message]);
-        // un jeton déjà reçu puis refusé par userinfo (session Keycloak fermée) ne doit pas finir dans le cookie
-        $this->tokenManager->clearAccessToken();
+        // jeton reçu puis refusé par userinfo : pas de cookie ; sans jeton reçu (échange de code refusé), le cookie encore valable est conservé
+        if (true === $request->attributes->get(self::REQUEST_ATTR_TOKEN_RECEIVED)) {
+            $this->tokenManager->clearAccessToken();
+        }
 
         return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?authentication_failed=1');
     }

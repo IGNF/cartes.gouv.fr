@@ -8,6 +8,7 @@ use App\Security\Cookie\AuthCookieResponseListener;
 use App\Security\State\LoginStateSerializer;
 use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Double\FakeKeycloakClient;
+use League\OAuth2\Client\Token\AccessToken;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
@@ -75,16 +76,7 @@ final class AuthenticationFlowTest extends WebTestCase
     {
         $client = self::createClient();
         // le cookie est posé avec une expiration navigateur future : seul le jeton qu’il contient est expiré
-        $expiredToken = FakeKeycloakClient::createAccessToken(-60);
-        $cipher = self::getContainer()->get(AuthCookieCipher::class);
-        $client->getCookieJar()->set(new Cookie(
-            AuthCookieResponseListener::COOKIE_NAME,
-            $cipher->encrypt(serialize($expiredToken)),
-            (string) (time() + 3600),
-            '/',
-            'localhost',
-            true,
-        ));
+        $this->setCookieWithToken($client, FakeKeycloakClient::createAccessToken(-60));
 
         $client->xmlHttpRequest('GET', self::BASE.'/api/users/me');
 
@@ -123,6 +115,18 @@ final class AuthenticationFlowTest extends WebTestCase
         self::assertSame([], array_filter($client->getResponse()->headers->getCookies(), fn ($cookie) => !$cookie->isCleared()), 'aucun cookie posé avec le jeton refusé');
     }
 
+    public function testFailedTokenExchangeKeepsAnExistingCookie(): void
+    {
+        $client = self::createClient();
+        $this->setCookieWithToken($client, FakeKeycloakClient::createAccessToken(3600));
+        FakeKeycloakClient::failNextTokenExchange(new \UnexpectedValueException('invalid code'));
+        $this->loginCheck($client, ['referer' => null]);
+
+        self::assertResponseRedirects('/publier-une-donnee?authentication_failed=1');
+        // aucun jeton reçu : le cookie encore valable n’est pas effacé
+        self::assertSame([], $client->getResponse()->headers->getCookies());
+    }
+
     public function testFailedTokenExchangeRedirectsToPublishPage(): void
     {
         $client = self::createClient();
@@ -145,5 +149,18 @@ final class AuthenticationFlowTest extends WebTestCase
     {
         $state = self::getContainer()->get(LoginStateSerializer::class)->encode($statePayload);
         $client->request('GET', self::BASE.'/login/check?code=fake-code&state='.urlencode($state));
+    }
+
+    private function setCookieWithToken(KernelBrowser $client, AccessToken $token): void
+    {
+        $cipher = self::getContainer()->get(AuthCookieCipher::class);
+        $client->getCookieJar()->set(new Cookie(
+            AuthCookieResponseListener::COOKIE_NAME,
+            $cipher->encrypt(serialize($token)),
+            (string) (time() + 3600),
+            '/',
+            'localhost',
+            true,
+        ));
     }
 }
