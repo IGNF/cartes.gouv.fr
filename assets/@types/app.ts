@@ -41,15 +41,20 @@ import {
     UserKeyResponseDto,
 } from "./entrepot";
 
-/** utilisateur courant : identité Keycloak, profil Entrepôt tel que l’API le renvoie, expiration de session (secondes Unix) */
-export type CartesUser = Omit<UserDetailsResponseDto, "email" | "first_name" | "last_name"> & {
+/** identité de connexion, depuis l’ID token Keycloak ; l’e-mail Keycloak prime sur celui du profil Entrepôt */
+export type KeycloakIdentity = {
     email: string;
     user_name: string;
     first_name?: string | null;
     last_name?: string | null;
     roles: string[];
-    session_expires_at: number;
 };
+
+/** profil Entrepôt tel que l’API le renvoie (`_id`, `communities_member`, quotas...) */
+export type EntrepotUserProfile = Omit<UserDetailsResponseDto, "email" | "first_name" | "last_name">;
+
+/** utilisateur courant, charge commune au dump `#user` et à `/api/users/me` ; `session_expires_at` en secondes Unix */
+export type CartesUser = KeycloakIdentity & EntrepotUserProfile & { session_expires_at: number };
 
 /** datastore */
 export type Datastore = DatastoreDetailResponseDto;
