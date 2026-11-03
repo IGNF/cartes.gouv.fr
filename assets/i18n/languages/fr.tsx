@@ -65,6 +65,7 @@ import { BreadcrumbFrTranslations } from "../../modules/entrepot/breadcrumbs/Bre
 import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
 import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
+import { SessionAlertFrTranslations } from "@/components/Utils/SessionAlert.locale";
 import { commonFrTranslations } from "../Common.locale";
 import { ApiErrorFrTranslations } from "../../modules/apiError.locale";
 import type { Translations } from "../types";
@@ -138,5 +139,6 @@ export const translations: Translations<"fr"> = {
     ManageGridsDialog: ManageGridsDialogFrTranslations,
     alerts: AlertsFrTranslations,
     KeyValueList: KeyValueListFrTranslations,
+    SessionAlert: SessionAlertFrTranslations,
     Stats: StatsFrTranslations,
 };

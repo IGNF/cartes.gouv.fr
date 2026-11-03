@@ -6,7 +6,7 @@ import { PropsWithChildren, memo } from "react";
 
 import { IUseAlert } from "@/hooks/useAlert";
 import useBreadcrumb from "@/hooks/useBreadcrumb";
-import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
+import SessionAlert from "../Utils/SessionAlert";
 
 export interface MainProps {
     customBreadcrumbProps?: BreadcrumbProps;
@@ -32,7 +32,7 @@ function Main(props: PropsWithChildren<MainProps>) {
             <div className={classes?.container ?? fr.cx("fr-container")}>
                 {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
 
-                <SessionExpiredAlert />
+                <SessionAlert />
 
                 {children}
             </div>

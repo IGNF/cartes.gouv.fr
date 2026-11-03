@@ -10,7 +10,7 @@ import { tss } from "tss-react";
 import DatastoreSideMenu from "@/components/Layout/DatastoreSideMenu";
 import useBreadcrumb from "@/hooks/useBreadcrumb";
 import { routes } from "@/router/router";
-import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
+import SessionAlert from "../Utils/SessionAlert";
 import { type MainProps } from "./Main";
 
 export type DatastoreMainProps = PropsWithChildren<
@@ -57,7 +57,7 @@ export default function DatastoreMain(props: DatastoreMainProps) {
                     <div className={cx(fr.cx("fr-col-12", "fr-col-md-9"), classes.content, propsClasses?.content)}>
                         {/* // "fr-px-5w" */}
                         {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
-                        <SessionExpiredAlert />
+                        <SessionAlert />
                         {children}
                     </div>
                 </div>
