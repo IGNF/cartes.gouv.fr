@@ -26,9 +26,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[Route(
     '/api/datastores/{datastoreId}/pyramid-vector',
     name: 'cartesgouvfr_api_pyramid_vector_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] pyramid-vector', description: 'Génération de pyramides de tuiles vectorielles et création/modification des services associés')]
 class PyramidVectorController extends ServiceController implements ApiControllerInterface
 {

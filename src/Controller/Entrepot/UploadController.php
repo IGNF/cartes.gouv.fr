@@ -22,9 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/datastores/{datastoreId}/upload',
     name: 'cartesgouvfr_api_upload_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[entrepot] upload')]
 class UploadController extends AbstractController implements ApiControllerInterface
 {

@@ -18,7 +18,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[Route(
     name: 'cartesgouvfr_contact_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()',
 )]
 class ContactController extends AbstractController
 {
@@ -32,9 +31,7 @@ class ContactController extends AbstractController
         '/contact_us',
         name: 'contact_us',
         options: ['expose' => true],
-        methods: ['POST'],
-        condition: 'request.isXmlHttpRequest()'
-    )]
+        methods: ['POST'])]
     public function contact(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -104,9 +101,7 @@ class ContactController extends AbstractController
         '/api/contact/datastore_create_request',
         name: 'datastore_create_request',
         options: ['expose' => true],
-        methods: ['POST'],
-        condition: 'request.isXmlHttpRequest()'
-    )]
+        methods: ['POST'])]
     public function datastoreCreateRequest(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -158,9 +153,7 @@ class ContactController extends AbstractController
         '/api/contact/join_community',
         name: 'join_community',
         options: ['expose' => true],
-        methods: ['POST'],
-        condition: 'request.isXmlHttpRequest()'
-    )]
+        methods: ['POST'])]
     public function joinCommunity(Request $request): JsonResponse
     {
         $user = $this->getUser();

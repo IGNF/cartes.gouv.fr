@@ -14,9 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/espaceco/permission',
     name: 'cartesgouvfr_api_espaceco_permission_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] permissions', description: "Permissions d'accès")]
 class PermissionController extends AbstractController implements ApiControllerInterface
 {

@@ -17,9 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/community/{communityId}',
     name: 'cartesgouvfr_api_community_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[entrepot] community')]
 class CommunityController extends AbstractController implements ApiControllerInterface
 {

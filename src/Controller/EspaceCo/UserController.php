@@ -13,9 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/espaceco/user',
     name: 'cartesgouvfr_api_espaceco_user_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] user', description: "Informations des utilisateurs de l'espaceco")]
 class UserController extends AbstractController implements ApiControllerInterface
 {

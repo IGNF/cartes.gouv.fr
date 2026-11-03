@@ -13,9 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/espaceco/emailplanner',
     name: 'cartesgouvfr_api_espaceco_emailplanner_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] email-planner', description: "Planification d'emails d'une communauté")]
 class EmailPlannerController extends AbstractController implements ApiControllerInterface
 {

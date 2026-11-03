@@ -37,9 +37,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 #[Route(
     '/api/datastores/{datastoreId}/pyramid-raster',
     name: 'cartesgouvfr_api_pyramid_raster_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] pyramid-raster', description: 'Génération de pyramides de tuiles raster et création/modification des services associés')]
 class PyramidRasterController extends ServiceController implements ApiControllerInterface
 {

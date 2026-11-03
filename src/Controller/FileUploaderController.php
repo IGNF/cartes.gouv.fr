@@ -18,7 +18,6 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/file_uploader',
     name: 'cartesgouvfr_file_uploader_',
-    condition: 'request.isXmlHttpRequest()',
     options: ['expose' => true],
 )]
 class FileUploaderController extends AbstractController

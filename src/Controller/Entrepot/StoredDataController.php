@@ -24,9 +24,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/datastores/{datastoreId}/stored_data',
     name: 'cartesgouvfr_api_stored_data_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[entrepot] stored_data')]
 class StoredDataController extends AbstractController implements ApiControllerInterface
 {

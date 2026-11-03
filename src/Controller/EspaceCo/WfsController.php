@@ -13,9 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/espaceco/wfs',
     name: 'cartesgouvfr_api_espaceco_wfs_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] wfs', description: 'WFS')]
 class WfsController extends AbstractController implements ApiControllerInterface
 {

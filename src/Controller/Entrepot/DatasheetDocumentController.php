@@ -20,9 +20,7 @@ use Symfony\Component\Uid\Uuid;
 #[Route(
     '/api/datastores/{datastoreId}/datasheet/{datasheetName}/documents',
     name: 'cartesgouvfr_api_datasheet_document_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] datasheet-document', description: 'Des documents liés à une fiche de données sur cartes.gouv.fr')]
 class DatasheetDocumentController extends AbstractController implements ApiControllerInterface
 {
