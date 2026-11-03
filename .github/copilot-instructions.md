@@ -4,7 +4,7 @@ Read `AGENTS.md` at the repository root and follow it. It is the single source o
 
 ## Code review priorities
 
-Prioritize correctness, regressions and security over style preferences. Style is already enforced by ESLint, Prettier, php-cs-fixer, twig-cs-fixer and CI.
+Prioritize correctness, regressions and security over style preferences. Style is already enforced by Oxlint, Prettier, php-cs-fixer, twig-cs-fixer and CI.
 
 ## Do not flag
 

@@ -167,6 +167,7 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
                                 {openWithEmail.map((owe, index) => {
                                     return (
                                         <div
+                                            // oxlint-disable-next-line react/no-array-index-key -- e-mails pas encore garantis uniques (doublon possible avant « Appliquer »)
                                             key={index}
                                             className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-p-2v", "fr-my-2v")}
                                             style={{ border: "solid 1.5px", borderColor: fr.colors.decisions.border.default.blueFrance.default }}

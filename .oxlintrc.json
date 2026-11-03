@@ -3,7 +3,8 @@
     "plugins": ["typescript", "react", "jsx-a11y", "unicorn"],
     "jsPlugins": ["@tanstack/eslint-plugin-query", "eslint-plugin-tss-unused-classes"],
     "categories": {
-        "correctness": "error"
+        "correctness": "error",
+        "perf": "error"
     },
     "options": {
         "typeAware": true

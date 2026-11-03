@@ -98,6 +98,7 @@ export default function HeaderMenu({ openButtonProps, actionButtonProps, items, 
                                 };
 
                                 return (
+                                    // oxlint-disable-next-line react/no-array-index-key -- menu fixe, jamais réordonné, sans identifiant
                                     <li key={i} className={cx(classes.menuItem, !linkProps && classes.menuItemUnclickable)}>
                                         {linkProps ? (
                                             <Link {...linkProps} className={cx(fr.cx("fr-text--sm"))} onClick={handleLinkClick}>

@@ -3,7 +3,7 @@ import { CommunityResponseDTO } from "@/@types/espaceco";
 import RQKeys from "@/modules/espaceco/RQKeys";
 import { ApiError } from "@/modules/jsonFetch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, ReactNode, use, useState } from "react";
+import { createContext, ReactNode, use, useCallback, useMemo, useState } from "react";
 import api from "../api";
 import { COMMUNITY_FORM_STEPS } from "../pages/communities/FormSteps";
 
@@ -37,28 +37,31 @@ export const CommunityProvider = ({ children, communityId, mode }: { children: R
     const maxSteps = COMMUNITY_FORM_STEPS.REPORTS;
     const [currentStep, setCurrentStep] = useState<COMMUNITY_FORM_STEPS>(COMMUNITY_FORM_STEPS.DESCRIPTION);
 
-    const stepper =
-        mode === "edition"
-            ? null
-            : {
-                  maxSteps: COMMUNITY_FORM_STEPS.REPORTS,
-                  previousStep: () => {
-                      if (currentStep > COMMUNITY_FORM_STEPS.DESCRIPTION) {
-                          setCurrentStep(currentStep - 1);
-                      }
+    const stepper: IStepper | null = useMemo(
+        () =>
+            mode === "edition"
+                ? null
+                : {
+                      maxSteps: COMMUNITY_FORM_STEPS.REPORTS,
+                      previousStep: () => {
+                          if (currentStep > COMMUNITY_FORM_STEPS.DESCRIPTION) {
+                              setCurrentStep(currentStep - 1);
+                          }
+                      },
+                      nextStep: () => {
+                          if (currentStep < maxSteps) {
+                              setCurrentStep(currentStep + 1);
+                          }
+                      },
+                      isFirstStep: () => {
+                          return currentStep === COMMUNITY_FORM_STEPS.DESCRIPTION;
+                      },
+                      isLastStep: () => {
+                          return currentStep === maxSteps;
+                      },
                   },
-                  nextStep: () => {
-                      if (currentStep < maxSteps) {
-                          setCurrentStep(currentStep + 1);
-                      }
-                  },
-                  isFirstStep: () => {
-                      return currentStep === COMMUNITY_FORM_STEPS.DESCRIPTION;
-                  },
-                  isLastStep: () => {
-                      return currentStep === maxSteps;
-                  },
-              };
+        [currentStep, maxSteps, mode]
+    );
 
     const {
         data: community,
@@ -83,36 +86,50 @@ export const CommunityProvider = ({ children, communityId, mode }: { children: R
         },
     });
 
-    const updateCommunity = (datas: object, onSuccess?: () => void) => {
-        mutate(datas, {
-            onSuccess: (community) => {
-                queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), () => {
-                    return community;
-                });
-                onSuccess?.();
-            },
-        });
-    };
-
-    return (
-        <CommunityContext
-            value={{
-                mode,
-                currentStep,
-                stepper,
-                community,
-                isCommunityLoading,
-                isCommunityError,
-                communityError,
-                updateCommunity,
-                isCommunityUpdating: isUpdating,
-                isCommunityUpdatingError: isUpdatingError,
-                updatingCommunityError: updatingError,
-            }}
-        >
-            {children}
-        </CommunityContext>
+    const updateCommunity = useCallback(
+        (datas: object, onSuccess?: () => void) => {
+            mutate(datas, {
+                onSuccess: (community) => {
+                    queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), () => {
+                        return community;
+                    });
+                    onSuccess?.();
+                },
+            });
+        },
+        [mutate, queryClient]
     );
+
+    const value = useMemo(
+        () => ({
+            mode,
+            currentStep,
+            stepper,
+            community,
+            isCommunityLoading,
+            isCommunityError,
+            communityError,
+            updateCommunity,
+            isCommunityUpdating: isUpdating,
+            isCommunityUpdatingError: isUpdatingError,
+            updatingCommunityError: updatingError,
+        }),
+        [
+            mode,
+            currentStep,
+            stepper,
+            community,
+            isCommunityLoading,
+            isCommunityError,
+            communityError,
+            updateCommunity,
+            isUpdating,
+            isUpdatingError,
+            updatingError,
+        ]
+    );
+
+    return <CommunityContext value={value}>{children}</CommunityContext>;
 };
 
 // Custom hook for consuming context

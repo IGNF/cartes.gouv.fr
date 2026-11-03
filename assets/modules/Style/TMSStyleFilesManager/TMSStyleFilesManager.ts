@@ -40,6 +40,7 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
 
         for (const [uuid, files] of Object.entries(values.style_files)) {
             if (0 !== files.length) {
+                // oxlint-disable-next-line no-await-in-loop -- couches ajoutées au style dans l’ordre des tables
                 const layers = await this.#toMapboxLayer(uuid, files);
                 style.layers = [...style.layers, ...layers];
             }

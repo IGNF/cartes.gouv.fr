@@ -52,14 +52,12 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
 
         const _extents = Array.isArray(extents) ? extents : [extents];
 
-        const extentFeatures = _extents
-            .map((ext) =>
-                new GeoJSON({
-                    dataProjection: "EPSG:4326",
-                    featureProjection: "EPSG:3857",
-                }).readFeatures(ext)
-            )
-            .flat();
+        const extentFeatures = _extents.flatMap((ext) =>
+            new GeoJSON({
+                dataProjection: "EPSG:4326",
+                featureProjection: "EPSG:3857",
+            }).readFeatures(ext)
+        );
 
         const extentSource = new VectorSource({
             features: extentFeatures,

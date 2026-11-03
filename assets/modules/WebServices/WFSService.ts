@@ -65,6 +65,7 @@ class WFSService extends BaseService {
         for (const descUrl of this.service.urls) {
             const requestInfo = getRequestInfo(descUrl.url);
             if (!this.#featureTypes.length) {
+                // oxlint-disable-next-line no-await-in-loop -- types d’objets chargés une seule fois, au premier passage
                 await this.#getFeatureTypes(requestInfo);
             }
             const info = this.#getInfo(requestInfo);

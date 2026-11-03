@@ -160,62 +160,60 @@ const MyDocuments: FC = () => {
                 <>
                     <Table
                         headers={["Nom", "Description", "Labels", "Taille", "Mime type", "Extra", "Actions"]}
-                        data={documentsQuery.data.pages
-                            .map((group) =>
-                                group.map((doc) => [
-                                    doc.name,
-                                    doc.description,
-                                    <ul key={`labels-${doc._id}`} className={fr.cx("fr-tags-group")}>
-                                        {doc.labels?.map((label) => (
-                                            <Tag key={`doc-${doc._id}-label-${label}`}>{label}</Tag>
-                                        ))}
-                                    </ul>,
-                                    niceBytes(doc.size.toString()),
-                                    doc.mime_type,
-                                    <pre key={`pre-${doc._id}`}>
-                                        <code>{JSON.stringify(doc.extra, null, 2)}</code>
-                                    </pre>,
-                                    <ButtonsGroup
-                                        key={doc._id}
-                                        buttons={[
-                                            {
-                                                children: "Consulter",
-                                                priority: "secondary",
-                                                linkProps: {
-                                                    href: doc.public_url,
-                                                    target: "_blank",
-                                                    rel: "noreferrer",
-                                                },
-                                                className: fr.cx({ "fr-hidden": !doc.public_url }),
+                        data={documentsQuery.data.pages.flatMap((group) =>
+                            group.map((doc) => [
+                                doc.name,
+                                doc.description,
+                                <ul key={`labels-${doc._id}`} className={fr.cx("fr-tags-group")}>
+                                    {doc.labels?.map((label) => (
+                                        <Tag key={`doc-${doc._id}-label-${label}`}>{label}</Tag>
+                                    ))}
+                                </ul>,
+                                niceBytes(doc.size.toString()),
+                                doc.mime_type,
+                                <pre key={`pre-${doc._id}`}>
+                                    <code>{JSON.stringify(doc.extra, null, 2)}</code>
+                                </pre>,
+                                <ButtonsGroup
+                                    key={doc._id}
+                                    buttons={[
+                                        {
+                                            children: "Consulter",
+                                            priority: "secondary",
+                                            linkProps: {
+                                                href: doc.public_url,
+                                                target: "_blank",
+                                                rel: "noreferrer",
                                             },
-                                            {
-                                                children: "Remplacer",
-                                                priority: "secondary",
-                                                onClick: () => {
-                                                    setCurrentDocumentId(doc._id);
-                                                    // setReplaceAccordionExpanded(true);
-                                                },
+                                            className: fr.cx({ "fr-hidden": !doc.public_url }),
+                                        },
+                                        {
+                                            children: "Remplacer",
+                                            priority: "secondary",
+                                            onClick: () => {
+                                                setCurrentDocumentId(doc._id);
+                                                // setReplaceAccordionExpanded(true);
                                             },
-                                            {
-                                                children: "Modifier",
-                                                priority: "secondary",
-                                                onClick: () => {
-                                                    setCurrentDocumentId(doc._id);
-                                                    // setReplaceAccordionExpanded(true);
-                                                },
+                                        },
+                                        {
+                                            children: "Modifier",
+                                            priority: "secondary",
+                                            onClick: () => {
+                                                setCurrentDocumentId(doc._id);
+                                                // setReplaceAccordionExpanded(true);
                                             },
-                                            {
-                                                children: "Supprimer",
-                                                onClick: () => handleDeleteDocument(doc._id, doc.name),
-                                                priority: "secondary",
-                                            },
-                                        ]}
-                                        inlineLayoutWhen="sm and up"
-                                        buttonsSize="small"
-                                    />,
-                                ])
-                            )
-                            .flat()}
+                                        },
+                                        {
+                                            children: "Supprimer",
+                                            onClick: () => handleDeleteDocument(doc._id, doc.name),
+                                            priority: "secondary",
+                                        },
+                                    ]}
+                                    inlineLayoutWhen="sm and up"
+                                    buttonsSize="small"
+                                />,
+                            ])
+                        )}
                     />
                     <div>
                         <Button onClick={() => documentsQuery.fetchNextPage()} disabled={!documentsQuery.hasNextPage || documentsQuery.isFetching}>

@@ -42,8 +42,8 @@ export default function DatastoreSelection() {
             />
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                {paginatedItems.map((datastore, i) => (
-                    <div key={(datastore._id ?? "sandbox") + i} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                {paginatedItems.map((datastore) => (
+                    <div key={datastore.community_id} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
                         <Card
                             imageUrl={datastore.is_sandbox === true ? sandboxDatastoreThumbnailSvg : placeholder16x9}
                             imageAlt=""

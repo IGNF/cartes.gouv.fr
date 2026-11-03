@@ -23,8 +23,8 @@ type ColumnPermissionListProps = {
 };
 
 function getAvailableColumns(permission: ITablePermission, table: TableDetailedDTO) {
-    const permissionColumns = permission.columns.map((c) => c.id);
-    return table.columns.filter((t) => !permissionColumns.includes(t.id));
+    const permissionColumns = new Set(permission.columns.map((c) => c.id));
+    return table.columns.filter((t) => !permissionColumns.has(t.id));
 }
 
 const ColumnPermissionList: FC<ColumnPermissionListProps> = ({ databaseId, tableId }) => {

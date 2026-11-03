@@ -31,12 +31,13 @@ class TMSService extends BaseService {
         }
 
         // On ne conserve que l'URL du TMS
-        const tmsUrl = this.service.urls.filter((descUrl) => {
-            return descUrl.type === "TMS";
-        });
+        const tmsUrl = this.service.urls.find((descUrl) => descUrl.type === "TMS")?.url;
+        if (!tmsUrl) {
+            throw Error(`TMS URL in service ${this.service._id} does not exist`);
+        }
 
         const metadatas = this.service.tms_metadata;
-        const infos = await this.#getInfo(tmsUrl?.[0].url);
+        const infos = await this.#getInfo(tmsUrl);
 
         const layer = new VectorTileLayer({
             minZoom: metadatas.minzoom,

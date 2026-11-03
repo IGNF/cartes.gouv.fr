@@ -5,13 +5,15 @@ import { FC, ReactNode, useCallback, useMemo } from "react";
 import { GridDTO } from "../../../../@types/espaceco";
 import SearchGrids from "./SearchGrids";
 
+const NO_GRIDS: GridDTO[] = [];
+
 type GridListProps = {
     grids?: GridDTO[];
     displayType?: boolean;
     onChange: (grids: GridDTO[]) => void;
 };
 
-const GridList: FC<GridListProps> = ({ grids = [], displayType = false, onChange }) => {
+const GridList: FC<GridListProps> = ({ grids = NO_GRIDS, displayType = false, onChange }) => {
     const handleRemove = useCallback(
         (gridName: string) => {
             const next = grids.filter((grid) => grid.name !== gridName);

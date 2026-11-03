@@ -46,6 +46,7 @@ export default class FileUploader {
         while (start < file.size) {
             const chunk = file.slice(start, start + chunkSize);
 
+            // oxlint-disable-next-line no-await-in-loop -- morceaux envoyés dans l’ordre, un à la fois
             const response = await uploadChunk(index, chunk);
 
             numBytes += response.numBytes;
