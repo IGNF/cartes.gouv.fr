@@ -74,7 +74,8 @@ Navigateur              Symfony
     |                      |      → mise en cache dans request.attributes
     |                      |   → vérifier token non expiré
     |                      | KeycloakUserProvider::loadUser()
-    |                      |   → User depuis les claims de l'ID token (aucun appel amont)
+    |                      |   → User depuis les claims de l'ID token
+    |                      |   → vivacité de la session Keycloak (userinfo, 1 appel / 60 s / jeton)
     |                      |
     |                      | Controller → AuthenticatedHttpClient
     |                      |   → getAccessToken() → header Authorization: Bearer <token>
@@ -97,7 +98,11 @@ Deux firewalls (`config/packages/security.yaml`) :
 
 ## Identité, profil Entrepôt et cache par pod
 
-[`User`](../../../src/Security/User.php) est le principal Keycloak seul : `id` (claim `sub`, identique à l'identifiant utilisateur de l'Entrepôt), e-mail, nom d'utilisateur, prénom, nom, `session_expires_at`. [`KeycloakUserProvider`](../../../src/Security/KeycloakUserProvider.php) le reconstruit à chaque requête depuis les claims de l'ID token du cookie ([`JwtClaims`](../../../src/Security/Token/JwtClaims.php), sans vérification de signature : les jetons viennent de notre échange de code et dorment dans un cookie que nous chiffrons). Authentifier ne coûte aucun appel amont ; une panne Entrepôt n'empêche ni la connexion ni les pages publiques.
+[`User`](../../../src/Security/User.php) est le principal Keycloak seul : `id` (claim `sub`, identique à l'identifiant utilisateur de l'Entrepôt), e-mail, nom d'utilisateur, prénom, nom, `session_expires_at`. [`KeycloakUserProvider`](../../../src/Security/KeycloakUserProvider.php) le reconstruit à chaque requête depuis les claims de l'ID token du cookie ([`JwtClaims`](../../../src/Security/Token/JwtClaims.php), sans vérification de signature : les jetons viennent de notre échange de code et dorment dans un cookie que nous chiffrons). L'identité ne coûte aucun appel amont ; une panne Entrepôt n'empêche ni la connexion ni les pages publiques.
+
+Keycloak fait autorité sur l'état de la session : le fournisseur vérifie une fois par minute et par jeton (userinfo, réponse non lue, cache `keycloak-session-*` dans `cache.app`) que la session est encore ouverte. Session fermée ou compte désactivé → 401 et cookie effacé au plus tard 60 s après ; Keycloak injoignable → même refus (fermeture par défaut). Un échec à `/login/check` (session fermée, ID token illisible) ne pose jamais le cookie du jeton refusé.
+
+`MembershipService` refuse (500 explicite) un profil Entrepôt dont `_id` n'est pas le `sub` Keycloak : les comparaisons d'appartenance et l'ajout au bac à sable reposent sur cette égalité.
 
 Le profil Entrepôt (corps brut de `GET users/me`, mis en cache 60 s par identifiant dans [`EntrepotUserCache`](../../../src/Services/EntrepotUserCache.php), pool `cache.app`) n'est lu que par [`MembershipService`](../../../src/Services/MembershipService.php), qui en dérive les infos datastore/communauté (nom, `technical_name`, id de communauté) au lieu de les recharger via l'API. Vocabulaire : [glossaire](../glossaire.md).
 
@@ -187,7 +192,7 @@ Le navigateur supprime le cookie en même temps que le token expire : le serveur
 | [`src/Security/Cookie/AuthCookieResponseListener.php`](../../../src/Security/Cookie/AuthCookieResponseListener.php) | Pose ou efface le cookie sur `kernel.response` selon l'intent               |
 | [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                           | Accès centralisé au token (lecture cookie, cache requête, intent set/clear) |
 | [`src/Security/State/LoginStateSerializer.php`](../../../src/Security/State/LoginStateSerializer.php)               | Encode/décode le paramètre `state` OAuth2 signé HMAC                        |
-| [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Reconstruit `User` depuis les claims de l'ID token, sans appel amont        |
+| [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Reconstruit `User` depuis l'ID token, vérifie la session Keycloak (60 s)    |
 | [`src/Security/Token/JwtClaims.php`](../../../src/Security/Token/JwtClaims.php)                                     | Lit les claims d'un JWT compact (sans vérification de signature)            |
 | [`src/Services/EntrepotUserCache.php`](../../../src/Services/EntrepotUserCache.php)                                 | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement    |
 | [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Seul accès au profil Entrepôt ; dérivation datastore/communauté, deny-path  |
