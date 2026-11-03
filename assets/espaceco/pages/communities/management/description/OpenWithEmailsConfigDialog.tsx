@@ -146,7 +146,7 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
                             children: tCommon("apply"),
                             doClosesModal: false,
                             onClick: () => {
-                                handleSubmit(onSubmit)();
+                                void handleSubmit(onSubmit)();
                             },
                             priority: "primary",
                         },

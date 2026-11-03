@@ -137,9 +137,9 @@ export default function CommunityInfo() {
                 };
             });
 
-            queryClient.refetchQueries({ queryKey: RQKeys.user_me() });
-            queryClient.refetchQueries({ queryKey: RQKeys.community(datastore.community._id) });
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore(datastore._id) });
+            void queryClient.refetchQueries({ queryKey: RQKeys.user_me() });
+            void queryClient.refetchQueries({ queryKey: RQKeys.community(datastore.community._id) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore(datastore._id) });
 
             form.reset({
                 name: newData.name,
@@ -172,7 +172,7 @@ export default function CommunityInfo() {
             return api.user.leaveCommunity(community._id);
         },
         onSuccess: () => {
-            userQuery.refetch();
+            void userQuery.refetch();
             routes.datastore_selection().push();
         },
     });

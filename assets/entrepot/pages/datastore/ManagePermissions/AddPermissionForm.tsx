@@ -262,7 +262,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                                 },
                                 {
                                     children: tCommon("add"),
-                                    onClick: () => handleSubmit(onSubmit)(),
+                                    onClick: () => void handleSubmit(onSubmit)(),
                                 },
                             ]}
                             inlineLayoutWhen="always"

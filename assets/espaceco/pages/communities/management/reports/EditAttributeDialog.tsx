@@ -129,7 +129,7 @@ const EditAttributeDialog: FC<EditAttributeDialogProps> = ({ modal, theme, attri
                             priority: "primary",
                             children: tCommon("modify"),
                             doClosesModal: false,
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                         },
                     ]}
                 >

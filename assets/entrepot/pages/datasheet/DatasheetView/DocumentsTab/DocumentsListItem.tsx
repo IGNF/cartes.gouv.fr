@@ -181,7 +181,7 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
                         },
                         {
                             children: tCommon("validate"),
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                             priority: "primary",
                             doClosesModal: false,
                         },

@@ -264,7 +264,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
                             },
                             {
                                 children: currentStep < Object.values(STEPS).length ? tCommon("next_step") : editMode ? tCommon("modify") : tCommon("add"),
-                                onClick: nextStep,
+                                onClick: () => void nextStep(),
                             },
                         ]}
                         inlineLayoutWhen="always"

@@ -196,7 +196,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
             },
             {
                 children: t("thumbnail_action", { action: action }),
-                onClick: handleSubmit(onSubmit),
+                onClick: (e) => void handleSubmit(onSubmit)(e),
                 doClosesModal: false,
                 priority: "primary",
             },

@@ -64,7 +64,7 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
             return api.pyramidRaster.publishWmsRasterWmts(datastoreId, pyramidId, ConfigurationTypeEnum.WMTSTMS, formValues);
         },
         onSuccess() {
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "services" }).push();
         },
     });
@@ -85,9 +85,9 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
                 queryClient.removeQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offeringId) });
             }
 
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "services" }).push();
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
+            void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
         },
     });
 
@@ -249,7 +249,7 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
                             },
                             {
                                 children: currentStep < Object.values(STEPS).length ? tCommon("continue") : t("publish"),
-                                onClick: nextStep,
+                                onClick: () => void nextStep(),
                             },
                         ]}
                         inlineLayoutWhen="always"

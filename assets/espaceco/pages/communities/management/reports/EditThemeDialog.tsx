@@ -87,7 +87,7 @@ const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onMod
                         {
                             children: tCommon("modify"),
                             doClosesModal: false,
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                             priority: "primary",
                         },
                     ]}

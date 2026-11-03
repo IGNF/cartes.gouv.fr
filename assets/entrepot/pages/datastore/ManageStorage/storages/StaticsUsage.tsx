@@ -75,7 +75,7 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
                       }
                     : undefined;
             });
-            queryClient.invalidateQueries({
+            void queryClient.invalidateQueries({
                 queryKey: RQKeys.datastore_statics_list(datastore._id),
                 exact: false,
             });

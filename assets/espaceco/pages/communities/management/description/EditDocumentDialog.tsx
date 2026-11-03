@@ -102,7 +102,7 @@ const EditDocumentDialog: FC<EditDocumentDialogProps> = ({ editDocument, onModif
                         {
                             children: tCommon("modify"),
                             doClosesModal: false,
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                             priority: "primary",
                         },
                     ]}

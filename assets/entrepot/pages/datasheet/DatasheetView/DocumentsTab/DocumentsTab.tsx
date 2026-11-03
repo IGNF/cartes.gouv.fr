@@ -209,7 +209,7 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
                         },
                         {
                             children: tCommon("validate"),
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                             priority: "primary",
                             doClosesModal: false,
                             disabled: documentType === undefined || documentType === null,

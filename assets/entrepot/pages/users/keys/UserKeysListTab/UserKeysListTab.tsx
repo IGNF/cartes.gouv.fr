@@ -267,7 +267,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                         onClick={() => {
                                                             const hash = (accessKey.type_infos as HashInfoDto)?.hash;
                                                             if (hash) {
-                                                                copy(hash);
+                                                                void copy(hash);
                                                             }
                                                         }}
                                                     />
@@ -333,7 +333,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                                             }
                                                                             size="small"
                                                                             onClick={() => {
-                                                                                copy(service.offering.layer_name);
+                                                                                void copy(service.offering.layer_name);
                                                                             }}
                                                                         />
                                                                     </li>

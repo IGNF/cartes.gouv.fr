@@ -58,7 +58,7 @@ const EditEmailPlannerDialog: FC<EditEmailPlannerDialogProps> = ({ emailPlanner,
                             children: emailPlanner ? tCommon("modify") : tCommon("add"),
                             priority: "primary",
                             doClosesModal: false,
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                         },
                     ]}
                 >

@@ -229,7 +229,7 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
                             children: "Rejoindre",
                             onClick: () => {
                                 if (selectedCommunity) {
-                                    handleSubmit((formData) => {
+                                    void handleSubmit((formData) => {
                                         const variables: typeof joinCommunityMutation.variables = {
                                             community: selectedCommunity,
                                         };

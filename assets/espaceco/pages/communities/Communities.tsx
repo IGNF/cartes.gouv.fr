@@ -94,7 +94,7 @@ const Communities: FC = () => {
         },
         onSuccess: (community) => {
             // Mise a jour de users/me
-            meQuery.refetch();
+            void meQuery.refetch();
 
             queryClient.setQueryData<string[]>(RQKeys.communitiesName(), (oldNames) => {
                 const names = oldNames ? [...oldNames] : [];

@@ -72,7 +72,7 @@ const CreateCommunityDialog: FC<CreateCommunityDialogProps> = ({ communityNames,
                         {
                             children: tCommon("add"),
                             doClosesModal: false,
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                             priority: "primary",
                         },
                     ]}

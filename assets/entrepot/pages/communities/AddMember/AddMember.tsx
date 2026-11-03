@@ -74,7 +74,7 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
         onSuccess: () => {
             resetAll();
             routes.members_list({ communityId }).push(); // Suppression du parametre userId de la requete
-            queryClient.refetchQueries({ queryKey: RQKeys.community_members(communityId) });
+            void queryClient.refetchQueries({ queryKey: RQKeys.community_members(communityId) });
         },
     });
 
@@ -120,7 +120,7 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
                 },
                 {
                     children: tCommon("add"),
-                    onClick: handleSubmit(onSubmit),
+                    onClick: (e) => void handleSubmit(onSubmit)(e),
                     doClosesModal: false,
                     priority: "primary",
                 },

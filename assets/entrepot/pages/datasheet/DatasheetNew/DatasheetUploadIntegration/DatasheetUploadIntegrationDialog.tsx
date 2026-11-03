@@ -131,7 +131,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                 setShouldPingIntProg(false);
 
                 if (upload?.tags?.datasheet_name) {
-                    queryClient.invalidateQueries({
+                    void queryClient.invalidateQueries({
                         queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                     });
                     routes
@@ -197,7 +197,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                 children: "Consulter la fiche de données",
                                 onClick: () => {
                                     if (upload?.tags?.datasheet_name) {
-                                        queryClient.refetchQueries({
+                                        void queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                                         });
                                         routes
@@ -224,7 +224,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                 children: t("view_datasheet"),
                                 onClick: () => {
                                     if (upload?.tags?.datasheet_name) {
-                                        queryClient.refetchQueries({
+                                        void queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                                         });
                                         routes

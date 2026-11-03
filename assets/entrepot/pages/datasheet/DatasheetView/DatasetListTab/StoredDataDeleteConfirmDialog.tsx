@@ -72,7 +72,7 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
             dataUsesQuery.data?.offerings_list?.forEach((offering) => {
                 queryClient.removeQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offering._id) });
             });
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
         },
     });
 

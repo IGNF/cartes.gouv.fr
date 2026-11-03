@@ -163,7 +163,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                                 className={fr.cx("fr-my-3w")}
                                 closable
                                 onClose={() => {
-                                    metadataQuery.refetch();
+                                    void metadataQuery.refetch();
                                     resetForm();
                                     requestMutation.reset();
                                 }}

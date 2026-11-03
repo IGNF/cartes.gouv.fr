@@ -105,7 +105,7 @@ const AddDocumentDialog: FC<AddDocumentDialogProps> = ({ onAdd }) => {
         if (!documentFile) {
             return;
         }
-        getThumbnail(documentFile).then((uri) => {
+        void getThumbnail(documentFile).then((uri) => {
             setModalImageUrl(uri ? uri : "");
         });
     }, [documentFile]);
@@ -128,7 +128,7 @@ const AddDocumentDialog: FC<AddDocumentDialogProps> = ({ onAdd }) => {
                         {
                             children: tCommon("add"),
                             doClosesModal: false,
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                             priority: "primary",
                         },
                     ]}

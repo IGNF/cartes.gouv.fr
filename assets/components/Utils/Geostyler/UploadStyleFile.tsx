@@ -93,7 +93,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
         if (lastSentRef.current !== strStyle) {
             lastSentRef.current = strStyle;
             onChangeRef.current(strStyle);
-            triggerRef.current(encodedFieldName);
+            void triggerRef.current(encodedFieldName);
         }
     }, [strStyle, encodedFieldName]);
 
@@ -214,7 +214,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
                         hint={t("file_input_hint", { acceptedFileExtensions })}
                         nativeInputProps={{
                             accept: acceptAttr,
-                            onChange: handleUpload,
+                            onChange: (e) => void handleUpload(e),
                         }}
                     />
                     <div className={classes.divider}>

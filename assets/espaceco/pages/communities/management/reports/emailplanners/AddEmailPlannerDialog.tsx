@@ -89,7 +89,7 @@ const AddEmailPlannerDialog: FC<AddEmailPlannerDialogProps> = ({ themes, statuse
                             children: tCommon("add"),
                             priority: "primary",
                             doClosesModal: false,
-                            onClick: handleSubmit(onSubmit),
+                            onClick: (e) => void handleSubmit(onSubmit)(e),
                         },
                     ]}
                 >

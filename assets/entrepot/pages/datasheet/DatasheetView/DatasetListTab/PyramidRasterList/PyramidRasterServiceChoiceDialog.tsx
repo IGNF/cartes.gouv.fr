@@ -71,7 +71,7 @@ export const PyramidRasterServiceChoiceDialog: FC<PyramidRasterServiceChoiceDial
     }, [modal, onRegister]);
 
     useIsModalOpen(modal, {
-        onConceal: async () => {
+        onConceal: () => {
             openState?.resolve({ response: undefined });
 
             setOpenState(undefined);

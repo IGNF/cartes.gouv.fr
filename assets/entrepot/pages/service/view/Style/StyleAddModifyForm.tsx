@@ -320,10 +320,21 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                     queryClient.removeQueries({ queryKey: RQKeys.datastore_annexe(datastoreId, annexeId) });
                 });
 
-            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offeringId) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offeringId) });
             routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).push();
         },
     });
+
+    // Quitter sans enregistrer : valider puis enregistrer, sinon refermer la confirmation
+    const saveBeforeLeaving = async () => {
+        const isValid = await trigger(undefined);
+        if (isValid) {
+            const data = getFormValues();
+            onValid(data);
+        } else {
+            confirmReturnModal.close();
+        }
+    };
 
     return (
         <Main title={editMode ? `Modifier le style ${style.name}` : "Ajouter un style"}>
@@ -428,15 +439,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         },
                         {
                             children: "Enregistrer les modifications",
-                            onClick: async () => {
-                                const isValid = await trigger(undefined);
-                                if (isValid) {
-                                    const data = getFormValues();
-                                    onValid(data);
-                                } else {
-                                    confirmReturnModal.close();
-                                }
-                            },
+                            onClick: () => void saveBeforeLeaving(),
                             priority: "primary",
                         },
                     ]}

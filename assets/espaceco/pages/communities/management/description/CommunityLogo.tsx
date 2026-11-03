@@ -81,7 +81,7 @@ const CommunityLogo: FC = () => {
         setIsValid(false);
 
         if (community.logo_url) {
-            fetch(community.logo_url).then((res) => {
+            void fetch(community.logo_url).then((res) => {
                 setIsValid(() => res.status === 200);
             });
         }
@@ -175,7 +175,7 @@ const CommunityLogo: FC = () => {
             },
             {
                 children: t("logo_action", { action: action }),
-                onClick: handleSubmit(onSubmit),
+                onClick: (e) => void handleSubmit(onSubmit)(e),
                 doClosesModal: false,
                 priority: "primary",
             },
