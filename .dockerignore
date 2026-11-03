@@ -26,7 +26,6 @@
 /.playwright-mcp
 /.devcontainer
 /.idea
-/.eslint-rules
 /.php-cs-fixer.cache
 /.php-cs-fixer.dist.php
 /.twig-cs-fixer.cache

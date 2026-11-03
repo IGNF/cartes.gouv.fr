@@ -8,7 +8,7 @@
         "junstyle.php-cs-fixer",
         "mehedidracula.php-constructor",
         "devsense.composer-php-vscode",
-        "dbaeumer.vscode-eslint",
+        "oxc.oxc-vscode",
         "esbenp.prettier-vscode",
         "pflannery.vscode-versionlens",
         "yoavbls.pretty-ts-errors"

@@ -44,6 +44,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
 
     const filteredAndSortedPermissions = [...(permissions ?? [])]
         .map((permission) => {
+            // oxlint-disable-next-line react/purity -- lecture de la date courante, sans effet de bord
             const expired = permission.end_date && compareAsc(new Date(permission.end_date), new Date()) < 0;
             return { ...permission, expired };
         })
@@ -74,9 +75,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
             }
         });
 
-    const expiredCount = filteredAndSortedPermissions
-        ? filteredAndSortedPermissions.filter((p) => p.end_date && compareAsc(new Date(p.end_date), new Date()) < 0).length
-        : 0;
+    const expiredCount = filteredAndSortedPermissions ? filteredAndSortedPermissions.filter((p) => p.expired).length : 0;
 
     const activeCount = filteredAndSortedPermissions ? filteredAndSortedPermissions.length - expiredCount : 0;
 
@@ -202,6 +201,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
 
             {filteredAndSortedPermissions
                 .map((permission) => {
+                    // oxlint-disable-next-line react/purity -- lecture de la date courante, sans effet de bord
                     const expired = permission.end_date && compareAsc(new Date(permission.end_date), new Date()) < 0;
 
                     return { ...permission, expired };

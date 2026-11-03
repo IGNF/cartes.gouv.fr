@@ -25,7 +25,7 @@ export default function DynamicParamSelector(props: DynamicParamSelectorProps) {
 function useParamOptions<TOption>(
     param: ParamDef,
     resolvedDeps: Record<string, string>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     toOptions: (data: any, t: StatsTranslator) => TOption[],
     t: StatsTranslator
 ) {
@@ -35,7 +35,7 @@ function useParamOptions<TOption>(
     );
     const depsReady = !param.dependsOn || param.dependsOn.every((dep) => !!resolvedDeps[dep]);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     const select = useCallback((data: any) => toOptions(data, t), [toOptions, t]);
 
     const { data: options = [], isLoading } = useQuery({

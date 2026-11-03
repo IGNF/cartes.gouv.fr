@@ -19,7 +19,7 @@ import { routes } from "@/router/router";
 import { joinModal, successModal } from "./modal";
 
 function getInputProps(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     field: any,
     register: UseFormRegister<FieldValues>,
     registerOptionsOverrides?: RegisterOptions<FieldValues>
@@ -46,7 +46,7 @@ function getInputProps(
 }
 
 function registerField(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     field: any,
     register: UseFormRegister<FieldValues>,
     registerOptionsOverrides?: RegisterOptions<FieldValues>
@@ -251,7 +251,7 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
                                     {schema?.["description"] && <p>{renderTextWithLinks(schema["description"])}</p>}
 
                                     {schema?.["fields"] &&
-                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        // oxlint-disable-next-line typescript/no-explicit-any
                                         schema["fields"].map((field: any, i: number) => (
                                             <Input
                                                 key={field["name"] ?? i}

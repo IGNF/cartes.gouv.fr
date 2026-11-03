@@ -146,6 +146,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             {paginatedItems.map((permission) => {
+                                // oxlint-disable-next-line react/purity -- lecture de la date courante, sans effet de bord
                                 const now = new Date();
                                 const endDate = permission.end_date !== undefined ? parseISO(permission.end_date) : undefined;
                                 const daysLeft = endDate !== undefined ? differenceInCalendarDays(endDate, now) : undefined;

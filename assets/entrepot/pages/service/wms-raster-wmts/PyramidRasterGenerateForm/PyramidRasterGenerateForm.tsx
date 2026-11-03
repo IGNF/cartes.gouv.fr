@@ -53,6 +53,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     const [currentStep, setCurrentStep] = useState(STEPS.TECHNICAL_NAME);
 
     const serviceQuery = useServiceQuery(datastoreId, offeringId);
+    const bbox = (serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent | undefined)?.bbox;
 
     const queryClient = useQueryClient();
 
@@ -91,7 +92,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
             const formData = {
                 ...getFormValues(),
                 wmsv_offering_id: offeringId,
-                wmsv_config_bbox: bboxToWkt((serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent).bbox!),
+                wmsv_config_bbox: bboxToWkt(bbox!),
             };
 
             return api.pyramidRaster.add(datastoreId, formData);
@@ -144,7 +145,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                         </>
                     }
                 />
-            ) : (serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent).bbox === undefined ? (
+            ) : bbox === undefined ? (
                 <Alert
                     severity="error"
                     closable={false}

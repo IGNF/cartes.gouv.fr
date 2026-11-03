@@ -49,7 +49,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map | undefined>(undefined);
     // useState paresseux : instance unique, conservée par Fast Refresh (useMemo serait recalculé et détaché de la carte)
-    // eslint-disable-next-line react/hook-use-state
+    // oxlint-disable-next-line react/hook-use-state
     const [layerSwitcherControl] = useState(
         () =>
             new LayerSwitcher({
@@ -61,7 +61,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
                 },
             })
     );
-    // eslint-disable-next-line react/hook-use-state
+    // oxlint-disable-next-line react/hook-use-state
     const [controls] = useState(() => [
         new GeoportalZoom({ position: "top-left" }),
         new Attribution({ collapsible: true, collapsed: true }),
@@ -178,7 +178,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
             mapRef.current?.getView().fit(extent);
         }
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react/exhaustive-deps
     }, [layers]);
 
     useEffect(() => {
