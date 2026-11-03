@@ -11,6 +11,10 @@ const md = markdownit({
     quotes: ["«\xA0", "\xA0»", "‹\xA0", "\xA0›"],
     typographer: true,
 });
+// markdown-it 15 ne relie plus par défaut les adresses sans protocole
+md.linkify.set({ fuzzyLink: true });
+
+export const renderMarkdown = (content: string): string => md.render(content);
 
 interface MarkdownRendererProps extends HTMLAttributes<HTMLDivElement> {
     content: string;
@@ -18,7 +22,7 @@ interface MarkdownRendererProps extends HTMLAttributes<HTMLDivElement> {
 
 const MarkdownRenderer: FC<MarkdownRendererProps> = (props) => {
     const { className, content, ...rest } = props;
-    const result = md.render(content);
+    const result = renderMarkdown(content);
     const classNames = ["fr-tiptap"];
     if (className) {
         classNames.push(className);
