@@ -5,6 +5,7 @@ namespace App\Listener;
 use App\Serializer\ApiErrorEncoder;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -14,8 +15,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
 final readonly class ApiErrorFormatListener
 {
     public function __construct(
-        #[Autowire(param: 'app.api_path_pattern')]
-        private string $apiPathPattern,
+        #[Autowire(service: 'app.api_path_matcher')]
+        private RequestMatcherInterface $apiPathMatcher,
     ) {
     }
 
@@ -24,7 +25,7 @@ final readonly class ApiErrorFormatListener
     public function onKernelException(ExceptionEvent $event): void
     {
         $request = $event->getRequest();
-        if (1 === preg_match('{'.$this->apiPathPattern.'}', rawurldecode($request->getPathInfo()))) {
+        if ($this->apiPathMatcher->matches($request)) {
             $request->setRequestFormat(ApiErrorEncoder::FORMAT);
         }
     }

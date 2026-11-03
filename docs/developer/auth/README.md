@@ -2,7 +2,7 @@
 
 L'application utilise un **BFF stateless** (Backend-for-Frontend) : le backend Symfony gère intégralement le flux OAuth2/OIDC avec Keycloak et stocke les tokens dans un **cookie HttpOnly chiffré** posé sur le navigateur. Le frontend React n'a jamais accès aux tokens.
 
-Aucune session PHP n'est utilisée (le bloc `session:` est absent de `config/packages/framework.yaml`, le firewall est `stateless: true`).
+Aucune session PHP n'est utilisée (le bloc `session:` est absent de `config/packages/framework.yaml`, les deux firewalls sont `stateless: true`).
 
 ---
 
