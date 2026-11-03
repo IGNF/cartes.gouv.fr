@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Exception\AppException;
 use App\Security\User;
 use App\Services\MailerService;
 use App\Services\MembershipService;
@@ -294,11 +293,10 @@ class ContactController extends AbstractController
         return new JsonResponse(['state' => 'success']);
     }
 
+    // routes sous /api/contact : le pare-feu exige un utilisateur connecté
     private function connectedUserEmail(?UserInterface $user): string
     {
-        if (!$user instanceof User) {
-            throw new AppException('Demande réservée aux utilisateurs connectés', Response::HTTP_UNAUTHORIZED);
-        }
+        assert($user instanceof User);
 
         return $user->getEmail();
     }
