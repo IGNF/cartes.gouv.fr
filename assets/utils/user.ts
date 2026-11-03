@@ -2,6 +2,7 @@ import { CartesUser } from "@/@types/app";
 import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
+import { useSessionStore } from "@/stores/SessionStore";
 
 export function canUserAccess(
     userId: string,
@@ -41,4 +42,5 @@ export function bootstrapUser(): void {
     }
 
     queryClient.setQueryData<CartesUser | null>(RQKeys.user_me(), cartesUser);
+    useSessionStore.getState().applyUser(cartesUser);
 }

@@ -4,7 +4,6 @@ import { CartesUser } from "@/@types/app";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { ApiError } from "@/modules/jsonFetch";
-import { applyUser } from "@/modules/session";
 import { SessionStatus, useSessionStore } from "@/stores/SessionStore";
 import { delta } from "@/utils/delta";
 
@@ -16,8 +15,7 @@ export function userQueryOptions(sessionStatus: SessionStatus): UseQueryOptions<
         queryKey: RQKeys.user_me(),
         queryFn: async ({ signal }) => {
             const user = await api.user.getMe({ signal });
-            // requête annulée pendant la lecture du corps : réponse incomplète, le store n’en tient pas compte
-            if (!signal.aborted) applyUser(user);
+            useSessionStore.getState().applyUser(user);
             return user;
         },
         staleTime: delta.minutes(5),

@@ -25,7 +25,7 @@ async function caught(promise: Promise<unknown>): Promise<ApiError> {
 describe("jsonFetch", () => {
     afterEach(() => {
         vi.unstubAllGlobals();
-        useSessionStore.setState({ status: "anonymous", expiresAt: null });
+        useSessionStore.setState({ status: "anonymous" });
     });
 
     it("demande du JSON et marque l'appel comme XHR", async () => {
@@ -66,7 +66,7 @@ describe("jsonFetch", () => {
     });
 
     it("signale la session expirée sur tout 401, pas sur un autre statut", async () => {
-        useSessionStore.getState().applySession(Date.now() / 1000 + 3600);
+        useSessionStore.setState({ status: "active" });
 
         stubFetch(problem({ status: 403, title: "Forbidden" }, 403));
         await caught(jsonFetch("http://localhost/api/test"));

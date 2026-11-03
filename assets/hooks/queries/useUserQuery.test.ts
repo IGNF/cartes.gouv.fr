@@ -6,7 +6,6 @@ import { CartesUser } from "@/@types/app";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
 import SymfonyRouting from "@/modules/Routing";
-import { stopSessionClock } from "@/modules/session";
 import { useSessionStore } from "@/stores/SessionStore";
 import { userQueryOptions } from "./useUserQuery";
 
@@ -16,11 +15,10 @@ describe("userQueryOptions", () => {
     beforeEach(() => {
         SymfonyRouting.setBaseUrl("http://localhost");
         queryClient.clear();
-        useSessionStore.setState({ status: "anonymous", expiresAt: null });
+        useSessionStore.setState({ status: "anonymous" });
     });
 
     afterEach(() => {
-        stopSessionClock();
         vi.unstubAllGlobals();
     });
 
