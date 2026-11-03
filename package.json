@@ -118,5 +118,11 @@
         "*.twig": [
             "vendor/bin/twig-cs-fixer lint --fix"
         ]
+    },
+    "allowScripts": {
+        "esbuild": true,
+        "core-js": false,
+        "es5-ext": false,
+        "@parcel/watcher": false
     }
 }

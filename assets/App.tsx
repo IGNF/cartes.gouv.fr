@@ -6,6 +6,7 @@ import { FC } from "react";
 
 import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
+import { cacheBuster } from "./env";
 import { queryClient } from "./modules/queryClient";
 import { RouteProvider } from "./router/router";
 import RouterRenderer from "./router/RouterRenderer";
@@ -27,7 +28,7 @@ const App: FC = () => {
             client={queryClient}
             persistOptions={{
                 persister,
-                buster: __CACHE_BUSTER__,
+                buster: cacheBuster,
                 maxAge,
                 dehydrateOptions: {
                     // ne pas persister (localstorage) les données utilisateur : elles sont rechargées depuis le serveur à chaque chargement de page

@@ -4,6 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import App from "@/App";
+import { appRevision, appVersion } from "@/env";
 import { analyticsInit } from "@/modules/analytics";
 
 // Contourne la barre d'outils Symfony masquée au chargement en dev (élément absent en prod)
@@ -25,5 +26,5 @@ root.render(
 );
 
 // Sur main, la CI fournit la révision mais pas de version
-const appVersion = __APP_VERSION__ || "version inconnue";
-console.info(__APP_REVISION__ ? `cartes.gouv.fr ${appVersion} (${__APP_REVISION__})` : "cartes.gouv.fr version inconnue (build local)");
+const versionLabel = appVersion || "version inconnue";
+console.info(appRevision ? `cartes.gouv.fr ${versionLabel} (${appRevision})` : "cartes.gouv.fr version inconnue (build local)");
