@@ -178,29 +178,23 @@ Le navigateur supprime le cookie en même temps que le token expire : le serveur
 { "title": "Unauthorized", "status": 401, "detail": "Connexion requise", "details": [], "type": "/errors/anonymous" }
 ```
 
-C'est donc le front qui connaît l'expiration, par `session_expires_at` (secondes Unix, `expires` du jeton d'accès) dans la charge utilisateur. Le cookie expire à la même heure.
+C'est ce 401 qui apprend l'expiration au front. React Query relance les requêtes périmées au retour sur l'onglet et au montage de leurs composants (la requête utilisateur a 17 consommateurs, dont le menu d'en-tête), et plusieurs pages interrogent l'API en boucle (formulaires de service, intégration, permissions) : la première réponse 401 après l'expiration déclenche l'alerte. Pas d'horloge côté front : `session_expires_at` est fourni dans la charge utilisateur mais n'est pas exploité aujourd'hui. Un onglet resté au premier plan sans aucune requête voit l'alerte à sa première action, qui échoue une fois.
 
 ### États
 
-Le store [`SessionStore`](../../../assets/stores/SessionStore.ts) (zustand) porte `{ status, expiresAt }` avec trois statuts :
+Le store [`SessionStore`](../../../assets/stores/SessionStore.ts) (zustand) porte un statut :
 
-| Statut      | Condition                                          | Effet                                                                                                                                                            |
-| ----------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `anonymous` | charge `#user` absente                             | `useUserQuery` désactivé : aucun appel à `/api/users/me` (un visiteur ne devient connecté que par une navigation complète)                                       |
-| `active`    | avant `expiresAt`                                  | fonctionnement normal                                                                                                                                            |
-| `expired`   | `expiresAt` atteint, ou 401 reçu en session connue | alerte `error` « Session expirée » ; `useUserQuery` désactivé, le dernier utilisateur reste en cache, la page reste montée (la garde du routeur ne redirige pas) |
+| Statut      | Condition                               | Effet                                                                                                                                                            |
+| ----------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `anonymous` | charge `#user` absente                  | `useUserQuery` désactivé : aucun appel à `/api/users/me` (un visiteur ne devient connecté que par une navigation complète)                                       |
+| `active`    | charge `#user` ou `/api/users/me` reçue | fonctionnement normal                                                                                                                                            |
+| `expired`   | 401 reçu en session connue              | alerte `error` « Session expirée » ; `useUserQuery` désactivé, le dernier utilisateur reste en cache, la page reste montée (la garde du routeur ne redirige pas) |
 
-Entrées du store :
-
-- la charge `#user` au démarrage et chaque réponse de `/api/users/me` (`applyUser`, fixe `expiresAt` et recalcule le statut, dans un sens comme dans l'autre : la dernière réponse du serveur gagne) ;
-- l'horloge : une minuterie vers `expiresAt`, plus un recalcul sur `focus` et `visibilitychange` (les onglets en arrière-plan brident les minuteries). L'horloge ne fait qu'avancer : elle ne ramène jamais un `expired` reçu du serveur en `active` ;
-- tout 401 reçu par [`apiFetch`](../../../assets/modules/jsonFetch.ts) alors qu'un utilisateur est connu (déclencheur de secours, `markExpired`), sans effet en `anonymous`.
-
-Le module [`session.ts`](../../../assets/modules/session.ts) tient l'horloge, la popup et la relecture de `/api/users/me` à sa fermeture ; `startSessionClock()` est appelé une fois dans `App.tsx`, après `bootstrapUser()`. Une mutation qui a échoué sur un 401 n'est pas rejouée : l'utilisateur re-soumet après reconnexion.
+Entrées du store : la charge `#user` au démarrage et chaque réponse de `/api/users/me` (`applyUser`, la dernière réponse du serveur gagne, même après un 401) ; tout 401 reçu par [`apiFetch`](../../../assets/modules/jsonFetch.ts) alors qu'un utilisateur est connu (`markExpired`), sans effet en `anonymous`. Une mutation qui a échoué sur un 401 n'est pas rejouée : l'utilisateur re-soumet après reconnexion.
 
 ### Reconnexion par popup
 
-L'alerte [`SessionAlert`](../../../assets/components/Utils/SessionAlert.tsx) (DSFR, non fermable, sous le fil d'Ariane de `Main` et `DatastoreMain`, sur toute page) porte un bouton « Se reconnecter » qui appelle `reconnect()` dans le gestionnaire de clic :
+L'alerte [`SessionAlert`](../../../assets/components/Utils/SessionAlert.tsx) (DSFR, non fermable, sous le fil d'Ariane de `Main` et `DatastoreMain`, sur toute page) porte un bouton « Se reconnecter » qui appelle `reconnect()` ([`session.ts`](../../../assets/modules/session.ts)) dans le gestionnaire de clic :
 
 ```mermaid
 sequenceDiagram
@@ -224,12 +218,11 @@ sequenceDiagram
 ```
 
 - `window.open` renvoie `null` (popup bloquée) : `location.assign("/login")`, connexion dans l'onglet, retour par le `referer`.
-- Popup déjà ouverte : `focus()` dessus, pas de seconde fenêtre. Mobile ou réglage navigateur ouvrant un onglet au lieu d'une fenêtre : même code.
-- À la fermeture, `checkSession()` relit `/api/users/me` : utilisateur → `setQueryData`, puis statut `active` (la requête utilisateur se réactive), puis `invalidateQueries()` sans filtre, dans cet ordre ; 401 → reste `expired`, le bouton reste cliquable (pas de compteur, pas de délai de garde) ; erreur réseau ou amont → état inchangé. Une relecture encore en cours est abandonnée quand une nouvelle popup s'ouvre.
-- `invalidateQueries()` marque aussi `user_me` invalide : à sa réactivation la requête se relance malgré `staleTime`, soit un second `GET /api/users/me` juste après celui de `checkSession()`, servi par le cache serveur.
-- Autres onglets : un onglet qui affiche « Session expirée » le garde jusqu'à son propre clic sur « Se reconnecter » (avec un SSO vivant, sa popup se referme aussitôt). Entre-temps, ses appels d'API passent déjà avec le cookie posé par l'autre onglet : seule une réponse de `/api/users/me` ramène le store en `active`, et `useUserQuery` est désactivé en `expired`. Voulu : un clic par onglet plutôt qu'une revérification serveur au retour de focus.
+- Second clic pendant que la popup est ouverte : `window.open` avec le même nom renavigue la même fenêtre, pas de seconde popup ; les deux attentes relisent l'utilisateur à la fermeture, sans effet supplémentaire. Mobile ou réglage navigateur ouvrant un onglet au lieu d'une fenêtre : même code.
+- À la fermeture, `/api/users/me` est relu : utilisateur → `setQueryData`, puis statut `active` (la requête utilisateur se réactive), puis `invalidateQueries()` sans filtre, dans cet ordre ; 401 → reste `expired`, le bouton reste cliquable (pas de compteur, pas de délai de garde) ; erreur réseau ou amont → état inchangé.
+- `invalidateQueries()` marque aussi `user_me` invalide : à sa réactivation la requête se relance malgré `staleTime`, soit un second `GET /api/users/me` juste après celui de la relecture, servi par le cache serveur.
+- Autres onglets : un onglet qui affiche « Session expirée » le garde jusqu'à son propre clic sur « Se reconnecter » (avec un SSO vivant, sa popup se referme aussitôt). Entre-temps, ses appels d'API passent déjà avec le cookie posé par l'autre onglet : seule une réponse de `/api/users/me` ramène le store en `active`, et `useUserQuery` est désactivé en `expired`. Voulu : un clic par onglet.
 - Pas de `postMessage`, pas de `noopener` : la fermeture de la fenêtre est le signal. Un futur en-tête `Cross-Origin-Opener-Policy` devra valoir `same-origin-allow-popups`, et une CSP devra autoriser le `<script>` inline de la page de retour (nonce).
-- Décalage d'horloge : le front compare `session_expires_at` (heure serveur) à l'horloge du poste ; un poste en avance de X voit l'alerte X plus tôt, la reconnexion corrige.
 - `iam_login_disabled` : la popup affiche la page « connexion désactivée », voulue (maintenance du SSO).
 
 ---
@@ -255,7 +248,7 @@ sequenceDiagram
 | [`src/ApiClient/Auth/AuthenticatedHttpClient.php`](../../../src/ApiClient/Auth/AuthenticatedHttpClient.php)         | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt     |
 | [`assets/modules/jsonFetch.ts`](../../../assets/modules/jsonFetch.ts)                                               | Envoie `X-Requested-With`, signale les 401 au store de session              |
 | [`assets/stores/SessionStore.ts`](../../../assets/stores/SessionStore.ts)                                           | État de session du front : anonyme, active, expirée                         |
-| [`assets/modules/session.ts`](../../../assets/modules/session.ts)                                                   | Horloge de session, popup de reconnexion, relecture de `/api/users/me`      |
+| [`assets/modules/session.ts`](../../../assets/modules/session.ts)                                                   | Popup de reconnexion, relecture de `/api/users/me` à sa fermeture           |
 | [`assets/components/Utils/SessionAlert.tsx`](../../../assets/components/Utils/SessionAlert.tsx)                     | Alerte « Session expirée », bouton Se reconnecter                           |
 | [`config/packages/security.yaml`](../../../config/packages/security.yaml)                                           | Firewalls `api` et `main`, `stateless: true`, contrôle d'accès              |
 
@@ -286,6 +279,6 @@ sequenceDiagram
 
 **`/contact_us` public** : seule route d'API appelable sans cookie, n'importe qui peut y déclencher l'envoi de courriels ; à restreindre.
 
-**Popup de reconnexion** : le login dans la popup partage le cookie de l'onglet d'origine. Tout changement du flux d'échec (`onAuthenticationFailure`) doit garder la règle « pas de jeton reçu, pas de cookie effacé », sinon un échec dans la popup efface un cookie encore valable : celui qu'un autre onglet vient de poser en se reconnectant (l'onglet courant garde son alerte jusqu'à son propre clic), ou celui d'un poste dont l'horloge avance.
+**Popup de reconnexion** : le login dans la popup partage le cookie de l'onglet d'origine. Tout changement du flux d'échec (`onAuthenticationFailure`) doit garder la règle « pas de jeton reçu, pas de cookie effacé », sinon un échec dans la popup efface un cookie encore valable : celui qu'un autre onglet vient de poser en se reconnectant (l'onglet courant garde son alerte jusqu'à son propre clic), ou un cookie encore valable si le 401 venait d'une autre cause.
 
 **Pas de session PHP** : le bloc `session:` est intentionnellement absent de `config/packages/framework.yaml`. Ne pas le réintroduire pour des fonctionnalités annexes (flash, CSRF, etc.) sans réévaluer l'architecture stateless.
