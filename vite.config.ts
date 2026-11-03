@@ -6,23 +6,24 @@ import { defineConfig, loadEnv } from "vite";
 import run from "vite-plugin-run";
 import symfonyPlugin from "vite-plugin-symfony";
 
-// Renseignés par la CI (voir docker-build-publish.yml), vides en build local
-const appVersion = process.env.APP_VERSION ?? "";
-const appRevision = process.env.APP_REVISION ?? "";
-// Invalide le cache react-query persisté à chaque révision ; en local, à chaque build
-const cacheBuster = appRevision || `local-${Date.now()}`;
-
 export default defineConfig(({ mode }) => {
-    // Chemin de base de l’installation (alias Apache, ex. /cartes.gouv.fr), vide à la racine ; lu dans .env/.env.local
-    const basePath = (loadEnv(mode, import.meta.dirname, "").APP_BASE_PATH ?? "").replace(/\/+$/, "");
+    // .env*, .env.local et variables du processus (build-args de la CI) ; seules les clés nommées ci-dessous vont dans le bundle
+    const env = loadEnv(mode, import.meta.dirname, "");
+    // Chemin de base de l’installation (alias Apache, ex. /cartes.gouv.fr), vide à la racine
+    const basePath = (env.APP_BASE_PATH ?? "").replace(/\/+$/, "");
+    // Renseignés par la CI (voir docker-build-publish.yml), vides en build local
+    const appVersion = env.APP_VERSION ?? "";
+    const appRevision = env.APP_REVISION ?? "";
+    // Invalide le cache react-query persisté à chaque révision ; en local, à chaque build
+    const cacheBuster = appRevision || `local-${Date.now()}`;
 
     return {
         base: `${basePath}/build/`,
         define: {
             "import.meta.env.APP_BASE_PATH": JSON.stringify(basePath),
-            __APP_VERSION__: JSON.stringify(appVersion),
-            __APP_REVISION__: JSON.stringify(appRevision),
-            __CACHE_BUSTER__: JSON.stringify(cacheBuster),
+            "import.meta.env.APP_VERSION": JSON.stringify(appVersion),
+            "import.meta.env.APP_REVISION": JSON.stringify(appRevision),
+            "import.meta.env.APP_CACHE_BUSTER": JSON.stringify(cacheBuster),
         },
         server: {
             // Required to listen on all interfaces
@@ -36,7 +37,8 @@ export default defineConfig(({ mode }) => {
                 viteDevServerHostname: "localhost",
                 refresh: true,
                 sriAlgorithm: "sha384",
-                exposedEnvVars: ["APP_ENV"],
+                // variables du build injectées ci-dessus, aucune en plus (défaut : APP_ENV, inutilisée)
+                exposedEnvVars: [],
             }),
             // Régénère le fichier de routes commité (assets/modules/symfony-routes.json) en dev seulement : le build n’a pas besoin de PHP
             run([

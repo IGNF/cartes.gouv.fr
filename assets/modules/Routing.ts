@@ -1,8 +1,9 @@
 import Routing from "fos-router";
 
+import { basePath } from "@/env";
 import routes from "./symfony-routes.json";
 Routing.setRoutingData(routes);
-Routing.setBaseUrl(import.meta.env.APP_BASE_PATH ?? "");
+Routing.setBaseUrl(basePath);
 
 const SymfonyRouting = Routing;
 export default SymfonyRouting;
