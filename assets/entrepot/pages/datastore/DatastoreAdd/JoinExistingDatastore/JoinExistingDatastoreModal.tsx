@@ -16,6 +16,7 @@ import { annexesUrl } from "@/env";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { routes } from "@/router/router";
+import { fieldErrorMessage } from "@/utils";
 import { joinModal, successModal } from "./modal";
 
 function getInputProps(
@@ -258,7 +259,7 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
                                                 label={field["title"]}
                                                 hintText={field["description"]}
                                                 state={errors?.[field?.["name"]]?.message ? "error" : "default"}
-                                                stateRelatedMessage={errors?.[field?.["name"]]?.message?.toString()}
+                                                stateRelatedMessage={fieldErrorMessage(errors?.[field?.["name"]])}
                                                 nativeInputProps={{
                                                     ...getInputProps(field, register),
                                                 }}

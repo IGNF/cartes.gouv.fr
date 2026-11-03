@@ -12,7 +12,7 @@ type UploadStyleFileProps = {
 const acceptedFileExtensions = ["sld"];
 
 const StyleLoader: FC<UploadStyleFileProps> = (props) => {
-    const { tableNames = [], form } = props;
+    const { tableNames, form } = props;
 
     const { control } = form;
 

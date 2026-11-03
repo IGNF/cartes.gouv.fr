@@ -179,7 +179,7 @@ export type DescriptionFormType = {
     description?: string;
     editorial?: string;
     keywords?: string[];
-    logo?: unknown | null;
+    logo?: unknown;
     listed: boolean;
     membershipRequest: MembershipRequestType;
     openWithEmail: OpenWithEmailType[];

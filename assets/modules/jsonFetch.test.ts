@@ -38,6 +38,17 @@ describe("jsonFetch", () => {
         expect(request.headers.get("X-Requested-With")).toBe("XMLHttpRequest");
     });
 
+    it("garde les en-têtes de l’appelant, même fournis en objet Headers", async () => {
+        const fetchMock = stubFetch(new Response("{}", { status: 200 }));
+
+        await jsonFetch("http://localhost/api/test", { headers: new Headers({ Accept: "text/plain", "X-Test": "1" }) });
+
+        const request = fetchMock.mock.calls[0][0];
+        expect(request.headers.get("Accept")).toBe("text/plain");
+        expect(request.headers.get("X-Test")).toBe("1");
+        expect(request.headers.get("X-Requested-With")).toBe("XMLHttpRequest");
+    });
+
     it("expose le corps Problem Details de l'erreur", async () => {
         stubFetch(problem({ status: 409, title: "Conflict", detail: "Nom déjà utilisé", details: { error: "Conflict" } }, 409));
 

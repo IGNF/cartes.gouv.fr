@@ -12,7 +12,12 @@ import { useLang } from "../../i18n/i18n";
 
 const locales = { en: enGBLocale, fr: frLocale };
 
-interface DatePickerProps extends Omit<MuiDatePickerProps<false>, "onChange"> {
+type MuiSlotProps = NonNullable<MuiDatePickerProps<false>["slotProps"]>;
+// Forme objet seulement : ces props sont fusionnées avec celles du bouton d’effacement
+type FieldSlotProps = Exclude<MuiSlotProps["field"], (...args: never[]) => unknown>;
+
+interface DatePickerProps extends Omit<MuiDatePickerProps<false>, "onChange" | "slotProps"> {
+    slotProps?: Omit<MuiSlotProps, "field"> & { field?: FieldSlotProps };
     id?: string;
     label: string;
     hintText?: string;

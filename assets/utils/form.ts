@@ -1,6 +1,10 @@
 // Pour des chaines non définies ou vides => null
 export const setToNull = (value) => (value === undefined || value === "" ? null : value);
 
+// Message d’une erreur react-hook-form, y compris pour un champ tableau ou objet dont le type ne garantit pas une chaîne
+export const fieldErrorMessage = (error: { message?: unknown } | undefined): string | undefined =>
+    typeof error?.message === "string" ? error.message : undefined;
+
 export const cloneFile = (original: File) =>
     new File([original], original.name, {
         type: original.type,

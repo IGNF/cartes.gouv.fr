@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { SearchGridFilters } from "../../../../../@types/app_espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
+import { fieldErrorMessage } from "../../../../../utils";
 import SearchGrids from "../SearchGrids";
 
 type ExtentDialogProps = {
@@ -218,7 +219,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                                     disableClearable={true}
                                     filters={filters}
                                     state={errors.extent ? "error" : "default"}
-                                    stateRelatedMessage={errors.extent?.message?.toString()}
+                                    stateRelatedMessage={fieldErrorMessage(errors.extent)}
                                     onChange={(grid) => {
                                         setFormValue("extent", grid ? grid.extent : undefined);
                                         clearErrors();
@@ -233,7 +234,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                                         <Input
                                             label={t("zoom.xmin")}
                                             state={errors.xmin ? "error" : "default"}
-                                            stateRelatedMessage={errors.xmin?.message?.toString()}
+                                            stateRelatedMessage={fieldErrorMessage(errors.xmin)}
                                             nativeInputProps={{
                                                 type: "number",
                                                 ...register("xmin"),
@@ -242,7 +243,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                                         <Input
                                             label={t("zoom.xmax")}
                                             state={errors.xmax ? "error" : "default"}
-                                            stateRelatedMessage={errors.xmax?.message?.toString()}
+                                            stateRelatedMessage={fieldErrorMessage(errors.xmax)}
                                             nativeInputProps={{
                                                 type: "number",
                                                 ...register("xmax"),
@@ -253,7 +254,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                                         <Input
                                             label={t("zoom.ymin")}
                                             state={errors.ymin ? "error" : "default"}
-                                            stateRelatedMessage={errors.ymin?.message?.toString()}
+                                            stateRelatedMessage={fieldErrorMessage(errors.ymin)}
                                             nativeInputProps={{
                                                 type: "number",
                                                 ...register("ymin"),
@@ -262,7 +263,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                                         <Input
                                             label={t("zoom.ymax")}
                                             state={errors.ymax ? "error" : "default"}
-                                            stateRelatedMessage={errors.ymax?.message?.toString()}
+                                            stateRelatedMessage={fieldErrorMessage(errors.ymax)}
                                             nativeInputProps={{
                                                 type: "number",
                                                 ...register("ymax"),

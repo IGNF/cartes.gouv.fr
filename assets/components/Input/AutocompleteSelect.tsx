@@ -94,7 +94,8 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
             return option;
         }
 
-        return String(option);
+        // Une option objet exige getOptionLabel
+        return "";
     };
 
     const handleRemoveTag = (tagToRemove: OptionLike, event: SyntheticEvent) => {

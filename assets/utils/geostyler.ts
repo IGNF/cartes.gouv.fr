@@ -37,7 +37,7 @@ export function getParserForFormat(format: StyleFormatEnum): StyleParser {
         case StyleFormatEnum.QML:
             return qgisParser;
         default:
-            throw new Error(`No parser available for format: ${format}`);
+            throw new Error(`No parser available for format: ${String(format)}`);
     }
 }
 

@@ -94,11 +94,6 @@ const MyDocuments: FC = () => {
     const handleModifyDocument = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        console.log(e.currentTarget);
-
-        for (const [key, value] of formData.entries()) {
-            console.log(key + ": " + value);
-        }
 
         const data = Object.fromEntries(formData);
         try {

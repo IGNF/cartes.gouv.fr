@@ -34,8 +34,12 @@ function KeyValueItem(props: KeyValueListProps) {
         watch,
     } = useFormContext();
     const useKeys = watch(`${name}.useKeys`);
-    const keyError = get(errors, `${name}.values.${index}.key.message`);
-    const valueError = get(errors, `${name}.values.${index}.value.message`);
+    const errorMessage = (field: "key" | "value") => {
+        const message = get(errors, `${name}.values.${index}.${field}.message`);
+        return typeof message === "string" ? message : undefined;
+    };
+    const keyError = errorMessage("key");
+    const valueError = errorMessage("value");
 
     function handleMove(index: number) {
         return (event) => startDrag(event, index);
@@ -62,7 +66,7 @@ function KeyValueItem(props: KeyValueListProps) {
                         label="Clé"
                         nativeInputProps={register(`${name}.values.${index}.key`)}
                         state={keyError ? "error" : "default"}
-                        stateRelatedMessage={String(keyError ?? "")}
+                        stateRelatedMessage={keyError}
                     />
                 </div>
             )}
@@ -75,7 +79,7 @@ function KeyValueItem(props: KeyValueListProps) {
                             ...register(`${name}.values.${index}.value`),
                         }}
                         state={valueError ? "error" : "default"}
-                        stateRelatedMessage={String(valueError ?? "")}
+                        stateRelatedMessage={valueError}
                     />
                 )}
                 {valueType === "select" && (
@@ -85,7 +89,7 @@ function KeyValueItem(props: KeyValueListProps) {
                         nativeSelectProps={register(`${name}.values.${index}.value`)}
                         options={valueOptions}
                         state={valueError ? "error" : "default"}
-                        stateRelatedMessage={String(valueError ?? "")}
+                        stateRelatedMessage={valueError}
                     />
                 )}
             </div>
