@@ -31,6 +31,8 @@ const useDatastoreSelection = () => {
         onSuccess: async () => {
             // profil rechargé côté serveur avant de naviguer : l’entrepôt sandbox vient de l’appartenance
             const freshUser = await api.user.getMe({}, true);
+            // une lecture déjà en vol, servie avant l’ajout, écraserait sinon le profil frais
+            await queryClient.cancelQueries({ queryKey: RQKeys.user_me() });
             queryClient.setQueryData(RQKeys.user_me(), freshUser);
             const datastoreId = sandboxCommunityId !== null ? findMembership(freshUser, { communityId: sandboxCommunityId })?.community?.datastore : undefined;
             if (datastoreId) {
