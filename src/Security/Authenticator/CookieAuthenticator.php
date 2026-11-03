@@ -8,6 +8,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -25,8 +26,8 @@ final class CookieAuthenticator extends AbstractAuthenticator
     public function __construct(
         private readonly KeycloakTokenManager $tokenManager,
         private readonly RouterInterface $router,
-        #[Autowire(param: 'app.api_path_pattern')]
-        private readonly string $apiPathPattern,
+        #[Autowire(service: 'app.api_path_matcher')]
+        private readonly RequestMatcherInterface $apiPathMatcher,
     ) {
     }
 
@@ -75,7 +76,7 @@ final class CookieAuthenticator extends AbstractAuthenticator
         $this->tokenManager->clearAccessToken();
 
         // route d'API : laisser le pare-feu continuer sans jeton, le contrôle d'accès appelle le point d'entrée qui produit le 401
-        if (1 === preg_match('{'.$this->apiPathPattern.'}', rawurldecode($request->getPathInfo()))) {
+        if ($this->apiPathMatcher->matches($request)) {
             return null;
         }
 

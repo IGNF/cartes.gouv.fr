@@ -6,6 +6,7 @@ use App\Exception\AppException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -18,11 +19,12 @@ use Symfony\Component\HttpKernel\KernelEvents;
 final readonly class ApiFetchMetadataGuard
 {
     private const REJECTED_SITES = ['cross-site', 'same-site'];
-    private const DOC_PATH_PATTERN = '{^/api/doc(\.json)?$}';
 
     public function __construct(
-        #[Autowire(param: 'app.api_path_pattern')]
-        private string $apiPathPattern,
+        #[Autowire(service: 'app.api_path_matcher')]
+        private RequestMatcherInterface $apiPathMatcher,
+        #[Autowire(service: 'app.api_doc_path_matcher')]
+        private RequestMatcherInterface $apiDocPathMatcher,
     ) {
     }
 
@@ -35,9 +37,7 @@ final readonly class ApiFetchMetadataGuard
         }
 
         $request = $event->getRequest();
-        // décodé comme le routeur et le pare-feu, sinon /%61pi/... contourne la garde
-        $path = rawurldecode($request->getPathInfo());
-        if (1 !== preg_match('{'.$this->apiPathPattern.'}', $path) || 1 === preg_match(self::DOC_PATH_PATTERN, $path)) {
+        if (!$this->apiPathMatcher->matches($request) || $this->apiDocPathMatcher->matches($request)) {
             return;
         }
 

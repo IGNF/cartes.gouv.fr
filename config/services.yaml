@@ -9,12 +9,23 @@
 parameters:
     # frontière API (regex sans délimiteurs, partagée avec security.yaml) : /contact_us reste à la racine, appelé par le site de documentation
     app.api_path_pattern: "^/(api|contact_us)(/|$)"
+    # documentation OpenAPI (dev) : hors garde et hors contrôle d'accès
+    app.api_doc_path_pattern: "^/api/doc(\\.json)?$"
 
 services:
     # default configuration for services in *this* file
     _defaults:
         autowire: true # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # même correspondance que le pare-feu (chemin décodé) pour les écouteurs qui lisent la frontière API
+    app.api_path_matcher:
+        class: Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher
+        arguments: ["%app.api_path_pattern%"]
+
+    app.api_doc_path_matcher:
+        class: Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher
+        arguments: ["%app.api_doc_path_pattern%"]
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
