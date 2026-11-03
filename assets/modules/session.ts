@@ -4,12 +4,8 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
 import SymfonyRouting from "@/modules/Routing";
 import { EXPIRING_THRESHOLD_MS, useSessionStore } from "@/stores/SessionStore";
-import { ApiError } from "./jsonFetch";
 
-/**
- * Horloge de session et reconnexion par popup, hors React : le store `SessionStore` porte l’état,
- * ce module le fait avancer et le remet à jour après un passage par Keycloak.
- */
+/** horloge de session et reconnexion par popup, hors React ; l’état lui-même vit dans `SessionStore` */
 
 export const LOGIN_POPUP_NAME = "cartesgouvfr-login";
 export const LOGIN_POPUP_FEATURES = "popup,width=500,height=650";
@@ -48,8 +44,7 @@ function tick(): void {
     scheduleTick();
 }
 
-// les onglets en arrière-plan bridant les minuteries, l’horloge est revérifiée au retour sur la page ;
-// expirée, la session est revérifiée côté serveur : c’est ainsi qu’un autre onglet apprend une reconnexion
+// retour sur la page : horloge revérifiée (minuteries bridées en arrière-plan) et, si expirée, session relue (reconnexion faite dans un autre onglet)
 function revalidate(): void {
     if (document.visibilityState !== "visible") return;
     tick();
@@ -87,6 +82,12 @@ export function reconnect(): void {
         return;
     }
 
+    // une interrogation encore en cours (popup fermée il y a moins de 500 ms) n’en chevauche pas une nouvelle
+    if (popupPoll !== null) {
+        clearInterval(popupPoll);
+        popupPoll = null;
+    }
+
     popup = window.open(SymfonyRouting.generate("cartesgouvfr_security_login", { popup: 1 }), LOGIN_POPUP_NAME, LOGIN_POPUP_FEATURES);
     if (popup === null) {
         // popup bloquée : connexion dans l’onglet, retour sur la page par le referer
@@ -95,13 +96,14 @@ export function reconnect(): void {
     }
 
     // pas de postMessage : la page de retour se ferme seule, la fermeture est le signal
-    popupPoll = setInterval(() => {
+    const poll = setInterval(() => {
         if (popup !== null && !popup.closed) return;
-        if (popupPoll !== null) clearInterval(popupPoll);
-        popupPoll = null;
+        clearInterval(poll);
+        if (popupPoll === poll) popupPoll = null;
         popup = null;
         void checkSession();
     }, POPUP_POLL_MS);
+    popupPoll = poll;
 }
 
 /** relit /api/users/me ; une demande reçue pendant un appel en vol relance un appel à sa fin */
@@ -124,11 +126,8 @@ async function runCheck(): Promise<void> {
     let user: CartesUser | null;
     try {
         user = await api.user.getMe();
-    } catch (error) {
-        if ((error as Partial<ApiError> | null)?.status === 401) {
-            useSessionStore.getState().markExpired();
-        }
-        // erreur réseau ou amont : l’état ne change pas, le bouton reste cliquable
+    } catch {
+        // 401 : déjà signalé au store par apiFetch ; erreur réseau ou amont : état inchangé, le bouton reste cliquable
         return;
     }
     if (user === null) return;
@@ -138,3 +137,6 @@ async function runCheck(): Promise<void> {
     applyUser(user);
     void queryClient.invalidateQueries();
 }
+
+// rechargement à chaud : l’ancienne instance du module relâche ses écouteurs et minuteries
+import.meta.hot?.dispose(stopSessionClock);
