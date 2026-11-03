@@ -16,7 +16,7 @@ final class ApiErrorResponseTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->xmlHttpRequest('POST', self::BASE.'/datastore_create_request', content: '{}');
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore_create_request', content: '{}');
 
         self::assertResponseStatusCodeSame(401);
         self::assertResponseHeaderSame('content-type', 'application/problem+json');

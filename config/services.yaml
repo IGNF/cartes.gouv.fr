@@ -7,8 +7,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    # chemins des routes d'API : erreurs rendues en application/problem+json ; les 4 routes de contact à la racine en sortent quand elles passent sous /api/contact
-    app.api_path_pattern: "#^/(api|contact_us|join_community|accesses_request|datastore_create_request|datastore_deletion_request)(/|$)#"
+    # frontière API (regex sans délimiteurs, partagée avec security.yaml) : /contact_us reste à la racine, appelé par le site de documentation
+    app.api_path_pattern: "^/(api|contact_us)(/|$)"
 
 services:
     # default configuration for services in *this* file

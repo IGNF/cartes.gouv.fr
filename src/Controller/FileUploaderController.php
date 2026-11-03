@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
-    '/_file_uploader',
+    '/api/file_uploader',
     name: 'cartesgouvfr_file_uploader_',
     condition: 'request.isXmlHttpRequest()',
     options: ['expose' => true],
