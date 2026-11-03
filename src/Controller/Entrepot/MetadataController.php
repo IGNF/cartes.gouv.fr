@@ -18,9 +18,7 @@ use Symfony\Component\Routing\Requirement\Requirement;
 #[Route(
     '/api/datastores/{datastoreId}/metadata',
     name: 'cartesgouvfr_api_metadata_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[entrepot] metadata')]
 class MetadataController extends AbstractController implements ApiControllerInterface
 {

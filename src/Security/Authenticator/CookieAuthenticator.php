@@ -75,7 +75,7 @@ final class CookieAuthenticator extends AbstractAuthenticator
         $this->tokenManager->clearAccessToken();
 
         // route d'API : laisser le pare-feu continuer sans jeton, le contrôle d'accès appelle le point d'entrée qui produit le 401
-        if (1 === preg_match('{'.$this->apiPathPattern.'}', $request->getPathInfo())) {
+        if (1 === preg_match('{'.$this->apiPathPattern.'}', rawurldecode($request->getPathInfo()))) {
             return null;
         }
 

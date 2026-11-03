@@ -19,9 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/users',
     name: 'cartesgouvfr_api_user_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] user')]
 class UserController extends AbstractController implements ApiControllerInterface
 {

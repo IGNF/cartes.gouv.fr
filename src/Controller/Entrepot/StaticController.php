@@ -16,9 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/datastores/{datastoreId}/statics',
     name: 'cartesgouvfr_api_statics_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[entrepot] statics')]
 class StaticController extends AbstractController implements ApiControllerInterface
 {

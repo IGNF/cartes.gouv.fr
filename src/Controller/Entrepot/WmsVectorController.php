@@ -27,9 +27,7 @@ use Symfony\Component\Uid\Uuid;
 #[Route(
     '/api/datastores/{datastoreId}/stored_data/{storedDataId}/wmsvector',
     name: 'cartesgouvfr_api_wmsvector_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] WMS-VECTOR', description: 'Création/modification des services WMS-VECTOR')]
 class WmsVectorController extends ServiceController implements ApiControllerInterface
 {

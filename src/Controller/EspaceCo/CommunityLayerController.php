@@ -16,9 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/espaceco/community/{communityId}/layer',
     name: 'cartesgouvfr_api_espaceco_community_layer_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] community-layers', description: 'Couches cartographiques associées à une communauté')]
 class CommunityLayerController extends AbstractController implements ApiControllerInterface
 {

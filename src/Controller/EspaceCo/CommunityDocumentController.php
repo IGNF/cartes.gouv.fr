@@ -17,9 +17,7 @@ use Symfony\Component\Uid\Uuid;
 #[Route(
     '/api/espaceco/community/{communityId}/document',
     name: 'cartesgouvfr_api_espaceco_community_document_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] community-documents', description: 'Documents liés à une communauté')]
 class CommunityDocumentController extends AbstractController implements ApiControllerInterface
 {

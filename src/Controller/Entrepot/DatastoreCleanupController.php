@@ -26,7 +26,7 @@ class DatastoreCleanupController extends AbstractController implements ApiContro
     ) {
     }
 
-    #[Route('/content', name: 'get_content', methods: ['GET'], condition: 'request.isXmlHttpRequest()')]
+    #[Route('/content', name: 'get_content', methods: ['GET'])]
     public function getContentToBeDeleted(string $datastoreId): JsonResponse
     {
         $counts = $this->datastoreCleanupWorkflow->count($datastoreId);

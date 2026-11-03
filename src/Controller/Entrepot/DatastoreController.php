@@ -18,9 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/datastores',
     name: 'cartesgouvfr_api_datastore_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[entrepot] datastores')]
 class DatastoreController extends AbstractController implements ApiControllerInterface
 {
@@ -68,8 +66,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     }
 
     #[Route('/{datastoreId}/add_permission', name: 'add_permission', methods: ['POST'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')]
+        options: ['expose' => true])]
     public function addPermission(string $datastoreId, #[MapRequestPayload] PermissionDTO $dto): JsonResponse
     {
         $body = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
@@ -87,8 +84,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     }
 
     #[Route('{datastoreId}/update_permission/{permissionId}', name: 'update_permission', methods: ['PATCH'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')]
+        options: ['expose' => true])]
     public function updatePermission(string $datastoreId, string $permissionId, #[MapRequestPayload] UpdatePermissionDTO $dto): JsonResponse
     {
         $body = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
@@ -98,8 +94,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     }
 
     #[Route('{datastoreId}/remove_permission/{permissionId}', name: 'remove_permission', methods: ['DELETE'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')]
+        options: ['expose' => true])]
     public function removePermission(string $datastoreId, string $permissionId): JsonResponse
     {
         $this->datastoreApiService->removePermission($datastoreId, $permissionId)->await();

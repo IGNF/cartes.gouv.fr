@@ -24,9 +24,7 @@ use Symfony\Component\Uid\Uuid;
 #[Route(
     '/api/datastores/{datastoreId}/annexe',
     name: 'cartesgouvfr_api_annexe_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[entrepot] annexes')]
 class AnnexeController extends AbstractController implements ApiControllerInterface
 {

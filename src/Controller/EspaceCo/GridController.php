@@ -13,9 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/espaceco/grids',
     name: 'cartesgouvfr_api_espaceco_grids_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] grids', description: 'Emprises (entités administratives et autres)')]
 class GridController extends AbstractController implements ApiControllerInterface
 {

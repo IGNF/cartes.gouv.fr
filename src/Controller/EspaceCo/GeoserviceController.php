@@ -13,9 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/espaceco/geoservice',
     name: 'cartesgouvfr_api_espaceco_geoservice_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] geoservice', description: 'Service de données géographiques')]
 class GeoserviceController extends AbstractController implements ApiControllerInterface
 {
