@@ -1,0 +1,14 @@
+{# page autonome, sans bundle React : son seul rôle est de fermer la popup de connexion #}
+<!DOCTYPE html>
+<html lang="{{ app.request.getLocale() }}">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex" />
+        <title>Connexion - cartes.gouv.fr</title>
+    </head>
+    <body>
+        <p>Connexion terminée, vous pouvez fermer cette fenêtre.</p>
+        <script>window.close();</script>
+    </body>
+</html>

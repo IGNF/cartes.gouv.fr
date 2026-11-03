@@ -44,6 +44,73 @@ final class AuthenticationFlowTest extends WebTestCase
         $state = self::getContainer()->get(LoginStateSerializer::class)->decode($query['state']);
         self::assertNotNull($state);
         self::assertSame(self::BASE.'/tableau-de-bord', $state['referer']);
+        self::assertFalse($state['popup']);
+    }
+
+    public function testLoginFromThePopupCarriesTheFlagInTheState(): void
+    {
+        $client = self::createClient();
+        $client->request('GET', self::BASE.'/login?popup=1');
+
+        self::assertResponseRedirects();
+        parse_str((string) parse_url((string) $client->getResponse()->headers->get('Location'), PHP_URL_QUERY), $query);
+        self::assertIsString($query['state']);
+        $state = self::getContainer()->get(LoginStateSerializer::class)->decode($query['state']);
+        self::assertNotNull($state);
+        self::assertTrue($state['popup']);
+    }
+
+    public function testPopupLoginSetsTheCookieAndRedirectsToTheCallback(): void
+    {
+        $client = self::createClient();
+        $this->loginCheck($client, ['referer' => null, 'popup' => true]);
+
+        self::assertResponseRedirects('/login/popup-callback');
+        $cookie = $client->getResponse()->headers->getCookies()[0] ?? null;
+        self::assertNotNull($cookie);
+        self::assertSame(AuthCookieResponseListener::COOKIE_NAME, $cookie->getName());
+        self::assertFalse($cookie->isCleared());
+    }
+
+    public function testFailedPopupLoginRedirectsToTheCallbackAndKeepsAnExistingCookie(): void
+    {
+        $client = self::createClient();
+        $this->setCookieWithToken($client, FakeKeycloakClient::createAccessToken(3600));
+        FakeKeycloakClient::failNextTokenExchange(new \UnexpectedValueException('invalid code'));
+        $this->loginCheck($client, ['referer' => null, 'popup' => true]);
+
+        self::assertResponseRedirects('/login/popup-callback');
+        // aucun jeton reçu : le cookie encore valable de l’onglet d’origine n’est pas effacé
+        self::assertSame([], $client->getResponse()->headers->getCookies());
+    }
+
+    public function testExpiredStateStillEndsInTheCallbackWhenTheLoginWasOpenedInThePopup(): void
+    {
+        $client = self::createClient();
+        $this->loginCheck($client, ['referer' => null, 'popup' => true], lifetime: -1);
+
+        self::assertResponseRedirects('/login/popup-callback');
+    }
+
+    public function testForgedStateIsRejectedAsAnOrdinaryLoginFailure(): void
+    {
+        $client = self::createClient();
+        $client->request('GET', self::BASE.'/login/check?code=fake-code&state=forged.signature');
+
+        self::assertResponseRedirects('/publier-une-donnee?authentication_failed=1');
+    }
+
+    public function testPopupCallbackPageOnlyClosesItself(): void
+    {
+        $client = self::createClient();
+        $client->request('GET', self::BASE.'/login/popup-callback');
+
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('Content-Type', 'text/html; charset=UTF-8');
+        self::assertStringContainsString('no-store', (string) $client->getResponse()->headers->get('Cache-Control'));
+        $html = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('window.close()', $html);
+        self::assertStringNotContainsString('<script src', $html);
     }
 
     public function testSuccessfulLoginSetsTheCookieAndAuthenticatesApiCalls(): void
@@ -145,9 +212,9 @@ final class AuthenticationFlowTest extends WebTestCase
     }
 
     /** @param array<string, mixed> $statePayload */
-    private function loginCheck(KernelBrowser $client, array $statePayload): void
+    private function loginCheck(KernelBrowser $client, array $statePayload, int $lifetime = 300): void
     {
-        $state = self::getContainer()->get(LoginStateSerializer::class)->encode($statePayload);
+        $state = self::getContainer()->get(LoginStateSerializer::class)->encode($statePayload, $lifetime);
         $client->request('GET', self::BASE.'/login/check?code=fake-code&state='.urlencode($state));
     }
 

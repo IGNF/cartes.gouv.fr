@@ -23,6 +23,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public const LOGIN_CHECK_ROUTE = 'cartesgouvfr_security_login_check';
     public const SUCCESS_ROUTE = 'cartesgouvfr_app';
     public const HOME_ROUTE = 'cartesgouvfr_app';
+    public const POPUP_CALLBACK_ROUTE = 'cartesgouvfr_security_login_popup_callback';
     private const REQUEST_ATTR_STATE = '_login_state';
     private const REQUEST_ATTR_TOKEN_RECEIVED = '_login_token_received';
 
@@ -60,12 +61,17 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public function authenticate(Request $request): Passport
     {
         $stateBlob = $request->query->getString('state');
-        $statePayload = $this->loginStateSerializer->decode($stateBlob);
+        $statePayload = $this->loginStateSerializer->verify($stateBlob);
         if (null === $statePayload) {
-            throw new AuthenticationException('Paramètre state OAuth2 invalide ou expiré.');
+            throw new AuthenticationException('Paramètre state OAuth2 invalide.');
         }
 
+        // le state est gardé avant le contrôle d’expiration : l’échec doit encore savoir s’il se joue dans la popup
         $request->attributes->set(self::REQUEST_ATTR_STATE, $statePayload);
+        if ($this->loginStateSerializer->isExpired($statePayload)) {
+            throw new AuthenticationException('Paramètre state OAuth2 expiré.');
+        }
+
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 
         try {
@@ -90,6 +96,9 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         $statePayload = $request->attributes->get(self::REQUEST_ATTR_STATE, []);
+        if ($this->isPopup($statePayload)) {
+            return new RedirectResponse($this->router->generate(self::POPUP_CALLBACK_ROUTE));
+        }
 
         $sessionExpired = $statePayload['session_expired'] ?? null;
         $referer = $statePayload['referer'] ?? null;
@@ -125,6 +134,16 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
             $this->tokenManager->clearAccessToken();
         }
 
+        if ($this->isPopup($request->attributes->get(self::REQUEST_ATTR_STATE, []))) {
+            return new RedirectResponse($this->router->generate(self::POPUP_CALLBACK_ROUTE));
+        }
+
         return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?authentication_failed=1');
+    }
+
+    /** @param array<string, mixed> $statePayload */
+    private function isPopup(array $statePayload): bool
+    {
+        return true === ($statePayload['popup'] ?? false);
     }
 }

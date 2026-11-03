@@ -13,11 +13,14 @@ final readonly class LoginStateSerializer
         $this->hmacKey = hash_hkdf('sha256', $appSecret, 32, 'cgfr.login-state.v1');
     }
 
-    /** @param array<string, mixed> $payload */
-    public function encode(array $payload): string
+    /**
+     * @param array<string, mixed> $payload
+     * @param int                  $lifetime durée de validité en secondes (les tests fabriquent des states déjà expirés)
+     */
+    public function encode(array $payload, int $lifetime = 300): string
     {
         $payload['nonce'] = bin2hex(random_bytes(16));
-        $payload['exp'] = time() + 300;
+        $payload['exp'] = time() + $lifetime;
 
         $json = json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
         $jsonB64 = $this->base64url($json);
@@ -27,9 +30,11 @@ final readonly class LoginStateSerializer
     }
 
     /**
-     * @return array<string, mixed>|null
+     * Charge signée par nous, expirée ou non : un state expiré reste digne de confiance pour choisir où rediriger l’échec.
+     *
+     * @return array<string, mixed>|null null si la signature ne correspond pas
      */
-    public function decode(string $blob): ?array
+    public function verify(string $blob): ?array
     {
         $parts = explode('.', $blob, 2);
         if (2 !== \count($parts)) {
@@ -54,11 +59,23 @@ final readonly class LoginStateSerializer
             return null;
         }
 
-        if (!isset($payload['exp']) || time() > $payload['exp']) {
-            return null;
-        }
+        return \is_array($payload) ? $payload : null;
+    }
 
-        return $payload;
+    /** @param array<string, mixed> $payload */
+    public function isExpired(array $payload): bool
+    {
+        return !isset($payload['exp']) || !\is_int($payload['exp']) || time() > $payload['exp'];
+    }
+
+    /**
+     * @return array<string, mixed>|null null si la signature ne correspond pas ou si le state a expiré
+     */
+    public function decode(string $blob): ?array
+    {
+        $payload = $this->verify($blob);
+
+        return null === $payload || $this->isExpired($payload) ? null : $payload;
     }
 
     private function base64url(string $data): string
