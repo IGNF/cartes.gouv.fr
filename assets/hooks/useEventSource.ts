@@ -150,6 +150,7 @@ const useEventSource = <TEvents extends EventSourceEventMap>(options: UseEventSo
             return;
         }
 
+        // oxlint-disable-next-line react/set-state-in-effect -- ouverture d’un EventSource, système externe
         connect();
 
         return () => {

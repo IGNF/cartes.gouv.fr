@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { UseQueryResult, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo } from "react";
 
 import { Upload } from "@/@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
@@ -50,6 +50,36 @@ const parseIntegrationProgress = (rawProgress: string | undefined): Record<strin
 
 type IntegrationStatus = "at_least_one_failure" | "proc_int_launched" | "all_successful";
 
+const getIntegrationStatus = (integrationProgress: Record<string, string> | null): IntegrationStatus | undefined => {
+    if (!integrationProgress) {
+        return undefined;
+    }
+
+    const stepStatuses = Object.values(integrationProgress);
+
+    if (stepStatuses.includes("failed")) {
+        // au moins une étape a échoué
+        return "at_least_one_failure";
+    }
+
+    if (integrationProgress["integration_processing"] === "in_progress") {
+        // le traitement d'intégration en bd a été lancé
+        return "proc_int_launched";
+    }
+
+    // Le backend garantit 3 étapes au total.
+    const allSuccessful = stepStatuses.length === 3 && stepStatuses.every((s) => s === "successful");
+    if (allSuccessful) {
+        // toutes les étapes sont terminées avec succès
+        return "all_successful";
+    }
+};
+
+const isIntegrationFinished = (rawProgress: string | undefined): boolean => {
+    const status = getIntegrationStatus(parseIntegrationProgress(rawProgress));
+    return status === "at_least_one_failure" || status === "all_successful";
+};
+
 type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
     datasheetName: string | undefined;
@@ -58,8 +88,6 @@ type DatasheetUploadIntegrationDialogProps = {
 
 const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId }) => {
     const { t } = useTranslation("DatasheetUploadIntegration");
-
-    const [shouldPingIntProg, setShouldPingIntProg] = useState<boolean>(true);
 
     const queryClient = useQueryClient();
 
@@ -72,9 +100,8 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
             pingIntProgQuery.data === undefined
                 ? api.upload.getIntegrationProgress(datastoreId, uploadId, { signal })
                 : api.upload.pingIntegrationProgress(datastoreId, uploadId, { signal }),
-        refetchInterval: shouldPingIntProg ? 3000 : false,
+        refetchInterval: (query) => (isIntegrationFinished(query.state.data?.integration_progress) ? false : 3000),
         refetchIntervalInBackground: true,
-        enabled: shouldPingIntProg,
         staleTime: 0,
         refetchOnMount: "always",
     });
@@ -94,55 +121,20 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
         [pingIntProgQuery?.data]
     );
 
-    const integrationStatus: IntegrationStatus | undefined = useMemo(() => {
-        if (!integrationProgress) {
-            return undefined;
-        }
-
-        const stepStatuses = Object.values(integrationProgress);
-
-        if (stepStatuses.includes("failed")) {
-            // au moins une étape a échoué
-            return "at_least_one_failure";
-        }
-
-        if (integrationProgress["integration_processing"] === "in_progress") {
-            // le traitement d'intégration en bd a été lancé
-            return "proc_int_launched";
-        }
-
-        // Le backend garantit 3 étapes au total.
-        const allSuccessful = stepStatuses.length === 3 && stepStatuses.every((s) => s === "successful");
-        if (allSuccessful) {
-            // toutes les étapes sont terminées avec succès
-            return "all_successful";
-        }
-    }, [integrationProgress]);
+    const integrationStatus = useMemo(() => getIntegrationStatus(integrationProgress), [integrationProgress]);
 
     useEffect(() => {
-        switch (integrationStatus) {
-            case "at_least_one_failure":
-                setShouldPingIntProg(false);
-                break;
-            case "proc_int_launched":
-                // ne rien faire
-                break;
-            case "all_successful":
-                setShouldPingIntProg(false);
-
-                if (upload?.tags?.datasheet_name) {
-                    void queryClient.invalidateQueries({
-                        queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
-                    });
-                    routes
-                        .datastore_datasheet_view({
-                            datastoreId,
-                            datasheetName: upload?.tags?.datasheet_name,
-                            activeTab: DatasheetViewActiveTabEnum.Dataset,
-                        })
-                        .push();
-                }
-                break;
+        if (integrationStatus === "all_successful" && upload?.tags?.datasheet_name) {
+            void queryClient.invalidateQueries({
+                queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
+            });
+            routes
+                .datastore_datasheet_view({
+                    datastoreId,
+                    datasheetName: upload?.tags?.datasheet_name,
+                    activeTab: DatasheetViewActiveTabEnum.Dataset,
+                })
+                .push();
         }
     }, [integrationStatus, datastoreId, upload?.tags?.datasheet_name, queryClient]);
 

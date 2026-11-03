@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Select from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { HitStatisticsDto } from "@/@types/stats";
 import DateRangePicker from "@/components/Input/DateRangePicker";
@@ -54,10 +54,13 @@ export default function Stats() {
     const [startDate, setStartDate] = useState<Date | undefined>(() => initDate(1));
     const [endDate, setEndDate] = useState<Date | undefined>(() => initDate());
 
-    useEffect(() => {
+    // nouveau périmètre : repartir du type d’entité par défaut, sans paramètres
+    const [prevScope, setPrevScope] = useState(scope);
+    if (scope !== prevScope) {
+        setPrevScope(scope);
         setEntityTypeKey(initEntityTypeKey(scope));
         setResolvedParams({});
-    }, [scope]);
+    }
 
     // périmètre entrepôt : détection "aucun entrepôt" et exclusion du bac à sable
     const isDatastoreScope = scope === "datastore";

@@ -43,16 +43,20 @@ const ENTITY_LABELS: Record<(typeof ENTITY_ORDER)[number], string> & Partial<Rec
     uploads: "Livraisons",
 };
 
+function progressFromContent(entitiesCount: DatastoreCleanupEntitiesCount): DatastoreCleanupProgress {
+    return Object.fromEntries(Object.entries(entitiesCount).map(([entityType, count]) => [entityType, { initialCount: count, currentCount: count }]));
+}
+
 export default function DeleteCommunity() {
     const { datastore } = useDatastore();
     const community = useCommunity();
     const queryClient = useQueryClient();
-    const isOpenModal = useIsModalOpen(deleteCommunityModal);
 
-    const [state, setState] = useState<DeleteCommunityState>("disclaimer");
+    const [storedState, setStoredState] = useState<DeleteCommunityState>("disclaimer");
     const [streamError, setStreamError] = useState<string | null>(null);
     const [deletionError, setDeletionError] = useState<string | null>(null);
-    const [cleanupProgress, setCleanupProgress] = useState<DatastoreCleanupProgress>({});
+    // progression reçue du flux ; avant le premier événement, elle découle du contenu chargé
+    const [streamProgress, setStreamProgress] = useState<DatastoreCleanupProgress>();
 
     const {
         data: cleanupContentData,
@@ -68,28 +72,38 @@ export default function DeleteCommunity() {
         refetchOnReconnect: false,
     });
 
-    function updateCleanupProgress(entitiesCount: DatastoreCleanupEntitiesCount, resetInitial = false): void {
-        setCleanupProgress((prev) => {
-            const next: DatastoreCleanupProgress = resetInitial ? {} : { ...prev };
+    const cleanupProgress: DatastoreCleanupProgress = streamProgress ?? progressFromContent(cleanupContentData?.entities ?? {});
+    const state: DeleteCommunityState = storedState === "loading" && (cleanupContentData?.entities || isCleanupContentError) ? "confirm" : storedState;
+
+    function updateCleanupProgress(entitiesCount: DatastoreCleanupEntitiesCount): void {
+        setStreamProgress((prev) => {
+            const base = prev ?? cleanupProgress;
+            const next: DatastoreCleanupProgress = { ...base };
             Object.entries(entitiesCount).forEach(([entityType, currentCount]) => {
-                const initialCount = resetInitial ? currentCount : (prev[entityType]?.initialCount ?? currentCount);
-                next[entityType] = { initialCount, currentCount };
+                next[entityType] = { initialCount: base[entityType]?.initialCount ?? currentCount, currentCount };
             });
             return next;
         });
     }
 
-    useEffect(() => {
-        if (!cleanupContentData?.entities) return;
-        updateCleanupProgress(cleanupContentData.entities, true);
-        setState((current) => (current === "loading" ? "confirm" : current));
-    }, [cleanupContentData]);
+    function resetDialog(): void {
+        setStoredState("disclaimer");
+        setStreamError(null);
+        setDeletionError(null);
+        setStreamProgress(undefined);
+    }
 
-    useEffect(() => {
-        if (isCleanupContentError) {
-            setState((current) => (current === "loading" ? "confirm" : current));
-        }
-    }, [isCleanupContentError]);
+    useIsModalOpen(deleteCommunityModal, {
+        onDisclose: () => {
+            resetDialog();
+            void refetchCleanupContent();
+        },
+        onConceal: () => {
+            disconnectStream();
+            resetDialog();
+            queryClient.removeQueries({ queryKey: RQKeys.datastore_cleanup_content(datastore._id), exact: true });
+        },
+    });
 
     const hasContent = Object.values(cleanupProgress).some((e) => e.currentCount > 0);
     const isActive = state === "connecting" || state === "cleanup_progress" || state === "deleting";
@@ -98,10 +112,10 @@ export default function DeleteCommunity() {
         mutationFn: (failedItems: FailedCleanupItem[]) =>
             api.contact.requestDatastoreDeletion({ datastoreId: datastore._id, communityId: community._id, failedItems }),
         onSuccess: () => {
-            setState("mail_sent");
+            setStoredState("mail_sent");
         },
         onError: (err) => {
-            setState("error");
+            setStoredState("error");
             setDeletionError(getApiErrorDescription(err) ?? "La suppression de l’entrepôt a échoué.");
         },
     });
@@ -111,30 +125,33 @@ export default function DeleteCommunity() {
         autoConnect: false,
         handlers: {
             started: (payload) => {
-                setState("cleanup_progress");
+                setStoredState("cleanup_progress");
                 updateCleanupProgress(payload.entities ?? {});
             },
             progress: (payload) => {
-                setState("cleanup_progress");
+                setStoredState("cleanup_progress");
                 updateCleanupProgress(payload.entities ?? {});
             },
             done: (payload) => {
                 updateCleanupProgress(payload.entities ?? {});
                 disconnectStream();
-                setState("deleting");
+                setStoredState("deleting");
                 deleteCommunityMutation.mutate(payload.failedItems ?? []);
             },
             failed: (payload) => {
                 updateCleanupProgress(payload.entities ?? {});
-                setState("error");
+                setStoredState("error");
                 setStreamError(payload.message ?? "La suppression du contenu a échoué.");
                 disconnectStream();
-                void refetchCleanupContent();
+                // le contenu rechargé remplace la progression du flux, si le rechargement réussit
+                void refetchCleanupContent().then((result) => {
+                    if (result.isSuccess) setStreamProgress(undefined);
+                });
             },
         },
         onError: (error) => {
             if (error.type === "connection") {
-                setState("error");
+                setStoredState("error");
                 setStreamError("La connexion de suppression a été interrompue.");
             }
         },
@@ -146,41 +163,24 @@ export default function DeleteCommunity() {
         setDeletionError(null);
 
         if (hasContent || isCleanupContentError) {
-            setState("connecting");
+            setStoredState("connecting");
             disconnectStream();
             connectStream();
         } else {
-            setState("deleting");
+            setStoredState("deleting");
             deleteCommunityMutation.mutate([]);
         }
     }
 
     useEffect(() => {
-        if (!isOpenModal) {
-            disconnectStream();
-            setState("disclaimer");
-            setStreamError(null);
-            setDeletionError(null);
-            setCleanupProgress({});
-            queryClient.removeQueries({ queryKey: RQKeys.datastore_cleanup_content(datastore._id), exact: true });
-            return;
-        }
-
-        setState("disclaimer");
-        setStreamError(null);
-        setDeletionError(null);
-        setCleanupProgress({});
-        void refetchCleanupContent();
-    }, [datastore._id, disconnectStream, isOpenModal, queryClient, refetchCleanupContent]);
-
-    useEffect(() => {
         return () => {
             disconnectStream();
+            queryClient.removeQueries({ queryKey: RQKeys.datastore_cleanup_content(datastore._id), exact: true });
         };
-    }, [disconnectStream]);
+    }, [datastore._id, disconnectStream, queryClient]);
 
     function proceedFromDisclaimer(): void {
-        setState(isCleanupContentLoading ? "loading" : "confirm");
+        setStoredState(isCleanupContentLoading ? "loading" : "confirm");
     }
 
     const confirmButtonLabel = hasContent ? "Vider et supprimer" : "Supprimer l’entrepôt";

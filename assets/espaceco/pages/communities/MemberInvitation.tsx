@@ -5,7 +5,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 
 import Main from "@/components/Layout/Main";
 import { CommunityMember, Role } from "../../../@types/app_espaceco";
@@ -39,22 +39,12 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
     const apiEspaceCoUrl = useApiEspaceCoStore((state) => state.api_espaceco_url);
     const espaceCoUrl = useMemo(() => (apiEspaceCoUrl ? apiEspaceCoUrl.replace("/gcms/api", "/login") : undefined), [apiEspaceCoUrl]);
 
-    const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>();
-
-    useEffect(() => {
-        if (isMeError) {
-            if (meError.status === 403 && meError.detail?.includes("CGU")) {
-                setErrorMessage({
-                    message: t("espaceco_accept_cgu", { url: espaceCoUrl }),
-                    type: "warning",
-                });
-            } else {
-                setErrorMessage({
-                    message: getApiErrorMessage(meError),
-                    type: "warning",
-                });
-            }
+    const errorMessage: ErrorMessage | undefined = useMemo(() => {
+        if (!isMeError) return undefined;
+        if (meError.status === 403 && meError.detail?.includes("CGU")) {
+            return { message: t("espaceco_accept_cgu", { url: espaceCoUrl }), type: "warning" };
         }
+        return { message: getApiErrorMessage(meError), type: "warning" };
     }, [espaceCoUrl, isMeError, meError, t]);
 
     const query = useQuery<CommunityResponseDTO, ApiError>({
