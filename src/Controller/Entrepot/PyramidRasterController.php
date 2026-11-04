@@ -234,7 +234,6 @@ class PyramidRasterController extends ServiceController implements ApiController
         $thumbnail = $request->files->get('thumbnail');
         $attributionLogo = $request->files->get('attribution_logo');
 
-        $legendStatic = null;
         try {
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
             $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
@@ -267,19 +266,19 @@ class PyramidRasterController extends ServiceController implements ApiController
                         'name' => sprintf('config_%s_style_%s', $configurationId, $configType),
                     ])->await();
                 },
+                // après la création de l’offre, le fichier de style reste : le flux l’utilise
+                function () use ($datastoreId, $legendStatic): void {
+                    try {
+                        $this->staticApiService->delete($datastoreId, $legendStatic['_id'])->await();
+                    } catch (\Throwable) {
+                        // le nettoyage ne doit pas masquer l’erreur d’origine
+                    }
+                },
             );
 
             return $this->json($offering, Response::HTTP_CREATED);
-        } catch (\Throwable $th) {
-            // pas de fichier de style orphelin
-            if (null !== $legendStatic) {
-                $this->staticApiService->delete($datastoreId, $legendStatic['_id'])->await();
-            }
-
-            if ($th instanceof ApiException || $th instanceof AppException) {
-                throw new CartesApiException($th->getMessage(), $th->getStatusCode(), $th->getDetails(), $th);
-            }
-            throw $th;
+        } catch (ApiException|AppException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
 
