@@ -8,6 +8,7 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
+use App\Dto\Services\Form\ServiceFormDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
@@ -18,13 +19,16 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StaticApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
+use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
 use App\Utils;
 use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -61,6 +65,7 @@ class PyramidRasterController extends ServiceController implements ApiController
         private Filesystem $fs,
         ParameterBagInterface $params,
         HttpClientInterface $httpClient,
+        private MultipartPayloadMapper $payloadMapper,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
 
@@ -210,6 +215,71 @@ class PyramidRasterController extends ServiceController implements ApiController
             return $this->json($offering);
         } catch (ApiException|AppException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{pyramidId}/wms-raster-wmts/publish', name: 'wms_raster_wmts_publish', methods: ['POST'])]
+    public function publishWmsRasterWmts(
+        string $datastoreId,
+        string $pyramidId,
+        #[MapQueryParameter] string $type,
+        Request $request,
+    ): JsonResponse {
+        $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
+        if (!in_array($type, $acceptedTypes, true)) {
+            throw new CartesApiException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, join(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
+        }
+
+        $dto = $this->payloadMapper->map($request, ServiceFormDTO::class);
+        $thumbnail = $request->files->get('thumbnail');
+        $attributionLogo = $request->files->get('attribution_logo');
+
+        $legendStatic = null;
+        try {
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
+            $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
+            $configType = ConfigurationTypes::WMSRASTER === $type ? 'wmsr' : 'wmts';
+            $legendStatic = $this->saveLegendInStatic($datastoreId, $pyramid, $configType, $levels);
+
+            $typeInfos = [
+                'title' => $dto->title,
+                'abstract' => $dto->title,
+                'keywords' => $dto->themes,
+                'used_data' => [[
+                    'bottom_level' => $levels['bottom_level'],
+                    'top_level' => $levels['top_level'],
+                    'stored_data' => $pyramidId,
+                ]],
+                'styles' => [$legendStatic['_id']],
+            ];
+
+            $offering = $this->cartesServiceApiService->publishFromForm(
+                $datastoreId,
+                $pyramidId,
+                $dto,
+                $type,
+                $typeInfos,
+                $thumbnail instanceof UploadedFile ? $thumbnail : null,
+                $attributionLogo instanceof UploadedFile ? $attributionLogo : null,
+                // renommage avant toute étape qui peut échouer après la création de l’offre
+                function (string $configurationId) use ($datastoreId, $legendStatic, $configType): void {
+                    $this->staticApiService->modifyInfo($datastoreId, $legendStatic['_id'], [
+                        'name' => sprintf('config_%s_style_%s', $configurationId, $configType),
+                    ])->await();
+                },
+            );
+
+            return $this->json($offering, Response::HTTP_CREATED);
+        } catch (\Throwable $th) {
+            // pas de fichier de style orphelin
+            if (null !== $legendStatic) {
+                $this->staticApiService->delete($datastoreId, $legendStatic['_id'])->await();
+            }
+
+            if ($th instanceof ApiException || $th instanceof AppException) {
+                throw new CartesApiException($th->getMessage(), $th->getStatusCode(), $th->getDetails(), $th);
+            }
+            throw $th;
         }
     }
 
