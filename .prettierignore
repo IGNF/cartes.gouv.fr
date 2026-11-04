@@ -2,3 +2,5 @@
 /assets/modules/symfony-routes.json
 **/*.xml
 /**.twig
+/.agents
+/mate/AGENT_INSTRUCTIONS.md

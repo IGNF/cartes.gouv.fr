@@ -9,6 +9,7 @@
 - [Optimisation des images (génération des variantes WebP)](images.md)
 - [Explication des workflows](workflows.md)
 - [Utilisation de l'API Entrepôt](./entrepot/README.md)
+- [Symfony AI Mate](https://symfony.com/doc/current/ai/components/mate.html) : profileur, journaux et conteneur de services en ligne de commande (`vendor/bin/mate`). Depuis l’hôte, passer par le conteneur : `docker exec cartesgouvfr-app_dev-1 vendor/bin/mate tools:list`.
 
 ## Implémentations et features spécifiques à ce projet
 
