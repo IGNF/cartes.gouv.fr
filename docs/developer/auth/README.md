@@ -63,9 +63,8 @@ Navigateur              Symfony
     |-- GET /xyz -----------+
     |   Cookie: __Host-CGAUTH=...
     |                      |
-    |                      | ApiFetchMetadataGuard (routes d'API seulement)
-    |                      |   → 403 si Sec-Fetch-Site cross-site/same-site ou Sec-Fetch-Mode navigate
-    |                      |   → sans Fetch Metadata : X-Requested-With exigé
+    |                      | ApiGuard (routes d'API seulement)
+    |                      |   → 403 sans X-Requested-With: XMLHttpRequest
     |                      |
     |                      | CookieAuthenticator::supports() → true (cookie présent)
     |                      | CookieAuthenticator::authenticate()
@@ -82,14 +81,14 @@ Navigateur              Symfony
 
 ### Frontière API
 
-Une route est une route d'API si son chemin correspond au paramètre `app.api_path_pattern` (`config/services.yaml`) : `/api/*` et `/contact_us`. Ce motif est la seule règle ; il alimente le firewall `api`, le contrôle d'accès, la garde Fetch Metadata et le rendu des erreurs en `application/problem+json`.
+Une route est une route d'API si son chemin correspond au paramètre `app.api_path_pattern` (`config/services.yaml`) : `/api/*` et `/contact_us`. Ce motif est la seule règle ; il alimente le firewall `api`, le contrôle d'accès, la garde et le rendu des erreurs en `application/problem+json`.
 
 Deux firewalls (`config/packages/security.yaml`) :
 
 - **`api`** (motif) : `CookieAuthenticator` seul, `ROLE_USER` exigé par `access_control` (sauf `/contact_us`, appelé sans cookie par le formulaire du site de documentation, et `/api/doc` en dev). Sans cookie valide, le point d'entrée [`ApiAuthenticationEntryPoint`](../../../src/Security/ApiAuthenticationEntryPoint.php) produit l'unique 401 : `type` `/errors/anonymous`, `detail` « Connexion requise ». Un cookie expiré est effacé sur cette réponse. Jamais de redirection.
 - **`main`** (le reste : pages, `/login`, `/logout`, `/files`, `/rss`) : `CookieAuthenticator` + `KeycloakAuthenticator`. Cookie expiré sur une page → redirect `GET /login?session_expired=1` + effacement du cookie.
 
-[`ApiFetchMetadataGuard`](../../../src/Listener/ApiFetchMetadataGuard.php) (`kernel.request`, avant le firewall) refuse en 403 les appels d'API venus d'un autre site (`Sec-Fetch-Site` `cross-site` ou `same-site`) et les navigations (`Sec-Fetch-Mode` `navigate`) ; sans en-têtes Fetch Metadata, il exige `X-Requested-With: XMLHttpRequest`, envoyé par `jsonFetch`. Le cookie `SameSite=Lax` reste la première protection, la garde la seconde.
+[`ApiGuard`](../../../src/Listener/ApiGuard.php) (`kernel.request`, avant le firewall) refuse en 403 tout appel d'API sans `X-Requested-With: XMLHttpRequest`, envoyé par `jsonFetch`. Une navigation, une sous-ressource (`<img>`, `<script src>`) ou un formulaire d'un autre site ne porte jamais cet en-tête ; un autre site ne peut l'ajouter qu'en `fetch` avec CORS, que l'application n'autorise pas. Un GET d'API ouvert dans un onglet répond donc 403. Le cookie `SameSite=Lax` reste la première protection, la garde la seconde.
 
 ---
 
@@ -176,7 +175,7 @@ Le navigateur supprime le cookie en même temps que le token expire : le serveur
 | [`src/Security/Authenticator/CookieAuthenticator.php`](../../../src/Security/Authenticator/CookieAuthenticator.php) | Authenticator principal : lit et valide le cookie sur chaque requête        |
 | [`src/Security/KeycloakAuthenticator.php`](../../../src/Security/KeycloakAuthenticator.php)                         | Authenticator OAuth2 : gère le callback `/login/check` et le flux OIDC      |
 | [`src/Security/ApiAuthenticationEntryPoint.php`](../../../src/Security/ApiAuthenticationEntryPoint.php)             | Point d'entrée du firewall `api` : l'unique 401 des routes d'API            |
-| [`src/Listener/ApiFetchMetadataGuard.php`](../../../src/Listener/ApiFetchMetadataGuard.php)                         | Garde Fetch Metadata des routes d'API (403 autre site ou navigation)        |
+| [`src/Listener/ApiGuard.php`](../../../src/Listener/ApiGuard.php)                                                   | Garde des routes d'API (403 sans `X-Requested-With`)                        |
 | [`src/Security/Cookie/AuthCookieCipher.php`](../../../src/Security/Cookie/AuthCookieCipher.php)                     | Chiffrement/déchiffrement XSalsa20-Poly1305 + HKDF                          |
 | [`src/Security/Cookie/AuthCookieResponseListener.php`](../../../src/Security/Cookie/AuthCookieResponseListener.php) | Pose ou efface le cookie sur `kernel.response` selon l'intent               |
 | [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                           | Accès centralisé au token (lecture cookie, cache requête, intent set/clear) |
@@ -215,7 +214,7 @@ Le navigateur supprime le cookie en même temps que le token expire : le serveur
 
 **Aucune route `GET` à effet de bord** : une image (`<img>`) de même origine, par exemple dans une description en markdown, envoie le cookie, et `SameSite=Lax` le laisse passer sur les navigations. Toute écriture passe par `POST`, `PUT`, `PATCH` ou `DELETE`.
 
-**Garde Fetch Metadata** : un appel d'API doit venir de la même origine. Le site de documentation (`/aide`, même origine) passe ; une brique servie depuis un sous-domaine serait refusée (`same-site`) et devrait être autorisée explicitement. Un `EventSource` natif ne peut pas envoyer `X-Requested-With` : il ne passe que par `Sec-Fetch-Site: same-origin`, donc pas sur un navigateur sans Fetch Metadata.
+**Garde `X-Requested-With`** : tout appel d'API passe par `jsonFetch`/`apiFetch`, qui envoie l'en-tête. Un `EventSource` natif ne peut pas l'envoyer : lire un flux par `fetch` et `readServerEvents`. Une brique servie depuis un sous-domaine devrait passer par CORS, absent aujourd'hui.
 
 **`/contact_us` public** : seule route d'API appelable sans cookie, n'importe qui peut y déclencher l'envoi de courriels ; à restreindre.
 
