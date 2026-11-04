@@ -69,6 +69,8 @@ export default function ServiceDescriptionSection({
                             onBlur: field.onBlur,
                             onChange: (e) => {
                                 field.onChange(e.target.value);
+                                // les tables appartiennent au jeu précédent : une table homonyme ne doit pas hériter de sa saisie
+                                setValue("tables", []);
                                 prefillThemesFromStoredData(e.target.value);
                             },
                         }}
