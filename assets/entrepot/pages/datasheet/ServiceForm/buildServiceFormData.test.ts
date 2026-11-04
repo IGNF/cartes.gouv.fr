@@ -55,4 +55,18 @@ describe("buildServiceFormData", () => {
         expect(formData.get("attribution_logo")).toBeNull();
         expect(payloadOf(formData).tables).toBeUndefined();
     });
+
+    it("envoie en WMS les tables cochées et leur fichier de style sous le nom de la table", () => {
+        const style = new File(["<sld/>"], "routes.sld");
+        const formData = buildServiceFormData("wms", {
+            ...values,
+            tables: [
+                { ...values.tables[0], native_name: "mes routes.v2", style },
+                { ...values.tables[1], style: new File(["x"], "ignore.sld") },
+            ],
+        });
+        expect(payloadOf(formData).selected_tables).toEqual(["mes routes.v2"]);
+        expect(formData.get("style_files[mes routes.v2]")).toBe(style);
+        expect(formData.get("style_files[brouillon]")).toBeNull();
+    });
 });

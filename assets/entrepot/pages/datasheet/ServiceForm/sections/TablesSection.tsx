@@ -8,17 +8,19 @@ import { type StoredDataRelation } from "@/@types/app";
 import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import { filterGeometricRelations } from "@/helpers";
 import { getInspireKeywords } from "@/utils/metadata";
-import { type ServiceFormValues, type WfsTableFormValues } from "../serviceFormSchema";
+import { type ServiceFormValues, type ServiceTableFormValues } from "../serviceFormSchema";
 
 const inspireKeywords = getInspireKeywords();
 
-type WfsTablesSectionProps = {
+type TablesSectionProps = {
     /** tables de la base vecteur sélectionnée, undefined tant qu’elle n’est pas chargée */
     relations?: StoredDataRelation[];
     isLoading?: boolean;
+    /** titre, nom technique, résumé et mots-clés par table cochée (WFS) */
+    detailed?: boolean;
 };
 
-export default function WfsTablesSection({ relations, isLoading = false }: WfsTablesSectionProps) {
+export default function TablesSection({ relations, isLoading = false, detailed = false }: TablesSectionProps) {
     const {
         register,
         control,
@@ -32,7 +34,7 @@ export default function WfsTablesSection({ relations, isLoading = false }: WfsTa
     // une ligne de formulaire par table géométrique de la base choisie ; les saisies déjà faites sont conservées
     useEffect(() => {
         const previous = new Map(getValues("tables").map((table) => [table.native_name, table]));
-        const tables: WfsTableFormValues[] = geometricRelations.map(
+        const tables: ServiceTableFormValues[] = geometricRelations.map(
             (relation) =>
                 previous.get(relation.name) ?? {
                     native_name: relation.name,
@@ -71,7 +73,7 @@ export default function WfsTablesSection({ relations, isLoading = false }: WfsTa
             />
 
             {tables.map((table, index) =>
-                table.selected ? (
+                detailed && table.selected ? (
                     <fieldset key={table.native_name} className={fr.cx("fr-fieldset", "fr-mb-4w")}>
                         <legend className={fr.cx("fr-fieldset__legend", "fr-text--bold")}>{table.native_name}</legend>
                         <div className={fr.cx("fr-fieldset__element")}>

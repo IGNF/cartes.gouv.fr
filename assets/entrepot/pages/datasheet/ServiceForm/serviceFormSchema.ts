@@ -8,13 +8,15 @@ export type ServiceType = (typeof SERVICE_TYPES)[number];
 export const SERVICE_ACCESSES = ["public", "restricted_visible", "restricted"] as const;
 export type ServiceAccess = (typeof SERVICE_ACCESSES)[number];
 
-export type WfsTableFormValues = {
+/** titre, nom technique, résumé et mots-clés : WFS seulement ; style : WMS-V seulement */
+export type ServiceTableFormValues = {
     native_name: string;
     selected: boolean;
     title: string;
     public_name: string;
     description: string;
     keywords: string[];
+    style?: File;
 };
 
 export type ServiceFormValues = {
@@ -24,8 +26,8 @@ export type ServiceFormValues = {
     /** undefined : inchangée, null : supprimée, File : nouvelle image */
     thumbnail?: File | null;
     themes: string[];
-    /** une entrée par table de la base vecteur, cochée ou non (WFS) */
-    tables: WfsTableFormValues[];
+    /** une entrée par table de la base vecteur, cochée ou non (WFS, WMS-V) */
+    tables: ServiceTableFormValues[];
     access: ServiceAccess;
     attribution_enabled: boolean;
     attribution_title: string;
@@ -55,15 +57,17 @@ export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;
 const isImageFile = (value: unknown) => value === undefined || value === null || value instanceof File;
 
 type BuildServiceFormSchemaParams = {
-    /** type de flux choisi : décide des sections validées (tables pour WFS) */
+    /** type de flux choisi : décide des sections validées (tables pour WFS et WMS-V) */
     type: ServiceType;
+    /** donnée choisie = pyramide raster : un flux WMS devient WMS-R, sans tables ni styles */
+    isRasterPyramid?: boolean;
     /** noms de couches déjà pris pour ce type de flux */
     existingLayerNames: string[];
     /** préfixe imposé par l’entrepôt aux noms techniques, suivi d’un point */
     layerNamePrefix?: string;
 };
 
-export function buildServiceFormSchema({ type, existingLayerNames, layerNamePrefix }: BuildServiceFormSchemaParams) {
+export function buildServiceFormSchema({ type, isRasterPyramid = false, existingLayerNames, layerNamePrefix }: BuildServiceFormSchemaParams) {
     const requiredWhenSelected = (message: string) => (schema: yup.StringSchema) => schema.required(message);
 
     const wfsTableSchema = yup.object({
@@ -93,7 +97,31 @@ export function buildServiceFormSchema({ type, existingLayerNames, layerNamePref
         keywords: yup.array(yup.string().required()).default([]),
     });
 
-    const tablesSchema = yup.array(wfsTableSchema).default([]);
+    const wmsVectorTableSchema = yup.object({
+        native_name: yup.string().required(),
+        selected: yup.boolean().required(),
+        style: yup.mixed<File>().when("selected", {
+            is: true,
+            then: (schema) =>
+                schema.required("Le fichier de style de la table est obligatoire").test("is-valid-sld", async (file, ctx) => {
+                    if (!(file instanceof File)) {
+                        return true;
+                    }
+                    // chargé à la demande : le lecteur SLD est lourd
+                    const { default: SldStyleWmsVectorValidator } = await import("@/validations/sld/sldStyle");
+                    return new SldStyleWmsVectorValidator().validate(ctx.parent.native_name, await file.text(), ctx);
+                }),
+        }),
+    });
+
+    const hasSelectedTable = (tables?: { selected?: boolean }[]) => (tables ?? []).some((table) => table.selected);
+
+    const tablesSchema =
+        type === "wfs"
+            ? yup.array(wfsTableSchema).default([]).test("at-least-one", "Veuillez choisir au moins une table", hasSelectedTable)
+            : type === "wms" && !isRasterPyramid
+              ? yup.array(wmsVectorTableSchema).default([]).test("at-least-one", "Veuillez choisir au moins une table", hasSelectedTable)
+              : yup.array().default([]);
 
     return yup.object({
         stored_data_id: yup.string().required("Veuillez sélectionner un jeu de données vecteur"),
@@ -116,10 +144,7 @@ export function buildServiceFormSchema({ type, existingLayerNames, layerNamePref
             ),
         thumbnail: yup.mixed<File>().nullable().optional().test("is-file", "Fichier invalide", isImageFile),
         themes: yup.array(yup.string().required()).min(1, "Sélectionnez au moins une thématique").required(),
-        tables:
-            type === "wfs"
-                ? tablesSchema.test("at-least-one", "Veuillez choisir au moins une table", (tables) => (tables ?? []).some((table) => table.selected))
-                : tablesSchema,
+        tables: tablesSchema,
         access: yup
             .string()
             .oneOf([...SERVICE_ACCESSES])
