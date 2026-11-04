@@ -552,7 +552,9 @@ class CartesServiceApiService
      * Publie un flux depuis le nouveau formulaire : annexes images, configuration, offre, permissions, capabilities,
      * puis couches de la métadonnée de la fiche. La métadonnée doit exister : elle fournit les liens `metadata` de la configuration.
      *
-     * @param array<mixed> $typeInfos
+     * @param array<mixed>            $typeInfos
+     * @param ?\Closure(string): void $onConfigurationCreated appelé avec l’identifiant de la configuration juste après sa création ; un échec annule la configuration
+     * @param ?\Closure(): void       $onRollback             appelé quand la publication échoue avant la création de l’offre : aucune configuration ne subsiste ; ne doit pas lever d’exception
      *
      * @return array<mixed> offre créée, avec sa configuration
      */
@@ -564,28 +566,30 @@ class CartesServiceApiService
         array $typeInfos,
         ?UploadedFile $thumbnail = null,
         ?UploadedFile $attributionLogo = null,
+        ?\Closure $onConfigurationCreated = null,
+        ?\Closure $onRollback = null,
     ): array {
-        $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
-        $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME] ?? null;
-        if (!is_string($datasheetName)) {
-            throw new CartesApiException('La donnée n’est rattachée à aucune fiche de données', Response::HTTP_BAD_REQUEST);
-        }
-
-        $apiMetadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
-        if (null === $apiMetadata) {
-            throw new CartesApiException('Renseignez d’abord la description de la fiche de données', Response::HTTP_BAD_REQUEST);
-        }
-
-        $endpoint = $this->getEndpointByAccess($datastoreId, $type, $dto->access);
-
-        $configTags = [
-            CommonTags::DATASHEET_NAME => $datasheetName,
-            CommonTags::THEME_CATEGORIES => implode(', ', $dto->themes),
-        ];
-
         $thumbnailUrl = null;
         $logo = null;
         try {
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
+            $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME] ?? null;
+            if (!is_string($datasheetName)) {
+                throw new CartesApiException('La donnée n’est rattachée à aucune fiche de données', Response::HTTP_BAD_REQUEST);
+            }
+
+            $apiMetadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
+            if (null === $apiMetadata) {
+                throw new CartesApiException('Renseignez d’abord la description de la fiche de données', Response::HTTP_BAD_REQUEST);
+            }
+
+            $endpoint = $this->getEndpointByAccess($datastoreId, $type, $dto->access);
+
+            $configTags = [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+                CommonTags::THEME_CATEGORIES => implode(', ', $dto->themes),
+            ];
+
             // les dépôts d’images sont dans le try : un échec du second ne doit pas laisser le premier orphelin
             $thumbnailUrl = null !== $thumbnail ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
             $logo = null !== $attributionLogo && null !== $dto->attribution
@@ -602,6 +606,9 @@ class CartesServiceApiService
 
             $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody)->array();
             try {
+                if (null !== $onConfigurationCreated) {
+                    $onConfigurationCreated($configuration['_id']);
+                }
                 $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->array();
                 if (null !== $thumbnailUrl) {
                     // l’Entrepôt ignore `extra` à la création : écriture par modification partielle
@@ -614,6 +621,9 @@ class CartesServiceApiService
                 throw $th;
             }
         } catch (\Throwable $th) {
+            if (null !== $onRollback) {
+                $onRollback();
+            }
             // pas d’annexe orpheline
             foreach ([$thumbnailUrl, $logo['url'] ?? null] as $url) {
                 if (is_string($url)) {

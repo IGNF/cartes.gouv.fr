@@ -2,8 +2,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { useEffect, useMemo, useRef } from "react";
+import { FormProvider, type Resolver, useForm, useWatch } from "react-hook-form";
 
 import {
     ConfigurationTypeEnum,
@@ -27,19 +27,24 @@ import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
 import AccessSection from "./sections/AccessSection";
 import ServiceDescriptionSection from "./sections/ServiceDescriptionSection";
 import ServiceTypeSection from "./sections/ServiceTypeSection";
-import WfsTablesSection from "./sections/WfsTablesSection";
+import StylesSection from "./sections/StylesSection";
+import TablesSection from "./sections/TablesSection";
 import { buildServiceFormSchema, defaultServiceFormValues, type ServiceFormValues, type ServiceType } from "./serviceFormSchema";
 
 /** types dont le formulaire est livré ; les autres cartes restent désactivées (tranches suivantes de #1117) */
-export const IMPLEMENTED_SERVICE_TYPES: ServiceType[] = ["wfs"];
+export const IMPLEMENTED_SERVICE_TYPES: ServiceType[] = ["wfs", "wms"];
+
+/** un flux WMS publié depuis une pyramide raster est un WMS-R */
+export const isRasterPyramid = (datasheet: DatasheetDetailed | undefined, storedDataId: string): boolean =>
+    (datasheet?.pyramid_raster_list ?? []).some((item) => item._id === storedDataId);
 
 // type de configuration Entrepôt (et d’endpoint) correspondant au type de flux du formulaire
-const configurationTypeFor = (type: ServiceType): ConfigurationTypeEnum => {
+const configurationTypeFor = (type: ServiceType, isRaster: boolean): ConfigurationTypeEnum => {
     switch (type) {
         case "wfs":
             return ConfigurationTypeEnum.WFS;
         case "wms":
-            return ConfigurationTypeEnum.WMSVECTOR;
+            return isRaster ? ConfigurationTypeEnum.WMSRASTER : ConfigurationTypeEnum.WMSVECTOR;
         case "tms":
         case "wmts":
             return ConfigurationTypeEnum.WMTSTMS;
@@ -88,49 +93,67 @@ export default function ServiceForm({
     const { userRights, isSupervisor } = useCommunityRights();
     const canManageAnnexes = isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX) ?? false);
 
-    const existingLayerNamesQuery = useQuery<string[], CartesApiException>({
-        queryKey: RQKeys.datastore_layernames_list(datastoreId, configurationTypeFor(type)),
-        queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, configurationTypeFor(type), { signal }),
-        staleTime: 60000,
-    });
-
-    // React Hook Form relit ses options à chaque rendu : le schéma suit les noms de couches chargés après le montage
-    const schema = useMemo(
-        () =>
-            buildServiceFormSchema({
-                type,
-                existingLayerNames: existingLayerNamesQuery.data ?? [],
-                layerNamePrefix: datastore.configuration_layer_name_prefix,
-            }),
-        [type, existingLayerNamesQuery.data, datastore.configuration_layer_name_prefix]
-    );
+    // le schéma dépend de la donnée choisie (WMS-V ou WMS-R), connue seulement après la création du formulaire
+    const schemaRef = useRef<ReturnType<typeof buildServiceFormSchema> | null>(null);
+    const resolver: Resolver<ServiceFormValues> = (values, context, options) =>
+        // même contournement que MetadataForm : les types conditionnels yup/RHF sont incompatibles
+        (yupResolver(schemaRef.current!) as never as Resolver<ServiceFormValues>)(values, context, options);
 
     const form = useForm<ServiceFormValues>({
-        // même contournement que MetadataForm : les types conditionnels yup/RHF sont incompatibles
-        resolver: yupResolver(schema) as never,
+        resolver,
         mode: "onSubmit",
         reValidateMode: "onBlur",
         defaultValues: { ...defaultServiceFormValues, ...defaultValues },
     });
-    const { handleSubmit, setError, control } = form;
+    const { handleSubmit, setError, setValue, control } = form;
 
     const storedDataId = useWatch({ control, name: "stored_data_id" });
+    const isRaster = type === "wms" && isRasterPyramid(datasheet, storedDataId);
+    const isWmsVector = type === "wms" && !isRaster;
+    const configurationType = configurationTypeFor(type, isRaster);
+
+    const existingLayerNamesQuery = useQuery<string[], CartesApiException>({
+        queryKey: RQKeys.datastore_layernames_list(datastoreId, configurationType),
+        queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, configurationType, { signal }),
+        staleTime: 60000,
+    });
+
+    const schema = useMemo(
+        () =>
+            buildServiceFormSchema({
+                type,
+                isRasterPyramid: isRaster,
+                existingLayerNames: existingLayerNamesQuery.data ?? [],
+                layerNamePrefix: datastore.configuration_layer_name_prefix,
+            }),
+        [type, isRaster, existingLayerNamesQuery.data, datastore.configuration_layer_name_prefix]
+    );
+    useEffect(() => {
+        schemaRef.current = schema;
+    }, [schema]);
+
+    // une pyramide raster n’a pas de tables : rien de caché ne doit partir avec le formulaire
+    useEffect(() => {
+        if (isRaster) {
+            setValue("tables", []);
+        }
+    }, [isRaster, setValue]);
 
     const endpointsQuery = useQuery<DatastoreEndpoint[], CartesApiException>({
         queryKey: RQKeys.datastore_endpoints(datastoreId),
         queryFn: ({ signal }) => api.datastore.getEndpoints(datastoreId, {}, { signal }),
         staleTime: 3600000,
     });
-    const endpointType = configurationTypeFor(type) as string as EndpointTypeEnum;
+    const endpointType = configurationType as string as EndpointTypeEnum;
     const endpointsOfType = (endpointsQuery.data ?? []).filter((item) => item.endpoint.type.toUpperCase() === endpointType);
     const hasPublicEndpoint = endpointsOfType.some((item) => item.endpoint.open);
     const hasPrivateEndpoint = endpointsOfType.some((item) => !item.endpoint.open);
 
-    // tables de la base vecteur choisie (WFS)
+    // tables de la base vecteur choisie (WFS, WMS-V)
     const storedDataQuery = useQuery<VectorDb, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data(datastoreId, storedDataId),
         queryFn: ({ signal }) => api.storedData.get<VectorDb>(datastoreId, storedDataId, { signal }),
-        enabled: type === "wfs" && storedDataId !== "",
+        enabled: (type === "wfs" || isWmsVector) && storedDataId !== "",
         staleTime: 60000,
     });
 
@@ -157,9 +180,23 @@ export default function ServiceForm({
                             canManageAnnexes={canManageAnnexes}
                         />
                     </MetadataSection>
-                    {type === "wfs" && (
+                    {(type === "wfs" || isWmsVector) && (
                         <MetadataSection title="Tables">
-                            <WfsTablesSection relations={storedDataQuery.data?.type_infos?.relations} isLoading={storedDataQuery.isLoading} />
+                            <TablesSection
+                                relations={storedDataQuery.data?.type_infos?.relations}
+                                isLoading={storedDataQuery.isLoading}
+                                detailed={type === "wfs"}
+                            />
+                        </MetadataSection>
+                    )}
+                    {isWmsVector && (
+                        <MetadataSection title="Style du flux">
+                            <StylesSection />
+                        </MetadataSection>
+                    )}
+                    {isRaster && (
+                        <MetadataSection title="Style du flux">
+                            <p className={fr.cx("fr-text--sm", "fr-mb-0")}>Le style du flux dépend des données raster sources.</p>
                         </MetadataSection>
                     )}
                     <MetadataSection title="Droits et accès">

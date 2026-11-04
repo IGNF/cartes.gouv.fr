@@ -3,7 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
-import { type DatasheetDetailed, type Metadata, type Service } from "@/@types/app";
+import { ConfigurationTypeEnum, type DatasheetDetailed, type Metadata, type Service } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
@@ -15,7 +15,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import { routes } from "@/router/router";
 import { buildServiceFormData } from "../ServiceForm/buildServiceFormData";
-import ServiceForm, { IMPLEMENTED_SERVICE_TYPES } from "../ServiceForm/ServiceForm";
+import ServiceForm, { IMPLEMENTED_SERVICE_TYPES, isRasterPyramid } from "../ServiceForm/ServiceForm";
 import { isServiceType, type ServiceFormValues, type ServiceType } from "../ServiceForm/serviceFormSchema";
 
 type ServiceCreateProps = {
@@ -51,10 +51,17 @@ export default function ServiceCreate({ datastoreId, datasheetName, type, stored
 
     const publishMutation = useMutation<Service, CartesApiException, ServiceFormValues>({
         mutationFn: (values) => {
-            if (serviceType !== "wfs") {
-                return Promise.reject(new Error(`La publication d’un flux ${serviceType.toUpperCase()} n’est pas encore disponible`));
+            const formData = buildServiceFormData(serviceType, values);
+            switch (serviceType) {
+                case "wfs":
+                    return api.wfs.publish(datastoreId, values.stored_data_id, formData);
+                case "wms":
+                    return isRasterPyramid(datasheetQuery.data, values.stored_data_id)
+                        ? api.pyramidRaster.publishFromForm(datastoreId, values.stored_data_id, ConfigurationTypeEnum.WMSRASTER, formData)
+                        : api.wmsVector.publish(datastoreId, values.stored_data_id, formData);
+                default:
+                    return Promise.reject(new Error(`La publication d’un flux ${serviceType.toUpperCase()} n’est pas encore disponible`));
             }
-            return api.wfs.publish(datastoreId, values.stored_data_id, buildServiceFormData(serviceType, values));
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });

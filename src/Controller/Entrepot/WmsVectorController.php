@@ -5,6 +5,7 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\Form\WmsVectorFormDTO;
 use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
@@ -14,12 +15,14 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\StaticApiService;
+use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
@@ -42,6 +45,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         protected Filesystem $filesystem,
         CartesMetadataApiService $cartesMetadataApiService,
         SandboxService $sandboxService,
+        private MultipartPayloadMapper $payloadMapper,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
@@ -76,6 +80,85 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             }
 
             return $this->json($offering);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/publish', name: 'publish', methods: ['POST'])]
+    public function publish(string $datastoreId, string $storedDataId, Request $request): JsonResponse
+    {
+        $dto = $this->payloadMapper->map($request, WmsVectorFormDTO::class);
+        $thumbnail = $request->files->get('thumbnail');
+        $attributionLogo = $request->files->get('attribution_logo');
+
+        // `style_files[<table>]` : PHP garde tels quels les espaces et points d’un nom de table placé entre crochets
+        $styleFiles = $request->files->all('style_files');
+        foreach ($dto->selected_tables as $tableName) {
+            if (!($styleFiles[$tableName] ?? null) instanceof UploadedFile) {
+                throw new CartesApiException(sprintf('Le fichier de style de la table %s est manquant', $tableName), Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+        /** @var array<string,string> nom de table => identifiant du fichier statique */
+        $styleFilesByTable = [];
+        $removeStyleFiles = function () use ($datastoreId, &$styleFilesByTable): void {
+            foreach ($styleFilesByTable as $staticFileId) {
+                try {
+                    $this->staticApiService->delete($datastoreId, $staticFileId)->await();
+                } catch (\Throwable) {
+                    // le nettoyage ne doit pas masquer l’erreur d’origine
+                }
+            }
+        };
+
+        try {
+            // nom temporaire : l’identifiant de la configuration n’existe pas encore
+            $tmpConfigUuid = Uuid::v4();
+            foreach ($dto->selected_tables as $tableName) {
+                /** @var UploadedFile $file */
+                $file = $styleFiles[$tableName];
+                $tmpFileDir = $this->getParameter('style_files_path').'/'.Uuid::v4();
+                $file->move($tmpFileDir, $file->getClientOriginalName());
+
+                $staticFile = $this->staticApiService->add(
+                    $datastoreId,
+                    $tmpFileDir.'/'.$file->getClientOriginalName(),
+                    sprintf('config_tmp_%s_style_wmsv_%s', $tmpConfigUuid, $tableName),
+                    StaticFileTypes::GEOSERVER_STYLE,
+                );
+                $styleFilesByTable[$tableName] = $staticFile['_id'];
+            }
+        } catch (\Throwable $th) {
+            $removeStyleFiles();
+            if ($th instanceof ApiException) {
+                throw new CartesApiException($th->getMessage(), $th->getStatusCode(), $th->getDetails(), $th);
+            }
+            throw $th;
+        }
+
+        try {
+            $offering = $this->cartesServiceApiService->publishFromForm(
+                $datastoreId,
+                $storedDataId,
+                $dto,
+                ConfigurationTypes::WMSVECTOR,
+                $this->getFormConfigTypeInfos($dto, $styleFilesByTable, $storedDataId),
+                $thumbnail instanceof UploadedFile ? $thumbnail : null,
+                $attributionLogo instanceof UploadedFile ? $attributionLogo : null,
+                // renommage avant toute étape qui peut échouer après la création de l’offre
+                function (string $configurationId) use ($datastoreId, $styleFilesByTable): void {
+                    foreach ($styleFilesByTable as $tableName => $staticFileId) {
+                        $this->staticApiService->modifyInfo($datastoreId, $staticFileId, [
+                            'name' => sprintf('config_%s_style_wmsv_%s', $configurationId, $tableName),
+                        ])->await();
+                    }
+                },
+                // après la création de l’offre, les fichiers de style restent : le flux les utilise
+                $removeStyleFiles,
+            );
+
+            return $this->json($offering, Response::HTTP_CREATED);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -145,6 +228,32 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                     'stored_data' => $storedDataId,
                 ],
             ],
+        ];
+    }
+
+    /**
+     * @param array<string,string> $styleFilesByTable
+     *
+     * @return array<mixed>
+     */
+    private function getFormConfigTypeInfos(WmsVectorFormDTO $dto, array $styleFilesByTable, string $storedDataId): array
+    {
+        $relations = [];
+        foreach ($dto->selected_tables as $tableName) {
+            $relations[] = [
+                'name' => $tableName,
+                'style' => $styleFilesByTable[$tableName],
+            ];
+        }
+
+        return [
+            'title' => $dto->title,
+            'abstract' => $dto->title,
+            'keywords' => $dto->themes,
+            'used_data' => [[
+                'relations' => $relations,
+                'stored_data' => $storedDataId,
+            ]],
         ];
     }
 
