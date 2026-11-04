@@ -97,7 +97,14 @@ function GroupDatastore(props: IGroupDatastoreProps) {
                 };
             case "datastore_service_add_next":
                 return {
-                    render: <ServiceCreate datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />,
+                    render: (
+                        <ServiceCreate
+                            datastoreId={route.params.datastoreId}
+                            datasheetName={route.params.datasheetName}
+                            type={route.params.type}
+                            storedDataId={route.params.storedDataId}
+                        />
+                    ),
                 };
             case "datastore_stored_data_details":
                 return {
