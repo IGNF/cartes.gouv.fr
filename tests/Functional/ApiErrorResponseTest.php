@@ -2,6 +2,8 @@
 
 namespace App\Tests\Functional;
 
+use App\Exception\ApiErrorType;
+use App\Security\ApiAuthenticationEntryPoint;
 use App\Tests\Support\KeycloakLoginTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -16,16 +18,30 @@ final class ApiErrorResponseTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->xmlHttpRequest('POST', self::BASE.'/datastore_create_request', content: '{}');
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore_create_request', content: '{}');
 
         self::assertResponseStatusCodeSame(401);
         self::assertResponseHeaderSame('content-type', 'application/problem+json');
         $json = $this->jsonResponse($client);
         self::assertSame(401, $json['status']);
         self::assertSame('Unauthorized', $json['title']);
-        self::assertSame('Demande réservée aux utilisateurs connectés', $json['detail']);
+        self::assertSame(ApiAuthenticationEntryPoint::DETAIL, $json['detail']);
         self::assertSame([], $json['details']);
-        self::assertArrayNotHasKey('type', $json);
+        self::assertSame(ApiErrorType::ANONYMOUS, $json['type']);
+    }
+
+    public function testUnauthorizedHidesClassAndTraceOutsideDebug(): void
+    {
+        $client = self::createClient(['debug' => false]);
+
+        $client->xmlHttpRequest('GET', self::BASE.'/api/users/me');
+
+        self::assertResponseStatusCodeSame(401);
+        self::assertResponseHeaderSame('content-type', 'application/problem+json');
+        self::assertSame(
+            ['title' => 'Unauthorized', 'status' => 401, 'detail' => ApiAuthenticationEntryPoint::DETAIL, 'details' => [], 'type' => ApiErrorType::ANONYMOUS],
+            $this->jsonResponse($client)
+        );
     }
 
     public function testValidationErrorListsViolations(): void

@@ -24,9 +24,7 @@ use Symfony\Component\Routing\Requirement\Requirement;
 #[Route(
     '/api/datastores/{datastoreId}/offerings',
     name: 'cartesgouvfr_api_service_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] services', description: 'Actions génériques sur les services')]
 class ServiceController extends AbstractController implements ApiControllerInterface
 {

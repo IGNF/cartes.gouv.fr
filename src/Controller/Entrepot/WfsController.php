@@ -20,9 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/datastores/{datastoreId}/stored_data/{storedDataId}/wfs',
     name: 'cartesgouvfr_api_wfs_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] WFS', description: 'Création/modification des services WFS')]
 class WfsController extends ServiceController implements ApiControllerInterface
 {

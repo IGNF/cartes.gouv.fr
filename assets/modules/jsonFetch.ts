@@ -12,7 +12,6 @@ export type ApiError = {
 
 /** valeurs de `type` sur lesquelles le front branche (App\Exception\ApiErrorType côté Symfony) */
 export const ApiErrorType = {
-    SESSION_EXPIRED: "/errors/session-expired",
     ANONYMOUS: "/errors/anonymous",
 } as const;
 
@@ -56,7 +55,8 @@ export async function apiFetch(
     // corps non-JSON (page d'erreur proxy...) : erreur normalisée à partir du status HTTP
     const data = (await response.json().catch(() => null)) as Partial<ApiError> | null;
 
-    if (response.status === 401 && data?.type === ApiErrorType.SESSION_EXPIRED) {
+    // session expirée ou jamais connecté : l'alerte ne s'affiche que si un utilisateur est connu
+    if (response.status === 401) {
         useAuthStore.getState().setSessionExpired(true);
     }
 

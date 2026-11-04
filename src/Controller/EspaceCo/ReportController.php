@@ -18,9 +18,7 @@ use Symfony\Component\Uid\Uuid;
 #[Route(
     '/api/espaceco',
     name: 'cartesgouvfr_api_espaceco_report_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] reports', description: 'Signalements géolocalisés')]
 class ReportController extends AbstractController implements ApiControllerInterface
 {

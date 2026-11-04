@@ -15,9 +15,7 @@ use Symfony\Component\Routing\Requirement\Requirement;
 #[Route(
     '/api/espaceco/databases/{databaseId}/transactions',
     name: 'cartesgouvfr_api_espaceco_databases_transactions_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] transaction', description: "Ensemble de modifications apportées à des données d'une base de données")]
 class TransactionController extends AbstractController implements ApiControllerInterface
 {

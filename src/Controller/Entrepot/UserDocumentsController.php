@@ -18,9 +18,7 @@ use Symfony\Component\Uid\Uuid;
 #[Route(
     '/api/users/me/documents',
     name: 'cartesgouvfr_api_user_me_documents_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[entrepot] user documents')]
 class UserDocumentsController extends AbstractController implements ApiControllerInterface
 {

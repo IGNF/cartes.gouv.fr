@@ -13,9 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/espaceco/databases',
     name: 'cartesgouvfr_api_espaceco_databases_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] database', description: 'Bases de données')]
 class DatabaseController extends AbstractController implements ApiControllerInterface
 {

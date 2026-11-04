@@ -12,9 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/catalogs',
     name: 'cartesgouvfr_api_catalogs_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[entrepot] catalogs')]
 class CatalogsController extends AbstractController implements ApiControllerInterface
 {

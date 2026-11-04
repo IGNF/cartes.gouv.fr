@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Exception\AppException;
 use App\Security\User;
 use App\Services\MailerService;
 use App\Services\MembershipService;
@@ -18,7 +17,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[Route(
     name: 'cartesgouvfr_contact_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()',
 )]
 class ContactController extends AbstractController
 {
@@ -32,9 +30,7 @@ class ContactController extends AbstractController
         '/contact_us',
         name: 'contact_us',
         options: ['expose' => true],
-        methods: ['POST'],
-        condition: 'request.isXmlHttpRequest()'
-    )]
+        methods: ['POST'])]
     public function contact(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -101,12 +97,10 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/datastore_create_request',
+        '/api/contact/datastore_create_request',
         name: 'datastore_create_request',
         options: ['expose' => true],
-        methods: ['POST'],
-        condition: 'request.isXmlHttpRequest()'
-    )]
+        methods: ['POST'])]
     public function datastoreCreateRequest(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -155,12 +149,10 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/join_community',
+        '/api/contact/join_community',
         name: 'join_community',
         options: ['expose' => true],
-        methods: ['POST'],
-        condition: 'request.isXmlHttpRequest()'
-    )]
+        methods: ['POST'])]
     public function joinCommunity(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -205,7 +197,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/accesses_request',
+        '/api/contact/accesses_request',
         name: 'accesses_request',
         methods: ['POST'],
     )]
@@ -262,7 +254,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/datastore_deletion_request',
+        '/api/contact/datastore_deletion_request',
         name: 'datastore_deletion_request',
         methods: ['POST'],
     )]
@@ -301,11 +293,10 @@ class ContactController extends AbstractController
         return new JsonResponse(['state' => 'success']);
     }
 
+    // routes sous /api/contact : le pare-feu exige un utilisateur connecté
     private function connectedUserEmail(?UserInterface $user): string
     {
-        if (!$user instanceof User) {
-            throw new AppException('Demande réservée aux utilisateurs connectés', Response::HTTP_UNAUTHORIZED);
-        }
+        assert($user instanceof User);
 
         return $user->getEmail();
     }

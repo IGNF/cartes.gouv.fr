@@ -23,9 +23,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/datastores/{datastoreId}/datasheet',
     name: 'cartesgouvfr_api_datasheet_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] datasheet', description: 'Une fiche de données sur cartes.gouv.fr')]
 class DatasheetController extends AbstractController implements ApiControllerInterface
 {

@@ -14,9 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/datastores/{datastoreId}/processing',
     name: 'cartesgouvfr_api_processing_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[entrepot] processing')]
 class ProcessingController extends AbstractController implements ApiControllerInterface
 {

@@ -12,10 +12,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/geonetwork/metadata',
-    name: 'cartesgouvfr_geonetwork_metadata_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    name: 'cartesgouvfr_api_geonetwork_metadata_',
+    options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] geonetwork', description: 'Les métadonnées sur geonetwork')]
 class GeonetworkController extends AbstractController
 {

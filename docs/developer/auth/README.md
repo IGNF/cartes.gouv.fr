@@ -2,7 +2,7 @@
 
 L'application utilise un **BFF stateless** (Backend-for-Frontend) : le backend Symfony gère intégralement le flux OAuth2/OIDC avec Keycloak et stocke les tokens dans un **cookie HttpOnly chiffré** posé sur le navigateur. Le frontend React n'a jamais accès aux tokens.
 
-Aucune session PHP n'est utilisée (le bloc `session:` est absent de `config/packages/framework.yaml`, le firewall est `stateless: true`).
+Aucune session PHP n'est utilisée (le bloc `session:` est absent de `config/packages/framework.yaml`, les deux firewalls sont `stateless: true`).
 
 ---
 
@@ -63,6 +63,9 @@ Navigateur              Symfony
     |-- GET /xyz -----------+
     |   Cookie: __Host-CGAUTH=...
     |                      |
+    |                      | ApiGuard (routes d'API seulement)
+    |                      |   → 403 sans X-Requested-With: XMLHttpRequest
+    |                      |
     |                      | CookieAuthenticator::supports() → true (cookie présent)
     |                      | CookieAuthenticator::authenticate()
     |                      |   → KeycloakTokenManager::getAccessToken()
@@ -76,10 +79,16 @@ Navigateur              Symfony
     |<-- réponse -----------+
 ```
 
-[`CookieAuthenticator`](../../../src/Security/Authenticator/CookieAuthenticator.php) s'active sur toute requête portant le cookie (sauf `/login/check`). En cas d'échec (cookie absent, HMAC invalide, token expiré) :
+### Frontière API
 
-- **Route `/api/*`** → 401 en `application/problem+json`, `type` `/errors/session-expired` (cookie présent) ou `/errors/anonymous` (pas de cookie) ; [`jsonFetch.ts`](../../../assets/modules/jsonFetch.ts) lit `type` côté frontend.
-- **Toute autre route** → redirect `GET /login?session_expired=1` + effacement du cookie.
+Une route est une route d'API si son chemin correspond au paramètre `app.api_path_pattern` (`config/services.yaml`) : `/api/*` et `/contact_us`. Ce motif est la seule règle ; il alimente le firewall `api`, le contrôle d'accès, la garde et le rendu des erreurs en `application/problem+json`.
+
+Deux firewalls (`config/packages/security.yaml`) :
+
+- **`api`** (motif) : `CookieAuthenticator` seul, `ROLE_USER` exigé par `access_control` (sauf `/contact_us`, appelé sans cookie par le formulaire du site de documentation, et `/api/doc` en dev). Sans cookie valide, le point d'entrée [`ApiAuthenticationEntryPoint`](../../../src/Security/ApiAuthenticationEntryPoint.php) produit l'unique 401 : `type` `/errors/anonymous`, `detail` « Connexion requise ». Un cookie expiré est effacé sur cette réponse. Jamais de redirection.
+- **`main`** (le reste : pages, `/login`, `/logout`, `/files`, `/rss`) : `CookieAuthenticator` + `KeycloakAuthenticator`. Cookie expiré sur une page → redirect `GET /login?session_expired=1` + effacement du cookie.
+
+[`ApiGuard`](../../../src/Listener/ApiGuard.php) (`kernel.request`, avant le firewall) refuse en 403 tout appel d'API sans `X-Requested-With: XMLHttpRequest`, envoyé par `jsonFetch`. Une navigation, une sous-ressource (`<img>`, `<script src>`) ou un formulaire d'un autre site ne porte jamais cet en-tête ; un autre site ne peut l'ajouter qu'en `fetch` avec CORS, que l'application n'autorise pas. Un GET d'API ouvert dans un onglet répond donc 403. Le cookie `SameSite=Lax` reste la première protection, la garde la seconde.
 
 ---
 
@@ -149,13 +158,13 @@ La vérification HMAC avec `hash_equals` protège contre les forgeries. La clé 
 
 ## Expiration de session (UX frontend)
 
-Quand `CookieAuthenticator` détecte un token expiré sur une requête `/api/*`, il répond un 401 en Problem Details (RFC 9457) :
+Le navigateur supprime le cookie en même temps que le token expire : le serveur ne distingue pas « session expirée » de « jamais connecté » et répond le même 401 en Problem Details (RFC 9457) :
 
 ```json
-{ "status": 401, "title": "Unauthorized", "detail": "…", "type": "/errors/session-expired", "details": [] }
+{ "title": "Unauthorized", "status": 401, "detail": "Connexion requise", "details": [], "type": "/errors/anonymous" }
 ```
 
-[`jsonFetch.ts`](../../../assets/modules/jsonFetch.ts) appelle `AuthStore.setSessionExpired(true)` seulement pour ce `type`, ce qui affiche le bandeau [`SessionExpiredAlert`](../../../assets/components/Utils/SessionExpiredAlert.tsx) invitant l'utilisateur à se reconnecter. Sans cookie, le `type` vaut `/errors/anonymous` et le bandeau ne s'affiche pas.
+[`jsonFetch.ts`](../../../assets/modules/jsonFetch.ts) appelle `AuthStore.setSessionExpired(true)` sur tout 401 ; le bandeau [`SessionExpiredAlert`](../../../assets/components/Utils/SessionExpiredAlert.tsx) ne s'affiche que si un utilisateur est en cache, donc jamais pour un visiteur anonyme. Le module de session à venir (expiration connue du front, reconnexion par popup) remplace ce bandeau.
 
 ---
 
@@ -165,6 +174,8 @@ Quand `CookieAuthenticator` détecte un token expiré sur une requête `/api/*`,
 | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | [`src/Security/Authenticator/CookieAuthenticator.php`](../../../src/Security/Authenticator/CookieAuthenticator.php) | Authenticator principal : lit et valide le cookie sur chaque requête        |
 | [`src/Security/KeycloakAuthenticator.php`](../../../src/Security/KeycloakAuthenticator.php)                         | Authenticator OAuth2 : gère le callback `/login/check` et le flux OIDC      |
+| [`src/Security/ApiAuthenticationEntryPoint.php`](../../../src/Security/ApiAuthenticationEntryPoint.php)             | Point d'entrée du firewall `api` : l'unique 401 des routes d'API            |
+| [`src/Listener/ApiGuard.php`](../../../src/Listener/ApiGuard.php)                                                   | Garde des routes d'API (403 sans `X-Requested-With`)                        |
 | [`src/Security/Cookie/AuthCookieCipher.php`](../../../src/Security/Cookie/AuthCookieCipher.php)                     | Chiffrement/déchiffrement XSalsa20-Poly1305 + HKDF                          |
 | [`src/Security/Cookie/AuthCookieResponseListener.php`](../../../src/Security/Cookie/AuthCookieResponseListener.php) | Pose ou efface le cookie sur `kernel.response` selon l'intent               |
 | [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                           | Accès centralisé au token (lecture cookie, cache requête, intent set/clear) |
@@ -175,8 +186,8 @@ Quand `CookieAuthenticator` détecte un token expiré sur une requête `/api/*`,
 | [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                           | Routes `/login`, `/logout`, `/login/check`                                  |
 | [`src/Listener/LogoutSubscriber.php`](../../../src/Listener/LogoutSubscriber.php)                                   | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak              |
 | [`src/ApiClient/Auth/AuthenticatedHttpClient.php`](../../../src/ApiClient/Auth/AuthenticatedHttpClient.php)         | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt     |
-| [`assets/modules/jsonFetch.ts`](../../../assets/modules/jsonFetch.ts)                                               | Détecte le 401 `/errors/session-expired` et notifie l'AuthStore             |
-| [`config/packages/security.yaml`](../../../config/packages/security.yaml)                                           | Firewall `stateless: true`, ordre des authenticators                        |
+| [`assets/modules/jsonFetch.ts`](../../../assets/modules/jsonFetch.ts)                                               | Envoie `X-Requested-With`, notifie l'AuthStore sur 401                      |
+| [`config/packages/security.yaml`](../../../config/packages/security.yaml)                                           | Firewalls `api` et `main`, `stateless: true`, contrôle d'accès              |
 
 ---
 
@@ -202,5 +213,9 @@ Quand `CookieAuthenticator` détecte un token expiré sur une requête `/api/*`,
 **Taille du cookie** : les JWT Keycloak avec beaucoup de rôles/groupes peuvent être volumineux. La compression `gzdeflate` (niveau 6) est indispensable pour rester sous la limite navigateur de ~4 ko par cookie. Ne pas la retirer sans mesurer la taille réelle pour les comptes administrateurs.
 
 **Aucune route `GET` à effet de bord** : une image (`<img>`) de même origine, par exemple dans une description en markdown, envoie le cookie, et `SameSite=Lax` le laisse passer sur les navigations. Toute écriture passe par `POST`, `PUT`, `PATCH` ou `DELETE`.
+
+**Garde `X-Requested-With`** : tout appel d'API passe par `jsonFetch`/`apiFetch`, qui envoie l'en-tête. Un `EventSource` natif ne peut pas l'envoyer : lire un flux par `fetch` et `readServerEvents`. Une brique servie depuis un sous-domaine devrait passer par CORS, absent aujourd'hui.
+
+**`/contact_us` public** : seule route d'API appelable sans cookie, n'importe qui peut y déclencher l'envoi de courriels ; à restreindre.
 
 **Pas de session PHP** : le bloc `session:` est intentionnellement absent de `config/packages/framework.yaml`. Ne pas le réintroduire pour des fonctionnalités annexes (flash, CSRF, etc.) sans réévaluer l'architecture stateless.

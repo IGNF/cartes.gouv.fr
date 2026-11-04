@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional;
 
+use App\Security\ApiAuthenticationEntryPoint;
 use App\Tests\Double\FakeKeycloakClient;
 use App\Tests\Support\KeycloakLoginTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -75,7 +76,7 @@ final class ContactFormTest extends WebTestCase
         $client = self::createClient();
         $this->logIn($client);
 
-        $client->xmlHttpRequest('POST', self::BASE.'/datastore_create_request', content: $this->json([
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore_create_request', content: $this->json([
             'name' => 'Entrepôt test',
             'technical_name' => 'entrepot_test',
             'offer' => 'standard',
@@ -93,10 +94,11 @@ final class ContactFormTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->xmlHttpRequest('POST', self::BASE.'/datastore_create_request', content: $this->json(['name' => 'Entrepôt test']));
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore_create_request', content: $this->json(['name' => 'Entrepôt test']));
 
         self::assertResponseStatusCodeSame(401);
-        self::assertSame('Demande réservée aux utilisateurs connectés', $this->jsonResponse($client)['detail']);
+        // refusé par le pare-feu, avant le contrôleur
+        self::assertSame(ApiAuthenticationEntryPoint::DETAIL, $this->jsonResponse($client)['detail']);
         self::assertEmailCount(0);
     }
 
@@ -105,7 +107,7 @@ final class ContactFormTest extends WebTestCase
         $client = self::createClient();
         $this->logIn($client);
 
-        $client->xmlHttpRequest('POST', self::BASE.'/join_community', content: $this->json([
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/join_community', content: $this->json([
             'community' => ['_id' => 'community-1', 'name' => 'Communauté test', 'contact' => 'gestion@example.test'],
             'other_info' => ['Motif' => 'Projet test'],
         ]));
@@ -121,7 +123,7 @@ final class ContactFormTest extends WebTestCase
         $client = self::createClient();
         $this->logIn($client);
 
-        $client->xmlHttpRequest('POST', self::BASE.'/accesses_request', content: $this->json([
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/accesses_request', content: $this->json([
             'file_identifier' => 'fid-1',
             'email_contact' => 'producteur@example.test',
             'layers' => [[

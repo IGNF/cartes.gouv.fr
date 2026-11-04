@@ -13,9 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(
     '/api/espaceco/reports/{reportId}/replies',
     name: 'cartesgouvfr_api_espaceco_report_reply_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[espaceco] reply', description: 'Réponses/commentaires aux signalements')]
 class ReplyController extends AbstractController implements ApiControllerInterface
 {

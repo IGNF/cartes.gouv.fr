@@ -15,14 +15,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Route(
     '/api/users',
     name: 'cartesgouvfr_api_user_',
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
-)]
+    options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] user')]
 class UserController extends AbstractController implements ApiControllerInterface
 {
@@ -36,10 +33,6 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function getCurrentUser(): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user instanceof UserInterface) {
-            return $this->json(null);
-        }
-
         assert($user instanceof User);
 
         // rafraîchit à travers le cache serveur pour qu'il voie aussi la donnée fraîche
