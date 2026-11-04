@@ -47,16 +47,16 @@ export async function apiFetch(
     // NOTE : les erreurs réseau et les annulations (AbortError) sont propagées telles quelles, react-query les gère
     const response = await fetch(new Request(url, fetchConfig));
 
+    // la fin de l’expiration est posée par reconnect() : une réponse OK d’une ressource publique ne prouve pas la reconnexion
     if (response.ok) {
-        useAuthStore.getState().setSessionExpired(false);
         return response;
     }
 
     // corps non-JSON (page d'erreur proxy...) : erreur normalisée à partir du status HTTP
     const data = (await response.json().catch(() => null)) as Partial<ApiError> | null;
 
-    // session expirée ou jamais connecté : l'alerte ne s'affiche que si un utilisateur est connu
-    if (response.status === 401) {
+    // session expirée ou jamais connecté (pas un 401 relayé d'une API amont) : l'alerte ne s'affiche que si un utilisateur est connu
+    if (response.status === 401 && data?.type === ApiErrorType.ANONYMOUS) {
         useAuthStore.getState().setSessionExpired(true);
     }
 
