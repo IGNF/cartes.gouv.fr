@@ -6,6 +6,7 @@ import SymfonyRouting from "../../modules/Routing";
 import { useAuthStore } from "../../stores/AuthStore";
 import { groups, useRoute } from "@/router/router";
 import useUserQuery from "@/hooks/queries/useUserQuery";
+import { reconnect } from "@/modules/reconnect";
 
 const SessionExpiredAlert: FC = () => {
     const sessionExpired = useAuthStore((state) => state.sessionExpired);
@@ -24,18 +25,17 @@ const SessionExpiredAlert: FC = () => {
                         <>
                             Veuillez{" "}
                             <a
-                                href={SymfonyRouting.generate("cartesgouvfr_security_login", {
-                                    session_expired: 1,
-                                })}
-                                rel="noreferrer"
-                                target="_blank"
+                                href={SymfonyRouting.generate("cartesgouvfr_security_login")}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    void reconnect();
+                                }}
                             >
-                                vous-reconnecter
-                            </a>{" "}
-                            dans un nouvel onglet
+                                vous reconnecter
+                            </a>
                         </>
                     }
-                    closable={true}
+                    closable={false}
                 />
             </div>
         )
