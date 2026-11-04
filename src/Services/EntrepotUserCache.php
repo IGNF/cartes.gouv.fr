@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Security;
+namespace App\Services;
 
 use App\Services\EntrepotApi\UserApiService;
 use Symfony\Contracts\Cache\CacheInterface;
