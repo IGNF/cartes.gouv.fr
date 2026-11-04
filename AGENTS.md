@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Instructions for AI coding agents working on this repository. This is the single source of truth: `CLAUDE.md` and `.github/copilot-instructions.md` defer to this file.
+Instructions for AI coding agents working on this repository. This is the single source of truth: `CLAUDE.md`, `.github/copilot-instructions.md` and `.github/skills/code-review/SKILL.md` defer to this file.
 
 ## Project
 
