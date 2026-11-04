@@ -552,7 +552,8 @@ class CartesServiceApiService
      * Publie un flux depuis le nouveau formulaire : annexes images, configuration, offre, permissions, capabilities,
      * puis couches de la métadonnée de la fiche. La métadonnée doit exister : elle fournit les liens `metadata` de la configuration.
      *
-     * @param array<mixed> $typeInfos
+     * @param array<mixed>            $typeInfos
+     * @param ?\Closure(string): void $onConfigurationCreated appelé avec l’identifiant de la configuration juste après sa création ; un échec annule la configuration
      *
      * @return array<mixed> offre créée, avec sa configuration
      */
@@ -564,6 +565,7 @@ class CartesServiceApiService
         array $typeInfos,
         ?UploadedFile $thumbnail = null,
         ?UploadedFile $attributionLogo = null,
+        ?\Closure $onConfigurationCreated = null,
     ): array {
         $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
         $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME] ?? null;
@@ -602,6 +604,9 @@ class CartesServiceApiService
 
             $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody)->array();
             try {
+                if (null !== $onConfigurationCreated) {
+                    $onConfigurationCreated($configuration['_id']);
+                }
                 $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->array();
                 if (null !== $thumbnailUrl) {
                     // l’Entrepôt ignore `extra` à la création : écriture par modification partielle
