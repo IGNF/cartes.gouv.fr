@@ -15,9 +15,9 @@ Both commands accept `--format`: `json` to parse the result, `toon` (when `helge
 ## Workflow
 
 1. Locate candidates with `symfony-services`, filtered. Never dump the whole container.
-    - By class or interface: `vendor/bin/mate tools:call symfony-services --query=MailerInterface`
-    - By id fragment: `--query=app.handler`
-    - By tag, to see who participates in a hook: `vendor/bin/mate tools:call symfony-services --tag=kernel.event_listener`
+   - By class or interface: `vendor/bin/mate tools:call symfony-services --query=MailerInterface`
+   - By id fragment: `--query=app.handler`
+   - By tag, to see who participates in a hook: `vendor/bin/mate tools:call symfony-services --tag=kernel.event_listener`
 2. Take the exact id from that map and read it: `vendor/bin/mate tools:call symfony-service-detail --id=App\\Mailer\\Mailer`.
 3. Interpret against the symptom below.
 
@@ -28,11 +28,11 @@ Both commands accept `--format`: `json` to parse the result, `toon` (when `helge
 - **Class in a resource glob but not registered as expected:** `detail` the FQCN. The boolean flags are the effective values of the compiled definition, the same `debug:container <id>` reports (`synthetic: true` means the object is set at runtime, e.g. `kernel`, so there is no class wiring to inspect). `abstract: true` with a `container.excluded` tag means the container holds a placeholder instead of a service. When the tag has a `source`, it narrows the cause: `in "config/services.yaml"` names the file whose glob skipped the class, either through its `exclude` pattern or because the class carries `#[Exclude]` / a non-matching `#[When]` (check the class before hunting for a pattern); `because the class is abstract` and `by tag "..."` speak for themselves. To check one class, use `symfony-services --tag=container.excluded --query=<class>`; the unfiltered tag listing is cut at `limit`.
 - **Constructor/factory surprise:** `factory` (present only when set) is `Class::method`, telling you the object is built by a factory, not `new`. `calls` lists setter-injection method names invoked after construction. A dependency that is null at runtime is often a missing setter call here.
 - **What is actually wired in:** `arguments` is the constructor argument list in declaration order, each `{name, type, value}`.
-    - `type: service`: `value` is the referenced service id. Feed it straight back into `--id=` to walk one level deeper.
-    - `type: collection`: `value` is a nested list of the same shape. This is where a list of collaborators lives, and it is usually the answer to "which of these is registered": **the middleware on a messenger bus**, the handlers on a chain, the wrapped services of a decorator.
-    - `type: scalar`: a literal, or a description like `all services tagged "app.plugin"` for a tagged iterator.
-    - `name` comes from the constructor (or factory method) signature. A name like `#3` means the position could not be matched to a parameter: the class is not loadable, or it is built by a factory service that records no class.
-    - `value: ***REDACTED***` means the parameter name looked like a secret (`key`, `password`, `token`, `secret`, `auth`, `dsn`, `url`, …) **or** the parameter could not be identified. Service ids and collections are never redacted, so wiring stays readable either way. If you need the literal, read the config that sets it, not this tool.
+  - `type: service`: `value` is the referenced service id. Feed it straight back into `--id=` to walk one level deeper.
+  - `type: collection`: `value` is a nested list of the same shape. This is where a list of collaborators lives, and it is usually the answer to "which of these is registered": **the middleware on a messenger bus**, the handlers on a chain, the wrapped services of a decorator.
+  - `type: scalar`: a literal, or a description like `all services tagged "app.plugin"` for a tagged iterator.
+  - `name` comes from the constructor (or factory method) signature. A name like `#3` means the position could not be matched to a parameter: the class is not loadable, or it is built by a factory service that records no class.
+  - `value: ***REDACTED***` means the parameter name looked like a secret (`key`, `password`, `token`, `secret`, `auth`, `dsn`, `url`, …) **or** the parameter could not be identified. Service ids and collections are never redacted, so wiring stays readable either way. If you need the literal, read the config that sets it, not this tool.
 
 ## Failure paths
 

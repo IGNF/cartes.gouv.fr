@@ -10,8 +10,8 @@ One decision: where to start. Make it with one call, then hand off.
 1. Is it a wiring symptom, not a runtime one? "Service not found", wrong implementation injected, a tag/listener that never fires, a decorator that does nothing. These never reach a request cleanly. Go straight to service inspection.
 
 2. Otherwise probe for a profile: `vendor/bin/mate tools:call symfony-profiler-list --limit=1` (or `--url=<path>` / `--statusCode=500` if you know them).
-    - A profile matching the request exists: use profiler debugging. It pins one request to its exception, queries, and timing, which the logs cannot.
-    - No profiles (profiler off, or prod): use log investigation. Also the right tool when the question is about time or frequency ("when did this start", "how often"), not one request.
+   - A profile matching the request exists: use profiler debugging. It pins one request to its exception, queries, and timing, which the logs cannot.
+   - No profiles (profiler off, or prod): use log investigation. Also the right tool when the question is about time or frequency ("when did this start", "how often"), not one request.
 
 3. Not sure it is even one request, or it spans many (a user's whole session, a recurring error): use log investigation and pivot on a context field.
 

@@ -20,9 +20,9 @@ These commands accept `--format`: `json` to parse the result, `toon` (when `helg
 1. Orient: `vendor/bin/mate tools:call monolog-list-files`. Confirm the environment you care about is present and recently modified.
 2. Latest state: `vendor/bin/mate tools:call monolog-tail --level=error --limit=50`. Good for "what just broke", nothing else.
 3. Narrow with search:
-    - `vendor/bin/mate tools:call monolog-search --term="Timeout" --level=error`
-    - Time-box it: `--from="-1 hour"`, `--from=2026-07-01 --to=2026-07-02`. Any PHP-parseable date works.
-    - Regex: `vendor/bin/mate tools:call monolog-search --term="user \d+ locked" --regex`. A bare pattern is wrapped as `/.../i`; pass your own `/.../` or `#...#` to control anchoring and flags.
+   - `vendor/bin/mate tools:call monolog-search --term="Timeout" --level=error`
+   - Time-box it: `--from="-1 hour"`, `--from=2026-07-01 --to=2026-07-02`. Any PHP-parseable date works.
+   - Regex: `vendor/bin/mate tools:call monolog-search --term="user \d+ locked" --regex`. A bare pattern is wrapped as `/.../i`; pass your own `/.../` or `#...#` to control anchoring and flags.
 4. Pivot on a field: once you have an identifier (request id, user id, order id), follow it with `vendor/bin/mate tools:call monolog-context-search --key=request_id --value=abc123`. This is how you reconstruct one request or one user across many lines.
 
 ## Reading

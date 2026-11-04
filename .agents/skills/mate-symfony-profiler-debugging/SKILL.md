@@ -17,8 +17,8 @@ These commands accept `--format`: `json` to parse the result, `toon` (when `helg
 ## Workflow
 
 1. Find the profile. Do not scroll all profiles.
-    - Error: `vendor/bin/mate tools:call symfony-profiler-list --statusCode=500 --limit=5`
-    - Known URL: `--url=/checkout`. Latest request: `--limit=1`.
+   - Error: `vendor/bin/mate tools:call symfony-profiler-list --statusCode=500 --limit=5`
+   - Known URL: `--url=/checkout`. Latest request: `--limit=1`.
 2. `vendor/bin/mate resources:read symfony-profiler://profile/<token>` to see which collectors exist. Apps differ; only read what is present.
 3. Read collectors in diagnosis order, not all of them.
 
@@ -30,7 +30,6 @@ Branch on the symptom.
 `data.class`, `message` (secrets scrubbed), `file`, `line`, and `trace` (top 10 frames) are the fix. If `has_exception` is false on an error response, the failure is upstream: check `request` for the status and `logger` for what was logged.
 
 **Slow but succeeded:** skip `exception`, go to `time`, then `db`, then `memory`.
-
 - `time`: `duration_ms` is total. `events` are sorted slowest first with a `category` (e.g. `doctrine`, `template`, `controller`) that tells you which subsystem ate the time. That category picks the next collector.
 - `db`: `query_count` plus `summary.duplicate_query_count`. `queries` are grouped by identical SQL, sorted by `total_time_ms`. An N+1 shows as one grouped entry with a high `count` (same statement fired in a loop), or a high `duplicate_query_count`. One slow statement shows as a high `avg_time_ms`. `sample_params` shows what was bound. Grouped list caps at 50 (`queries_truncated`).
 - `memory`: `usage_percent` against the limit. Only relevant when the request is heavy or OOMs.
