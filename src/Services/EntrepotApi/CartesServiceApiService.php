@@ -673,7 +673,10 @@ class CartesServiceApiService
         // création d'une permission pour la communauté actuelle
         if ($shareWithCommunity) {
             $communityId = $this->membershipService->getDatastoreIdentity($datastoreId)->communityId;
-            $permissions = [...$permissions, ...$this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions)];
+            $created = $this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions);
+            if ([] !== $created) {
+                $permissions[] = $created;
+            }
         }
 
         if ($isPrivate) {
