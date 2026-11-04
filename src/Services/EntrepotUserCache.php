@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Security;
+namespace App\Services;
 
 use App\Services\EntrepotApi\UserApiService;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -8,7 +8,7 @@ use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
- * Cache serveur de la réponse GET users/me de l'API Entrepôt, clé par identifiant Keycloak.
+ * Cache serveur de la réponse GET users/me de l'API Entrepôt, clé par identifiant utilisateur (sub = _id).
  */
 class EntrepotUserCache implements ResetInterface
 {
@@ -77,6 +77,10 @@ class EntrepotUserCache implements ResetInterface
         return $this->cache->get(self::CACHE_KEY_PREFIX.$keycloakId, function (ItemInterface $item) use ($keycloakId) {
             $item->expiresAfter(self::TTL);
             $data = $this->userApiService->getMe()->array();
+            // l'id du cookie et le jeton envoyé à l'Entrepôt doivent désigner le même utilisateur ; pas d'erreur d'authentification, qui bouclerait sur le login
+            if (($data['_id'] ?? null) !== $keycloakId) {
+                throw new \LogicException('Profil Entrepôt d’un autre utilisateur que celui du cookie');
+            }
             $this->computedInRequest[$keycloakId] = true;
 
             return ['fetched_at' => time(), 'data' => $data];

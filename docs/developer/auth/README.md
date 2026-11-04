@@ -72,6 +72,9 @@ Navigateur              Symfony
     |                      |      → déchiffrer cookie → unserialize → AccessToken
     |                      |      → mise en cache dans request.attributes
     |                      |   → vérifier token non expiré
+    |                      | KeycloakUserProvider::loadUser()
+    |                      |   → User depuis les claims de l'id_token du cookie
+    |                      |      (aucun appel Keycloak ni Entrepôt)
     |                      |
     |                      | Controller → AuthenticatedHttpClient
     |                      |   → getAccessToken() → header Authorization: Bearer <token>
@@ -94,7 +97,15 @@ Deux firewalls (`config/packages/security.yaml`) :
 
 ## Snapshot utilisateur Entrepôt et cache par pod
 
-L’objet `User` est reconstruit à chaque requête à partir du JWT et de la réponse `GET users/me` de l’Entrepôt, mise en cache 60 s par identifiant Keycloak ([`EntrepotUserCache`](../../../src/Security/EntrepotUserCache.php), pool `cache.app`). Les infos datastore/communauté (nom, `technical_name`, id de communauté) sont dérivées de ce snapshot par [`MembershipService`](../../../src/Services/MembershipService.php) au lieu d’être rechargées via l’API. Vocabulaire : [glossaire](../glossaire.md).
+L’objet `User` ne porte que l’identité : `id` (claim `sub`, égal à l’identifiant utilisateur Entrepôt), e-mail, nom d’utilisateur, prénom et nom, lus dans l’`id_token` du cookie. Le cookie est scellé, la signature de l’ID token n’est donc pas revérifiée. L’authentification ne fait aucun appel amont. Un ID token sans `sub`, `email` ou `preferred_username` est refusé au retour de Keycloak, avant d’entrer dans le cookie : redirection vers `/publier-une-donnee?authentication_failed=1`, en anonyme. Une erreur d’authentification sur une requête suivante bouclerait, Keycloak reconnectant le même compte.
+
+L’identité est celle de l’ID token reçu au login : une modification du nom ou de l’e-mail dans le compte Keycloak n’apparaît dans l’application qu’après une reconnexion (au plus 12 h, durée du jeton). Assumé : ces modifications sont rares, et le support identifie un compte par son `id`.
+
+L’Entrepôt valide les jetons hors ligne (signature et `exp`) : un jeton dont la session Keycloak a été fermée reste accepté jusqu’à son expiration, 12 h (test du 04/11/2026). Un contrôle de vivacité côté serveur (userinfo) ne réduirait donc pas ce délai pour l’Entrepôt. Si une exigence de révocation apparaît, le repli est un appel userinfo en cache 15 min dans `KeycloakUserProvider`.
+
+Le profil Entrepôt (`GET users/me`) est mis en cache 60 s par identifiant utilisateur ([`EntrepotUserCache`](../../../src/Services/EntrepotUserCache.php), pool `cache.app`) et lu seulement par [`MembershipService`](../../../src/Services/MembershipService.php). Si `users/me` renvoie un `_id` différent du `sub` du cookie, la lecture échoue en 500 (garde contre un profil attribué au mauvais utilisateur ; une erreur d’authentification bouclerait sur le login, Keycloak reconnectant le même compte). Les infos datastore/communauté (nom, `technical_name`, id de communauté) en sont dérivées au lieu d’être rechargées via l’API. Vocabulaire : [glossaire](../glossaire.md).
+
+La charge utilisateur du front (type `CartesUser`, 13 clés) est assemblée par [`CartesUserPayload`](../../../src/Services/CartesUserPayload.php) : identité + profil en cache pour la page (`#user`), identité + profil frais pour `GET /api/users/me`. Si l’Entrepôt est en panne, une page ou `/api/users/me` d’un utilisateur connecté répond 503 ; une page anonyme reste servie.
 
 Trois mécanismes limitent la fenêtre de péremption :
 
@@ -180,9 +191,10 @@ Le navigateur supprime le cookie en même temps que le token expire : le serveur
 | [`src/Security/Cookie/AuthCookieResponseListener.php`](../../../src/Security/Cookie/AuthCookieResponseListener.php) | Pose ou efface le cookie sur `kernel.response` selon l'intent               |
 | [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                           | Accès centralisé au token (lecture cookie, cache requête, intent set/clear) |
 | [`src/Security/State/LoginStateSerializer.php`](../../../src/Security/State/LoginStateSerializer.php)               | Encode/décode le paramètre `state` OAuth2 signé HMAC                        |
-| [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Reconstruit l'objet `User` à partir du JWT (claims Keycloak)                |
-| [`src/Security/EntrepotUserCache.php`](../../../src/Security/EntrepotUserCache.php)                                 | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement    |
-| [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Dérivation datastore/communauté depuis l'appartenance, deny-path            |
+| [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Construit l'objet `User` depuis les claims de l'`id_token` du cookie        |
+| [`src/Services/EntrepotUserCache.php`](../../../src/Services/EntrepotUserCache.php)                                 | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement    |
+| [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Seul lecteur du profil Entrepôt, dérivation datastore/communauté, deny-path |
+| [`src/Services/CartesUserPayload.php`](../../../src/Services/CartesUserPayload.php)                                 | Charge utilisateur du front (`CartesUser`) : identité + profil Entrepôt     |
 | [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                           | Routes `/login`, `/logout`, `/login/check`                                  |
 | [`src/Listener/LogoutSubscriber.php`](../../../src/Listener/LogoutSubscriber.php)                                   | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak              |
 | [`src/ApiClient/Auth/AuthenticatedHttpClient.php`](../../../src/ApiClient/Auth/AuthenticatedHttpClient.php)         | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt     |

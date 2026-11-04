@@ -100,6 +100,38 @@ final class AuthenticationFlowTest extends WebTestCase
         self::assertResponseRedirects('/publier-une-donnee?authentication_failed=1');
     }
 
+    public function testIncompleteIdTokenAtLoginRedirectsToPublishPageWithoutCookie(): void
+    {
+        $client = self::createClient();
+        FakeKeycloakClient::issueIdTokenWithout('email');
+        $this->loginCheck($client, ['referer' => null]);
+
+        self::assertResponseRedirects('/publier-une-donnee?authentication_failed=1');
+        foreach ($client->getResponse()->headers->getCookies() as $cookie) {
+            self::assertTrue(AuthCookieResponseListener::COOKIE_NAME !== $cookie->getName() || $cookie->isCleared(), 'aucun cookie d’authentification ne doit être posé');
+        }
+    }
+
+    // ne peut venir que d’un cookie antérieur à la vérification au login : 500, pas de redirection vers le login
+    public function testIncompleteIdTokenInCookieAnswersServerErrorWithoutRedirect(): void
+    {
+        $client = self::createClient();
+        FakeKeycloakClient::issueIdTokenWithout('sub');
+        $cipher = self::getContainer()->get(AuthCookieCipher::class);
+        $client->getCookieJar()->set(new Cookie(
+            AuthCookieResponseListener::COOKIE_NAME,
+            $cipher->encrypt(serialize(FakeKeycloakClient::createAccessToken())),
+            (string) (time() + 3600),
+            '/',
+            'localhost',
+            true,
+        ));
+
+        $client->request('GET', self::BASE.'/publier-une-donnee');
+
+        self::assertResponseStatusCodeSame(500);
+    }
+
     public function testLogoutRedirectsToPublishPage(): void
     {
         $client = self::createClient();

@@ -6,6 +6,7 @@ use App\Constants\EntrepotApi\UserKeyTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\User\UserKeyDTO;
 use App\Security\User;
+use App\Services\CartesUserPayload;
 use App\Services\EntrepotApi\ServiceAccount;
 use App\Services\EntrepotApi\UserApiService;
 use App\Services\MembershipService;
@@ -26,6 +27,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function __construct(
         private readonly UserApiService $userApiService,
         private readonly MembershipService $membershipService,
+        private readonly CartesUserPayload $cartesUserPayload,
     ) {
     }
 
@@ -35,10 +37,8 @@ class UserController extends AbstractController implements ApiControllerInterfac
         $user = $this->getUser();
         assert($user instanceof User);
 
-        // rafraîchit à travers le cache serveur pour qu'il voie aussi la donnée fraîche
-        $this->membershipService->refreshCurrentUser();
-
-        return $this->json($user);
+        // relecture fraîche, à travers le cache serveur pour qu'il voie aussi la donnée fraîche
+        return $this->json($this->cartesUserPayload->build($user, true));
     }
 
     #[Route('/me/keys', name: 'keys', methods: ['GET'])]

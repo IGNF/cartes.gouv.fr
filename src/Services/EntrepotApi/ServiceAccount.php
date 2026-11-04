@@ -42,9 +42,9 @@ class ServiceAccount
             throw new AccessDeniedException();
         }
 
-        // lecture fraîche : le token peut encore lister une appartenance quittée il y a moins de 60 s sur un autre pod
-        $this->membershipService->refreshCurrentUser();
-        if (null !== $user->findMembershipByCommunity($sandboxCommunityId)) {
+        // lecture fraîche : le cache peut encore lister une appartenance quittée il y a moins de 60 s sur un autre pod
+        $this->membershipService->invalidateCurrentUser();
+        if (null !== $this->membershipService->findByCommunity($sandboxCommunityId)) {
             return;
         }
 

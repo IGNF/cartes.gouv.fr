@@ -101,14 +101,14 @@ class ContactController extends AbstractController
         name: 'datastore_create_request',
         options: ['expose' => true],
         methods: ['POST'])]
-    public function datastoreCreateRequest(Request $request): JsonResponse
+    public function datastoreCreateRequest(Request $request, MembershipService $membershipService): JsonResponse
     {
         $user = $this->getUser();
 
         $supervisor = [];   // Liste des community dont l'utilisateur courant est "supervisor"
         $member = [];       // Liste des community dont l'utilisateur courant est simple membre
         if ($user instanceof User) {
-            foreach ($user->getCommunitiesMember() as $communityMember) {
+            foreach ($membershipService->currentProfile()['communities_member'] ?? [] as $communityMember) {
                 $community = $communityMember['community'];
                 if ($user->getId() === $community['supervisor']) {
                     $supervisor[$community['name']] = $community['_id'];
