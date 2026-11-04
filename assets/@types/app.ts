@@ -183,7 +183,6 @@ export type Upload = UploadPrivateDetailResponseDto & {
         vectordb_id?: string;
         data_upload_path?: string;
         integration_progress?: string;
-        integration_current_step?: string;
     };
 };
 

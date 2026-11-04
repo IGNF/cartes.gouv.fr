@@ -4,14 +4,13 @@ Certaines entités portent une propriété `tags`, qui est un dictionnaire clé/
 
 ## `upload`
 
-| tag                        | description                                                                                                                                               |         |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `datasheet_name`           | nom de la fiche de donnée                                                                                                                                 | string  |
-| `proc_int_id`              | identifiant de l'exécution du traitement "Intégration de données vecteur livrées en base"                                                                 | uuidv4  |
-| `vectordb_id`              | identifiant de la donnée stockée en sortie du traitement `proc_int_id`                                                                                    | uuidv4  |
-| `data_upload_path`         | chemin vers le fichier téléversé                                                                                                                          |         |
-| `integration_progress`     | progression de l'intégration en base de données (envoi du fichier téléversé à l'API, attente des vérifications et puis le traitement d'intégration en BD) | json(1) |
-| `integration_current_step` | numéro de l'étape courante de integration_progress                                                                                                        | number  |
+| tag                    | description                                                                                                                                               |         |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `datasheet_name`       | nom de la fiche de donnée                                                                                                                                 | string  |
+| `proc_int_id`          | identifiant de l'exécution du traitement "Intégration de données vecteur livrées en base"                                                                 | uuidv4  |
+| `vectordb_id`          | identifiant de la donnée stockée en sortie du traitement `proc_int_id`                                                                                    | uuidv4  |
+| `data_upload_path`     | chemin vers le fichier téléversé                                                                                                                          |         |
+| `integration_progress` | progression de l'intégration en base de données (envoi du fichier téléversé à l'API, attente des vérifications et puis le traitement d'intégration en BD) | json(1) |
 
 (1) structure de json (chaîne json encodée) :
 
