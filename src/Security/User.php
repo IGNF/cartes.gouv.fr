@@ -9,6 +9,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class User implements UserInterface
 {
+    /**
+     * @param non-empty-string $email
+     */
     public function __construct(
         private readonly string $id,
         private readonly string $email,
@@ -31,10 +34,6 @@ class User implements UserInterface
 
     public function getUserIdentifier(): string
     {
-        if ('' === $this->email) {
-            throw new \LogicException('Utilisateur sans adresse e-mail : identifiant indisponible');
-        }
-
         return $this->email;
     }
 

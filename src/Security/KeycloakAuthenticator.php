@@ -31,6 +31,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         private readonly KeycloakTokenManager $tokenManager,
         private readonly LoginStateSerializer $loginStateSerializer,
         private readonly LoggerInterface $logger,
+        private readonly KeycloakUserProvider $userProvider,
     ) {
     }
 
@@ -77,6 +78,16 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         }
 
         $this->tokenManager->setAccessToken($accessToken);
+
+        // un ID token incomplet ne doit jamais entrer dans le cookie : Keycloak reconnecterait le même compte en boucle
+        try {
+            $this->userProvider->loadUser();
+        } catch (\UnexpectedValueException $ex) {
+            $this->logger->error('{class}: {message}', ['class' => self::class, 'message' => $ex->getMessage()]);
+            $this->tokenManager->clearAccessToken();
+
+            throw new AuthenticationException($ex->getMessage(), Response::HTTP_UNAUTHORIZED, $ex);
+        }
 
         return new SelfValidatingPassport(new UserBadge($accessToken->getToken()));
     }

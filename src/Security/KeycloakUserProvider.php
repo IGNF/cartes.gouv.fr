@@ -7,7 +7,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
 use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
-use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
@@ -25,8 +24,8 @@ class KeycloakUserProvider implements UserProviderInterface
     }
 
     /**
-     * @throws TokenNotFoundException         pas de jeton dans le cookie
-     * @throws AuthenticationExpiredException ID token absent ou incomplet
+     * @throws TokenNotFoundException    pas de jeton dans le cookie
+     * @throws \UnexpectedValueException ID token absent ou incomplet : erreur serveur, pas d'authentification (qui bouclerait sur le login)
      */
     public function loadUser(): User
     {
@@ -38,7 +37,7 @@ class KeycloakUserProvider implements UserProviderInterface
         $claims = $this->decodeIdToken((string) $this->tokenManager->getIdToken());
         foreach (['sub', 'email', 'preferred_username'] as $claim) {
             if (!is_string($claims[$claim] ?? null) || '' === $claims[$claim]) {
-                throw new AuthenticationExpiredException("ID token sans claim $claim");
+                throw new \UnexpectedValueException("ID token sans claim $claim");
             }
         }
 
@@ -73,7 +72,8 @@ class KeycloakUserProvider implements UserProviderInterface
      *
      * {@inheritDoc}
      *
-     * @throws UserNotFoundException if the user is not found
+     * @throws TokenNotFoundException    pas de jeton dans le cookie
+     * @throws \UnexpectedValueException ID token absent ou incomplet
      */
     public function loadUserByIdentifier(string $identifier): UserInterface
     {

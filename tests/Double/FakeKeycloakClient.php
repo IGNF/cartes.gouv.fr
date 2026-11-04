@@ -24,9 +24,19 @@ final class FakeKeycloakClient extends KeycloakClient
 
     private static ?\Throwable $nextTokenException = null;
 
+    /** @var array<string, string> claims de l’ID token des prochains jetons */
+    private static array $idTokenClaims = self::DEFAULT_RESOURCE_OWNER;
+
     public static function reset(): void
     {
         self::$nextTokenException = null;
+        self::$idTokenClaims = self::DEFAULT_RESOURCE_OWNER;
+    }
+
+    // les prochains jetons portent un ID token sans ce claim, jusqu’au prochain reset()
+    public static function issueIdTokenWithout(string $claim): void
+    {
+        unset(self::$idTokenClaims[$claim]);
     }
 
     public static function failNextTokenExchange(\Throwable $exception): void
@@ -39,7 +49,7 @@ final class FakeKeycloakClient extends KeycloakClient
         return new AccessToken([
             'access_token' => self::ACCESS_TOKEN,
             'expires' => time() + $lifetimeSeconds,
-            'id_token' => self::idToken(self::DEFAULT_RESOURCE_OWNER),
+            'id_token' => self::idToken(self::$idTokenClaims),
         ]);
     }
 

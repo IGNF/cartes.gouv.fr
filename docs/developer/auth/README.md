@@ -97,7 +97,7 @@ Deux firewalls (`config/packages/security.yaml`) :
 
 ## Snapshot utilisateur Entrepôt et cache par pod
 
-L’objet `User` ne porte que l’identité : `id` (claim `sub`, égal à l’identifiant utilisateur Entrepôt), e-mail, nom d’utilisateur, prénom et nom, lus dans l’`id_token` du cookie. Le cookie est scellé, la signature de l’ID token n’est donc pas revérifiée. L’authentification ne fait aucun appel amont.
+L’objet `User` ne porte que l’identité : `id` (claim `sub`, égal à l’identifiant utilisateur Entrepôt), e-mail, nom d’utilisateur, prénom et nom, lus dans l’`id_token` du cookie. Le cookie est scellé, la signature de l’ID token n’est donc pas revérifiée. L’authentification ne fait aucun appel amont. Un ID token sans `sub`, `email` ou `preferred_username` est refusé au retour de Keycloak, avant d’entrer dans le cookie : redirection vers `/publier-une-donnee?authentication_failed=1`, en anonyme. Une erreur d’authentification sur une requête suivante bouclerait, Keycloak reconnectant le même compte.
 
 L’Entrepôt valide les jetons hors ligne (signature et `exp`) : un jeton dont la session Keycloak a été fermée reste accepté jusqu’à son expiration, 12 h (test du 04/11/2026). Un contrôle de vivacité côté serveur (userinfo) ne réduirait donc pas ce délai pour l’Entrepôt. Si une exigence de révocation apparaît, le repli est un appel userinfo en cache 15 min dans `KeycloakUserProvider`.
 
