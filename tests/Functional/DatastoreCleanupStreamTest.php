@@ -20,7 +20,7 @@ final class DatastoreCleanupStreamTest extends WebTestCase
         EntrepotMockResponseFactory::reset();
     }
 
-    // la route attrape-tout du front accepte toutes les méthodes : un GET reçoit la page React, jamais le flux
+    // un GET reçoit le 403 de la garde ou la page React (route attrape-tout du front), jamais le flux
     public function testGetNeverReachesTheStream(): void
     {
         $client = self::createClient();
@@ -29,7 +29,7 @@ final class DatastoreCleanupStreamTest extends WebTestCase
         foreach ([false, true] as $xhr) {
             $xhr ? $client->xmlHttpRequest('GET', self::STREAM_URL) : $client->request('GET', self::STREAM_URL);
 
-            self::assertStringStartsWith('text/html', (string) $client->getResponse()->headers->get('Content-Type'));
+            self::assertStringStartsNotWith('text/event-stream', (string) $client->getResponse()->headers->get('Content-Type'));
             self::assertStringNotContainsString('event: started', $client->getInternalResponse()->getContent());
         }
     }

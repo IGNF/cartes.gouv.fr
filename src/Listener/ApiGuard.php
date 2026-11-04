@@ -5,21 +5,16 @@ namespace App\Listener;
 use App\Exception\AppException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Garde des routes d'API contre les requêtes d'un autre site et les navigations (CSRF, ouverture dans un onglet).
- *
- * Fetch Metadata (`Sec-Fetch-*`) fait foi ; sans ces en-têtes, l'en-tête `X-Requested-With` des appels `jsonFetch` est exigé.
+ * Garde CSRF des routes d'API : exige l'en-tête `X-Requested-With` envoyé par `jsonFetch`, qu'aucune navigation, sous-ressource ni requête d'un autre site ne porte.
  */
-final readonly class ApiFetchMetadataGuard
+final readonly class ApiGuard
 {
-    private const REJECTED_SITES = ['cross-site', 'same-site'];
-
     public function __construct(
         #[Autowire(service: 'app.api_path_matcher')]
         private RequestMatcherInterface $apiPathMatcher,
@@ -41,18 +36,8 @@ final readonly class ApiFetchMetadataGuard
             return;
         }
 
-        if (!$this->isAllowed($request)) {
-            throw new AppException('Appel d’API refusé : origine ou navigation non autorisée', Response::HTTP_FORBIDDEN);
+        if (!$request->isXmlHttpRequest()) {
+            throw new AppException('Appel d’API refusé : en-tête X-Requested-With absent', Response::HTTP_FORBIDDEN);
         }
-    }
-
-    private function isAllowed(Request $request): bool
-    {
-        $site = $request->headers->get('Sec-Fetch-Site');
-        if (null === $site) {
-            return $request->isXmlHttpRequest();
-        }
-
-        return !in_array($site, self::REJECTED_SITES, true) && 'navigate' !== $request->headers->get('Sec-Fetch-Mode');
     }
 }

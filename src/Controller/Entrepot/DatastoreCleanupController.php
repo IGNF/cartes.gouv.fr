@@ -36,7 +36,7 @@ class DatastoreCleanupController extends AbstractController implements ApiContro
         ]);
     }
 
-    #[Route('/delete-stream', name: 'delete_content_stream', methods: ['POST'], condition: 'request.isXmlHttpRequest()')]
+    #[Route('/delete-stream', name: 'delete_content_stream', methods: ['POST'])]
     public function deleteContentStream(string $datastoreId): EventStreamResponse
     {
         return new EventStreamResponse(function (EventStreamResponse $response) use ($datastoreId): void {
