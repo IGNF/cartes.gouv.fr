@@ -12,8 +12,10 @@ use App\Constants\EntrepotApi\OfferingStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\PermissionTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
+use App\Constants\ServiceAccess;
 use App\Dto\Datasheet\DatasheetServices;
 use App\Dto\Services\CommonDTO;
+use App\Dto\Services\Form\ServiceFormDTO;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\ApiException;
@@ -26,6 +28,7 @@ use App\Utils;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -57,6 +60,8 @@ class CartesServiceApiService
         private MembershipService $membershipService,
         private CacheInterface $cache,
         private LoggerInterface $logger,
+        private ServiceConfigurationRequestBuilder $configurationRequestBuilder,
+        private ServiceImageAnnexeService $serviceImageAnnexeService,
         HttpClientInterface $httpClient,
         #[Autowire(service: 'app.api_client.entrepot')]
         private readonly ApiClient $entrepotApi,
@@ -261,6 +266,18 @@ class CartesServiceApiService
         $this->removeOfferingFully($datastoreId, $offering);
 
         $configuration = $this->waitForConfigurationUnpublished($datastoreId, $offering['configuration']['_id']);
+
+        // vignette et logo d’attribution du flux : annexes sans autre usage
+        try {
+            $this->serviceImageAnnexeService->removeServiceImages($datastoreId, $configuration);
+        } catch (\Throwable $e) {
+            $this->logger->warning('{class}: Failed to remove image annexes of configuration {configurationId}: {error}', [
+                'class' => self::class,
+                'configurationId' => $configuration['_id'],
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
 
@@ -529,6 +546,147 @@ class CartesServiceApiService
         $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::THEME_CATEGORIES], $cswMetadata, $dto, $services);
 
         return $offering;
+    }
+
+    /**
+     * Publie un flux depuis le nouveau formulaire : annexes images, configuration, offre, permissions, capabilities,
+     * puis couches de la métadonnée de la fiche. La métadonnée doit exister : elle fournit les liens `metadata` de la configuration.
+     *
+     * @param array<mixed> $typeInfos
+     *
+     * @return array<mixed> offre créée, avec sa configuration
+     */
+    public function publishFromForm(
+        string $datastoreId,
+        string $storedDataId,
+        ServiceFormDTO $dto,
+        string $type,
+        array $typeInfos,
+        ?UploadedFile $thumbnail = null,
+        ?UploadedFile $attributionLogo = null,
+    ): array {
+        $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
+        $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME] ?? null;
+        if (!is_string($datasheetName)) {
+            throw new CartesApiException('La donnée n’est rattachée à aucune fiche de données', Response::HTTP_BAD_REQUEST);
+        }
+
+        $apiMetadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
+        if (null === $apiMetadata) {
+            throw new CartesApiException('Renseignez d’abord la description de la fiche de données', Response::HTTP_BAD_REQUEST);
+        }
+
+        $endpoint = $this->getEndpointByAccess($datastoreId, $type, $dto->access);
+
+        $thumbnailUrl = null !== $thumbnail ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
+        $logo = null !== $attributionLogo && null !== $dto->attribution
+            ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
+            : null;
+
+        $configRequestBody = $this->configurationRequestBuilder->build(
+            $dto,
+            $type,
+            $typeInfos,
+            $this->getNewConfigMetadata($apiMetadata['file_identifier']),
+            $logo,
+        );
+        $configTags = [
+            CommonTags::DATASHEET_NAME => $datasheetName,
+            CommonTags::THEME_CATEGORIES => implode(', ', $dto->themes),
+        ];
+
+        try {
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody)->array();
+            try {
+                $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->array();
+                if (null !== $thumbnailUrl) {
+                    // l’Entrepôt ignore `extra` à la création : écriture par modification partielle
+                    $configuration = $this->configurationApiService->modify($datastoreId, $configuration['_id'], ServiceConfigurationRequestBuilder::buildThumbnailExtra($thumbnailUrl), $configuration)->array();
+                }
+                $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open'])->array();
+            } catch (\Throwable $th) {
+                // si la suite plante, on défait la création de la configuration
+                $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
+                throw $th;
+            }
+        } catch (\Throwable $th) {
+            // pas d’annexe orpheline
+            foreach ([$thumbnailUrl, $logo['url'] ?? null] as $url) {
+                if (is_string($url)) {
+                    $this->serviceImageAnnexeService->removeByUrl($datastoreId, $url);
+                }
+            }
+            throw $th;
+        }
+
+        $offering['configuration'] = $configuration;
+
+        $this->handleAccessPermissions($datastoreId, $offering, $dto->access);
+        $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
+
+        $services = $this->getDatasheetServices($datastoreId, $datasheetName);
+        $this->cartesMetadataApiService->updateLayers($datastoreId, $datasheetName, $services);
+
+        return $offering;
+    }
+
+    /**
+     * @param array<mixed> $endpoint
+     * @param array<mixed> $offering
+     */
+    private function createOrUpdateCapabilities(string $datastoreId, array $endpoint, array $offering): void
+    {
+        // capabilities filtrées, sauf dans l’espace découverte (sandbox)
+        try {
+            if (!$this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            }
+        } catch (\Exception $e) {
+            $this->logger->warning('{class}: Failed to create or update capabilities for endpoint {endpointName} ({endpoint}) after the creation/modification of offering {offeringId}: {error}', [
+                'class' => self::class,
+                'endpoint' => $endpoint['_id'],
+                'endpointName' => $endpoint['technical_name'],
+                'offeringId' => $offering['_id'],
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Permissions selon l’accès choisi : la communauté propre de l’entrepôt reçoit une permission sur tout flux restreint,
+     * la communauté cartes.gouv.fr seulement quand le flux doit rester visualisable sur Explorer les cartes.
+     *
+     * @param array<mixed> $offering
+     */
+    private function handleAccessPermissions(string $datastoreId, array $offering, string $access): void
+    {
+        if (ServiceAccess::isOpen($access)) {
+            return;
+        }
+
+        $permissions = $this->datastoreApiService->getPermissions($datastoreId)->resolve();
+
+        $communityId = $this->membershipService->getDatastoreIdentity($datastoreId)->communityId;
+        $created = $this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions);
+        if ([] !== $created) {
+            $permissions[] = $created;
+        }
+
+        $configCommunityId = $this->params->get('config')['community_id'];
+        if (ServiceAccess::allowsCartesGouvView($access)) {
+            $this->addPermissionForCommunity($datastoreId, $configCommunityId, $offering, $permissions);
+        } else {
+            $this->removeExistingConfigPermission($datastoreId, $offering, $permissions);
+        }
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getEndpointByAccess(string $datastoreId, string $configType, string $access): array
+    {
+        return $this->getEndpointByShareType($datastoreId, $configType, ServiceAccess::isOpen($access) ? 'all_public' : 'your_community');
     }
 
     /**
