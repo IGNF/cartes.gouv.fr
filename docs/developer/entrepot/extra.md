@@ -79,6 +79,22 @@ export type Styles = {
 ]
 ```
 
+## vignette d’un flux
+
+Chemin dans extra : "_search.url_vignette"
+
+```json
+{
+    "extra": {
+        "_search": {
+            "url_vignette": "https://data.geopf.fr/annexes/{technical_name}/thumbnail/{uuid}.png"
+        }
+    }
+}
+```
+
+URL de l’annexe vignette déposée par le formulaire de publication (voir [annexes/README.md](annexes/README.md)). Lue par l’onglet « Flux » de la fiche et par Explorer les cartes.
+
 ## légende GetLegendGraphic du WMS-Vecteur associée à la pyramide raster générée par moissonnage
 
 ```json

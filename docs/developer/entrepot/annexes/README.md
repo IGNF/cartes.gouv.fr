@@ -90,6 +90,32 @@ Labels :
 | `datasheet_name` | nom de la fiche de donnée | string |
 | `type`           | valeur fixe : "thumbnail" | string |
 
+## la vignette d’un flux
+
+Déposée par le formulaire de publication refondu, référencée par l’URL dans `extra._search.url_vignette` de la configuration (voir [extra.md](../extra.md)). Supprimée avec le flux.
+
+Chemin : `/thumbnail/{uuid}.{jpg|png}`
+
+Labels :
+
+| label            | description                       |        |
+| ---------------- | --------------------------------- | ------ |
+| `datasheet_name` | nom de la fiche de donnée         | string |
+| `type`           | valeur fixe : "service-thumbnail" | string |
+
+## le logo d’attribution d’un flux
+
+Déposé par le formulaire de publication refondu quand une attribution avec logo est renseignée, référencé par `attribution.logo.url` de la configuration (l’Entrepôt exige aussi `width`, `height` et `format`, calculés au dépôt). Supprimé avec le flux.
+
+Chemin : `/attribution-logo/{uuid}.{jpg|png}`
+
+Labels :
+
+| label            | description                      |        |
+| ---------------- | -------------------------------- | ------ |
+| `datasheet_name` | nom de la fiche de donnée        | string |
+| `type`           | valeur fixe : "attribution-logo" | string |
+
 ## un fichier GetCapabilities filtré pour chaque endpoint public des flux WFS, WMS (raster et vecteur) et WMTS
 
 Syntaxe du path :
