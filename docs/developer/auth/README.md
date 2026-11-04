@@ -201,4 +201,6 @@ Quand `CookieAuthenticator` détecte un token expiré sur une requête `/api/*`,
 
 **Taille du cookie** : les JWT Keycloak avec beaucoup de rôles/groupes peuvent être volumineux. La compression `gzdeflate` (niveau 6) est indispensable pour rester sous la limite navigateur de ~4 ko par cookie. Ne pas la retirer sans mesurer la taille réelle pour les comptes administrateurs.
 
+**Aucune route `GET` à effet de bord** : une image (`<img>`) de même origine, par exemple dans une description en markdown, envoie le cookie, et `SameSite=Lax` le laisse passer sur les navigations. Toute écriture passe par `POST`, `PUT`, `PATCH` ou `DELETE`.
+
 **Pas de session PHP** : le bloc `session:` est intentionnellement absent de `config/packages/framework.yaml`. Ne pas le réintroduire pour des fonctionnalités annexes (flash, CSRF, etc.) sans réévaluer l'architecture stateless.
