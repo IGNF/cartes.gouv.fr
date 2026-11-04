@@ -647,7 +647,7 @@ class CartesServiceApiService
         ];
         $configMetadata[] = [
             'format' => 'text/html',
-            'url' => implode('/', [$catalogueBaseUrl, 'dataset', $fileIdentifier]),
+            'url' => implode('/', [$catalogueBaseUrl, 'dataset', rawurlencode($fileIdentifier)]),
             'type' => ConfigurationMetadataTypes::OTHER,
         ];
 
