@@ -20,9 +20,33 @@ final class EntrepotMockResponseFactory
     /** @var list<array{method: string, path: string, body: string}> requêtes d’écriture reçues, conservées entre redémarrages du noyau */
     private static array $writeRequests = [];
 
+    private static int $usersMeCalls = 0;
+    private static bool $usersMeDown = false;
+    private static string $usersMeId = self::USER_ID;
+
     public static function reset(): void
     {
         self::$writeRequests = [];
+        self::$usersMeCalls = 0;
+        self::$usersMeDown = false;
+        self::$usersMeId = self::USER_ID;
+    }
+
+    // GET users/me répond pour un autre utilisateur jusqu’au prochain reset()
+    public static function answerUsersMeFor(string $userId): void
+    {
+        self::$usersMeId = $userId;
+    }
+
+    public static function usersMeCalls(): int
+    {
+        return self::$usersMeCalls;
+    }
+
+    // GET users/me répond 503 jusqu’au prochain reset()
+    public static function takeUsersMeDown(): void
+    {
+        self::$usersMeDown = true;
     }
 
     /** @return list<array{method: string, path: string, body: string}> */
@@ -44,8 +68,13 @@ final class EntrepotMockResponseFactory
         }
 
         if (self::ENTREPOT_HOST === $host && 'GET' === $method && str_ends_with($path, '/users/me')) {
+            ++self::$usersMeCalls;
+            if (self::$usersMeDown) {
+                return $this->json(['error' => 'Service Unavailable'], 503);
+            }
+
             return $this->json([
-                '_id' => self::USER_ID,
+                '_id' => self::$usersMeId,
                 'email' => FakeKeycloakClient::DEFAULT_RESOURCE_OWNER['email'],
                 'creation' => '2026-01-01T00:00:00Z',
                 'last_login' => '2026-10-29T08:00:00Z',

@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Exception\SandboxUnavailableException;
+use App\Security\User;
+use App\Services\CartesUserPayload;
 use App\Services\SandboxService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,9 +24,13 @@ class AppController extends AbstractController
         requirements: ['reactRouting' => Requirement::CATCH_ALL],
         options: ['expose' => true]
     )]
-    public function app(): Response
+    public function app(CartesUserPayload $cartesUserPayload): Response
     {
-        return $this->render('app.html.twig');
+        $user = $this->getUser();
+
+        return $this->render('app.html.twig', [
+            'user_payload' => $user instanceof User ? $cartesUserPayload->build($user, false) : null,
+        ]);
     }
 
     #[Route(

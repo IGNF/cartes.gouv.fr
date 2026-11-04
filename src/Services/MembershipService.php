@@ -7,6 +7,7 @@ use App\Security\User;
 use App\Services\EntrepotApi\CommunityApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\UserApiService;
+use App\Utils;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -29,7 +30,8 @@ class MembershipService
      */
     public function findByDatastore(string $datastoreId): ?array
     {
-        return $this->find(fn (User $user) => $user->findMembershipByDatastore($datastoreId));
+        // `community.datastore` est un id string dans users/me, absent si la communauté n'a pas de datastore
+        return $this->find('datastore', $datastoreId);
     }
 
     /**
@@ -37,7 +39,7 @@ class MembershipService
      */
     public function findByCommunity(string $communityId): ?array
     {
-        return $this->find(fn (User $user) => $user->findMembershipByCommunity($communityId));
+        return $this->find('_id', $communityId);
     }
 
     /**
@@ -103,44 +105,39 @@ class MembershipService
     {
         $user = $this->security->getUser();
         if ($user instanceof User && (null === $userId || $user->getId() === $userId)) {
-            $this->entrepotUserCache->invalidate($user->getKeycloakId());
+            $this->entrepotUserCache->invalidate($user->getId());
         }
     }
 
     /**
-     * Recharge users/me à travers le cache serveur et met à jour l'utilisateur du token.
+     * Profil Entrepôt (users/me) de l'utilisateur courant, en cache 60 s ; $fresh force la relecture.
+     *
+     * @return array<mixed>
      */
-    public function refreshCurrentUser(): void
+    public function currentProfile(bool $fresh = false): array
     {
         $user = $this->security->getUser();
         if (!$user instanceof User) {
-            return;
+            throw new \LogicException('Aucun utilisateur connecté');
         }
 
-        $user->updateFromApiInfo($this->entrepotUserCache->refresh($user->getKeycloakId()));
+        return $fresh ? $this->entrepotUserCache->refresh($user->getId()) : $this->entrepotUserCache->get($user->getId());
     }
 
     /**
-     * Cherche dans le token, puis une fois avec des données fraîches si absent (l'appartenance a pu changer depuis moins de 60 s).
-     *
-     * @param callable(User): (array<mixed>|null) $lookup
+     * Cherche dans le profil en cache, puis une fois avec des données fraîches si absent (l'appartenance a pu changer depuis moins de 60 s).
      *
      * @return array<mixed>|null
      */
-    private function find(callable $lookup): ?array
+    private function find(string $communityKey, string $value): ?array
     {
         $user = $this->security->getUser();
         if (!$user instanceof User) {
             return null;
         }
 
-        $membership = $lookup($user);
-        if (null !== $membership) {
-            return $membership;
-        }
+        $lookup = fn (array $profile) => Utils::array_find($profile['communities_member'] ?? [], fn (array $member) => ($member['community'][$communityKey] ?? null) === $value);
 
-        $user->updateFromApiInfo($this->entrepotUserCache->refreshThrottled($user->getKeycloakId()));
-
-        return $lookup($user);
+        return $lookup($this->entrepotUserCache->get($user->getId())) ?? $lookup($this->entrepotUserCache->refreshThrottled($user->getId()));
     }
 }

@@ -2,73 +2,66 @@
 
 namespace App\Security;
 
-use App\Services\EntrepotUserCache;
-use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
-use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
-use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
-use Symfony\Component\HttpClient\Exception\TimeoutException;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
 use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 
 /**
+ * Construit l'utilisateur depuis l'ID token du cookie, sans appel à Keycloak ni à l'Entrepôt.
+ *
  * @implements UserProviderInterface<User>
  */
 class KeycloakUserProvider implements UserProviderInterface
 {
     public function __construct(
-        private readonly ClientRegistry $clientRegistry,
         private readonly KeycloakTokenManager $tokenManager,
-        private readonly EntrepotUserCache $entrepotUserCache,
         private readonly LoggerInterface $logger,
-        private readonly CacheInterface $cache,
     ) {
     }
 
+    /**
+     * @throws TokenNotFoundException         pas de jeton dans le cookie
+     * @throws AuthenticationExpiredException ID token absent ou incomplet
+     */
     public function loadUser(): User
     {
-        /** @var KeycloakClient */
-        $keycloakClient = $this->clientRegistry->getClient('keycloak');
-
-        $accessToken = $this->tokenManager->getAccessToken();
-        if (null == $accessToken) {
+        if (!$this->tokenManager->getAccessToken() instanceof AccessToken) {
             $this->logger->debug('{class}: No token found', ['class' => self::class]);
             throw new TokenNotFoundException();
         }
 
-        try {
-            /** @var KeycloakResourceOwner */
-            $keycloakUser = $this->cache->get('keycloak-user-'.sha1((string) $accessToken), function (ItemInterface $item) use ($accessToken, $keycloakClient) {
-                $item->expiresAfter(60);
-
-                return $keycloakClient->fetchUserFromToken($accessToken);
-            });
-        } catch (\Throwable $th) {
-            $this->logger->debug('{class}: Failed to fetch user from token', ['class' => self::class]);
-            throw new AuthenticationExpiredException('Failed to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
+        $claims = $this->decodeIdToken((string) $this->tokenManager->getIdToken());
+        foreach (['sub', 'email', 'preferred_username'] as $claim) {
+            if (!is_string($claims[$claim] ?? null) || '' === $claims[$claim]) {
+                throw new AuthenticationExpiredException("ID token sans claim $claim");
+            }
         }
 
-        $keycloakId = $keycloakUser->getId();
-        if (null === $keycloakId) {
-            throw new \UnexpectedValueException('Utilisateur Keycloak sans identifiant (sub)');
-        }
+        return new User(
+            $claims['sub'],
+            $claims['email'],
+            $claims['preferred_username'],
+            is_string($claims['given_name'] ?? null) ? $claims['given_name'] : null,
+            is_string($claims['family_name'] ?? null) ? $claims['family_name'] : null,
+        );
+    }
 
-        try {
-            $apiUser = $this->entrepotUserCache->get($keycloakId);
-        } catch (TimeoutException $ex) {
-            $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
-            throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
-        }
+    /**
+     * Charge de l'ID token sans vérifier la signature : le cookie scellé en garantit l'origine.
+     *
+     * @return array<mixed>
+     */
+    private function decodeIdToken(string $idToken): array
+    {
+        $payload = explode('.', $idToken)[1] ?? '';
+        $claims = json_decode((string) base64_decode(strtr($payload, '-_', '+/'), true), true);
 
-        return new User($keycloakUser->toArray(), $apiUser);
+        return is_array($claims) ? $claims : [];
     }
 
     /**

@@ -15,7 +15,7 @@ final class FakeKeycloakClient extends KeycloakClient
     public const ACCESS_TOKEN = 'fake-access-token';
 
     public const DEFAULT_RESOURCE_OWNER = [
-        'sub' => 'kc-user-1',
+        'sub' => EntrepotMockResponseFactory::USER_ID,
         'email' => 'test@example.com',
         'preferred_username' => 'test',
         'given_name' => 'Test',
@@ -39,8 +39,20 @@ final class FakeKeycloakClient extends KeycloakClient
         return new AccessToken([
             'access_token' => self::ACCESS_TOKEN,
             'expires' => time() + $lifetimeSeconds,
-            'id_token' => 'fake-id-token',
+            'id_token' => self::idToken(self::DEFAULT_RESOURCE_OWNER),
         ]);
+    }
+
+    /**
+     * ID token à charge réelle ; en-tête et signature factices, comme le lit l'application (sans vérification).
+     *
+     * @param array<string, mixed> $claims
+     */
+    public static function idToken(array $claims): string
+    {
+        $encode = fn (string $json) => rtrim(strtr(base64_encode($json), '+/', '-_'), '=');
+
+        return $encode('{"alg":"none"}').'.'.$encode((string) json_encode($claims)).'.signature';
     }
 
     /** @param array<string, mixed> $options */
@@ -53,11 +65,6 @@ final class FakeKeycloakClient extends KeycloakClient
         }
 
         return self::createAccessToken();
-    }
-
-    public function fetchUserFromToken(AccessToken $accessToken): KeycloakResourceOwner
-    {
-        return new KeycloakResourceOwner(self::DEFAULT_RESOURCE_OWNER);
     }
 
     public function fetchUser(): KeycloakResourceOwner
