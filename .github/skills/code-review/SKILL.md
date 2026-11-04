@@ -30,7 +30,7 @@ description: Project review checklist for cartes.gouv.fr pull requests (Symfony 
 - Forms use React Hook Form + yup. Each `.test()` handles `undefined`.
 - Route and search params are validated against an enum with a fallback; `NaN` and empty values are handled.
 - No state setter passed directly as a DOM event handler. Non-submit buttons inside forms have `type="button"`.
-- React Query: no query key built from a possibly-`undefined` id; no `setQueryData` on an empty cache; `onSuccess` uses `variables` when the API returns no body.
+- React Query: no query key built from a possibly-`undefined` id; no `setQueryData` seeding placeholder data into an empty cache; `onSuccess` uses `variables` when the API returns no body.
 - npm dependencies go to `devDependencies`, except packages used at runtime by the Node cron jobs.
 - UI text lives in `.locale.ts(x)` files. French text uses the typographic apostrophe `’`. No em dash anywhere.
 
