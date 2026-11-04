@@ -167,6 +167,9 @@ const datastoreRoutes = {
     datastore_service_add_next: datastoreRoute.extend(
         {
             datasheetName: param.path.string,
+            // type de flux présélectionné ("wfs" | "wms" | "tms" | "wmts") et donnée stockée présélectionnée
+            type: param.query.optional.string,
+            storedDataId: param.query.optional.string,
         },
         (p) => `/donnees/${p.datasheetName}/next/service/ajout`
     ),
