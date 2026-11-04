@@ -578,24 +578,28 @@ class CartesServiceApiService
 
         $endpoint = $this->getEndpointByAccess($datastoreId, $type, $dto->access);
 
-        $thumbnailUrl = null !== $thumbnail ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
-        $logo = null !== $attributionLogo && null !== $dto->attribution
-            ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
-            : null;
-
-        $configRequestBody = $this->configurationRequestBuilder->build(
-            $dto,
-            $type,
-            $typeInfos,
-            $this->getNewConfigMetadata($apiMetadata['file_identifier']),
-            $logo,
-        );
         $configTags = [
             CommonTags::DATASHEET_NAME => $datasheetName,
             CommonTags::THEME_CATEGORIES => implode(', ', $dto->themes),
         ];
 
+        $thumbnailUrl = null;
+        $logo = null;
         try {
+            // les dépôts d’images sont dans le try : un échec du second ne doit pas laisser le premier orphelin
+            $thumbnailUrl = null !== $thumbnail ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
+            $logo = null !== $attributionLogo && null !== $dto->attribution
+                ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
+                : null;
+
+            $configRequestBody = $this->configurationRequestBuilder->build(
+                $dto,
+                $type,
+                $typeInfos,
+                $this->getNewConfigMetadata($apiMetadata['file_identifier']),
+                $logo,
+            );
+
             $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody)->array();
             try {
                 $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->array();
