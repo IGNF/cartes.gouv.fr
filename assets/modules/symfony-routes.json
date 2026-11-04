@@ -885,7 +885,7 @@
             "requirements": [],
             "hosttokens": [],
             "methods": [
-                "GET"
+                "POST"
             ],
             "schemes": []
         },

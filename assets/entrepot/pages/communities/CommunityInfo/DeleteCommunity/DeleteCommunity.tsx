@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { DatastoreCleanupEntitiesCount, FailedCleanupItem } from "@/@types/app";
@@ -11,8 +11,9 @@ import Progress from "@/components/Utils/Progress";
 import { useCommunity } from "@/contexts/community";
 import { useDatastore } from "@/contexts/datastore";
 import api from "@/entrepot/api";
-import useEventSource from "@/hooks/useEventSource";
 import { getApiErrorDescription } from "@/modules/apiError";
+import { apiFetch } from "@/modules/jsonFetch";
+import { readServerEvents } from "@/modules/serverEvents";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { routes } from "@/router/router";
 import { deleteCommunityModal } from "./deleteCommunityModal";
@@ -21,15 +22,7 @@ type DeleteCommunityState = "disclaimer" | "loading" | "confirm" | "connecting" 
 
 type DatastoreCleanupProgress = Record<string, { initialCount: number; currentCount: number }>;
 
-type DatastoreCleanupStreamPayload = { entities?: DatastoreCleanupEntitiesCount };
-type DatastoreCleanupStreamDonePayload = DatastoreCleanupStreamPayload & { failedItems?: FailedCleanupItem[] };
-type DatastoreCleanupStreamFailedPayload = DatastoreCleanupStreamPayload & { message?: string };
-type DatastoreCleanupStreamEvents = {
-    started: DatastoreCleanupStreamPayload;
-    progress: DatastoreCleanupStreamPayload;
-    done: DatastoreCleanupStreamDonePayload;
-    failed: DatastoreCleanupStreamFailedPayload;
-};
+type DatastoreCleanupStreamPayload = { entities?: DatastoreCleanupEntitiesCount; failedItems?: FailedCleanupItem[]; message?: string };
 
 const ENTITY_ORDER = ["processing_executions", "offerings", "configurations", "metadata", "statics", "annexes", "uploads", "stored_data"] as const;
 const ENTITY_LABELS: Record<(typeof ENTITY_ORDER)[number], string> & Partial<Record<string, string>> = {
@@ -120,42 +113,64 @@ export default function DeleteCommunity() {
         },
     });
 
-    const { connect: connectStream, disconnect: disconnectStream } = useEventSource<DatastoreCleanupStreamEvents>({
-        url: api.datastore.getCleanupStreamUrl(datastore._id),
-        autoConnect: false,
-        handlers: {
-            started: (payload) => {
-                setStoredState("cleanup_progress");
-                updateCleanupProgress(payload.entities ?? {});
-            },
-            progress: (payload) => {
-                setStoredState("cleanup_progress");
-                updateCleanupProgress(payload.entities ?? {});
-            },
-            done: (payload) => {
-                updateCleanupProgress(payload.entities ?? {});
-                disconnectStream();
-                setStoredState("deleting");
-                deleteCommunityMutation.mutate(payload.failedItems ?? []);
-            },
-            failed: (payload) => {
-                updateCleanupProgress(payload.entities ?? {});
-                setStoredState("error");
-                setStreamError(payload.message ?? "La suppression du contenu a échoué.");
-                disconnectStream();
-                // le contenu rechargé remplace la progression du flux, si le rechargement réussit
-                void refetchCleanupContent().then((result) => {
-                    if (result.isSuccess) setStreamProgress(undefined);
-                });
-            },
-        },
-        onError: (error) => {
-            if (error.type === "connection") {
-                setStoredState("error");
-                setStreamError("La connexion de suppression a été interrompue.");
+    const streamAbortRef = useRef<AbortController | null>(null);
+
+    const disconnectStream = useCallback((): void => {
+        streamAbortRef.current?.abort();
+        streamAbortRef.current = null;
+    }, []);
+
+    async function connectStream(): Promise<void> {
+        const controller = new AbortController();
+        streamAbortRef.current = controller;
+
+        try {
+            const response = await apiFetch(api.datastore.getCleanupStreamUrl(datastore._id), {
+                method: "POST",
+                signal: controller.signal,
+                headers: { Accept: "text/event-stream" },
+            });
+
+            for await (const { event, data } of readServerEvents(response)) {
+                let payload: DatastoreCleanupStreamPayload;
+                try {
+                    payload = JSON.parse(data) as DatastoreCleanupStreamPayload;
+                } catch {
+                    continue; // événement illisible ignoré, comme avec EventSource
+                }
+
+                switch (event) {
+                    case "started":
+                    case "progress":
+                        setStoredState("cleanup_progress");
+                        updateCleanupProgress(payload.entities ?? {});
+                        break;
+                    case "done":
+                        updateCleanupProgress(payload.entities ?? {});
+                        disconnectStream();
+                        setStoredState("deleting");
+                        deleteCommunityMutation.mutate(payload.failedItems ?? []);
+                        return;
+                    case "failed":
+                        updateCleanupProgress(payload.entities ?? {});
+                        setStoredState("error");
+                        setStreamError(payload.message ?? "La suppression du contenu a échoué.");
+                        disconnectStream();
+                        // le contenu rechargé remplace la progression du flux, si le rechargement réussit
+                        void refetchCleanupContent().then((result) => {
+                            if (result.isSuccess) setStreamProgress(undefined);
+                        });
+                        return;
+                }
             }
-        },
-    });
+        } catch {
+            // annulation volontaire (bouton, fermeture, démontage) : pas d’erreur à afficher
+            if (controller.signal.aborted) return;
+        }
+        // erreur réseau, ou flux terminé sans done ni failed
+        setStoredState("error");
+        setStreamError("La connexion de suppression a été interrompue.");
+    }
 
     function startDeletion(): void {
         if (isActive) return;
@@ -165,7 +180,7 @@ export default function DeleteCommunity() {
         if (hasContent || isCleanupContentError) {
             setStoredState("connecting");
             disconnectStream();
-            connectStream();
+            void connectStream();
         } else {
             setStoredState("deleting");
             deleteCommunityMutation.mutate([]);
@@ -209,7 +224,7 @@ export default function DeleteCommunity() {
                     {
                         children: "Annuler",
                         priority: "secondary",
-                        onClick: disconnectStream,
+                        onClick: () => disconnectStream(),
                     },
                     state === "disclaimer"
                         ? { children: "Continuer", onClick: proceedFromDisclaimer, doClosesModal: false }
