@@ -7,8 +7,9 @@ use App\Workflow\DatastoreCleanupWorkflow;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\EventStreamResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\ServerEvent;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -35,28 +36,22 @@ class DatastoreCleanupController extends AbstractController implements ApiContro
         ]);
     }
 
-    #[Route('/delete-stream', name: 'delete_content_stream', methods: ['GET'])]
-    public function deleteContentStream(string $datastoreId): StreamedResponse
+    #[Route('/delete-stream', name: 'delete_content_stream', methods: ['POST'], condition: 'request.isXmlHttpRequest()')]
+    public function deleteContentStream(string $datastoreId): EventStreamResponse
     {
-        ini_set('zlib.output_compression', '0');
-
-        $response = new StreamedResponse(function () use ($datastoreId) {
+        return new EventStreamResponse(function (EventStreamResponse $response) use ($datastoreId): void {
             set_time_limit(0);
 
-            $emit = function (string $event, array $payload): void {
-                echo "event: $event\n";
-                echo 'data: '.json_encode($payload)."\n\n";
-
-                StreamedResponse::closeOutputBuffers(0, true);
-                flush();
+            $emit = static function (string $type, array $payload) use ($response): void {
+                $response->sendEvent(new ServerEvent(json_encode($payload, JSON_THROW_ON_ERROR), type: $type));
             };
 
-            $counts = $this->datastoreCleanupWorkflow->count($datastoreId);
-            $emit('started', [
-                'entities' => $counts,
-            ]);
-
             try {
+                $counts = $this->datastoreCleanupWorkflow->count($datastoreId);
+                $emit('started', [
+                    'entities' => $counts,
+                ]);
+
                 $result = $this->datastoreCleanupWorkflow->deleteSequentially(
                     $datastoreId,
                     $emit,
@@ -82,12 +77,5 @@ class DatastoreCleanupController extends AbstractController implements ApiContro
                 }
             }
         });
-
-        $response->headers->set('Content-Type', 'text/event-stream');
-        $response->headers->set('Cache-Control', 'no-cache, no-transform');
-        $response->headers->set('Connection', 'keep-alive');
-        $response->headers->set('X-Accel-Buffering', 'no');
-
-        return $response;
     }
 }

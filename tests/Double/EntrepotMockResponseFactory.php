@@ -59,7 +59,8 @@ final class EntrepotMockResponseFactory
 
         $datastorePath = '/api/datastores/'.self::DATASTORE_ID;
 
-        if (self::ENTREPOT_HOST === $host && 'GET' === $method && $datastorePath.'/metadata' === $path) {
+        // listes vides : entrepôt sans contenu
+        if (self::ENTREPOT_HOST === $host && 'GET' === $method && 1 === preg_match('#^'.$datastorePath.'/(processings/executions|offerings|configurations|metadata|statics|annexes|stored_data|uploads)$#', $path)) {
             return $this->json([], 200, ['content-range' => '0-0/0']);
         }
 
