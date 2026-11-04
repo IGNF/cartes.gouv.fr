@@ -49,21 +49,6 @@ class UploadIntegrationWorkflow
     /**
      * @param array<string,string> $progress
      */
-    public function getCurrentStepIndex(array $progress): int
-    {
-        $steps = $this->getStepNames();
-        foreach ($steps as $index => $stepName) {
-            if (($progress[$stepName] ?? JobStatuses::WAITING) !== JobStatuses::SUCCESSFUL) {
-                return $index;
-            }
-        }
-
-        return count($steps);
-    }
-
-    /**
-     * @param array<string,string> $progress
-     */
     public function isIntegrationCompleted(array $progress): bool
     {
         $steps = $this->getStepNames();

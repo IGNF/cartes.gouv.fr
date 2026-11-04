@@ -52,7 +52,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
         refetchOnMount: "always",
     });
 
-    // mise à jour de integrationProgress et integrationCurrentStep à chaque refetch de pingIntProgQuery
+    // mise à jour de integrationProgress à chaque refetch de pingIntProgQuery
     const {
         integrationProgress,
         upload,

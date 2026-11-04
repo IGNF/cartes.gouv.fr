@@ -4,6 +4,8 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\Form\WfsFormDTO;
+use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Dto\Services\Wfs\WfsServiceDTO;
 use App\Dto\Services\Wfs\WfsTableDTO;
 use App\Exception\ApiException;
@@ -13,9 +15,13 @@ use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -35,8 +41,65 @@ class WfsController extends ServiceController implements ApiControllerInterface
         CapabilitiesService $capabilitiesService,
         CartesMetadataApiService $cartesMetadataApiService,
         SandboxService $sandboxService,
+        private MultipartPayloadMapper $payloadMapper,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
+    }
+
+    /**
+     * Publication depuis le nouveau formulaire : champ JSON `data` (WfsFormDTO) et fichiers `thumbnail`, `attribution_logo`.
+     */
+    #[Route('/publish', name: 'publish', methods: ['POST'])]
+    public function publish(string $datastoreId, string $storedDataId, Request $request): JsonResponse
+    {
+        $dto = $this->payloadMapper->map($request, WfsFormDTO::class);
+        $thumbnail = $request->files->get('thumbnail');
+        $attributionLogo = $request->files->get('attribution_logo');
+
+        try {
+            $offering = $this->cartesServiceApiService->publishFromForm(
+                $datastoreId,
+                $storedDataId,
+                $dto,
+                ConfigurationTypes::WFS,
+                $this->getFormConfigTypeInfos($dto, $storedDataId),
+                $thumbnail instanceof UploadedFile ? $thumbnail : null,
+                $attributionLogo instanceof UploadedFile ? $attributionLogo : null,
+            );
+
+            return $this->json($offering, Response::HTTP_CREATED);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getFormConfigTypeInfos(WfsFormDTO $dto, string $storedDataId): array
+    {
+        $relations = [];
+
+        /** @var WfsTableFormDTO $table */
+        foreach ($dto->tables as $table) {
+            $relation = [
+                'native_name' => $table->native_name,
+                'public_name' => $table->public_name,
+                'title' => $table->title,
+                'abstract' => $table->description,
+            ];
+            if ([] !== $table->keywords) {
+                $relation['keywords'] = $table->keywords;
+            }
+            $relations[] = $relation;
+        }
+
+        return [
+            'used_data' => [[
+                'relations' => $relations,
+                'stored_data' => $storedDataId,
+            ]],
+        ];
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]

@@ -59,9 +59,7 @@ Le workflow a 3 étapes fixes. Chaque étape est un couple (nom, statut).
 2. Calcul de progression
     - Le backend calcule un tableau progress (étape -> statut).
     - Il détermine l'étape courante (première étape non successful).
-    - Il écrit les tags :
-        - integration_progress (json encodé)
-        - integration_current_step (index de l'étape courante)
+    - Il écrit le tag integration_progress (json encodé).
 
 3. Avancement contrôlé
     - Si l'étape courante est en waiting, le backend peut avancer d'une étape.
@@ -84,7 +82,6 @@ Le workflow a 3 étapes fixes. Chaque étape est un couple (nom, statut).
     - proc_int_id
     - vectordb_id
     - integration_progress
-    - integration_current_step
 - stored_data (VECTOR-DB)
     - upload_id
     - proc_int_id

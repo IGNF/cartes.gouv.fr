@@ -157,21 +157,11 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
             }
 
-            $currentStepIndex = $uploadIntegrationWorkflow->getCurrentStepIndex($progress);
-
             $progressJson = json_encode($progress);
-            $stepString = (string) $currentStepIndex;
-            $existingProgressJson = $upload['tags'][UploadTags::INTEGRATION_PROGRESS] ?? null;
-            $existingStepString = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? (string) $upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP] : null;
-
-            $uploadTags = [
-                UploadTags::INTEGRATION_PROGRESS => $progressJson,
-                UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
-            ];
 
             // mise à jour état des étapes de l'intégration uniquement si changement
-            if ($existingProgressJson !== $progressJson || $existingStepString !== $stepString) {
-                $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags)->await();
+            if (($upload['tags'][UploadTags::INTEGRATION_PROGRESS] ?? null) !== $progressJson) {
+                $this->uploadApiService->addTags($datastoreId, $uploadId, [UploadTags::INTEGRATION_PROGRESS => $progressJson])->await();
             }
 
             // supprime livraison si intégration terminée
@@ -184,7 +174,6 @@ class UploadController extends AbstractController implements ApiControllerInterf
             return $this->json([
                 'upload' => $upload,
                 UploadTags::INTEGRATION_PROGRESS => $progressJson,
-                UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
             ]);
         } catch (ApiException|AppException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);

@@ -39,11 +39,12 @@
 
 ### Onglet "Flux" (fiche de données refondue)
 
-| Action               | Droits nécessaires | En l'absence de droits    |
-| -------------------- | ------------------ | ------------------------- |
-| Créer un flux        | BROADCAST          | Ne pas afficher le bouton |
-| Menu - Mettre à jour | BROADCAST          | Ne pas afficher l'action  |
-| Menu - Supprimer     | BROADCAST          | Ne pas afficher l'action  |
+| Action                      | Droits nécessaires | En l'absence de droits    |
+| --------------------------- | ------------------ | ------------------------- |
+| Créer un flux               | BROADCAST          | Ne pas afficher le bouton |
+| Formulaire - vignette, logo | ANNEX              | Ne pas afficher le champ  |
+| Menu - Mettre à jour        | BROADCAST          | Ne pas afficher l'action  |
+| Menu - Supprimer            | BROADCAST          | Ne pas afficher l'action  |
 
 ### Onglet "Document"
 

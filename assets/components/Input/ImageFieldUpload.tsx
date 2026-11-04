@@ -6,7 +6,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { tss } from "tss-react";
 
-import { acceptToInputAttribute, type ImageSize } from "@/utils";
+import { acceptToInputAttribute, type ImageFileValidationError, type ImageSize, validateImageFile } from "@/utils";
 import ImageCropModal, { useImageCropModal } from "./ImageCropModal/ImageCropModal";
 
 import placeholder1x1 from "../../img/placeholder.1x1.png";
@@ -26,10 +26,36 @@ interface ImageFieldUploadProps {
     minResolution?: ImageSize;
     /** URL d'une image déjà enregistrée (mode édition) */
     existingUrl?: string;
+    /** false : le fichier choisi est pris tel quel après validation, sans modale de recadrage (ex : logo) */
+    crop?: boolean;
 }
 
+const imageErrorMessage = (error: ImageFileValidationError): string => {
+    switch (error.code) {
+        case "file_too_large":
+            return `Le fichier dépasse ${error.maxFileSizeMo} Mo`;
+        case "invalid_format":
+            return `Formats acceptés : ${error.accept.join(", ")}`;
+        case "not_decodable":
+            return "Le fichier n’est pas une image lisible";
+        case "resolution_too_low":
+            return `Résolution minimale : ${error.min.width} × ${error.min.height} px`;
+    }
+};
+
 export default function ImageFieldUpload(props: ImageFieldUploadProps) {
-    const { name, label, hintText, modalTitle, accept = ["jpg", "jpeg", "png"], aspect = 1, maxFileSizeMo = 2, minResolution, existingUrl } = props;
+    const {
+        name,
+        label,
+        hintText,
+        modalTitle,
+        accept = ["jpg", "jpeg", "png"],
+        aspect = 1,
+        maxFileSizeMo = 2,
+        minResolution,
+        existingUrl,
+        crop = true,
+    } = props;
     const { classes, cx } = useStyles();
 
     const { control } = useFormContext();
@@ -44,6 +70,9 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
     const originalFileRef = useRef<File | undefined>(undefined);
 
     const { hovered: isHovered, ref: wrapperRef } = useHover<HTMLDivElement>();
+
+    // erreur de validation du fichier pris sans recadrage
+    const [fileError, setFileError] = useState<string | undefined>(undefined);
 
     // aperçu du File recadré via URL objet (révoquée au remplacement / démontage)
     const [objectUrl, setObjectUrl] = useState<string | undefined>(undefined);
@@ -64,15 +93,25 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
     const previewUrl = value instanceof File ? objectUrl : value === null ? undefined : existingUrl;
     const showPreview = Boolean(previewUrl);
 
-    const handleFilePicked = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleFilePicked = (e: ChangeEvent<HTMLInputElement>, onChange: (file: File) => void) => {
         const file = e.target.files?.[0];
         // réinitialisation de l'input natif : la valeur du formulaire est le File recadré produit par la modale
         e.target.value = "";
-        if (file) {
-            originalFileRef.current = file;
-            setPendingImage(file);
-            cropModal.open();
+        if (!file) {
+            return;
         }
+        if (!crop) {
+            validateImageFile(file, { accept, maxFileSizeMo, minResolution }).then((errors) => {
+                setFileError(errors.length > 0 ? imageErrorMessage(errors[0]) : undefined);
+                if (errors.length === 0) {
+                    onChange(file);
+                }
+            });
+            return;
+        }
+        originalFileRef.current = file;
+        setPendingImage(file);
+        cropModal.open();
     };
 
     const handleEdit = () => {
@@ -87,7 +126,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
             control={control}
             name={name}
             render={({ field: { onChange }, fieldState: { error } }) => {
-                const errorMsg = error?.message;
+                const errorMsg = error?.message ?? fileError;
 
                 return (
                     <div className={fr.cx("fr-input-group", !!errorMsg && "fr-input-group--error")}>
@@ -107,14 +146,16 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                                     />
                                     {isHovered && showPreview && (
                                         <div className={classes.hoverOverlay}>
-                                            <Button
-                                                iconId="fr-icon-edit-line"
-                                                priority="tertiary no outline"
-                                                title="Modifier l’image"
-                                                size="small"
-                                                type="button"
-                                                onClick={handleEdit}
-                                            />
+                                            {crop && (
+                                                <Button
+                                                    iconId="fr-icon-edit-line"
+                                                    priority="tertiary no outline"
+                                                    title="Modifier l’image"
+                                                    size="small"
+                                                    type="button"
+                                                    onClick={handleEdit}
+                                                />
+                                            )}
                                             <Button
                                                 iconId="fr-icon-delete-line"
                                                 priority="tertiary no outline"
@@ -141,7 +182,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                                         stateRelatedMessage={errorMsg}
                                         nativeInputProps={{
                                             accept: acceptToInputAttribute(accept),
-                                            onChange: handleFilePicked,
+                                            onChange: (e) => handleFilePicked(e, onChange),
                                         }}
                                         className={fr.cx("fr-input-group")}
                                     />

@@ -31,7 +31,7 @@ class UploadAddDTO
 
         #[SerializedName('data_upload_path')]
         #[Assert\NotBlank(message: 'Veuillez déposer un fichier de données')]
-        #[Assert\Regex(pattern: '/^[^\/\\\\]+$/', message: 'Chemin de fichier invalide')]
+        #[Assert\Regex(pattern: '#^[0-9a-f-]{36}/[^/\\\\]+$#', message: 'Chemin de fichier invalide')]
         public readonly string $data_upload_path = '',
 
         #[Assert\NotBlank(message: 'Le nom du jeu de données est obligatoire')]
