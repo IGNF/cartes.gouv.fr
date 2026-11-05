@@ -1,0 +1,14 @@
+framework:
+    rate_limiter:
+        # formulaire de contact public : chaque appel envoie un courriel au support ; compteur APCu par pod en production
+        contact_us:
+            policy: sliding_window
+            limit: 5
+            interval: "10 minutes"
+
+when@test:
+    framework:
+        rate_limiter:
+            contact_us:
+                # le cache « array » des tests est vidé à chaque requête : stockage en mémoire non réinitialisé
+                storage_service: app.rate_limiter.in_memory_storage

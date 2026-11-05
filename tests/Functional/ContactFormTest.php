@@ -53,6 +53,33 @@ final class ContactFormTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
+    public function testContactUsRefusesTheSixthCallFromTheSameIpWithin10Minutes(): void
+    {
+        // hors débogage : le corps d’erreur ne doit exposer ni classe ni pile d’appels
+        $client = self::createClient(['debug' => false]);
+        // le compteur vit dans le cache du noyau : pas de redémarrage entre deux requêtes
+        $client->disableReboot();
+        $honeypot = $this->json(['importance' => '1']);
+
+        for ($i = 1; $i <= 5; ++$i) {
+            $client->xmlHttpRequest('POST', self::BASE.'/contact_us', content: $honeypot);
+            self::assertResponseIsSuccessful("appel n° {$i}");
+        }
+
+        $client->xmlHttpRequest('POST', self::BASE.'/contact_us', content: $honeypot);
+
+        self::assertResponseStatusCodeSame(429);
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json');
+        self::assertGreaterThan(0, (int) $client->getResponse()->headers->get('Retry-After'));
+        $body = $this->jsonResponse($client);
+        self::assertSame('Trop de demandes, réessayez plus tard', $body['detail']);
+        self::assertArrayNotHasKey('class', $body);
+        self::assertArrayNotHasKey('trace', $body);
+
+        $client->xmlHttpRequest('POST', self::BASE.'/contact_us', server: ['REMOTE_ADDR' => '192.0.2.10'], content: $honeypot);
+        self::assertResponseIsSuccessful();
+    }
+
     public function testContactUsRejectsAnInvalidEmail(): void
     {
         $client = self::createClient();
