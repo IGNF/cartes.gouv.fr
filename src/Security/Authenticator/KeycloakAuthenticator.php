@@ -8,6 +8,7 @@ use App\Security\State\LoginStateSerializer;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,6 +29,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public const AFTER_LOGOUT_PATH = 'publier-une-donnee';
     public const LOGIN_FAILED_PATH = 'publier-une-donnee?login_failed=1';
     public const POPUP_CALLBACK_ROUTE = 'cartesgouvfr_security_login_popup_callback';
+    public const STATE_COOKIE_NAME = '__Host-CGSTATE';
     private const REQUEST_ATTR_STATE = '_login_state';
 
     public function __construct(
@@ -71,6 +73,11 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         }
 
         $request->attributes->set(self::REQUEST_ATTR_STATE, $statePayload);
+        $nonce = $statePayload['nonce'] ?? null;
+        if (!is_string($nonce) || '' === $nonce || !hash_equals($nonce, $request->cookies->getString(self::STATE_COOKIE_NAME))) {
+            throw new AuthenticationException('Paramètre state OAuth2 ouvert par un autre navigateur.');
+        }
+
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 
         try {
@@ -104,16 +111,18 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         $statePayload = $request->attributes->get(self::REQUEST_ATTR_STATE, []);
-        if ($this->isPopup($statePayload)) {
-            return new RedirectResponse($this->router->generate(self::POPUP_CALLBACK_ROUTE));
-        }
-
         $referer = $statePayload['referer'] ?? null;
-        $redirectUrl = is_string($referer) && str_starts_with($referer, $request->getSchemeAndHttpHost().'/')
-            ? $referer
-            : $this->router->generate(self::HOME_ROUTE, [], RouterInterface::ABSOLUTE_URL);
+        $redirectUrl = match (true) {
+            $this->isPopup($statePayload) => $this->router->generate(self::POPUP_CALLBACK_ROUTE),
+            is_string($referer) && str_starts_with($referer, $request->getSchemeAndHttpHost().'/') => $referer,
+            default => $this->router->generate(self::HOME_ROUTE, [], RouterInterface::ABSOLUTE_URL),
+        };
 
-        return new RedirectResponse($redirectUrl);
+        // effacé sur succès seulement : un échec (autre onglet en cours de login) ne doit pas faire échouer le login qui détient le cookie
+        $response = new RedirectResponse($redirectUrl);
+        $response->headers->clearCookie(self::STATE_COOKIE_NAME, '/', null, true, true, Cookie::SAMESITE_LAX);
+
+        return $response;
     }
 
     /**

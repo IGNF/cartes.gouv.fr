@@ -8,6 +8,7 @@ use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Stevenmaguire\OAuth2\Client\Provider\Keycloak;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,14 +38,18 @@ class SecurityController extends AbstractController
         $referer = $request->headers->get('referer');
         $safeReferer = is_string($referer) && \strlen($referer) <= 2048 && str_starts_with($referer, $request->getSchemeAndHttpHost().'/') ? $referer : null;
 
+        // le cookie lie le state à ce navigateur : un lien /login/check fabriqué par un tiers échoue (login CSRF)
+        $nonce = bin2hex(random_bytes(16));
         $state = $loginStateSerializer->encode([
             'referer' => $safeReferer,
             'popup' => $popup,
+            'nonce' => $nonce,
         ]);
 
-        $client = $clientRegistry->getClient('keycloak');
+        $response = $clientRegistry->getClient('keycloak')->redirect(['openid', 'profile', 'email'], ['state' => $state]);
+        $response->headers->setCookie(Cookie::create(KeycloakAuthenticator::STATE_COOKIE_NAME, $nonce, time() + LoginStateSerializer::LIFETIME, '/', null, true, true, false, Cookie::SAMESITE_LAX));
 
-        return $client->redirect(['openid', 'profile', 'email'], ['state' => $state]);
+        return $response;
     }
 
     #[Route('/login/check', name: 'login_check', methods: ['GET'])]
