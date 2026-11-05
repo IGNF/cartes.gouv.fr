@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Security\Authenticator\KeycloakAuthenticator;
 use App\Security\State\LoginStateSerializer;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Stevenmaguire\OAuth2\Client\Provider\Keycloak;
@@ -29,7 +30,7 @@ class SecurityController extends AbstractController
     ): RedirectResponse {
         $iamLoginDisabled = boolval($params->get('iam_login_disabled'));
         if ($iamLoginDisabled) {
-            return $this->redirect($this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL).'connexion-desactivee');
+            return $this->redirect($this->generateUrl(KeycloakAuthenticator::HOME_ROUTE, [], UrlGeneratorInterface::ABSOLUTE_URL).'connexion-desactivee');
         }
 
         // le referer voyage dans le state de l’URL Keycloak : longueur bornée

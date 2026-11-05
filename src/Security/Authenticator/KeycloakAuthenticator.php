@@ -23,8 +23,10 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
 {
     public const LOGIN_ROUTE = 'cartesgouvfr_security_login';
     public const LOGIN_CHECK_ROUTE = 'cartesgouvfr_security_login_check';
-    public const SUCCESS_ROUTE = 'cartesgouvfr_app';
+    // accueil de l’application, repli après connexion ; les chemins suivants s’y ajoutent
     public const HOME_ROUTE = 'cartesgouvfr_app';
+    public const AFTER_LOGOUT_PATH = 'publier-une-donnee';
+    public const LOGIN_FAILED_PATH = 'publier-une-donnee?login_failed=1';
     public const POPUP_CALLBACK_ROUTE = 'cartesgouvfr_security_login_popup_callback';
     private const REQUEST_ATTR_STATE = '_login_state';
 
@@ -109,7 +111,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         $referer = $statePayload['referer'] ?? null;
         $redirectUrl = is_string($referer) && str_starts_with($referer, $request->getSchemeAndHttpHost().'/')
             ? $referer
-            : $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
+            : $this->router->generate(self::HOME_ROUTE, [], RouterInterface::ABSOLUTE_URL);
 
         return new RedirectResponse($redirectUrl);
     }
@@ -128,7 +130,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
             return new RedirectResponse($this->router->generate(self::POPUP_CALLBACK_ROUTE));
         }
 
-        return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?login_failed=1');
+        return new RedirectResponse($this->router->generate(self::HOME_ROUTE).self::LOGIN_FAILED_PATH);
     }
 
     /** @param array<string, mixed> $statePayload */

@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Security\Authenticator\KeycloakAuthenticator;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Stevenmaguire\OAuth2\Client\Provider\Keycloak;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -26,7 +27,7 @@ class LogoutSubscriber
         $idToken = $this->tokenManager->getIdToken();
         $this->tokenManager->clearAccessToken();
 
-        $redirectUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL).'publier-une-donnee';
+        $redirectUrl = $this->urlGenerator->generate(KeycloakAuthenticator::HOME_ROUTE, [], UrlGeneratorInterface::ABSOLUTE_URL).KeycloakAuthenticator::AFTER_LOGOUT_PATH;
 
         if ('test' === $this->parameters->get('app_env') || null === $idToken) {
             $response = new RedirectResponse($redirectUrl);
