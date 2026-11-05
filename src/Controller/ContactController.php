@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -33,10 +34,16 @@ class ContactController extends AbstractController
         name: 'contact_us',
         options: ['expose' => true],
         methods: ['POST'])]
-    public function contact(Request $request, RateLimiterFactory $contactUsLimiter): JsonResponse
+    public function contact(Request $request, RateLimiterFactory $contactUsLimiter, LockFactory $lockFactory): JsonResponse
     {
-        // avant tout contrôle : les appels de robots comptent aussi
-        $limit = $contactUsLimiter->create($request->getClientIp())->consume();
+        // avant tout contrôle : les appels de robots comptent aussi ; verrou commun, le compteur reste par adresse IP
+        $lock = $lockFactory->createLock('contact_us_limiter');
+        $lock->acquire(true);
+        try {
+            $limit = $contactUsLimiter->create($request->getClientIp())->consume();
+        } finally {
+            $lock->release();
+        }
         if (!$limit->isAccepted()) {
             throw new AppException('Trop de demandes, réessayez plus tard', Response::HTTP_TOO_MANY_REQUESTS, headers: ['Retry-After' => (string) max(1, $limit->getRetryAfter()->getTimestamp() - time())]);
         }
