@@ -9,18 +9,25 @@ export const LOGIN_POPUP_NAME = "cartesgouvfr-login";
 export const LOGIN_POPUP_FEATURES = "popup,width=500,height=650";
 
 let pending: Promise<void> | null = null;
+let openPopup: Window | null = null;
 
 /** reconnexion dans une popup Keycloak, à appeler depuis un gestionnaire de clic (sinon le navigateur la bloque) */
 export function reconnect(): Promise<void> {
-    // un second clic réutilise la popup en cours : rouvrir la renverrait au début du formulaire Keycloak
-    pending ??= openAndWait().finally(() => {
+    // un second clic ramène la popup en cours au premier plan : rouvrir la renverrait au début du formulaire Keycloak
+    if (pending) {
+        openPopup?.focus();
+        return pending;
+    }
+    pending = openAndWait().finally(() => {
         pending = null;
+        openPopup = null;
     });
     return pending;
 }
 
 async function openAndWait(): Promise<void> {
     const popup = window.open(SymfonyRouting.generate("cartesgouvfr_security_login", { popup: 1 }), LOGIN_POPUP_NAME, LOGIN_POPUP_FEATURES);
+    openPopup = popup;
     if (popup === null) {
         // popup bloquée : connexion dans l’onglet, retour sur la page par le referer
         window.location.assign(SymfonyRouting.generate("cartesgouvfr_security_login"));
@@ -39,7 +46,6 @@ async function openAndWait(): Promise<void> {
         return;
     }
 
-    // dans cet ordre : l’invalidation ne recharge pas une requête encore désactivée
     queryClient.setQueryData(RQKeys.user_me(), user);
     useAuthStore.getState().setSessionExpired(false);
     void queryClient.invalidateQueries();

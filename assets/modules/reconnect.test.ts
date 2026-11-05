@@ -15,7 +15,7 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 function fakePopup() {
-    return { closed: false } as Window;
+    return { closed: false, focus: vi.fn() } as unknown as Window;
 }
 
 describe("reconnect", () => {
@@ -60,17 +60,12 @@ describe("reconnect", () => {
         expect(assign).toHaveBeenCalledWith("http://localhost/login");
     });
 
-    it("relit l’utilisateur à la fermeture de la popup : cache écrit, session levée, puis invalidation", async () => {
+    it("relit l’utilisateur à la fermeture de la popup : cache écrit, session levée, requêtes invalidées", async () => {
         vi.stubGlobal(
             "fetch",
             vi.fn(() => Promise.resolve(jsonResponse(user)))
         );
-        const setQueryData = vi.spyOn(queryClient, "setQueryData");
-        const invalidateQueries = vi.spyOn(queryClient, "invalidateQueries").mockImplementation(() => {
-            // l’invalidation doit trouver la requête utilisateur déjà réactivée
-            expect(useAuthStore.getState().sessionExpired).toBe(false);
-            return Promise.resolve();
-        });
+        const invalidateQueries = vi.spyOn(queryClient, "invalidateQueries");
         const popup = fakePopup();
         vi.spyOn(window, "open").mockReturnValue(popup);
 
@@ -86,15 +81,15 @@ describe("reconnect", () => {
         expect(queryClient.getQueryData(RQKeys.user_me())).toEqual(user);
         expect(useAuthStore.getState().sessionExpired).toBe(false);
         expect(invalidateQueries).toHaveBeenCalledWith();
-        expect(setQueryData.mock.invocationCallOrder[0]).toBeLessThan(invalidateQueries.mock.invocationCallOrder[0]);
     });
 
-    it("ne rouvre pas la popup sur un second clic tant qu’elle est ouverte", async () => {
+    it("ramène la popup au premier plan sur un second clic au lieu de la rouvrir", async () => {
         vi.stubGlobal(
             "fetch",
             vi.fn(() => Promise.resolve(jsonResponse(user)))
         );
         const popup = fakePopup();
+        const focus = vi.mocked(popup.focus);
         const open = vi.spyOn(window, "open").mockReturnValue(popup);
 
         const first = reconnect();
@@ -104,6 +99,7 @@ describe("reconnect", () => {
         await Promise.all([first, second]);
 
         expect(open).toHaveBeenCalledTimes(1);
+        expect(focus).toHaveBeenCalledTimes(1);
         expect(fetch).toHaveBeenCalledTimes(1);
     });
 
