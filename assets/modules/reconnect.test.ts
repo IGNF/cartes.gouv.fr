@@ -88,8 +88,8 @@ describe("reconnect", () => {
             "fetch",
             vi.fn(() => Promise.resolve(jsonResponse(user)))
         );
-        const popup = fakePopup();
-        const focus = vi.mocked(popup.focus);
+        const focus = vi.fn();
+        const popup = { closed: false, focus } as unknown as Window;
         const open = vi.spyOn(window, "open").mockReturnValue(popup);
 
         const first = reconnect();
