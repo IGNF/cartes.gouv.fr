@@ -107,6 +107,29 @@ describe("reconnect", () => {
         expect(fetch).toHaveBeenCalledTimes(1);
     });
 
+    it("recharge la page quand la popup a connecté un autre compte", async () => {
+        queryClient.setQueryData(RQKeys.user_me(), { ...user, id: "user-0" });
+        vi.stubGlobal(
+            "fetch",
+            vi.fn(() => Promise.resolve(jsonResponse(user)))
+        );
+        const reload = vi.fn();
+        vi.stubGlobal("location", { href: window.location.href, reload });
+        const setQueryData = vi.spyOn(queryClient, "setQueryData");
+        const invalidateQueries = vi.spyOn(queryClient, "invalidateQueries");
+        const popup = fakePopup();
+        vi.spyOn(window, "open").mockReturnValue(popup);
+
+        const done = reconnect();
+        (popup as { closed: boolean }).closed = true;
+        await vi.advanceTimersByTimeAsync(500);
+        await done;
+
+        expect(reload).toHaveBeenCalledTimes(1);
+        expect(setQueryData).not.toHaveBeenCalled();
+        expect(invalidateQueries).not.toHaveBeenCalled();
+    });
+
     it("reste expirée quand la popup se ferme sans connexion", async () => {
         vi.stubGlobal(
             "fetch",

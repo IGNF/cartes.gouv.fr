@@ -1,3 +1,4 @@
+import { CartesUser } from "@/@types/app";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
@@ -30,6 +31,13 @@ async function openAndWait(): Promise<void> {
     // 401 : déjà signalé au store par jsonFetch ; autre erreur : état inchangé, le lien reste cliquable
     const user = await api.user.getMe().catch(() => null);
     if (user === null) return;
+
+    // autre compte : recharger plutôt que mêler sa session aux pages en cache de l’ancien
+    const previous = queryClient.getQueryData<CartesUser | null>(RQKeys.user_me());
+    if (previous && previous.id !== user.id) {
+        window.location.reload();
+        return;
+    }
 
     // dans cet ordre : l’invalidation ne recharge pas une requête encore désactivée
     queryClient.setQueryData(RQKeys.user_me(), user);
