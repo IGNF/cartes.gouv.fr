@@ -1,5 +1,6 @@
 import Main from "@/components/Layout/Main";
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup, { ButtonsGroupProps } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useEffect } from "react";
 
@@ -24,13 +25,12 @@ export default function DiscoverPublish() {
     const { params } = useRoute();
     const { data: user } = useUserQuery();
 
-    useEffect(() => {
-        if (routeParam(params, "authentication_failed") !== undefined) {
-            routes.discover_publish().replace();
-        }
+    // anonyme seulement : le paramètre, gardé jusqu’à la fermeture (page rendue deux fois au chargement), revient par le referer après une connexion réussie
+    const loginFailed = !user && routeParam(params, "login_failed") === 1;
 
-        if (user && routeParam(params, "session_expired_login_success") === 1) {
-            window.close();
+    useEffect(() => {
+        if (user && routeParam(params, "login_failed") !== undefined) {
+            routes.discover_publish().replace();
         }
     }, [params, user]);
 
@@ -53,6 +53,15 @@ export default function DiscoverPublish() {
                 </div>
                 <div className={classes.contentWrapper}>
                     <div className={classes.card}>
+                        {loginFailed && (
+                            <Alert
+                                severity="error"
+                                title="La connexion a échoué"
+                                closable
+                                isClosed={false}
+                                onClose={() => routes.discover_publish().replace()}
+                            />
+                        )}
                         <img src={uploaderSvgUrl} alt="" />
 
                         <div className={classes.title}>
