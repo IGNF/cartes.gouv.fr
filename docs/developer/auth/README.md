@@ -46,12 +46,15 @@ Navigateur         Symfony               Keycloak
     |                                        |
 ```
 
-1. **`GET /login`** ([`SecurityController::login()`](../../../src/Controller/SecurityController.php)) construit le paramètre `state` HMAC-signé (voir [Paramètre `state`](#paramètre-state)) et redirige vers Keycloak.
+1. **`GET /login`** ([`SecurityController::login()`](../../../src/Controller/SecurityController.php)) construit le paramètre `state` HMAC-signé (voir [Paramètre `state`](#paramètre-state)) et redirige vers Keycloak. Le `referer` n’y entre que s’il commence par l’origine de l’application (`https://hôte/`) et fait au plus 2048 caractères : il voyage dans l’URL Keycloak.
 2. Keycloak authentifie l'utilisateur, puis rappelle **`GET /login/check?code=…&state=…`**.
-3. [`KeycloakAuthenticator`](../../../src/Security/KeycloakAuthenticator.php) valide le `state`, échange le code contre un `AccessToken` via KnpU, et appelle `KeycloakTokenManager::setAccessToken()`.
+3. [`KeycloakAuthenticator`](../../../src/Security/Authenticator/KeycloakAuthenticator.php) valide le `state`, échange le code contre un `AccessToken` via KnpU, et appelle `KeycloakTokenManager::setAccessToken()`.
 4. [`KeycloakTokenManager::setAccessToken()`](../../../src/Security/KeycloakTokenManager.php) pose un **intent** dans les attributs de la requête.
 5. [`AuthCookieResponseListener`](../../../src/Security/Cookie/AuthCookieResponseListener.php) intercepte l'événement `kernel.response`, lit l'intent et pose le cookie chiffré sur la réponse.
-6. `KeycloakAuthenticator::onAuthenticationSuccess()` redirige vers la page d'origine (via `referer` stocké dans `state`).
+6. `KeycloakAuthenticator::onAuthenticationSuccess()` redirige vers la page d’origine (`referer` du `state`, revérifié sur l’origine), sinon vers l’accueil de l’application. Login ouvert en popup : vers `/login/popup-callback` (voir [Expiration de session](#expiration-de-session-ux-frontend)).
+7. Échec (code refusé, `state` invalide ou expiré, ID token incomplet) : `KeycloakAuthenticator::onAuthenticationFailure()` redirige vers `/publier-une-donnee?login_failed=1`. La page affiche l’alerte fermable « La connexion a échoué » ; la fermer retire le paramètre de l’URL. Le paramètre reste jusque-là, car la page est rendue deux fois au premier chargement (pendant puis après le chargement des traductions). Après un échec puis une connexion réussie, le retour par le `referer` garde `?login_failed=1` : l’alerte ne s’affiche donc qu’aux visiteurs anonymes, et la page retire le paramètre dès qu’un utilisateur est connecté.
+
+Les cibles de redirection sont des constantes de `KeycloakAuthenticator` : `HOME_ROUTE`, `AFTER_LOGOUT_PATH`, `LOGIN_FAILED_PATH`, `POPUP_CALLBACK_ROUTE`.
 
 ---
 
@@ -89,7 +92,7 @@ Une route est une route d'API si son chemin correspond au paramètre `app.api_pa
 Deux firewalls (`config/packages/security.yaml`) :
 
 - **`api`** (motif) : `CookieAuthenticator` seul, `ROLE_USER` exigé par `access_control` (sauf `/contact_us`, appelé sans cookie par le formulaire du site de documentation, et `/api/doc` en dev). Sans cookie valide, le point d'entrée [`ApiAuthenticationEntryPoint`](../../../src/Security/ApiAuthenticationEntryPoint.php) produit le seul 401 de `type` `/errors/anonymous`, `detail` « Connexion requise ». Un cookie expiré est effacé sur cette réponse. Jamais de redirection.
-- **`main`** (le reste : pages, `/login`, `/logout`, `/files`, `/rss`) : `CookieAuthenticator` + `KeycloakAuthenticator`. Cookie expiré sur une page → redirect `GET /login?session_expired=1` + effacement du cookie.
+- **`main`** (le reste : pages, `/login`, `/logout`, `/files`, `/rss`) : `CookieAuthenticator` + `KeycloakAuthenticator`. Cookie expiré sur une page → redirection vers `GET /login` + effacement du cookie.
 
 [`ApiGuard`](../../../src/Listener/ApiGuard.php) (`kernel.request`, avant le firewall) refuse en 403 tout appel d'API sans `X-Requested-With: XMLHttpRequest`, envoyé par `jsonFetch`. Une navigation, une sous-ressource (`<img>`, `<script src>`) ou un formulaire d'un autre site ne porte jamais cet en-tête ; un autre site ne peut l'ajouter qu'en `fetch` avec CORS, que l'application n'autorise pas. Un GET d'API ouvert dans un onglet répond donc 403. Le cookie `SameSite=Lax` reste la première protection, la garde la seconde.
 
@@ -97,7 +100,7 @@ Deux firewalls (`config/packages/security.yaml`) :
 
 ## Snapshot utilisateur Entrepôt et cache par pod
 
-L’objet `User` ne porte que l’identité : `id` (claim `sub`, égal à l’identifiant utilisateur Entrepôt), e-mail, nom d’utilisateur, prénom et nom, lus dans l’`id_token` du cookie. Le cookie est scellé, la signature de l’ID token n’est donc pas revérifiée. L’authentification ne fait aucun appel amont. Un ID token sans `sub`, `email` ou `preferred_username` est refusé au retour de Keycloak, avant d’entrer dans le cookie : redirection vers `/publier-une-donnee?authentication_failed=1`, en anonyme. Une erreur d’authentification sur une requête suivante bouclerait, Keycloak reconnectant le même compte.
+L’objet `User` ne porte que l’identité : `id` (claim `sub`, égal à l’identifiant utilisateur Entrepôt), e-mail, nom d’utilisateur, prénom et nom, lus dans l’`id_token` du cookie. Le cookie est scellé, la signature de l’ID token n’est donc pas revérifiée. L’authentification ne fait aucun appel amont. Un ID token sans `sub`, `email` ou `preferred_username` est refusé au retour de Keycloak, avant d’entrer dans le cookie : redirection vers `/publier-une-donnee?login_failed=1`, en anonyme. Une erreur d’authentification sur une requête suivante bouclerait, Keycloak reconnectant le même compte.
 
 L’identité est celle de l’ID token reçu au login : une modification du nom ou de l’e-mail dans le compte Keycloak n’apparaît dans l’application qu’après une reconnexion (au plus 12 h, durée du jeton). Assumé : ces modifications sont rares, et le support identifie un compte par son `id`.
 
@@ -141,10 +144,10 @@ Navigateur              Symfony               Keycloak
     |                      |                     |
     |<-- 302 + cookie vide -+---> end_session_endpoint?id_token_hint=…&post_logout_redirect_uri=…
     |                                            |
-    |<-- redirect vers /decouvrir ---------------+
+    |<-- redirect vers /publier-une-donnee ------+
 ```
 
-[`LogoutSubscriber`](../../../src/Listener/LogoutSubscriber.php) récupère l'`id_token` depuis le token manager, déclenche l'effacement du cookie via `clearAccessToken()` (intent `__clear__`), puis redirige vers le `end_session_endpoint` Keycloak avec `id_token_hint` pour invalider la session SSO côté fournisseur.
+[`LogoutSubscriber`](../../../src/Security/LogoutSubscriber.php) récupère l'`id_token` depuis le token manager, déclenche l'effacement du cookie via `clearAccessToken()` (intent `__clear__`), puis redirige vers le `end_session_endpoint` Keycloak avec `id_token_hint` pour invalider la session SSO côté fournisseur.
 
 Si l'utilisateur est déjà anonyme (cookie absent), `getIdToken()` retourne `null` : le `LogoutSubscriber` redirige directement vers `/publier-une-donnee` sans appeler Keycloak.
 
@@ -154,13 +157,12 @@ Si l'utilisateur est déjà anonyme (cookie absent), `getIdToken()` retourne `nu
 
 Le `state` remplace le stockage de contexte en session PHP. C'est un blob `base64url(json).base64url(hmac)` signé avec HKDF-SHA256 (`cgfr.login-state.v1`), valable **5 minutes**.
 
-| Clé               | Contenu                                                                                                                                                                                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `referer`         | URL de la page depuis laquelle le login a été déclenché, pour y rediriger après succès                                                                                                                                                               |
-| `session_expired` | `"1"` si le login a été déclenché par une expiration de session, pour afficher un message approprié                                                                                                                                                  |
-| `nonce`           | 16 octets aléatoires en hex - entropie pour que chaque state ait une signature HMAC distincte. Il n'y a pas de nonce serveur à usage unique (design stateless) ; la fenêtre de rejeu est bornée par `exp` (5 min)                                    |
-| `popup`           | `true` si le login est ouvert en popup par `reconnect()` : succès et échec redirigent vers `/login/popup-callback`. Un `state` expiré n’est pas décodé et perd ce drapeau : l’échec s’affiche alors dans la popup, que l’utilisateur ferme à la main |
-| `exp`             | Timestamp d'expiration Unix (+5 min) - le state ne peut pas être réutilisé indéfiniment                                                                                                                                                              |
+| Clé       | Contenu                                                                                                                                                                                                                                              |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `referer` | URL de la page depuis laquelle le login a été déclenché, pour y rediriger après succès (même origine seulement)                                                                                                                                      |
+| `nonce`   | 16 octets aléatoires en hex - entropie pour que chaque state ait une signature HMAC distincte. Il n'y a pas de nonce serveur à usage unique (design stateless) ; la fenêtre de rejeu est bornée par `exp` (5 min)                                    |
+| `popup`   | `true` si le login est ouvert en popup par `reconnect()` : succès et échec redirigent vers `/login/popup-callback`. Un `state` expiré n’est pas décodé et perd ce drapeau : l’échec s’affiche alors dans la popup, que l’utilisateur ferme à la main |
+| `exp`     | Timestamp d'expiration Unix (+5 min) - le state ne peut pas être réutilisé indéfiniment                                                                                                                                                              |
 
 La vérification HMAC avec `hash_equals` protège contre les forgeries. La clé `use_state: false` dans `knpu_oauth2_client.yaml` désactive la gestion native du state par le bundle : on gère entièrement le nôtre.
 
@@ -209,26 +211,26 @@ Limites assumées : un autre onglet garde son alerte jusqu’à son propre clic 
 
 ## Composants clés
 
-| Fichier                                                                                                             | Rôle                                                                        |
-| ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [`src/Security/Authenticator/CookieAuthenticator.php`](../../../src/Security/Authenticator/CookieAuthenticator.php) | Authenticator principal : lit et valide le cookie sur chaque requête        |
-| [`src/Security/KeycloakAuthenticator.php`](../../../src/Security/KeycloakAuthenticator.php)                         | Authenticator OAuth2 : gère le callback `/login/check` et le flux OIDC      |
-| [`src/Security/ApiAuthenticationEntryPoint.php`](../../../src/Security/ApiAuthenticationEntryPoint.php)             | Point d'entrée du firewall `api` : seul 401 `/errors/anonymous`             |
-| [`src/Listener/ApiGuard.php`](../../../src/Listener/ApiGuard.php)                                                   | Garde des routes d'API (403 sans `X-Requested-With`)                        |
-| [`src/Security/Cookie/AuthCookieCipher.php`](../../../src/Security/Cookie/AuthCookieCipher.php)                     | Chiffrement/déchiffrement XSalsa20-Poly1305 + HKDF                          |
-| [`src/Security/Cookie/AuthCookieResponseListener.php`](../../../src/Security/Cookie/AuthCookieResponseListener.php) | Pose ou efface le cookie sur `kernel.response` selon l'intent               |
-| [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                           | Accès centralisé au token (lecture cookie, cache requête, intent set/clear) |
-| [`src/Security/State/LoginStateSerializer.php`](../../../src/Security/State/LoginStateSerializer.php)               | Encode/décode le paramètre `state` OAuth2 signé HMAC                        |
-| [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                           | Construit l'objet `User` depuis les claims de l'`id_token` du cookie        |
-| [`src/Services/EntrepotUserCache.php`](../../../src/Services/EntrepotUserCache.php)                                 | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement    |
-| [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                 | Seul lecteur du profil Entrepôt, dérivation datastore/communauté, deny-path |
-| [`src/Services/CartesUserPayload.php`](../../../src/Services/CartesUserPayload.php)                                 | Charge utilisateur du front (`CartesUser`) : identité + profil Entrepôt     |
-| [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                           | Routes `/login`, `/logout`, `/login/check`, `/login/popup-callback`         |
-| [`src/Listener/LogoutSubscriber.php`](../../../src/Listener/LogoutSubscriber.php)                                   | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak              |
-| [`src/ApiClient/Auth/AuthenticatedHttpClient.php`](../../../src/ApiClient/Auth/AuthenticatedHttpClient.php)         | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt     |
-| [`assets/modules/jsonFetch.ts`](../../../assets/modules/jsonFetch.ts)                                               | Envoie `X-Requested-With`, notifie l'AuthStore sur 401                      |
-| [`assets/modules/reconnect.ts`](../../../assets/modules/reconnect.ts)                                               | Reconnexion par popup depuis l’alerte de session expirée                    |
-| [`config/packages/security.yaml`](../../../config/packages/security.yaml)                                           | Firewalls `api` et `main`, `stateless: true`, contrôle d'accès              |
+| Fichier                                                                                                                 | Rôle                                                                                  |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [`src/Security/Authenticator/CookieAuthenticator.php`](../../../src/Security/Authenticator/CookieAuthenticator.php)     | Authenticator principal : lit et valide le cookie sur chaque requête                  |
+| [`src/Security/Authenticator/KeycloakAuthenticator.php`](../../../src/Security/Authenticator/KeycloakAuthenticator.php) | Authenticator OAuth2 : gère le callback `/login/check` et le flux OIDC                |
+| [`src/Security/ApiAuthenticationEntryPoint.php`](../../../src/Security/ApiAuthenticationEntryPoint.php)                 | Point d'entrée du firewall `api` : seul 401 `/errors/anonymous`                       |
+| [`src/Listener/ApiGuard.php`](../../../src/Listener/ApiGuard.php)                                                       | Garde des routes d'API (403 sans `X-Requested-With`)                                  |
+| [`src/Security/Cookie/AuthCookieCipher.php`](../../../src/Security/Cookie/AuthCookieCipher.php)                         | Chiffrement/déchiffrement XSalsa20-Poly1305 + HKDF                                    |
+| [`src/Security/Cookie/AuthCookieResponseListener.php`](../../../src/Security/Cookie/AuthCookieResponseListener.php)     | Pose ou efface le cookie sur `kernel.response` selon l'intent                         |
+| [`src/Security/KeycloakTokenManager.php`](../../../src/Security/KeycloakTokenManager.php)                               | Accès centralisé au token (lecture cookie, cache requête, intent set/clear)           |
+| [`src/Security/State/LoginStateSerializer.php`](../../../src/Security/State/LoginStateSerializer.php)                   | Encode/décode le paramètre `state` OAuth2 signé HMAC                                  |
+| [`src/Security/KeycloakUserProvider.php`](../../../src/Security/KeycloakUserProvider.php)                               | Construit l'objet `User` depuis les claims de l'`id_token` du cookie                  |
+| [`src/Services/EntrepotUserCache.php`](../../../src/Services/EntrepotUserCache.php)                                     | Cache serveur (60 s) de `GET users/me`, invalidation et rafraîchissement              |
+| [`src/Services/MembershipService.php`](../../../src/Services/MembershipService.php)                                     | Seul lecteur du profil Entrepôt, dérivation datastore/communauté, deny-path           |
+| [`src/Services/CartesUserPayload.php`](../../../src/Services/CartesUserPayload.php)                                     | Charge utilisateur du front (`CartesUser`) : identité + profil Entrepôt               |
+| [`src/Controller/SecurityController.php`](../../../src/Controller/SecurityController.php)                               | Routes `/login`, `/logout`, `/login/check`, `/login/popup-callback`, `/userinfo/edit` |
+| [`src/Security/LogoutSubscriber.php`](../../../src/Security/LogoutSubscriber.php)                                       | Récupère l'`id_token` et déclenche la déconnexion SSO Keycloak                        |
+| [`src/ApiClient/Auth/AuthenticatedHttpClient.php`](../../../src/ApiClient/Auth/AuthenticatedHttpClient.php)             | Injecte `Authorization: Bearer` sur les appels sortants vers l'Entrepôt               |
+| [`assets/modules/jsonFetch.ts`](../../../assets/modules/jsonFetch.ts)                                                   | Envoie `X-Requested-With`, notifie l'AuthStore sur 401                                |
+| [`assets/modules/reconnect.ts`](../../../assets/modules/reconnect.ts)                                                   | Reconnexion par popup depuis l’alerte de session expirée                              |
+| [`config/packages/security.yaml`](../../../config/packages/security.yaml)                                               | Firewalls `api` et `main`, `stateless: true`, contrôle d'accès                        |
 
 ---
 
@@ -256,6 +258,8 @@ Limites assumées : un autre onglet garde son alerte jusqu’à son propre clic 
 **Aucune route `GET` à effet de bord** : une image (`<img>`) de même origine, par exemple dans une description en markdown, envoie le cookie, et `SameSite=Lax` le laisse passer sur les navigations. Toute écriture passe par `POST`, `PUT`, `PATCH` ou `DELETE`.
 
 **Garde `X-Requested-With`** : tout appel d'API passe par `jsonFetch`/`apiFetch`, qui envoie l'en-tête. Un `EventSource` natif ne peut pas l'envoyer : lire un flux par `fetch` et `readServerEvents`. Une brique servie depuis un sous-domaine devrait passer par CORS, absent aujourd'hui.
+
+**Retour après connexion** : le `referer` n’est gardé que s’il commence par `getSchemeAndHttpHost()` suivi de `/`. Derrière le proxy, cette origine vient des en-têtes `x-forwarded-proto`, `x-forwarded-host` et `x-forwarded-port` (`trusted_proxies`, `framework.yaml`) : s’ils manquent, tout `referer` est écarté et l’utilisateur revient sur l’accueil.
 
 **`/contact_us` public** : seule route d'API appelable sans cookie, n'importe qui peut y déclencher l'envoi de courriels ; à restreindre.
 

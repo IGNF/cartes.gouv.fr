@@ -8,8 +8,7 @@ export const appRoot = SymfonyRouting.getBaseUrl();
 const publicRoutes = {
     discover_publish: defineRoute(
         {
-            authentication_failed: param.query.optional.number,
-            session_expired_login_success: param.query.optional.number,
+            login_failed: param.query.optional.number,
         },
         () => `${appRoot}/publier-une-donnee`
     ),

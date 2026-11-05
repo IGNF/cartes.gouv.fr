@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Security;
+namespace App\Security\Authenticator;
 
+use App\Security\KeycloakTokenManager;
+use App\Security\KeycloakUserProvider;
 use App\Security\State\LoginStateSerializer;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
@@ -21,8 +23,10 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
 {
     public const LOGIN_ROUTE = 'cartesgouvfr_security_login';
     public const LOGIN_CHECK_ROUTE = 'cartesgouvfr_security_login_check';
-    public const SUCCESS_ROUTE = 'cartesgouvfr_app';
+    // accueil de l’application, repli après connexion ; les chemins suivants s’y ajoutent
     public const HOME_ROUTE = 'cartesgouvfr_app';
+    public const AFTER_LOGOUT_PATH = 'publier-une-donnee';
+    public const LOGIN_FAILED_PATH = 'publier-une-donnee?login_failed=1';
     public const POPUP_CALLBACK_ROUTE = 'cartesgouvfr_security_login_popup_callback';
     private const REQUEST_ATTR_STATE = '_login_state';
 
@@ -104,23 +108,10 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
             return new RedirectResponse($this->router->generate(self::POPUP_CALLBACK_ROUTE));
         }
 
-        $sessionExpired = $statePayload['session_expired'] ?? null;
         $referer = $statePayload['referer'] ?? null;
-        if (!is_string($referer) || parse_url($referer, PHP_URL_HOST) !== $request->getHost()) {
-            $referer = null;
-        }
-
-        if (!is_null($sessionExpired) && 1 === intval($sessionExpired)) {
-            $redirectUrl = $this->router->generate(self::HOME_ROUTE, [], RouterInterface::ABSOLUTE_URL).'publier-une-donnee?session_expired_login_success=1';
-        } else {
-            $redirectUrl = $referer ?? $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
-            $redirectUrl = str_replace('authentication_failed=1', '', $redirectUrl);
-
-            if (in_array(parse_url($redirectUrl, PHP_URL_PATH), ['/decouvrir', '/publier-une-donnee'])) {
-                $redirectUrl = $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
-                $redirectUrl .= 'tableau-de-bord';
-            }
-        }
+        $redirectUrl = is_string($referer) && str_starts_with($referer, $request->getSchemeAndHttpHost().'/')
+            ? $referer
+            : $this->router->generate(self::HOME_ROUTE, [], RouterInterface::ABSOLUTE_URL);
 
         return new RedirectResponse($redirectUrl);
     }
@@ -139,7 +130,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
             return new RedirectResponse($this->router->generate(self::POPUP_CALLBACK_ROUTE));
         }
 
-        return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?authentication_failed=1');
+        return new RedirectResponse($this->router->generate(self::HOME_ROUTE).self::LOGIN_FAILED_PATH);
     }
 
     /** @param array<string, mixed> $statePayload */

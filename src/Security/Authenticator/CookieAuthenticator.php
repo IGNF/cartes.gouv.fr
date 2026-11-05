@@ -20,9 +20,6 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 final class CookieAuthenticator extends AbstractAuthenticator
 {
-    private const LOGIN_CHECK_ROUTE = 'cartesgouvfr_security_login_check';
-    private const LOGIN_ROUTE = 'cartesgouvfr_security_login';
-
     public function __construct(
         private readonly KeycloakTokenManager $tokenManager,
         private readonly RouterInterface $router,
@@ -37,7 +34,7 @@ final class CookieAuthenticator extends AbstractAuthenticator
      */
     public function supports(Request $request): bool
     {
-        if (self::LOGIN_CHECK_ROUTE === $request->attributes->get('_route')) {
+        if (KeycloakAuthenticator::LOGIN_CHECK_ROUTE === $request->attributes->get('_route')) {
             return false;
         }
 
@@ -80,6 +77,6 @@ final class CookieAuthenticator extends AbstractAuthenticator
             return null;
         }
 
-        return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE, ['session_expired' => 1]));
+        return new RedirectResponse($this->router->generate(KeycloakAuthenticator::LOGIN_ROUTE));
     }
 }
