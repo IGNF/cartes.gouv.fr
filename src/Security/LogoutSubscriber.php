@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Listener;
+namespace App\Security;
 
-use App\Security\KeycloakTokenManager;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Stevenmaguire\OAuth2\Client\Provider\Keycloak;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;

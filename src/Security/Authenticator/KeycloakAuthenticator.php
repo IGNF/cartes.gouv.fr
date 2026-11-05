@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Security;
+namespace App\Security\Authenticator;
 
+use App\Security\KeycloakTokenManager;
+use App\Security\KeycloakUserProvider;
 use App\Security\State\LoginStateSerializer;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;

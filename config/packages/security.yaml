@@ -23,7 +23,7 @@ security:
             # https://symfony.com/doc/current/security.html#the-firewall
             custom_authenticators:
                 - App\Security\Authenticator\CookieAuthenticator
-                - App\Security\KeycloakAuthenticator
+                - App\Security\Authenticator\KeycloakAuthenticator
             logout:
                 path: cartesgouvfr_security_logout
                 # where to redirect after logout
