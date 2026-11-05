@@ -2,8 +2,10 @@
 
 namespace App\Tests\Support;
 
+use App\Security\Authenticator\KeycloakAuthenticator;
 use App\Security\State\LoginStateSerializer;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\BrowserKit\Cookie;
 
 /**
  * Connexion par le retour Keycloak doublé (FakeKeycloakClient) : le client reçoit le cookie d’authentification.
@@ -15,7 +17,9 @@ trait KeycloakLoginTrait
 
     private function logIn(KernelBrowser $client): void
     {
-        $state = self::getContainer()->get(LoginStateSerializer::class)->encode(['referer' => null]);
+        $state = self::getContainer()->get(LoginStateSerializer::class)->encode(['referer' => null, 'nonce' => 'test-nonce']);
+        // Secure : le navigateur de test ne garde un cookie Secure qu’en https
+        $client->getCookieJar()->set(new Cookie(KeycloakAuthenticator::STATE_COOKIE_NAME, 'test-nonce', null, '/', 'localhost', true));
         $client->request('GET', self::BASE.'/login/check?code=fake-code&state='.urlencode($state));
         self::assertResponseRedirects(self::BASE.'/');
     }

@@ -6,6 +6,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final readonly class LoginStateSerializer
 {
+    // durée de validité du state, et du cookie qui lie son nonce au navigateur (secondes)
+    public const LIFETIME = 300;
+
     private string $hmacKey;
 
     public function __construct(#[Autowire(param: 'kernel.secret')] string $appSecret)
@@ -16,8 +19,8 @@ final readonly class LoginStateSerializer
     /** @param array<string, mixed> $payload */
     public function encode(array $payload): string
     {
-        $payload['nonce'] = bin2hex(random_bytes(16));
-        $payload['exp'] = time() + 300;
+        $payload['nonce'] ??= bin2hex(random_bytes(16));
+        $payload['exp'] = time() + self::LIFETIME;
 
         $json = json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
         $jsonB64 = $this->base64url($json);

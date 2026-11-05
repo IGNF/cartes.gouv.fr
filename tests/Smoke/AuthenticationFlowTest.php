@@ -3,6 +3,7 @@
 namespace App\Tests\Smoke;
 
 use App\Exception\ApiErrorType;
+use App\Security\Authenticator\KeycloakAuthenticator;
 use App\Security\Cookie\AuthCookieCipher;
 use App\Security\Cookie\AuthCookieResponseListener;
 use App\Security\State\LoginStateSerializer;
@@ -11,6 +12,7 @@ use App\Tests\Double\FakeKeycloakClient;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\HttpFoundation\Cookie as HttpCookie;
 
 /**
  * Flux complet login / cookie / API / logout, Keycloak et Entrepôt doublés.
@@ -64,9 +66,8 @@ final class AuthenticationFlowTest extends WebTestCase
         $this->loginCheck($client, ['referer' => null, 'popup' => true]);
 
         self::assertResponseRedirects('/login/popup-callback');
-        $cookie = $client->getResponse()->headers->getCookies()[0] ?? null;
+        $cookie = $this->responseCookie($client, AuthCookieResponseListener::COOKIE_NAME);
         self::assertNotNull($cookie);
-        self::assertSame(AuthCookieResponseListener::COOKIE_NAME, $cookie->getName());
         self::assertFalse($cookie->isCleared());
     }
 
@@ -98,9 +99,8 @@ final class AuthenticationFlowTest extends WebTestCase
         $this->loginCheck($client, ['referer' => null]);
 
         self::assertResponseRedirects(self::BASE.'/');
-        $cookie = $client->getResponse()->headers->getCookies()[0] ?? null;
+        $cookie = $this->responseCookie($client, AuthCookieResponseListener::COOKIE_NAME);
         self::assertNotNull($cookie);
-        self::assertSame(AuthCookieResponseListener::COOKIE_NAME, $cookie->getName());
         self::assertTrue($cookie->isSecure());
         self::assertTrue($cookie->isHttpOnly());
 
@@ -180,6 +180,71 @@ final class AuthenticationFlowTest extends WebTestCase
         self::assertSame('cartesgouvfr_app', $client->getRequest()->attributes->get('_route'));
     }
 
+    public function testLoginBindsTheStateToTheBrowserWithACookie(): void
+    {
+        $client = self::createClient();
+        $client->request('GET', self::BASE.'/login');
+
+        parse_str((string) parse_url((string) $client->getResponse()->headers->get('Location'), PHP_URL_QUERY), $query);
+        self::assertIsString($query['state']);
+        $state = self::getContainer()->get(LoginStateSerializer::class)->decode($query['state']);
+        self::assertNotNull($state);
+
+        $cookie = $this->responseCookie($client, KeycloakAuthenticator::STATE_COOKIE_NAME);
+        self::assertNotNull($cookie);
+        self::assertSame($state['nonce'], $cookie->getValue());
+        self::assertTrue($cookie->isSecure());
+        self::assertTrue($cookie->isHttpOnly());
+        self::assertSame(HttpCookie::SAMESITE_LAX, $cookie->getSameSite());
+        self::assertSame('/', $cookie->getPath());
+        self::assertEqualsWithDelta(time() + LoginStateSerializer::LIFETIME, $cookie->getExpiresTime(), 5);
+    }
+
+    public function testLoginThenCallbackInTheSameBrowserSucceedsAndClearsTheStateCookie(): void
+    {
+        $client = self::createClient();
+        $client->request('GET', self::BASE.'/login');
+        parse_str((string) parse_url((string) $client->getResponse()->headers->get('Location'), PHP_URL_QUERY), $query);
+        self::assertIsString($query['state']);
+
+        // aucun cookie posé à la main : le navigateur de test garde celui de /login
+        $client->request('GET', self::BASE.'/login/check?code=fake-code&state='.urlencode($query['state']));
+
+        self::assertResponseRedirects(self::BASE.'/');
+        self::assertNotNull($this->responseCookie($client, AuthCookieResponseListener::COOKIE_NAME));
+        self::assertTrue($this->responseCookie($client, KeycloakAuthenticator::STATE_COOKIE_NAME)?->isCleared());
+    }
+
+    public function testCallbackWithoutTheStateCookieFails(): void
+    {
+        $client = self::createClient();
+        $this->loginCheck($client, ['referer' => null], withStateCookie: false);
+
+        self::assertResponseRedirects('/publier-une-donnee?login_failed=1');
+        self::assertNull($this->responseCookie($client, AuthCookieResponseListener::COOKIE_NAME));
+    }
+
+    public function testCallbackWithAnotherStateCookieFailsAndKeepsIt(): void
+    {
+        $client = self::createClient();
+        $client->getCookieJar()->set(new Cookie(KeycloakAuthenticator::STATE_COOKIE_NAME, 'other-nonce', null, '/', 'localhost', true));
+        $this->loginCheck($client, ['referer' => null], withStateCookie: false);
+
+        self::assertResponseRedirects('/publier-une-donnee?login_failed=1');
+        self::assertNull($this->responseCookie($client, AuthCookieResponseListener::COOKIE_NAME));
+        // un autre onglet peut encore terminer son login avec ce cookie
+        self::assertNull($this->responseCookie($client, KeycloakAuthenticator::STATE_COOKIE_NAME));
+    }
+
+    public function testPopupCallbackWithoutTheStateCookieEndsInTheCallback(): void
+    {
+        $client = self::createClient();
+        $this->loginCheck($client, ['referer' => null, 'popup' => true], withStateCookie: false);
+
+        self::assertResponseRedirects('/login/popup-callback');
+        self::assertNull($this->responseCookie($client, AuthCookieResponseListener::COOKIE_NAME));
+    }
+
     public function testFailedTokenExchangeRedirectsToPublishPage(): void
     {
         $client = self::createClient();
@@ -244,9 +309,24 @@ final class AuthenticationFlowTest extends WebTestCase
     }
 
     /** @param array<string, mixed> $statePayload */
-    private function loginCheck(KernelBrowser $client, array $statePayload): void
+    private function loginCheck(KernelBrowser $client, array $statePayload, bool $withStateCookie = true): void
     {
+        $statePayload['nonce'] = 'test-nonce';
         $state = self::getContainer()->get(LoginStateSerializer::class)->encode($statePayload);
+        if ($withStateCookie) {
+            $client->getCookieJar()->set(new Cookie(KeycloakAuthenticator::STATE_COOKIE_NAME, 'test-nonce', null, '/', 'localhost', true));
+        }
         $client->request('GET', self::BASE.'/login/check?code=fake-code&state='.urlencode($state));
+    }
+
+    private function responseCookie(KernelBrowser $client, string $name): ?HttpCookie
+    {
+        foreach ($client->getResponse()->headers->getCookies() as $cookie) {
+            if ($cookie->getName() === $name) {
+                return $cookie;
+            }
+        }
+
+        return null;
     }
 }
