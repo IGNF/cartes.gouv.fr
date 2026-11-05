@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 /**
- * Point d’entrée du pare-feu `api` : seul producteur du 401 des routes d’API, pour toute requête sans cookie valide.
+ * Point d’entrée du pare-feu `api` : seul producteur du 401 `/errors/anonymous`, pour toute requête d’API sans cookie valide (un 401 amont relayé n’en porte pas le type).
  *
  * @SuppressWarnings(UnusedFormalParameter) signature imposée par l'interface
  */

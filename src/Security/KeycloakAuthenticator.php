@@ -23,6 +23,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public const LOGIN_CHECK_ROUTE = 'cartesgouvfr_security_login_check';
     public const SUCCESS_ROUTE = 'cartesgouvfr_app';
     public const HOME_ROUTE = 'cartesgouvfr_app';
+    public const POPUP_CALLBACK_ROUTE = 'cartesgouvfr_security_login_popup_callback';
     private const REQUEST_ATTR_STATE = '_login_state';
 
     public function __construct(
@@ -99,6 +100,9 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         $statePayload = $request->attributes->get(self::REQUEST_ATTR_STATE, []);
+        if ($this->isPopup($statePayload)) {
+            return new RedirectResponse($this->router->generate(self::POPUP_CALLBACK_ROUTE));
+        }
 
         $sessionExpired = $statePayload['session_expired'] ?? null;
         $referer = $statePayload['referer'] ?? null;
@@ -130,6 +134,17 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
         $this->logger->info(self::class, [$message]);
 
+        // shortcut: un state expiré (formulaire Keycloak ouvert plus de 5 min) perd le drapeau popup et affiche l’échec dans la popup, à revoir si des utilisateurs le signalent
+        if ($this->isPopup($request->attributes->get(self::REQUEST_ATTR_STATE, []))) {
+            return new RedirectResponse($this->router->generate(self::POPUP_CALLBACK_ROUTE));
+        }
+
         return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?authentication_failed=1');
+    }
+
+    /** @param array<string, mixed> $statePayload */
+    private function isPopup(array $statePayload): bool
+    {
+        return true === ($statePayload['popup'] ?? false);
     }
 }

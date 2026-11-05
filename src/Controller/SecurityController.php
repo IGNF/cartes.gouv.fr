@@ -11,6 +11,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -25,6 +26,7 @@ class SecurityController extends AbstractController
         ClientRegistry $clientRegistry,
         ParameterBagInterface $params,
         LoginStateSerializer $loginStateSerializer,
+        #[MapQueryParameter] bool $popup = false,
     ): RedirectResponse {
         $iamLoginDisabled = boolval($params->get('iam_login_disabled'));
         if ($iamLoginDisabled) {
@@ -43,6 +45,7 @@ class SecurityController extends AbstractController
         $state = $loginStateSerializer->encode([
             'referer' => $safeReferer,
             'session_expired' => $request->query->get('session_expired'),
+            'popup' => $popup,
         ]);
 
         $client = $clientRegistry->getClient('keycloak');
@@ -53,6 +56,16 @@ class SecurityController extends AbstractController
     #[Route('/login/check', name: 'login_check', methods: ['GET'])]
     public function loginCheck(): void
     {
+    }
+
+    // fin du login ouvert en popup : la page se ferme seule, l’onglet d’origine relit l’utilisateur
+    #[Route('/login/popup-callback', name: 'login_popup_callback', methods: ['GET'])]
+    public function loginPopupCallback(): Response
+    {
+        $response = $this->render('security/login_popup_callback.html.twig');
+        $response->headers->set('Cache-Control', 'no-store');
+
+        return $response;
     }
 
     #[Route('/logout', name: 'logout', methods: ['GET'], options: ['expose' => true])]

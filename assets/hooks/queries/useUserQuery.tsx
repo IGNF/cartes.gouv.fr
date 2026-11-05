@@ -4,6 +4,7 @@ import { CartesUser } from "@/@types/app";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { ApiError } from "@/modules/jsonFetch";
+import { useAuthStore } from "@/stores/AuthStore";
 import { delta } from "@/utils/delta";
 
 /**
@@ -17,5 +18,7 @@ export default function useUserQuery(options?: Partial<UseQueryOptions<CartesUse
         queryFn: ({ signal }) => api.user.getMe({ signal }),
         staleTime: delta.minutes(5),
         ...options,
+        // en pause pendant l’expiration : le dernier utilisateur reste en cache et la page reste montée
+        enabled: !useAuthStore((state) => state.sessionExpired),
     });
 }
