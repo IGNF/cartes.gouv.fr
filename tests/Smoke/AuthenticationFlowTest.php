@@ -115,17 +115,7 @@ final class AuthenticationFlowTest extends WebTestCase
     public function testExpiredTokenInCookieAnswersJsonUnauthorizedAndClearsTheCookie(): void
     {
         $client = self::createClient();
-        // le cookie est posé avec une expiration navigateur future : seul le jeton qu’il contient est expiré
-        $expiredToken = FakeKeycloakClient::createAccessToken(-60);
-        $cipher = self::getContainer()->get(AuthCookieCipher::class);
-        $client->getCookieJar()->set(new Cookie(
-            AuthCookieResponseListener::COOKIE_NAME,
-            $cipher->encrypt(serialize($expiredToken)),
-            (string) (time() + 3600),
-            '/',
-            'localhost',
-            true,
-        ));
+        $this->setExpiredTokenCookie($client);
 
         $client->xmlHttpRequest('GET', self::BASE.'/api/users/me');
 
@@ -139,13 +129,64 @@ final class AuthenticationFlowTest extends WebTestCase
         self::assertTrue($clearedCookie->isCleared());
     }
 
+    public function testExpiredTokenInCookieOnAPageRedirectsToLogin(): void
+    {
+        $client = self::createClient();
+        $this->setExpiredTokenCookie($client);
+
+        $client->request('GET', self::BASE.'/tableau-de-bord');
+
+        self::assertResponseRedirects('/login');
+    }
+
+    public function testLoginKeepsOnlyASameOriginReferer(): void
+    {
+        $client = self::createClient();
+        foreach (['https://localhost.evil.test/page' => null, 'https://localhost@evil.test/page' => null, self::BASE.'/catalogue' => self::BASE.'/catalogue'] as $referer => $expected) {
+            $client->request('GET', self::BASE.'/login', server: ['HTTP_REFERER' => $referer]);
+
+            parse_str((string) parse_url((string) $client->getResponse()->headers->get('Location'), PHP_URL_QUERY), $query);
+            self::assertIsString($query['state']);
+            $state = self::getContainer()->get(LoginStateSerializer::class)->decode($query['state']);
+            self::assertNotNull($state);
+            self::assertSame($expected, $state['referer'], $referer);
+        }
+    }
+
+    public function testSuccessfulLoginReturnsToTheRefererPage(): void
+    {
+        $client = self::createClient();
+        // la requête est gardée telle quelle : le front n’affiche l’alerte d’échec qu’aux visiteurs anonymes
+        $this->loginCheck($client, ['referer' => self::BASE.'/publier-une-donnee?login_failed=1']);
+
+        self::assertResponseRedirects(self::BASE.'/publier-une-donnee?login_failed=1');
+    }
+
+    public function testSuccessfulLoginIgnoresAForeignRefererInTheState(): void
+    {
+        $client = self::createClient();
+        $this->loginCheck($client, ['referer' => 'https://evil.test/']);
+
+        self::assertResponseRedirects(self::BASE.'/');
+    }
+
+    public function testSignupIsNoLongerARoute(): void
+    {
+        $client = self::createClient();
+        $client->request('GET', self::BASE.'/signup');
+
+        // servie par l’application React, qui affiche sa page « introuvable »
+        self::assertResponseIsSuccessful();
+        self::assertSame('cartesgouvfr_app', $client->getRequest()->attributes->get('_route'));
+    }
+
     public function testFailedTokenExchangeRedirectsToPublishPage(): void
     {
         $client = self::createClient();
         FakeKeycloakClient::failNextTokenExchange(new \UnexpectedValueException('invalid code'));
         $this->loginCheck($client, ['referer' => null]);
 
-        self::assertResponseRedirects('/publier-une-donnee?authentication_failed=1');
+        self::assertResponseRedirects('/publier-une-donnee?login_failed=1');
     }
 
     public function testIncompleteIdTokenAtLoginRedirectsToPublishPageWithoutCookie(): void
@@ -154,7 +195,7 @@ final class AuthenticationFlowTest extends WebTestCase
         FakeKeycloakClient::issueIdTokenWithout('email');
         $this->loginCheck($client, ['referer' => null]);
 
-        self::assertResponseRedirects('/publier-une-donnee?authentication_failed=1');
+        self::assertResponseRedirects('/publier-une-donnee?login_failed=1');
         foreach ($client->getResponse()->headers->getCookies() as $cookie) {
             self::assertTrue(AuthCookieResponseListener::COOKIE_NAME !== $cookie->getName() || $cookie->isCleared(), 'aucun cookie d’authentification ne doit être posé');
         }
@@ -186,6 +227,20 @@ final class AuthenticationFlowTest extends WebTestCase
         $client->request('GET', self::BASE.'/logout');
 
         self::assertResponseRedirects(self::BASE.'/publier-une-donnee');
+    }
+
+    // le cookie est posé avec une expiration navigateur future : seul le jeton qu’il contient est expiré
+    private function setExpiredTokenCookie(KernelBrowser $client): void
+    {
+        $cipher = self::getContainer()->get(AuthCookieCipher::class);
+        $client->getCookieJar()->set(new Cookie(
+            AuthCookieResponseListener::COOKIE_NAME,
+            $cipher->encrypt(serialize(FakeKeycloakClient::createAccessToken(-60))),
+            (string) (time() + 3600),
+            '/',
+            'localhost',
+            true,
+        ));
     }
 
     /** @param array<string, mixed> $statePayload */

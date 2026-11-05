@@ -5321,21 +5321,6 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_security_signup": {
-            "tokens": [
-                [
-                    "text",
-                    "\/signup"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "GET"
-            ],
-            "schemes": []
-        },
         "cartesgouvfr_security_userinfo_edit": {
             "tokens": [
                 [

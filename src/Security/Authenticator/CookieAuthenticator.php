@@ -80,6 +80,6 @@ final class CookieAuthenticator extends AbstractAuthenticator
             return null;
         }
 
-        return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE, ['session_expired' => 1]));
+        return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE));
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Exception\AppException;
 use App\Security\State\LoginStateSerializer;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Stevenmaguire\OAuth2\Client\Provider\Keycloak;
@@ -33,18 +32,12 @@ class SecurityController extends AbstractController
             return $this->redirect($this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL).'connexion-desactivee');
         }
 
+        // le referer voyage dans le state de l’URL Keycloak : longueur bornée
         $referer = $request->headers->get('referer');
-        $safeReferer = null;
-        if (is_string($referer) && \strlen($referer) <= 2048) {
-            $refererHost = parse_url($referer, PHP_URL_HOST);
-            if (is_string($refererHost) && $refererHost === $request->getHost()) {
-                $safeReferer = $referer;
-            }
-        }
+        $safeReferer = is_string($referer) && \strlen($referer) <= 2048 && str_starts_with($referer, $request->getSchemeAndHttpHost().'/') ? $referer : null;
 
         $state = $loginStateSerializer->encode([
             'referer' => $safeReferer,
-            'session_expired' => $request->query->get('session_expired'),
             'popup' => $popup,
         ]);
 
@@ -71,12 +64,6 @@ class SecurityController extends AbstractController
     #[Route('/logout', name: 'logout', methods: ['GET'], options: ['expose' => true])]
     public function logout(): void
     {
-    }
-
-    #[Route('/signup', name: 'signup', methods: ['GET'], options: ['expose' => true])]
-    public function signup(): RedirectResponse
-    {
-        throw new AppException('not yet implemented', Response::HTTP_NOT_IMPLEMENTED);
     }
 
     #[Route('/userinfo/edit', name: 'userinfo_edit', methods: ['GET'], options: ['expose' => true])]

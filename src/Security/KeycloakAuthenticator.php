@@ -104,23 +104,10 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
             return new RedirectResponse($this->router->generate(self::POPUP_CALLBACK_ROUTE));
         }
 
-        $sessionExpired = $statePayload['session_expired'] ?? null;
         $referer = $statePayload['referer'] ?? null;
-        if (!is_string($referer) || parse_url($referer, PHP_URL_HOST) !== $request->getHost()) {
-            $referer = null;
-        }
-
-        if (!is_null($sessionExpired) && 1 === intval($sessionExpired)) {
-            $redirectUrl = $this->router->generate(self::HOME_ROUTE, [], RouterInterface::ABSOLUTE_URL).'publier-une-donnee?session_expired_login_success=1';
-        } else {
-            $redirectUrl = $referer ?? $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
-            $redirectUrl = str_replace('authentication_failed=1', '', $redirectUrl);
-
-            if (in_array(parse_url($redirectUrl, PHP_URL_PATH), ['/decouvrir', '/publier-une-donnee'])) {
-                $redirectUrl = $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
-                $redirectUrl .= 'tableau-de-bord';
-            }
-        }
+        $redirectUrl = is_string($referer) && str_starts_with($referer, $request->getSchemeAndHttpHost().'/')
+            ? $referer
+            : $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
 
         return new RedirectResponse($redirectUrl);
     }
@@ -139,7 +126,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
             return new RedirectResponse($this->router->generate(self::POPUP_CALLBACK_ROUTE));
         }
 
-        return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?authentication_failed=1');
+        return new RedirectResponse($this->router->generate(self::HOME_ROUTE).'publier-une-donnee?login_failed=1');
     }
 
     /** @param array<string, mixed> $statePayload */
