@@ -265,6 +265,6 @@ Limites assumées : un autre onglet garde son alerte jusqu’à son propre clic 
 
 **Retour après connexion** : le `referer` n’est gardé que s’il commence par `getSchemeAndHttpHost()` suivi de `/`. Derrière le proxy, cette origine vient des en-têtes `x-forwarded-proto`, `x-forwarded-host` et `x-forwarded-port` (`trusted_proxies`, `framework.yaml`) : s’ils manquent, tout `referer` est écarté et l’utilisateur revient sur l’accueil.
 
-**`/contact_us` public** : seule route d'API appelable sans cookie, n'importe qui peut y déclencher l'envoi de courriels ; à restreindre.
+**`/contact_us` public** : seule route d'API appelable sans cookie, chaque appel envoie un courriel au support. Le limiteur `contact_us` (`config/packages/rate_limiter.yaml`) accepte 5 appels par 10 min et par adresse IP, appels de robots compris ; au-delà, 429 en Problem Details avec `Retry-After`. Le compteur est en APCu, donc propre à chaque pod : avec N pods, jusqu'à 5 × N appels passent. Une limite exacte demanderait un stockage partagé (Redis), non prévu.
 
 **Pas de session PHP** : le bloc `session:` est intentionnellement absent de `config/packages/framework.yaml`. Ne pas le réintroduire pour des fonctionnalités annexes (flash, CSRF, etc.) sans réévaluer l'architecture stateless.
