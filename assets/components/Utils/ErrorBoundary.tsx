@@ -5,24 +5,22 @@ import { FC, PropsWithChildren } from "react";
 import { ErrorBoundary as BaseErrorBoundary, type FallbackProps, getErrorMessage } from "react-error-boundary";
 
 import { externalUrls } from "@/router/externalUrls";
-import AppLayout from "../Layout/AppLayout";
-import Main from "../Layout/Main";
 
+// rendu hors du routeur : ni en-tête ni fil d’Ariane, qui lisent les routes
 function Fallback({ error, resetErrorBoundary }: FallbackProps) {
     return (
-        <AppLayout>
-            <Main title="Une erreur est survenue">
-                <Alert severity="error" title="Une erreur est survenue" description={getErrorMessage(error) ?? undefined} className={fr.cx("fr-my-3w")} />
-                <Button
-                    onClick={() => {
-                        resetErrorBoundary();
-                        window.location.assign(externalUrls.discover_cartesgouvfr);
-                    }}
-                >
-                    {"Retour à l'accueil"}
-                </Button>
-            </Main>
-        </AppLayout>
+        <main id="main" role="main" className={fr.cx("fr-container", "fr-my-6w")}>
+            <h1>Une erreur est survenue</h1>
+            <Alert severity="error" title="Une erreur est survenue" description={getErrorMessage(error) ?? undefined} className={fr.cx("fr-my-3w")} />
+            <Button
+                onClick={() => {
+                    resetErrorBoundary();
+                    window.location.assign(externalUrls.discover_cartesgouvfr);
+                }}
+            >
+                {"Retour à l'accueil"}
+            </Button>
+        </main>
     );
 }
 

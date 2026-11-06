@@ -11,7 +11,10 @@ import getBreadcrumb, { BreadcrumbRouteParams } from "../modules/entrepot/breadc
 import useUserQuery from "./queries/useUserQuery";
 
 export default function useBreadcrumb(customBreadcrumbProps?: BreadcrumbProps) {
-    const routeId = useMatches({ select: (matches) => matches.at(-1)?.routeId });
+    // pas de fil d’Ariane sur une page d’erreur : ses paramètres peuvent manquer
+    const routeId = useMatches({
+        select: (matches) => (matches.some((match) => match.status === "error" || match.status === "notFound") ? undefined : matches.at(-1)?.routeId),
+    });
     const pathParams = useParams({ strict: false });
     const search = useSearch({ strict: false });
     const { datastore } = use(DatastoreContext);
