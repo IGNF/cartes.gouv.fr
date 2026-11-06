@@ -11,6 +11,7 @@ import { useEffect, useId, useMemo, useState } from "react";
 import { tss } from "tss-react";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
+import { communityMembersQueryOptions } from "@/hooks/queries/communityQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
@@ -69,11 +70,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const community = useCommunity();
 
     // Les membres de cette communauté
-    const { data: communityMembers, isLoading } = useQuery({
-        queryKey: RQKeys.community_members(community._id),
-        queryFn: ({ signal }) => api.community.getMembers(community._id, { signal }),
-        staleTime: 20000,
-    });
+    const { data: communityMembers, isLoading } = useQuery(communityMembersQueryOptions(community._id));
 
     const communitySupervisor = useMemo(() => {
         return community?.supervisor._id;

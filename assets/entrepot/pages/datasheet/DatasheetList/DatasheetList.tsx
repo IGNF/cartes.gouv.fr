@@ -13,6 +13,7 @@ import { useToggle } from "@mantine/hooks";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import { ListHeader } from "@/components/Layout/ListHeader";
+import { datasheetListQueryOptions } from "@/hooks/queries/datasheetListQueryOptions";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import useMembership from "@/hooks/useMembership";
 import { usePagination } from "@/hooks/usePagination";
@@ -22,9 +23,7 @@ import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Skeleton from "../../../../components/Utils/Skeleton";
 import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { searchAwareActiveOptions } from "@/router/AppLink";
-import api from "../../../api";
 import { SortByEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";
 import NoData from "./NoData";
@@ -47,12 +46,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t: tCommon } = useTranslation("Common");
     const isSandbox = useMembership({ datastoreId })?.isSandbox === true;
 
-    const datasheetListQuery = useQuery({
-        queryKey: RQKeys.datastore_datasheet_list(datastoreId),
-        queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
-        staleTime: 60000,
-        enabled: datastore !== undefined,
-    });
+    const datasheetListQuery = useQuery(datasheetListQueryOptions(datastoreId));
     const { data: datasheetList, dataUpdatedAt, isFetching, isLoading, refetch } = datasheetListQuery;
 
     const metadataEndpoint = useMemo(
