@@ -1,9 +1,11 @@
+import { hashKey } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
 import { basePath } from "@/env";
+import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
 import { routeTree } from "@/routeTree.gen";
 
@@ -19,6 +21,15 @@ export const router = createRouter({
             <LoadingText withSpinnerIcon />
         </Main>
     ),
+});
+
+// toute nouvelle valeur de user_me (reconnexion, revalidation, droits modifiés) ré-évalue les gates ; partage structurel : même référence si rien n’a changé
+const userMeHash = hashKey(RQKeys.user_me());
+let lastUser = queryClient.getQueryData(RQKeys.user_me());
+queryClient.getQueryCache().subscribe((event) => {
+    if (event.type !== "updated" || event.query.queryHash !== userMeHash || event.query.state.data === lastUser) return;
+    lastUser = event.query.state.data;
+    void router.invalidate();
 });
 
 declare module "@tanstack/react-router" {
