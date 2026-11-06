@@ -13,7 +13,6 @@ import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../modules/jsonFetch";
 import { getApiErrorTitle, getApiErrorDescription } from "../../../modules/apiError";
-import { routes } from "../../../router/router";
 import api from "../../api";
 import UploadPreviewTab from "./PreviewTab/UploadPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
@@ -46,7 +45,11 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
                     <Button
                         iconId="fr-icon-arrow-left-s-line"
                         priority="tertiary no outline"
-                        linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "dataset" }).link}
+                        linkProps={{
+                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                            params: { datastoreId, datasheetName },
+                            search: { activeTab: "dataset" },
+                        }}
                         title="Retour à la fiche de donnée"
                         size="large"
                     />
@@ -54,7 +57,7 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
                     <Button
                         iconId="fr-icon-arrow-left-s-line"
                         priority="tertiary no outline"
-                        linkProps={routes.datasheet_list({ datastoreId }).link}
+                        linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}
                         title="Retour à mes données"
                         size="large"
                     />

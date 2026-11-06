@@ -6,6 +6,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { AnyObjectSchema } from "yup";
 
@@ -22,7 +23,6 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../../modules/apiError";
-import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import AccessRestrictions from "../../common/AccessRestrictions/AccessRestrictions";
 import { CommonSchemasValidation } from "../../common/common-schemas-validation";
@@ -49,6 +49,7 @@ type PyramidVectorTmsServiceFormProps = {
 };
 
 const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ datastoreId, pyramidId, offeringId }) => {
+    const navigate = useNavigate();
     const { t } = useTranslation("PyramidVectorTmsServiceForm");
     const { t: tCommon } = useTranslation("Common");
 
@@ -70,9 +71,13 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                 void queryClient.invalidateQueries({
                     queryKey: RQKeys.datastore_datasheet(datastoreId, pyramidQuery.data?.tags.datasheet_name),
                 });
-                routes.datastore_datasheet_view({ datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                void navigate({
+                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                    params: { datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name },
+                    search: { activeTab: "services" },
+                });
             } else {
-                routes.datasheet_list({ datastoreId }).push();
+                void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
             }
         },
     });
@@ -99,10 +104,14 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                 void queryClient.invalidateQueries({
                     queryKey: RQKeys.datastore_datasheet(datastoreId, pyramidQuery.data?.tags.datasheet_name),
                 });
-                routes.datastore_datasheet_view({ datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                void navigate({
+                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                    params: { datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name },
+                    search: { activeTab: "services" },
+                });
                 void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, pyramidQuery.data?.tags?.datasheet_name) });
             } else {
-                routes.datasheet_list({ datastoreId }).push();
+                void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
             }
         },
     });
@@ -199,7 +208,9 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                     description={
                         <>
                             <p>{getApiErrorMessage(pyramidQuery.error)}</p>
-                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                            <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>
+                                {t("back_to_data_list")}
+                            </Button>
                         </>
                     }
                 />
@@ -211,7 +222,9 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                     description={
                         <>
                             <p>{getApiErrorMessage(offeringQuery.error)}</p>
-                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                            <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>
+                                {t("back_to_data_list")}
+                            </Button>
                         </>
                     }
                 />

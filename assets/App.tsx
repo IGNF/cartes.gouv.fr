@@ -1,17 +1,14 @@
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
-import { defaultShouldDehydrateQuery, hashKey } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { defaultShouldDehydrateQuery } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { FC } from "react";
+import { RouterProvider } from "@tanstack/react-router";
+import { FC, lazy, Suspense } from "react";
 
 import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
 import { cacheBuster } from "./env";
-import RQKeys from "./modules/entrepot/RQKeys";
-import { queryClient } from "./modules/queryClient";
-import { RouteProvider } from "./router/router";
-import RouterRenderer from "./router/RouterRenderer";
-import { bootstrapUser } from "./utils";
+import { queryClient, userMeHash } from "./modules/queryClient";
+import { router } from "./router";
 
 import "./sass/helpers.scss";
 
@@ -21,7 +18,8 @@ const persister = createAsyncStoragePersister({
 
 const maxAge = 1000 * 60 * 60 * 24; // 24h
 
-bootstrapUser();
+// retiré du build de production par élimination de code mort
+const Devtools = import.meta.env.DEV ? lazy(() => import("./devtools")) : () => null;
 
 const App: FC = () => {
     return (
@@ -33,19 +31,19 @@ const App: FC = () => {
                 maxAge,
                 dehydrateOptions: {
                     // ne pas persister (localstorage) les données utilisateur : elles sont rechargées depuis le serveur à chaque chargement de page
-                    shouldDehydrateQuery: (query) => defaultShouldDehydrateQuery(query) && query.queryHash !== hashKey(RQKeys.user_me()),
+                    shouldDehydrateQuery: (query) => defaultShouldDehydrateQuery(query) && query.queryHash !== userMeHash,
                 },
             }}
         >
-            <ReactQueryDevtools initialIsOpen={false} />
+            <Suspense fallback={null}>
+                <Devtools />
+            </Suspense>
 
-            <RouteProvider>
-                <ErrorBoundary>
-                    <AlertProvider>
-                        <RouterRenderer />
-                    </AlertProvider>
-                </ErrorBoundary>
-            </RouteProvider>
+            <ErrorBoundary>
+                <AlertProvider>
+                    <RouterProvider router={router} />
+                </AlertProvider>
+            </ErrorBoundary>
         </PersistQueryClientProvider>
     );
 };

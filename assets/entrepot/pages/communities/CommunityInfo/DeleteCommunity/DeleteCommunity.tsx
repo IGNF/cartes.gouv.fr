@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -15,7 +16,6 @@ import { getApiErrorDescription } from "@/modules/apiError";
 import { apiFetch } from "@/modules/jsonFetch";
 import { readServerEvents } from "@/modules/serverEvents";
 import RQKeys from "@/modules/entrepot/RQKeys";
-import { routes } from "@/router/router";
 import { deleteCommunityModal } from "./deleteCommunityModal";
 
 type DeleteCommunityState = "disclaimer" | "loading" | "confirm" | "connecting" | "cleanup_progress" | "deleting" | "error" | "mail_sent";
@@ -41,6 +41,7 @@ function progressFromContent(entitiesCount: DatastoreCleanupEntitiesCount): Data
 }
 
 export default function DeleteCommunity() {
+    const navigate = useNavigate();
     const { datastore } = useDatastore();
     const community = useCommunity();
     const queryClient = useQueryClient();
@@ -209,7 +210,7 @@ export default function DeleteCommunity() {
                     {
                         children: "Continuer",
                         onClick: () => {
-                            routes.datastore_selection().push();
+                            void navigate({ to: "/tableau-de-bord/entrepots" });
                         },
                     },
                 ]}

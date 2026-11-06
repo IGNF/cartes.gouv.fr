@@ -111,7 +111,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                     severity="error"
                     closable={false}
                     title={getApiErrorMessage(metadataQuery.error)}
-                    description={<Button linkProps={{ href: catalogueDatasheetUrl }}>{t("back_to_catalogue")}</Button>}
+                    description={<Button linkProps={{ href: catalogueDatasheetUrl, target: "_self" }}>{t("back_to_catalogue")}</Button>}
                     className={fr.cx("fr-mb-6v")}
                 />
             ) : (
@@ -151,7 +151,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                         {privateLayers.length === 0 ? (
                             <div>
                                 <p>{t("explanation_no_private_services")}</p>
-                                <Button linkProps={{ href: catalogueDatasheetUrl }} className={fr.cx("fr-mb-6v")}>
+                                <Button linkProps={{ href: catalogueDatasheetUrl, target: "_self" }} className={fr.cx("fr-mb-6v")}>
                                     {t("back_to_catalogue")}
                                 </Button>
                             </div>
@@ -181,7 +181,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                             >
                                 <Success color="blue-cumulus" width={"4rem"} height={"4rem"} />
                                 <p>{t("request_sent_successfully")}</p>
-                                <Button linkProps={{ href: catalogueDatasheetUrl }}>{t("back_to_catalogue")}</Button>
+                                <Button linkProps={{ href: catalogueDatasheetUrl, target: "_self" }}>{t("back_to_catalogue")}</Button>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit(onSubmit)}>

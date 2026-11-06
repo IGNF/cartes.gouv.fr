@@ -3,6 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -15,12 +16,14 @@ import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { routes, useRoutePaginationParams } from "../../../../../router/router";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import { niceBytes } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
 import { DatastoreManageStorageTab } from "../types";
 import { getApiErrorTitle, getApiErrorDescription } from "../../../../../modules/apiError";
+
+const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation");
 
 const confirmDialogModal = createModal({
     id: "confirm-delete-fs-modal",
@@ -34,7 +37,7 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
 
-    const { page, limit } = useRoutePaginationParams();
+    const { page, limit } = routeApi.useSearch();
 
     const filesystemUsage = useMemo(() => {
         return datastore?.storages.data?.find((data) => data.storage.type === "FILESYSTEM");
@@ -136,10 +139,10 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
                             storedData.tags.datasheet_name !== undefined && {
                                 iconId: "fr-icon-arrow-right-s-line",
                                 priority: "tertiary no outline",
-                                linkProps: routes.datastore_datasheet_view({
-                                    datastoreId: datastore._id,
-                                    datasheetName: storedData.tags.datasheet_name,
-                                }).link,
+                                linkProps: {
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                    params: { datastoreId: datastore._id, datasheetName: storedData.tags.datasheet_name },
+                                },
                                 children: tCommon("see_2"),
                             },
                         ]}
@@ -150,9 +153,12 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
                 <Pagination
                     defaultPage={page}
                     count={totalPages}
-                    getPageLinkProps={(pageNumber: number) =>
-                        routes.datastore_manage_storage({ datastoreId: datastore._id, limit, page: pageNumber, tab: DatastoreManageStorageTab.FILESYSTEM }).link
-                    }
+                    getPageLinkProps={(pageNumber: number) => ({
+                        to: "/tableau-de-bord/entrepots/$datastoreId/consommation",
+                        params: { datastoreId: datastore._id },
+                        search: { tab: DatastoreManageStorageTab.FILESYSTEM, page: pageNumber, limit },
+                        activeOptions: searchAwareActiveOptions,
+                    })}
                 />
             )}
 

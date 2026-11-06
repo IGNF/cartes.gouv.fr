@@ -12,11 +12,10 @@ import useUserQuery from "@/hooks/queries/useUserQuery";
 import { useTranslation } from "@/i18n";
 import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
-import { routeStringParam, routes, useRoute } from "@/router/router";
 import { findMembership } from "@/utils";
 import { statsPeriodQuery } from "@/utils/stats";
 import DynamicParamSelector from "./DynamicParamSelector";
-import { statsScopes, type StatsScope, type StatsScopeConfig } from "./stats.types";
+import { type StatsScope, type StatsScopeConfig } from "./stats.types";
 import StatsBarChart from "./StatsBarChart";
 import { statsConfig } from "./statsConfig";
 
@@ -35,11 +34,11 @@ function initDate(offsetMonths = 0): Date {
     return d;
 }
 
-export default function Stats() {
-    const { params } = useRoute();
-    const scopeParamValue = routeStringParam(params, "scope");
-    const scope = statsScopes.find((s) => s === scopeParamValue);
+type StatsProps = {
+    scope: StatsScope;
+};
 
+export default function Stats({ scope }: StatsProps) {
     const { t } = useTranslation("Stats");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
@@ -130,15 +129,15 @@ export default function Stats() {
                 container: fr.cx("fr-container", "fr-mb-4v"),
             }}
             customBreadcrumbProps={{
-                homeLinkProps: routes.dashboard().link,
+                homeLinkProps: { to: "/tableau-de-bord" },
                 segments: [
                     {
                         label: tBreadcrumb("discover_publish"),
-                        linkProps: routes.discover_publish().link,
+                        linkProps: { to: "/publier-une-donnee" },
                     },
                     {
                         label: tBreadcrumb("stats_scope_selection"),
-                        linkProps: routes.stats_scope_selection().link,
+                        linkProps: { to: "/tableau-de-bord/statistiques-de-consommation" },
                     },
                 ],
                 currentPageLabel: t("scope_title", { scope }),

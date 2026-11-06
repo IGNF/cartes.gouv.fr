@@ -1,37 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
-import { FC, PropsWithChildren, memo, useMemo } from "react";
+import { PropsWithChildren } from "react";
 
+import LoadingText from "@/components/Utils/LoadingText";
+import { CommunityProvider } from "@/contexts/community";
+import { DatastoreProvider } from "@/contexts/datastore";
+import api from "@/entrepot/api";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
-import { canUserAccess } from "@/utils";
+import useRequiredRights from "@/hooks/useRequiredRights";
+import { isApiError } from "@/modules/apiError";
+import RQKeys from "@/modules/entrepot/RQKeys";
+import Forbidden from "@/pages/error/Forbidden";
+import PageNotFound from "@/pages/error/PageNotFound";
 import { delta } from "@/utils/delta";
-import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
-import { CommunityProvider } from "../../contexts/community";
-import { DatastoreProvider } from "../../contexts/datastore";
-import api from "../../entrepot/api";
-import RQKeys from "../../modules/entrepot/RQKeys";
-import { isApiError } from "../../modules/apiError";
-import Forbidden from "../../pages/error/Forbidden";
-import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
-import LoadingText from "../Utils/LoadingText";
-import AppLayout from "./AppLayout";
-import { DatastoreLayoutProps } from "./DatastoreLayout";
-import Main from "./Main";
+import { hasAccess } from "@/utils/membership";
+import { useResourceStateWrapper, useTabsLayoutBelow } from "./DatastorePanelMain";
 
-export interface CommunityLayoutProps extends Omit<DatastoreLayoutProps, "datastoreId"> {
-    accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[];
-    communityId: string;
-}
-
-const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => {
-    const { accessRight, children, communityId, ...rest } = props;
-
+export default function CommunityLayout({ communityId, children }: PropsWithChildren<{ communityId: string }>) {
     const { data: user } = useUserQuery();
+    const requiredRights = useRequiredRights();
+    const wrap = useResourceStateWrapper();
+    const tabsBelow = useTabsLayoutBelow();
+
     const communityQuery = useQuery({
         queryKey: RQKeys.community(communityId),
         queryFn: ({ signal }) => api.community.get(communityId, { signal }),
         staleTime: delta.seconds(20),
-        enabled: !!communityId,
     });
     const community = communityQuery.data;
 
@@ -45,25 +39,8 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     const failureReason = communityQuery.failureReason ?? datastoreQuery.failureReason;
     const isPending = communityQuery.isPending || (datastoreId !== undefined && datastoreQuery.isPending);
 
-    const isAuthorized = useMemo(() => {
-        if (!user?.id || !user?.communities_member) {
-            return false;
-        }
-        const communityMember = user.communities_member.find((member) => member.community?._id === communityId);
-        if (!communityMember) {
-            return false; // is not part of the community
-        }
-        return canUserAccess(user.id, communityMember, accessRight);
-    }, [accessRight, user?.communities_member, communityId, user?.id]);
-
     if (isPending) {
-        return (
-            <AppLayout {...rest}>
-                <Main>
-                    <LoadingText withSpinnerIcon />
-                </Main>
-            </AppLayout>
-        );
+        return wrap(<LoadingText withSpinnerIcon />);
     }
 
     if (
@@ -72,22 +49,18 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
         !community ||
         (datastoreId !== undefined && !datastore)
     ) {
-        return <PageNotFoundWithLayout />;
+        return <PageNotFound />;
     }
 
     return (
-        <AppLayout {...rest}>
-            <CommunityProvider community={community}>
-                <DatastoreProvider
-                    datastore={datastore}
-                    isFetching={communityQuery.isFetching || datastoreQuery.isFetching}
-                    status={datastoreId !== undefined ? datastoreQuery.status : communityQuery.status}
-                >
-                    {isAuthorized ? children : <Forbidden />}
-                </DatastoreProvider>
-            </CommunityProvider>
-        </AppLayout>
+        <CommunityProvider community={community}>
+            <DatastoreProvider
+                datastore={datastore}
+                isFetching={communityQuery.isFetching || datastoreQuery.isFetching}
+                status={datastoreId !== undefined ? datastoreQuery.status : communityQuery.status}
+            >
+                {tabsBelow || hasAccess(user, { communityId }, requiredRights) ? children : wrap(<Forbidden />)}
+            </DatastoreProvider>
+        </CommunityProvider>
     );
-};
-
-export default memo(CommunityLayout);
+}

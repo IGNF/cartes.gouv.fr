@@ -5,6 +5,7 @@ import { type Translations } from "./types";
 const { i18n } = declareComponentKeys<
     | "warning"
     | "error"
+    | "retry"
     | "add"
     | "adding"
     | "modify"
@@ -61,6 +62,7 @@ export type I18n = typeof i18n;
 export const commonFrTranslations: Translations<"fr">["Common"] = {
     warning: "Avertissement",
     error: "Une erreur est survenue",
+    retry: "Réessayer",
     add: "Ajouter",
     adding: "Ajout en cours ...",
     modify: "Modifier",
@@ -120,6 +122,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
 export const commonEnTranslations: Translations<"en">["Common"] = {
     warning: "Warning",
     error: "An error occurred",
+    retry: "Retry",
     add: "Add",
     adding: "Adding ...",
     modify: "Modify",

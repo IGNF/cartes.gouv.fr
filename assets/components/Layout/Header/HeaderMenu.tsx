@@ -94,7 +94,8 @@ export default function HeaderMenu({ openButtonProps, actionButtonProps, items, 
 
                                 const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
                                     closeMenu();
-                                    linkProps?.onClick?.(e);
+                                    // la variante TanStack du lien ne déclare pas les props DOM
+                                    if (linkProps && "onClick" in linkProps) linkProps.onClick?.(e);
                                 };
 
                                 return (

@@ -2,7 +2,6 @@ import { declareComponentKeys } from "i18nifty";
 import { Translations } from "../../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
-    | { K: "community_members"; P: { communityName: string }; R: string }
     | { K: "already_member"; P: { userId: string }; R: string }
     | "rights"
     | "name"
@@ -17,7 +16,6 @@ const { i18n } = declareComponentKeys<
 export type I18n = typeof i18n;
 
 export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMembers"] = {
-    community_members: ({ communityName }) => communityName,
     already_member: ({ userId }) => `L'utilisateur ${userId} est déjà membre de cet espace de travail`,
     rights: "Permissions du compte",
     name: "Nom",
@@ -31,7 +29,6 @@ export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMember
 };
 
 export const CommunityMembersEnTranslations: Translations<"en">["CommunityMembers"] = {
-    community_members: ({ communityName }) => communityName,
     already_member: ({ userId }) => `User ${userId} is already a member of this community`,
     rights: "User rights",
     name: "Name",

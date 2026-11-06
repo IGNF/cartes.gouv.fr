@@ -5,7 +5,6 @@ import useUserQuery from "@/hooks/queries/useUserQuery";
 import { queryClient } from "@/modules/queryClient";
 import SymfonyRouting from "@/modules/Routing";
 import { externalLink, externalUrls } from "@/router/externalUrls";
-import { routes } from "@/router/router";
 import HeaderMenu from "./HeaderMenu";
 import "../../../sass/components/buttons.scss";
 
@@ -58,12 +57,13 @@ export function HeaderMenuServices() {
                 {
                     iconId: "fr-icon-search-line",
                     children: "Rechercher une donnée",
-                    linkProps: { href: externalUrls.catalogue },
+                    // URL absolue mais même site : react-dsfr ouvrirait un nouvel onglet
+                    linkProps: { href: externalUrls.catalogue, target: "_self" },
                 },
                 {
                     iconId: "fr-icon-database-line",
                     children: "Publier une donnée",
-                    linkProps: routes.discover_publish().link,
+                    linkProps: { to: "/publier-une-donnee" },
                 },
                 // {
                 //     iconId: "fr-icon-brush-line",
@@ -150,12 +150,12 @@ export function HeaderMenuUser() {
                 {
                     children: "Tableau de bord",
                     iconId: "fr-icon-dashboard-3-line",
-                    linkProps: routes.dashboard().link,
+                    linkProps: { to: "/tableau-de-bord" },
                 },
                 {
                     children: "Mon compte",
                     iconId: "fr-icon-user-line",
-                    linkProps: routes.my_account().link,
+                    linkProps: { to: "/mon-compte" },
                 },
             ]}
             actionButtonProps={{

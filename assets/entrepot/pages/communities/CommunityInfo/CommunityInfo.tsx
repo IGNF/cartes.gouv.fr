@@ -7,6 +7,7 @@ import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import { useStyles } from "tss-react";
@@ -16,8 +17,6 @@ import * as yup from "yup";
 import { Community } from "@/@types/app";
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
-import PageTitle from "@/components/Layout/PageTitle";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
 import { useCommunity } from "@/contexts/community";
@@ -29,7 +28,6 @@ import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { ApiError } from "@/modules/jsonFetch";
 import { getApiErrorTitle, getApiErrorDescription } from "@/modules/apiError";
-import { routes } from "@/router/router";
 import { isSandboxCommunity } from "@/utils";
 import DeleteCommunity from "./DeleteCommunity/DeleteCommunity";
 import { deleteCommunityModal } from "./DeleteCommunity/deleteCommunityModal";
@@ -69,6 +67,7 @@ const leaveCommunityModal = createModal({
 });
 
 export default function CommunityInfo() {
+    const navigate = useNavigate();
     const { t } = useTranslation("CommunityInfo");
     const { t: tCommon } = useTranslation("Common");
     const { css } = useStyles();
@@ -143,16 +142,12 @@ export default function CommunityInfo() {
         },
         onSuccess: () => {
             void userQuery.refetch();
-            routes.datastore_selection().push();
+            void navigate({ to: "/tableau-de-bord/entrepots" });
         },
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastore._id}>
-            <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} />
-
-            <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={datastore.community._id} />
-
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>
                 <div
                     className={fr.cx("fr-col-12", "fr-py-0")}

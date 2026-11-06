@@ -3,6 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useMemo, useState } from "react";
 
 import useUserQuery from "@/hooks/queries/useUserQuery";
@@ -25,7 +26,6 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../../modules/apiError";
-import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import UserKeyLink from "./UserKeyLink";
 
@@ -40,6 +40,7 @@ type UserKeysListTabProps = {
 const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UserKeysListTab");
+    const navigate = useNavigate();
 
     const { data: user } = useUserQuery();
 
@@ -249,7 +250,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                 iconId="fr-icon-edit-line"
                                                 size="small"
                                                 onClick={() => {
-                                                    routes.user_key_edit({ keyId: accessKey._id }).push();
+                                                    void navigate({ to: "/mes-cles/$keyId/modification", params: { keyId: accessKey._id } });
                                                 }}
                                             />
                                             {accessKey.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.HASH &&

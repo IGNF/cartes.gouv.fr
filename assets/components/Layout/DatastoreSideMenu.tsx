@@ -1,11 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 import SideMenu from "@codegouvfr/react-dsfr/SideMenu";
+import { useMatches } from "@tanstack/react-router";
 import { MouseEvent } from "react";
 import { tss } from "tss-react";
 
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
 import { useTranslation } from "@/i18n";
-import { routes, useRoute } from "@/router/router";
 
 type DatastoreSideMenuProps = {
     datastoreId?: string;
@@ -13,7 +14,7 @@ type DatastoreSideMenuProps = {
 };
 export default function DatastoreSideMenu({ datastoreId, communityId }: DatastoreSideMenuProps) {
     const { t: tCommon } = useTranslation("Common");
-    const route = useRoute();
+    const onSelection = useMatches({ select: (matches) => matches.at(-1)?.routeId === "/_private/_panneau/tableau-de-bord/entrepots/" });
     const { classes, css, cx } = useStyles();
 
     const { datastoreList, addUserToSandbox } = useDatastoreSelection();
@@ -56,22 +57,21 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
             items={[
                 {
                     text: "Tous les entrepôts",
-                    linkProps: routes.datastore_selection().link,
+                    linkProps: { to: "/tableau-de-bord/entrepots" },
                     expandedByDefault: true,
-                    isActive: route.name === routes.datastore_selection().name,
+                    isActive: onSelection,
                 },
                 ...datastoreList.map((datastore) => ({
                     text: tCommon("datastore_name", { name: datastore.name, isSandbox: datastore.is_sandbox }),
-                    linkProps:
-                        datastore._id !== undefined
-                            ? routes.datasheet_list({ datastoreId: datastore._id }).link
-                            : {
-                                  href: "#",
-                                  onClick: (e: MouseEvent<HTMLAnchorElement>) => {
-                                      e.preventDefault();
-                                      addUserToSandbox();
-                                  },
+                    linkProps: (datastore._id !== undefined
+                        ? { to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId: datastore._id } }
+                        : {
+                              href: "#",
+                              onClick: (e: MouseEvent<HTMLAnchorElement>) => {
+                                  e.preventDefault();
+                                  addUserToSandbox();
                               },
+                          }) satisfies RegisteredLinkProps as RegisteredLinkProps,
                     isActive: (datastore._id !== undefined && datastoreId === datastore._id) || communityId === datastore.community_id,
                 })),
             ]}

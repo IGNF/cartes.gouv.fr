@@ -6,12 +6,11 @@ import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearch as useRouteSearch } from "@tanstack/react-router";
 import { useEffect, useId, useMemo, useState } from "react";
 import { tss } from "tss-react";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
-import PageTitle from "@/components/Layout/PageTitle";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
@@ -21,11 +20,11 @@ import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useCommunity } from "../../../../contexts/community";
-import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
-import { routePositiveIntegerParam, routes, useRoute } from "../../../../router/router";
+import { searchAwareActiveOptions } from "@/router/AppLink";
+import { positiveIntegerParam } from "@/router/searchParams";
 import api from "../../../api";
 import { AddMember, addMemberModal } from "../AddMember/AddMember";
 import { complete, rightTypes, UserRights } from "../UserRights";
@@ -68,7 +67,6 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
 
     // Data
     const community = useCommunity();
-    const { datastore } = useDatastore();
 
     // Les membres de cette communauté
     const { data: communityMembers, isLoading } = useQuery({
@@ -109,9 +107,11 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
         return members;
     }, [communityMembers, communitySupervisor, user?.id]);
 
-    const { params } = useRoute();
-    const page = routePositiveIntegerParam(params, "page") ?? 1;
-    const limit = routePositiveIntegerParam(params, "limit") ?? 20;
+    const navigate = useNavigate();
+    // page rendue sous deux routes (entrepôt et communauté) : lecture non stricte, bornée ici
+    const routeSearch = useRouteSearch({ strict: false });
+    const page = positiveIntegerParam(routeSearch.page) ?? 1;
+    const limit = positiveIntegerParam(routeSearch.limit) ?? 20;
 
     const { search, searchedItems } = useSearch(members);
     const { paginatedItems, totalPages } = usePagination(searchedItems, page, limit);
@@ -178,7 +178,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { classes, cx } = useStyles();
 
     return (
-        <DatastoreMain title="Membres" datastoreId={datastore._id} communityId={community._id}>
+        <DatastoreMain title="Membres">
             {isLoading && <LoadingText />}
             {!isLoading && userId && communityMemberIds.includes(userId) && (
                 <Alert
@@ -187,16 +187,12 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                     title={t("already_member", { userId: userId })}
                     closable
                     onClose={() => {
-                        routes.members_list({ communityId: community._id }).push();
+                        void navigate({ to: ".", search: {} });
                     }}
                 />
             )}
             {!isLoading && (
                 <>
-                    <PageTitle title={t("community_members", { communityName: community?.name ?? "" })} />
-
-                    <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />
-
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-2v")}>
                         <div
                             className={fr.cx("fr-col-12", "fr-py-0")}
@@ -230,7 +226,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                                 label={tCommon("search")}
                                 onButtonClick={(text) => {
                                     if (!isLoading) {
-                                        routes.members_list({ communityId: community._id, userId, search: text }).replace();
+                                        void navigate({ to: ".", search: { userId, search: text }, replace: true });
                                     }
                                 }}
                                 allowEmptySearch={true}
@@ -327,7 +323,9 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                             count={totalPages}
                             showFirstLast={true}
                             getPageLinkProps={(pageNumber) => ({
-                                ...routes.members_list({ communityId: community._id, userId, page: pageNumber, limit: limit, search }).link,
+                                to: ".",
+                                search: { userId, page: pageNumber, limit, search },
+                                activeOptions: searchAwareActiveOptions,
                             })}
                             defaultPage={page}
                         />

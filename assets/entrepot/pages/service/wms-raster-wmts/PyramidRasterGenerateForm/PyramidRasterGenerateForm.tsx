@@ -8,6 +8,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -25,10 +26,9 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../../modules/apiError";
-import { routes } from "../../../../../router/router";
 import { bboxToWkt } from "../../../../../utils";
 import api from "../../../../api";
-import { DatasheetViewActiveTabEnum } from "../../../datasheet/DatasheetView/DatasheetView/DatasheetView";
+import { DatasheetViewActiveTabEnum } from "../../../datasheet/DatasheetView/DatasheetView/types";
 
 const STEPS = {
     TECHNICAL_NAME: 1,
@@ -47,6 +47,7 @@ type PyramidRasterGenerateFormProps = {
     datasheetName: string;
 };
 const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datastoreId, offeringId, datasheetName }) => {
+    const navigate = useNavigate();
     const { t } = useTranslation("PyramidRasterGenerateForm");
     const { t: tCommon } = useTranslation("Common");
 
@@ -100,7 +101,11 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         onSuccess() {
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
-            routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "dataset" }).push();
+            void navigate({
+                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                params: { datastoreId, datasheetName },
+                search: { activeTab: "dataset" },
+            });
         },
     });
 
@@ -138,7 +143,11 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                         <>
                             <p>{getApiErrorMessage(serviceQuery.error)}</p>
                             <Button
-                                linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: DatasheetViewActiveTabEnum.Services }).link}
+                                linkProps={{
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                    params: { datastoreId, datasheetName },
+                                    search: { activeTab: DatasheetViewActiveTabEnum.Services },
+                                }}
                             >
                                 {t("back_to_datasheet")}
                             </Button>
@@ -152,7 +161,11 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                     title={t("wmsv-service.bbox_not_found")}
                     description={
                         <Button
-                            linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: DatasheetViewActiveTabEnum.Services }).link}
+                            linkProps={{
+                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                params: { datastoreId, datasheetName },
+                                search: { activeTab: DatasheetViewActiveTabEnum.Services },
+                            }}
                         >
                             {t("back_to_datasheet")}
                         </Button>

@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
+import { getRouteApi } from "@tanstack/react-router";
 import { FC, useMemo } from "react";
 
 import { ManageCommunityActiveTabEnum } from "@/@types/app_espaceco";
@@ -10,7 +11,6 @@ import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import useUserMe from "@/espaceco/hooks/useUserMe";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../i18n/i18n";
-import { routeStringParam, routes, useRoute } from "../../../router/router";
 import Databases from "./management/Databases";
 import Description from "./management/Description";
 import Grids from "./management/Grids";
@@ -21,6 +21,8 @@ import Tools from "./management/Tools";
 import ZoomAndCentering from "./management/ZoomAndCentering";
 import { getApiErrorMessage } from "../../../modules/apiError";
 
+const routeApi = getRouteApi("/_private/espace-collaboratif/$communityId/gerer-le-guichet");
+
 const ManageCommunity: FC = () => {
     const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();
 
@@ -28,10 +30,8 @@ const ManageCommunity: FC = () => {
 
     const { community, isCommunityLoading, isCommunityError, communityError } = useCommunityContext();
 
-    const route = useRoute();
-    const tab = routeStringParam(route.params, "activeTab");
-    const activeTab: ManageCommunityActiveTabEnum =
-        Object.values(ManageCommunityActiveTabEnum).find((value) => value === tab) ?? ManageCommunityActiveTabEnum.Description;
+    const navigate = routeApi.useNavigate();
+    const { activeTab } = routeApi.useSearch();
 
     const isAdmin = useMemo(() => {
         return me?.administrator === true;
@@ -67,7 +67,7 @@ const ManageCommunity: FC = () => {
                     description={
                         <>
                             <p>{getApiErrorMessage(meError)}</p>
-                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                            <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
                         </>
                     }
                 />
@@ -79,7 +79,7 @@ const ManageCommunity: FC = () => {
                     description={
                         <>
                             <p>{getApiErrorMessage(communityError)}</p>
-                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                            <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
                         </>
                     }
                 />
@@ -98,8 +98,9 @@ const ManageCommunity: FC = () => {
                                 label: t("tab", { tab: v }),
                             }))}
                             selectedTabId={activeTab}
-                            onTabChange={(activeTab) => {
-                                routes.espaceco_manage_community({ communityId: community.id, activeTab }).replace();
+                            onTabChange={(tabId) => {
+                                // les tabId des onglets sont les valeurs de l’enum
+                                void navigate({ search: { activeTab: tabId as ManageCommunityActiveTabEnum }, replace: true });
                             }}
                         >
                             <>

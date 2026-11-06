@@ -9,6 +9,7 @@ import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { PermissionCreateDtoTypeEnum } from "../../../../@types/entrepot";
@@ -19,7 +20,6 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routes } from "../../../../router/router";
 import { isOfferingUnavailable } from "../../../../utils";
 import "../../../../sass/pages/permission.scss";
 import api from "../../../api";
@@ -37,6 +37,7 @@ type AddPermissionFormProps = {
 };
 
 const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
+    const navigate = useNavigate();
     const { t } = useTranslation("DatastorePermissions");
     const { t: tCommon } = useTranslation("Common");
 
@@ -78,7 +79,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                     return [...oldPermissions, ...permissions];
                 }
             });
-            routes.datastore_manage_permissions({ datastoreId: datastoreId }).push();
+            void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params: { datastoreId } });
         },
     });
 
@@ -256,7 +257,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                         <ButtonsGroup
                             buttons={[
                                 {
-                                    linkProps: routes.datastore_manage_permissions({ datastoreId: datastoreId }).link,
+                                    linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params: { datastoreId } },
                                     children: tCommon("cancel"),
                                     priority: "secondary",
                                 },

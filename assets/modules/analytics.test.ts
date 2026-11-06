@@ -61,15 +61,30 @@ describe("matomoPageTitle", () => {
     });
     afterEach(() => vi.unstubAllGlobals());
 
-    it("prefixes by route group and uses the page labels", async () => {
-        const { matomoPageTitle } = await import("./analytics");
-        const { routes } = await import("@/router/router");
+    const match = (routeId: string, matomoLabel?: string) => ({ routeId, staticData: { matomoLabel } });
 
-        expect(matomoPageTitle(routes.dashboard())).toBe("[Publier] Tableau de bord");
-        expect(matomoPageTitle(routes.datastore_wfs_service_new({ datastoreId: "d", vectorDbId: "v", datasheetName: "n" }))).toBe(
-            "[Publier] Publier un service WFS"
+    it("prefixes by space and uses the deepest label", async () => {
+        const { matomoPageTitle } = await import("./analytics");
+
+        expect(matomoPageTitle([match("__root__"), match("/_private"), match("/_private/tableau-de-bord/", "Tableau de bord")])).toBe(
+            "[Publier] Tableau de bord"
         );
-        expect(matomoPageTitle(routes.espaceco_community_list())).toBe("[Contribuer] Liste des guichets");
-        expect(matomoPageTitle({ name: false, params: {} } as never)).toBe("[Publier] Page introuvable");
+        expect(
+            matomoPageTitle([
+                match("/_private"),
+                match("/_private/tableau-de-bord/entrepots/$datastoreId"),
+                match("/_private/tableau-de-bord/entrepots/$datastoreId/service/wfs/ajout", "Publier un service WFS"),
+            ])
+        ).toBe("[Publier] Publier un service WFS");
+        expect(
+            matomoPageTitle([match("/_private"), match("/_private/espace-collaboratif"), match("/_private/espace-collaboratif/", "Liste des guichets")])
+        ).toBe("[Contribuer] Liste des guichets");
+    });
+
+    it("falls back to the not found label without a leaf", async () => {
+        const { matomoPageTitle } = await import("./analytics");
+
+        expect(matomoPageTitle([match("__root__")])).toBe("[Publier] Page introuvable");
+        expect(matomoPageTitle([])).toBe("[Publier] Page introuvable");
     });
 });

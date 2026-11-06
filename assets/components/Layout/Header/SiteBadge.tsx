@@ -1,34 +1,32 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
+import { useMatches } from "@tanstack/react-router";
 
-import { groups, useRoute } from "@/router/router";
+import type { RouteId } from "@/router";
+
+// routes (layouts compris : un layout couvre toutes ses feuilles) où le badge « Publier » s’affiche
+const PUBLISH_ROUTE_IDS = new Set<RouteId>([
+    "/_private/_panneau",
+    "/_private/tableau-de-bord/entrepots/$datastoreId",
+    "/_private/tableau-de-bord/communaute/$communityId",
+    "/_private/configuration/alertes",
+    "/_private/espace-collaboratif",
+    "/_private/tableau-de-bord/",
+    "/_private/demande-acces/$fileIdentifier",
+    "/_public/publier-une-donnee",
+]);
 
 export default function SiteBadge() {
-    const route = useRoute();
+    const isPublish = useMatches({ select: (matches) => matches.some((match) => PUBLISH_ROUTE_IDS.has(match.routeId)) });
 
-    if (
-        groups.datastore.has(route) ||
-        groups.community.has(route) ||
-        groups.config.has(route) ||
-        groups.espaceco.has(route) ||
-        (route.name &&
-            [
-                "dashboard",
-                "datastore_selection",
-                "datastore_create_request",
-                "datastore_create_request_confirm",
-                "join_community",
-                "accesses_request",
-                "discover_publish",
-            ].includes(route.name))
-    ) {
-        return (
-            <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
-                <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} aria-hidden="true" />
-                Publier
-            </Badge>
-        );
+    if (!isPublish) {
+        return null;
     }
 
-    return null;
+    return (
+        <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
+            <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} aria-hidden="true" />
+            Publier
+        </Badge>
+    );
 }

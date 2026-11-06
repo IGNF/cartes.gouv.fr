@@ -6,6 +6,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -18,7 +19,6 @@ import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../../modules/apiError";
-import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import TableSelection from "../../common/TableSelection/TableSelection";
 import formatForm from "../format-form";
@@ -52,6 +52,7 @@ type PyramidVectorNewProps = {
 };
 
 const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, technicalName }) => {
+    const navigate = useNavigate();
     const { t } = useTranslation("PyramidVectorGenerateForm");
     const { t: tCommon } = useTranslation("Common");
 
@@ -147,9 +148,13 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                 if (vectorDbQuery.data?.tags?.datasheet_name) {
                     void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name) });
                     void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
-                    routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "dataset" }).push();
+                    void navigate({
+                        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                        params: { datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name },
+                        search: { activeTab: "dataset" },
+                    });
                 } else {
-                    routes.datasheet_list({ datastoreId }).push();
+                    void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
                 }
             })
             .catch((error) => {
@@ -171,7 +176,9 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                     severity="error"
                     closable={false}
                     title={t("stored_data.fetch_failed")}
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>}
+                    description={
+                        <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>{t("back_to_data_list")}</Button>
+                    }
                 />
             ) : (
                 <>
