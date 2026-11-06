@@ -1,5 +1,7 @@
 import { CommunityListFilter } from "../../@types/app_espaceco";
+import { withQueryKeyNamespace } from "../withQueryKeyNamespace";
 
+/** Factory des query keys react-query du domaine Espace collaboratif, toutes préfixées par "espaceco" */
 const RQKeys = {
     communityList: (queryParams: Record<string, unknown> = {}): string[] => ["communities", JSON.stringify(queryParams)],
     communities: (fields: string | null = null): string[] => {
@@ -22,7 +24,7 @@ const RQKeys = {
     userSharedThemes: (): string[] => ["user", "shared_themes"],
     searchAddress: (search: string, filters: Record<string, unknown>): string[] => ["searchAddress", search, JSON.stringify(filters)],
     searchGrids: (text: string, filters: Record<string, unknown>): string[] => ["searchGrids", text, JSON.stringify(filters)],
-    getMe: (): string[] => ["espaceco", "users", "me"],
+    getMe: (): string[] => ["users", "me"],
     searchUsers: (text: string): string[] => ["searchUsers", text],
     databases: (fields: string[]) => ["databases", fields.join(",")],
     database: (databaseId: number) => ["databases", databaseId.toString()],
@@ -35,4 +37,4 @@ const RQKeys = {
     emailPlanners: (communityId: number): string[] => ["emailplanners", communityId.toString()],
 };
 
-export default RQKeys;
+export default withQueryKeyNamespace("espaceco", RQKeys);
