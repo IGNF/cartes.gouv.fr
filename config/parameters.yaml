@@ -1,6 +1,5 @@
 parameters:
     app_env: "%env(resolve:APP_ENV)%"
-    api_harvest_mode: "%env(resolve:API_HARVEST_MODE)%"
 
     assets_directory: "%kernel.project_dir%/assets"
 
