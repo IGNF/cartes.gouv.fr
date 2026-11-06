@@ -3,7 +3,7 @@ import { Route } from "type-route";
 
 import { groups } from "./router";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
-import CommunityLayout, { CommunityLayoutProps } from "@/components/Layout/CommunityLayout";
+import CommunityLayout from "@/components/Layout/CommunityLayout";
 import api from "@/entrepot/api";
 
 const ConfigEvents = lazy(() => import("../entrepot/pages/config/Alerts"));
@@ -17,7 +17,7 @@ interface IGroupConfigProps {
 function GroupConfig(props: IGroupConfigProps) {
     const { route } = props;
 
-    const content: { render: JSX.Element; layoutProps?: Omit<CommunityLayoutProps, "communityId"> } = useMemo(() => {
+    const content: { render: JSX.Element } = useMemo(() => {
         switch (route.name) {
             case "config_alerts":
                 return {
@@ -30,11 +30,7 @@ function GroupConfig(props: IGroupConfigProps) {
         return <PageNotFoundWithLayout />;
     }
 
-    return (
-        <CommunityLayout communityId={communityId} {...content?.layoutProps}>
-            {content.render}
-        </CommunityLayout>
-    );
+    return <CommunityLayout communityId={communityId}>{content.render}</CommunityLayout>;
 }
 
 export default GroupConfig;

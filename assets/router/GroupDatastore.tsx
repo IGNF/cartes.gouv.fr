@@ -2,7 +2,7 @@ import { JSX, lazy, useMemo } from "react";
 import { Route } from "type-route";
 
 import { groups } from "./router";
-import DatastoreLayout, { DatastoreLayoutProps } from "../components/Layout/DatastoreLayout";
+import DatastoreLayout from "../components/Layout/DatastoreLayout";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 
 const DatastoreManageStorage = lazy(() => import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage"));
@@ -34,7 +34,7 @@ interface IGroupDatastoreProps {
 function GroupDatastore(props: IGroupDatastoreProps) {
     const { route } = props;
 
-    const content: { render: JSX.Element; layoutProps?: Omit<DatastoreLayoutProps, "datastoreId"> } = useMemo(() => {
+    const content: { render: JSX.Element } = useMemo(() => {
         switch (route.name) {
             case "datastore_manage_storage":
                 return {
@@ -212,11 +212,7 @@ function GroupDatastore(props: IGroupDatastoreProps) {
         return <PageNotFoundWithLayout />;
     }
 
-    return (
-        <DatastoreLayout datastoreId={route.params.datastoreId} {...content?.layoutProps}>
-            {content.render}
-        </DatastoreLayout>
-    );
+    return <DatastoreLayout datastoreId={route.params.datastoreId}>{content.render}</DatastoreLayout>;
 }
 
 export default GroupDatastore;

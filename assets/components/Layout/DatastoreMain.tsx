@@ -1,79 +1,27 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useHead } from "@unhead/react";
 import { PropsWithChildren } from "react";
-import { tss } from "tss-react";
 
-import DatastoreSideMenu from "@/components/Layout/DatastoreSideMenu";
-import useBreadcrumb from "@/hooks/useBreadcrumb";
-import { routes } from "@/router/router";
-import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import { type MainProps } from "./Main";
 
 export type DatastoreMainProps = PropsWithChildren<
-    MainProps & {
+    Pick<MainProps, "noticeProps" | "title"> & {
         datastoreId?: string;
         communityId?: string;
     }
-> & {
-    classes?: Partial<MainProps["classes"] & Record<"content", string>>;
-};
+>;
 
-export default function DatastoreMain(props: DatastoreMainProps) {
-    const { datastoreId, communityId, children, customBreadcrumbProps, noticeProps, title, classes: propsClasses } = props;
-
+/** contenu d’une page rendue dans le panneau des entrepôts (DatastorePanelMain) : titre du document et notice */
+export default function DatastoreMain({ children, noticeProps, title }: DatastoreMainProps) {
     useHead({
         titleTemplate: "%s | cartes.gouv.fr",
         title: title,
     });
-    const breadcrumbProps = useBreadcrumb(customBreadcrumbProps);
-
-    const { classes } = useStyles();
 
     return (
-        <main id="main" role="main">
+        <>
             {noticeProps && <Notice isClosable {...noticeProps} />}
-            <div className={propsClasses?.container ?? fr.cx("fr-container")}>
-                <div className={fr.cx("fr-grid-row")}>
-                    <div
-                        className={cx(fr.cx("fr-col-12", "fr-col-md-3"), classes?.sideMenuCol)} // "fr-pl-5w"
-                    >
-                        <DatastoreSideMenu datastoreId={datastoreId} communityId={communityId} />
-
-                        <ButtonsGroup
-                            className={fr.cx("fr-mb-md-6v", "fr-mr-md-8v")}
-                            buttons={[
-                                {
-                                    children: "Ajouter un entrepôt",
-                                    linkProps: routes.datastore_create_request().link,
-                                    priority: "secondary",
-                                },
-                            ]}
-                        />
-                    </div>
-                    <div className={cx(fr.cx("fr-col-12", "fr-col-md-9"), classes.content, propsClasses?.content)}>
-                        {/* // "fr-px-5w" */}
-                        {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
-                        <SessionExpiredAlert />
-                        {children}
-                    </div>
-                </div>
-            </div>
-        </main>
+            {children}
+        </>
     );
 }
-
-const useStyles = tss.withName({ DatastoreMain }).create({
-    sideMenuCol: {
-        display: "flex",
-        flexDirection: "column",
-        gap: fr.spacing("10v"),
-        borderRight: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
-    },
-    content: {
-        padding: "0 1rem",
-    },
-});

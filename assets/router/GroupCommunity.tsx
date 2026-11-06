@@ -2,8 +2,7 @@ import { JSX, lazy, useMemo } from "react";
 import { Route } from "type-route";
 
 import { groups } from "./router";
-import CommunityLayout, { CommunityLayoutProps } from "../components/Layout/CommunityLayout";
-import { CommunityMemberDtoRightsEnum } from "../@types/entrepot";
+import CommunityLayout from "../components/Layout/CommunityLayout";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 
 const CommunityInfo = lazy(() => import("../entrepot/pages/communities/CommunityInfo/CommunityInfo"));
@@ -16,7 +15,7 @@ interface IGroupCommunityProps {
 function GroupCommunity(props: IGroupCommunityProps) {
     const { route } = props;
 
-    const content: { render: JSX.Element; layoutProps?: Omit<CommunityLayoutProps, "communityId"> } = useMemo(() => {
+    const content: { render: JSX.Element } = useMemo(() => {
         switch (route.name) {
             case "community_info":
                 return {
@@ -24,7 +23,6 @@ function GroupCommunity(props: IGroupCommunityProps) {
                 };
             case "members_list":
                 return {
-                    layoutProps: { accessRight: CommunityMemberDtoRightsEnum.COMMUNITY },
                     render: <CommunityMembers userId={route.params.userId} />,
                 };
         }
@@ -34,11 +32,7 @@ function GroupCommunity(props: IGroupCommunityProps) {
         return <PageNotFoundWithLayout />;
     }
 
-    return (
-        <CommunityLayout communityId={route.params.communityId} {...content?.layoutProps}>
-            {content.render}
-        </CommunityLayout>
-    );
+    return <CommunityLayout communityId={route.params.communityId}>{content.render}</CommunityLayout>;
 }
 
 export default GroupCommunity;

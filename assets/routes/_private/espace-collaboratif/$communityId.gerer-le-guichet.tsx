@@ -1,0 +1,30 @@
+import { createFileRoute, notFound, SearchSchemaInput } from "@tanstack/react-router";
+
+import { ManageCommunityActiveTabEnum } from "@/@types/app_espaceco";
+import { CommunityProvider } from "@/espaceco/contexts/CommunityContext";
+import ManageCommunity from "@/espaceco/pages/communities/ManageCommunity";
+import { enumParam } from "@/router/searchParams";
+
+export const Route = createFileRoute("/_private/espace-collaboratif/$communityId/gerer-le-guichet")({
+    validateSearch: (search: { activeTab?: ManageCommunityActiveTabEnum } & SearchSchemaInput): { activeTab: ManageCommunityActiveTabEnum } => ({
+        activeTab: enumParam(search.activeTab, Object.values(ManageCommunityActiveTabEnum)) ?? ManageCommunityActiveTabEnum.Description,
+    }),
+    staticData: { matomoLabel: "Gérer le guichet" },
+    params: {
+        parse: (raw) => ({ communityId: Number(raw.communityId) }),
+        stringify: (params) => ({ communityId: String(params.communityId) }),
+    },
+    beforeLoad: ({ params }) => {
+        if (!Number.isInteger(params.communityId)) throw notFound();
+    },
+    component: RouteComponent,
+});
+
+function RouteComponent() {
+    const { communityId } = Route.useParams();
+    return (
+        <CommunityProvider communityId={communityId} mode="edition">
+            <ManageCommunity />
+        </CommunityProvider>
+    );
+}
