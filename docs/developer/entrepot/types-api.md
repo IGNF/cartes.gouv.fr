@@ -17,7 +17,7 @@ Le spec amont contient des défauts. Le script `bin/entrepot-openapi-overlay.mjs
 3. Des champs toujours renvoyés par l’API sont remis dans les listes `required`.
 4. Les enums répétés en ligne qui entrent en conflit sont remontés en composants partagés : `ConfigurationStatus`, `ConfigurationType`, `OfferingStatus`.
 
-Chaque bloc porte un commentaire qui décrit le défaut corrigé.
+Chaque bloc porte un commentaire qui décrit le défaut corrigé. Le script échoue quand un bloc n’a plus rien à corriger : c’est le signal pour le supprimer.
 
 Règle : supprimer un bloc quand l’amont corrige le défaut ; le job CI signale le changement.
 
