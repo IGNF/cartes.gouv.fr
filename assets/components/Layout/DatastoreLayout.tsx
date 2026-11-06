@@ -10,12 +10,13 @@ import { isApiError } from "@/modules/apiError";
 import Forbidden from "@/pages/error/Forbidden";
 import PageNotFound from "@/pages/error/PageNotFound";
 import { hasAccess } from "@/utils/membership";
-import { useResourceStateWrapper } from "./DatastorePanelMain";
+import { useResourceStateWrapper, useTabsLayoutBelow } from "./DatastorePanelMain";
 
 export default function DatastoreLayout({ datastoreId, children }: PropsWithChildren<{ datastoreId: string }>) {
     const { data: user } = useUserQuery();
     const requiredRights = useRequiredRights();
     const wrap = useResourceStateWrapper();
+    const tabsBelow = useTabsLayoutBelow();
     const { data, error, failureReason, isFetching, isPending, status } = useQuery(datastoreQueryOptions(datastoreId));
 
     if (isPending) {
@@ -28,7 +29,7 @@ export default function DatastoreLayout({ datastoreId, children }: PropsWithChil
 
     return (
         <DatastoreProvider datastore={data} isFetching={isFetching} status={status}>
-            {hasAccess(user, { datastoreId }, requiredRights) ? children : wrap(<Forbidden />)}
+            {tabsBelow || hasAccess(user, { datastoreId }, requiredRights) ? children : wrap(<Forbidden />)}
         </DatastoreProvider>
     );
 }

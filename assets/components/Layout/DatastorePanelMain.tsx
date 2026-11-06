@@ -53,8 +53,13 @@ const isTabsLayout = (match: { routeId: string }) => match.routeId.endsWith("/_o
  * Enveloppe des états d’attente et de refus d’un layout de ressource : dans le panneau si les onglets sont dessous,
  * nue si le panneau est déjà au-dessus, pleine page sinon.
  */
+/** layout d’onglets parmi les routes enfants : il rend lui-même le refus de droits, sous ses onglets */
+export function useTabsLayoutBelow(): boolean {
+    return useChildMatches({ select: (matches) => matches.some(isTabsLayout) });
+}
+
 export function useResourceStateWrapper(): (node: ReactNode) => ReactNode {
-    const tabsBelow = useChildMatches({ select: (matches) => matches.some(isTabsLayout) });
+    const tabsBelow = useTabsLayoutBelow();
     const tabsAbove = useParentMatches({ select: (matches) => matches.some(isTabsLayout) });
 
     return (node) => (tabsBelow ? <DatastorePanelMain>{node}</DatastorePanelMain> : tabsAbove ? node : <Main>{node}</Main>);

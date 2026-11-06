@@ -14,12 +14,13 @@ import Forbidden from "@/pages/error/Forbidden";
 import PageNotFound from "@/pages/error/PageNotFound";
 import { delta } from "@/utils/delta";
 import { hasAccess } from "@/utils/membership";
-import { useResourceStateWrapper } from "./DatastorePanelMain";
+import { useResourceStateWrapper, useTabsLayoutBelow } from "./DatastorePanelMain";
 
 export default function CommunityLayout({ communityId, children }: PropsWithChildren<{ communityId: string }>) {
     const { data: user } = useUserQuery();
     const requiredRights = useRequiredRights();
     const wrap = useResourceStateWrapper();
+    const tabsBelow = useTabsLayoutBelow();
 
     const communityQuery = useQuery({
         queryKey: RQKeys.community(communityId),
@@ -58,7 +59,7 @@ export default function CommunityLayout({ communityId, children }: PropsWithChil
                 isFetching={communityQuery.isFetching || datastoreQuery.isFetching}
                 status={datastoreId !== undefined ? datastoreQuery.status : communityQuery.status}
             >
-                {hasAccess(user, { communityId }, requiredRights) ? children : wrap(<Forbidden />)}
+                {tabsBelow || hasAccess(user, { communityId }, requiredRights) ? children : wrap(<Forbidden />)}
             </DatastoreProvider>
         </CommunityProvider>
     );
