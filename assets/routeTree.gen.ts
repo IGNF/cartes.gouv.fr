@@ -36,6 +36,7 @@ import { Route as PrivateTableauDeBordEntrepotsDatastoreIdRouteRouteImport } fro
 import { Route as PrivatePanneauTableauDeBordEntrepotsIndexRouteImport } from './routes/_private/_panneau/tableau-de-bord/entrepots/index'
 import { Route as PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRouteImport } from './routes/_private/_panneau/tableau-de-bord/entrepots/demande-de-creation'
 import { Route as PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteImport } from './routes/_private/tableau-de-bord/communaute/$communityId/_onglets/route'
+import { Route as PrivateTableauDeBordCommunauteCommunityIdInfoRouteImport } from './routes/_private/tableau-de-bord/communaute/$communityId/info'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/route'
 import { Route as PrivateTableauDeBordCommunauteCommunityIdOngletsIndexRouteImport } from './routes/_private/tableau-de-bord/communaute/$communityId/_onglets/index'
 import { Route as PrivateTableauDeBordCommunauteCommunityIdOngletsMembresRouteImport } from './routes/_private/tableau-de-bord/communaute/$communityId/_onglets/membres'
@@ -213,6 +214,12 @@ const PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRoute =
 const PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRoute =
   PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteImport.update({
     id: '/_onglets',
+    getParentRoute: () => PrivateTableauDeBordCommunauteCommunityIdRouteRoute,
+  } as any)
+const PrivateTableauDeBordCommunauteCommunityIdInfoRoute =
+  PrivateTableauDeBordCommunauteCommunityIdInfoRouteImport.update({
+    id: '/info',
+    path: '/info',
     getParentRoute: () => PrivateTableauDeBordCommunauteCommunityIdRouteRoute,
   } as any)
 const PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRoute =
@@ -466,6 +473,7 @@ export interface FileRoutesByFullPath {
   '/espace-collaboratif/$communityId/invitation': typeof PrivateEspaceCollaboratifCommunityIdInvitationRoute
   '/mes-cles/$keyId/modification': typeof PrivateMesClesKeyIdModificationRoute
   '/tableau-de-bord/entrepots/demande-de-creation': typeof PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRoute
+  '/tableau-de-bord/communaute/$communityId/info': typeof PrivateTableauDeBordCommunauteCommunityIdInfoRoute
   '/tableau-de-bord/entrepots/': typeof PrivatePanneauTableauDeBordEntrepotsIndexRoute
   '/tableau-de-bord/communaute/$communityId/membres': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsMembresRoute
   '/tableau-de-bord/entrepots/$datastoreId/consommation': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsConsommationRoute
@@ -520,6 +528,7 @@ export interface FileRoutesByTo {
   '/espace-collaboratif/$communityId/invitation': typeof PrivateEspaceCollaboratifCommunityIdInvitationRoute
   '/mes-cles/$keyId/modification': typeof PrivateMesClesKeyIdModificationRoute
   '/tableau-de-bord/entrepots/demande-de-creation': typeof PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRoute
+  '/tableau-de-bord/communaute/$communityId/info': typeof PrivateTableauDeBordCommunauteCommunityIdInfoRoute
   '/tableau-de-bord/entrepots': typeof PrivatePanneauTableauDeBordEntrepotsIndexRoute
   '/tableau-de-bord/communaute/$communityId/membres': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsMembresRoute
   '/tableau-de-bord/entrepots/$datastoreId/consommation': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsConsommationRoute
@@ -579,6 +588,7 @@ export interface FileRoutesById {
   '/_private/tableau-de-bord/communaute/$communityId/_onglets': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteWithChildren
   '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRouteWithChildren
   '/_private/_panneau/tableau-de-bord/entrepots/demande-de-creation': typeof PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRoute
+  '/_private/tableau-de-bord/communaute/$communityId/info': typeof PrivateTableauDeBordCommunauteCommunityIdInfoRoute
   '/_private/_panneau/tableau-de-bord/entrepots/': typeof PrivatePanneauTableauDeBordEntrepotsIndexRoute
   '/_private/tableau-de-bord/communaute/$communityId/_onglets/membres': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsMembresRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsConsommationRoute
@@ -636,6 +646,7 @@ export interface FileRouteTypes {
     | '/espace-collaboratif/$communityId/invitation'
     | '/mes-cles/$keyId/modification'
     | '/tableau-de-bord/entrepots/demande-de-creation'
+    | '/tableau-de-bord/communaute/$communityId/info'
     | '/tableau-de-bord/entrepots/'
     | '/tableau-de-bord/communaute/$communityId/membres'
     | '/tableau-de-bord/entrepots/$datastoreId/consommation'
@@ -690,6 +701,7 @@ export interface FileRouteTypes {
     | '/espace-collaboratif/$communityId/invitation'
     | '/mes-cles/$keyId/modification'
     | '/tableau-de-bord/entrepots/demande-de-creation'
+    | '/tableau-de-bord/communaute/$communityId/info'
     | '/tableau-de-bord/entrepots'
     | '/tableau-de-bord/communaute/$communityId/membres'
     | '/tableau-de-bord/entrepots/$datastoreId/consommation'
@@ -748,6 +760,7 @@ export interface FileRouteTypes {
     | '/_private/tableau-de-bord/communaute/$communityId/_onglets'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets'
     | '/_private/_panneau/tableau-de-bord/entrepots/demande-de-creation'
+    | '/_private/tableau-de-bord/communaute/$communityId/info'
     | '/_private/_panneau/tableau-de-bord/entrepots/'
     | '/_private/tableau-de-bord/communaute/$communityId/_onglets/membres'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation'
@@ -974,6 +987,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/tableau-de-bord/communaute/$communityId'
       preLoaderRoute: typeof PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteImport
+      parentRoute: typeof PrivateTableauDeBordCommunauteCommunityIdRouteRoute
+    }
+    '/_private/tableau-de-bord/communaute/$communityId/info': {
+      id: '/_private/tableau-de-bord/communaute/$communityId/info'
+      path: '/info'
+      fullPath: '/tableau-de-bord/communaute/$communityId/info'
+      preLoaderRoute: typeof PrivateTableauDeBordCommunauteCommunityIdInfoRouteImport
       parentRoute: typeof PrivateTableauDeBordCommunauteCommunityIdRouteRoute
     }
     '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets': {
@@ -1250,12 +1270,15 @@ const PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteWithChildren =
 
 interface PrivateTableauDeBordCommunauteCommunityIdRouteRouteChildren {
   PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRoute: typeof PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteWithChildren
+  PrivateTableauDeBordCommunauteCommunityIdInfoRoute: typeof PrivateTableauDeBordCommunauteCommunityIdInfoRoute
 }
 
 const PrivateTableauDeBordCommunauteCommunityIdRouteRouteChildren: PrivateTableauDeBordCommunauteCommunityIdRouteRouteChildren =
   {
     PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRoute:
       PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteWithChildren,
+    PrivateTableauDeBordCommunauteCommunityIdInfoRoute:
+      PrivateTableauDeBordCommunauteCommunityIdInfoRoute,
   }
 
 const PrivateTableauDeBordCommunauteCommunityIdRouteRouteWithChildren =
