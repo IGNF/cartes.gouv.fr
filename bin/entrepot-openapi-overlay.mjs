@@ -100,7 +100,7 @@ for (const [name, from, prop] of [
             }
         }
     }
-    if (replaced === 0) fail(`aucune propriété remplacée par ${name}, revoir le bloc 3`);
+    if (replaced < 2) fail(`plus de doublon pour ${name} dans le spec amont, retirer cette entrée du bloc 3`);
 }
 
 mkdirSync(dirname(output), { recursive: true });
