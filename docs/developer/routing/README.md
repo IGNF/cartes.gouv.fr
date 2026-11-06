@@ -1,6 +1,6 @@
 # Routage (TanStack Router)
 
-Le front utilise [TanStack Router](https://tanstack.com/router) en routage par fichiers. Ce document décrit les conventions du dépôt. Le chargement des données par les `loader` des routes sera documenté avec leur arrivée.
+Le front utilise [TanStack Router](https://tanstack.com/router) en routage par fichiers. Ce document décrit les conventions du dépôt.
 
 ## Arbre des routes
 
@@ -17,8 +17,17 @@ Le front utilise [TanStack Router](https://tanstack.com/router) en routage par f
 
 - Les layouts `.../entrepots/$datastoreId/route.tsx` et `.../communaute/$communityId/route.tsx` décident dans `beforeLoad`, sans requête, à partir de l’appartenance lue dans `user_me` (`findMembership`).
 - Sans appartenance, la route lève `notFound()` : une ressource inaccessible et une ressource inexistante donnent la même page 404. Avant ce refus, `revalidateUser()` relance une fois `user_me` (au plus toutes les 30 s).
-- Une feuille qui exige des droits les déclare dans `staticData.requiredRights` (tous requis). `DatastoreLayout` et `CommunityLayout` les lisent avec `useRequiredRights()` et affichent `Forbidden` sans les droits. Le superviseur de la communauté a tous les droits.
+- Une feuille qui exige des droits les déclare dans `staticData.requiredRights` (tous requis). `ResourceAccessGate` et les layouts d’onglets les lisent avec `useRequiredRights()` et affichent `Forbidden` sans les droits. Le superviseur de la communauté a tous les droits.
 - Toute nouvelle valeur de `user_me` (reconnexion, revalidation) relance les `beforeLoad` par `router.invalidate()` (abonnement dans `assets/router/index.tsx`). Une erreur 403 ou 404 d’une requête relance `user_me` (`assets/modules/queryClient.ts`).
+
+## Chargement des données
+
+- Les options d’une requête partagée vivent dans `assets/hooks/queries/xxxQueryOptions.ts` (`queryOptions` de react-query : clé, fonction, `staleTime`, `throwOnError`). Le `loader` de la route et la page importent les mêmes options.
+- Le `loader` lance la requête sans l’attendre : `void context.queryClient.query(options).catch(() => {})`. La navigation ne bloque pas. Une erreur reste dans le cache et la page la lève au rendu. `prefetchQuery`, `fetchQuery` et `ensureQueryData` sont dépréciés.
+- Le nom, les ids, le superviseur et les droits d’un entrepôt ou d’une communauté viennent de l’appartenance (`useMembership`), sans requête. Le nom de l’entrepôt est celui de sa communauté.
+- Seules les pages qui lisent le DTO complet l’attendent, avec `useSuspenseQuery` (consommation, formulaires de service, fiche communauté). Pendant l’attente, `defaultPendingComponent` occupe la zone de la page ; l’en-tête et les onglets restent affichés.
+- Une erreur levée sous un entrepôt ou une communauté arrive à `ApiErrorPage` : page 404 pour un 404, sinon erreur générique avec bouton « Réessayer ».
+- Le client de requêtes ne réessaie pas une erreur 4xx et réessaie au plus 3 fois les autres (`assets/modules/queryClient.ts`).
 
 ## Paramètres de recherche
 
@@ -44,5 +53,5 @@ Le front utilise [TanStack Router](https://tanstack.com/router) en routage par f
 
 - `autoCodeSplitting` met le composant de chaque route dans son propre chunk. Les layouts `_public` et `_private` et la page d’accueil restent dans le bundle principal (`codeSplitGroupings: []`).
 - Les layouts `_public` et `_private` ont un `pendingComponent` avec en-tête et pied de page. Une feuille en attente de son chunk affiche `defaultPendingComponent` dans la zone de son layout.
-- Préchargement à l’intention : au survol d’un lien pendant 200 ms, le routeur charge le chunk et exécute `beforeLoad`.
+- Pas de préchargement au survol par défaut (`defaultPreload: false`) : le `loader` d’une route appellerait l’API Entrepôt. Un lien l’active avec `preload="intent"` (ou `linkProps={{ …, preload: "intent" }}`) : après 200 ms de survol, le routeur charge le chunk, exécute `beforeLoad` et le `loader`.
 - Outils de développement : `assets/devtools.tsx` regroupe les panneaux Query et Router, chargés seulement en développement.

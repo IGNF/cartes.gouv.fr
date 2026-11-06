@@ -1,6 +1,5 @@
-import { Outlet } from "@tanstack/react-router";
+import { Outlet, useParams } from "@tanstack/react-router";
 
-import { useDatastore } from "@/contexts/datastore";
 import SandboxDatastoreExplanation from "@/entrepot/pages/datasheet/DatasheetList/SandboxDatastoreExplanation";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useMembership from "@/hooks/useMembership";
@@ -15,16 +14,25 @@ import PageTitle from "./PageTitle";
 /** espace de travail d’un entrepôt : panneau, nom de l’entrepôt et onglets restent montés entre les onglets */
 export default function DatastoreTabsLayout() {
     const { t: tCommon } = useTranslation("Common");
-    const { datastore } = useDatastore();
-    const isSandbox = useMembership({ datastoreId: datastore._id })?.isSandbox === true;
+    // rendu sous l’URL de l’entrepôt ou sous celle de la communauté
+    const params = useParams({ strict: false });
+    const membership = useMembership({ datastoreId: params.datastoreId, communityId: params.communityId?.toString() });
     const { data: user } = useUserQuery();
     const requiredRights = useRequiredRights();
 
+    if (!membership) return null;
+
+    const datastoreId = membership.community?.datastore;
+    // communauté sans entrepôt : pas d’onglets possibles (suite séparée)
+    if (!datastoreId) throw new Error("La communauté n’a pas d’entrepôt");
+
     return (
         <DatastorePanelMain>
-            <PageTitle title={tCommon("datastore_name", { name: datastore.name, isSandbox })}>{isSandbox && <SandboxDatastoreExplanation />}</PageTitle>
-            <DatastoreTertiaryNavigation datastoreId={datastore._id} />
-            {hasAccess(user, { datastoreId: datastore._id }, requiredRights) ? <Outlet /> : <Forbidden />}
+            <PageTitle title={tCommon("datastore_name", { name: membership.community?.name, isSandbox: membership.isSandbox })}>
+                {membership.isSandbox && <SandboxDatastoreExplanation />}
+            </PageTitle>
+            <DatastoreTertiaryNavigation datastoreId={datastoreId} />
+            {hasAccess(user, { datastoreId }, requiredRights) ? <Outlet /> : <Forbidden />}
         </DatastorePanelMain>
     );
 }

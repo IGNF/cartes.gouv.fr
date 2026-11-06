@@ -1,14 +1,10 @@
 import { BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { useMatches, useParams, useSearch } from "@tanstack/react-router";
-import { use, useMemo } from "react";
+import { useMemo } from "react";
 
-import { CommunityContext } from "@/contexts/community";
-import { sandboxCommunityId } from "@/env";
 import { stringParam } from "@/router/searchParams";
-import { findMembership, isSandboxCommunity } from "@/utils";
-import { DatastoreContext } from "../contexts/datastore";
+import useMembership from "./useMembership";
 import getBreadcrumb, { BreadcrumbRouteParams } from "../modules/entrepot/breadcrumbs/Breadcrumb";
-import useUserQuery from "./queries/useUserQuery";
 
 export default function useBreadcrumb(customBreadcrumbProps?: BreadcrumbProps) {
     // pas de fil d’Ariane sur une page d’erreur : ses paramètres peuvent manquer
@@ -17,9 +13,6 @@ export default function useBreadcrumb(customBreadcrumbProps?: BreadcrumbProps) {
     });
     const pathParams = useParams({ strict: false });
     const search = useSearch({ strict: false });
-    const { datastore } = use(DatastoreContext);
-    const community = use(CommunityContext);
-    const { data: user } = useUserQuery();
 
     // le fil d’Ariane lit les paramètres de chemin et de recherche ensemble
     const params: BreadcrumbRouteParams = useMemo(
@@ -32,16 +25,16 @@ export default function useBreadcrumb(customBreadcrumbProps?: BreadcrumbProps) {
         [pathParams, search]
     );
 
-    // flags sandbox dérivés de l’appartenance + env : le DTO ne porte plus is_sandbox
-    const datastoreId = params.datastoreId ?? datastore?._id ?? community?.datastore?._id;
-    const datastoreIsSandbox = isSandboxCommunity(findMembership(user, { datastoreId })?.community, sandboxCommunityId);
-    const communityIsSandbox = isSandboxCommunity(community ?? undefined, sandboxCommunityId);
+    // nom et sandbox lus dans l’appartenance, par l’entrepôt ou par la communauté de l’URL
+    const membership = useMembership({ datastoreId: params.datastoreId, communityId: params.communityId });
+    const community = membership?.community;
+    const isSandbox = membership?.isSandbox === true;
 
     return useMemo(() => {
         if (customBreadcrumbProps !== undefined) {
             return customBreadcrumbProps;
         }
 
-        return getBreadcrumb(routeId, params, datastore, community, { datastoreIsSandbox, communityIsSandbox });
-    }, [routeId, params, datastore, community, datastoreIsSandbox, communityIsSandbox, customBreadcrumbProps]);
+        return getBreadcrumb(routeId, params, community, isSandbox);
+    }, [routeId, params, community, isSandbox, customBreadcrumbProps]);
 }

@@ -5,6 +5,8 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
+import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
+import MuiSkeleton from "@mui/material/Skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { FC, useId, useMemo } from "react";
@@ -13,6 +15,8 @@ import { useToggle } from "@mantine/hooks";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import { ListHeader } from "@/components/Layout/ListHeader";
+import { datasheetListQueryOptions } from "@/hooks/queries/datasheetListQueryOptions";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import useMembership from "@/hooks/useMembership";
 import { usePagination } from "@/hooks/usePagination";
@@ -20,11 +24,8 @@ import { useSearch } from "@/hooks/useSearch";
 import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Skeleton from "../../../../components/Utils/Skeleton";
-import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { searchAwareActiveOptions } from "@/router/AppLink";
-import api from "../../../api";
 import { SortByEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";
 import NoData from "./NoData";
@@ -43,16 +44,12 @@ type DatasheetListProps = {
 };
 const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatasheetList");
-    const { datastore } = useDatastore();
     const { t: tCommon } = useTranslation("Common");
-    const isSandbox = useMembership({ datastoreId })?.isSandbox === true;
+    const membership = useMembership({ datastoreId });
+    // le quota vient du DTO entrepôt, chargé à part : la liste ne l’attend pas
+    const { data: datastore, isPending: isQuotaPending } = useQuery(datastoreQueryOptions(datastoreId));
 
-    const datasheetListQuery = useQuery({
-        queryKey: RQKeys.datastore_datasheet_list(datastoreId),
-        queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
-        staleTime: 60000,
-        enabled: datastore !== undefined,
-    });
+    const datasheetListQuery = useQuery(datasheetListQueryOptions(datastoreId));
     const { data: datasheetList, dataUpdatedAt, isFetching, isLoading, refetch } = datasheetListQuery;
 
     const metadataEndpoint = useMemo(
@@ -80,7 +77,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     const { userRights, isSupervisor } = useCommunityRights();
 
-    const datastoreName = tCommon("datastore_name", { name: datastore?.name, isSandbox });
+    const datastoreName = tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox });
 
     return (
         <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })}>
@@ -99,21 +96,25 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 {filteredItems.length ?? 0}
                             </Badge>
                             {(isSupervisor ||
-                                (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
-                                    userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
-                                <Button
-                                    linkProps={
-                                        datasheetCreationImpossible
-                                            ? { href: undefined, "aria-hidden": true }
-                                            : { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement", params: { datastoreId } }
-                                    }
-                                    iconId="fr-icon-add-line"
-                                    iconPosition="right"
-                                    className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
-                                >
-                                    {t("create_datasheet")}
-                                </Button>
-                            )}
+                                (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) && userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) &&
+                                (isQuotaPending ? (
+                                    <MuiDsfrThemeProvider>
+                                        <MuiSkeleton variant="rectangular" width="16rem" height="2.5rem" className={fr.cx("fr-ml-auto")} />
+                                    </MuiDsfrThemeProvider>
+                                ) : (
+                                    <Button
+                                        linkProps={
+                                            datasheetCreationImpossible
+                                                ? { href: undefined, "aria-hidden": true }
+                                                : { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement", params: { datastoreId } }
+                                        }
+                                        iconId="fr-icon-add-line"
+                                        iconPosition="right"
+                                        className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
+                                    >
+                                        {t("create_datasheet")}
+                                    </Button>
+                                ))}
                         </div>
                     </div>
 
