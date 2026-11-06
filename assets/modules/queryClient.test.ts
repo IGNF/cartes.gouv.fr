@@ -40,3 +40,18 @@ describe("revalidation de user_me sur erreur d’accès", () => {
         expect(invalidate).not.toHaveBeenCalled();
     });
 });
+
+describe("nouvel essai des requêtes", () => {
+    it("ne réessaie pas une erreur 4xx", async () => {
+        const { shouldRetry } = await import("./queryClient");
+        expect(shouldRetry(0, apiError(404))).toBe(false);
+        expect(shouldRetry(0, apiError(403))).toBe(false);
+    });
+
+    it("réessaie une erreur serveur ou réseau jusqu’à 3 fois", async () => {
+        const { shouldRetry } = await import("./queryClient");
+        expect(shouldRetry(0, apiError(500))).toBe(true);
+        expect(shouldRetry(2, new TypeError("Failed to fetch"))).toBe(true);
+        expect(shouldRetry(3, apiError(503))).toBe(false);
+    });
+});
