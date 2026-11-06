@@ -76,3 +76,5 @@ when@test:
             calls: [[setAsStateless, []]] # comme use_state: false dans knpu_oauth2_client.yaml
             public: true # le registre du bundle le charge par identifiant
         App\Tests\Double\EntrepotMockResponseFactory: ~
+        app.rate_limiter.in_memory_storage:
+            class: Symfony\Component\RateLimiter\Storage\InMemoryStorage

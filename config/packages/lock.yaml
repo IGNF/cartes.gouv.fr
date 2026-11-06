@@ -1,0 +1,3 @@
+framework:
+    # fichier verrou dans /tmp (emptyDir en production) : sérialise la limite de débit de /contact_us entre les threads FrankenPHP d’un pod
+    lock: flock
