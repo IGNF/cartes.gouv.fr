@@ -3,6 +3,7 @@ import { createFileRoute, SearchSchemaInput } from "@tanstack/react-router";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import CommunityLayout from "@/components/Layout/CommunityLayout";
 import { useDatastore } from "@/contexts/datastore";
+import { communityMembersQueryOptions } from "@/hooks/queries/communityQueryOptions";
 import CommunityMembers from "@/entrepot/pages/communities/CommunityMembers/CommunityMembers";
 import { positiveIntegerParam, stringParam } from "@/router/searchParams";
 
@@ -16,6 +17,10 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
         search: stringParam(search.search) ?? "",
     }),
     staticData: { matomoLabel: "Membres", requiredRights: [CommunityMemberDtoRightsEnum.COMMUNITY] },
+    loader: ({ context }) => {
+        const communityId = context.membership.community?._id;
+        if (communityId) void context.queryClient.query(communityMembersQueryOptions(communityId)).catch(() => {});
+    },
     component: RouteComponent,
 });
 

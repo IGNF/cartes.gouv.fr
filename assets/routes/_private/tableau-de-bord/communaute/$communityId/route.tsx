@@ -2,6 +2,7 @@ import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
 import CommunityLayout from "@/components/Layout/CommunityLayout";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { revalidateUser } from "@/modules/queryClient";
 import ApiErrorPage from "@/pages/error/ApiErrorPage";
@@ -18,6 +19,10 @@ export const Route = createFileRoute("/_private/tableau-de-bord/communaute/$comm
             throw notFound();
         }
         return { membership };
+    },
+    loader: ({ context }) => {
+        const datastoreId = context.membership.community?.datastore;
+        if (datastoreId) void context.queryClient.query(datastoreQueryOptions(datastoreId)).catch(() => {});
     },
     component: CommunityRoute,
     errorComponent: ApiErrorPage,

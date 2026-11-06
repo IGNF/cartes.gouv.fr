@@ -1,5 +1,6 @@
 import { createFileRoute, SearchSchemaInput } from "@tanstack/react-router";
 
+import { datasheetListQueryOptions } from "@/hooks/queries/datasheetListQueryOptions";
 import DatasheetList from "@/entrepot/pages/datasheet/DatasheetList/DatasheetList";
 import { FilterEnum } from "@/hooks/useFilters";
 import { SortOrderEnum } from "@/hooks/useSort";
@@ -17,6 +18,9 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
         published: enumParam(search.published, [FilterEnum.ALL, FilterEnum.ENABLED, FilterEnum.DISABLED]) ?? FilterEnum.ALL,
     }),
     staticData: { matomoLabel: "Données entrepôt" },
+    loader: ({ context, params }) => {
+        void context.queryClient.query(datasheetListQueryOptions(params.datastoreId)).catch(() => {});
+    },
     component: RouteComponent,
 });
 

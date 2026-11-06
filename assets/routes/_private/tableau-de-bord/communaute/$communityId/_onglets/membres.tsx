@@ -1,6 +1,7 @@
 import { createFileRoute, SearchSchemaInput } from "@tanstack/react-router";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import { communityMembersQueryOptions } from "@/hooks/queries/communityQueryOptions";
 import CommunityMembers from "@/entrepot/pages/communities/CommunityMembers/CommunityMembers";
 import { positiveIntegerParam, stringParam } from "@/router/searchParams";
 
@@ -14,6 +15,9 @@ export const Route = createFileRoute("/_private/tableau-de-bord/communaute/$comm
         search: stringParam(search.search) ?? "",
     }),
     staticData: { matomoLabel: "Membres", requiredRights: [CommunityMemberDtoRightsEnum.COMMUNITY] },
+    loader: ({ context, params }) => {
+        void context.queryClient.query(communityMembersQueryOptions(params.communityId)).catch(() => {});
+    },
     component: RouteComponent,
 });
 
