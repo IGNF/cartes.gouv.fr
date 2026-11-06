@@ -1,15 +1,16 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
 
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { canUserAccess } from "@/utils";
-import { Datastore } from "../../@types/app";
-import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
+import { delta } from "@/utils/delta";
+import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import { CommunityProvider } from "../../contexts/community";
 import { DatastoreProvider } from "../../contexts/datastore";
 import api from "../../entrepot/api";
 import RQKeys from "../../modules/entrepot/RQKeys";
-import { ApiError } from "../../modules/jsonFetch";
+import { isApiError } from "../../modules/apiError";
 import Forbidden from "../../pages/error/Forbidden";
 import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
 import LoadingText from "../Utils/LoadingText";
@@ -26,27 +27,23 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     const { accessRight, children, communityId, ...rest } = props;
 
     const { data: user } = useUserQuery();
-    const queryClient = useQueryClient();
-
-    const { data, error, failureReason, isFetching, isLoading, status } = useQuery<[CommunityDetailResponseDto, Datastore | undefined], ApiError>({
+    const communityQuery = useQuery({
         queryKey: RQKeys.community(communityId),
-        queryFn: async ({ signal }) => {
-            const community = await api.community.get(communityId, { signal });
-            let datastore: Datastore | undefined;
-            if (community.datastore !== undefined && community.datastore._id) {
-                const datastoreId = community.datastore._id;
-                datastore = await queryClient.query({
-                    queryKey: RQKeys.datastore(datastoreId),
-                    queryFn: () => api.datastore.get(datastoreId, { signal }),
-                });
-            }
-            return [community, datastore];
-        },
-        staleTime: 20000,
+        queryFn: ({ signal }) => api.community.get(communityId, { signal }),
+        staleTime: delta.seconds(20),
         enabled: !!communityId,
     });
+    const community = communityQuery.data;
 
-    const [community, datastore] = data ?? [];
+    // requête dépendante : le datastore éventuel de la communauté (une communauté peut ne pas en avoir)
+    const datastoreId = community?.datastore?._id;
+    const datastoreQuery = useQuery(datastoreQueryOptions(datastoreId));
+    const datastore = datastoreQuery.data;
+
+    // une requête désactivée n’a ni data ni erreur et reste pending : ne la compter que si elle a un id
+    const error = communityQuery.error ?? datastoreQuery.error;
+    const failureReason = communityQuery.failureReason ?? datastoreQuery.failureReason;
+    const isPending = communityQuery.isPending || (datastoreId !== undefined && datastoreQuery.isPending);
 
     const isAuthorized = useMemo(() => {
         if (!user?.id || !user?.communities_member) {
@@ -59,7 +56,7 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
         return canUserAccess(user.id, communityMember, accessRight);
     }, [accessRight, user?.communities_member, communityId, user?.id]);
 
-    if (isLoading) {
+    if (isPending) {
         return (
             <AppLayout {...rest}>
                 <Main>
@@ -69,14 +66,23 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
         );
     }
 
-    if (error?.status === 404 || failureReason?.status === 404 || !community) {
+    if (
+        (isApiError(error) && error.status === 404) ||
+        (isApiError(failureReason) && failureReason.status === 404) ||
+        !community ||
+        (datastoreId !== undefined && !datastore)
+    ) {
         return <PageNotFoundWithLayout />;
     }
 
     return (
         <AppLayout {...rest}>
             <CommunityProvider community={community}>
-                <DatastoreProvider datastore={datastore} isFetching={isFetching} status={status}>
+                <DatastoreProvider
+                    datastore={datastore}
+                    isFetching={communityQuery.isFetching || datastoreQuery.isFetching}
+                    status={datastoreId !== undefined ? datastoreQuery.status : communityQuery.status}
+                >
                     {isAuthorized ? children : <Forbidden />}
                 </DatastoreProvider>
             </CommunityProvider>

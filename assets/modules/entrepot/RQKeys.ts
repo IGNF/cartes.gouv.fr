@@ -1,9 +1,8 @@
 import { ConfigurationTypeEnum } from "../../@types/app";
 import { type QueryParams } from "../Routing";
+import { withQueryKeyNamespace } from "../withQueryKeyNamespace";
 
-/**
- * Factory pour créer des query keys pour react-query
- */
+/** Factory des query keys react-query du domaine Entrepôt, toutes préfixées par "entrepot" */
 const RQKeys = {
     datastore_list: (): string[] => ["datastore"],
     datastore: (datastoreId: string): string[] => ["datastore", datastoreId],
@@ -107,4 +106,4 @@ const RQKeys = {
     alerts: (): string[] => ["alerts"],
 };
 
-export default RQKeys;
+export default withQueryKeyNamespace("entrepot", RQKeys);

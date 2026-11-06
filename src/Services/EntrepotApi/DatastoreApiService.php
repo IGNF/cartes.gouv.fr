@@ -32,6 +32,11 @@ final readonly class DatastoreApiService
         });
     }
 
+    public function invalidate(string $datastoreId): void
+    {
+        $this->cache->delete("datastore-$datastoreId");
+    }
+
     /**
      * @param array<string,mixed> $query
      *
