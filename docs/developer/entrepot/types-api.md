@@ -10,12 +10,11 @@ Le job CI `upstream-spec` tourne chaque jour. Il télécharge le spec et échoue
 
 ## Surcouche
 
-Le spec amont contient des défauts. Le script `bin/entrepot-openapi-overlay.mjs` les corrige avant la génération, en quatre blocs :
+Le spec amont contient des défauts. Le script `bin/entrepot-openapi-overlay.mjs` les corrige avant la génération, en trois blocs :
 
 1. Les schémas vides deviennent des `object`, et `DocumentDetailsResponseDto` retrouve ses propriétés.
 2. La propriété `extra` est rétablie sur les schémas où l’API la renvoie et l’accepte.
-3. Des champs toujours renvoyés par l’API sont remis dans les listes `required`.
-4. Les enums répétés en ligne qui entrent en conflit sont remontés en composants partagés : `ConfigurationStatus`, `ConfigurationType`, `OfferingStatus`.
+3. Les enums répétés en ligne qui entrent en conflit sont remontés en composants partagés : `ConfigurationStatus`, `ConfigurationType`, `OfferingStatus`.
 
 Chaque bloc porte un commentaire qui décrit le défaut corrigé. Le script échoue quand un bloc n’a plus rien à corriger : c’est le signal pour le supprimer.
 

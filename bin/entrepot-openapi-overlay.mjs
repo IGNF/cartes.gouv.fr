@@ -78,41 +78,7 @@ if (withExtra.length > 0) {
     );
 }
 
-// 3. Champs toujours renvoyés par l’API mais sortis des listes `required` depuis la génération du 31/10/2025.
-const alreadyRequired = [];
-for (const [name, field] of [
-    ["AccessDetailResponseDto", "permission"],
-    ["AccessDetailWithKeyResponseDto", "permission"],
-    ["DocumentListResponseDto", "name"],
-    ["DocumentListResponseDto", "size"],
-    ["EndpointDetailResponseDto", "urls"],
-    ["EntryDto", "links"],
-    ["FeedDto", "links"],
-    ["OfferingCatalogResponseDto", "urls"],
-    ["OfferingExtendedDetailResponseDto", "urls"],
-    ["OfferingExtendedListResponseDto", "urls"],
-    ["OfferingStandardDetailResponseDto", "urls"],
-    ["OfferingStandardListResponseDto", "urls"],
-    ["PermissionExtendedListResponseDto", "offerings"],
-    ["PermissionStandardListResponseDto", "offerings"],
-    ["PermissionWithOfferingsDetailsResponseDto", "offerings"],
-    ["PermissionWithOfferingsResponseDto", "offerings"],
-    ["ProcessingStandardDetailResponseDto", "required_checks"],
-    ["StorageDetailResponseDto", "labels"],
-    ["StorageListResponseDto", "labels"],
-]) {
-    const required = new Set(schemas[name].required ?? []);
-    if (required.has(field)) alreadyRequired.push(`${name}.${field}`);
-    required.add(field);
-    schemas[name].required = [...required].sort();
-}
-if (alreadyRequired.length > 0) {
-    fail(
-        `ces champs sont déjà dans \`required\` dans le spec amont, les retirer de la liste du bloc 3, ou supprimer le bloc s’il est vide : ${alreadyRequired.join(", ")}`
-    );
-}
-
-// 4. Enums déclarés en ligne et répétés dans chaque schéma : le générateur en fait des enums TypeScript
+// 3. Enums déclarés en ligne et répétés dans chaque schéma : le générateur en fait des enums TypeScript
 //    distincts, donc incompatibles entre eux. On remonte en composant partagé les ensembles qui entrent en conflit.
 //    `ConfigurationType` sert aussi au `type` des offres et des permissions (mêmes membres en amont) : `app.ts`
 //    l’expose comme `ConfigurationTypeEnum` et `OfferingTypeEnum`.
@@ -122,7 +88,7 @@ for (const [name, from, prop] of [
     ["OfferingStatus", "OfferingStandardDetailResponseDto", "status"],
 ]) {
     const enumValues = schemas[from].properties[prop].enum;
-    if (enumValues === undefined) fail(`l’enum de ${from}.${prop} n’est plus déclaré en ligne, revoir le bloc 4`);
+    if (enumValues === undefined) fail(`l’enum de ${from}.${prop} n’est plus déclaré en ligne, revoir le bloc 3`);
     const members = JSON.stringify(enumValues);
     schemas[name] = { type: "string", enum: JSON.parse(members) };
     let replaced = 0;
@@ -134,7 +100,7 @@ for (const [name, from, prop] of [
             }
         }
     }
-    if (replaced === 0) fail(`aucune propriété remplacée par ${name}, revoir le bloc 4`);
+    if (replaced === 0) fail(`aucune propriété remplacée par ${name}, revoir le bloc 3`);
 }
 
 mkdirSync(dirname(output), { recursive: true });

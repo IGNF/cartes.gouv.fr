@@ -78,7 +78,7 @@ export interface AccessDetailResponseDto {
     /** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
     offering: OfferingStandardListResponseDto;
     /** Information sur la permission */
-    permission: PermissionResponseDto;
+    permission?: PermissionResponseDto;
     /**
      * Date de dernière mise à jour
      * @format date-time
@@ -102,7 +102,7 @@ export interface AccessDetailWithKeyResponseDto {
     /** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
     offering: OfferingStandardListResponseDto;
     /** Information sur la permission */
-    permission: PermissionResponseDto;
+    permission?: PermissionResponseDto;
     /**
      * Date de dernière mise à jour
      * @format date-time
@@ -2229,14 +2229,14 @@ export interface DocumentListResponseDto {
     /** Le type mime du document */
     mime_type?: string;
     /** Nom du document */
-    name: string;
+    name?: string;
     /** URL publique du document */
     public_url?: string;
     /**
      * La taille du document
      * @format int64
      */
-    size: number;
+    size?: number;
     /**
      * Date de dernière mise à jour
      * @format date-time
@@ -2327,7 +2327,7 @@ export interface EndpointDetailResponseDto {
      */
     update: string;
     /** @uniqueItems true */
-    urls: EndpointUrl[];
+    urls?: EndpointUrl[];
     /** Indique si le point d'accès est accessible en écriture (applicable uniquement pour le type API-FEATURES) */
     writable?: boolean;
 }
@@ -2389,7 +2389,7 @@ export interface EntryDto {
     content: string;
     /** Identifiant */
     id: string;
-    links: LinkDto[];
+    links?: LinkDto[];
     /** Bounding box (en degrés) */
     polygon?: BoundingBox;
     /** Description */
@@ -2457,7 +2457,7 @@ export interface FeedDto {
     entries: EntryDto[];
     /** Identifiant */
     id: string;
-    links: LinkDto[];
+    links?: LinkDto[];
     /** Licence et conditions d'utilisation */
     rights: string;
     /** Description */
@@ -2674,7 +2674,7 @@ export interface OfferingCatalogResponseDto {
      */
     update: string;
     /** @uniqueItems true */
-    urls: EndpointUrl[];
+    urls?: EndpointUrl[];
     extra?: Record<string, any>;
 }
 
@@ -2745,7 +2745,7 @@ export interface OfferingExtendedDetailResponseDto {
      */
     update: string;
     /** @uniqueItems true */
-    urls: EndpointUrl[];
+    urls?: EndpointUrl[];
     extra?: Record<string, any>;
 }
 
@@ -2799,7 +2799,7 @@ export interface OfferingExtendedListResponseDto {
      */
     update: string;
     /** @uniqueItems true */
-    urls: EndpointUrl[];
+    urls?: EndpointUrl[];
     extra?: Record<string, any>;
 }
 
@@ -2838,7 +2838,7 @@ export interface OfferingStandardDetailResponseDto {
      */
     update: string;
     /** @uniqueItems true */
-    urls: EndpointUrl[];
+    urls?: EndpointUrl[];
     extra?: Record<string, any>;
 }
 
@@ -2877,7 +2877,7 @@ export interface OfferingStandardListResponseDto {
      */
     update: string;
     /** @uniqueItems true */
-    urls: EndpointUrl[];
+    urls?: EndpointUrl[];
     extra?: Record<string, any>;
 }
 
@@ -3194,7 +3194,7 @@ export interface PermissionExtendedListResponseDto {
     /** Nom de la permission */
     name?: string;
     /** @uniqueItems true */
-    offerings: PermissionOfferingResponseDto[];
+    offerings?: PermissionOfferingResponseDto[];
     only_oauth?: boolean;
     /**
      * Identifiant de l'organisme rattaché
@@ -3324,7 +3324,7 @@ export interface PermissionStandardListResponseDto {
     /** Nom de la permission */
     name?: string;
     /** @uniqueItems true */
-    offerings: PermissionOfferingResponseDto[];
+    offerings?: PermissionOfferingResponseDto[];
     only_oauth?: boolean;
     /**
      * Date de dernière mise à jour
@@ -3365,7 +3365,7 @@ export interface PermissionWithOfferingsDetailsResponseDto {
     /** Nom de la permission */
     name?: string;
     /** @uniqueItems true */
-    offerings: PermissionOfferingDetailsResponseDto[];
+    offerings?: PermissionOfferingDetailsResponseDto[];
     only_oauth?: boolean;
     /**
      * Date de dernière mise à jour
@@ -3396,7 +3396,7 @@ export interface PermissionWithOfferingsResponseDto {
     /** Nom de la permission */
     name?: string;
     /** @uniqueItems true */
-    offerings: PermissionOfferingResponseDto[];
+    offerings?: PermissionOfferingResponseDto[];
     only_oauth?: boolean;
     /**
      * Date de dernière mise à jour
@@ -3807,7 +3807,7 @@ export interface ProcessingStandardDetailResponseDto {
      * Vérifications nécessaires au lancement du traitement
      * @uniqueItems true
      */
-    required_checks: CheckingListResponseDto[];
+    required_checks?: CheckingListResponseDto[];
     /**
      * Date de dernière mise à jour
      * @format date-time
@@ -4084,7 +4084,7 @@ export interface StorageDetailResponseDto {
      */
     creation: string;
     /** @uniqueItems true */
-    labels: string[];
+    labels?: string[];
     /** Le nom du stockage. ce nom est unique pour la plateforme */
     name: string;
     /** Le type de stockage */
@@ -4126,7 +4126,7 @@ export interface StorageListResponseDto {
      */
     creation: string;
     /** @uniqueItems true */
-    labels: string[];
+    labels?: string[];
     /** Le nom du stockage. ce nom est unique pour la plateforme */
     name: string;
     /** Le type de stockage */
