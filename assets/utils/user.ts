@@ -1,19 +1,6 @@
 import { CartesUser } from "@/@types/app";
-import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
-import { hasRights, isSupervisor } from "./membership";
-
-export function canUserAccess(
-    userId: string,
-    communityMember: CommunityMemberDto,
-    accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[]
-): boolean {
-    return (
-        isSupervisor(userId, communityMember) ||
-        hasRights(communityMember, accessRight === undefined ? [] : Array.isArray(accessRight) ? accessRight : [accessRight])
-    );
-}
 
 /**
  * Chargement des données de l'utilisateur à partir du DOM dans le cache de react-query.

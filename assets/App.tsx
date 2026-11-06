@@ -10,7 +10,6 @@ import { cacheBuster } from "./env";
 import RQKeys from "./modules/entrepot/RQKeys";
 import { queryClient } from "./modules/queryClient";
 import { router } from "./router";
-import { RouteProvider } from "./router/router";
 import { bootstrapUser } from "./utils";
 
 import "./sass/helpers.scss";
@@ -44,14 +43,11 @@ const App: FC = () => {
                 <Devtools />
             </Suspense>
 
-            {/* RouteProvider de type-route gardé tant que des pages lisent useRoute */}
-            <RouteProvider>
-                <ErrorBoundary>
-                    <AlertProvider>
-                        <RouterProvider router={router} />
-                    </AlertProvider>
-                </ErrorBoundary>
-            </RouteProvider>
+            <ErrorBoundary>
+                <AlertProvider>
+                    <RouterProvider router={router} />
+                </AlertProvider>
+            </ErrorBoundary>
         </PersistQueryClientProvider>
     );
 };

@@ -81,7 +81,6 @@
         "swagger-typescript-api": "^13.12.2",
         "tsafe": "^1.6.5",
         "tss-react": "^4.9.12",
-        "type-route": "^1.0.1",
         "typescript": "^7.0.2",
         "uuid": "^14.0.0",
         "validator": "^13.15.23",
