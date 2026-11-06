@@ -14,6 +14,9 @@ export const router = createRouter({
     routeTree,
     basepath: basePath || "/",
     context: { queryClient },
+    // préchargement au survol d’un lien : un délai court évite les rafales en parcourant une liste
+    defaultPreload: "intent",
+    defaultPreloadDelay: 200,
     // react-query décide de la fraîcheur, pas le cache de préchargement du routeur
     defaultPreloadStaleTime: 0,
     // chargement du chunk d’une feuille : rendu dans l’Outlet du layout parent
