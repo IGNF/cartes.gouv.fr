@@ -16,7 +16,6 @@ import { getApiErrorTitle, getApiErrorDescription } from "../../../modules/apiEr
 import api from "../../api";
 import UploadPreviewTab from "./PreviewTab/UploadPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
-import { useDatastore } from "../../../contexts/datastore";
 import Main from "../../../components/Layout/Main";
 
 type UploadDetailsProps = {
@@ -25,11 +24,10 @@ type UploadDetailsProps = {
 };
 
 const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
-    const { datastore } = useDatastore();
     const { t: tCommon } = useTranslation("Common");
     // le libellé « Espace Découverte » vient de l’appartenance, le DTO ne porte plus is_sandbox
-    const membership = useMembership({ datastoreId: datastore?._id });
-    const datastoreName = tCommon("datastore_name", { name: datastore?.name, isSandbox: membership?.isSandbox });
+    const membership = useMembership({ datastoreId });
+    const datastoreName = tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox });
 
     const reportQuery = useQuery<UploadReport, ApiError>({
         queryKey: RQKeys.datastore_upload_report(datastoreId, uploadId),

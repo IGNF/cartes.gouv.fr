@@ -1,6 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
 import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
@@ -11,7 +13,7 @@ import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import frequencyCodes from "../../../../data/maintenance_frequency.json";
 import { getTranslation } from "../../../../i18n/i18n";
 import { getInspireKeywords, getThematicCategories, regex } from "../../../../utils";
-import { useDatastore } from "@/contexts/datastore";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 
 const keywords = getInspireKeywords();
 const thematicCategories = getThematicCategories();
@@ -33,7 +35,9 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = getTranslation("MetadatasForm");
 
-    const { datastore } = useDatastore();
+    // rendu dans les formulaires de service, sous le layout entrepôt
+    const { datastoreId } = useParams({ from: "/_private/tableau-de-bord/entrepots/$datastoreId" });
+    const { data: datastore } = useSuspenseQuery(datastoreQueryOptions(datastoreId));
 
     const {
         register,

@@ -21,7 +21,6 @@ import { usePagination } from "@/hooks/usePagination";
 import { formatDateFromISO } from "@/utils";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
-import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
@@ -41,9 +40,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
     const queryClient = useQueryClient();
 
-    // Le datastore
-    const { datastore, status: datastoreStatus } = useDatastore();
-    const isSandbox = useMembership({ datastoreId })?.isSandbox === true;
+    const membership = useMembership({ datastoreId });
 
     // Les permissions
     const {
@@ -83,7 +80,9 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     const { css } = useStyles();
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}>
+        <DatastoreMain
+            title={t("title", { datastoreName: tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox }) })}
+        >
             {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={getApiErrorMessage(removeError)} />}
             {removeStatus === "pending" && (
                 <Wait>
@@ -123,7 +122,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                 // TODO recherche et filtres ici
             )}
 
-            {datastoreStatus === "pending" || permissionStatus === "pending" ? (
+            {permissionStatus === "pending" ? (
                 <Skeleton count={6} rectangleHeight={200} />
             ) : permissions?.length === 0 ? (
                 <Alert className={fr.cx("fr-mb-1w")} severity={"info"} title={t("list.no_permissions")} closable />

@@ -1,11 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC } from "react";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import useMembership from "@/hooks/useMembership";
-import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import AnnexeUsage from "./storages/AnnexeUsage";
 import EndpointsUsage from "./storages/EndpointsUsage";
@@ -15,6 +15,7 @@ import S3Usage from "./storages/S3Usage";
 import StaticsUsage from "./storages/StaticsUsage";
 import UploadUsage from "./storages/UploadUsage";
 import { DatastoreManageStorageTab } from "./types";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
 
 const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation");
@@ -22,8 +23,9 @@ const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/_
 const DatastoreManageStorage: FC = () => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
-    const { datastore } = useDatastore();
-    const isSandbox = useMembership({ datastoreId: datastore._id })?.isSandbox === true;
+    const { datastoreId } = routeApi.useParams();
+    const { data: datastore } = useSuspenseQuery(datastoreQueryOptions(datastoreId));
+    const isSandbox = useMembership({ datastoreId })?.isSandbox === true;
 
     const navigate = useNavigate();
     const { tab: currentTab } = routeApi.useSearch();

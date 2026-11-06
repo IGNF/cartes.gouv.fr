@@ -2,7 +2,7 @@ import { createFileRoute, SearchSchemaInput } from "@tanstack/react-router";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import CommunityLayout from "@/components/Layout/CommunityLayout";
-import { useDatastore } from "@/contexts/datastore";
+import useMembership from "@/hooks/useMembership";
 import { communityMembersQueryOptions } from "@/hooks/queries/communityQueryOptions";
 import CommunityMembers from "@/entrepot/pages/communities/CommunityMembers/CommunityMembers";
 import { positiveIntegerParam, stringParam } from "@/router/searchParams";
@@ -25,10 +25,11 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
 });
 
 function RouteComponent() {
-    const { datastore } = useDatastore();
+    const communityId = useMembership(Route.useParams())?.community?._id;
     const { userId } = Route.useSearch();
+    if (!communityId) return null;
     return (
-        <CommunityLayout communityId={datastore.community._id}>
+        <CommunityLayout communityId={communityId}>
             <CommunityMembers userId={userId} />
         </CommunityLayout>
     );

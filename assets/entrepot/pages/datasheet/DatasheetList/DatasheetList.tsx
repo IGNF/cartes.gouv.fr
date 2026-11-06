@@ -14,6 +14,7 @@ import { useToggle } from "@mantine/hooks";
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import { ListHeader } from "@/components/Layout/ListHeader";
 import { datasheetListQueryOptions } from "@/hooks/queries/datasheetListQueryOptions";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import useMembership from "@/hooks/useMembership";
 import { usePagination } from "@/hooks/usePagination";
@@ -21,7 +22,6 @@ import { useSearch } from "@/hooks/useSearch";
 import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Skeleton from "../../../../components/Utils/Skeleton";
-import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import { SortByEnum } from "./DatasheetList.types";
@@ -42,9 +42,9 @@ type DatasheetListProps = {
 };
 const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatasheetList");
-    const { datastore } = useDatastore();
     const { t: tCommon } = useTranslation("Common");
-    const isSandbox = useMembership({ datastoreId })?.isSandbox === true;
+    const membership = useMembership({ datastoreId });
+    const { data: datastore } = useQuery(datastoreQueryOptions(datastoreId));
 
     const datasheetListQuery = useQuery(datasheetListQueryOptions(datastoreId));
     const { data: datasheetList, dataUpdatedAt, isFetching, isLoading, refetch } = datasheetListQuery;
@@ -74,7 +74,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     const { userRights, isSupervisor } = useCommunityRights();
 
-    const datastoreName = tCommon("datastore_name", { name: datastore?.name, isSandbox });
+    const datastoreName = tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox });
 
     return (
         <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })}>

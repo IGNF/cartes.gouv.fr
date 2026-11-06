@@ -1,5 +1,6 @@
-import { useDatastore } from "@/contexts/datastore";
-import { isSupervisor } from "@/utils/membership";
+import { useParams } from "@tanstack/react-router";
+
+import { findMembership, isSupervisor } from "@/utils/membership";
 import useUserQuery from "./queries/useUserQuery";
 
 /**
@@ -11,10 +12,9 @@ const useCommunityRights = () => {
         throw new Error("useCommunityRights must be used within an authenticated context (i.e., where user is logged in)");
     }
 
-    const { datastore } = useDatastore();
-
-    const communityId = datastore.community._id;
-    const communityMember = user.communities_member.find((member) => member.community?._id === communityId);
+    // appelé seulement sous le layout entrepôt
+    const { datastoreId } = useParams({ from: "/_private/tableau-de-bord/entrepots/$datastoreId" });
+    const communityMember = findMembership(user, { datastoreId });
     const community = communityMember?.community;
     if (!communityMember || !community) {
         throw new Error("User is not a member of the community related to the current datastore");

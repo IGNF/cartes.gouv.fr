@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import CommunityLayout from "@/components/Layout/CommunityLayout";
-import { useDatastore } from "@/contexts/datastore";
+import useMembership from "@/hooks/useMembership";
 import { communityQueryOptions } from "@/hooks/queries/communityQueryOptions";
 import CommunityInfo from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo";
 
@@ -15,9 +15,10 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
 });
 
 function RouteComponent() {
-    const { datastore } = useDatastore();
+    const communityId = useMembership(Route.useParams())?.community?._id;
+    if (!communityId) return null;
     return (
-        <CommunityLayout communityId={datastore.community._id}>
+        <CommunityLayout communityId={communityId}>
             <CommunityInfo />
         </CommunityLayout>
     );
