@@ -195,7 +195,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                 <>
                     <PageTitle title={t("community_members", { communityName: community?.name ?? "" })} />
 
-                    <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />
+                    <DatastoreTertiaryNavigation datastoreId={datastore._id} />
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-2v")}>
                         <div

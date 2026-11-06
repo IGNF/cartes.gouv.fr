@@ -17,7 +17,7 @@ export default function DatastoreTabsLayout() {
     return (
         <DatastorePanelMain>
             <PageTitle title={tCommon("datastore_name", { name: datastore.name, isSandbox })}>{isSandbox && <SandboxDatastoreExplanation />}</PageTitle>
-            <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={datastore.community._id} />
+            <DatastoreTertiaryNavigation datastoreId={datastore._id} />
             <Outlet />
         </DatastorePanelMain>
     );

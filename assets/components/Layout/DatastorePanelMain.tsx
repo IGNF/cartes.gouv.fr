@@ -8,7 +8,6 @@ import { tss } from "tss-react";
 
 import DatastoreSideMenu from "@/components/Layout/DatastoreSideMenu";
 import useBreadcrumb from "@/hooks/useBreadcrumb";
-import { routes } from "@/router/router";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import Main from "./Main";
 
@@ -31,7 +30,7 @@ export default function DatastorePanelMain({ children }: PropsWithChildren) {
                             buttons={[
                                 {
                                     children: "Ajouter un entrepôt",
-                                    linkProps: routes.datastore_create_request().link,
+                                    linkProps: { to: "/tableau-de-bord/entrepots/demande-de-creation" },
                                     priority: "secondary",
                                 },
                             ]}

@@ -50,7 +50,7 @@ const DatastoreManageStorage: FC = () => {
                 }
             ></PageTitle>
 
-            <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={datastore.community._id} />
+            <DatastoreTertiaryNavigation datastoreId={datastore._id} />
 
             {datastore && (
                 <div className={fr.cx("fr-grid-row", "fr-mt-6v", "fr-mb-16v")}>

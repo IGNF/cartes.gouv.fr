@@ -5,6 +5,7 @@ import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
 import { basePath } from "@/env";
+import { trackPageViews } from "@/modules/analytics";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
 import { routeTree } from "@/routeTree.gen";
@@ -22,6 +23,8 @@ export const router = createRouter({
         </Main>
     ),
 });
+
+trackPageViews(router);
 
 // toute nouvelle valeur de user_me (reconnexion, revalidation, droits modifiés) ré-évalue les gates ; partage structurel : même référence si rien n’a changé
 const userMeHash = hashKey(RQKeys.user_me());

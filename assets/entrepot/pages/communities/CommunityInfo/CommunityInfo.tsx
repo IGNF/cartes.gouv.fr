@@ -151,7 +151,7 @@ export default function CommunityInfo() {
         <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastore._id}>
             <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} />
 
-            <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={datastore.community._id} />
+            <DatastoreTertiaryNavigation datastoreId={datastore._id} />
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>
                 <div

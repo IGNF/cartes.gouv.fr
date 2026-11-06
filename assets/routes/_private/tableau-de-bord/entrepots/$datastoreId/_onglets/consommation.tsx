@@ -6,7 +6,7 @@ import { enumParam, positiveIntegerParam } from "@/router/searchParams";
 
 export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation")({
     validateSearch: (
-        search: { tab?: DatastoreManageStorageTab; page?: number; limit?: number } & SearchSchemaInput
+        search: { tab?: `${DatastoreManageStorageTab}`; page?: number; limit?: number } & SearchSchemaInput
     ): { tab: DatastoreManageStorageTab; page: number; limit: number } => ({
         tab: enumParam(search.tab, Object.values(DatastoreManageStorageTab)) ?? DatastoreManageStorageTab.POSTGRESQL,
         page: positiveIntegerParam(search.page) ?? 1,

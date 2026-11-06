@@ -1,4 +1,6 @@
-import { routeNumberParam, routeStringParam, useRoute } from "@/router/router";
+import { useSearch } from "@tanstack/react-router";
+
+import { integerParam, stringParam } from "@/router/searchParams";
 
 export enum SortOrderEnum {
     ASCENDING = 1,
@@ -28,12 +30,12 @@ interface IUseSortResult<T> {
 }
 
 export function useSort<T>(data: T[], availableSortBy = ["name"], defaultSortBy = "name", defaultSortOrder = SortOrderEnum.ASCENDING): IUseSortResult<T> {
-    const { params } = useRoute();
-    let sortBy = routeStringParam(params, "sortBy") ?? defaultSortBy;
+    const search = useSearch({ strict: false });
+    let sortBy = stringParam(search.sortBy) ?? defaultSortBy;
     if (!availableSortBy.includes(sortBy)) {
         sortBy = defaultSortBy;
     }
-    let sortOrder = routeNumberParam(params, "sortOrder") ?? defaultSortOrder;
+    let sortOrder = integerParam(search.sortOrder) ?? defaultSortOrder;
     if (!availableSortOrder.includes(sortOrder)) {
         sortOrder = defaultSortOrder;
     }

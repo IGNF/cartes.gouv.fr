@@ -1,4 +1,6 @@
-import { routeStringParam, useRoute } from "@/router/router";
+import { useSearch as useRouteSearch } from "@tanstack/react-router";
+
+import { stringParam } from "@/router/searchParams";
 
 interface IUseSearchResult<T> {
     search: string;
@@ -6,8 +8,7 @@ interface IUseSearchResult<T> {
 }
 
 export function useSearch<T>(data: T[], searchProperty = "name"): IUseSearchResult<T> {
-    const { params } = useRoute();
-    const search = routeStringParam(params, "search") ?? "";
+    const search = stringParam(useRouteSearch({ strict: false }).search) ?? "";
     const matches = (item: T) => {
         const value = (item as Record<string, unknown>)[searchProperty];
         return typeof value === "string" && value.toLowerCase().includes(search.toLowerCase());

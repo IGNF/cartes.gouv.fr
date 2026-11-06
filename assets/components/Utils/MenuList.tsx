@@ -1,6 +1,6 @@
 import { fr, type FrIconClassName, type RiIconClassName } from "@codegouvfr/react-dsfr";
 import Button, { ButtonProps } from "@codegouvfr/react-dsfr/Button";
-import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
+import { getLink, RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import Typography from "@mui/material/Typography";
@@ -36,6 +36,8 @@ type MenuListProps = {
 };
 
 const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items, disabled = false }) => {
+    // lien enregistré auprès de react-dsfr (au démarrage, donc lu au rendu) : routes internes sans rechargement de page
+    const { Link } = getLink();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const isMenuOpen = Boolean(anchorEl);
 
@@ -149,9 +151,9 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items, disabled = fa
 
                             if (item.linkProps && !item.disabled) {
                                 return (
-                                    <a key={item.text} {...item.linkProps}>
+                                    <Link key={item.text} {...item.linkProps}>
                                         {itemContent}
-                                    </a>
+                                    </Link>
                                 );
                             }
 

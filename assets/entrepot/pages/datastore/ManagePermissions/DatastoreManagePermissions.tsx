@@ -86,7 +86,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
         <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastoreId}>
             <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} />
 
-            <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
+            <DatastoreTertiaryNavigation datastoreId={datastoreId} />
 
             {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={getApiErrorMessage(removeError)} />}
             {removeStatus === "pending" && (

@@ -1,16 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MainNavigation from "@codegouvfr/react-dsfr/MainNavigation";
-
-import { routes, useRoute } from "@/router/router";
+import { useMatches } from "@tanstack/react-router";
 import { tss } from "tss-react";
 
 type DatastoreTertiaryNavigationProps = {
     datastoreId: string;
-    communityId: string;
 };
-export default function DatastoreTertiaryNavigation(props: DatastoreTertiaryNavigationProps) {
-    const { datastoreId, communityId } = props;
-    const { name: routeName } = useRoute();
+
+const TABS = "/_private/tableau-de-bord/entrepots/$datastoreId/_onglets";
+const COMMUNITY_TABS = "/_private/tableau-de-bord/communaute/$communityId/_onglets";
+
+export default function DatastoreTertiaryNavigation({ datastoreId }: DatastoreTertiaryNavigationProps) {
+    const routeId = useMatches({ select: (matches) => matches.at(-1)?.routeId });
+    const params = { datastoreId };
 
     const { classes } = useStyles();
 
@@ -19,28 +21,28 @@ export default function DatastoreTertiaryNavigation(props: DatastoreTertiaryNavi
             items={[
                 {
                     text: "Fiches de données",
-                    linkProps: routes.datasheet_list({ datastoreId }).link,
-                    isActive: routeName === "datasheet_list",
+                    linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params },
+                    isActive: routeId === `${TABS}/donnees/`,
                 },
                 {
                     text: "Membres",
-                    linkProps: routes.members_list({ communityId: communityId }).link,
-                    isActive: routeName === "members_list",
+                    linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/membres", params },
+                    isActive: routeId === `${TABS}/membres` || routeId === `${COMMUNITY_TABS}/membres`,
                 },
                 {
                     text: "Permissions",
-                    linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
-                    isActive: routeName === "datastore_manage_permissions",
+                    linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params },
+                    isActive: routeId === `${TABS}/permissions/`,
                 },
                 {
                     text: "Consommation",
-                    linkProps: routes.datastore_manage_storage({ datastoreId }).link,
-                    isActive: routeName === "datastore_manage_storage",
+                    linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/consommation", params },
+                    isActive: routeId === `${TABS}/consommation`,
                 },
                 {
                     text: "Info",
-                    linkProps: routes.community_info({ communityId }).link,
-                    isActive: routeName === "community_info",
+                    linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/info", params },
+                    isActive: routeId === `${TABS}/info` || routeId === `${COMMUNITY_TABS}/`,
                 },
             ]}
             classes={{

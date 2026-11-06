@@ -87,7 +87,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
         <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })} datastoreId={datastoreId}>
             <PageTitle title={t("title", { datastoreName })}>{isSandbox && <SandboxDatastoreExplanation />}</PageTitle>
 
-            <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
+            <DatastoreTertiaryNavigation datastoreId={datastoreId} />
 
             {datasheetList && datasheetList?.length > 0 && (
                 <>

@@ -6,7 +6,7 @@ import ManageCommunity from "@/espaceco/pages/communities/ManageCommunity";
 import { enumParam } from "@/router/searchParams";
 
 export const Route = createFileRoute("/_private/espace-collaboratif/$communityId/gerer-le-guichet")({
-    validateSearch: (search: { activeTab?: ManageCommunityActiveTabEnum } & SearchSchemaInput): { activeTab: ManageCommunityActiveTabEnum } => ({
+    validateSearch: (search: { activeTab?: `${ManageCommunityActiveTabEnum}` } & SearchSchemaInput): { activeTab: ManageCommunityActiveTabEnum } => ({
         activeTab: enumParam(search.activeTab, Object.values(ManageCommunityActiveTabEnum)) ?? ManageCommunityActiveTabEnum.Description,
     }),
     staticData: { matomoLabel: "Gérer le guichet" },

@@ -1,4 +1,6 @@
-import { routeNumberParam, useRoute } from "@/router/router";
+import { useSearch } from "@tanstack/react-router";
+
+import { integerParam } from "@/router/searchParams";
 
 export enum FilterEnum {
     ALL = 0,
@@ -43,10 +45,10 @@ interface IUseFiltersResult<T> {
 }
 
 export function useFilters<T>(data: T[], availableFilters: string[], tests: FilterTests<T> = defaultTests): IUseFiltersResult<T> {
-    const { params } = useRoute();
+    const search: Record<string, unknown> = useSearch({ strict: false });
     const filters = Object.fromEntries(
         availableFilters.map((key) => {
-            const value = routeNumberParam(params, key) ?? FilterEnum.ALL;
+            const value = integerParam(search[key]) ?? FilterEnum.ALL;
             return [key, availableValues.includes(value) ? value : FilterEnum.ALL];
         })
     );

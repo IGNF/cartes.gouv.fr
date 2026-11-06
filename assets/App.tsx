@@ -1,6 +1,7 @@
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { defaultShouldDehydrateQuery, hashKey } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { RouterProvider } from "@tanstack/react-router";
 import { FC, lazy, Suspense } from "react";
 
 import AlertProvider from "./components/Provider/AlertProvider";
@@ -8,8 +9,8 @@ import ErrorBoundary from "./components/Utils/ErrorBoundary";
 import { cacheBuster } from "./env";
 import RQKeys from "./modules/entrepot/RQKeys";
 import { queryClient } from "./modules/queryClient";
+import { router } from "./router";
 import { RouteProvider } from "./router/router";
-import RouterRenderer from "./router/RouterRenderer";
 import { bootstrapUser } from "./utils";
 
 import "./sass/helpers.scss";
@@ -43,10 +44,11 @@ const App: FC = () => {
                 <Devtools />
             </Suspense>
 
+            {/* RouteProvider de type-route gardé tant que des pages lisent useRoute */}
             <RouteProvider>
                 <ErrorBoundary>
                     <AlertProvider>
-                        <RouterRenderer />
+                        <RouterProvider router={router} />
                     </AlertProvider>
                 </ErrorBoundary>
             </RouteProvider>
