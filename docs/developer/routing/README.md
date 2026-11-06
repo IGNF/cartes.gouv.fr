@@ -53,5 +53,5 @@ Le front utilise [TanStack Router](https://tanstack.com/router) en routage par f
 
 - `autoCodeSplitting` met le composant de chaque route dans son propre chunk. Les layouts `_public` et `_private` et la page d’accueil restent dans le bundle principal (`codeSplitGroupings: []`).
 - Les layouts `_public` et `_private` ont un `pendingComponent` avec en-tête et pied de page. Une feuille en attente de son chunk affiche `defaultPendingComponent` dans la zone de son layout.
-- Préchargement à l’intention : au survol d’un lien pendant 200 ms, le routeur charge le chunk et exécute `beforeLoad`.
+- Pas de préchargement au survol par défaut (`defaultPreload: false`) : le `loader` d’une route appellerait l’API Entrepôt. Un lien l’active avec `preload="intent"` (ou `linkProps={{ …, preload: "intent" }}`) : après 200 ms de survol, le routeur charge le chunk, exécute `beforeLoad` et le `loader`.
 - Outils de développement : `assets/devtools.tsx` regroupe les panneaux Query et Router, chargés seulement en développement.
