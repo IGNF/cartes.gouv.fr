@@ -1,6 +1,6 @@
 import { createFileRoute, SearchSchemaInput } from "@tanstack/react-router";
 
-import { DatasheetViewActiveTabEnum } from "@/entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView";
+import { DatasheetViewActiveTabEnum } from "@/entrepot/pages/datasheet/DatasheetView/DatasheetView/types";
 import DatasheetView from "@/entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView";
 import { enumParam } from "@/router/searchParams";
 

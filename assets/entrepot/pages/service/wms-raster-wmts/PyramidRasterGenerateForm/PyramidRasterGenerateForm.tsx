@@ -28,7 +28,7 @@ import { ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../../modules/apiError";
 import { bboxToWkt } from "../../../../../utils";
 import api from "../../../../api";
-import { DatasheetViewActiveTabEnum } from "../../../datasheet/DatasheetView/DatasheetView/DatasheetView";
+import { DatasheetViewActiveTabEnum } from "../../../datasheet/DatasheetView/DatasheetView/types";
 
 const STEPS = {
     TECHNICAL_NAME: 1,

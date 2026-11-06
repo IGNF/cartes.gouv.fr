@@ -28,6 +28,7 @@ import DatasheetThumbnail from "../DatasheetThumbnail";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useCommunityRights from "@/hooks/useCommunityRights";
+import { DatasheetViewActiveTabEnum } from "./types";
 
 const DatasetListTab = lazy(() => import("../DatasetListTab/DatasetListTab"));
 const DocumentsTab = lazy(() => import("../DocumentsTab/DocumentsTab"));
@@ -38,13 +39,6 @@ const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
     isOpenedByDefault: false,
 });
-
-export enum DatasheetViewActiveTabEnum {
-    Metadata = "metadata",
-    Dataset = "dataset",
-    Services = "services",
-    Documents = "documents",
-}
 
 export const deleteUploadConfirmModal = createModal({
     id: "delete-upload-confirm-modal",

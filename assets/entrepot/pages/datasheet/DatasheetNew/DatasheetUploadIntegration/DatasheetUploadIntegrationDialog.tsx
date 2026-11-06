@@ -9,7 +9,7 @@ import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
-import { DatasheetViewActiveTabEnum } from "../../DatasheetView/DatasheetView/DatasheetView";
+import { DatasheetViewActiveTabEnum } from "../../DatasheetView/DatasheetView/types";
 
 const getStepIcon = (status: string) => {
     let icon = <span className={fr.cx("fr-icon-time-line")} />;
