@@ -159,3 +159,21 @@ jobs:
               uses: davelosert/vitest-coverage-report-action@8f86cfb56ed6d5613ea8cdc5259f207fbfd51ece # v2.13.1
               with:
                   comment-on: none
+
+    # Instantané du spec OpenAPI de l’Entrepôt (prod) commité : le job quotidien signale tout changement amont.
+    # Rafraîchir en local : curl --fail --silent --show-error https://data.geopf.fr/api/v3/api-docs | jq -S . > assets/@types/entrepot-openapi.json
+    upstream-spec:
+        name: Upstream spec
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Check committed Entrepôt OpenAPI spec is up to date
+              shell: bash
+              run: |
+                  curl --fail --silent --show-error https://data.geopf.fr/api/v3/api-docs | jq -S . > assets/@types/entrepot-openapi.json
+                  git diff --exit-code -- assets/@types/entrepot-openapi.json \
+                      || { echo "::error::Le spec OpenAPI de l’Entrepôt a changé : rafraîchir assets/@types/entrepot-openapi.json (commande en commentaire du job upstream-spec dans ci.yml)"; exit 1; }
