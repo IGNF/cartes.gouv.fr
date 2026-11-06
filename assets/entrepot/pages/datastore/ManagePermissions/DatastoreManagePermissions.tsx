@@ -7,15 +7,14 @@ import Card from "@codegouvfr/react-dsfr/Card";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { differenceInCalendarDays, parseISO } from "date-fns";
 import { FC, useState } from "react";
 import { useStyles } from "tss-react/mui";
 
 import { DatastorePermission } from "@/@types/app";
 import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
 import { ListHeader } from "@/components/Layout/ListHeader";
-import PageTitle from "@/components/Layout/PageTitle";
 import Skeleton from "@/components/Utils/Skeleton";
 import useMembership from "@/hooks/useMembership";
 import { usePagination } from "@/hooks/usePagination";
@@ -27,8 +26,10 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../modules/apiError";
-import { routePositiveIntegerParam, routes, useRoute } from "../../../../router/router";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import api from "../../../api";
+
+const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/permissions/");
 
 type DatastoreManagePermissionsProps = {
     datastoreId: string;
@@ -74,20 +75,15 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
     const [currentPermission, setCurrentPermission] = useState<string | undefined>(undefined);
 
-    const { params } = useRoute();
-    const page = routePositiveIntegerParam(params, "page") ?? 1;
-    const limit = routePositiveIntegerParam(params, "limit") ?? 4;
+    const navigate = useNavigate();
+    const { page, limit } = routeApi.useSearch();
 
     const { paginatedItems, totalPages } = usePagination(permissions ?? [], page, limit);
 
     const { css } = useStyles();
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} />
-
-            <DatastoreTertiaryNavigation datastoreId={datastoreId} />
-
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}>
             {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={getApiErrorMessage(removeError)} />}
             {removeStatus === "pending" && (
                 <Wait>
@@ -114,7 +110,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                             {permissions?.length ?? 0}
                         </Badge>
                         <Button
-                            linkProps={routes.datastore_add_permission({ datastoreId: datastoreId }).link}
+                            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/permissions/ajout", params: { datastoreId } }}
                             iconId="fr-icon-add-line"
                             iconPosition="right"
                             className={fr.cx("fr-ml-auto")}
@@ -220,10 +216,11 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                                         {
                                                             children: tCommon("modify"),
                                                             iconId: "fr-icon-edit-line",
-                                                            onClick: routes.datastore_edit_permission({
-                                                                datastoreId: datastoreId,
-                                                                permissionId: permission._id,
-                                                            }).push,
+                                                            onClick: () =>
+                                                                void navigate({
+                                                                    to: "/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification",
+                                                                    params: { datastoreId, permissionId: permission._id },
+                                                                }),
                                                         },
                                                         {
                                                             children: tCommon("delete"),
@@ -251,7 +248,10 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                     count={totalPages}
                                     showFirstLast={true}
                                     getPageLinkProps={(pageNumber) => ({
-                                        ...routes.datastore_manage_permissions({ datastoreId, page: pageNumber, limit: limit }).link,
+                                        to: "/tableau-de-bord/entrepots/$datastoreId/permissions",
+                                        params: { datastoreId },
+                                        search: { page: pageNumber, limit },
+                                        activeOptions: searchAwareActiveOptions,
                                     })}
                                     defaultPage={page}
                                 />

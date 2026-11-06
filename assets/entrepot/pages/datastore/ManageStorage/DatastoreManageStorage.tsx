@@ -1,13 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC } from "react";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
-import PageTitle from "@/components/Layout/PageTitle";
 import useMembership from "@/hooks/useMembership";
-import { routeStringParam, routes, useRoute } from "@/router/router";
-import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import AnnexeUsage from "./storages/AnnexeUsage";
@@ -20,15 +17,16 @@ import UploadUsage from "./storages/UploadUsage";
 import { DatastoreManageStorageTab } from "./types";
 import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
 
+const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation");
+
 const DatastoreManageStorage: FC = () => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
-    const { datastore, isFetching } = useDatastore();
+    const { datastore } = useDatastore();
     const isSandbox = useMembership({ datastoreId: datastore._id })?.isSandbox === true;
 
-    const route = useRoute();
-    const tabParam = routeStringParam(route.params, "tab");
-    const currentTab = Object.values(DatastoreManageStorageTab).find((tab) => tab === tabParam) ?? DatastoreManageStorageTab.POSTGRESQL;
+    const navigate = useNavigate();
+    const { tab: currentTab } = routeApi.useSearch();
 
     const hasFilesystemStorage = datastore?.storages.data?.find((data) => data.storage.type === "FILESYSTEM") !== undefined;
 
@@ -40,24 +38,13 @@ const DatastoreManageStorage: FC = () => {
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })} datastoreId={datastore._id}>
-            <PageTitle
-                title={
-                    <>
-                        {t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}
-                        {isFetching && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon />}
-                    </>
-                }
-            ></PageTitle>
-
-            <DatastoreTertiaryNavigation datastoreId={datastore._id} />
-
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}>
             {datastore && (
                 <div className={fr.cx("fr-grid-row", "fr-mt-6v", "fr-mb-16v")}>
                     <div className={fr.cx("fr-col-12")}>
                         <Tabs
                             selectedTabId={currentTab}
-                            onTabChange={(tabId: string) => routes.datastore_manage_storage({ datastoreId: datastore._id, tab: tabId }).replace()}
+                            onTabChange={(tabId: string) => void navigate({ to: ".", search: { tab: tabId as DatastoreManageStorageTab }, replace: true })}
                             tabs={[
                                 {
                                     tabId: DatastoreManageStorageTab.POSTGRESQL,
