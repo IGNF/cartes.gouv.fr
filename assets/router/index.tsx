@@ -1,5 +1,4 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { hashKey } from "@tanstack/react-query";
 import { createRouter, type RegisteredRouter, type RouteIds } from "@tanstack/react-router";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
@@ -7,7 +6,7 @@ import LoadingText from "@/components/Utils/LoadingText";
 import { basePath } from "@/env";
 import { trackPageViews } from "@/modules/analytics";
 import RQKeys from "@/modules/entrepot/RQKeys";
-import { queryClient } from "@/modules/queryClient";
+import { queryClient, userMeHash } from "@/modules/queryClient";
 import { routeTree } from "@/routeTree.gen";
 import { bootstrapUser } from "@/utils";
 
@@ -34,7 +33,6 @@ export const router = createRouter({
 trackPageViews(router);
 
 // toute nouvelle valeur de user_me (reconnexion, revalidation, droits modifiés) ré-évalue les gates ; partage structurel : même référence si rien n’a changé
-const userMeHash = hashKey(RQKeys.user_me());
 let lastUser = queryClient.getQueryData(RQKeys.user_me());
 queryClient.getQueryCache().subscribe((event) => {
     if (event.type !== "updated" || event.query.queryHash !== userMeHash || event.query.state.data === lastUser) return;

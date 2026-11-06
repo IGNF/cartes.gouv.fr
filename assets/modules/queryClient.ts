@@ -11,7 +11,7 @@ declare module "@tanstack/react-query" {
     }
 }
 
-const userMeHash = hashKey(RQKeys.user_me());
+export const userMeHash = hashKey(RQKeys.user_me());
 const USER_ME_REVALIDATION_WINDOW = delta.seconds(30);
 let lastRevalidation = 0;
 
