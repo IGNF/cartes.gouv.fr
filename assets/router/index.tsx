@@ -1,8 +1,8 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import { hashKey } from "@tanstack/react-query";
 import { createRouter, type RegisteredRouter, type RouteIds } from "@tanstack/react-router";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
 import { basePath } from "@/env";
 import { trackPageViews } from "@/modules/analytics";
@@ -23,11 +23,11 @@ export const router = createRouter({
     defaultPreloadDelay: 200,
     // react-query décide de la fraîcheur, pas le cache de préchargement du routeur
     defaultPreloadStaleTime: 0,
-    // chargement du chunk d’une feuille : rendu dans l’Outlet du layout parent
+    // chargement du chunk d’une feuille, dans l’Outlet du layout parent : pas de Main, le layout fournit déjà main et fil d’Ariane
     defaultPendingComponent: () => (
-        <Main>
+        <div className={fr.cx("fr-container", "fr-my-4w")}>
             <LoadingText withSpinnerIcon />
-        </Main>
+        </div>
     ),
 });
 
