@@ -1,7 +1,7 @@
 {
     "$schema": "./node_modules/oxlint/configuration_schema.json",
     "plugins": ["typescript", "react", "jsx-a11y", "unicorn"],
-    "jsPlugins": ["@tanstack/eslint-plugin-query", "eslint-plugin-tss-unused-classes"],
+    "jsPlugins": ["@tanstack/eslint-plugin-query", "@tanstack/eslint-plugin-router", "eslint-plugin-tss-unused-classes"],
     "categories": {
         "correctness": "error",
         "perf": "error"
@@ -14,7 +14,7 @@
         "browser": true,
         "node": true
     },
-    "ignorePatterns": ["public/build", "public/bundles", "assets/data", "vendor", "var", "assets/@types/entrepot.ts"],
+    "ignorePatterns": ["public/build", "public/bundles", "assets/data", "vendor", "var", "assets/@types/entrepot.ts", "assets/routeTree.gen.ts"],
     "rules": {
         // Règles hors catégorie correctness, reprises de l’ancienne configuration ESLint
         "array-callback-return": "error",
@@ -50,6 +50,7 @@
         "@tanstack/query/no-unstable-deps": "error",
         "@tanstack/query/no-void-query-fn": "error",
         "@tanstack/query/stable-query-client": "error",
+        "@tanstack/router/create-route-property-order": "error",
         "tss-unused-classes/unused-classes": "warn",
 
         // Règles typées hors catégorie correctness

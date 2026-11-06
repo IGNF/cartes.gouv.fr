@@ -1,8 +1,7 @@
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { defaultShouldDehydrateQuery, hashKey } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { FC } from "react";
+import { FC, lazy, Suspense } from "react";
 
 import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
@@ -23,6 +22,9 @@ const maxAge = 1000 * 60 * 60 * 24; // 24h
 
 bootstrapUser();
 
+// retiré du build de production par élimination de code mort
+const Devtools = import.meta.env.DEV ? lazy(() => import("./devtools")) : () => null;
+
 const App: FC = () => {
     return (
         <PersistQueryClientProvider
@@ -37,7 +39,9 @@ const App: FC = () => {
                 },
             }}
         >
-            <ReactQueryDevtools initialIsOpen={false} />
+            <Suspense fallback={null}>
+                <Devtools />
+            </Suspense>
 
             <RouteProvider>
                 <ErrorBoundary>

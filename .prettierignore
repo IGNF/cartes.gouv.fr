@@ -1,6 +1,7 @@
 /assets/data
 /assets/modules/symfony-routes.json
 /assets/@types/entrepot-openapi.json
+/assets/routeTree.gen.ts
 **/*.xml
 /**.twig
 /.agents

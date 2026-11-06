@@ -1,4 +1,5 @@
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
+import { type LinkProps } from "@tanstack/react-router";
 import { createHead, UnheadProvider } from "@unhead/react/client";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -6,11 +7,19 @@ import ReactDOM from "react-dom/client";
 import App from "@/App";
 import { appRevision, appVersion } from "@/env";
 import { analyticsInit } from "@/modules/analytics";
+import AppLink from "@/router/AppLink";
+
+// signature explicite et non typeof AppLink : un composant générique déballé retombe sur AnyRouter
+declare module "@codegouvfr/react-dsfr/spa" {
+    interface RegisterLink {
+        Link: (props: LinkProps & { href?: string }) => React.JSX.Element;
+    }
+}
 
 // Contourne la barre d'outils Symfony masquée au chargement en dev (élément absent en prod)
 document.getElementsByClassName("sf-toolbar")?.[0]?.classList?.remove("sf-display-none");
 
-startReactDsfr({ defaultColorScheme: "light" });
+startReactDsfr({ defaultColorScheme: "light", Link: AppLink });
 
 const head = createHead();
 
