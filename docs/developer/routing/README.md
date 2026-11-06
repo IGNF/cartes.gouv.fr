@@ -24,7 +24,6 @@ Le front utilise [TanStack Router](https://tanstack.com/router) en routage par f
 
 - Chaque route valide sa recherche dans `validateSearch`, avec les fonctions de `assets/router/searchParams.ts` (entiers, entiers positifs, listes autorisées, paramètres requis).
 - Un paramètre requis absent lève une erreur que le routeur enveloppe dans `SearchParamError`. Les `errorComponent` de la racine et des sous-arbres la rendent en page 404.
-- Les valeurs par défaut sont retirées de l’URL par `stripSearchParams(defaults)`.
 - Une page lit sa recherche par `getRouteApi("<id de route>").useSearch()`, sans importer son fichier de route. Une page rendue sous plusieurs routes lit `useSearch({ strict: false })`.
 
 ## Liens et navigation
