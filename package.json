@@ -103,6 +103,7 @@
         "format:fix": "prettier --write assets/",
         "prepare": "husky",
         "type-check": "tsc -b",
+        "types:entrepot": "node bin/entrepot-openapi-overlay.mjs assets/@types/entrepot-openapi.json node_modules/.cache/entrepot-openapi.overlaid.json && swagger-typescript-api generate -p node_modules/.cache/entrepot-openapi.overlaid.json -o assets/@types -n entrepot.ts --extract-enums --no-client --silent && prettier --write --log-level warn assets/@types/entrepot.ts",
         "test": "vitest run"
     },
     "browserslist": [
