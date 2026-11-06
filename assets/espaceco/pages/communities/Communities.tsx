@@ -4,10 +4,11 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC, useMemo, useState } from "react";
 
 import Main from "@/components/Layout/Main";
-import { CommunityListFilter, GetResponse, arrCommunityListFilters } from "../../../@types/app_espaceco";
+import { CommunityListFilter, GetResponse } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Skeleton from "../../../components/Utils/Skeleton";
@@ -16,12 +17,14 @@ import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { ApiError } from "../../../modules/jsonFetch";
 import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../modules/apiError";
-import { routeParam, routeStringParam, routes, useRoute } from "../../../router/router";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import api from "../../api";
 import CommunityList from "./CommunityList";
 import { CreateCommunityDialog, CreateCommunityDialogModal } from "./CreateCommunityDialog";
 import SearchCommunity from "./SearchCommunity";
 import useUserMe from "@/espaceco/hooks/useUserMe";
+
+const routeApi = getRouteApi("/_private/espace-collaboratif/");
 
 const defaultLimit = 10;
 
@@ -32,7 +35,8 @@ type QueryParamsType = {
 };
 
 const Communities: FC = () => {
-    const route = useRoute();
+    const navigate = useNavigate();
+    const { page, filter } = routeApi.useSearch();
 
     const meQuery = useUserMe();
     const { data: me } = meQuery;
@@ -41,21 +45,13 @@ const Communities: FC = () => {
     const { t: tValid } = useTranslation("ManageCommunityValidations");
     const { t } = useTranslation("EspaceCoCommunityList");
 
-    const filter = useMemo<CommunityListFilter>(() => {
-        const f = routeStringParam(route.params, "filter");
-        return arrCommunityListFilters.find((filter) => filter === f) ?? "listed";
-    }, [route]);
-
     const queryParams = useMemo<QueryParamsType>(() => {
-        const p = routeParam(route.params, "page");
-        const page = typeof p === "number" && Number.isInteger(p) ? p : 1;
-
         const params: QueryParamsType = { page: page, limit: defaultLimit };
         if (["iam_member", "affiliation"].includes(filter)) {
             params["pending"] = filter === "iam_member" ? false : true;
         }
         return params;
-    }, [route, filter]);
+    }, [page, filter]);
 
     const [community, setCommunity] = useState<CommunityResponseDTO | null>(null);
 
@@ -82,7 +78,7 @@ const Communities: FC = () => {
 
     const handleFilterChange = (filter: CommunityListFilter) => {
         setCommunity(null);
-        routes.espaceco_community_list({ filter: filter, page: 1 }).push();
+        void navigate({ to: "/espace-collaboratif", search: { filter } });
     };
 
     const queryClient = useQueryClient();
@@ -105,7 +101,7 @@ const Communities: FC = () => {
             queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), () => {
                 return community;
             });
-            routes.espaceco_create_community({ communityId: community.id }).push();
+            void navigate({ to: "/espace-collaboratif/$communityId/creer-un-guichet", params: { communityId: community.id } });
         },
     });
 
@@ -200,7 +196,11 @@ const Communities: FC = () => {
                                     <Pagination
                                         count={communityQuery.data.totalPages}
                                         defaultPage={queryParams.page}
-                                        getPageLinkProps={(pageNumber) => routes.espaceco_community_list({ filter: filter, page: pageNumber }).link}
+                                        getPageLinkProps={(pageNumber) => ({
+                                            to: "/espace-collaboratif",
+                                            search: { filter, page: pageNumber },
+                                            activeOptions: searchAwareActiveOptions,
+                                        })}
                                     />
                                 </div>
                             </div>
@@ -216,7 +216,11 @@ const Communities: FC = () => {
                                 <Pagination
                                     count={communitiesAsMemberQuery.data.totalPages}
                                     defaultPage={queryParams.page}
-                                    getPageLinkProps={(pageNumber) => routes.espaceco_community_list({ filter: filter, page: pageNumber }).link}
+                                    getPageLinkProps={(pageNumber) => ({
+                                        to: "/espace-collaboratif",
+                                        search: { filter, page: pageNumber },
+                                        activeOptions: searchAwareActiveOptions,
+                                    })}
                                 />
                             </div>
                         </div>

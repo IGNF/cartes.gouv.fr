@@ -23,7 +23,6 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../modules/apiError";
-import { routes } from "../../../../router/router";
 import "../../../../sass/pages/espaceco/member.scss";
 import api from "../../../api";
 import { AddMembersDialog, AddMembersDialogModal } from "./member/AddMembersDialog";
@@ -292,7 +291,7 @@ const Members: FC = () => {
                     description={
                         <>
                             <p>{getApiErrorMessage(membersQuery.error)}</p>
-                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                            <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
                         </>
                     }
                 />

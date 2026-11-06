@@ -1,10 +1,10 @@
 import Wait from "@/components/Utils/Wait";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
-import { routes } from "@/router/router";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -34,6 +34,7 @@ import { countActiveStatus, getMinAuthorizedStatus } from "./reports/Utils";
 const minStatuses = getMinAuthorizedStatus();
 
 const Reports: FC = () => {
+    const navigate = useNavigate();
     const { t: tStatus } = useTranslation("ReportStatuses");
     const { t: tCommon } = useTranslation("Common");
     const { t: tmc } = useTranslation("ManageCommunity");
@@ -244,7 +245,7 @@ const Reports: FC = () => {
         datas.attributes = formatAttributesForApi(datas.attributes);
         updateCommunity(datas, () => {
             if (mode === "creation" && !saveOnly) {
-                routes.espaceco_community_list().push();
+                void navigate({ to: "/espace-collaboratif" });
             }
         });
     };
