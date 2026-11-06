@@ -8,7 +8,6 @@ import { OfferingStatusEnum, OfferingTypeEnum } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
-import { routes } from "../../../../router/router";
 import { isOfferingUnavailable } from "../../../../utils";
 import PrivateServiceExplanation from "./PrivateServiceExplanation";
 import ServiceViewContent from "./ServiceViewContent";
@@ -32,7 +31,9 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                     severity="error"
                     closable={false}
                     title={getApiErrorMessage(serviceQuery.error)}
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
+                    description={
+                        <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>Retour à mes données</Button>
+                    }
                 />
             ) : serviceQuery.data ? (
                 <>
@@ -40,7 +41,11 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
-                            linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "services" }).link}
+                            linkProps={{
+                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                params: { datastoreId, datasheetName },
+                                search: { activeTab: "services" },
+                            }}
                             title="Retour à la fiche de donnée"
                             size="large"
                         />
@@ -77,13 +82,11 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                     {serviceQuery.data?.type === OfferingTypeEnum.WMSVECTOR && serviceQuery.data?.status === OfferingStatusEnum.PUBLISHED && (
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
                             <Button
-                                linkProps={
-                                    routes.datastore_pyramid_raster_generate({
-                                        datastoreId,
-                                        offeringId,
-                                        datasheetName,
-                                    }).link
-                                }
+                                linkProps={{
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout",
+                                    params: { datastoreId },
+                                    search: { offeringId, datasheetName },
+                                }}
                             >
                                 Créer un service raster WMS/WMTS
                             </Button>

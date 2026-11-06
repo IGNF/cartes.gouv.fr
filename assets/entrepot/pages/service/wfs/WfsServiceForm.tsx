@@ -6,6 +6,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { UseMutationResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
@@ -24,7 +25,6 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../modules/apiError";
-import { routes } from "../../../../router/router";
 import { regex, trimObject } from "../../../../utils";
 import api from "../../../api";
 import AccessRestrictions from "../common/AccessRestrictions/AccessRestrictions";
@@ -105,6 +105,7 @@ const commonValidation = new CommonSchemasValidation();
  * Formulaire general de création d'un service WFS
  */
 const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offeringId }) => {
+    const navigate = useNavigate();
     const { t } = useTranslation("WfsServiceForm");
     const { t: tCommon } = useTranslation("Common");
 
@@ -128,9 +129,13 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                 void queryClient.invalidateQueries({
                     queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
                 });
-                routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                void navigate({
+                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                    params: { datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name },
+                    search: { activeTab: "services" },
+                });
             } else {
-                routes.datasheet_list({ datastoreId }).push();
+                void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
             }
         },
     });
@@ -159,10 +164,14 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                 void queryClient.invalidateQueries({
                     queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
                 });
-                routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                void navigate({
+                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                    params: { datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name },
+                    search: { activeTab: "services" },
+                });
                 void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, vectorDbQuery.data?.tags?.datasheet_name) });
             } else {
-                routes.datasheet_list({ datastoreId }).push();
+                void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
             }
         },
     });
@@ -298,7 +307,9 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     description={
                         <>
                             <p>{getApiErrorMessage(vectorDbQuery.error)}</p>
-                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                            <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>
+                                {t("back_to_data_list")}
+                            </Button>
                         </>
                     }
                 />
@@ -310,7 +321,9 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     description={
                         <>
                             <p>{getApiErrorMessage(offeringQuery.error)}</p>
-                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                            <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>
+                                {t("back_to_data_list")}
+                            </Button>
                         </>
                     }
                 />

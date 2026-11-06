@@ -1,5 +1,3 @@
-import { routes } from "@/router/router";
-
 import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 
@@ -31,11 +29,11 @@ function PrivateServiceExplanation({ datastoreId }: PrivateServiceExplanationPro
                     buttons={[
                         {
                             children: "Voir mes clé d’accès",
-                            linkProps: routes.my_access_keys().link,
+                            linkProps: { to: "/mes-cles" },
                         },
                         {
                             children: "Configurer les permissions",
-                            linkProps: routes.datastore_add_permission({ datastoreId }).link,
+                            linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/permissions/ajout", params: { datastoreId } },
                             priority: "secondary",
                         },
                     ]}
