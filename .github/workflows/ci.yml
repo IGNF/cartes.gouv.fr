@@ -121,6 +121,10 @@ jobs:
             - name: Setup Node.js and npm dependencies
               uses: ./.github/actions/setup-js
 
+            # Les types de l’API Entrepôt sont générés depuis l’instantané du spec : le fichier commité doit y correspondre
+            - name: Check committed Entrepôt types are up to date
+              run: npm run types:entrepot && git diff --exit-code -- assets/@types/entrepot.ts
+
             - name: Lint
               run: npm run lint
 
