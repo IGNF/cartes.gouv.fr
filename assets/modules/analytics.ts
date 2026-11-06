@@ -74,8 +74,9 @@ export function matomoPageTitle(matches: MatchForTitle[]): string {
 /** page vue Matomo à chaque navigation, sans paramètres de requête, avec l’URL précédente comme référent */
 export function trackPageViews(router: AnyRouter) {
     let previousUrl = document.referrer.split("?")[0];
-    router.subscribe("onResolved", () => {
-        if (!window._paq) return;
+    // un router.invalidate() sans changement d’URL n’est pas une page vue
+    router.subscribe("onResolved", ({ hrefChanged }) => {
+        if (!hrefChanged || !window._paq) return;
         const currentUrl = window.location.origin + window.location.pathname;
 
         window._paq.push(["setReferrerUrl", previousUrl]);

@@ -9,6 +9,10 @@ import { trackPageViews } from "@/modules/analytics";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
 import { routeTree } from "@/routeTree.gen";
+import { bootstrapUser } from "@/utils";
+
+// user_me amorcé avant que le routeur ne lise le cache (gates, abonnement ci-dessous)
+bootstrapUser();
 
 export const router = createRouter({
     routeTree,

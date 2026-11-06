@@ -12,13 +12,22 @@ export const Route = createFileRoute("/_public")({
     codeSplitGroupings: [],
     component: PublicLayout,
     pendingComponent: PublicLayoutPending,
-    notFoundComponent: PageNotFound,
+    // remplace aussi la mise en page du layout : la page 404 apporte la sienne
+    notFoundComponent: PublicNotFound,
 });
 
 function PublicLayout() {
     return (
         <AppLayout navItems={defaultNavItems()}>
             <Outlet />
+        </AppLayout>
+    );
+}
+
+function PublicNotFound() {
+    return (
+        <AppLayout navItems={defaultNavItems()}>
+            <PageNotFound />
         </AppLayout>
     );
 }

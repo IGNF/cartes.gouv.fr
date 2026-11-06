@@ -83,7 +83,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const datastoreName = tCommon("datastore_name", { name: datastore?.name, isSandbox });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })} datastoreId={datastoreId}>
+        <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })}>
             {datasheetList && datasheetList?.length > 0 && (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>

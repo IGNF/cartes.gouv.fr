@@ -10,7 +10,6 @@ import { cacheBuster } from "./env";
 import RQKeys from "./modules/entrepot/RQKeys";
 import { queryClient } from "./modules/queryClient";
 import { router } from "./router";
-import { bootstrapUser } from "./utils";
 
 import "./sass/helpers.scss";
 
@@ -19,8 +18,6 @@ const persister = createAsyncStoragePersister({
 });
 
 const maxAge = 1000 * 60 * 60 * 24; // 24h
-
-bootstrapUser();
 
 // retiré du build de production par élimination de code mort
 const Devtools = import.meta.env.DEV ? lazy(() => import("./devtools")) : () => null;

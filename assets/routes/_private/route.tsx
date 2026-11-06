@@ -6,7 +6,7 @@ import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import SymfonyRouting from "@/modules/Routing";
-import PageNotFound from "@/pages/error/PageNotFound";
+import PageNotFoundWithLayout from "@/pages/error/PageNotFoundWithLayout";
 
 export const Route = createFileRoute("/_private")({
     // user_me est amorcé depuis la page (null = anonyme) : connexion Keycloak en navigation pleine page
@@ -19,7 +19,8 @@ export const Route = createFileRoute("/_private")({
     codeSplitGroupings: [],
     component: PrivateLayout,
     pendingComponent: PrivateLayoutPending,
-    notFoundComponent: PageNotFound,
+    // remplace aussi la mise en page du layout : la page 404 apporte la sienne
+    notFoundComponent: PageNotFoundWithLayout,
 });
 
 function PrivateLayout() {

@@ -4,12 +4,7 @@ import { PropsWithChildren } from "react";
 
 import { type MainProps } from "./Main";
 
-export type DatastoreMainProps = PropsWithChildren<
-    Pick<MainProps, "noticeProps" | "title"> & {
-        datastoreId?: string;
-        communityId?: string;
-    }
->;
+export type DatastoreMainProps = PropsWithChildren<Pick<MainProps, "noticeProps" | "title">>;
 
 /** contenu d’une page rendue dans le panneau des entrepôts (DatastorePanelMain) : titre du document et notice */
 export default function DatastoreMain({ children, noticeProps, title }: DatastoreMainProps) {
