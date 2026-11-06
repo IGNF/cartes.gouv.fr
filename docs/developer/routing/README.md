@@ -17,7 +17,7 @@ Le front utilise [TanStack Router](https://tanstack.com/router) en routage par f
 
 - Les layouts `.../entrepots/$datastoreId/route.tsx` et `.../communaute/$communityId/route.tsx` décident dans `beforeLoad`, sans requête, à partir de l’appartenance lue dans `user_me` (`findMembership`).
 - Sans appartenance, la route lève `notFound()` : une ressource inaccessible et une ressource inexistante donnent la même page 404. Avant ce refus, `revalidateUser()` relance une fois `user_me` (au plus toutes les 30 s).
-- Une feuille qui exige des droits les déclare dans `staticData.requiredRights` (tous requis). `DatastoreLayout` et `CommunityLayout` les lisent avec `useRequiredRights()` et affichent `Forbidden` sans les droits. Le superviseur de la communauté a tous les droits.
+- Une feuille qui exige des droits les déclare dans `staticData.requiredRights` (tous requis). `ResourceAccessGate` et les layouts d’onglets les lisent avec `useRequiredRights()` et affichent `Forbidden` sans les droits. Le superviseur de la communauté a tous les droits.
 - Toute nouvelle valeur de `user_me` (reconnexion, revalidation) relance les `beforeLoad` par `router.invalidate()` (abonnement dans `assets/router/index.tsx`). Une erreur 403 ou 404 d’une requête relance `user_me` (`assets/modules/queryClient.ts`).
 
 ## Chargement des données

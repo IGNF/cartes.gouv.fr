@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
-import CommunityLayout from "@/components/Layout/CommunityLayout";
+import ResourceAccessGate from "@/components/Layout/ResourceAccessGate";
 import Alerts from "@/entrepot/pages/config/Alerts";
 import { configCommunityId } from "@/env";
 import useMembership from "@/hooks/useMembership";
@@ -10,7 +10,7 @@ import { revalidateUser } from "@/modules/queryClient";
 import { findMembership } from "@/utils/membership";
 
 export const Route = createFileRoute("/_private/configuration/alertes")({
-    // communauté de configuration fournie par l’environnement ; 404 miroir sans appartenance, droits vérifiés par CommunityLayout
+    // communauté de configuration fournie par l’environnement ; 404 miroir sans appartenance, droits vérifiés par ResourceAccessGate
     beforeLoad: ({ context }) => {
         if (!configCommunityId) throw notFound();
         const membership = findMembership(context.queryClient.getQueryData<CartesUser | null>(RQKeys.user_me()), { communityId: configCommunityId });
@@ -29,8 +29,8 @@ function RouteComponent() {
     const datastoreId = useMembership({ communityId: configCommunityId })?.community?.datastore;
     if (!datastoreId) return null;
     return (
-        <CommunityLayout communityId={configCommunityId}>
+        <ResourceAccessGate resource={{ communityId: configCommunityId }}>
             <Alerts datastoreId={datastoreId} />
-        </CommunityLayout>
+        </ResourceAccessGate>
     );
 }

@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
-import DatastoreLayout from "@/components/Layout/DatastoreLayout";
+import ResourceAccessGate from "@/components/Layout/ResourceAccessGate";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { revalidateUser } from "@/modules/queryClient";
@@ -32,8 +32,8 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
 function DatastoreRoute() {
     const { datastoreId } = Route.useParams();
     return (
-        <DatastoreLayout datastoreId={datastoreId}>
+        <ResourceAccessGate resource={{ datastoreId }}>
             <Outlet />
-        </DatastoreLayout>
+        </ResourceAccessGate>
     );
 }

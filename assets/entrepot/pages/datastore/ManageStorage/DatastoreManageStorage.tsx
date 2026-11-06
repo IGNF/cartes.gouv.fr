@@ -41,64 +41,62 @@ const DatastoreManageStorage: FC = () => {
 
     return (
         <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}>
-            {datastore && (
-                <div className={fr.cx("fr-grid-row", "fr-mt-6v", "fr-mb-16v")}>
-                    <div className={fr.cx("fr-col-12")}>
-                        <Tabs
-                            selectedTabId={currentTab}
-                            onTabChange={(tabId: string) => void navigate({ to: ".", search: { tab: tabId as DatastoreManageStorageTab }, replace: true })}
-                            tabs={[
-                                {
-                                    tabId: DatastoreManageStorageTab.POSTGRESQL,
-                                    label: t("storage.postgresql.label"),
-                                },
-                                {
-                                    tabId: DatastoreManageStorageTab.S3,
-                                    label: t("storage.s3.label"),
-                                },
-                                hasFilesystemStorage
-                                    ? {
-                                          tabId: DatastoreManageStorageTab.FILESYSTEM,
-                                          label: t("storage.filesystem.label"),
-                                      }
-                                    : null,
-                                {
-                                    tabId: DatastoreManageStorageTab.UPLOAD,
-                                    label: t("storage.upload.label"),
-                                },
-                                {
-                                    tabId: DatastoreManageStorageTab.ANNEXE,
-                                    label: t("storage.annexe.label"),
-                                },
-                                {
-                                    tabId: DatastoreManageStorageTab.ENDPOINTS,
-                                    label: t("storage.endpoints.label"),
-                                },
-                                {
-                                    tabId: DatastoreManageStorageTab.STATICS,
-                                    label: t("storage.statics.label"),
-                                },
-                            ].filter((t) => t !== null)}
-                        >
-                            {currentTab === DatastoreManageStorageTab.POSTGRESQL ? (
-                                <PostgresqlUsage datastore={datastore} />
-                            ) : currentTab === DatastoreManageStorageTab.S3 ? (
-                                <S3Usage datastore={datastore} />
-                            ) : currentTab === DatastoreManageStorageTab.FILESYSTEM ? (
-                                <FilesystemUsage datastore={datastore} />
-                            ) : currentTab === DatastoreManageStorageTab.UPLOAD ? (
-                                <UploadUsage datastore={datastore} />
-                            ) : currentTab === DatastoreManageStorageTab.ANNEXE ? (
-                                <AnnexeUsage datastore={datastore} />
-                            ) : currentTab === DatastoreManageStorageTab.ENDPOINTS ? (
-                                <EndpointsUsage datastore={datastore} />
-                            ) : currentTab === DatastoreManageStorageTab.STATICS ? (
-                                <StaticsUsage datastore={datastore} />
-                            ) : null}
-                        </Tabs>
-                    </div>
+            <div className={fr.cx("fr-grid-row", "fr-mt-6v", "fr-mb-16v")}>
+                <div className={fr.cx("fr-col-12")}>
+                    <Tabs
+                        selectedTabId={currentTab}
+                        onTabChange={(tabId: string) => void navigate({ to: ".", search: { tab: tabId as DatastoreManageStorageTab }, replace: true })}
+                        tabs={[
+                            {
+                                tabId: DatastoreManageStorageTab.POSTGRESQL,
+                                label: t("storage.postgresql.label"),
+                            },
+                            {
+                                tabId: DatastoreManageStorageTab.S3,
+                                label: t("storage.s3.label"),
+                            },
+                            hasFilesystemStorage
+                                ? {
+                                      tabId: DatastoreManageStorageTab.FILESYSTEM,
+                                      label: t("storage.filesystem.label"),
+                                  }
+                                : null,
+                            {
+                                tabId: DatastoreManageStorageTab.UPLOAD,
+                                label: t("storage.upload.label"),
+                            },
+                            {
+                                tabId: DatastoreManageStorageTab.ANNEXE,
+                                label: t("storage.annexe.label"),
+                            },
+                            {
+                                tabId: DatastoreManageStorageTab.ENDPOINTS,
+                                label: t("storage.endpoints.label"),
+                            },
+                            {
+                                tabId: DatastoreManageStorageTab.STATICS,
+                                label: t("storage.statics.label"),
+                            },
+                        ].filter((t) => t !== null)}
+                    >
+                        {currentTab === DatastoreManageStorageTab.POSTGRESQL ? (
+                            <PostgresqlUsage datastore={datastore} />
+                        ) : currentTab === DatastoreManageStorageTab.S3 ? (
+                            <S3Usage datastore={datastore} />
+                        ) : currentTab === DatastoreManageStorageTab.FILESYSTEM ? (
+                            <FilesystemUsage datastore={datastore} />
+                        ) : currentTab === DatastoreManageStorageTab.UPLOAD ? (
+                            <UploadUsage datastore={datastore} />
+                        ) : currentTab === DatastoreManageStorageTab.ANNEXE ? (
+                            <AnnexeUsage datastore={datastore} />
+                        ) : currentTab === DatastoreManageStorageTab.ENDPOINTS ? (
+                            <EndpointsUsage datastore={datastore} />
+                        ) : currentTab === DatastoreManageStorageTab.STATICS ? (
+                            <StaticsUsage datastore={datastore} />
+                        ) : null}
+                    </Tabs>
                 </div>
-            )}
+            </div>
         </DatastoreMain>
     );
 };

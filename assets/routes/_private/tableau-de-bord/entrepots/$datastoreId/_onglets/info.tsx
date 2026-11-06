@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import CommunityLayout from "@/components/Layout/CommunityLayout";
+import ResourceAccessGate from "@/components/Layout/ResourceAccessGate";
 import useMembership from "@/hooks/useMembership";
 import { communityQueryOptions } from "@/hooks/queries/communityQueryOptions";
 import CommunityInfo from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo";
@@ -18,8 +18,8 @@ function RouteComponent() {
     const communityId = useMembership(Route.useParams())?.community?._id;
     if (!communityId) return null;
     return (
-        <CommunityLayout communityId={communityId}>
+        <ResourceAccessGate resource={{ communityId }}>
             <CommunityInfo communityId={communityId} />
-        </CommunityLayout>
+        </ResourceAccessGate>
     );
 }

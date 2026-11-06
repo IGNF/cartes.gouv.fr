@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 
 import { CartesUser } from "@/@types/app";
-import CommunityLayout from "@/components/Layout/CommunityLayout";
+import ResourceAccessGate from "@/components/Layout/ResourceAccessGate";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { revalidateUser } from "@/modules/queryClient";
@@ -32,8 +32,8 @@ export const Route = createFileRoute("/_private/tableau-de-bord/communaute/$comm
 function CommunityRoute() {
     const { communityId } = Route.useParams();
     return (
-        <CommunityLayout communityId={communityId}>
+        <ResourceAccessGate resource={{ communityId }}>
             <Outlet />
-        </CommunityLayout>
+        </ResourceAccessGate>
     );
 }

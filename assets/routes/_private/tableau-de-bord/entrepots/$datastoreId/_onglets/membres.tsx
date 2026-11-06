@@ -1,7 +1,7 @@
 import { createFileRoute, SearchSchemaInput } from "@tanstack/react-router";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import CommunityLayout from "@/components/Layout/CommunityLayout";
+import ResourceAccessGate from "@/components/Layout/ResourceAccessGate";
 import useMembership from "@/hooks/useMembership";
 import { communityMembersQueryOptions } from "@/hooks/queries/communityQueryOptions";
 import CommunityMembers from "@/entrepot/pages/communities/CommunityMembers/CommunityMembers";
@@ -29,8 +29,8 @@ function RouteComponent() {
     const { userId } = Route.useSearch();
     if (!communityId) return null;
     return (
-        <CommunityLayout communityId={communityId}>
+        <ResourceAccessGate resource={{ communityId }}>
             <CommunityMembers communityId={communityId} userId={userId} />
-        </CommunityLayout>
+        </ResourceAccessGate>
     );
 }
