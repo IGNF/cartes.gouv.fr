@@ -57,7 +57,8 @@ export function HeaderMenuServices() {
                 {
                     iconId: "fr-icon-search-line",
                     children: "Rechercher une donnée",
-                    linkProps: { href: externalUrls.catalogue },
+                    // URL absolue mais même site : react-dsfr ouvrirait un nouvel onglet
+                    linkProps: { href: externalUrls.catalogue, target: "_self" },
                 },
                 {
                     iconId: "fr-icon-database-line",
