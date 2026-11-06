@@ -49,6 +49,32 @@ export enum StorageType {
     POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
+export interface UserKeyCreateDtoUserKeyInfoDto {
+    blacklist?: string[];
+    /** @minLength 1 */
+    name: string;
+    referer?: string;
+    type?: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
+    type_infos: UserKeyInfoDto;
+    user_agent?: string;
+    whitelist?: string[];
+}
+
+export interface PermissionCreateDto {
+    /** @format date-time */
+    end_date?: string;
+    /** @minLength 1 */
+    licence: string;
+    name?: string;
+    /**
+     * @minItems 1
+     * @uniqueItems true
+     */
+    offerings: string[];
+    only_oauth?: boolean;
+    type?: PermissionCreateDtoTypeEnum;
+}
+
 export interface AccessCreateDto {
     /**
      * Identifiants des offres
@@ -3123,21 +3149,6 @@ export type PermissionCommunityCreateDto = UtilRequiredKeys<PermissionCreateDto,
     communities: string[];
 };
 
-export interface PermissionCreateDto {
-    /** @format date-time */
-    end_date?: string;
-    /** @minLength 1 */
-    licence: string;
-    name?: string;
-    /**
-     * @minItems 1
-     * @uniqueItems true
-     */
-    offerings: string[];
-    only_oauth?: boolean;
-    type?: PermissionCreateDtoTypeEnum;
-}
-
 export interface PermissionDatastoreAuthorDto {
     /**
      * Identifiant technique
@@ -5045,17 +5056,6 @@ export type UserHashKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoD
     type_infos: HashInfoDto;
 };
 
-export interface UserKeyCreateDtoUserKeyInfoDto {
-    blacklist?: string[];
-    /** @minLength 1 */
-    name: string;
-    referer?: string;
-    type?: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
-    type_infos: UserKeyInfoDto;
-    user_agent?: string;
-    whitelist?: string[];
-}
-
 export interface UserKeyDetailsResponseDtoUserKeyInfoDto {
     /**
      * Identifiant technique
@@ -5131,6 +5131,17 @@ export interface UserUpdateDto {
      * @min 0
      */
     keys_quota?: number;
+}
+
+export enum UserKeyCreateDtoUserKeyInfoDtoTypeEnum {
+    HASH = "HASH",
+    BASIC = "BASIC",
+    OAUTH2 = "OAUTH2",
+}
+
+export enum PermissionCreateDtoTypeEnum {
+    ACCOUNT = "ACCOUNT",
+    COMMUNITY = "COMMUNITY",
 }
 
 /** Type de callback */
@@ -5416,11 +5427,6 @@ export enum NomenclatureResponseDtoTypeEnum {
     FORMAT = "FORMAT",
     RESOLUTION = "RESOLUTION",
     ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
-}
-
-export enum PermissionCreateDtoTypeEnum {
-    ACCOUNT = "ACCOUNT",
-    COMMUNITY = "COMMUNITY",
 }
 
 export enum ProcessingExecutionExtendedDetailResponseDtoStatusEnum {
@@ -5871,12 +5877,6 @@ export enum UploadStandardListResponseDtoTypeEnum {
     HISTORICIMAGERY = "HISTORIC-IMAGERY",
     POINTCLOUD = "POINT-CLOUD",
     PYRAMID3D = "PYRAMID-3D",
-}
-
-export enum UserKeyCreateDtoUserKeyInfoDtoTypeEnum {
-    HASH = "HASH",
-    BASIC = "BASIC",
-    OAUTH2 = "OAUTH2",
 }
 
 export enum UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum {
