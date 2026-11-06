@@ -6,7 +6,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
@@ -14,15 +14,13 @@ import { useStyles } from "tss-react";
 import isEmail from "validator/lib/isEmail";
 import * as yup from "yup";
 
-import { Community } from "@/@types/app";
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
-import { useCommunity } from "@/contexts/community";
-import { useDatastore } from "@/contexts/datastore";
 import api from "@/entrepot/api";
 import { sandboxCommunityId } from "@/env";
+import { communityQueryOptions } from "@/hooks/queries/communityQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { getTranslation, useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -66,7 +64,7 @@ const leaveCommunityModal = createModal({
     isOpenedByDefault: false,
 });
 
-export default function CommunityInfo() {
+export default function CommunityInfo({ communityId }: { communityId: string }) {
     const navigate = useNavigate();
     const { t } = useTranslation("CommunityInfo");
     const { t: tCommon } = useTranslation("Common");
@@ -74,8 +72,8 @@ export default function CommunityInfo() {
 
     const userQuery = useUserQuery();
     const { data: user } = userQuery;
-    const { datastore } = useDatastore();
-    const community: Community = useCommunity();
+    const { data: community } = useSuspenseQuery(communityQueryOptions(communityId));
+    const datastoreId = community.datastore?._id;
     const isSandbox = isSandboxCommunity(community, sandboxCommunityId);
 
     const queryClient = useQueryClient();
@@ -108,7 +106,7 @@ export default function CommunityInfo() {
             );
 
             void queryClient.refetchQueries({ queryKey: RQKeys.user_me() });
-            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore(datastore._id) });
+            if (datastoreId) void queryClient.invalidateQueries({ queryKey: RQKeys.datastore(datastoreId) });
 
             form.reset({
                 name: newData.name,
@@ -147,7 +145,7 @@ export default function CommunityInfo() {
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}>
+        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: community.name, isSandbox }) })}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>
                 <div
                     className={fr.cx("fr-col-12", "fr-py-0")}
@@ -270,7 +268,7 @@ export default function CommunityInfo() {
                 </Wait>
             )}
 
-            <DeleteCommunity />
+            {datastoreId && <DeleteCommunity datastoreId={datastoreId} communityId={community._id} />}
 
             {/* quitter la commu */}
             {createPortal(

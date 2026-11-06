@@ -12,5 +12,6 @@ export const Route = createFileRoute("/_private/tableau-de-bord/communaute/$comm
 });
 
 function RouteComponent() {
-    return <CommunityInfo />;
+    const { communityId } = Route.useParams();
+    return <CommunityInfo communityId={communityId} />;
 }

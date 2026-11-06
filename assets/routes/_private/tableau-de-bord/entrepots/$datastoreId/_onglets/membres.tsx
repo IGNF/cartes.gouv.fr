@@ -30,7 +30,7 @@ function RouteComponent() {
     if (!communityId) return null;
     return (
         <CommunityLayout communityId={communityId}>
-            <CommunityMembers userId={userId} />
+            <CommunityMembers communityId={communityId} userId={userId} />
         </CommunityLayout>
     );
 }

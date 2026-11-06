@@ -22,6 +22,7 @@ export const Route = createFileRoute("/_private/tableau-de-bord/communaute/$comm
 });
 
 function RouteComponent() {
+    const { communityId } = Route.useParams();
     const { userId } = Route.useSearch();
-    return <CommunityMembers userId={userId} />;
+    return <CommunityMembers communityId={communityId} userId={userId} />;
 }

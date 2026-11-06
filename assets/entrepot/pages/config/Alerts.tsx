@@ -24,7 +24,6 @@ import api from "../../api";
 
 import "./Alerts.scss";
 import Main from "@/components/Layout/Main";
-import { useDatastore } from "@/contexts/datastore";
 
 function getNewAlert() {
     return {
@@ -71,19 +70,18 @@ interface INotification {
     title: string;
 }
 
-const Alerts: FC = () => {
+const Alerts: FC<{ datastoreId: string }> = ({ datastoreId }) => {
     const alerts = useAlertStore(({ alerts }) => alerts);
     const [alert, setAlert] = useState<IAlert>(getNewAlert());
     const { t } = useTranslation("alerts");
     const title = t("title");
     const [notification, setNotification] = useState<INotification | null>(null);
     const queryClient = useQueryClient();
-    const { datastore } = useDatastore();
 
     // Load annex list and find annex matching the given path
     const { data } = useQuery<Annexe[], ApiError>({
-        queryKey: RQKeys.datastore_annexe_list(datastore?._id),
-        queryFn: ({ signal }) => api.annexe.getAll(datastore?._id, { signal }),
+        queryKey: RQKeys.datastore_annexe_list(datastoreId),
+        queryFn: ({ signal }) => api.annexe.getAll(datastoreId, { signal }),
     });
     const annexe = useMemo(() => data?.find((annexe) => annexe.paths.includes(annexePath)), [data]);
 
@@ -97,9 +95,9 @@ const Alerts: FC = () => {
             const file = new File([blob], fileName);
             queryClient.setQueryData(RQKeys.alerts(), () => data);
             if (annexe?._id) {
-                return api.annexe.replaceFile(datastore?._id, annexe?._id, file);
+                return api.annexe.replaceFile(datastoreId, annexe?._id, file);
             }
-            return api.annexe.add(datastore?._id, annexePath, file);
+            return api.annexe.add(datastoreId, annexePath, file);
         },
         onError: (error) => {
             setNotification({ severity: "error", title: t("alerts_update_error") });

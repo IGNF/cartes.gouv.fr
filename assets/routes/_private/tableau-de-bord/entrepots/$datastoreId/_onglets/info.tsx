@@ -19,7 +19,7 @@ function RouteComponent() {
     if (!communityId) return null;
     return (
         <CommunityLayout communityId={communityId}>
-            <CommunityInfo />
+            <CommunityInfo communityId={communityId} />
         </CommunityLayout>
     );
 }

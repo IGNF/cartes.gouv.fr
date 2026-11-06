@@ -9,8 +9,6 @@ import { createPortal } from "react-dom";
 import { DatastoreCleanupEntitiesCount, FailedCleanupItem } from "@/@types/app";
 import LoadingText from "@/components/Utils/LoadingText";
 import Progress from "@/components/Utils/Progress";
-import { useCommunity } from "@/contexts/community";
-import { useDatastore } from "@/contexts/datastore";
 import api from "@/entrepot/api";
 import { getApiErrorDescription } from "@/modules/apiError";
 import { apiFetch } from "@/modules/jsonFetch";
@@ -40,10 +38,8 @@ function progressFromContent(entitiesCount: DatastoreCleanupEntitiesCount): Data
     return Object.fromEntries(Object.entries(entitiesCount).map(([entityType, count]) => [entityType, { initialCount: count, currentCount: count }]));
 }
 
-export default function DeleteCommunity() {
+export default function DeleteCommunity({ datastoreId, communityId }: { datastoreId: string; communityId: string }) {
     const navigate = useNavigate();
-    const { datastore } = useDatastore();
-    const community = useCommunity();
     const queryClient = useQueryClient();
 
     const [storedState, setStoredState] = useState<DeleteCommunityState>("disclaimer");
@@ -58,8 +54,8 @@ export default function DeleteCommunity() {
         isLoading: isCleanupContentLoading,
         refetch: refetchCleanupContent,
     } = useQuery({
-        queryKey: RQKeys.datastore_cleanup_content(datastore._id),
-        queryFn: ({ signal }) => api.datastore.cleanupGetContent(datastore._id, { signal }),
+        queryKey: RQKeys.datastore_cleanup_content(datastoreId),
+        queryFn: ({ signal }) => api.datastore.cleanupGetContent(datastoreId, { signal }),
         enabled: false,
         staleTime: Infinity,
         refetchOnWindowFocus: false,
@@ -95,7 +91,7 @@ export default function DeleteCommunity() {
         onConceal: () => {
             disconnectStream();
             resetDialog();
-            queryClient.removeQueries({ queryKey: RQKeys.datastore_cleanup_content(datastore._id), exact: true });
+            queryClient.removeQueries({ queryKey: RQKeys.datastore_cleanup_content(datastoreId), exact: true });
         },
     });
 
@@ -103,8 +99,7 @@ export default function DeleteCommunity() {
     const isActive = state === "connecting" || state === "cleanup_progress" || state === "deleting";
 
     const deleteCommunityMutation = useMutation({
-        mutationFn: (failedItems: FailedCleanupItem[]) =>
-            api.contact.requestDatastoreDeletion({ datastoreId: datastore._id, communityId: community._id, failedItems }),
+        mutationFn: (failedItems: FailedCleanupItem[]) => api.contact.requestDatastoreDeletion({ datastoreId, communityId, failedItems }),
         onSuccess: () => {
             setStoredState("mail_sent");
         },
@@ -126,7 +121,7 @@ export default function DeleteCommunity() {
         streamAbortRef.current = controller;
 
         try {
-            const response = await apiFetch(api.datastore.getCleanupStreamUrl(datastore._id), {
+            const response = await apiFetch(api.datastore.getCleanupStreamUrl(datastoreId), {
                 method: "POST",
                 signal: controller.signal,
                 headers: { Accept: "text/event-stream" },
@@ -191,9 +186,9 @@ export default function DeleteCommunity() {
     useEffect(() => {
         return () => {
             disconnectStream();
-            queryClient.removeQueries({ queryKey: RQKeys.datastore_cleanup_content(datastore._id), exact: true });
+            queryClient.removeQueries({ queryKey: RQKeys.datastore_cleanup_content(datastoreId), exact: true });
         };
-    }, [datastore._id, disconnectStream, queryClient]);
+    }, [datastoreId, disconnectStream, queryClient]);
 
     function proceedFromDisclaimer(): void {
         setStoredState(isCleanupContentLoading ? "loading" : "confirm");

@@ -4,6 +4,7 @@ import { CartesUser } from "@/@types/app";
 import CommunityLayout from "@/components/Layout/CommunityLayout";
 import Alerts from "@/entrepot/pages/config/Alerts";
 import { configCommunityId } from "@/env";
+import useMembership from "@/hooks/useMembership";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { revalidateUser } from "@/modules/queryClient";
 import { findMembership } from "@/utils/membership";
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/_private/configuration/alertes")({
             revalidateUser();
             throw notFound();
         }
-        return { configCommunityId, membership };
+        return { configCommunityId };
     },
     staticData: { matomoLabel: "Configuration des alertes" },
     component: RouteComponent,
@@ -25,9 +26,11 @@ export const Route = createFileRoute("/_private/configuration/alertes")({
 
 function RouteComponent() {
     const { configCommunityId } = Route.useRouteContext();
+    const datastoreId = useMembership({ communityId: configCommunityId })?.community?.datastore;
+    if (!datastoreId) return null;
     return (
         <CommunityLayout communityId={configCommunityId}>
-            <Alerts />
+            <Alerts datastoreId={datastoreId} />
         </CommunityLayout>
     );
 }
