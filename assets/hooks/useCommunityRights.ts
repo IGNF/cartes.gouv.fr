@@ -1,4 +1,5 @@
 import { useDatastore } from "@/contexts/datastore";
+import { isSupervisor } from "@/utils/membership";
 import useUserQuery from "./queries/useUserQuery";
 
 /**
@@ -20,12 +21,12 @@ const useCommunityRights = () => {
     }
 
     const userRights = communityMember?.rights;
-    const isSupervisor = community?.supervisor === user.id;
+    const supervisor = isSupervisor(user.id, communityMember);
 
     return {
         userId: user.id,
         userRights,
-        isSupervisor,
+        isSupervisor: supervisor,
         communityMember,
     };
 };
