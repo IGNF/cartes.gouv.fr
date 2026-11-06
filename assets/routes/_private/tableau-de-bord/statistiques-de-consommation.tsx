@@ -16,5 +16,5 @@ export const Route = createFileRoute("/_private/tableau-de-bord/statistiques-de-
 function RouteComponent() {
     // sans périmètre : choix du périmètre
     const { scope } = Route.useSearch();
-    return scope === undefined ? <StatsIndex /> : <Stats />;
+    return scope === undefined ? <StatsIndex /> : <Stats scope={scope} />;
 }

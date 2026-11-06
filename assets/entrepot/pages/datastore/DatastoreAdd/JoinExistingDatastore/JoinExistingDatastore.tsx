@@ -9,7 +9,6 @@ import api from "@/entrepot/api";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { ApiError } from "@/modules/jsonFetch";
-import { routes } from "@/router/router";
 import { regex, removeDiacritics } from "@/utils";
 import { JoinExistingDatastoreModal } from "./JoinExistingDatastoreModal";
 import { joinModal } from "./modal";
@@ -76,7 +75,7 @@ export default function JoinExistingDatastore() {
                             imageUrl={placeholder16x9}
                             imageAlt=""
                             linkProps={{
-                                href: routes.join_community().href, // href inutile mais pour avoir le style "lien étendu"
+                                to: "/rejoindre-des-communautes", // lien inutile mais pour avoir le style "lien étendu"
                                 onClick: (e) => {
                                     e.preventDefault();
                                     setSelectedCommunity(community);

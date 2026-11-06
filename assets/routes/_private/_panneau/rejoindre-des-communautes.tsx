@@ -8,5 +8,5 @@ export const Route = createFileRoute("/_private/_panneau/rejoindre-des-communaut
 });
 
 function RouteComponent() {
-    return <DatastoreAdd />;
+    return <DatastoreAdd mode="join" />;
 }

@@ -1,19 +1,22 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+import { useNavigate } from "@tanstack/react-router";
 import { tss } from "tss-react";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import { useTranslation } from "@/i18n";
-import { routes, useRoute } from "@/router/router";
 import CreateNewDatastore from "./CreateNewDatastore";
 import JoinExistingDatastore from "./JoinExistingDatastore/JoinExistingDatastore";
 
-export default function DatastoreAdd() {
+type DatastoreAddProps = {
+    mode: "create" | "join";
+};
+
+export default function DatastoreAdd({ mode }: DatastoreAddProps) {
     const { t } = useTranslation("DatastoreAdd");
     const { classes } = useStyles();
-
-    const route = useRoute();
+    const navigate = useNavigate();
 
     return (
         <DatastoreMain title={t("title")}>
@@ -33,15 +36,15 @@ export default function DatastoreAdd() {
                                     {
                                         label: t("datastore_add_type", { type: "create" }),
                                         nativeInputProps: {
-                                            checked: route.name === routes.datastore_create_request.name,
-                                            onChange: () => routes.datastore_create_request().push(),
+                                            checked: mode === "create",
+                                            onChange: () => void navigate({ to: "/tableau-de-bord/entrepots/demande-de-creation" }),
                                         },
                                     },
                                     {
                                         label: t("datastore_add_type", { type: "existing" }),
                                         nativeInputProps: {
-                                            checked: route.name === routes.join_community.name,
-                                            onChange: () => routes.join_community().push(),
+                                            checked: mode === "join",
+                                            onChange: () => void navigate({ to: "/rejoindre-des-communautes" }),
                                         },
                                     },
                                 ]}
@@ -50,15 +53,15 @@ export default function DatastoreAdd() {
                     </div>
                 </div>
 
-                {route.name === routes.datastore_create_request.name ? (
+                {mode === "create" ? (
                     <div className={cx(classes.createNew)}>
                         <CreateNewDatastore classes={classes} />
                     </div>
-                ) : route.name === routes.join_community.name ? (
+                ) : (
                     <div className={cx(classes.joinExisting)}>
                         <JoinExistingDatastore />
                     </div>
-                ) : null}
+                )}
             </div>
         </DatastoreMain>
     );

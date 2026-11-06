@@ -8,5 +8,5 @@ export const Route = createFileRoute("/_private/_panneau/tableau-de-bord/entrepo
 });
 
 function RouteComponent() {
-    return <DatastoreAdd />;
+    return <DatastoreAdd mode="create" />;
 }

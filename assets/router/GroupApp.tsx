@@ -59,7 +59,7 @@ function GroupApp(props: IGroupAppProps) {
                 return { render: <AccessesRequest fileIdentifier={route.params.fileIdentifier} /> };
             case "datastore_create_request":
             case "join_community":
-                return { render: <DatastoreAdd /> };
+                return { render: <DatastoreAdd mode={route.name === "join_community" ? "join" : "create"} /> };
 
             case "dashboard":
                 return {
@@ -76,7 +76,7 @@ function GroupApp(props: IGroupAppProps) {
             case "stats_scope_selection":
                 return { render: <StatsIndex /> };
             case "stats_by_scope":
-                return { render: <Stats /> };
+                return { render: <Stats scope={route.params.scope === "user" ? "user" : "datastore"} /> };
         }
     }, [route]);
 

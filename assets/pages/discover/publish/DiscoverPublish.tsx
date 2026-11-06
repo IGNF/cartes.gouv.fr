@@ -2,12 +2,12 @@ import Main from "@/components/Layout/Main";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup, { ButtonsGroupProps } from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { sandboxCommunityId } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { externalUrls } from "@/router/externalUrls";
-import { routeParam, routes, useRoute } from "@/router/router";
 
 import classes from "./DiscoverPublish.module.css";
 
@@ -17,28 +17,31 @@ import background2160 from "@/img/discover/publish/background-2160.webp";
 import background800 from "@/img/discover/publish/background-800.webp";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
 
+const routeApi = getRouteApi("/_public/publier-une-donnee");
+
 const backgroundSrcSet = `${background800} 800w, ${background1200} 1200w, ${background1600} 1600w, ${background2160} 2160w`;
 // object-fit: cover sur un bloc d’au moins 600 px de haut : l’image couvre au moins 1080 px de large (ratio 1,8), sauf quand le bloc (65vw max) est plus large
 const backgroundSizes = "(min-width: 1662px) 65vw, 1080px";
 
 export default function DiscoverPublish() {
-    const { params } = useRoute();
+    const { login_failed } = routeApi.useSearch();
+    const navigate = useNavigate();
     const { data: user } = useUserQuery();
 
     // anonyme seulement : le paramètre, gardé jusqu’à la fermeture (page rendue deux fois au chargement), revient par le referer après une connexion réussie
-    const loginFailed = !user && routeParam(params, "login_failed") === 1;
+    const loginFailed = !user && login_failed === 1;
 
     useEffect(() => {
-        if (user && routeParam(params, "login_failed") !== undefined) {
-            routes.discover_publish().replace();
+        if (user && login_failed !== undefined) {
+            void navigate({ to: "/publier-une-donnee", replace: true });
         }
-    }, [params, user]);
+    }, [login_failed, navigate, user]);
 
     // au moins un entrepôt hors bac à sable : lien direct vers la page de stats des entrepôts
     const hasNonSandboxDatastore = (user?.communities_member ?? []).some(
         (cm) => cm.community?.datastore && (sandboxCommunityId === null || cm.community._id !== sandboxCommunityId)
     );
-    const statsRoute = hasNonSandboxDatastore ? routes.stats_by_scope({ scope: "datastore" }) : routes.stats_scope_selection();
+    const statsLinkProps = { to: "/tableau-de-bord/statistiques-de-consommation", search: hasNonSandboxDatastore ? { scope: "datastore" } : {} } as const;
 
     return (
         <Main
@@ -59,7 +62,7 @@ export default function DiscoverPublish() {
                                 title="La connexion a échoué"
                                 closable
                                 isClosed={false}
-                                onClose={() => routes.discover_publish().replace()}
+                                onClose={() => void navigate({ to: "/publier-une-donnee", replace: true })}
                             />
                         )}
                         <img src={uploaderSvgUrl} alt="" />
@@ -78,13 +81,13 @@ export default function DiscoverPublish() {
                                     {
                                         iconId: "fr-icon-arrow-right-s-line",
                                         iconPosition: "right",
-                                        linkProps: user ? routes.datastore_selection().link : { href: externalUrls.login },
+                                        linkProps: user ? { to: "/tableau-de-bord/entrepots" } : { href: externalUrls.login },
                                         children: user ? "Voir mes entrepôts" : "Connectez-vous pour commencer",
                                     },
                                     user
                                         ? {
                                               children: "Mes statistiques de consommation",
-                                              linkProps: statsRoute.link,
+                                              linkProps: statsLinkProps,
                                               priority: "secondary",
                                           }
                                         : null,
