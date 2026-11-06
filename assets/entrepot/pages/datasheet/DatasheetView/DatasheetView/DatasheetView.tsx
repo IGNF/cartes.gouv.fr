@@ -6,6 +6,7 @@ import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC, lazy, Suspense, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
@@ -22,7 +23,6 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { type ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../../modules/apiError";
-import { routeStringParam, routes, useRoute } from "../../../../../router/router";
 import api from "../../../../api";
 import DatasheetThumbnail from "../DatasheetThumbnail";
 
@@ -51,6 +51,8 @@ export const deleteUploadConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
+const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName");
+
 type DatasheetViewProps = {
     datastoreId: string;
     datasheetName: string;
@@ -60,11 +62,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation({ DatasheetView });
 
-    const route = useRoute();
-
-    const activeTabParam = routeStringParam(route.params, "activeTab");
-    const activeTab: DatasheetViewActiveTabEnum =
-        Object.values(DatasheetViewActiveTabEnum).find((tab) => tab === activeTabParam) ?? DatasheetViewActiveTabEnum.Metadata;
+    const { activeTab } = routeApi.useSearch();
+    const navigate = useNavigate();
 
     const queryClient = useQueryClient();
 
@@ -76,7 +75,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
 
-            routes.datasheet_list({ datastoreId }).push();
+            void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
         },
     });
 
@@ -153,7 +152,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 <Button
                     iconId="fr-icon-arrow-left-s-line"
                     priority="tertiary no outline"
-                    linkProps={routes.datasheet_list({ datastoreId }).link}
+                    linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}
                     title={t("datasheet.back_to_list")}
                     size="large"
                 />
@@ -173,7 +172,11 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             severity="error"
                             closable={true}
                             title={getApiErrorMessage(datasheetQuery.error)}
-                            description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("datasheet.back_to_list")}</Button>}
+                            description={
+                                <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>
+                                    {t("datasheet.back_to_list")}
+                                </Button>
+                            }
                             onClose={datasheetQuery.refetch}
                         />
                     </div>
@@ -257,7 +260,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                 ]}
                                 selectedTabId={activeTab}
                                 onTabChange={(activeTab) => {
-                                    routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab }).replace();
+                                    void navigate({ to: ".", search: { activeTab: activeTab as DatasheetViewActiveTabEnum }, replace: true });
                                 }}
                             >
                                 <Suspense fallback={<LoadingText withSpinnerIcon={true} as="p" />}>

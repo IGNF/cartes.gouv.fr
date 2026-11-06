@@ -4,7 +4,6 @@ import { tss } from "tss-react";
 
 import noDataSvgUrl from "@/img/pictograms/no-data.svg";
 import { externalLink } from "@/router/externalUrls";
-import { routes } from "@/router/router";
 
 type NoDataProps = {
     datastoreId: string;
@@ -30,7 +29,7 @@ export default function NoData({ datastoreId }: NoDataProps) {
                         },
                         {
                             children: "Créer une fiche de données",
-                            linkProps: routes.datastore_datasheet_upload({ datastoreId }).link,
+                            linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement", params: { datastoreId } },
                             iconId: "fr-icon-arrow-right-s-line",
                             iconPosition: "right",
                         },

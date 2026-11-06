@@ -6,14 +6,13 @@ import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { FC, useId, useMemo } from "react";
 import { tss } from "tss-react";
 import { useToggle } from "@mantine/hooks";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
-import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
 import { ListHeader } from "@/components/Layout/ListHeader";
-import PageTitle from "@/components/Layout/PageTitle";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import useMembership from "@/hooks/useMembership";
 import { usePagination } from "@/hooks/usePagination";
@@ -24,12 +23,11 @@ import Skeleton from "../../../../components/Utils/Skeleton";
 import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routePositiveIntegerParam, routes, useRoute } from "../../../../router/router";
+import { searchAwareActiveOptions } from "@/router/AppLink";
 import api from "../../../api";
 import { SortByEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";
 import NoData from "./NoData";
-import SandboxDatastoreExplanation from "./SandboxDatastoreExplanation";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useCommunityRights from "@/hooks/useCommunityRights";
 
@@ -37,6 +35,8 @@ const filterTests = {
     [FilterEnum.ENABLED]: (d: Datasheet) => d.nb_publications > 0,
     [FilterEnum.DISABLED]: (d: Datasheet) => d.nb_publications === 0,
 };
+
+const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/donnees/");
 
 type DatasheetListProps = {
     datastoreId: string;
@@ -64,9 +64,8 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
         metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use
     );
 
-    const { params } = useRoute();
-    const page = routePositiveIntegerParam(params, "page") ?? 1;
-    const limit = routePositiveIntegerParam(params, "limit") ?? 10;
+    const { page, limit } = routeApi.useSearch();
+    const navigate = routeApi.useNavigate();
 
     const [showFilters, toggleShowFilters] = useToggle();
     const filtersId = useId();
@@ -85,10 +84,6 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     return (
         <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName })}>{isSandbox && <SandboxDatastoreExplanation />}</PageTitle>
-
-            <DatastoreTertiaryNavigation datastoreId={datastoreId} />
-
             {datasheetList && datasheetList?.length > 0 && (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>
@@ -110,7 +105,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                     linkProps={
                                         datasheetCreationImpossible
                                             ? { href: undefined, "aria-hidden": true }
-                                            : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link
+                                            : { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement", params: { datastoreId } }
                                     }
                                     iconId="fr-icon-add-line"
                                     iconPosition="right"
@@ -148,7 +143,11 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 label={tCommon("search")}
                                 onButtonClick={(text) => {
                                     if (!isLoading) {
-                                        routes.datasheet_list({ ...filters, datastoreId, search: text, sortBy, sortOrder }).replace();
+                                        void navigate({
+                                            to: ".",
+                                            search: (prev) => ({ ...prev, search: text, page: undefined, limit: undefined }),
+                                            replace: true,
+                                        });
                                     }
                                 }}
                                 allowEmptySearch={true}
@@ -193,19 +192,18 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                         onChange: (event) => {
                                             const value = event.target.value;
                                             if (value === FilterEnum.ALL.toString()) {
-                                                routes.datasheet_list({ datastoreId, search, sortBy, sortOrder }).replace();
+                                                void navigate({
+                                                    to: ".",
+                                                    search: (prev) => ({ ...prev, published: undefined, page: undefined, limit: undefined }),
+                                                    replace: true,
+                                                });
                                             } else {
                                                 const published = value === FilterEnum.ENABLED.toString() ? FilterEnum.ENABLED : FilterEnum.DISABLED;
-                                                routes
-                                                    .datasheet_list({
-                                                        ...filters,
-                                                        datastoreId,
-                                                        search,
-                                                        sortBy,
-                                                        sortOrder,
-                                                        published,
-                                                    })
-                                                    .replace();
+                                                void navigate({
+                                                    to: ".",
+                                                    search: (prev) => ({ ...prev, published, page: undefined, limit: undefined }),
+                                                    replace: true,
+                                                });
                                             }
                                         },
                                     }}
@@ -242,9 +240,17 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                             const selectedSortBy = selectedSort?.[0];
                                             const selectedSortOrder = Number(selectedSort?.[1]);
                                             if (!selectedSortBy || isNaN(selectedSortOrder) || selectedSortOrder === 0) return;
-                                            routes
-                                                .datasheet_list({ ...filters, datastoreId, search, sortBy: selectedSortBy, sortOrder: selectedSortOrder })
-                                                .replace();
+                                            void navigate({
+                                                to: ".",
+                                                search: (prev) => ({
+                                                    ...prev,
+                                                    sortBy: selectedSortBy,
+                                                    sortOrder: selectedSortOrder,
+                                                    page: undefined,
+                                                    limit: undefined,
+                                                }),
+                                                replace: true,
+                                            });
                                         },
                                     }}
                                     placeholder={t("sort_placeholder")}
@@ -289,8 +295,10 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                         count={totalPages}
                                         showFirstLast={true}
                                         getPageLinkProps={(pageNumber) => ({
-                                            ...routes.datasheet_list({ ...filters, datastoreId, page: pageNumber, limit: limit, search, sortBy, sortOrder })
-                                                .link,
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees",
+                                            params: { datastoreId },
+                                            search: (prev) => ({ ...prev, page: pageNumber }),
+                                            activeOptions: searchAwareActiveOptions,
                                         })}
                                         defaultPage={page}
                                     />
