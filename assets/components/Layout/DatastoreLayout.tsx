@@ -1,14 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
 
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { canUserAccess } from "@/utils";
-import { Datastore } from "../../@types/app";
 import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import { DatastoreProvider } from "../../contexts/datastore";
-import api from "../../entrepot/api";
-import RQKeys from "../../modules/entrepot/RQKeys";
-import { ApiError } from "../../modules/jsonFetch";
+import { isApiError } from "../../modules/apiError";
 import Forbidden from "../../pages/error/Forbidden";
 import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
 import LoadingText from "../Utils/LoadingText";
@@ -23,11 +21,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
     const { accessRight, datastoreId, children, ...rest } = props;
 
     const { data: user } = useUserQuery();
-    const { data, error, failureReason, isFetching, isLoading, isPending, status } = useQuery<Datastore, ApiError>({
-        queryKey: RQKeys.datastore(datastoreId),
-        queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
-        staleTime: 3600000,
-    });
+    const { data, error, failureReason, isFetching, isLoading, isPending, status } = useQuery(datastoreQueryOptions(datastoreId));
 
     const isAuthorized = useMemo(() => {
         if (!user?.id || !user?.communities_member) {
@@ -50,7 +44,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
         );
     }
 
-    if (error?.status === 404 || failureReason?.status === 404 || !data) {
+    if ((isApiError(error) && error.status === 404) || (isApiError(failureReason) && failureReason.status === 404) || !data) {
         return <PageNotFoundWithLayout />;
     }
 
