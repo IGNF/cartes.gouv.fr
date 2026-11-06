@@ -2,23 +2,17 @@ import { CartesUser } from "@/@types/app";
 import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { queryClient } from "@/modules/queryClient";
+import { hasRights, isSupervisor } from "./membership";
 
 export function canUserAccess(
     userId: string,
     communityMember: CommunityMemberDto,
     accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[]
-) {
-    const { community, rights } = communityMember;
-    if (community?.supervisor === userId) {
-        return true;
-    }
-    if (!accessRight) {
-        return true;
-    }
-    if (typeof accessRight === "string") {
-        return rights?.includes(accessRight);
-    }
-    return accessRight.every((right) => rights?.includes(right));
+): boolean {
+    return (
+        isSupervisor(userId, communityMember) ||
+        hasRights(communityMember, accessRight === undefined ? [] : Array.isArray(accessRight) ? accessRight : [accessRight])
+    );
 }
 
 /**

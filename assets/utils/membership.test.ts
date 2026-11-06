@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { CartesUser } from "@/@types/app";
 import { CommunityMemberDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import { findMembership, isSandboxCommunity } from "./membership";
+import { findMembership, hasAccess, hasRights, isSandboxCommunity, isSupervisor } from "./membership";
 
 const USER_ID = "user-1";
+const SUPERVISOR_ID = "supervisor-1";
 
 function communityMember(): CommunityMemberDto {
     return {
@@ -12,7 +13,7 @@ function communityMember(): CommunityMemberDto {
         community: {
             _id: "community-1",
             datastore: "datastore-1",
-            supervisor: "supervisor-1",
+            supervisor: SUPERVISOR_ID,
             name: "Communauté 1",
             technical_name: "communaute-1",
             creation: "",
@@ -67,5 +68,67 @@ describe("isSandboxCommunity", () => {
     it("jamais bac à sable sans id configuré ou sans communauté", () => {
         expect(isSandboxCommunity(communityMember().community, null)).toBe(false);
         expect(isSandboxCommunity(undefined, "community-1")).toBe(false);
+    });
+});
+
+describe("isSupervisor", () => {
+    it("reconnaît le superviseur de la communauté", () => {
+        expect(isSupervisor(SUPERVISOR_ID, communityMember())).toBe(true);
+        expect(isSupervisor(USER_ID, communityMember())).toBe(false);
+    });
+});
+
+describe("hasRights", () => {
+    it("autorise quand aucun droit n’est requis (tableau vide)", () => {
+        expect(hasRights(communityMember(), [])).toBe(true);
+        const member = communityMember();
+        member.rights = undefined;
+        expect(hasRights(member, [])).toBe(true);
+    });
+
+    it("vérifie un droit unique", () => {
+        expect(hasRights(communityMember(), [CommunityMemberDtoRightsEnum.UPLOAD])).toBe(true);
+        expect(hasRights(communityMember(), [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
+    });
+
+    it("exige TOUS les droits demandés", () => {
+        const member = communityMember();
+        member.rights = [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING];
+        expect(hasRights(member, [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING])).toBe(true);
+        expect(hasRights(member, [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
+    });
+
+    it("refuse quand rights est absent", () => {
+        const member = communityMember();
+        member.rights = undefined;
+        expect(hasRights(member, [CommunityMemberDtoRightsEnum.UPLOAD])).toBe(false);
+    });
+
+    it("ne fait PAS de bypass superviseur (c’est le rôle de hasAccess)", () => {
+        const member = communityMember();
+        if (member.community) member.community.supervisor = USER_ID;
+        expect(hasRights(member, [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
+    });
+});
+
+describe("hasAccess", () => {
+    const member = communityMember();
+
+    it("refuse sans utilisateur ou sans appartenance", () => {
+        expect(hasAccess(null, { datastoreId: "datastore-1" })).toBe(false);
+        expect(hasAccess(user([member]), { datastoreId: "datastore-2" })).toBe(false);
+    });
+
+    it("autorise le membre, avec et sans droits requis", () => {
+        expect(hasAccess(user([member]), { datastoreId: "datastore-1" })).toBe(true);
+        expect(hasAccess(user([member]), { communityId: "community-1" }, [CommunityMemberDtoRightsEnum.UPLOAD])).toBe(true);
+        expect(hasAccess(user([member]), { datastoreId: "datastore-1" }, [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
+        expect(hasAccess(user([member]), { communityId: "community-1" }, [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(false);
+    });
+
+    it("autorise le superviseur quel que soit le droit demandé", () => {
+        const supervised = communityMember();
+        if (supervised.community) supervised.community.supervisor = USER_ID;
+        expect(hasAccess(user([supervised]), { communityId: "community-1" }, [CommunityMemberDtoRightsEnum.COMMUNITY])).toBe(true);
     });
 });
