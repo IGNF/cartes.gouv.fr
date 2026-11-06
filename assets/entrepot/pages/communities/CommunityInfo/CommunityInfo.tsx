@@ -13,7 +13,7 @@ import { useStyles } from "tss-react";
 import isEmail from "validator/lib/isEmail";
 import * as yup from "yup";
 
-import { Community, Datastore } from "@/@types/app";
+import { Community } from "@/@types/app";
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
@@ -103,42 +103,12 @@ export default function CommunityInfo() {
             return api.community.modify(community._id, data);
         },
         onSuccess: (newData: CommunityDetailResponseDto) => {
-            queryClient.setQueryData<[CommunityDetailResponseDto, Datastore | undefined]>(RQKeys.community(community._id), (oldData) => {
-                if (!oldData || !oldData[0]) return oldData;
-                const [oldCommunity, oldDatastore] = oldData;
-                return [
-                    { ...oldCommunity, ...newData },
-                    oldDatastore
-                        ? {
-                              ...oldDatastore,
-                              name: newData.name,
-                              description: newData.description,
-                              community: {
-                                  ...oldDatastore?.community,
-                                  ...newData,
-                              },
-                          }
-                        : undefined,
-                ] satisfies [CommunityDetailResponseDto, Datastore | undefined];
-            });
-            queryClient.setQueryData<Datastore>(RQKeys.datastore(datastore._id), (oldData) => {
-                if (!oldData) return oldData;
-                return {
-                    ...oldData,
-                    name: newData.name,
-                    description: newData.description,
-                    contact: newData.contact,
-                    public: newData.public,
-                    community: {
-                        ...oldData.community,
-                        contact: newData.contact,
-                        public: newData.public,
-                    },
-                };
-            });
+            // la réponse du PATCH fait foi pour la communauté ; le datastore est simplement invalidé
+            queryClient.setQueryData<CommunityDetailResponseDto>(RQKeys.community(community._id), (oldData) =>
+                oldData ? { ...oldData, ...newData } : oldData
+            );
 
             void queryClient.refetchQueries({ queryKey: RQKeys.user_me() });
-            void queryClient.refetchQueries({ queryKey: RQKeys.community(datastore.community._id) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore(datastore._id) });
 
             form.reset({
