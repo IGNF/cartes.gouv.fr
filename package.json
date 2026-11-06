@@ -73,6 +73,7 @@
         "react-hook-form": "^7.45.1",
         "sass-embedded": "^1.83.4",
         "stream": "^0.0.3",
+        "swagger-typescript-api": "^13.2.7",
         "tsafe": "^1.6.5",
         "tss-react": "^4.9.12",
         "type-route": "^1.0.1",
