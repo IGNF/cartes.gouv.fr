@@ -40,10 +40,10 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     const datastoreQuery = useQuery(datastoreQueryOptions(datastoreId));
     const datastore = datastoreQuery.data;
 
-    // une requête désactivée n’a ni data ni erreur, et isLoading reste faux tant qu’elle ne charge pas
+    // une requête désactivée n’a ni data ni erreur et reste pending : ne la compter que si elle a un id
     const error = communityQuery.error ?? datastoreQuery.error;
     const failureReason = communityQuery.failureReason ?? datastoreQuery.failureReason;
-    const isLoading = communityQuery.isLoading || datastoreQuery.isLoading;
+    const isPending = communityQuery.isPending || (datastoreId !== undefined && datastoreQuery.isPending);
 
     const isAuthorized = useMemo(() => {
         if (!user?.id || !user?.communities_member) {
@@ -56,7 +56,7 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
         return canUserAccess(user.id, communityMember, accessRight);
     }, [accessRight, user?.communities_member, communityId, user?.id]);
 
-    if (isLoading) {
+    if (isPending) {
         return (
             <AppLayout {...rest}>
                 <Main>
