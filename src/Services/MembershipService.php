@@ -93,6 +93,10 @@ class MembershipService
         $community = $this->communityApiService->modifyCommunity($communityId, $data)->array();
         // le nom de la communauté fait partie des infos dérivées de l'appartenance
         $this->invalidateCurrentUser();
+        // le DTO datastore reprend le nom et la description de la communauté
+        if (isset($community['datastore']['_id'])) {
+            $this->datastoreApiService->invalidate($community['datastore']['_id']);
+        }
 
         return $community;
     }
