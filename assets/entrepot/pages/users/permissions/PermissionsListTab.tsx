@@ -230,7 +230,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                                 </div>
                             </div>
                             <ul>
-                                {permission.offerings
+                                {(permission.offerings ?? [])
                                     .sort((a, b) =>
                                         a.layer_name.localeCompare(b.layer_name, "fr", {
                                             sensitivity: "base",

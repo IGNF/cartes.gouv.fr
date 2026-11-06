@@ -12,7 +12,7 @@ class WMTSService extends BaseService {
 
     async getLayers() {
         // On ne conserve que l'URL du WMTS
-        const wmtsUrl = this.service.urls.find((descUrl) => {
+        const wmtsUrl = (this.service.urls ?? []).find((descUrl) => {
             return descUrl.type === "WMTS";
         });
         if (wmtsUrl?.url === undefined) {

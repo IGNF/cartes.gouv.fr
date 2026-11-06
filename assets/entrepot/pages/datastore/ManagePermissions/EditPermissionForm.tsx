@@ -68,7 +68,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
     }, [permissionQuery.data]);
 
     const offeringIds = useMemo(() => {
-        return permissionQuery.data ? Array.from(permissionQuery.data.offerings, (offering) => offering._id) : [];
+        return permissionQuery.data ? Array.from(permissionQuery.data.offerings ?? [], (offering) => offering._id) : [];
     }, [permissionQuery.data]);
 
     // Formulaire,

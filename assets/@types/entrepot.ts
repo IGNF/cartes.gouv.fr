@@ -12,6 +12,34 @@
 
 type UtilRequiredKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
+export enum OfferingStatus {
+    PUBLISHING = "PUBLISHING",
+    MODIFYING = "MODIFYING",
+    PUBLISHED = "PUBLISHED",
+    UNPUBLISHING = "UNPUBLISHING",
+    UNSTABLE = "UNSTABLE",
+    UNPUBLISHED = "UNPUBLISHED",
+}
+
+export enum ConfigurationType {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
+}
+
+export enum ConfigurationStatus {
+    UNPUBLISHED = "UNPUBLISHED",
+    PUBLISHED = "PUBLISHED",
+    SYNCHRONIZING = "SYNCHRONIZING",
+}
+
 /** Le type de stockage */
 export enum StorageType {
     POSTGRESQL = "POSTGRESQL",
@@ -21,72 +49,408 @@ export enum StorageType {
     POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
-export interface PermissionCreateDto {
-    /** @format date-time */
-    end_date?: string;
-    licence: string;
-    /** @uniqueItems true */
+export interface AccessCreateDto {
+    /**
+     * Identifiants des offres
+     * @minItems 1
+     * @uniqueItems true
+     */
     offerings: string[];
-    type?: PermissionCreateDtoTypeEnum;
-    only_oauth?: boolean;
+    /**
+     * Identifiant de la permission
+     * @format uuid
+     */
+    permission: string;
 }
 
-export interface UserKeyCreateDtoUserKeyInfoDto {
-    name: string;
-    type?: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
-    whitelist?: string[];
-    blacklist?: string[];
-    user_agent?: string;
-    referer?: string;
-    type_infos: UserKeyInfoDto;
-}
-
-/** Informations détaillées sur le document */
-export interface DocumentDetailsResponseDto {
+/** Information sur l'accès */
+export interface AccessDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
     /**
      * Date de création
      * @format date-time
      */
     creation: string;
+    /** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
+    offering: OfferingStandardListResponseDto;
+    /** Information sur la permission */
+    permission?: PermissionResponseDto;
     /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    /** Nom du document */
-    name: string;
-    /** Description du document */
-    description?: string;
+}
+
+/** Information sur l'accès avec clé */
+export interface AccessDetailWithKeyResponseDto {
     /**
-     * La taille du document
-     * @format int64
+     * Identifiant technique
+     * @format uuid
      */
-    size: number;
-    /** Le type mime du document */
-    mime_type: string;
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    key: UserKeyResponseDto;
+    /** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
+    offering: OfferingStandardListResponseDto;
+    /** Information sur la permission */
+    permission?: PermissionResponseDto;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Paramètres de l'annexe à téléverser */
+export interface AnnexCreateDto {
+    /** @format binary */
+    file: File;
     /**
      * Liste des étiquettes
      * @uniqueItems true
      */
     labels?: string[];
-    /** URL publique du document */
-    public_url?: string;
+    /**
+     * Chemins dans l'URL publique
+     * @minItems 1
+     * @uniqueItems true
+     */
+    paths: string[];
+    /** État de publication */
+    published?: boolean;
+}
+
+/** Informations détaillées sur l'annexe */
+export interface AnnexExtendedDetailResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-    extra?: object;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** @uniqueItems true */
+    labels?: string[];
+    mime_type: string;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /** @uniqueItems true */
+    paths: string[];
+    published: boolean;
+    /** @format int64 */
+    size: number;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
 }
 
-/** Texte du commentaire à ajouter */
-export interface CommentSaveDto {
-    text: string;
+/** Informations sur l'annexe */
+export interface AnnexExtendedListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** @uniqueItems true */
+    labels?: string[];
+    mime_type: string;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /** @uniqueItems true */
+    paths: string[];
+    published: boolean;
+    /** @format int64 */
+    size: number;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations détaillées sur l'annexe */
+export interface AnnexStandardDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @uniqueItems true */
+    labels?: string[];
+    mime_type: string;
+    /** @uniqueItems true */
+    paths: string[];
+    published: boolean;
+    /** @format int64 */
+    size: number;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+/** Informations sur l'annexe */
+export interface AnnexStandardListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @uniqueItems true */
+    labels?: string[];
+    mime_type: string;
+    /** @uniqueItems true */
+    paths: string[];
+    published: boolean;
+    /** @format int64 */
+    size: number;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Paramètres modifiables de l'annexe */
+export interface AnnexUpdateDto {
+    /** @uniqueItems true */
+    labels?: string[];
+    /** @uniqueItems true */
+    paths?: string[];
+    published?: boolean;
+    extra?: Record<string, any>;
+}
+
+/** Producteur */
+export interface AuthorDto {
+    /** Email */
+    email: string;
+    /** Nom */
+    name: string;
 }
 
 /** Information sur l'auteur */
 export interface AuthorResponseDto {
     /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    first_name: string;
+    last_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+export interface BasicInfoDto {
+    login?: string;
+    password?: string;
+}
+
+/** Bounding box (en degrés) */
+export interface BoundingBox {
+    east: number;
+    north: number;
+    south: number;
+    west: number;
+}
+
+/** Callback à exécuter à la fin de l'exécution */
+export interface Callback {
+    /** URL associée au callback */
+    entity_url?: string;
+    /**
+     * Liste des adresses emails de destination
+     * @maxItems 20
+     * @minItems 1
+     * @example ["example@mail.fr"]
+     */
+    to_address: string[];
+    /** Type de callback */
+    type: CallbackTypeEnum;
+}
+
+/** Catégories */
+export interface CategoryDto {
+    label: string;
+    term: string;
+}
+
+/** Executions de vérification liées à la livraison */
+export interface CheckResponseDto {
+    asked?: CheckingExecutionListDto[];
+    failed?: CheckingExecutionListDto[];
+    in_progress?: CheckingExecutionListDto[];
+    passed?: CheckingExecutionListDto[];
+}
+
+/** Paramètres de la vérification à créer */
+export interface CheckingCreateDto {
+    /** @uniqueItems true */
+    default_uploads_check?: CheckingCreateDtoDefaultUploadsCheckEnum[];
+    /**
+     * Description de la vérification
+     * @minLength 1
+     */
+    description: string;
+    /**
+     * Nom de la vérification. ce nom doit être unique pour la plateforme
+     * @minLength 1
+     */
+    name: string;
+    /**
+     * Nom technique de la vérification tel que connu par l'orchestrateur
+     * @minLength 1
+     */
+    orchestrator_job_name: string;
+    /**
+     * Priorité de la vérification
+     * @default "STANDARD"
+     */
+    priority?: CheckingCreateDtoPriorityEnum;
+}
+
+/** Informations sur la vérification */
+export interface CheckingExecutionCheckResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations détaillées sur l'exécution de vérification */
+export interface CheckingExecutionExtendedDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Callback à exécuter à la fin de l'exécution */
+    callback?: Callback;
+    /** Informations sur la vérification */
+    check: CheckingExecutionCheckResponseDto;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** @format date-time */
+    finish?: string;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /** @format date-time */
+    start?: string;
+    status: CheckingExecutionExtendedDetailResponseDtoStatusEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    /** Informations sur la livraison */
+    upload: CheckingExecutionUploadResponseDto;
+}
+
+/** Informations sur l'exécution de vérification liée à la livraison */
+export interface CheckingExecutionListDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Informations sur la vérification */
+    check: CheckingExecutionCheckResponseDto;
+    /**
      * Date de création
      * @format date-time
      */
@@ -96,127 +460,241 @@ export interface AuthorResponseDto {
      * @format date-time
      */
     update: string;
-    first_name: string;
-    last_name: string;
+}
+
+/** Informations sur l'exécution de vérification */
+export interface CheckingExecutionListResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
+    /** Informations sur la vérification */
+    check: CheckingExecutionCheckResponseDto;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    status: CheckingExecutionListResponseDtoStatusEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations détaillées sur l'exécution de vérification */
+export interface CheckingExecutionStandardDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Callback à exécuter à la fin de l'exécution */
+    callback?: Callback;
+    /** Informations sur la vérification */
+    check: CheckingExecutionCheckResponseDto;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @format date-time */
+    finish?: string;
+    /** @format date-time */
+    start?: string;
+    status: CheckingExecutionStandardDetailResponseDtoStatusEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    /** Informations sur la livraison */
+    upload: CheckingExecutionUploadResponseDto;
+}
+
+/** Informations sur la livraison */
+export interface CheckingExecutionUploadResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    name: string;
+    type: CheckingExecutionUploadResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations sur la vérification */
+export interface CheckingExtendedDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @uniqueItems true */
+    default_uploads_check?: CheckingExtendedDetailResponseDtoDefaultUploadsCheckEnum[];
+    /** Description de la vérification */
+    description: string;
+    /** Nom de la vérification. ce nom doit être unique pour la plateforme */
+    name: string;
+    /** Nom technique de la vérification tel que connu par l'orchestrateur */
+    orchestrator_job_name?: string;
+    /** Priorité de la vérification */
+    priority?: CheckingExtendedDetailResponseDtoPriorityEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations sur la vérification */
+export interface CheckingListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description de la vérification */
+    description: string;
+    /** Nom de la vérification. ce nom doit être unique pour la plateforme */
+    name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations détaillées sur la vérification */
+export interface CheckingStandardDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @uniqueItems true */
+    default_uploads_check?: CheckingStandardDetailResponseDtoDefaultUploadsCheckEnum[];
+    /** Description de la vérification */
+    description: string;
+    /** Nom de la vérification. ce nom doit être unique pour la plateforme */
+    name: string;
+    /** Priorité de la vérification */
+    priority?: CheckingStandardDetailResponseDtoPriorityEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Nouveaux paramètres de la vérification à modifier (ceux non fournis sont laissés en l'état) */
+export interface CheckingUpdateDto {
+    /** @uniqueItems true */
+    default_uploads_check?: CheckingUpdateDtoDefaultUploadsCheckEnum[];
+    /** Description de la vérification */
+    description?: string;
+    /** Nom de la vérification. ce nom doit être unique pour la plateforme */
+    name?: string;
+    /** Nom technique de la vérification tel que connu par l'orchestrateur */
+    orchestrator_job_name?: string;
+    /** Priorité de la vérification */
+    priority?: CheckingUpdateDtoPriorityEnum;
 }
 
 /** Commentaire */
 export interface CommentResponseDto {
     /**
-     * Date de création
-     * @format date-time
+     * Identifiant technique
+     * @format uuid
      */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    text: string;
+    _id: string;
     /** Information sur l'auteur */
     author: AuthorResponseDto;
     /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations spécifiques d'un fichier de dérivation SQL */
-export type StaticFileDerivationSqlDetailsDto = StaticFileDetailsDto & {
-    /** @uniqueItems true */
-    used_variables: string[];
-};
-
-/** les informations spécifiques liées au type de statique */
-export type StaticFileDetailsDto = object;
-
-/** Informations spécifiques d'un fichier FTL Geoserver */
-export type StaticFileGeoserverFtlDetailsDto = StaticFileDetailsDto & {
-    /** @uniqueItems true */
-    used_attributes: string[];
-};
-
-/** Informations spécifiques d'un fichier de style SLD Geoserver */
-export type StaticFileGeoserverStyleDetailsDto = StaticFileDetailsDto & {
-    /**
-     * Dénominateur de l'échelle maximale
-     * @format double
-     */
-    max_scale_denominator?: number;
-    /**
-     * Dénominateur de l'échelle minimale
-     * @format double
-     */
-    min_scale_denominator?: number;
-    /** @uniqueItems true */
-    used_attributes: string[];
-};
-
-/** Informations spécifiques d'un fichier de style Rok4 */
-export type StaticFileRok4StyleDetailsDto = StaticFileDetailsDto & {
-    /** Identificateur du style ROK4 */
-    identifier?: string;
-    /** Url de la légende du style ROK4 */
-    legend_url?: string;
-};
-
-/** Informations détaillées sur le fichier statique */
-export interface StaticFileStandardDetailResponseDto {
-    /**
      * Date de création
      * @format date-time
      */
     creation: string;
+    text: string;
     /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    /** Nom du fichier statique */
-    name: string;
-    /** Description du fichier statique */
+}
+
+/** Texte du commentaire à ajouter */
+export interface CommentSaveDto {
+    /** @minLength 1 */
+    text: string;
+}
+
+export interface CommunityAddUserDto {
+    /** @uniqueItems true */
+    rights?: CommunityAddUserDtoRightsEnum[];
+}
+
+/** Paramètres de la communauté à créer */
+export interface CommunityCreateDto {
+    /** Nom du contact de la communauté */
+    contact?: string;
+    /** Description de la communauté */
     description?: string;
-    /** Type du fichier statique */
-    type: StaticFileStandardDetailResponseDtoTypeEnum;
     /**
-     * Identifiant technique
-     * @format uuid
+     * Nom de la communauté
+     * @minLength 1
      */
-    _id: string;
-    extra?: object;
-    type_infos: StaticFileDerivationSqlDetailsDto | StaticFileGeoserverFtlDetailsDto | StaticFileGeoserverStyleDetailsDto | StaticFileRok4StyleDetailsDto;
-}
-
-/** Informations sur la configuration de l'offre */
-export interface ConfigurationBaseResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la configuration */
     name: string;
-    status: ConfigurationStandardDetailResponseDtoStatusEnum;
+    public?: boolean;
+    /**
+     * ID du superviseur de la communauté
+     * @format uuid
+     */
+    supervisor: string;
+    /**
+     * Nom technique de la communauté
+     * @minLength 0
+     * @maxLength 30
+     * @pattern ^[A-Za-z0-9_\-\.]+$
+     */
+    technical_name: string;
+}
+
+/** Informations sur l'entrepôt lié */
+export interface CommunityDatastoreResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-}
-
-/** Informations sur le point d'accès */
-export interface EndpointListResponseDto {
+    active?: boolean;
     /**
      * Date de création
      * @format date-time
@@ -227,119 +705,241 @@ export interface EndpointListResponseDto {
      * @format date-time
      */
     update: string;
-    /** le nom du point d'accès */
+}
+
+/** Informations détaillées sur la communauté */
+export interface CommunityDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Nom du contact de la communauté */
+    contact: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Informations sur l'entrepôt lié */
+    datastore?: CommunityDatastoreResponseDto;
+    /** Description de la communauté */
+    description?: string;
+    /** Nom de la communauté */
     name: string;
+    /** Informations sur l'organisme de la communauté */
+    organization?: CommunityOrganizationResponseDto;
+    /** Valeur définissant si la communauté est publique ou non */
+    public: boolean;
+    /** Informations sur le superviseur de la communauté */
+    supervisor: CommunitySupervisorResponseDto;
+    /** Nom technique de la communauté */
+    technical_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations sur la communauté */
+export interface CommunityListResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
+    /** Nom du contact de la communauté */
+    contact: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description de la communauté */
+    description?: string;
+    /** Nom de la communauté */
+    name: string;
+    /** Informations sur l'organisme de la communauté */
+    organization?: CommunityOrganizationResponseDto;
+    /** Valeur définissant si la communauté est publique ou non */
+    public: boolean;
+    /** Nom technique de la communauté */
+    technical_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
 }
 
-/** Liste des urls du point d'accès */
-export interface EndpointUrl {
-    /** Type de l'URL du point d'accès */
-    type: EndpointUrlTypeEnum;
-    /** URL du point d'accès */
-    url: string;
+export interface CommunityMemberDto {
+    community?: CommunityUserDto;
+    rights?: CommunityMemberDtoRightsEnum[];
 }
 
-/** Informations détaillées sur l'offre */
-export interface OfferingStandardDetailResponseDto {
+/** Informations sur l'organisme de la communauté */
+export interface CommunityOrganizationResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Nom de l'organisme */
+    name?: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations sur le superviseur de la communauté */
+export interface CommunitySupervisorResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Courriel du superviseur */
+    email?: string;
+    /** Prénom du superviseur */
+    first_name?: string;
+    /** Nom du superviseur */
+    last_name?: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Nouveaux paramètres de la communauté à modifier (ceux non fournis sont laissés en l'état) */
+export interface CommunityUpdateDto {
+    /** Nom du contact de la communauté */
+    contact?: string;
+    /** Description de la communauté */
+    description?: string;
+    /** Nom de la communauté */
+    name?: string;
+    /** Valeur définissant si la communauté est publique ou non */
+    public?: boolean;
+    /**
+     * ID du superviseur de la communauté
+     * @format uuid
+     */
+    supervisor?: string;
+}
+
+export interface CommunityUserDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
     /**
      * Date de création
      * @format date-time
      */
     creation: string;
     /**
+     * Datastore de la communauté
+     * @format uuid
+     */
+    datastore: string;
+    /** Description de la communauté */
+    description?: string;
+    /** Nom de la communauté */
+    name: string;
+    public?: boolean;
+    /**
+     * Nom du superviseur de la communauté
+     * @format uuid
+     */
+    supervisor: string;
+    /** Nom technique de la communauté */
+    technical_name: string;
+    /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    /** Indique si l'offre est ouverte sans clé d'accès */
-    open: boolean;
-    /** Indique si l'offre est disponible */
-    available: boolean;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name: string;
-    /** Type de configuration */
-    type: OfferingStandardDetailResponseDtoTypeEnum;
-    /** Statut de l'offre */
-    status: OfferingStandardDetailResponseDtoStatusEnum;
-    /** Informations sur la configuration de l'offre */
-    configuration: ConfigurationBaseResponseDto;
-    /** Informations sur le point d'accès */
-    endpoint: EndpointListResponseDto;
-    /** @uniqueItems true */
-    urls: EndpointUrl[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /** L'activité de la donnée stockée est-elle publique ? */
-    public_activity: boolean;
 }
 
-/** Informations détaillées sur la métadonnée */
-export interface MetadataStandardResponseDto {
+export interface CommunityUserResponseDto {
     /**
-     * Date de création
+     * Date d'ajout de l'utilisateur à la communauté
      * @format date-time
      */
     creation: string;
+    rights?: CommunityUserResponseDtoRightsEnum[];
     /**
-     * Date de dernière mise à jour
+     * Date de dernière mise à jour de l'utilisateur dans la communauté
      * @format date-time
      */
     update: string;
-    type: MetadataStandardResponseDtoTypeEnum;
-    open_data: boolean;
-    level: MetadataStandardResponseDtoLevelEnum;
-    file_identifier: string;
-    tags?: Record<string, string>;
-    endpoints?: EndpointListResponseDto[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
+    user: UserDto;
 }
 
-/** Bounding box (en degrés) */
-export interface BoundingBox {
-    west: number;
-    south: number;
-    east: number;
-    north: number;
-}
-
+/** ALTIMETRY */
 export type ConfigurationAltimetryDetailsContent = ConfigurationDetailsContent & {
+    /**
+     * Description
+     * @minLength 1
+     */
+    abstract: string;
     /** Bounding box (en degrés) */
     bbox?: BoundingBox;
-    /** Titre */
-    title: string;
     /**
      * Mots clés
      * @uniqueItems true
      */
     keywords?: string[];
-    /** Données utilisées */
+    /**
+     * Titre
+     * @minLength 1
+     */
+    title: string;
+    /**
+     * Données utilisées
+     * @minItems 1
+     */
     used_data: ConfigurationUsedDataAltimetryDetailsContent[];
-    /** Description */
-    abstract: string;
+};
+
+/** API-FEATURES */
+export type ConfigurationApiFeatureDetailsContent = ConfigurationDetailsContent & {
+    /** Bounding box (en degrés) */
+    bbox?: BoundingBox;
+    period?: string[];
+    /** @minItems 1 */
+    used_data: ConfigurationUsedDataApiFeatureDetailsContent[];
 };
 
 /** Métadonnées liées au propriétaire de la configuration */
 export interface ConfigurationAttribution {
-    /** Nom du propriétaire */
-    title: string;
-    /** URL vers le site du propriétaire */
-    url: string;
     /** Logo du propriétaire */
     logo?: ConfigurationAttributionLogo;
+    /**
+     * Nom du propriétaire
+     * @minLength 1
+     */
+    title: string;
+    /**
+     * URL vers le site du propriétaire
+     * @minLength 1
+     */
+    url: string;
 }
 
 /** Logo du propriétaire */
@@ -350,7 +950,16 @@ export interface ConfigurationAttributionLogo {
      * @example "image/jpeg"
      */
     format: string;
-    /** l'URL d'accès au logo */
+    /**
+     * la hauteur du logo
+     * @format int64
+     * @min 1
+     */
+    height: number;
+    /**
+     * l'URL d'accès au logo
+     * @minLength 1
+     */
     url: string;
     /**
      * la largeur du logo
@@ -358,46 +967,147 @@ export interface ConfigurationAttributionLogo {
      * @min 1
      */
     width: number;
+}
+
+/** Informations sur la configuration de l'offre */
+export interface ConfigurationBaseResponseDto {
     /**
-     * la hauteur du logo
-     * @format int64
-     * @min 1
+     * Identifiant technique
+     * @format uuid
      */
-    height: number;
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Nom de la configuration */
+    name: string;
+    status: ConfigurationStatus;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations à fournir pour la déclaration d'une nouvelle configuration */
+export interface ConfigurationCreateDto {
+    /** Métadonnées liées au propriétaire de la configuration */
+    attribution?: ConfigurationAttribution;
+    /**
+     * Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point
+     * @pattern ^[A-Za-z_][A-Za-z0-9_\-.]*$
+     */
+    layer_name: string;
+    /**
+     * Métadonnées liées à la configuration
+     * @uniqueItems true
+     */
+    metadata?: ConfigurationMetadata[];
+    /**
+     * Nom de la configuration
+     * @minLength 1
+     */
+    name: string;
+    type: ConfigurationType;
+    type_infos:
+        | ConfigurationAltimetryDetailsContent
+        | ConfigurationApiFeatureDetailsContent
+        | ConfigurationDownloadDetailsContent
+        | ConfigurationItineraryIsocurveDetailsContent
+        | ConfigurationSearchDetailsContent
+        | ConfigurationVectorTmsDetailsContent
+        | ConfigurationWfsDetailsContent
+        | ConfigurationWmsRasterDetailsContent
+        | ConfigurationWmsVectorDetailsContent
+        | ConfigurationWmtsTmsDetailsContent;
 }
 
 export type ConfigurationDetailsContent = object;
 
+/** DOWNLOAD */
 export type ConfigurationDownloadDetailsContent = ConfigurationDetailsContent & {
-    /** Titre dans les différentes langues disponibles */
-    title: Record<string, string>;
+    /** Description dans les différentes langues disponibles */
+    abstract: Record<string, string>;
     /**
      * Mots clés
      * @uniqueItems true
      */
     keywords?: string[];
-    /** Identifiant produit de la ressource */
-    product_identifier?: string;
     /** Namespace de la ressource */
     namespace?: string;
+    /** Identifiant produit de la ressource */
+    product_identifier?: string;
     /** Droits applicables */
     rights?: string;
-    /** Données utilisées */
+    /** Titre dans les différentes langues disponibles */
+    title: Record<string, string>;
+    /**
+     * Données utilisées
+     * @minItems 1
+     */
     used_data: ConfigurationUsedDataDownloadDetailsContent[];
-    /** Description dans les différentes langues disponibles */
-    abstract: Record<string, string>;
 };
 
-/** Informations à fournir pour modifier la configuration */
-export interface ConfigurationFullUpdateDto {
-    /** Type de configuration */
-    type: ConfigurationFullUpdateDtoTypeEnum;
-    /** Nom de la configuration */
-    name: string;
+/** Événement */
+export interface ConfigurationEventDto {
+    /** @format date-time */
+    date: string;
+    /** Informations sur l'initiateur de l'évènement */
+    initiator?: EventInitiatorDto;
+    text?: string;
+    title: string;
+    /** @uniqueItems true */
+    urls?: EndpointUrl[];
+}
+
+/** Informations détaillées sur la configuration */
+export interface ConfigurationExtendedDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
     /** Métadonnées liées au propriétaire de la configuration */
     attribution?: ConfigurationAttribution;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** Événement */
+    last_event?: ConfigurationEventDto;
+    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
+    layer_name: string;
+    /**
+     * Métadonnées liées à la configuration
+     * @uniqueItems true
+     */
+    metadata?: ConfigurationMetadata[];
+    /** Nom de la configuration */
+    name: string;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    status: ConfigurationStatus;
+    tags: Record<string, string>;
+    type: ConfigurationType;
     type_infos:
         | ConfigurationAltimetryDetailsContent
+        | ConfigurationApiFeatureDetailsContent
         | ConfigurationDownloadDetailsContent
         | ConfigurationItineraryIsocurveDetailsContent
         | ConfigurationSearchDetailsContent
@@ -407,30 +1117,116 @@ export interface ConfigurationFullUpdateDto {
         | ConfigurationWmsVectorDetailsContent
         | ConfigurationWmtsTmsDetailsContent;
     /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+/** Informations sur la configuration (les champs metadatas, attribution, last_event, tags, creation et update ne sont pas retournés par défaut) */
+export interface ConfigurationExtendedListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Métadonnées liées au propriétaire de la configuration */
+    attribution?: ConfigurationAttribution;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** Événement */
+    last_event?: ConfigurationEventDto;
+    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
+    layer_name?: string;
+    /**
      * Métadonnées liées à la configuration
      * @uniqueItems true
      */
     metadata?: ConfigurationMetadata[];
+    /** Nom de la configuration */
+    name?: string;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    status?: ConfigurationStatus;
+    /** Liste des étiquettes  de configuration (format clé/valeur) */
+    tags?: Record<string, string>;
+    type?: ConfigurationType;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
 }
 
-export type ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent = ConfigurationGetFeatureInfoWmtsTmsDetailsContent & {
+/** Informations à fournir pour modifier la configuration */
+export interface ConfigurationFullUpdateDto {
+    /** Métadonnées liées au propriétaire de la configuration */
+    attribution?: ConfigurationAttribution;
+    /**
+     * Métadonnées liées à la configuration
+     * @uniqueItems true
+     */
+    metadata?: ConfigurationMetadata[];
+    /**
+     * Nom de la configuration
+     * @minLength 1
+     */
+    name: string;
+    type: ConfigurationType;
+    type_infos:
+        | ConfigurationAltimetryDetailsContent
+        | ConfigurationApiFeatureDetailsContent
+        | ConfigurationDownloadDetailsContent
+        | ConfigurationItineraryIsocurveDetailsContent
+        | ConfigurationSearchDetailsContent
+        | ConfigurationVectorTmsDetailsContent
+        | ConfigurationWfsDetailsContent
+        | ConfigurationWmsRasterDetailsContent
+        | ConfigurationWmsVectorDetailsContent
+        | ConfigurationWmtsTmsDetailsContent;
+}
+
+export interface ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent {
     /** Indique si on va utiliser directement la donnée stockée */
     stored_data: boolean;
-};
+}
 
-export type ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent = ConfigurationGetFeatureInfoWmtsTmsDetailsContent & {
+export interface ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent {
+    /** @minLength 1 */
     server_url: string;
-};
+}
 
 /** Ressource cible du GetFeatureInfo */
 export type ConfigurationGetFeatureInfoWmtsTmsDetailsContent =
     ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent | ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent;
 
+/** ITINERARY-ISOCURVE */
 export type ConfigurationItineraryIsocurveDetailsContent = ConfigurationDetailsContent & {
+    /**
+     * Description
+     * @minLength 1
+     */
+    abstract: string;
     /** Bounding box (en degrés) */
     bbox?: BoundingBox;
-    /** Titre */
-    title: string;
+    constraints?: JsonNode;
     /**
      * Mots clés
      * @uniqueItems true
@@ -438,26 +1234,22 @@ export type ConfigurationItineraryIsocurveDetailsContent = ConfigurationDetailsC
     keywords?: string[];
     /** Limites pour les calculs d'itinéraire (nombre d'étapes et de contraintes) et d'isochrone (durée et distance) */
     limits?: ConfigurationLimitsItineraryIsocurveDetailsContent;
-    /** Définition des contraintes pour la configuration */
-    constraints?: object;
     /** Projection(s) */
     srss?: string[];
-    /** Données utilisées */
+    /**
+     * Titre
+     * @minLength 1
+     */
+    title: string;
+    /**
+     * Données utilisées
+     * @minItems 1
+     */
     used_data: ConfigurationUsedDataItineraryIsocurveDetailsContent[];
-    /** Description */
-    abstract: string;
 };
 
 /** Limites pour les calculs d'itinéraire (nombre d'étapes et de contraintes) et d'isochrone (durée et distance) */
 export interface ConfigurationLimitsItineraryIsocurveDetailsContent {
-    /**
-     * Nombre d'étapes maximal pour le service d'itinéraire
-     * @format int32
-     * @min 0
-     * @max 25
-     * @default 16
-     */
-    steps?: number;
     /**
      * Nombre de contraintes maximal pour le service d'itinéraire
      * @format int32
@@ -467,6 +1259,14 @@ export interface ConfigurationLimitsItineraryIsocurveDetailsContent {
      */
     constraints?: number;
     /**
+     * Distance maximale pour le calcul d'isochrone
+     * @format int32
+     * @min 0
+     * @max 2000000
+     * @default 1000000
+     */
+    distance?: number;
+    /**
      * Durée maximale pour le calcul d'isochrone
      * @format int32
      * @min 0
@@ -475,123 +1275,265 @@ export interface ConfigurationLimitsItineraryIsocurveDetailsContent {
      */
     duration?: number;
     /**
-     * Distance maximale pour le calcul d'isochrone
+     * Nombre d'étapes maximal pour le service d'itinéraire
      * @format int32
      * @min 0
-     * @max 2000000
-     * @default 1000000
+     * @max 25
+     * @default 16
      */
-    distance?: number;
+    steps?: number;
 }
 
 /** Informations sur la métadonnée liée à la configuration */
 export interface ConfigurationMetadata {
     /**
      * Le format (mime-type) de la métadonnée
+     * @minLength 1
      * @pattern \w+/[-+.\w]+
      * @example "application/xml"
      */
     format: string;
-    /** L'URL d'accès à la métadonnée' */
-    url: string;
     /** Le type de métadonnées */
     type: ConfigurationMetadataTypeEnum;
+    /**
+     * L'URL d'accès à la métadonnée'
+     * @minLength 1
+     */
+    url: string;
 }
 
+export interface ConfigurationPartialUpdateDto {
+    /** Nom de la configuration */
+    name?: string;
+    extra?: Record<string, any>;
+}
+
+export interface ConfigurationPrimariesApiFeatureDetailsContent {
+    geometry?: string;
+    instant?: string;
+}
+
+/** SEARCH */
 export type ConfigurationSearchDetailsContent = ConfigurationDetailsContent & {
-    /** Titre */
-    title: string;
+    /**
+     * Description
+     * @minLength 1
+     */
+    abstract: string;
     /**
      * Mots clés
      * @uniqueItems true
      */
     keywords?: string[];
-    /** Données utilisées */
+    /**
+     * Titre
+     * @minLength 1
+     */
+    title: string;
+    /**
+     * Données utilisées
+     * @minItems 1
+     */
     used_data: ConfigurationUsedDataSearchDetailsContent[];
-    /** Description */
-    abstract: string;
 };
 
+/** Informations détaillées sur la configuration */
+export interface ConfigurationStandardDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Métadonnées liées au propriétaire de la configuration */
+    attribution?: ConfigurationAttribution;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Événement */
+    last_event?: ConfigurationEventDto;
+    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
+    layer_name: string;
+    /**
+     * Métadonnées liées à la configuration
+     * @uniqueItems true
+     */
+    metadata?: ConfigurationMetadata[];
+    /** Nom de la configuration */
+    name: string;
+    status: ConfigurationStatus;
+    tags: Record<string, string>;
+    type: ConfigurationType;
+    type_infos:
+        | ConfigurationAltimetryDetailsContent
+        | ConfigurationApiFeatureDetailsContent
+        | ConfigurationDownloadDetailsContent
+        | ConfigurationItineraryIsocurveDetailsContent
+        | ConfigurationSearchDetailsContent
+        | ConfigurationVectorTmsDetailsContent
+        | ConfigurationWfsDetailsContent
+        | ConfigurationWmsRasterDetailsContent
+        | ConfigurationWmsVectorDetailsContent
+        | ConfigurationWmtsTmsDetailsContent;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+/** Informations sur la configuration (les champs metadatas, attribution, last_event, tags, creation et update ne sont pas retournés par défaut) */
+export interface ConfigurationStandardListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Métadonnées liées au propriétaire de la configuration */
+    attribution?: ConfigurationAttribution;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Événement */
+    last_event?: ConfigurationEventDto;
+    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
+    layer_name?: string;
+    /**
+     * Métadonnées liées à la configuration
+     * @uniqueItems true
+     */
+    metadata?: ConfigurationMetadata[];
+    /** Nom de la configuration */
+    name?: string;
+    status?: ConfigurationStatus;
+    /** Liste des étiquettes  de configuration (format clé/valeur) */
+    tags?: Record<string, string>;
+    type?: ConfigurationType;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
 export interface ConfigurationUsedDataAltimetryDetailsContent {
-    /** Titre */
-    title: string;
+    /** Informations sur la source des données */
+    accuracy: ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent;
     /** Bounding box (en degrés) */
     bbox?: BoundingBox;
     /** Informations sur la source des données */
     source: ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent;
-    /** Informations sur la source des données */
-    accuracy: ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent;
     /**
      * Identifiant de la donnée stockée
      * @format uuid
      */
     stored_data: string;
+    /**
+     * Titre
+     * @minLength 1
+     */
+    title: string;
+}
+
+export interface ConfigurationUsedDataApiFeatureDetailsContent {
+    /** @minLength 1 */
+    abstract: string;
+    primaries?: ConfigurationPrimariesApiFeatureDetailsContent;
+    queryables?: string[];
+    /** @minLength 1 */
+    relation: string;
+    schema?: JsonNode;
+    sortables?: string[];
+    /**
+     * Identifiant de la donnée stockée
+     * @format uuid
+     */
+    stored_data: string;
+    /** @minLength 1 */
+    title: string;
+    total?: boolean;
+    writable?: boolean;
 }
 
 export interface ConfigurationUsedDataAttributeItineraryIsocurveDetailsContent {
-    /** Nom de la table */
-    table_name?: string;
-    /** Nom de l'attribut dans la table */
+    default?: boolean;
+    /**
+     * Nom de l'attribut dans la table
+     * @minLength 1
+     */
     native_name: string;
     /**
      * Nom de l'attribut vu du service
+     * @minLength 1
      * @pattern ^[A-Za-z0-9_-]+$
      */
     public_name: string;
-    default?: boolean;
+    /** Nom de la table */
+    table_name?: string;
 }
 
 /** Données utilisées */
 export interface ConfigurationUsedDataDownloadDetailsContent {
-    /**
-     * Nom technique de la sous-ressource. Ce nom doit être unique au sein de la configuration. Uniquement des caractères alphanumériques, tiret, tiret bas, point
-     * @pattern ^[A-Za-z0-9_\-.]+$
-     */
-    sub_name: string;
-    /** Titre dans les différentes langues disponibles */
-    title?: Record<string, string>;
+    /** Description dans les différentes langues disponibles */
+    abstract?: Record<string, string>;
+    /** Format des fichiers */
+    format?: string;
     /**
      * Mots clés
      * @uniqueItems true
      */
     keywords?: string[];
-    /** Format des fichiers */
-    format?: string;
-    /** Zone géographique concernée */
-    zone?: string;
-    /** Droits applicables */
-    rights?: string;
-    /** Thématique des données */
-    thematic?: string;
     /** Résolution des données */
     resolution?: string;
+    /** Droits applicables */
+    rights?: string;
     /**
      * Identifiant de la donnée stockée
      * @format uuid
      */
     stored_data: string;
-    /** Description dans les différentes langues disponibles */
-    abstract?: Record<string, string>;
+    /**
+     * Nom technique de la sous-ressource. Ce nom doit être unique au sein de la configuration. Uniquement des caractères alphanumériques, tiret, tiret bas, point
+     * @minLength 1
+     * @pattern ^[A-Za-z0-9_\-.]+$
+     */
+    sub_name: string;
+    /** Thématique des données */
+    thematic?: string;
+    /** Titre dans les différentes langues disponibles */
+    title?: Record<string, string>;
+    /** Zone géographique concernée */
+    zone?: string;
 }
 
 export interface ConfigurationUsedDataItineraryIsocurveDetailsContent {
-    /** Profil de graphe à utiliser (e.g. voiture ou piéton) */
-    profile: string;
-    /** Optimisation de graphe à utiliser (e.g. plus court ou plus rapide) */
-    optimization: string;
-    /** Colonne de coût (pour stored data de type GRAPHE-DB) */
-    cost_column?: string;
-    /** Colonne de coût inverse (pour stored data de type GRAPHE-DB) */
-    reverse_cost_column?: string;
-    /** Type de coût */
-    cost_type?: ConfigurationUsedDataItineraryIsocurveDetailsContentCostTypeEnum;
-    /** Méthode de calcul de coût (pour stored data de type GRAPHE-VALHALLA) */
-    costing?: ConfigurationUsedDataItineraryIsocurveDetailsContentCostingEnum;
     /**
      * Attributs retournés par l'API
      * @uniqueItems true
      */
     attributes?: ConfigurationUsedDataAttributeItineraryIsocurveDetailsContent[];
+    /** Colonne de coût (pour stored data de type GRAPHE-DB) */
+    cost_column?: string;
+    /** Type de coût */
+    cost_type?: ConfigurationUsedDataItineraryIsocurveDetailsContentCostTypeEnum;
+    /** Méthode de calcul de coût (pour stored data de type GRAPHE-VALHALLA) */
+    costing?: ConfigurationUsedDataItineraryIsocurveDetailsContentCostingEnum;
+    /**
+     * Optimisation de graphe à utiliser (e.g. plus court ou plus rapide)
+     * @minLength 1
+     */
+    optimization: string;
+    /**
+     * Profil de graphe à utiliser (e.g. voiture ou piéton)
+     * @minLength 1
+     */
+    profile: string;
+    /** Colonne de coût inverse (pour stored data de type GRAPHE-DB) */
+    reverse_cost_column?: string;
     /**
      * Identifiant de la donnée stockée
      * @format uuid
@@ -600,40 +1542,58 @@ export interface ConfigurationUsedDataItineraryIsocurveDetailsContent {
 }
 
 export interface ConfigurationUsedDataRelationVectorTmsDetailsContent {
-    /** Nom de la table */
+    /**
+     * Description
+     * @minLength 1
+     */
+    abstract: string;
+    /**
+     * Nom de la table
+     * @minLength 1
+     */
     native_name: string;
     /** Nom public de la table */
     public_name?: string;
-    /** Description */
-    abstract: string;
 }
 
 export interface ConfigurationUsedDataRelationWfsDetailsContent {
-    /** Nom de la table */
-    native_name: string;
-    /** Nom public de la table */
-    public_name?: string;
-    /** Titre */
-    title: string;
+    /**
+     * Description
+     * @minLength 1
+     */
+    abstract: string;
     /**
      * Mots clés
      * @uniqueItems true
      */
     keywords?: string[];
-    /** Description */
-    abstract: string;
+    /**
+     * Nom de la table
+     * @minLength 1
+     */
+    native_name: string;
+    /** Nom public de la table */
+    public_name?: string;
+    /**
+     * Titre
+     * @minLength 1
+     */
+    title: string;
 }
 
 export interface ConfigurationUsedDataRelationWmsVectorDetailsContent {
-    /** Nom de la table */
+    /** @format uuid */
+    ftl?: string;
+    /**
+     * Nom de la table
+     * @minLength 1
+     */
     name: string;
     /**
      * Lien vers une entité Static
      * @format uuid
      */
     style: string;
-    /** @format uuid */
-    ftl?: string;
 }
 
 export interface ConfigurationUsedDataSearchDetailsContent {
@@ -648,12 +1608,15 @@ export interface ConfigurationUsedDataSearchDetailsContent {
 export type ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent =
     ConfigurationUsedDataSourceAccuracyManualAltimetryDetailsContent | ConfigurationUsedDataSourceAccuracyPyramidAltimetryDetailsContent;
 
-export type ConfigurationUsedDataSourceAccuracyManualAltimetryDetailsContent = ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent & {
-    /** Valeur unique pour la source des données */
+export interface ConfigurationUsedDataSourceAccuracyManualAltimetryDetailsContent {
+    /**
+     * Valeur unique pour la source des données
+     * @minLength 1
+     */
     value: string;
-};
+}
 
-export type ConfigurationUsedDataSourceAccuracyPyramidAltimetryDetailsContent = ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent & {
+export interface ConfigurationUsedDataSourceAccuracyPyramidAltimetryDetailsContent {
     /** Mapping entre les valeurs de la pyramide et les valeurs effectivement renvoyées */
     mapping: Record<string, string>;
     /**
@@ -661,9 +1624,10 @@ export type ConfigurationUsedDataSourceAccuracyPyramidAltimetryDetailsContent = 
      * @format uuid
      */
     stored_data: string;
-};
+}
 
 export interface ConfigurationUsedDataVectorTmsDetailsContent {
+    /** @minItems 1 */
     relations: ConfigurationUsedDataRelationVectorTmsDetailsContent[];
     /**
      * Identifiant de la donnée stockée
@@ -673,8 +1637,9 @@ export interface ConfigurationUsedDataVectorTmsDetailsContent {
 }
 
 export interface ConfigurationUsedDataWfsDetailsContent {
-    relations: ConfigurationUsedDataRelationWfsDetailsContent[];
     expose_primary_key?: boolean;
+    /** @minItems 1 */
+    relations: ConfigurationUsedDataRelationWfsDetailsContent[];
     /**
      * Identifiant de la donnée stockée
      * @format uuid
@@ -683,6 +1648,7 @@ export interface ConfigurationUsedDataWfsDetailsContent {
 }
 
 export interface ConfigurationUsedDataWmsVectorDetailsContent {
+    /** @minItems 1 */
     relations: ConfigurationUsedDataRelationWmsVectorDetailsContent[];
     /**
      * Identifiant de la donnée stockée
@@ -692,68 +1658,46 @@ export interface ConfigurationUsedDataWmsVectorDetailsContent {
 }
 
 export interface ConfigurationUsedDataWmtsTmsDetailsContent {
+    /** @minLength 1 */
     bottom_level: string;
-    top_level: string;
     /**
      * Identifiant de la donnée stockée
      * @format uuid
      */
     stored_data: string;
+    /** @minLength 1 */
+    top_level: string;
 }
 
+/** VECTOR-TMS */
 export type ConfigurationVectorTmsDetailsContent = ConfigurationDetailsContent & {
+    /** @minItems 1 */
     used_data: ConfigurationUsedDataVectorTmsDetailsContent[];
 };
 
+/** WFS */
 export type ConfigurationWfsDetailsContent = ConfigurationDetailsContent & {
     /** Bounding box (en degrés) */
     bbox?: BoundingBox;
+    /** @minItems 1 */
     used_data: ConfigurationUsedDataWfsDetailsContent[];
 };
 
+/** WMS-RASTER */
 export type ConfigurationWmsRasterDetailsContent = ConfigurationDetailsContent & {
+    /** @minLength 1 */
+    abstract: string;
     /** Bounding box (en degrés) */
     bbox?: BoundingBox;
-    title: string;
-    /**
-     * Mots clés
-     * @uniqueItems true
-     */
-    keywords?: string[];
-    /** Identifiants des fichiers statiques de style Rok4 */
-    styles?: string[];
-    used_data: ConfigurationUsedDataWmtsTmsDetailsContent[];
+    /** Résolution minimale de la couche */
+    bottom_resolution?: number;
+    /** Ressource cible du GetFeatureInfo */
+    getfeatureinfo?: ConfigurationGetFeatureInfoWmtsTmsDetailsContent;
     /**
      * Interpolation utilisée pour les conversions de résolution
      * @default "BICUBIC"
      */
     interpolation?: ConfigurationWmsRasterDetailsContentInterpolationEnum;
-    /** Résolution minimale de la couche */
-    bottom_resolution?: number;
-    /** Résolution maximale de la couche */
-    top_resolution?: number;
-    abstract: string;
-    /** Ressource cible du GetFeatureInfo */
-    getfeatureinfo?: ConfigurationGetFeatureInfoWmtsTmsDetailsContent;
-};
-
-export type ConfigurationWmsVectorDetailsContent = ConfigurationDetailsContent & {
-    /** Bounding box (en degrés) */
-    bbox?: BoundingBox;
-    title: string;
-    /**
-     * Mots clés
-     * @uniqueItems true
-     */
-    keywords?: string[];
-    used_data: ConfigurationUsedDataWmsVectorDetailsContent[];
-    abstract: string;
-};
-
-export type ConfigurationWmtsTmsDetailsContent = ConfigurationDetailsContent & {
-    /** Bounding box (en degrés) */
-    bbox?: BoundingBox;
-    title: string;
     /**
      * Mots clés
      * @uniqueItems true
@@ -761,358 +1705,53 @@ export type ConfigurationWmtsTmsDetailsContent = ConfigurationDetailsContent & {
     keywords?: string[];
     /** Identifiants des fichiers statiques de style Rok4 */
     styles?: string[];
+    /** @minLength 1 */
+    title: string;
+    /** Résolution maximale de la couche */
+    top_resolution?: number;
+    /** @minItems 1 */
     used_data: ConfigurationUsedDataWmtsTmsDetailsContent[];
+};
+
+/** WMS-VECTOR */
+export type ConfigurationWmsVectorDetailsContent = ConfigurationDetailsContent & {
+    /** @minLength 1 */
     abstract: string;
+    /** Bounding box (en degrés) */
+    bbox?: BoundingBox;
+    /**
+     * Mots clés
+     * @uniqueItems true
+     */
+    keywords?: string[];
+    /** @minLength 1 */
+    title: string;
+    /** @minItems 1 */
+    used_data: ConfigurationUsedDataWmsVectorDetailsContent[];
+};
+
+/** WMTS-TMS */
+export type ConfigurationWmtsTmsDetailsContent = ConfigurationDetailsContent & {
+    /** @minLength 1 */
+    abstract: string;
+    /** Bounding box (en degrés) */
+    bbox?: BoundingBox;
     /** Ressource cible du GetFeatureInfo */
     getfeatureinfo?: ConfigurationGetFeatureInfoWmtsTmsDetailsContent;
-};
-
-/** Événement */
-export interface ConfigurationEventDto {
+    /**
+     * Mots clés
+     * @uniqueItems true
+     */
+    keywords?: string[];
+    /** Identifiants des fichiers statiques de style Rok4 */
+    styles?: string[];
+    /** @minLength 1 */
     title: string;
-    text?: string;
-    /** @format date-time */
-    date: string;
-    /** Informations sur l'initiateur de l'évènement */
-    initiator?: EventInitiatorDto;
-    /** @uniqueItems true */
-    urls?: EndpointUrl[];
-}
-
-/** Informations détaillées sur la configuration */
-export interface ConfigurationStandardDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la configuration */
-    name: string;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name: string;
-    /** Type de configuration */
-    type: ConfigurationStandardDetailResponseDtoTypeEnum;
-    status: ConfigurationStandardDetailResponseDtoStatusEnum;
-    tags: Record<string, string>;
-    /** Métadonnées liées au propriétaire de la configuration */
-    attribution?: ConfigurationAttribution;
-    /** Événement */
-    last_event?: ConfigurationEventDto;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /**
-     * Métadonnées liées à la configuration
-     * @uniqueItems true
-     */
-    metadata?: ConfigurationMetadata[];
-    type_infos:
-        | ConfigurationAltimetryDetailsContent
-        | ConfigurationDownloadDetailsContent
-        | ConfigurationItineraryIsocurveDetailsContent
-        | ConfigurationSearchDetailsContent
-        | ConfigurationVectorTmsDetailsContent
-        | ConfigurationWfsDetailsContent
-        | ConfigurationWmsRasterDetailsContent
-        | ConfigurationWmsVectorDetailsContent
-        | ConfigurationWmtsTmsDetailsContent;
-}
-
-/** Informations sur l'initiateur de l'évènement */
-export interface EventInitiatorDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    last_name: string;
-    first_name: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations détaillées sur l'annexe */
-export interface AnnexStandardDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** @uniqueItems true */
-    paths: string[];
-    /** @format int64 */
-    size: number;
-    mime_type: string;
-    published: boolean;
-    /** @uniqueItems true */
-    labels?: string[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-}
-
-export interface CommunityAddUserDto {
-    /** @uniqueItems true */
-    rights?: CommunityAddUserDtoRightsEnum[];
-}
-
-/** Paramètres du traitement à créer */
-export interface ProcessingCreateDto {
-    /** Nom du traitement. ce nom doit être unique pour la plateforme */
-    name: string;
-    /** Description du traitement */
-    description: string;
-    /** Nom technique du traitement tel que connu par l'orchestrateur */
-    orchestrator_job_name: string;
-    /**
-     * Priorité de traitement
-     * @default "STANDARD"
-     */
-    priority?: ProcessingCreateDtoPriorityEnum;
-    /** Types de données acceptés en entrée du traitement */
-    input_types?: ProcessingInputTypesDto;
-    output_type: ProcessingOutputTypeStoredDataDto | ProcessingOutputTypeUploadDto;
-    /**
-     * Paramètres en entrée du traitement
-     * @uniqueItems true
-     */
-    parameters?: (ProcessingParameterFreeDto | ProcessingParameterStaticFileDto)[];
-    /**
-     * Vérifications nécessaires au lancement du traitement
-     * @uniqueItems true
-     */
-    required_checks?: string[];
-}
-
-/** Types de données acceptés en entrée du traitement */
-export interface ProcessingInputTypesDto {
-    /**
-     * Types de livraisons en entrée acceptés
-     * @uniqueItems true
-     */
-    upload?: ProcessingInputTypesDtoUploadEnum[];
-    /**
-     * Types de données stockées en entrée acceptés
-     * @uniqueItems true
-     */
-    stored_data?: ProcessingInputTypesDtoStoredDataEnum[];
-}
-
-export type ProcessingOutputTypeDto = object;
-
-/** Type de donnée stockée en sortie du traitement */
-export type ProcessingOutputTypeStoredDataDto = ProcessingOutputTypeDto & {
-    /** Type de donnée stockée */
-    stored_data: ProcessingOutputTypeStoredDataDtoStoredDataEnum;
-    /**
-     * Types de stockage cible du traitement
-     * @minItems 1
-     * @uniqueItems true
-     */
-    storage: ProcessingOutputTypeStoredDataDtoStorageEnum[];
+    /** @minItems 1 */
+    used_data: ConfigurationUsedDataWmtsTmsDetailsContent[];
 };
 
-/** Type de livraison en sortie du traitement */
-export type ProcessingOutputTypeUploadDto = ProcessingOutputTypeDto & {
-    /** Type de livraison */
-    upload: ProcessingOutputTypeUploadDtoUploadEnum;
-};
-
-export interface ProcessingParameterDto {
-    /** Nom du paramètre */
-    name: string;
-    /** Description du paramètre */
-    description: string;
-    /** Indique si le paramètre est obligatoire */
-    mandatory: boolean;
-    /** Valeur par défaut pour le paramètre" */
-    default_value?: string | number | boolean | object;
-    constraints?: object;
-}
-
-/** Informations spécifiques d'un paramètre libre */
-export type ProcessingParameterFreeDto = UtilRequiredKeys<ProcessingParameterDto, "name" | "description" | "mandatory">;
-
-/** Informations spécifiques d'un paramètre de type statique(s) */
-export type ProcessingParameterStaticFileDto = UtilRequiredKeys<ProcessingParameterDto, "name" | "description" | "mandatory"> & {
-    /** Type de fichier(s) statique(s) attendu(s) pour ce paramètre */
-    static_type: ProcessingParameterStaticFileDtoStaticTypeEnum;
-};
-
-/** Informations sur la vérification */
-export interface CheckingListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la vérification. ce nom doit être unique pour la plateforme */
-    name: string;
-    /** Description de la vérification */
-    description: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations détaillées sur le traitement */
-export interface ProcessingExtendedDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom du traitement. ce nom doit être unique pour la plateforme */
-    name: string;
-    /** Description du traitement */
-    description: string;
-    /** Priorité de traitement */
-    priority: ProcessingExtendedDetailResponseDtoPriorityEnum;
-    /** Types de données acceptés en entrée du traitement */
-    input_types: ProcessingInputTypesDto;
-    output_type: ProcessingOutputTypeStoredDataDto | ProcessingOutputTypeUploadDto;
-    /**
-     * Paramètres en entrée du traitement
-     * @uniqueItems true
-     */
-    parameters: (ProcessingParameterFreeDto | ProcessingParameterStaticFileDto)[];
-    /** Nom technique du traitement tel que connu par l'orchestrateur */
-    orchestrator_job_name: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Vérifications nécessaires au lancement du traitement
-     * @uniqueItems true
-     */
-    required_checks: CheckingListResponseDto[];
-}
-
-export interface BasicInfoDto {
-    login?: string;
-    password?: string;
-}
-
-export interface HashInfoDto {
-    hash?: string;
-}
-
-export interface HeaderInfoDto {
-    headers?: Record<string, string>;
-}
-
-export type OAuth2InfoDto = object;
-
-export type UserBasicKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
-    type_infos: BasicInfoDto;
-};
-
-export type UserHashKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
-    type_infos: HashInfoDto;
-};
-
-export type UserHeaderKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
-    type_infos: HeaderInfoDto;
-};
-
-export type UserKeyInfoDto = object;
-
-export type UserOauth2KeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
-    type_infos: OAuth2InfoDto;
-};
-
-export interface UserKeyDetailsResponseDtoUserKeyInfoDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    name: string;
-    type?: UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum;
-    whitelist?: string[];
-    blacklist?: string[];
-    user_agent?: string;
-    referer?: string;
-    type_infos: UserKeyInfoDto;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-export interface AccessCreateDto {
-    /**
-     * Identifiant de la permission
-     * @format uuid
-     */
-    permission: string;
-    /**
-     * Identifiants des offres
-     * @uniqueItems true
-     */
-    offerings: string[];
-}
-
-/** Paramètres du document à téléverser */
-export interface DocumentCreateDto {
-    /** @format binary */
-    file: File;
-    /** Description du document */
-    description?: string;
-    /** Nom du document */
-    name: string;
-    /**
-     * Liste des étiquettes
-     * @uniqueItems true
-     */
-    labels?: string[];
-}
-
-/** Coordonnées d'origine du dallage */
+/** Coordonnées d'origine du dallage (pour le type COPC) */
 export interface Coordinate {
     /**
      * Longitude
@@ -1126,151 +1765,683 @@ export interface Coordinate {
     y: number;
 }
 
-/** Informations à fournir pour la déclaration d'une nouvelle livraison, la livraison est privée par défaut */
-export interface UploadCreateDto {
-    /** Description de la livraison */
-    description: string;
-    /** Nom de la livraison */
-    name: string;
-    /** Type de livraison */
-    type: UploadCreateDtoTypeEnum;
-    /** Système de coordonnées de référence de la livraison */
-    srs: string;
-    /** Informations spécifiques au type de livraison */
-    type_infos?: UploadDetailsDto;
-}
-
-/** Informations spécifiques au type de livraison */
-export type UploadDetailsDto = UploadRok4PyramidDetailsDto | UploadIndexDetailsDto | UploadHistoricImageryDetailsDto | UploadPyramid3DDetailsDto;
-
-/** Informations spécifiques d'une livraison d'images historiques */
-export type UploadHistoricImageryDetailsDto = UploadDetailsDto & {
-    /** Identifiant de jeu de données */
-    dataset_identifier: string;
-};
-
-/** Informations spécifiques d'une livraison de type Index */
-export type UploadIndexDetailsDto = UploadDetailsDto & {
-    search_layer?: boolean;
-    /**
-     * Indique si l'index se comportera comme l'index standard
-     * @default false
-     */
-    is_search_layer?: boolean;
-};
-
-/** Informations spécifiques d'une livraison de pyramide 3D */
-export type UploadPyramid3DDetailsDto = UploadDetailsDto & {
-    /** Type de pyramide 3D */
-    pyramid_type: UploadPyramid3DDetailsDtoPyramidTypeEnum;
-    /** Coordonnées d'origine du dallage */
-    origin?: Coordinate;
-    /**
-     * Largeur des dalles (pour le type COPC)
-     * @format double
-     * @min 0
-     * @exclusiveMin true
-     */
-    tile_size?: number;
-    /** Template de nommage des dalles (pour le type COPC) */
-    template?: string;
-    /** Type de données (pour le type EPT) */
-    data_type?: UploadPyramid3DDetailsDtoDataTypeEnum;
-    /**
-     * Span (pour le type EPT)
-     * @format int32
-     * @min 1
-     */
-    span?: number;
-};
-
-/** Informations spécifiques d'une livraison de pyramide Rok4 */
-export type UploadRok4PyramidDetailsDto = UploadDetailsDto & {
-    /** Format des données */
-    format: string;
-    /**
-     * Nombre de canaux des images, uniquement pour une pyramide raster
-     * @format int32
-     * @min 1
-     */
-    channels_number?: number;
-    /** TileMatrixSet de la pyramide */
-    tms: string;
-};
-
-/** Événement */
-export interface EventDto {
-    title: string;
-    text?: string;
-    /** @format date-time */
-    date: string;
-    /** Informations sur l'initiateur de l'évènement */
-    initiator?: EventInitiatorDto;
-}
-
-/** Etendue géographique au format GeoJson */
-export type JsonNode = object;
-
-/** Informations détaillées sur la livraison */
-export interface UploadPrivateDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la livraison */
-    name: string;
-    /** Description de la livraison */
-    description: string;
-    /** Type de livraison */
-    type: UploadPrivateDetailResponseDtoTypeEnum;
-    /** Livraison ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open: boolean;
-    /** Statut de la livraison */
-    status: UploadPrivateDetailResponseDtoStatusEnum;
-    /** Système de coordonnées de référence de la livraison */
-    srs: string;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Etendue géographique au format GeoJson */
-    extent?: JsonNode;
-    /**
-     * Taille de la livraison (en octets)
-     * @format int64
-     */
-    size?: number;
-    /** Événement */
-    last_event?: EventDto;
-    /** Liste des étiquettes de la livraison (format clé/valeur) */
-    tags: Record<string, string>;
+/** Communauté à laquelle l'entrepôt est rattaché */
+export interface DatastoreCommunityResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-    extra?: object;
-    /** Informations spécifiques au type de livraison */
-    type_infos?: UploadDetailsDto;
+    contact: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    public: boolean;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
 }
 
-/** Callback à exécuter à la fin de l'exécution */
-export interface Callback {
-    /** Type de callback */
-    type: CallbackTypeEnum;
+/** Paramètres de l'entrepôt à créer */
+export interface DatastoreCreateDto {
     /**
-     * Liste des adresses emails de destination
-     * @maxItems 20
-     * @minItems 1
-     * @example ["example@mail.fr"]
+     * Liste des vérifications auxquelles l'entrepôt a accès
+     * @uniqueItems true
      */
-    to_address: string[];
-    /** URL associée au callback */
-    entity_url?: string;
+    checks?: string[];
+    /**
+     * Communauté à laquelle l'entrepôt est rattaché
+     * @format uuid
+     */
+    community: string;
+    /** Préfixe obligatoire pour le layer_name des configurations créées sur ce datastore */
+    configuration_layer_name_prefix?: string;
+    /**
+     * Liste des points d'accès auxquels l'entrepôt a accès
+     * @uniqueItems true
+     */
+    endpoints: DatastoreEndpointDto[];
+    /** Préfixe obligatoire pour le file_identifier des métadonnées déposées sur ce datastore */
+    metadata_file_identifier_prefix?: string;
+    /**
+     * Liste des traitements auxquels l'entrepôt a accès
+     * @uniqueItems true
+     */
+    processings?: string[];
+    /**
+     * Datastore ouvert aux partages ou non
+     * @default true
+     */
+    sharings?: boolean;
+    /** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
+    storages: DatastoreStoragesCreateDto;
+}
+
+/** Informations sur l'entrepôt */
+export interface DatastoreDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Datastore actif ou non */
+    active: boolean;
+    /**
+     * Liste des vérifications auxquelles l'entrepôt a accès
+     * @uniqueItems true
+     */
+    checks: string[];
+    /** Communauté à laquelle l'entrepôt est rattaché */
+    community: DatastoreCommunityResponseDto;
+    /** Préfixe obligatoire pour le layer_name des configurations créées sur ce datastore */
+    configuration_layer_name_prefix?: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description de la communauté */
+    description?: string;
+    /**
+     * Liste des points d'accès auxquels l'entrepôt a accès
+     * @uniqueItems true
+     */
+    endpoints: DatastoreEndpointStandardResponseDto[];
+    /** Préfixe obligatoire pour le file_identifier des métadonnées déposées sur ce datastore */
+    metadata_file_identifier_prefix?: string;
+    /** Nom de la communauté */
+    name: string;
+    /**
+     * Liste des traitements auxquels l'entrepôt a accès
+     * @uniqueItems true
+     */
+    processings: string[];
+    /** Datastore ouvert aux partages ou non */
+    sharings?: boolean;
+    /** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
+    storages: DatastoreStoragesResponseDto;
+    /** Nom technique de la communauté */
+    technical_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations sur le point d'accès */
+export interface DatastoreEndpointDto {
+    /**
+     * Identifiant du point d'accès
+     * @format uuid
+     */
+    endpoint: string;
+    /**
+     * Nombre d'offres maximum
+     * @format int64
+     */
+    quota: number;
+}
+
+/** Informations sur le point d'accès */
+export interface DatastoreEndpointExtendedResponseDto {
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** Informations détaillées sur le point d'accès */
+    endpoint: EndpointDetailResponseDto;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /**
+     * Nombre d'offres maximum
+     * @format int64
+     */
+    quota: number;
+    /**
+     * Nombre d'offres présentes
+     * @format int64
+     */
+    use: number;
+}
+
+/** Informations sur le point d'accès */
+export interface DatastoreEndpointStandardResponseDto {
+    /** Informations détaillées sur le point d'accès */
+    endpoint: EndpointDetailResponseDto;
+    /**
+     * Nombre d'offres maximum
+     * @format int64
+     */
+    quota: number;
+    /**
+     * Nombre d'offres présentes
+     * @format int64
+     */
+    use: number;
+}
+
+/** Informations sur l'entrepôt */
+export interface DatastoreListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Datastore actif ou non */
+    active: boolean;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Nom de la communauté */
+    name: string;
+    /** Nom technique de la communauté */
+    technical_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations sur l'entrepôt */
+export interface DatastoreListWithEndpointUsageResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Datastore actif ou non */
+    active: boolean;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Nom de la communauté */
+    name: string;
+    /**
+     * Quota en octets
+     * @format int64
+     */
+    quota: number;
+    /** Nom technique de la communauté */
+    technical_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    /**
+     * Espace occupé en octets
+     * @format int64
+     */
+    use: number;
+}
+
+/** Informations sur l'entrepôt */
+export interface DatastoreListWithStorageUsageResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Datastore actif ou non */
+    active: boolean;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Nom de la communauté */
+    name: string;
+    /**
+     * Quota en octets pour les annexes
+     * @format int64
+     */
+    storage_annexes_quota?: number;
+    /**
+     * Espace occupé en octets pour les annexes
+     * @format int64
+     */
+    storage_annexes_use?: number;
+    /**
+     * Quota en octets pour les données stockées
+     * @format int64
+     */
+    storage_data_quota?: number;
+    /**
+     * Espace occupé en octets pour les données stockées
+     * @format int64
+     */
+    storage_data_use?: number;
+    /**
+     * Quota en octets pour les livraisons
+     * @format int64
+     */
+    storage_uploads_quota?: number;
+    /**
+     * Espace occupé en octets pour les livraisons
+     * @format int64
+     */
+    storage_uploads_use?: number;
+    /** Nom technique de la communauté */
+    technical_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations sur l'entrepôt partagé */
+export interface DatastoreSharingResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    active: boolean;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    description?: string;
+    name: string;
+    technical_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations sur le stockage */
+export interface DatastoreStorageDto {
+    /**
+     * Quota en octets
+     * @format int64
+     */
+    quota: number;
+    /**
+     * Identifiant du stockage
+     * @format uuid
+     */
+    storage: string;
+}
+
+/** Informations sur le stockage */
+export interface DatastoreStorageResponseDto {
+    /**
+     * Quota en octets
+     * @format int64
+     */
+    quota: number;
+    /** Informations sur le stockage */
+    storage: StorageListResponseDto;
+    /**
+     * Espace occupé en octets
+     * @format int64
+     */
+    use: number;
+}
+
+/** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
+export interface DatastoreStoragesCreateDto {
+    /** Informations sur le stockage */
+    annexes: DatastoreStorageDto;
+    /**
+     * Liste de stockages pour les données stockées
+     * @uniqueItems true
+     */
+    data: DatastoreStorageDto[];
+    /** Informations sur le stockage */
+    uploads: DatastoreStorageDto;
+}
+
+/** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
+export interface DatastoreStoragesResponseDto {
+    /** Informations sur le stockage */
+    annexes: DatastoreStorageResponseDto;
+    /**
+     * Liste de stockages pour les données stockées
+     * @uniqueItems true
+     */
+    data: DatastoreStorageResponseDto[];
+    /** Informations sur le stockage */
+    uploads: DatastoreStorageResponseDto;
+}
+
+/** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
+export interface DatastoreStoragesUpdateDto {
+    /** Informations sur le stockage */
+    annexes?: DatastoreStorageDto;
+    /**
+     * Liste de stockages pour les données stockées
+     * @uniqueItems true
+     */
+    data?: DatastoreStorageDto[];
+    /** Informations sur le stockage */
+    uploads?: DatastoreStorageDto;
+}
+
+/** Nouvelle configuration de l'entrepôt */
+export interface DatastoreUpdateDto {
+    /** Datastore actif ou non */
+    active?: boolean;
+    /**
+     * Liste des vérifications auxquelles l'entrepôt a accès
+     * @uniqueItems true
+     */
+    checks?: string[];
+    /**
+     * Préfixe obligatoire pour le layer_name des configurations créées sur ce datastore
+     * Une chaîne vide permet de supprimer le préfixe
+     */
+    configuration_layer_name_prefix?: string;
+    /**
+     * Liste des points d'accès auxquels l'entrepôt a accès
+     * @uniqueItems true
+     */
+    endpoints: DatastoreEndpointDto[];
+    /**
+     * Préfixe obligatoire pour le file_identifier des métadonnées déposées sur ce datastore
+     * Une chaîne vide permet de supprimer le préfixe
+     */
+    metadata_file_identifier_prefix?: string;
+    /**
+     * Liste des traitements auxquels l'entrepôt a accès
+     * @uniqueItems true
+     */
+    processings?: string[];
+    /** Datastore ouvert aux partages ou non */
+    sharings?: boolean;
+    /** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
+    storages?: DatastoreStoragesUpdateDto;
+}
+
+/** Informations détaillées sur le document */
+export interface DocumentDetailsResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    description?: string;
+    labels?: string[];
+    mime_type: string;
+    /** Nom du document */
+    name: string;
+    public_url?: string;
+    /**
+     * La taille du document
+     * @format int64
+     */
+    size: number;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+/** Informations sur le document */
+export interface DocumentListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description du document */
+    description?: string;
+    /**
+     * Liste des étiquettes
+     * @uniqueItems true
+     */
+    labels?: string[];
+    /** Le type mime du document */
+    mime_type?: string;
+    /** Nom du document */
+    name?: string;
+    /** URL publique du document */
+    public_url?: string;
+    /**
+     * La taille du document
+     * @format int64
+     */
+    size?: number;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Paramètres du document à modifier */
+export interface DocumentUpdateDto {
+    /** Description du document */
+    description?: string;
+    /**
+     * Liste des étiquettes
+     * @uniqueItems true
+     */
+    labels?: string[];
+    /** Nom du document */
+    name?: string;
+    /** URL publique du document */
+    public_url?: boolean;
+    extra?: Record<string, any>;
+}
+
+/** Paramètres du point d'accès à ajouter */
+export interface EndpointCreateDto {
+    /** Attribution obligatoire */
+    force_attribution?: boolean;
+    /** Métadonnée obligatoire */
+    force_metadata?: boolean;
+    /** @minLength 1 */
+    metadata_fi: string;
+    /**
+     * Nom du point d'accès. ce nom doit être unique. le nom est insensible à la casse
+     * @minLength 1
+     */
+    name: string;
+    /** Point d'accès ouvert ? (sans contrôle des accès) */
+    open: boolean;
+    /** Synchronisation avec l'index de recherche */
+    search_publish?: boolean;
+    /**
+     * Nom technique du point d'accès. ce nom technique doit être unique
+     * @minLength 1
+     * @pattern (^[a-z0-9-]+$|^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$)
+     */
+    technical_name: string;
+    /** Type du point d'accès */
+    type: EndpointCreateDtoTypeEnum;
+    /**
+     * @minItems 1
+     * @uniqueItems true
+     */
+    urls: EndpointUrl[];
+    /** Indique si le point d'accès est accessible en écriture (applicable uniquement pour le type API-FEATURES) */
+    writable?: boolean;
+}
+
+/** Informations détaillées sur le point d'accès */
+export interface EndpointDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Attribution obligatoire */
+    force_attribution?: boolean;
+    /** Métadonnée obligatoire */
+    force_metadata?: boolean;
+    metadata_fi?: string;
+    /** Nom du point d'accès. ce nom doit être unique. le nom est insensible à la casse */
+    name: string;
+    /** Point d'accès ouvert ? (sans contrôle des accès) */
+    open: boolean;
+    /** Synchronisation avec l'index de recherche */
+    search_publish?: boolean;
+    /** Nom technique du point d'accès. ce nom technique doit être unique */
+    technical_name: string;
+    /** Type du point d'accès */
+    type: EndpointDetailResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    /** @uniqueItems true */
+    urls?: EndpointUrl[];
+    /** Indique si le point d'accès est accessible en écriture (applicable uniquement pour le type API-FEATURES) */
+    writable?: boolean;
+}
+
+/** Informations sur le point d'accès */
+export interface EndpointListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** le nom du point d'accès */
+    name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Paramètres du point d'accès à modifier */
+export interface EndpointUpdateDto {
+    /** Attribution obligatoire */
+    force_attribution?: boolean;
+    /** Métadonnée obligatoire */
+    force_metadata?: boolean;
+    metadata_fi?: string;
+    /** Nom du point d'accès. ce nom doit être unique. le nom est insensible à la casse */
+    name?: string;
+    /** Synchronisation avec l'index de recherche */
+    search_publish?: boolean;
+    /** @uniqueItems true */
+    urls?: EndpointUrl[];
+    /** Indique si le point d'accès est accessible en écriture (applicable uniquement pour le type API-FEATURES) */
+    writable?: boolean;
+}
+
+/** Liste des urls du point d'accès */
+export interface EndpointUrl {
+    /** Type de l'URL du point d'accès */
+    type: EndpointUrlTypeEnum;
+    /**
+     * URL du point d'accès
+     * @minLength 1
+     */
+    url: string;
+}
+
+/** Entrées */
+export interface EntryDto {
+    /** Catégories */
+    categories: CategoryDto[];
+    /** Description */
+    content: string;
+    /** Identifiant */
+    id: string;
+    links?: LinkDto[];
+    /** Bounding box (en degrés) */
+    polygon?: BoundingBox;
+    /** Description */
+    subtitle?: string;
+    /** Nom */
+    title: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    updated?: string;
+}
+
+/** Événement */
+export interface EventDto {
+    /** @format date-time */
+    date: string;
+    /** Informations sur l'initiateur de l'évènement */
+    initiator?: EventInitiatorDto;
+    text?: string;
+    title: string;
+}
+
+/** Informations sur l'initiateur de l'évènement */
+export interface EventInitiatorDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    first_name: string;
+    last_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Evénement */
+export interface EventResponseDto {
+    /** @format date-time */
+    date: string;
+    /** Information sur l'auteur */
+    initiator: AuthorResponseDto;
+    text?: string;
+    title: string;
 }
 
 /** Paramètres d'une exécution de traitement à mettre à jour */
@@ -1279,586 +2450,232 @@ export interface ExecutionUpdateDto {
     callback?: Callback;
 }
 
-/** Partage avec un entrepôt */
-export interface SharingOrVisibilityResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
+export interface FeedDto {
+    /** Producteur */
+    author: AuthorDto;
+    /** Entrées */
+    entries: EntryDto[];
+    /** Identifiant */
+    id: string;
+    links?: LinkDto[];
+    /** Licence et conditions d'utilisation */
+    rights: string;
+    /** Description */
+    subtitle?: string;
     /** Nom */
-    name: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations spécifiques d'une donnée stockée archive */
-export type StoredDataArchiveDetailsDto = {
-    /**
-     * Nombre de fichiers contenus dans la donnée stockée
-     * @format int32
-     */
-    files_number: number;
-};
-
-/** Détails sur une donnée stockée */
-export type StoredDataDetailsDto =
-    | StoredDataRok4PyramidRasterDetailsDto
-    | StoredDataRok4PyramidVectorDetailsDto
-    | StoredDataVectorDbDetailsDto
-    | StoredDataArchiveDetailsDto
-    | StoredDataGraphDbDetailsDto
-    | StoredDataGraphDetailsDto
-    | StoredDataIndexDetailsDto;
-
-/** Liste des relations en BDD */
-export interface StoredDataDetailsRelationDto {
-    name: string;
-    type: StoredDataDetailsRelationDtoTypeEnum;
-    attributes: Record<string, string>;
-    primary_key?: string[];
-}
-
-/** Période d'édition de la donnée stockée */
-export interface StoredDataEdition {
-    /** @format date */
-    from?: string;
-    /** @format date */
-    to?: string;
-}
-
-/** Informations spécifiques d'une donnée stockée graphe d'itinéraire DB */
-export type StoredDataGraphDbDetailsDto = {
-    /**
-     * Liste des attributs utilisables du graphe
-     * @uniqueItems true
-     */
-    attributes: string[];
-    /**
-     * Liste des modes utilisables du graphe
-     * @uniqueItems true
-     */
-    modes: StoredDataGraphDetailsOptimizationProfileDto[];
-    /**
-     * Liste des relations en BDD
-     * @uniqueItems true
-     */
-    relations: StoredDataDetailsRelationDto[];
-};
-
-/** Informations spécifiques d'une donnée stockée graphe d'itinéraire OSRM ou VALHALLA */
-export type StoredDataGraphDetailsDto = {
-    /**
-     * Liste des attributs utilisables du graphe
-     * @uniqueItems true
-     */
-    attributes: string[];
-    /**
-     * Liste des modes utilisables du graphe
-     * @uniqueItems true
-     */
-    modes: StoredDataGraphDetailsOptimizationProfileDto[];
-};
-
-/** Liste des modes utilisables du graphe */
-export interface StoredDataGraphDetailsOptimizationProfileDto {
-    profile: string;
-    optimization: string;
-    md5: string;
-}
-
-/** Informations spécifiques d'une donnée stockée index */
-export type StoredDataIndexDetailsDto = {
-    /** Champs présents dans les documents et leur type */
-    fields: Record<string, string>;
-    /**
-     * Nombre de documents contenus dans l'index
-     * @format int32
-     */
-    count: number;
-    search_layer?: boolean;
-    /** Indique si l'index se comportera comme l'index standard */
-    is_search_layer: boolean;
-};
-
-/** Informations détaillées sur la donnée stockée */
-export interface StoredDataPrivateDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
+    title: string;
     /**
      * Date de dernière mise à jour
      * @format date-time
      */
-    update: string;
-    /** Nom de la donnée stockée */
-    name: string;
-    /** Type de donnée stockée */
-    type: StoredDataPrivateDetailResponseDtoTypeEnum;
-    /** Donnée stockée ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open: boolean;
-    /** Système de coordonnées de référence de la donnée stockée */
-    srs?: string;
-    /** Description de la donnée stockée */
-    description?: string;
-    /** Période d'édition de la donnée stockée */
-    edition?: StoredDataEdition;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Etendue géographique au format GeoJson */
-    extent?: JsonNode;
-    /**
-     * Taille de la donnée stockée (en octets)
-     * @format int64
-     */
-    size?: number;
-    /** Statut de la donnée stockée */
-    status: StoredDataPrivateDetailResponseDtoStatusEnum;
-    /** Événement */
-    last_event?: EventDto;
-    /** Liste des étiquettes de la donnée stockée (format clé/valeur) */
-    tags?: Record<string, string>;
-    /** Stockage contenant la donnée stockée */
-    storage: StoredDataStorageDto;
-    public_activity?: boolean;
-    /**
-     * Identifiant de la donnée stockée
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /** Détails sur une donnée stockée */
-    type_infos?: StoredDataDetailsDto;
+    updated?: string;
+    xmlns?: string;
 }
 
-/** Informations spécifiques d'une donnée stockée pyramide Rok4 Raster */
-export type StoredDataRok4PyramidRasterDetailsDto = {
-    tms: string;
-    /** @uniqueItems true */
-    levels: string[];
-    channels_format: StoredDataRok4PyramidRasterDetailsDtoChannelsFormatEnum;
-    /**
-     * @format int32
-     * @min 1
-     */
-    channels_number: number;
-    compression: StoredDataRok4PyramidRasterDetailsDtoCompressionEnum;
-    nodata_value: string;
-};
-
-/** Informations spécifiques d'une donnée stockée pyramide Rok4 Vecteur */
-export type StoredDataRok4PyramidVectorDetailsDto = {
-    tms: string;
-    /** @uniqueItems true */
-    levels: string[];
-};
-
-/** Stockage contenant la donnée stockée */
-export interface StoredDataStorageDto {
-    type: StoredDataStorageDtoTypeEnum;
-    /** @uniqueItems true */
-    labels?: string[];
+export interface HashInfoDto {
+    hash?: string;
 }
 
-/** Informations spécifiques d'une donnée stockée base vectorielle */
-export type StoredDataVectorDbDetailsDto = {
-    /** @uniqueItems true */
-    relations: StoredDataDetailsRelationDto[];
-};
-
-/** Paramètres du statique à ajouter */
-export interface StaticFileCreateDto {
-    /** @format binary */
-    file: File;
-    /** Nom du fichier statique */
-    name: string;
-    /** Description du fichier statique */
-    description?: string;
-    /** Type du fichier statique */
-    type: StaticFileCreateDtoTypeEnum;
-}
-
-export type IdFieldDto = UploadOutputDto & {
+/** existing_upload */
+export interface IdFieldDto {
     /**
      * Identifiant de la livraison
      * @format uuid
      */
     id: string;
-};
+}
 
-export type NamedFieldDto = UploadOutputDto & {
+export type JsonNode = object;
+
+export interface LinkDto {
+    /** URL */
+    href: string;
+    /** Type de lien */
+    rel: string;
+    /** Nom */
+    title: string;
+    /** Mime-type de la cible */
+    type: string;
+}
+
+/** Informations détaillées sur la métadonnée */
+export interface MetadataExtendedResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    endpoints?: EndpointListResponseDto[];
+    file_identifier: string;
+    level: MetadataExtendedResponseDtoLevelEnum;
+    open_data: boolean;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    tags?: Record<string, string>;
+    type: MetadataExtendedResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+export interface MetadataPublicationDto {
+    /** @format uuid */
+    endpoint: string;
+    /**
+     * @minItems 1
+     * @uniqueItems true
+     */
+    file_identifiers: string[];
+}
+
+/** Informations détaillées sur la métadonnée */
+export interface MetadataStandardResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    endpoints?: EndpointListResponseDto[];
+    file_identifier: string;
+    level: MetadataStandardResponseDtoLevelEnum;
+    open_data: boolean;
+    tags?: Record<string, string>;
+    type: MetadataStandardResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+export interface MetadataUpdateDto {
+    open_data?: boolean;
+    type?: MetadataUpdateDtoTypeEnum;
+    extra?: Record<string, any>;
+}
+
+/** new_upload */
+export interface NamedFieldDto {
     /** Nom de la livraison */
     name: string;
-};
-
-/** Paramètres de l'exécution de traitement à créer */
-export interface ProcessingExecutionCreateDto {
-    /**
-     * Identifiant du traitement
-     * @format uuid
-     */
-    processing: string;
-    /** Données en entrée du traitement */
-    inputs?: ProcessingExecutionCreateInputDto;
-    output: ProcessingExecutionCreateOutputStoredDataDto | ProcessingExecutionCreateOutputUploadDto;
-    /** Paramètres en entrée du traitement */
-    parameters?: Record<string, object>;
-    /** Callback à exécuter à la fin de l'exécution */
-    callback?: Callback;
 }
 
-/** Données en entrée du traitement */
-export interface ProcessingExecutionCreateInputDto {
-    /** Livraisons en entrée */
-    upload?: string[];
-    /** Données stockées en entrée */
-    stored_data?: string[];
-}
-
-/** Donnée en sortie du traitement */
-export type ProcessingExecutionCreateOutputDto = object;
-
-export type ProcessingExecutionCreateOutputStoredDataDto = ProcessingExecutionCreateOutputDto & {
-    stored_data?: StoredDataOutputDto;
-};
-
-export type ProcessingExecutionCreateOutputUploadDto = ProcessingExecutionCreateOutputDto & {
-    upload?: UploadOutputDto;
-};
-
-export type StoredDataCreationDto = StoredDataOutputDto & {
-    /** Nom de la donnée stockée */
-    name: string;
-    /** Type de stockage */
-    storage_type?: StoredDataCreationDtoStorageTypeEnum;
-    storage_tags?: string[];
-};
-
-export type StoredDataOutputDto = IdFieldDto | StoredDataCreationDto;
-
-export type UploadOutputDto = NamedFieldDto | IdFieldDto;
-
-export interface ProcessingExecutionInputDto {
-    upload: ProcessingExecutionUploadDto[];
-    stored_data: ProcessingExecutionStoredDataDto[];
-}
-
-export type ProcessingExecutionOutputDto = object;
-
-export type ProcessingExecutionOutputStoredDataDto = ProcessingExecutionOutputDto & {
-    /** Informations simplifiée sur une donnée stockée */
-    stored_data: ProcessingExecutionStoredDataDto;
-};
-
-export type ProcessingExecutionOutputUploadDto = ProcessingExecutionOutputDto & {
-    /** Informations simplifiée sur une livraison */
-    upload: ProcessingExecutionUploadDto;
-};
-
-/** Traitement */
-export interface ProcessingExecutionProcessingDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    name: string;
+/** Informations détaillées sur la nomenclature */
+export interface NomenclatureAdminResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
+    /** Label de la nomenclature */
+    label: string;
+    /** Code de la nomenclature */
+    term: string;
+    /** Type de famille à laquelle appartient la nomenclature */
+    type: NomenclatureAdminResponseDtoTypeEnum;
 }
 
-/** Informations détaillées sur l'exécution de traitement */
-export interface ProcessingExecutionStandardDetailResponseDto {
-    /** @format date-time */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Traitement */
-    processing: ProcessingExecutionProcessingDto;
-    status: ProcessingExecutionStandardDetailResponseDtoStatusEnum;
-    /** @format date-time */
-    launch?: string;
-    /** @format date-time */
-    start?: string;
-    /** @format date-time */
-    finish?: string;
-    inputs: ProcessingExecutionInputDto;
-    output: ProcessingExecutionOutputStoredDataDto | ProcessingExecutionOutputUploadDto;
-    parameters: Record<string, object>;
-    /** Callback à exécuter à la fin de l'exécution */
-    callback?: Callback;
+/** Paramètres de la nomenclature à créer */
+export interface NomenclatureCreateDto {
+    /** Label de la nomenclature */
+    label: string;
+    /** Code de la nomenclature */
+    term: string;
+    /** Type de famille à laquelle appartient la nomenclature */
+    type: NomenclatureCreateDtoTypeEnum;
+}
+
+/** Informations sur la nomenclature */
+export interface NomenclatureResponseDto {
+    /** Label de la nomenclature */
+    label: string;
+    /** Code de la nomenclature */
+    term: string;
+    /** Type de famille à laquelle appartient la nomenclature */
+    type: NomenclatureResponseDtoTypeEnum;
+}
+
+/** Informations sur la nomenclature */
+export interface NomenclatureSimpleResponseDto {
+    /** Label de la nomenclature */
+    label: string;
+    /** Code de la nomenclature */
+    term: string;
+}
+
+/** Paramètres de la nomenclature à modifier */
+export interface NomenclatureUpdateDto {
+    /** Label de la nomenclature */
+    label: string;
+}
+
+export type OAuth2InfoDto = object;
+
+/** Informations détaillées sur l'offre */
+export interface OfferingCatalogResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-}
-
-/** Informations simplifiée sur une donnée stockée */
-export interface ProcessingExecutionStoredDataDto {
+    /**
+     * Indique si l'offre est disponible
+     * @deprecated
+     */
+    available: boolean;
+    /** Informations sur la configuration de l'offre */
+    configuration: ConfigurationBaseResponseDto;
+    contact: string;
     /**
      * Date de création
      * @format date-time
      */
     creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    name: string;
-    type: ProcessingExecutionStoredDataDtoTypeEnum;
-    status: ProcessingExecutionStoredDataDtoStatusEnum;
-    srs: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations simplifiée sur une livraison */
-export interface ProcessingExecutionUploadDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    type: ProcessingExecutionUploadDtoTypeEnum;
-    name: string;
-    status: ProcessingExecutionUploadDtoStatusEnum;
-    srs?: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-export type PermissionAccountCreateDto = UtilRequiredKeys<PermissionCreateDto, "licence" | "offerings"> & {
-    /**
-     * Compte utilisateurs auxquels la permission est rattachée
-     * @uniqueItems true
-     */
-    users: string[];
-};
-
-export type PermissionCommunityCreateDto = UtilRequiredKeys<PermissionCreateDto, "licence" | "offerings"> & {
-    /**
-     * Communautés auxquelles la permission est rattachée
-     * @uniqueItems true
-     */
-    communities: string[];
-};
-
-export interface PermissionAccountBeneficiaryResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    last_name: string;
-    first_name: string;
-}
-
-/** Information sur le bénéficiaire de la permission de l'entrepôt */
-export type PermissionBeneficiaryDto = (
-    | UtilRequiredKeys<PermissionAccountBeneficiaryResponseDto, "creation" | "update" | "_id">
-    | UtilRequiredKeys<PermissionCommunityBeneficiaryResponseDto, "creation" | "update" | "_id">
-) & {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-};
-
-export interface PermissionCommunityBeneficiaryResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    name: string;
-    /** @pattern ^[A-Za-z0-9_\-.]+$ */
-    technical_name: string;
-    contact?: string;
-    public?: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-export interface PermissionDatastoreAuthorDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    name?: string;
-    technical_name?: string;
-    active?: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Information sur l'offre */
-export interface PermissionOfferingResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Type de configuration */
-    type: PermissionOfferingResponseDtoTypeEnum;
-    /** Statut de l'offre */
-    status: PermissionOfferingResponseDtoStatusEnum;
+    /** Informations sur le point d'accès */
+    endpoint: EndpointListResponseDto;
     /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
     layer_name: string;
     /** Indique si l'offre est ouverte sans clé d'accès */
     open: boolean;
-    /** Indique si l'offre est disponible */
-    available: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur la permission */
-export interface PermissionStandardListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
+    /** L'activité de la donnée stockée est-elle publique ? */
+    public_activity: boolean;
+    status: OfferingStatus;
+    type: ConfigurationType;
     /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    /** Licence de la permission */
-    licence: string;
-    /**
-     * Date de fin de la permission
-     * @format date-time
-     */
-    end_date: string;
     /** @uniqueItems true */
-    offerings: PermissionOfferingResponseDto[];
-    datastore_author?: PermissionDatastoreAuthorDto;
-    /** Information sur le bénéficiaire de la permission de l'entrepôt */
-    beneficiary?: PermissionBeneficiaryDto;
-    only_oauth?: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-export interface MetadataPublicationDto {
-    /** @uniqueItems true */
-    file_identifiers: string[];
-    /** @format uuid */
-    endpoint: string;
-}
-
-/** Informations à fournir pour la déclaration d'une nouvelle configuration */
-export interface ConfigurationCreateDto {
-    /** Type de configuration */
-    type: ConfigurationCreateDtoTypeEnum;
-    /** Nom de la configuration */
-    name: string;
-    /** Métadonnées liées au propriétaire de la configuration */
-    attribution?: ConfigurationAttribution;
-    /**
-     * Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point
-     * @pattern ^[A-Za-z_][A-Za-z0-9_\-.]*$
-     */
-    layer_name: string;
-    type_infos:
-        | ConfigurationAltimetryDetailsContent
-        | ConfigurationDownloadDetailsContent
-        | ConfigurationItineraryIsocurveDetailsContent
-        | ConfigurationSearchDetailsContent
-        | ConfigurationVectorTmsDetailsContent
-        | ConfigurationWfsDetailsContent
-        | ConfigurationWmsRasterDetailsContent
-        | ConfigurationWmsVectorDetailsContent
-        | ConfigurationWmtsTmsDetailsContent;
-    /**
-     * Métadonnées liées à la configuration
-     * @uniqueItems true
-     */
-    metadata?: ConfigurationMetadata[];
+    urls?: EndpointUrl[];
+    extra?: Record<string, any>;
 }
 
 /** Paramètre pour la création de l'offre */
@@ -1878,133 +2695,244 @@ export interface OfferingCreateDto {
     public_activity?: boolean;
 }
 
-/** Paramètres de l'annexe à téléverser */
-export interface AnnexCreateDto {
-    /** @format binary */
-    file: File;
+/** Informations détaillées sur l'offre */
+export interface OfferingExtendedDetailResponseDto {
     /**
-     * Chemins dans l'URL publique
-     * @uniqueItems true
+     * Identifiant technique
+     * @format uuid
      */
-    paths: string[];
-    /** État de publication */
-    published?: boolean;
+    _id: string;
     /**
-     * Liste des étiquettes
-     * @uniqueItems true
+     * Indique si l'offre est disponible
+     * @deprecated
      */
-    labels?: string[];
-}
-
-/** Paramètres du stockage à créer */
-export interface StorageCreateDto {
-    /** Le nom du stockage. ce nom doit être unique pour la plateforme */
-    name: string;
-    /** Le type de stockage */
-    type: StorageCreateDtoTypeEnum;
-    /** @uniqueItems true */
-    labels?: string[];
-    type_infos: StorageFileSystemDetailsDto | StorageOpenSearchDetailsDto | StoragePostgresqlDetailsDto | StorageS3DetailsDto;
-}
-
-/** Les informations spécifiques liées au type de stockage */
-export type StorageDetailsDto = object;
-
-/** Les informations spécifiques liées au stockage FILESYSTEM */
-export type StorageFileSystemDetailsDto = StorageDetailsDto & {
+    available: boolean;
     /**
-     * le point de montage du stockage
-     * @pattern \S+
+     * Identifiant de la communauté rattachée
+     * @format uuid
      */
-    mount_name: string;
-};
-
-/** Les informations spécifiques liées au stockage OPENSEARCH */
-export type StorageOpenSearchDetailsDto = StorageDetailsDto & {
-    /**
-     * le hosts pour la connexion au stockage OPENSEARCH
-     * @uniqueItems true
-     */
-    hosts: StorageSocket[];
-};
-
-/** Les informations spécifiques liées au stockage POSTGRESQL */
-export type StoragePostgresqlDetailsDto = StorageDetailsDto & {
-    /** le host pour la connexion au stockage Postgresql */
-    host: string;
-    /**
-     * le port pour la connexion au stockage Postgresql à destination des traitements, et des services en lecture/écriture
-     * @format int32
-     * @min 1
-     * @max 65535
-     */
-    port: number;
-    /**
-     * le port pour la connexion au stockage Postgresql à destination des services en lecture uniquement
-     * @format int32
-     * @min 1
-     * @max 65535
-     */
-    port_read_only?: number;
-    /**
-     * le nom de la base de données sur le serveur Postgresql
-     * @pattern \S+
-     */
-    database_name: string;
-};
-
-/** Les informations spécifiques liées au stockage S3 */
-export type StorageS3DetailsDto = StorageDetailsDto & {
-    /**
-     * le nom du bucket S3
-     * @pattern \S+
-     * @example "potName"
-     */
-    pot_name: string;
-};
-
-/** le hosts pour la connexion au stockage OPENSEARCH */
-export interface StorageSocket {
-    /** le host pour la connexion au stockage */
-    host: string;
-    /**
-     * le port pour la connexion au stockage
-     * @format int32
-     * @min 1
-     * @max 65535
-     */
-    port: number;
-}
-
-/** Informations sur le stockage */
-export interface StorageDetailResponseDto {
+    community: string;
+    /** Informations sur la configuration de l'offre */
+    configuration: ConfigurationBaseResponseDto;
     /**
      * Date de création
      * @format date-time
      */
     creation: string;
     /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** Informations sur le point d'accès */
+    endpoint: EndpointListResponseDto;
+    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
+    layer_name: string;
+    /** Indique si l'offre est ouverte sans clé d'accès */
+    open: boolean;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /** L'activité de la donnée stockée est-elle publique ? */
+    public_activity: boolean;
+    status: OfferingStatus;
+    type: ConfigurationType;
+    /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    /** Le nom du stockage. ce nom est unique pour la plateforme */
-    name: string;
-    /** Le type de stockage */
-    type: StorageType;
     /** @uniqueItems true */
-    labels: string[];
+    urls?: EndpointUrl[];
+    extra?: Record<string, any>;
+}
+
+/** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
+export interface OfferingExtendedListResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-    type_infos?: StorageFileSystemDetailsDto | StorageOpenSearchDetailsDto | StoragePostgresqlDetailsDto | StorageS3DetailsDto;
+    /**
+     * Indique si l'offre est disponible
+     * @deprecated
+     */
+    available: boolean;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /** Informations sur la configuration de l'offre */
+    configuration: ConfigurationBaseResponseDto;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** Informations sur le point d'accès */
+    endpoint: EndpointListResponseDto;
+    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
+    layer_name: string;
+    /** Indique si l'offre est ouverte sans clé d'accès */
+    open: boolean;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /** L'activité de la donnée stockée est-elle publique ? */
+    public_activity: boolean;
+    status: OfferingStatus;
+    type: ConfigurationType;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    /** @uniqueItems true */
+    urls?: EndpointUrl[];
+    extra?: Record<string, any>;
+}
+
+/** Informations détaillées sur l'offre */
+export interface OfferingStandardDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Indique si l'offre est disponible
+     * @deprecated
+     */
+    available: boolean;
+    /** Informations sur la configuration de l'offre */
+    configuration: ConfigurationBaseResponseDto;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Informations sur le point d'accès */
+    endpoint: EndpointListResponseDto;
+    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
+    layer_name: string;
+    /** Indique si l'offre est ouverte sans clé d'accès */
+    open: boolean;
+    /** L'activité de la donnée stockée est-elle publique ? */
+    public_activity: boolean;
+    status: OfferingStatus;
+    type: ConfigurationType;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    /** @uniqueItems true */
+    urls?: EndpointUrl[];
+    extra?: Record<string, any>;
+}
+
+/** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
+export interface OfferingStandardListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Indique si l'offre est disponible
+     * @deprecated
+     */
+    available: boolean;
+    /** Informations sur la configuration de l'offre */
+    configuration: ConfigurationBaseResponseDto;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Informations sur le point d'accès */
+    endpoint: EndpointListResponseDto;
+    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
+    layer_name: string;
+    /** Indique si l'offre est ouverte sans clé d'accès */
+    open: boolean;
+    /** L'activité de la donnée stockée est-elle publique ? */
+    public_activity: boolean;
+    status: OfferingStatus;
+    type: ConfigurationType;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    /** @uniqueItems true */
+    urls?: EndpointUrl[];
+    extra?: Record<string, any>;
+}
+
+export interface OfferingUpdateDto {
+    /**
+     * Indique si l'offre est disponible
+     * @deprecated
+     */
+    available?: boolean;
+    /** Indique si l'offre est ouverte sans clé d'accès */
+    open?: boolean;
+    /** L'activité de l'offre est-elle publique ? */
+    public_activity?: boolean;
+    extra?: Record<string, any>;
+}
+
+/** Informations sur l'organisme */
+export interface OrganizationCatalogResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Nom de l'organisme */
+    name: string;
+    /** SIREN de l'organisme */
+    siren?: string;
+    /** SIRET de l'organisme */
+    siret?: string;
+    /** N° de TVA intracommunautaire de l'organisme */
+    tva_intracom?: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
 }
 
 /** Paramètres de l'organisme à créer */
 export interface OrganizationCreateDto {
-    /** Nom de l'organisme */
+    /**
+     * Identifiant de la nomenclature du modèle économique de l'organisme
+     * @format uuid
+     */
+    economical_model?: string;
+    /**
+     * Nom de l'organisme
+     * @minLength 0
+     * @maxLength 99
+     */
     name: string;
     /**
      * SIREN de l'organisme
@@ -2028,6 +2956,84 @@ export interface OrganizationCreateDto {
      */
     tva_intracom?: string;
     /**
+     * Quota de livraisons pour l'organisme (en octets)
+     * @format int64
+     * @min 0
+     */
+    uploads_quota: number;
+}
+
+/** Informations détaillées sur l'organisme */
+export interface OrganizationDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Informations sur la nomenclature */
+    economical_model?: NomenclatureSimpleResponseDto;
+    /** Nom de l'organisme */
+    name: string;
+    /** SIREN de l'organisme */
+    siren?: string;
+    /** SIRET de l'organisme */
+    siret?: string;
+    /** N° de TVA intracommunautaire de l'organisme */
+    tva_intracom?: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    /**
+     * Quota de livraisons pour l'organisme (en octets)
+     * @format int64
+     */
+    uploads_quota: number;
+    extra?: Record<string, any>;
+}
+
+/** Informations sur l'organisme (les champs creation, siren, siret, tva_intracom, economical_model et uploads_quota ne sont pas retournés par défaut) */
+export interface OrganizationListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Informations sur la nomenclature */
+    economical_model?: NomenclatureSimpleResponseDto;
+    /** Nom de l'organisme */
+    name: string;
+    /** SIREN de l'organisme */
+    siren?: string;
+    /** SIRET de l'organisme */
+    siret?: string;
+    /** N° de TVA intracommunautaire de l'organisme */
+    tva_intracom?: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    /**
+     * Quota de livraisons pour l'organisme (en octets)
+     * @format int64
+     */
+    uploads_quota: number;
+}
+
+export interface OrganizationUpdateDto {
+    /**
      * Identifiant de la nomenclature du modèle économique de l'organisme
      * @format uuid
      */
@@ -2037,586 +3043,294 @@ export interface OrganizationCreateDto {
      * @format int64
      * @min 0
      */
-    uploads_quota: number;
+    uploads_quota?: number;
+    extra?: Record<string, any>;
 }
 
-/** Informations sur la nomenclature */
-export interface NomenclatureSimpleResponseDto {
-    /** Label de la nomenclature */
-    label: string;
-    /** Code de la nomenclature */
-    term: string;
-}
-
-/** Informations détaillées sur l'organisme */
-export interface OrganizationDetailResponseDto {
-    /** @format date-time */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de l'organisme */
-    name: string;
-    /** SIREN de l'organisme */
-    siren?: string;
-    /** SIRET de l'organisme */
-    siret?: string;
-    /** N° de TVA intracommunautaire de l'organisme */
-    tva_intracom?: string;
-    /** Informations sur la nomenclature */
-    economical_model?: NomenclatureSimpleResponseDto;
-    /**
-     * Quota de livraisons pour l'organisme (en octets)
-     * @format int64
-     */
-    uploads_quota: number;
+/**
+ * Account beneficiary
+ * Bénéficiaire de type compte utilisateur
+ */
+export interface PermissionAccountBeneficiaryResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-    extra?: object;
-}
-
-/** Paramètres de la nomenclature à créer */
-export interface NomenclatureCreateDto {
-    /** Type de famille à laquelle appartient la nomenclature */
-    type: NomenclatureCreateDtoTypeEnum;
-    /** Label de la nomenclature */
-    label: string;
-    /** Code de la nomenclature */
-    term: string;
-}
-
-/** Informations détaillées sur la nomenclature */
-export interface NomenclatureAdminResponseDto {
-    /** Label de la nomenclature */
-    label: string;
-    /** Code de la nomenclature */
-    term: string;
-    /** Type de famille à laquelle appartient la nomenclature */
-    type: NomenclatureAdminResponseDtoTypeEnum;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Paramètres du point d'accès à ajouter */
-export interface EndpointCreateDto {
-    /** Nom du point d'accès. ce nom doit être unique. le nom est insensible à la casse */
-    name: string;
-    /**
-     * Nom technique du point d'accès. ce nom technique doit être unique
-     * @pattern (^[a-z0-9-]+$|^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$)
-     */
-    technical_name: string;
-    /** Type du point d'accès */
-    type: EndpointCreateDtoTypeEnum;
-    /** @uniqueItems true */
-    urls: EndpointUrl[];
-    /** Métadonnée obligatoire */
-    force_metadata?: boolean;
-    /** Attribution obligatoire */
-    force_attribution?: boolean;
-    /** Synchronisation avec l'index de recherche */
-    search_publish?: boolean;
-    /** Point d'accès ouvert ? (sans contrôle des accès) */
-    open: boolean;
-    metadata_fi: string;
-}
-
-/** Informations détaillées sur le point d'accès */
-export interface EndpointDetailResponseDto {
     /**
      * Date de création
      * @format date-time
      */
     creation: string;
+    first_name: string;
+    last_name: string;
     /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    /** Nom du point d'accès. ce nom doit être unique. le nom est insensible à la casse */
-    name: string;
-    /** Nom technique du point d'accès. ce nom technique doit être unique */
-    technical_name: string;
-    /** Type du point d'accès */
-    type: EndpointDetailResponseDtoTypeEnum;
-    /** @uniqueItems true */
-    urls: EndpointUrl[];
-    /** Métadonnée obligatoire */
-    force_metadata?: boolean;
-    /** Attribution obligatoire */
-    force_attribution?: boolean;
-    /** Synchronisation avec l'index de recherche */
-    search_publish?: boolean;
+}
+
+export type PermissionAccountCreateDto = UtilRequiredKeys<PermissionCreateDto, "licence" | "offerings"> & {
+    /**
+     * Compte utilisateurs auxquels la permission est rattachée
+     * @minItems 1
+     * @uniqueItems true
+     */
+    users: string[];
+};
+
+/** Information sur le bénéficiaire de la permission de l'entrepôt */
+export type PermissionBeneficiaryDto = PermissionAccountBeneficiaryResponseDto | PermissionCommunityBeneficiaryResponseDto;
+
+/**
+ * Community beneficiary
+ * Bénéficiaire de type communauté
+ */
+export interface PermissionCommunityBeneficiaryResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-    /** Point d'accès ouvert ? (sans contrôle des accès) */
-    open: boolean;
-    metadata_fi?: string;
+    contact?: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @minLength 1 */
+    name: string;
+    public?: boolean;
+    /**
+     * @minLength 1
+     * @pattern ^[A-Za-z0-9_\-.]+$
+     */
+    technical_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
 }
 
-/** Paramètres de l'entrepôt à créer */
-export interface DatastoreCreateDto {
+export type PermissionCommunityCreateDto = UtilRequiredKeys<PermissionCreateDto, "licence" | "offerings"> & {
     /**
-     * Liste des traitements auxquels l'entrepôt a accès
+     * Communautés auxquelles la permission est rattachée
+     * @minItems 1
      * @uniqueItems true
      */
-    processings?: string[];
-    /** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
-    storages: DatastoreStoragesCreateDto;
+    communities: string[];
+};
+
+export interface PermissionCreateDto {
+    /** @format date-time */
+    end_date?: string;
+    /** @minLength 1 */
+    licence: string;
+    name?: string;
     /**
-     * Liste des points d'accès auxquels l'entrepôt a accès
+     * @minItems 1
      * @uniqueItems true
      */
-    endpoints: DatastoreEndpointDto[];
-    /** Préfixe obligatoire pour le file_identifier des métadonnées déposées sur ce datastore */
-    metadata_file_identifier_prefix?: string;
-    /** Préfixe obligatoire pour le layer_name des configurations créées sur ce datastore */
-    configuration_layer_name_prefix?: string;
+    offerings: string[];
+    only_oauth?: boolean;
+    type?: PermissionCreateDtoTypeEnum;
+}
+
+export interface PermissionDatastoreAuthorDto {
     /**
-     * Datastore ouvert aux partages ou non
-     * @default true
+     * Identifiant technique
+     * @format uuid
      */
-    sharings?: boolean;
+    _id: string;
+    active?: boolean;
     /**
-     * Communauté à laquelle l'entrepôt est rattaché
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    name?: string;
+    technical_name?: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations sur la permission */
+export interface PermissionExtendedListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Information sur le bénéficiaire de la permission de l'entrepôt */
+    beneficiary?: PermissionBeneficiaryDto;
+    /**
+     * Identifiant de la communauté rattachée
      * @format uuid
      */
     community: string;
     /**
-     * Liste des vérifications auxquelles l'entrepôt a accès
-     * @uniqueItems true
-     */
-    checks?: string[];
-}
-
-/** Informations sur le point d'accès */
-export interface DatastoreEndpointDto {
-    /**
-     * Nombre d'offres maximum
-     * @format int64
-     */
-    quota: number;
-    /**
-     * Identifiant du point d'accès
-     * @format uuid
-     */
-    endpoint: string;
-}
-
-/** Informations sur le stockage */
-export interface DatastoreStorageDto {
-    /**
-     * Quota en octets
-     * @format int64
-     */
-    quota: number;
-    /**
-     * Identifiant du stockage
-     * @format uuid
-     */
-    storage: string;
-}
-
-/** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
-export interface DatastoreStoragesCreateDto {
-    /**
-     * Liste de stockages pour les données stockées
-     * @uniqueItems true
-     */
-    data: DatastoreStorageDto[];
-    /** Informations sur le stockage */
-    uploads: DatastoreStorageDto;
-    /** Informations sur le stockage */
-    annexes: DatastoreStorageDto;
-}
-
-/** Communauté à laquelle l'entrepôt est rattaché */
-export interface DatastoreCommunityResponseDto {
-    /**
      * Date de création
      * @format date-time
      */
     creation: string;
     /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    contact: string;
-    public: boolean;
-    /**
-     * Identifiant technique
+     * Identifiant du datastore rattaché
      * @format uuid
      */
-    _id: string;
-}
-
-/** Informations sur l'entrepôt */
-export interface DatastoreDetailResponseDto {
+    datastore: string;
+    datastore_author?: PermissionDatastoreAuthorDto;
     /**
-     * Date de création
+     * Date de fin de la permission
      * @format date-time
      */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Communauté à laquelle l'entrepôt est rattaché */
-    community: DatastoreCommunityResponseDto;
-    /**
-     * Liste des traitements auxquels l'entrepôt a accès
-     * @uniqueItems true
-     */
-    processings?: string[];
-    /** Nom de la communauté */
-    name: string;
-    /** Description de la communauté */
-    description?: string;
-    /** Nom technique de la communauté */
-    technical_name: string;
-    /**
-     * Liste des points d'accès auxquels l'entrepôt a accès
-     * @uniqueItems true
-     */
-    endpoints?: DatastoreEndpointStandardResponseDto[];
-    /** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
-    storages: DatastoreStoragesResponseDto;
-    /** Préfixe obligatoire pour le file_identifier des métadonnées déposées sur ce datastore */
-    metadata_file_identifier_prefix?: string;
-    /** Préfixe obligatoire pour le layer_name des configurations créées sur ce datastore */
-    configuration_layer_name_prefix?: string;
-    /** Datastore ouvert aux partages ou non */
-    sharings?: boolean;
-    /** Datastore actif ou non */
-    active: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Liste des vérifications auxquelles l'entrepôt a accès
-     * @uniqueItems true
-     */
-    checks?: string[];
-}
-
-/** Informations sur le point d'accès */
-export interface DatastoreEndpointStandardResponseDto {
-    /**
-     * Nombre d'offres présentes
-     * @format int64
-     */
-    use: number;
-    /**
-     * Nombre d'offres maximum
-     * @format int64
-     */
-    quota: number;
-    /** Informations détaillées sur le point d'accès */
-    endpoint: EndpointDetailResponseDto;
-}
-
-/** Informations sur le stockage */
-export interface DatastoreStorageResponseDto {
-    /**
-     * Espace occupé en octets
-     * @format int64
-     */
-    use: number;
-    /**
-     * Quota en octets
-     * @format int64
-     */
-    quota: number;
-    /** Informations sur le stockage */
-    storage: StorageListResponseDto;
-}
-
-/** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
-export interface DatastoreStoragesResponseDto {
-    /**
-     * Liste de stockages pour les données stockées
-     * @uniqueItems true
-     */
-    data?: DatastoreStorageResponseDto[];
-    /** Informations sur le stockage */
-    uploads: DatastoreStorageResponseDto;
-    /** Informations sur le stockage */
-    annexes: DatastoreStorageResponseDto;
-}
-
-/** Informations sur le stockage */
-export interface StorageListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Le nom du stockage. ce nom est unique pour la plateforme */
-    name: string;
-    /** Le type de stockage */
-    type: StorageType;
+    end_date: string;
+    /** Licence de la permission */
+    licence: string;
+    /** Nom de la permission */
+    name?: string;
     /** @uniqueItems true */
-    labels: string[];
+    offerings?: PermissionOfferingResponseDto[];
+    only_oauth?: boolean;
     /**
-     * Identifiant technique
+     * Identifiant de l'organisme rattaché
      * @format uuid
      */
-    _id: string;
-}
-
-/** Paramètres de la communauté à créer */
-export interface CommunityCreateDto {
-    /** Nom de la communauté */
-    name: string;
-    /** Description de la communauté */
-    description?: string;
-    /**
-     * Nom technique de la communauté
-     * @minLength 0
-     * @maxLength 30
-     * @pattern ^[A-Za-z0-9_\-\.]+$
-     */
-    technical_name: string;
-    /** Nom du contact de la communauté */
-    contact?: string;
-    public?: boolean;
-    /**
-     * ID du superviseur de la communauté
-     * @format uuid
-     */
-    supervisor: string;
-}
-
-/** Informations sur l'entrepôt lié */
-export interface CommunityDatastoreResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
+    organization?: string;
     /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    active?: boolean;
+}
+
+/** Information sur l'offre */
+export interface PermissionOfferingDetailsResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-}
-
-/** Informations détaillées sur la communauté */
-export interface CommunityDetailResponseDto {
+    /**
+     * Indique si l'offre est disponible
+     * @deprecated
+     */
+    available: boolean;
     /**
      * Date de création
      * @format date-time
      */
     creation: string;
+    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
+    layer_name: string;
+    /** Indique si l'offre est ouverte sans clé d'accès */
+    open: boolean;
+    status: OfferingStatus;
+    type: ConfigurationType;
     /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    /** Nom de la communauté */
-    name: string;
-    /** Description de la communauté */
-    description?: string;
-    /** Nom technique de la communauté */
-    technical_name: string;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Informations sur l'organisme de la communauté */
-    organization?: CommunityOrganizationResponseDto;
-    /** Informations sur l'entrepôt lié */
-    datastore?: CommunityDatastoreResponseDto;
-    /** Informations sur le superviseur de la communauté */
-    supervisor: CommunitySupervisorResponseDto;
-    /** Valeur définissant si la communauté est publique ou non */
-    public: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur l'organisme de la communauté */
-export interface CommunityOrganizationResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de l'organisme */
-    name?: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur le superviseur de la communauté */
-export interface CommunitySupervisorResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Adresse électronique du superviseur */
-    email?: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /** Nom du superviseur */
-    last_name?: string;
-    /** Prénom du superviseur */
-    first_name?: string;
-}
-
-/** Paramètres de la vérification à créer */
-export interface CheckingCreateDto {
-    /** Nom de la vérification. ce nom doit être unique pour la plateforme */
-    name: string;
-    /** Description de la vérification */
-    description: string;
-    /** Nom technique de la vérification tel que connu par l'orchestrateur */
-    orchestrator_job_name: string;
-    /**
-     * Priorité de la vérification
-     * @default "STANDARD"
-     */
-    priority?: CheckingCreateDtoPriorityEnum;
     /** @uniqueItems true */
-    default_uploads_check?: CheckingCreateDtoDefaultUploadsCheckEnum[];
+    urls?: EndpointUrl[];
 }
 
-/** Informations sur la vérification */
-export interface CheckingExtendedDetailResponseDto {
+/** Information sur l'offre */
+export interface PermissionOfferingResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Indique si l'offre est disponible
+     * @deprecated
+     */
+    available: boolean;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
+    layer_name: string;
+    /** Indique si l'offre est ouverte sans clé d'accès */
+    open: boolean;
+    status: OfferingStatus;
+    type: ConfigurationType;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Information sur la permission */
+export interface PermissionResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
     /**
      * Date de création
      * @format date-time
      */
     creation: string;
     /**
+     * Date de fin de la permission
+     * @format date-time
+     */
+    end_date: string;
+    /** Licence de la permission */
+    licence: string;
+    /** Nom de la permission */
+    name?: string;
+    only_oauth?: boolean;
+    /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    /** Nom de la vérification. ce nom doit être unique pour la plateforme */
-    name: string;
-    /** Description de la vérification */
-    description: string;
-    /** Priorité de la vérification */
-    priority?: CheckingExtendedDetailResponseDtoPriorityEnum;
-    /** Nom technique de la vérification tel que connu par l'orchestrateur */
-    orchestrator_job_name?: string;
+}
+
+/** Informations sur la permission */
+export interface PermissionStandardListResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-    /** @uniqueItems true */
-    default_uploads_check?: CheckingExtendedDetailResponseDtoDefaultUploadsCheckEnum[];
-}
-
-export interface UserKeyUpdateDto {
-    name?: string;
-    whitelist?: string[];
-    blacklist?: string[];
-    user_agent?: string;
-    referer?: string;
-}
-
-/** Paramètres du document à modifier */
-export interface DocumentUpdateDto {
-    /** Nom du document */
-    name?: string;
-    /** Description du document */
-    description?: string;
+    /** Information sur le bénéficiaire de la permission de l'entrepôt */
+    beneficiary?: PermissionBeneficiaryDto;
     /**
-     * Liste des étiquettes
-     * @uniqueItems true
+     * Date de création
+     * @format date-time
      */
-    labels?: string[];
-    /** URL publique du document */
-    public_url?: boolean;
-    extra?: object;
-}
-
-/** Informations à fournir pour la modification d'une livraison existante */
-export interface UploadUpdateDto {
-    /** Description de la livraison */
-    description?: string;
-    /** Nom de la livraison */
+    creation: string;
+    datastore_author?: PermissionDatastoreAuthorDto;
+    /**
+     * Date de fin de la permission
+     * @format date-time
+     */
+    end_date: string;
+    /** Licence de la permission */
+    licence: string;
+    /** Nom de la permission */
     name?: string;
-    /** Livraison ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open?: boolean;
-    /** Système de coordonnées de référence de la livraison */
-    srs?: string;
-    /** Etendue géographique au format GeoJson */
-    extent?: JsonNode;
-    extra?: object;
-}
-
-/** Informations à fournir pour la modification d'une donnée existante */
-export interface StoredDataUpdateDto {
-    /** Nom de la donnée stockée */
-    name?: string;
-    /** Donnée stockée ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open?: boolean;
-    /** Description de la donnée stockée */
-    description?: string;
-    /** Période d'édition de la donnée stockée */
-    edition?: StoredDataEdition;
-    /** Etendue géographique au format GeoJson */
-    extent?: JsonNode;
-    extra?: object;
-    /** L'activité de la donnée stockée est-elle publique ? */
-    public_activity?: boolean;
-}
-
-/** Paramètres du statique à modifier */
-export interface StaticFileUpdateDto {
-    /** Nom du fichier statique */
-    name?: string;
-    /** Description du fichier statique */
-    description?: string;
-    extra?: object;
+    /** @uniqueItems true */
+    offerings?: PermissionOfferingResponseDto[];
+    only_oauth?: boolean;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
 }
 
 /** Paramètres des permissions à créer */
@@ -2624,128 +3338,1784 @@ export interface PermissionUpdateDto {
     /** @format date-time */
     end_date?: string;
     licence?: string;
+    name?: string;
     /** @uniqueItems true */
     offerings?: string[];
 }
 
-/** Informations à fournir pour la modification d'une offre existante */
-export interface OfferingUpdateDto {
-    /** Indique si l'offre est ouverte sans clé d'accès */
-    open?: boolean;
-    /** Indique si l'offre est disponible */
-    available?: boolean;
-    extra?: object;
-    /** L'activité de l'offre est-elle publique ? */
-    public_activity?: boolean;
-}
-
-export interface MetadataUpdateDto {
-    type?: MetadataUpdateDtoTypeEnum;
-    open_data?: boolean;
-    extra?: object;
-}
-
-/** Informations à fournir pour modifier la configuration */
-export interface ConfigurationPartialUpdateDto {
-    /** Nom de la configuration */
-    name?: string;
-    extra?: object;
-}
-
-/** Informations sur la vérification */
-export interface CheckingExecutionCheckResponseDto {
+/** Information sur la permission */
+export interface PermissionWithOfferingsDetailsResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
     /**
      * Date de création
      * @format date-time
      */
     creation: string;
     /**
+     * Date de fin de la permission
+     * @format date-time
+     */
+    end_date: string;
+    /** Licence de la permission */
+    licence: string;
+    /** Nom de la permission */
+    name?: string;
+    /** @uniqueItems true */
+    offerings?: PermissionOfferingDetailsResponseDto[];
+    only_oauth?: boolean;
+    /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    name: string;
+}
+
+/** Information sur la permission */
+export interface PermissionWithOfferingsResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-}
-
-/** Informations détaillées sur l'exécution de vérification */
-export interface CheckingExecutionStandardDetailResponseDto {
-    /** @format date-time */
+    /**
+     * Date de création
+     * @format date-time
+     */
     creation: string;
+    /**
+     * Date de fin de la permission
+     * @format date-time
+     */
+    end_date: string;
+    /** Licence de la permission */
+    licence: string;
+    /** Nom de la permission */
+    name?: string;
+    /** @uniqueItems true */
+    offerings?: PermissionOfferingResponseDto[];
+    only_oauth?: boolean;
     /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    /** Informations sur la vérification */
-    check: CheckingExecutionCheckResponseDto;
-    status: CheckingExecutionStandardDetailResponseDtoStatusEnum;
-    /** @format date-time */
-    start?: string;
-    /** @format date-time */
-    finish?: string;
-    /** Informations sur la livraison */
-    upload: CheckingExecutionUploadResponseDto;
+}
+
+/** Paramètres du traitement à créer */
+export type ProcessingCreateDto = object;
+
+/** Paramètres de l'exécution de traitement à créer */
+export interface ProcessingExecutionCreateDto {
+    /** Callback à exécuter à la fin de l'exécution */
+    callback?: Callback;
+    /** Données en entrée du traitement */
+    inputs?: ProcessingExecutionCreateInputDto;
+    output: ProcessingExecutionCreateOutputStoredDataDto | ProcessingExecutionCreateOutputUploadDto;
+    /** Paramètres en entrée du traitement */
+    parameters?: Record<string, object>;
+    /**
+     * Identifiant du traitement
+     * @format uuid
+     */
+    processing: string;
+}
+
+/** Données en entrée du traitement */
+export interface ProcessingExecutionCreateInputDto {
+    /** Données stockées en entrée */
+    stored_data?: string[];
+    /** Livraisons en entrée */
+    upload?: string[];
+}
+
+/** Donnée en sortie du traitement */
+export type ProcessingExecutionCreateOutputDto = object;
+
+/** stored_data */
+export type ProcessingExecutionCreateOutputStoredDataDto = ProcessingExecutionCreateOutputDto & {
+    stored_data?: StoredDataOutputDto;
+};
+
+/** upload */
+export type ProcessingExecutionCreateOutputUploadDto = ProcessingExecutionCreateOutputDto & {
+    upload?: UploadOutputDto;
+};
+
+/** Informations détaillées sur l'exécution de traitement */
+export interface ProcessingExecutionExtendedDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
     /** Callback à exécuter à la fin de l'exécution */
     callback?: Callback;
     /**
-     * Identifiant technique
+     * Identifiant de la communauté rattachée
      * @format uuid
      */
-    _id: string;
-}
-
-/** Informations sur la livraison */
-export interface CheckingExecutionUploadResponseDto {
+    community: string;
+    /** Informations sur l'initiateur de l'évènement */
+    created_by: EventInitiatorDto;
     /**
      * Date de création
      * @format date-time
      */
     creation: string;
     /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** @format date-time */
+    finish?: string;
+    inputs: ProcessingExecutionInputDto;
+    /** @format date-time */
+    launch?: string;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    output: ProcessingExecutionOutputStoredDataDto | ProcessingExecutionOutputUploadDto;
+    parameters: Record<string, object>;
+    /** Traitement */
+    processing: ProcessingExecutionProcessingDto;
+    /** @format date-time */
+    start?: string;
+    status: ProcessingExecutionExtendedDetailResponseDtoStatusEnum;
+    /**
      * Date de dernière mise à jour
      * @format date-time
      */
     update: string;
-    type: CheckingExecutionUploadResponseDtoTypeEnum;
-    name: string;
+}
+
+/** Informations sur les traitements */
+export interface ProcessingExecutionExtendedListResponseDto {
     /**
      * Identifiant technique
      * @format uuid
      */
     _id: string;
-}
-
-/** Paramètres modifiables de l'annexe */
-export interface AnnexUpdateDto {
-    /** @uniqueItems true */
-    labels?: string[];
-    published?: boolean;
-    /** @uniqueItems true */
-    paths?: string[];
-    extra?: object;
-}
-
-/** Nouveaux paramètres de la communauté à modifier (ceux non fournis sont laissés en l'état) */
-export interface CommunityUpdateDto {
-    /** Nom de la communauté */
-    name?: string;
-    /** Description de la communauté */
-    description?: string;
-    /** Nom du contact de la communauté */
-    contact?: string;
     /**
-     * ID du superviseur de la communauté
+     * Identifiant de la communauté rattachée
      * @format uuid
      */
-    supervisor?: string;
-    /** Valeur définissant si la communauté est publique ou non */
-    public?: boolean;
+    community: string;
+    /** Informations sur l'initiateur de l'évènement */
+    created_by: EventInitiatorDto;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /**
+     * Date de fin du traitement
+     * @format date-time
+     */
+    finish?: string;
+    /**
+     * Date de lancement du traitement
+     * @format date-time
+     */
+    launch?: string;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /** Traitement */
+    processing: ProcessingExecutionProcessingDto;
+    /**
+     * Date du démarrage du traitement
+     * @format date-time
+     */
+    start?: string;
+    /** Statut des exécutions à récupérer */
+    status: ProcessingExecutionExtendedListResponseDtoStatusEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
 }
+
+export interface ProcessingExecutionInputDto {
+    stored_data: ProcessingExecutionStoredDataDto[];
+    upload: ProcessingExecutionUploadDto[];
+}
+
+export type ProcessingExecutionOutputDto = object;
+
+/** stored_data */
+export type ProcessingExecutionOutputStoredDataDto = ProcessingExecutionOutputDto & {
+    /** Informations simplifiée sur une donnée stockée */
+    stored_data: ProcessingExecutionStoredDataDto;
+};
+
+/** upload */
+export type ProcessingExecutionOutputUploadDto = ProcessingExecutionOutputDto & {
+    /** Informations simplifiée sur une livraison */
+    upload: ProcessingExecutionUploadDto;
+};
+
+/** Traitement */
+export interface ProcessingExecutionProcessingDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations détaillées sur l'exécution de traitement */
+export interface ProcessingExecutionStandardDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Callback à exécuter à la fin de l'exécution */
+    callback?: Callback;
+    /** Informations sur l'initiateur de l'évènement */
+    created_by: EventInitiatorDto;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @format date-time */
+    finish?: string;
+    inputs: ProcessingExecutionInputDto;
+    /** @format date-time */
+    launch?: string;
+    output: ProcessingExecutionOutputStoredDataDto | ProcessingExecutionOutputUploadDto;
+    parameters: Record<string, object>;
+    /** Traitement */
+    processing: ProcessingExecutionProcessingDto;
+    /** @format date-time */
+    start?: string;
+    status: ProcessingExecutionStandardDetailResponseDtoStatusEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations sur les traitements */
+export interface ProcessingExecutionStandardListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Informations sur l'initiateur de l'évènement */
+    created_by: EventInitiatorDto;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Date de fin du traitement
+     * @format date-time
+     */
+    finish?: string;
+    /**
+     * Date de lancement du traitement
+     * @format date-time
+     */
+    launch?: string;
+    /** Traitement */
+    processing: ProcessingExecutionProcessingDto;
+    /**
+     * Date du démarrage du traitement
+     * @format date-time
+     */
+    start?: string;
+    /** Statut des exécutions à récupérer */
+    status: ProcessingExecutionStandardListResponseDtoStatusEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations simplifiée sur une donnée stockée */
+export interface ProcessingExecutionStoredDataDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    name: string;
+    srs: string;
+    status: ProcessingExecutionStoredDataDtoStatusEnum;
+    type: ProcessingExecutionStoredDataDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations simplifiée sur une livraison */
+export interface ProcessingExecutionUploadDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    name: string;
+    srs?: string;
+    status: ProcessingExecutionUploadDtoStatusEnum;
+    type: ProcessingExecutionUploadDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Informations détaillées sur le traitement */
+export type ProcessingExtendedDetailResponseDto = object;
+
+/** Types de données acceptés en entrée du traitement */
+export interface ProcessingInputTypesDto {
+    /**
+     * Types de données stockées en entrée acceptés
+     * @uniqueItems true
+     */
+    stored_data?: ProcessingInputTypesDtoStoredDataEnum[];
+    /**
+     * Types de livraisons en entrée acceptés
+     * @uniqueItems true
+     */
+    upload?: ProcessingInputTypesDtoUploadEnum[];
+}
+
+/** Informations sur le traitement(les champs priority, input_types et output_types ne sont pas retournés par défaut) */
+export interface ProcessingListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description du traitement */
+    description?: string;
+    /** Types de données acceptés en entrée du traitement */
+    input_types?: ProcessingInputTypesDto;
+    /** Nom du traitement. ce nom doit être unique pour la plateforme */
+    name?: string;
+    output_type?: ProcessingOutputTypeStoredDataDto | ProcessingOutputTypeUploadDto;
+    /** Priorité de traitement */
+    priority?: ProcessingListResponseDtoPriorityEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Types de données acceptés en sortie du traitement */
+export type ProcessingOutputTypeDto = object;
+
+/**
+ * stored_data
+ * Type de donnée stockée en sortie du traitement
+ */
+export type ProcessingOutputTypeStoredDataDto = ProcessingOutputTypeDto & {
+    /**
+     * Types de stockage cible du traitement
+     * @minItems 1
+     * @uniqueItems true
+     */
+    storage: ProcessingOutputTypeStoredDataDtoStorageEnum[];
+    /** Type de donnée stockée */
+    stored_data: ProcessingOutputTypeStoredDataDtoStoredDataEnum;
+};
+
+/**
+ * upload
+ * Type de livraison en sortie du traitement
+ */
+export type ProcessingOutputTypeUploadDto = ProcessingOutputTypeDto & {
+    /** Type de livraison */
+    upload: ProcessingOutputTypeUploadDtoUploadEnum;
+};
+
+/** Informations sur le traitement(les champs priority, input_types et output_types ne sont pas retournés par défaut) */
+export interface ProcessingStandardDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description du traitement */
+    description: string;
+    /** Types de données acceptés en entrée du traitement */
+    input_types: ProcessingInputTypesDto;
+    /** Nom du traitement. ce nom doit être unique pour la plateforme */
+    name: string;
+    output_type: ProcessingOutputTypeStoredDataDto | ProcessingOutputTypeUploadDto;
+    /** Priorité de traitement */
+    priority: ProcessingStandardDetailResponseDtoPriorityEnum;
+    /**
+     * Vérifications nécessaires au lancement du traitement
+     * @uniqueItems true
+     */
+    required_checks?: CheckingListResponseDto[];
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Paramètres du traitement à modifier */
+export interface ProcessingUpdateDto {
+    /** Description du traitement */
+    description?: string;
+    /** Nom du traitement. ce nom doit être unique pour la plateforme */
+    name?: string;
+    /** Nom technique du traitement tel que connu par l'orchestrateur */
+    orchestrator_job_name?: string;
+    /** Priorité de traitement */
+    priority?: ProcessingUpdateDtoPriorityEnum;
+}
+
+/** Partage avec un entrepôt */
+export interface SharingOrVisibilityResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Nom */
+    name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Paramètres du statique à ajouter */
+export interface StaticFileCreateDto {
+    /** Description du fichier statique */
+    description?: string;
+    /** @format binary */
+    file: File;
+    /**
+     * Nom du fichier statique
+     * @minLength 1
+     */
+    name: string;
+    /** Type du fichier statique */
+    type: StaticFileCreateDtoTypeEnum;
+}
+
+/**
+ * DERIVATION-SQL
+ * Informations spécifiques d'un fichier de dérivation SQL
+ */
+export type StaticFileDerivationSqlDetailsDto = StaticFileDetailsDto & {
+    /** @uniqueItems true */
+    used_variables?: string[];
+};
+
+/** les informations spécifiques liées au type de statique */
+export type StaticFileDetailsDto = object;
+
+/** Informations détaillées sur le fichier statique */
+export interface StaticFileExtendedDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** Description du fichier statique */
+    description?: string;
+    /** Nom du fichier statique */
+    name: string;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /** Type du fichier statique */
+    type: StaticFileExtendedDetailResponseDtoTypeEnum;
+    type_infos: StaticFileDerivationSqlDetailsDto | StaticFileGeoserverFtlDetailsDto | StaticFileGeoserverStyleDetailsDto | StaticFileRok4StyleDetailsDto;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+/** Informations sur le fichier statique */
+export interface StaticFileExtendedListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** Description du fichier statique */
+    description?: string;
+    /** Nom du fichier statique */
+    name: string;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /** Type du fichier statique */
+    type: StaticFileExtendedListResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/**
+ * GEOSERVER-FTL
+ * Informations spécifiques d'un fichier FTL Geoserver
+ */
+export type StaticFileGeoserverFtlDetailsDto = StaticFileDetailsDto & {
+    /** @uniqueItems true */
+    used_attributes?: string[];
+};
+
+/**
+ * GEOSERVER-STYLE
+ * Informations spécifiques d'un fichier de style SLD Geoserver
+ */
+export type StaticFileGeoserverStyleDetailsDto = StaticFileDetailsDto & {
+    /**
+     * Dénominateur de l'échelle maximale
+     * @format double
+     */
+    max_scale_denominator?: number;
+    /**
+     * Dénominateur de l'échelle minimale
+     * @format double
+     */
+    min_scale_denominator?: number;
+    /** @uniqueItems true */
+    used_attributes?: string[];
+};
+
+/**
+ * ROK4-STYLE
+ * Informations spécifiques d'un fichier de style Rok4
+ */
+export type StaticFileRok4StyleDetailsDto = StaticFileDetailsDto & {
+    /** Identificateur du style ROK4 */
+    identifier?: string;
+    /** Url de la légende du style ROK4 */
+    legend_url?: string;
+};
+
+/** Informations détaillées sur le fichier statique */
+export interface StaticFileStandardDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description du fichier statique */
+    description?: string;
+    /** Nom du fichier statique */
+    name: string;
+    /** Type du fichier statique */
+    type: StaticFileStandardDetailResponseDtoTypeEnum;
+    type_infos: StaticFileDerivationSqlDetailsDto | StaticFileGeoserverFtlDetailsDto | StaticFileGeoserverStyleDetailsDto | StaticFileRok4StyleDetailsDto;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+/** Informations sur le fichier statique */
+export interface StaticFileStandardListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description du fichier statique */
+    description?: string;
+    /** Nom du fichier statique */
+    name: string;
+    /** Type du fichier statique */
+    type: StaticFileStandardListResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Paramètres du statique à modifier */
+export interface StaticFileUpdateDto {
+    /** Description du fichier statique */
+    description?: string;
+    /** Nom du fichier statique */
+    name?: string;
+    extra?: Record<string, any>;
+}
+
+/** Paramètres du stockage à créer */
+export interface StorageCreateDto {
+    /** @uniqueItems true */
+    labels?: string[];
+    /**
+     * Le nom du stockage. ce nom doit être unique pour la plateforme
+     * @minLength 1
+     */
+    name: string;
+    /** Le type de stockage */
+    type: StorageCreateDtoTypeEnum;
+    type_infos: StorageFileSystemDetailsDto | StorageOpenSearchDetailsDto | StoragePostgresqlDetailsDto | StorageS3DetailsDto;
+}
+
+/** Informations sur le stockage */
+export interface StorageDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @uniqueItems true */
+    labels?: string[];
+    /** Le nom du stockage. ce nom est unique pour la plateforme */
+    name: string;
+    /** Le type de stockage */
+    type: StorageType;
+    type_infos?: StorageFileSystemDetailsDto | StorageOpenSearchDetailsDto | StoragePostgresqlDetailsDto | StorageS3DetailsDto;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Les informations spécifiques liées au type de stockage */
+export type StorageDetailsDto = object;
+
+/**
+ * FILESYSTEM
+ * Les informations spécifiques liées au stockage FILESYSTEM
+ */
+export type StorageFileSystemDetailsDto = StorageDetailsDto & {
+    /**
+     * le point de montage du stockage
+     * @minLength 1
+     * @pattern \S+
+     */
+    mount_name: string;
+};
+
+/** Informations sur le stockage */
+export interface StorageListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @uniqueItems true */
+    labels?: string[];
+    /** Le nom du stockage. ce nom est unique pour la plateforme */
+    name: string;
+    /** Le type de stockage */
+    type: StorageType;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/**
+ * OPENSEARCH
+ * Les informations spécifiques liées au stockage OPENSEARCH
+ */
+export type StorageOpenSearchDetailsDto = StorageDetailsDto & {
+    /**
+     * le hosts pour la connexion au stockage OPENSEARCH
+     * @minItems 1
+     * @uniqueItems true
+     */
+    hosts: StorageSocket[];
+};
+
+/**
+ * POSTGRESQL
+ * Les informations spécifiques liées au stockage POSTGRESQL
+ */
+export type StoragePostgresqlDetailsDto = StorageDetailsDto & {
+    /**
+     * le nom de la base de données sur le serveur Postgresql
+     * @minLength 1
+     * @pattern \S+
+     */
+    database_name: string;
+    /**
+     * le host pour la connexion au stockage Postgresql
+     * @minLength 1
+     */
+    host: string;
+    /**
+     * le port pour la connexion au stockage Postgresql à destination des traitements, et des services en lecture/écriture
+     * @format int32
+     * @min 1
+     * @max 65535
+     */
+    port: number;
+    /**
+     * le port pour la connexion au stockage Postgresql à destination des services en lecture uniquement
+     * @format int32
+     * @min 1
+     * @max 65535
+     */
+    port_read_only?: number;
+    /** indique si le stockage PostgreSQL est accessible en écriture */
+    writable?: boolean;
+};
+
+/**
+ * S3
+ * Les informations spécifiques liées au stockage S3
+ */
+export type StorageS3DetailsDto = StorageDetailsDto & {
+    /**
+     * le nom du bucket S3
+     * @minLength 1
+     * @pattern \S+
+     * @example "potName"
+     */
+    pot_name: string;
+};
+
+/** le hosts pour la connexion au stockage OPENSEARCH */
+export interface StorageSocket {
+    /**
+     * le host pour la connexion au stockage
+     * @minLength 1
+     */
+    host: string;
+    /**
+     * le port pour la connexion au stockage
+     * @format int32
+     * @min 1
+     * @max 65535
+     */
+    port: number;
+}
+
+/** Paramètres du stockage  à modifier */
+export interface StorageUpdateDto {
+    /** @uniqueItems true */
+    labels?: string[];
+    /** Le nom du stockage. ce nom doit être unique pour la plateforme */
+    name?: string;
+    /** indique si le stockage PostgreSQL est accessible en écriture (applicable uniquement pour le type POSTGRESQL) */
+    writable?: boolean;
+}
+
+/**
+ * ARCHIVE
+ * Informations spécifiques d'une donnée stockée archive
+ */
+export interface StoredDataArchiveDetailsDto {
+    /**
+     * Nombre de fichiers contenus dans la donnée stockée
+     * @format int32
+     */
+    files_number: number;
+}
+
+/** new_stored_data */
+export interface StoredDataCreationDto {
+    /** Nom de la donnée stockée */
+    name: string;
+    storage_tags?: string[];
+    /** Type de stockage */
+    storage_type?: StoredDataCreationDtoStorageTypeEnum;
+}
+
+export interface StoredDataDependenciesResponseDto {
+    use: StoredDataDependencyResponseDto[];
+    used_by: StoredDataDependencyResponseDto[];
+}
+
+export interface StoredDataDependencyResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    name?: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Détails sur une donnée stockée */
+export type StoredDataDetailsDto =
+    | StoredDataRok4PyramidRasterDetailsDto
+    | StoredDataRok4PyramidVectorDetailsDto
+    | StoredDataVectorDbDetailsDto
+    | StoredDataArchiveDetailsDto
+    | StoredDataGraphDbDetailsDto
+    | StoredDataGraphDetailsDto
+    | StoredDataIndexDetailsDto;
+
+export interface StoredDataDetailsFunctionDto {
+    language?: string;
+    name: string;
+    output_type?: string;
+    parameters?: string;
+}
+
+/** Liste des relations en BDD */
+export interface StoredDataDetailsRelationDto {
+    attributes: Record<string, string>;
+    indexes?: StoredDataDetailsRelationIndexDto[];
+    name: string;
+    primary_key?: string[];
+    triggers?: StoredDataDetailsRelationTriggerDto[];
+    type: StoredDataDetailsRelationDtoTypeEnum;
+}
+
+export interface StoredDataDetailsRelationIndexDto {
+    name: string;
+    using?: string;
+}
+
+export interface StoredDataDetailsRelationTriggerDto {
+    action?: string;
+    manipulation?: string;
+    name: string;
+    orientation?: string;
+    timing?: string;
+}
+
+export interface StoredDataDetailsSequenceDto {
+    name: string;
+}
+
+/** Période d'édition de la donnée stockée */
+export interface StoredDataEdition {
+    /** @format date */
+    from?: string;
+    /** @format date */
+    to?: string;
+}
+
+/** Informations sur la donnée stockée(les champs description, edition, contact, status, size, last_event, creation, tags et bbox ne sont pas retournés par défaut) */
+export interface StoredDataExtendedListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Bounding box (en degrés) */
+    bbox: BoundingBox;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /** Nom du contact de la communauté */
+    contact: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** Description de la donnée stockée */
+    description: string;
+    /** Période d'édition de la donnée stockée */
+    edition: StoredDataEdition;
+    /** Événement */
+    last_event?: EventDto;
+    /** Nom de la donnée stockée */
+    name: string;
+    /** Donnée stockée ouverte ? (visible par tous les entrepôts et utilisateurs) */
+    open: boolean;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /** L'activité de la donnée stockée est-elle publique ? */
+    public_activity: boolean;
+    /**
+     * Taille de la donnée stockée (en octets)
+     * @format int64
+     */
+    size?: number;
+    /** Système de coordonnées de référence de la donnée stockée */
+    srs?: string;
+    /** Statut de la donnée stockée */
+    status: StoredDataExtendedListResponseDtoStatusEnum;
+    /** Liste des étiquettes de la donnée stockée (format clé/valeur) */
+    tags: Record<string, string>;
+    /** Type de donnée stockée */
+    type: StoredDataExtendedListResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/**
+ * GRAPH-DB
+ * Informations spécifiques d'une donnée stockée graphe d'itinéraire DB
+ */
+export interface StoredDataGraphDbDetailsDto {
+    /**
+     * Liste des attributs utilisables du graphe
+     * @minItems 1
+     * @uniqueItems true
+     */
+    attributes: string[];
+    /**
+     * Liste des modes utilisables du graphe
+     * @minItems 1
+     * @uniqueItems true
+     */
+    modes: StoredDataGraphDetailsOptimizationProfileDto[];
+    /**
+     * Liste des relations en BDD
+     * @minItems 1
+     * @uniqueItems true
+     */
+    relations: StoredDataDetailsRelationDto[];
+}
+
+/**
+ * GRAPH-OSRM / GRAPH-VALHALLA
+ * Informations spécifiques d'une donnée stockée graphe d'itinéraire OSRM ou VALHALLA
+ */
+export interface StoredDataGraphDetailsDto {
+    /**
+     * Liste des attributs utilisables du graphe
+     * @minItems 1
+     * @uniqueItems true
+     */
+    attributes: string[];
+    /**
+     * Liste des modes utilisables du graphe
+     * @minItems 1
+     * @uniqueItems true
+     */
+    modes: StoredDataGraphDetailsOptimizationProfileDto[];
+}
+
+/** Liste des modes utilisables du graphe */
+export interface StoredDataGraphDetailsOptimizationProfileDto {
+    /** @minLength 1 */
+    md5: string;
+    /** @minLength 1 */
+    optimization: string;
+    /** @minLength 1 */
+    profile: string;
+}
+
+/**
+ * INDEX
+ * Informations spécifiques d'une donnée stockée index
+ */
+export interface StoredDataIndexDetailsDto {
+    /**
+     * Nombre de documents contenus dans l'index
+     * @format int32
+     */
+    count: number;
+    /** Champs présents dans les documents et leur type */
+    fields: Record<string, string>;
+    /** Indique si l'index se comportera comme l'index standard */
+    is_search_layer: boolean;
+    search_layer?: boolean;
+}
+
+export type StoredDataOutputDto = IdFieldDto | StoredDataCreationDto;
+
+/**
+ * Private_details
+ * Informations détaillées sur la donnée stockée
+ */
+export interface StoredDataPrivateDetailResponseDto {
+    /**
+     * Identifiant de la donnée stockée
+     * @format uuid
+     */
+    _id: string;
+    /** Nom du contact de la communauté */
+    contact: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description de la donnée stockée */
+    description?: string;
+    /** Période d'édition de la donnée stockée */
+    edition?: StoredDataEdition;
+    extent?: JsonNode;
+    /** Événement */
+    last_event?: EventDto;
+    /** Nom de la donnée stockée */
+    name: string;
+    /** Donnée stockée ouverte ? (visible par tous les entrepôts et utilisateurs) */
+    open: boolean;
+    public_activity?: boolean;
+    /**
+     * Taille de la donnée stockée (en octets)
+     * @format int64
+     */
+    size?: number;
+    /** Système de coordonnées de référence de la donnée stockée */
+    srs?: string;
+    /** Statut de la donnée stockée */
+    status: StoredDataPrivateDetailResponseDtoStatusEnum;
+    /** Stockage contenant la donnée stockée */
+    storage: StoredDataStorageDto;
+    /** Liste des étiquettes de la donnée stockée (format clé/valeur) */
+    tags?: Record<string, string>;
+    /** Type de donnée stockée */
+    type: StoredDataPrivateDetailResponseDtoTypeEnum;
+    /** Détails sur une donnée stockée */
+    type_infos?: StoredDataDetailsDto;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+/**
+ * ROK4-PYRAMID-RASTER
+ * Informations spécifiques d'une donnée stockée pyramide Rok4 Raster
+ */
+export interface StoredDataRok4PyramidRasterDetailsDto {
+    channels_format: StoredDataRok4PyramidRasterDetailsDtoChannelsFormatEnum;
+    /**
+     * @format int32
+     * @min 1
+     */
+    channels_number: number;
+    compression: StoredDataRok4PyramidRasterDetailsDtoCompressionEnum;
+    /**
+     * @minItems 1
+     * @uniqueItems true
+     */
+    levels: string[];
+    nodata_value: string;
+    tms: string;
+}
+
+/**
+ * ROK4-PYRAMID-VECTOR
+ * Informations spécifiques d'une donnée stockée pyramide Rok4 Vecteur
+ */
+export interface StoredDataRok4PyramidVectorDetailsDto {
+    /**
+     * @minItems 1
+     * @uniqueItems true
+     */
+    levels: string[];
+    tms: string;
+}
+
+/**
+ * Shared_details
+ * Informations détaillées sur la donnée stockée partagée
+ */
+export interface StoredDataSharedDetailResponseDto {
+    /**
+     * Identifiant de la donnée stockée
+     * @format uuid
+     */
+    _id: string;
+    /** Nom du contact de la communauté */
+    contact: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description de la donnée stockée */
+    description?: string;
+    /** Période d'édition de la donnée stockée */
+    edition?: StoredDataEdition;
+    extent?: JsonNode;
+    /** Nom de la donnée stockée */
+    name: string;
+    /** Donnée stockée ouverte ? (visible par tous les entrepôts et utilisateurs) */
+    open: boolean;
+    /**
+     * Taille de la donnée stockée (en octets)
+     * @format int64
+     */
+    size?: number;
+    /** Système de coordonnées de référence de la donnée stockée */
+    srs?: string;
+    /** Statut de la donnée stockée */
+    status: StoredDataSharedDetailResponseDtoStatusEnum;
+    /** Type de donnée stockée */
+    type: StoredDataSharedDetailResponseDtoTypeEnum;
+    /** Détails sur une donnée stockée */
+    type_infos?: StoredDataDetailsDto;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+/** Informations sur la donnée stockée(les champs description, edition, contact, status, size, last_event, creation, tags et bbox ne sont pas retournés par défaut) */
+export interface StoredDataStandardListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Bounding box (en degrés) */
+    bbox: BoundingBox;
+    /** Nom du contact de la communauté */
+    contact: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description de la donnée stockée */
+    description: string;
+    /** Période d'édition de la donnée stockée */
+    edition: StoredDataEdition;
+    /** Événement */
+    last_event?: EventDto;
+    /** Nom de la donnée stockée */
+    name: string;
+    /** Donnée stockée ouverte ? (visible par tous les entrepôts et utilisateurs) */
+    open: boolean;
+    /** L'activité de la donnée stockée est-elle publique ? */
+    public_activity: boolean;
+    /**
+     * Taille de la donnée stockée (en octets)
+     * @format int64
+     */
+    size?: number;
+    /** Système de coordonnées de référence de la donnée stockée */
+    srs?: string;
+    /** Statut de la donnée stockée */
+    status: StoredDataStandardListResponseDtoStatusEnum;
+    /** Liste des étiquettes de la donnée stockée (format clé/valeur) */
+    tags: Record<string, string>;
+    /** Type de donnée stockée */
+    type: StoredDataStandardListResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Stockage contenant la donnée stockée */
+export interface StoredDataStorageDto {
+    /** @uniqueItems true */
+    labels?: string[];
+    type: StoredDataStorageDtoTypeEnum;
+}
+
+export interface StoredDataUpdateDto {
+    /** Description de la donnée stockée */
+    description?: string;
+    /** Période d'édition de la donnée stockée */
+    edition?: StoredDataEdition;
+    extent?: JsonNode;
+    /** Nom de la donnée stockée */
+    name?: string;
+    /** Donnée stockée ouverte ? (visible par tous les entrepôts et utilisateurs) */
+    open?: boolean;
+    /** L'activité de la donnée stockée est-elle publique ? */
+    public_activity?: boolean;
+    extra?: Record<string, any>;
+}
+
+/**
+ * VECTOR-DB
+ * Informations spécifiques d'une donnée stockée base vectorielle
+ */
+export interface StoredDataVectorDbDetailsDto {
+    /** @uniqueItems true */
+    functions?: StoredDataDetailsFunctionDto[];
+    /**
+     * @minItems 1
+     * @uniqueItems true
+     */
+    relations: StoredDataDetailsRelationDto[];
+    /** @uniqueItems true */
+    sequences?: StoredDataDetailsSequenceDto[];
+}
+
+/** Informations détaillés sur le TMS */
+export interface TileMatrixSetDetailResponseDto {
+    _id: string;
+    /** @uniqueItems true */
+    levels: TileMatrixSetLevelDto[];
+    srs: string;
+}
+
+export interface TileMatrixSetLevelDto {
+    id: string;
+    /** @format double */
+    resolution: number;
+}
+
+/** Informations sur le TMS */
+export interface TileMatrixSetListDto {
+    _id: string;
+    srs: string;
+}
+
+/** Informations à fournir pour la déclaration d'une nouvelle livraison, la livraison est privée par défaut */
+export interface UploadCreateDto {
+    /**
+     * Description de la livraison
+     * @minLength 1
+     */
+    description: string;
+    /**
+     * Nom de la livraison
+     * @minLength 1
+     */
+    name: string;
+    /**
+     * Système de coordonnées de référence de la livraison
+     * @minLength 1
+     */
+    srs: string;
+    /** Type de livraison */
+    type: UploadCreateDtoTypeEnum;
+    /** Informations spécifiques au type de livraison */
+    type_infos?: UploadDetailsDto;
+}
+
+/** Informations spécifiques au type de livraison */
+export type UploadDetailsDto = UploadRok4PyramidDetailsDto | UploadIndexDetailsDto | UploadHistoricImageryDetailsDto | UploadPyramid3DDetailsDto;
+
+/** Informations sur la livraison (les champs contact, size, last_event, tags, creation et bbox ne sont pas retournés par défaut) */
+export interface UploadExtendedListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Bounding box (en degrés) */
+    bbox: BoundingBox;
+    /**
+     * Identifiant de la communauté rattachée
+     * @format uuid
+     */
+    community: string;
+    /** Nom du contact de la communauté */
+    contact: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Identifiant du datastore rattaché
+     * @format uuid
+     */
+    datastore: string;
+    /** Description de la livraison */
+    description: string;
+    /** Événement */
+    last_event?: EventDto;
+    /** Nom de la livraison */
+    name: string;
+    /** Livraison ouverte ? (visible par tous les entrepôts et utilisateurs) */
+    open: boolean;
+    /**
+     * Identifiant de l'organisme rattaché
+     * @format uuid
+     */
+    organization?: string;
+    /**
+     * Taille de la livraison (en octets)
+     * @format int64
+     */
+    size?: number;
+    /** Système de coordonnées de référence de la livraison */
+    srs: string;
+    /** Statut de la livraison */
+    status: UploadExtendedListResponseDtoStatusEnum;
+    /** Liste des étiquettes de la livraison (format clé/valeur) */
+    tags: Record<string, string>;
+    /** Type de livraison */
+    type: UploadExtendedListResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/**
+ * HISTORIC-IMAGERY
+ * Informations spécifiques d'une livraison d'images historiques
+ */
+export interface UploadHistoricImageryDetailsDto {
+    /**
+     * Identifiant de jeu de données
+     * @minLength 1
+     */
+    dataset_identifier: string;
+}
+
+/**
+ * INDEX
+ * Informations spécifiques d'une livraison de type Index
+ */
+export interface UploadIndexDetailsDto {
+    /**
+     * Indique si l'index se comportera comme l'index standard
+     * @default false
+     */
+    is_search_layer?: boolean;
+    search_layer?: boolean;
+}
+
+export type UploadOutputDto = NamedFieldDto | IdFieldDto;
+
+/**
+ * Private_details
+ * Informations détaillées sur la livraison
+ */
+export interface UploadPrivateDetailResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Nom du contact de la communauté */
+    contact: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description de la livraison */
+    description: string;
+    extent?: JsonNode;
+    /** Événement */
+    last_event?: EventDto;
+    /** Nom de la livraison */
+    name: string;
+    /** Livraison ouverte ? (visible par tous les entrepôts et utilisateurs) */
+    open: boolean;
+    /**
+     * Taille de la livraison (en octets)
+     * @format int64
+     */
+    size?: number;
+    /** Système de coordonnées de référence de la livraison */
+    srs: string;
+    /** Statut de la livraison */
+    status: UploadPrivateDetailResponseDtoStatusEnum;
+    /** Liste des étiquettes de la livraison (format clé/valeur) */
+    tags: Record<string, string>;
+    /** Type de livraison */
+    type: UploadPrivateDetailResponseDtoTypeEnum;
+    /** Informations spécifiques au type de livraison */
+    type_infos?: UploadDetailsDto;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    extra?: Record<string, any>;
+}
+
+/**
+ * PYRAMID-3D
+ * Informations spécifiques d'une livraison de pyramide 3D
+ */
+export interface UploadPyramid3DDetailsDto {
+    /** Type de données (pour le type EPT) */
+    data_type?: UploadPyramid3DDetailsDtoDataTypeEnum;
+    /** Coordonnées d'origine du dallage (pour le type COPC) */
+    origin?: Coordinate;
+    /** Type de pyramide 3D */
+    pyramid_type: UploadPyramid3DDetailsDtoPyramidTypeEnum;
+    /**
+     * Span (pour le type EPT)
+     * @format int32
+     * @min 1
+     */
+    span?: number;
+    /** Template de nommage des dalles (pour le type COPC) */
+    template?: string;
+    /**
+     * Largeur des dalles (pour le type COPC)
+     * @format double
+     * @min 0
+     */
+    tile_size?: number;
+}
+
+/**
+ * ROK4-PYRAMID
+ * Informations spécifiques d'une livraison de pyramide Rok4
+ */
+export interface UploadRok4PyramidDetailsDto {
+    /**
+     * Nombre de canaux des images, uniquement pour une pyramide raster
+     * @format int32
+     * @min 1
+     */
+    channels_number?: number;
+    /** Format des données */
+    format: string;
+    /** TileMatrixSet de la pyramide */
+    tms: string;
+}
+
+/** Informations sur la livraison (les champs contact, size, last_event, tags, creation et bbox ne sont pas retournés par défaut) */
+export interface UploadStandardListResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Bounding box (en degrés) */
+    bbox: BoundingBox;
+    /** Nom du contact de la communauté */
+    contact: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** Description de la livraison */
+    description: string;
+    /** Événement */
+    last_event?: EventDto;
+    /** Nom de la livraison */
+    name: string;
+    /** Livraison ouverte ? (visible par tous les entrepôts et utilisateurs) */
+    open: boolean;
+    /**
+     * Taille de la livraison (en octets)
+     * @format int64
+     */
+    size?: number;
+    /** Système de coordonnées de référence de la livraison */
+    srs: string;
+    /** Statut de la livraison */
+    status: UploadStandardListResponseDtoStatusEnum;
+    /** Liste des étiquettes de la livraison (format clé/valeur) */
+    tags: Record<string, string>;
+    /** Type de livraison */
+    type: UploadStandardListResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+/** Arborescence des fichiers liés à la livraison */
+export interface UploadTreeElementResponseDto {
+    children?: UploadTreeElementResponseDto[];
+    name?: string;
+    /** @format int64 */
+    size?: number;
+    type?: string;
+}
+
+export interface UploadUpdateDto {
+    /** Description de la livraison */
+    description?: string;
+    extent?: JsonNode;
+    /** Nom de la livraison */
+    name?: string;
+    /** Livraison ouverte ? (visible par tous les entrepôts et utilisateurs) */
+    open?: boolean;
+    /** Système de coordonnées de référence de la livraison */
+    srs?: string;
+    extra?: Record<string, any>;
+}
+
+export type UserBasicKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
+    type_infos: BasicInfoDto;
+};
+
+export interface UserDetailsResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    administrator?: boolean;
+    communities_member?: CommunityMemberDto[];
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /**
+     * Taille maximum (en octet) disponible pour les documents de l'utilisateur
+     * @format int64
+     */
+    documents_quota?: number;
+    /**
+     * Espace déjà utilisé (en octet) par les documents
+     * @format int64
+     */
+    documents_use?: number;
+    email: string;
+    first_name: string;
+    /**
+     * Nombre maximum de clé que l'utilisateur peut posséder
+     * @format int64
+     */
+    keys_quota?: number;
+    /**
+     * Nombre de clé que l'utilisateur possède
+     * @format int64
+     */
+    keys_use?: number;
+    /** @format date-time */
+    last_login?: string;
+    last_name: string;
+    technical?: boolean;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+export interface UserDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+export type UserHashKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
+    type_infos: HashInfoDto;
+};
+
+export interface UserKeyCreateDtoUserKeyInfoDto {
+    blacklist?: string[];
+    /** @minLength 1 */
+    name: string;
+    referer?: string;
+    type?: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
+    type_infos: UserKeyInfoDto;
+    user_agent?: string;
+    whitelist?: string[];
+}
+
+export interface UserKeyDetailsResponseDtoUserKeyInfoDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    blacklist?: string[];
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @minLength 1 */
+    name: string;
+    referer?: string;
+    type?: UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum;
+    type_infos: UserKeyInfoDto;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+    user_agent?: string;
+    whitelist?: string[];
+}
+
+export type UserKeyInfoDto = object;
+
+export interface UserKeyResponseDto {
+    /**
+     * Identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /**
+     * Date de création
+     * @format date-time
+     */
+    creation: string;
+    /** @minLength 1 */
+    name: string;
+    type?: UserKeyResponseDtoTypeEnum;
+    /**
+     * Date de dernière mise à jour
+     * @format date-time
+     */
+    update: string;
+}
+
+export interface UserKeyUpdateDto {
+    blacklist?: string[];
+    name?: string;
+    referer?: string;
+    user_agent?: string;
+    whitelist?: string[];
+}
+
+export type UserOauth2KeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
+    type_infos: OAuth2InfoDto;
+};
 
 /** Quota de l'utilisateur à modifier */
 export interface UserUpdateDto {
@@ -2763,2269 +5133,156 @@ export interface UserUpdateDto {
     keys_quota?: number;
 }
 
-export interface CommunityMemberDto {
-    rights?: CommunityMemberDtoRightsEnum[];
-    community?: CommunityUserDto;
-}
-
-export interface CommunityUserDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la communauté */
-    name: string;
-    /** Description de la communauté */
-    description?: string;
-    /** Nom technique de la communauté */
-    technical_name: string;
-    /**
-     * Datastore de la communauté
-     * @format uuid
-     */
-    datastore: string;
-    /**
-     * Nom du superviseur de la communauté
-     * @format uuid
-     */
-    supervisor: string;
-    public?: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-export interface UserDetailsResponseDto {
-    /** @format date-time */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    email: string;
-    /** @format date-time */
-    last_login?: string;
-    communities_member?: CommunityMemberDto[];
-    /**
-     * Taille maximum (en octet) disponible pour les documents de l'utilisateur
-     * @format int64
-     */
-    documents_quota?: number;
-    /**
-     * Espace déjà utilisé (en octet) par les documents
-     * @format int64
-     */
-    documents_use?: number;
-    /**
-     * Nombre maximum de clé que l'utilisateur peut posséder
-     * @format int64
-     */
-    keys_quota?: number;
-    /**
-     * Nombre de clé que l'utilisateur possède
-     * @format int64
-     */
-    keys_use?: number;
-    administrator?: boolean;
-    technical?: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    last_name: string;
-    first_name: string;
-}
-
-/** Paramètres du stockage  à modifier */
-export interface StorageUpdateDto {
-    /** Le nom du stockage. ce nom doit être unique pour la plateforme */
-    name?: string;
-    /** @uniqueItems true */
-    labels?: string[];
-}
-
-/** Paramètres du traitement à modifier */
-export interface ProcessingUpdateDto {
-    /** Nom du traitement. ce nom doit être unique pour la plateforme */
-    name?: string;
-    /** Description du traitement */
-    description?: string;
-    /** Nom technique du traitement tel que connu par l'orchestrateur */
-    orchestrator_job_name?: string;
-    /** Priorité de traitement */
-    priority?: ProcessingUpdateDtoPriorityEnum;
-}
-
-/** Paramètres de l'organisme à modifier */
-export interface OrganizationUpdateDto {
-    /**
-     * Identifiant de la nomenclature du modèle économique de l'organisme
-     * @format uuid
-     */
-    economical_model?: string;
-    /**
-     * Quota de livraisons pour l'organisme (en octets)
-     * @format int64
-     * @min 0
-     */
-    uploads_quota?: number;
-    extra?: object;
-}
-
-/** Paramètres de la nomenclature à modifier */
-export interface NomenclatureUpdateDto {
-    /** Label de la nomenclature */
-    label: string;
-}
-
-/** Paramètres du point d'accès à modifier */
-export interface EndpointUpdateDto {
-    /** Nom du point d'accès. ce nom doit être unique. le nom est insensible à la casse */
-    name?: string;
-    /** @uniqueItems true */
-    urls?: EndpointUrl[];
-    /** Métadonnée obligatoire */
-    force_metadata?: boolean;
-    /** Attribution obligatoire */
-    force_attribution?: boolean;
-    /** Synchronisation avec l'index de recherche */
-    search_publish?: boolean;
-    metadata_fi?: string;
-}
-
-/** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
-export interface DatastoreStoragesUpdateDto {
-    /**
-     * Liste de stockages pour les données stockées
-     * @uniqueItems true
-     */
-    data?: DatastoreStorageDto[];
-    /** Informations sur le stockage */
-    uploads?: DatastoreStorageDto;
-    /** Informations sur le stockage */
-    annexes?: DatastoreStorageDto;
-}
-
-/** Nouvelle configuration de l'entrepôt */
-export interface DatastoreUpdateDto {
-    /** Datastore actif ou non */
-    active?: boolean;
-    /**
-     * Liste des traitements auxquels l'entrepôt a accès
-     * @uniqueItems true
-     */
-    processings?: string[];
-    /** Stockages que l'entrepôt utilise et quotas à ne pas dépasser */
-    storages?: DatastoreStoragesUpdateDto;
-    /**
-     * Liste des points d'accès auxquels l'entrepôt a accès
-     * @uniqueItems true
-     */
-    endpoints?: DatastoreEndpointDto[];
-    /**
-     * Préfixe obligatoire pour le file_identifier des métadonnées déposées sur ce datastore
-     * Une chaîne vide permet de supprimer le préfixe
-     */
-    metadata_file_identifier_prefix?: string;
-    /**
-     * Préfixe obligatoire pour le layer_name des configurations créées sur ce datastore
-     * Une chaîne vide permet de supprimer le préfixe
-     */
-    configuration_layer_name_prefix?: string;
-    /** Datastore ouvert aux partages ou non */
-    sharings?: boolean;
-    /**
-     * Liste des vérifications auxquelles l'entrepôt a accès
-     * @uniqueItems true
-     */
-    checks?: string[];
-}
-
-/** Nouveaux paramètres de la vérification à modifier (ceux non fournis sont laissés en l'état) */
-export interface CheckingUpdateDto {
-    /** Nom de la vérification. ce nom doit être unique pour la plateforme */
-    name?: string;
-    /** Description de la vérification */
-    description?: string;
-    /** Nom technique de la vérification tel que connu par l'orchestrateur */
-    orchestrator_job_name?: string;
-    /** Priorité de la vérification */
-    priority?: CheckingUpdateDtoPriorityEnum;
-    /** @uniqueItems true */
-    default_uploads_check?: CheckingUpdateDtoDefaultUploadsCheckEnum[];
-}
-
-/** Informations sur la donnée stockée(les champs description, edition, contact, status, size, last_event, creation, tags et bbox ne sont pas retournés par défaut) */
-export interface StoredDataStandardListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la donnée stockée */
-    name: string;
-    /** Type de donnée stockée */
-    type: StoredDataStandardListResponseDtoTypeEnum;
-    /** Donnée stockée ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open: boolean;
-    /** Système de coordonnées de référence de la donnée stockée */
-    srs?: string;
-    /** Description de la donnée stockée */
-    description: string;
-    /** Statut de la donnée stockée */
-    status: StoredDataStandardListResponseDtoStatusEnum;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Bounding box (en degrés) */
-    bbox: BoundingBox;
-    /**
-     * Taille de la donnée stockée (en octets)
-     * @format int64
-     */
-    size?: number;
-    /** Événement */
-    last_event?: EventDto;
-    /** Liste des étiquettes de la donnée stockée (format clé/valeur) */
-    tags: Record<string, string>;
-    /** Période d'édition de la donnée stockée */
-    edition: StoredDataEdition;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /** L'activité de la donnée stockée est-elle publique ? */
-    public_activity: boolean;
-}
-
-/** Informations détaillées sur la donnée stockée partagée */
-export interface StoredDataSharedDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la donnée stockée */
-    name: string;
-    /** Type de donnée stockée */
-    type: StoredDataSharedDetailResponseDtoTypeEnum;
-    /** Donnée stockée ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open: boolean;
-    /** Système de coordonnées de référence de la donnée stockée */
-    srs?: string;
-    /** Description de la donnée stockée */
-    description?: string;
-    /** Période d'édition de la donnée stockée */
-    edition?: StoredDataEdition;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Etendue géographique au format GeoJson */
-    extent?: JsonNode;
-    /**
-     * Taille de la donnée stockée (en octets)
-     * @format int64
-     */
-    size?: number;
-    /** Statut de la donnée stockée */
-    status: StoredDataSharedDetailResponseDtoStatusEnum;
-    /**
-     * Identifiant de la donnée stockée
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /** Détails sur une donnée stockée */
-    type_infos?: StoredDataDetailsDto;
-}
-
-/** Information sur la permission */
-export interface PermissionWithOfferingsResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Licence de la permission */
-    licence: string;
-    /**
-     * Date de fin de la permission
-     * @format date-time
-     */
-    end_date: string;
-    /** @uniqueItems true */
-    offerings: PermissionOfferingResponseDto[];
-    only_oauth?: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Information sur l'offre */
-export interface PermissionOfferingDetailsResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Type de configuration */
-    type: PermissionOfferingResponseDtoTypeEnum;
-    /** Statut de l'offre */
-    status: PermissionOfferingResponseDtoStatusEnum;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name: string;
-    /** Indique si l'offre est ouverte sans clé d'accès */
-    open: boolean;
-    /** Indique si l'offre est disponible */
-    available: boolean;
-    /** @uniqueItems true */
-    urls?: EndpointUrl[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Information sur la permission */
-export interface PermissionWithOfferingsDetailsResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Licence de la permission */
-    licence: string;
-    /**
-     * Date de fin de la permission
-     * @format date-time
-     */
-    end_date: string;
-    /** @uniqueItems true */
-    offerings: PermissionOfferingDetailsResponseDto[];
-    only_oauth?: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-export interface UserKeyResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    name: string;
-    type?: UserKeyResponseDtoTypeEnum;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Information sur l'accès */
-export interface AccessDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Information sur la permission */
-    permission?: PermissionResponseDto;
-    /** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
-    offering: OfferingStandardListResponseDto;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
-export interface OfferingStandardListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Indique si l'offre est ouverte sans clé d'accès */
-    open: boolean;
-    /** Indique si l'offre est disponible */
-    available: boolean;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name: string;
-    /** Type de configuration */
-    type: OfferingStandardListResponseDtoTypeEnum;
-    /** Statut de l'offre */
-    status: OfferingStandardListResponseDtoStatusEnum;
-    /** Informations sur la configuration de l'offre */
-    configuration: ConfigurationBaseResponseDto;
-    /** Informations sur le point d'accès */
-    endpoint: EndpointListResponseDto;
-    /** @uniqueItems true */
-    urls: EndpointUrl[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /** L'activité de la donnée stockée est-elle publique ? */
-    public_activity: boolean;
-}
-
-/** Information sur la permission */
-export interface PermissionResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Licence de la permission */
-    licence: string;
-    /**
-     * Date de fin de la permission
-     * @format date-time
-     */
-    end_date: string;
-    only_oauth?: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur le document */
-export interface DocumentListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom du document */
-    name: string;
-    /**
-     * La taille du document
-     * @format int64
-     */
-    size: number;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Information sur l'accès avec clé */
-export interface AccessDetailWithKeyResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Information sur la permission */
-    permission: PermissionResponseDto;
-    /** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
-    offering: OfferingStandardListResponseDto;
-    key: UserKeyResponseDto;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur le TMS */
-export interface TileMatrixSetListDto {
-    srs: string;
-    _id: string;
-}
-
-/** Informations détaillés sur le TMS */
-export interface TileMatrixSetDetailResponseDto {
-    srs: string;
-    /** @uniqueItems true */
-    levels: TileMatrixSetLevelDto[];
-    _id: string;
-}
-
-export interface TileMatrixSetLevelDto {
-    /** @format double */
-    resolution: number;
-    id: string;
-}
-
-/** Informations sur la nomenclature */
-export interface NomenclatureResponseDto {
-    /** Label de la nomenclature */
-    label: string;
-    /** Code de la nomenclature */
-    term: string;
-    /** Type de famille à laquelle appartient la nomenclature */
-    type: NomenclatureResponseDtoTypeEnum;
-}
-
-export interface UserDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    email: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    last_name: string;
-    first_name: string;
-}
-
-/** Informations sur la livraison (les champs contact, size, last_event, tags, creation et bbox ne sont pas retournés par défaut) */
-export interface UploadExtendedListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Type de livraison */
-    type: UploadExtendedListResponseDtoTypeEnum;
-    /** Nom de la livraison */
-    name: string;
-    /** Livraison ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open: boolean;
-    /** Système de coordonnées de référence de la livraison */
-    srs: string;
-    /** Description de la livraison */
-    description: string;
-    /** Statut de la livraison */
-    status: UploadExtendedListResponseDtoStatusEnum;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Bounding box (en degrés) */
-    bbox: BoundingBox;
-    /**
-     * Taille de la livraison (en octets)
-     * @format int64
-     */
-    size?: number;
-    /** Événement */
-    last_event?: EventDto;
-    /** Liste des étiquettes de la livraison (format clé/valeur) */
-    tags: Record<string, string>;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur la donnée stockée(les champs description, edition, contact, status, size, last_event, creation, tags et bbox ne sont pas retournés par défaut) */
-export interface StoredDataExtendedListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la donnée stockée */
-    name: string;
-    /** Type de donnée stockée */
-    type: StoredDataExtendedListResponseDtoTypeEnum;
-    /** Donnée stockée ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open: boolean;
-    /** Système de coordonnées de référence de la donnée stockée */
-    srs?: string;
-    /** Description de la donnée stockée */
-    description: string;
-    /** Statut de la donnée stockée */
-    status: StoredDataExtendedListResponseDtoStatusEnum;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Bounding box (en degrés) */
-    bbox: BoundingBox;
-    /**
-     * Taille de la donnée stockée (en octets)
-     * @format int64
-     */
-    size?: number;
-    /** Événement */
-    last_event?: EventDto;
-    /** Liste des étiquettes de la donnée stockée (format clé/valeur) */
-    tags: Record<string, string>;
-    /** Période d'édition de la donnée stockée */
-    edition: StoredDataEdition;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /** L'activité de la donnée stockée est-elle publique ? */
-    public_activity: boolean;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur le fichier statique */
-export interface StaticFileExtendedListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom du fichier statique */
-    name: string;
-    /** Type du fichier statique */
-    type: StaticFileExtendedListResponseDtoTypeEnum;
-    /** Description du fichier statique */
-    description?: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur les traitements */
-export interface ProcessingExecutionExtendedListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Traitement */
-    processing: ProcessingExecutionProcessingDto;
-    /** Statut des exécutions à récupérer */
-    status: ProcessingExecutionExtendedListResponseDtoStatusEnum;
-    /**
-     * Date de lancement du traitement
-     * @format date-time
-     */
-    launch?: string;
-    /**
-     * Date du démarage du traitement
-     * @format date-time
-     */
-    start?: string;
-    /**
-     * Date de fin du traitement
-     * @format date-time
-     */
-    finish?: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur la permission */
-export interface PermissionExtendedListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Licence de la permission */
-    licence: string;
-    /**
-     * Date de fin de la permission
-     * @format date-time
-     */
-    end_date: string;
-    /** @uniqueItems true */
-    offerings: PermissionOfferingResponseDto[];
-    datastore_author?: PermissionDatastoreAuthorDto;
-    /** Information sur le bénéficiaire de la permission de l'entrepôt */
-    beneficiary?: PermissionBeneficiaryDto;
-    only_oauth?: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur l'offre (les champs endpoint, configuration, urls, extra, creation et update ne sont pas retournés par défaut) */
-export interface OfferingExtendedListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Indique si l'offre est ouverte sans clé d'accès */
-    open: boolean;
-    /** Indique si l'offre est disponible */
-    available: boolean;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name: string;
-    /** Type de configuration */
-    type: OfferingExtendedListResponseDtoTypeEnum;
-    /** Statut de l'offre */
-    status: OfferingExtendedListResponseDtoStatusEnum;
-    /** Informations sur la configuration de l'offre */
-    configuration: ConfigurationBaseResponseDto;
-    /** Informations sur le point d'accès */
-    endpoint: EndpointListResponseDto;
-    /** @uniqueItems true */
-    urls: EndpointUrl[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /** L'activité de la donnée stockée est-elle publique ? */
-    public_activity: boolean;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur le point d'accès */
-export interface DatastoreEndpointExtendedResponseDto {
-    /**
-     * Nombre d'offres présentes
-     * @format int64
-     */
-    use: number;
-    /**
-     * Nombre d'offres maximum
-     * @format int64
-     */
-    quota: number;
-    /** Informations détaillées sur le point d'accès */
-    endpoint: EndpointDetailResponseDto;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur la configuration (les champs metadatas, attribution, last_event, tags, creation et update ne sont pas retournés par défaut) */
-export interface ConfigurationExtendedListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la configuration */
-    name?: string;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name?: string;
-    /** Type de configuration */
-    type?: ConfigurationExtendedListResponseDtoTypeEnum;
-    /** Statut de la configuration */
-    status?: ConfigurationExtendedListResponseDtoStatusEnum;
-    /** Liste des étiquettes  de configuration (format clé/valeur) */
-    tags?: Record<string, string>;
-    /** Métadonnées liées au propriétaire de la configuration */
-    attribution?: ConfigurationAttribution;
-    /** Événement */
-    last_event?: ConfigurationEventDto;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Métadonnées liées à la configuration
-     * @uniqueItems true
-     */
-    metadata?: ConfigurationMetadata[];
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur la communauté */
-export interface CommunityListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la communauté */
-    name: string;
-    /** Description de la communauté */
-    description?: string;
-    /** Nom technique de la communauté */
-    technical_name: string;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Informations sur l'organisme de la communauté */
-    organization?: CommunityOrganizationResponseDto;
-    /** Valeur définissant si la communauté est publique ou non */
-    public: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur l'annexe */
-export interface AnnexExtendedListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** @uniqueItems true */
-    paths: string[];
-    /** @format int64 */
-    size: number;
-    mime_type: string;
-    published: boolean;
-    /** @uniqueItems true */
-    labels?: string[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur la livraison (les champs contact, size, last_event, tags, creation et bbox ne sont pas retournés par défaut) */
-export interface UploadStandardListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Type de livraison */
-    type: UploadStandardListResponseDtoTypeEnum;
-    /** Nom de la livraison */
-    name: string;
-    /** Livraison ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open: boolean;
-    /** Système de coordonnées de référence de la livraison */
-    srs: string;
-    /** Description de la livraison */
-    description: string;
-    /** Statut de la livraison */
-    status: UploadStandardListResponseDtoStatusEnum;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Bounding box (en degrés) */
-    bbox: BoundingBox;
-    /**
-     * Taille de la livraison (en octets)
-     * @format int64
-     */
-    size?: number;
-    /** Événement */
-    last_event?: EventDto;
-    /** Liste des étiquettes de la livraison (format clé/valeur) */
-    tags: Record<string, string>;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations détaillées sur la livraison partagée */
-export interface UploadSharedDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la livraison */
-    name: string;
-    /** Description de la livraison */
-    description: string;
-    /** Type de livraison */
-    type: UploadSharedDetailResponseDtoTypeEnum;
-    /** Livraison ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open: boolean;
-    /** Statut de la livraison */
-    status: UploadSharedDetailResponseDtoStatusEnum;
-    /** Système de coordonnées de référence de la livraison */
-    srs: string;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Etendue géographique au format GeoJson */
-    extent?: JsonNode;
-    /**
-     * Taille de la livraison (en octets)
-     * @format int64
-     */
-    size?: number;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /** Informations spécifiques au type de livraison */
-    type_infos?: UploadDetailsDto;
-}
-
-/** Informations sur une livraison partagée ou personnelle */
-export type UploadStandardDetailResponseDto = UploadPrivateDetailResponseDto | UploadSharedDetailResponseDto;
-
-/** Arborescence des fichiers liés à la livraison */
-export interface UploadTreeElementResponseDto {
-    type?: string;
-    name?: string;
-    /** @format int64 */
-    size?: number;
-    children?: UploadTreeElementResponseDto[];
-}
-
-/** Evénement */
-export interface EventResponseDto {
-    /** @format date-time */
-    date: string;
-    title: string;
-    text?: string;
-    /** Information sur l'auteur */
-    initiator: AuthorResponseDto;
-}
-
-/** Executions de vérification liées à la livraison */
-export interface CheckResponseDto {
-    asked?: CheckingExecutionListDto[];
-    in_progress?: CheckingExecutionListDto[];
-    passed?: CheckingExecutionListDto[];
-    failed?: CheckingExecutionListDto[];
-}
-
-/** Informations sur l'exécution de vérification liée à la livraison */
-export interface CheckingExecutionListDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Informations sur la vérification */
-    check: CheckingExecutionCheckResponseDto;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Producteur */
-export interface AuthorDto {
-    /** Nom */
-    name: string;
-    /** Email */
-    email: string;
-}
-
-/** Catégories */
-export interface CategoryDto {
-    term: string;
-    label: string;
-}
-
-/** Entrées */
-export interface EntryDto {
-    /** Identifiant */
-    id: string;
-    /** Nom */
-    title: string;
-    /** Description */
-    subtitle?: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    updated?: string;
-    /** Liens */
-    links: LinkDto[];
-    /** Description */
-    content: string;
-    /** Catégories */
-    categories: CategoryDto[];
-    /** Bounding box (en degrés) */
-    polygon?: BoundingBox;
-}
-
-export interface FeedDto {
-    /** Identifiant */
-    id: string;
-    /** Nom */
-    title: string;
-    /** Description */
-    subtitle?: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    updated?: string;
-    /** Liens */
-    links: LinkDto[];
-    xmlns?: string;
-    /** Licence et conditions d'utilisation */
-    rights: string;
-    /** Producteur */
-    author: AuthorDto;
-    /** Entrées */
-    entries: EntryDto[];
-}
-
-/** Liens */
-export interface LinkDto {
-    /** URL */
-    href: string;
-    /** Mime-type de la cible */
-    type: string;
-    /** Nom */
-    title: string;
-    /** Type de lien */
-    rel: string;
-}
-
-/** Informations sur une donnée stockée partagée ou personnelle */
-export type StoredDataStandardDetailResponseDto = StoredDataPrivateDetailResponseDto | StoredDataSharedDetailResponseDto;
-
-export interface StoredDataDependenciesResponseDto {
-    used_by: StoredDataDependencyResponseDto[];
-    use: StoredDataDependencyResponseDto[];
-}
-
-export interface StoredDataDependencyResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    name?: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur le fichier statique */
-export interface StaticFileStandardListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom du fichier statique */
-    name: string;
-    /** Type du fichier statique */
-    type: StaticFileStandardListResponseDtoTypeEnum;
-    /** Description du fichier statique */
-    description?: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur le traitement(les champs priority, input_types et output_types ne sont pas retournés par défaut) */
-export interface ProcessingListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom du traitement. ce nom doit être unique pour la plateforme */
-    name?: string;
-    /** Description du traitement */
-    description?: string;
-    /** Priorité de traitement */
-    priority?: ProcessingListResponseDtoPriorityEnum;
-    /** Types de données acceptés en entrée du traitement */
-    input_types?: ProcessingInputTypesDto;
-    output_type?: ProcessingOutputTypeStoredDataDto | ProcessingOutputTypeUploadDto;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur le traitement(les champs priority, input_types et output_types ne sont pas retournés par défaut) */
-export interface ProcessingStandardDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom du traitement. ce nom doit être unique pour la plateforme */
-    name: string;
-    /** Description du traitement */
-    description: string;
-    /** Priorité de traitement */
-    priority: ProcessingStandardDetailResponseDtoPriorityEnum;
-    /** Types de données acceptés en entrée du traitement */
-    input_types: ProcessingInputTypesDto;
-    output_type: ProcessingOutputTypeStoredDataDto | ProcessingOutputTypeUploadDto;
-    /**
-     * Paramètres en entrée du traitement
-     * @uniqueItems true
-     */
-    parameters: (ProcessingParameterFreeDto | ProcessingParameterStaticFileDto)[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Vérifications nécessaires au lancement du traitement
-     * @uniqueItems true
-     */
-    required_checks: CheckingListResponseDto[];
-}
-
-/** Informations sur les traitements */
-export interface ProcessingExecutionStandardListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Traitement */
-    processing: ProcessingExecutionProcessingDto;
-    /** Statut des exécutions à récupérer */
-    status: ProcessingExecutionStandardListResponseDtoStatusEnum;
-    /**
-     * Date de lancement du traitement
-     * @format date-time
-     */
-    launch?: string;
-    /**
-     * Date du démarage du traitement
-     * @format date-time
-     */
-    start?: string;
-    /**
-     * Date de fin du traitement
-     * @format date-time
-     */
-    finish?: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur l'entrepôt partagé */
-export interface DatastoreSharingResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    name: string;
-    description?: string;
-    technical_name: string;
-    active: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur la configuration (les champs metadatas, attribution, last_event, tags, creation et update ne sont pas retournés par défaut) */
-export interface ConfigurationStandardListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la configuration */
-    name?: string;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name?: string;
-    /** Type de configuration */
-    type?: ConfigurationStandardListResponseDtoTypeEnum;
-    /** Statut de la configuration */
-    status?: ConfigurationStandardListResponseDtoStatusEnum;
-    /** Liste des étiquettes  de configuration (format clé/valeur) */
-    tags?: Record<string, string>;
-    /** Métadonnées liées au propriétaire de la configuration */
-    attribution?: ConfigurationAttribution;
-    /** Événement */
-    last_event?: ConfigurationEventDto;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Métadonnées liées à la configuration
-     * @uniqueItems true
-     */
-    metadata?: ConfigurationMetadata[];
-}
-
-/** Informations détaillées sur la vérification */
-export interface CheckingStandardDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la vérification. ce nom doit être unique pour la plateforme */
-    name: string;
-    /** Description de la vérification */
-    description: string;
-    /** Priorité de la vérification */
-    priority?: CheckingStandardDetailResponseDtoPriorityEnum;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /** @uniqueItems true */
-    default_uploads_check?: CheckingStandardDetailResponseDtoDefaultUploadsCheckEnum[];
-}
-
-/** Informations sur l'exécution de vérification */
-export interface CheckingExecutionListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Informations sur la vérification */
-    check: CheckingExecutionCheckResponseDto;
-    status: CheckingExecutionListResponseDtoStatusEnum;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations sur l'annexe */
-export interface AnnexStandardListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** @uniqueItems true */
-    paths: string[];
-    /** @format int64 */
-    size: number;
-    mime_type: string;
-    published: boolean;
-    /** @uniqueItems true */
-    labels?: string[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-export interface CommunityUserResponseDto {
-    rights?: CommunityUserResponseDtoRightsEnum[];
-    user: UserDto;
-    /**
-     * Date d'ajout de l'utilisateur à la communauté
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour de l'utilisateur dans la communauté
-     * @format date-time
-     */
-    update: string;
-}
-
-/** Informations sur l'organisme */
-export interface OrganizationCatalogResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de l'organisme */
-    name: string;
-    /** SIREN de l'organisme */
-    siren?: string;
-    /** SIRET de l'organisme */
-    siret?: string;
-    /** N° de TVA intracommunautaire de l'organisme */
-    tva_intracom?: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations détaillées sur l'offre */
-export interface OfferingCatalogResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Indique si l'offre est ouverte sans clé d'accès */
-    open: boolean;
-    /** Indique si l'offre est disponible */
-    available: boolean;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name: string;
-    /** Type de configuration */
-    type: OfferingCatalogResponseDtoTypeEnum;
-    /** Statut de l'offre */
-    status: OfferingCatalogResponseDtoStatusEnum;
-    /** Informations sur la configuration de l'offre */
-    configuration: ConfigurationBaseResponseDto;
-    /** Informations sur le point d'accès */
-    endpoint: EndpointListResponseDto;
-    /** @uniqueItems true */
-    urls: EndpointUrl[];
-    contact: string;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /** L'activité de la donnée stockée est-elle publique ? */
-    public_activity: boolean;
-}
-
-/** Informations détaillées sur la livraison */
-export interface UploadExtendedDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la livraison */
-    name: string;
-    /** Description de la livraison */
-    description: string;
-    /** Type de livraison */
-    type: UploadExtendedDetailResponseDtoTypeEnum;
-    /** Livraison ouverte ? (visible par tous les entrepôts et utilisateurs) */
-    open: boolean;
-    /** Statut de la livraison */
-    status: UploadExtendedDetailResponseDtoStatusEnum;
-    /** Système de coordonnées de référence de la livraison */
-    srs: string;
-    /** Nom du contact de la communauté */
-    contact: string;
-    /** Etendue géographique au format GeoJson */
-    extent?: JsonNode;
-    /**
-     * Taille de la livraison (en octets)
-     * @format int64
-     */
-    size?: number;
-    /** Événement */
-    last_event?: EventDto;
-    /** Liste des étiquettes de la livraison (format clé/valeur) */
-    tags: Record<string, string>;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /** Informations spécifiques au type de livraison */
-    type_infos?: UploadDetailsDto;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur l'entrepôt */
-export interface DatastoreListWithStorageUsageResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la communauté */
-    name: string;
-    /** Nom technique de la communauté */
-    technical_name: string;
-    /**
-     * Espace occupé en octets pour les annexes
-     * @format int64
-     */
-    storage_annexes_use?: number;
-    /**
-     * Quota en octets pour les annexes
-     * @format int64
-     */
-    storage_annexes_quota?: number;
-    /**
-     * Espace occupé en octets pour les livraisons
-     * @format int64
-     */
-    storage_uploads_use?: number;
-    /**
-     * Quota en octets pour les livraisons
-     * @format int64
-     */
-    storage_uploads_quota?: number;
-    /**
-     * Espace occupé en octets pour les données stockées
-     * @format int64
-     */
-    storage_data_use?: number;
-    /**
-     * Quota en octets pour les données stockées
-     * @format int64
-     */
-    storage_data_quota?: number;
-    /** Datastore actif ou non */
-    active: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations détaillées sur le fichier statique */
-export interface StaticFileExtendedDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom du fichier statique */
-    name: string;
-    /** Description du fichier statique */
-    description?: string;
-    /** Type du fichier statique */
-    type: StaticFileExtendedDetailResponseDtoTypeEnum;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    type_infos: StaticFileDerivationSqlDetailsDto | StaticFileGeoserverFtlDetailsDto | StaticFileGeoserverStyleDetailsDto | StaticFileRok4StyleDetailsDto;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur l'entrepôt */
-export interface DatastoreListResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la communauté */
-    name: string;
-    /** Nom technique de la communauté */
-    technical_name: string;
-    /** Datastore actif ou non */
-    active: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations détaillées sur l'exécution de traitement */
-export interface ProcessingExecutionExtendedDetailResponseDto {
-    /** @format date-time */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Traitement */
-    processing: ProcessingExecutionProcessingDto;
-    status: ProcessingExecutionExtendedDetailResponseDtoStatusEnum;
-    /** @format date-time */
-    launch?: string;
-    /** @format date-time */
-    start?: string;
-    /** @format date-time */
-    finish?: string;
-    inputs: ProcessingExecutionInputDto;
-    output: ProcessingExecutionOutputStoredDataDto | ProcessingExecutionOutputUploadDto;
-    parameters: Record<string, object>;
-    /** Callback à exécuter à la fin de l'exécution */
-    callback?: Callback;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur l'organisme (les champs creation, siren, siret, tva_intracom, economical_model et uploads_quota ne sont pas retournés par défaut) */
-export interface OrganizationListResponseDto {
-    /** @format date-time */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de l'organisme */
-    name: string;
-    /** SIREN de l'organisme */
-    siren?: string;
-    /** SIRET de l'organisme */
-    siret?: string;
-    /** N° de TVA intracommunautaire de l'organisme */
-    tva_intracom?: string;
-    /** Informations sur la nomenclature */
-    economical_model?: NomenclatureSimpleResponseDto;
-    /**
-     * Quota de livraisons pour l'organisme (en octets)
-     * @format int64
-     */
-    uploads_quota: number;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations détaillées sur l'offre */
-export interface OfferingExtendedDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Indique si l'offre est ouverte sans clé d'accès */
-    open: boolean;
-    /** Indique si l'offre est disponible */
-    available: boolean;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name: string;
-    /** Type de configuration */
-    type: OfferingExtendedDetailResponseDtoTypeEnum;
-    /** Statut de l'offre */
-    status: OfferingExtendedDetailResponseDtoStatusEnum;
-    /** Informations sur la configuration de l'offre */
-    configuration: ConfigurationBaseResponseDto;
-    /** Informations sur le point d'accès */
-    endpoint: EndpointListResponseDto;
-    /** @uniqueItems true */
-    urls: EndpointUrl[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /** L'activité de la donnée stockée est-elle publique ? */
-    public_activity: boolean;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations détaillées sur la métadonnée */
-export interface MetadataExtendedResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    type: MetadataExtendedResponseDtoTypeEnum;
-    open_data: boolean;
-    level: MetadataExtendedResponseDtoLevelEnum;
-    file_identifier: string;
-    tags?: Record<string, string>;
-    endpoints?: EndpointListResponseDto[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations sur l'entrepôt */
-export interface DatastoreListWithEndpointUsageResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la communauté */
-    name: string;
-    /** Nom technique de la communauté */
-    technical_name: string;
-    /**
-     * Espace occupé en octets
-     * @format int64
-     */
-    use: number;
-    /**
-     * Quota en octets
-     * @format int64
-     */
-    quota: number;
-    /** Datastore actif ou non */
-    active: boolean;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-/** Informations détaillées sur la configuration */
-export interface ConfigurationExtendedDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Nom de la configuration */
-    name: string;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Ne peut commencer que par un caractère alphabétique ou un tiret bas, puis uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name: string;
-    /** Type de configuration */
-    type: ConfigurationExtendedDetailResponseDtoTypeEnum;
-    status: ConfigurationExtendedDetailResponseDtoStatusEnum;
-    tags: Record<string, string>;
-    /** Métadonnées liées au propriétaire de la configuration */
-    attribution?: ConfigurationAttribution;
-    /** Événement */
-    last_event?: ConfigurationEventDto;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /**
-     * Métadonnées liées à la configuration
-     * @uniqueItems true
-     */
-    metadata?: ConfigurationMetadata[];
-    type_infos:
-        | ConfigurationAltimetryDetailsContent
-        | ConfigurationDownloadDetailsContent
-        | ConfigurationItineraryIsocurveDetailsContent
-        | ConfigurationSearchDetailsContent
-        | ConfigurationVectorTmsDetailsContent
-        | ConfigurationWfsDetailsContent
-        | ConfigurationWmsRasterDetailsContent
-        | ConfigurationWmsVectorDetailsContent
-        | ConfigurationWmtsTmsDetailsContent;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations détaillées sur l'exécution de vérification */
-export interface CheckingExecutionExtendedDetailResponseDto {
-    /** @format date-time */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** Informations sur la vérification */
-    check: CheckingExecutionCheckResponseDto;
-    status: CheckingExecutionExtendedDetailResponseDtoStatusEnum;
-    /** @format date-time */
-    start?: string;
-    /** @format date-time */
-    finish?: string;
-    /** Informations sur la livraison */
-    upload: CheckingExecutionUploadResponseDto;
-    /** Callback à exécuter à la fin de l'exécution */
-    callback?: Callback;
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-/** Informations détaillées sur l'annexe */
-export interface AnnexExtendedDetailResponseDto {
-    /**
-     * Date de création
-     * @format date-time
-     */
-    creation: string;
-    /**
-     * Date de dernière mise à jour
-     * @format date-time
-     */
-    update: string;
-    /** @uniqueItems true */
-    paths: string[];
-    /** @format int64 */
-    size: number;
-    mime_type: string;
-    published: boolean;
-    /** @uniqueItems true */
-    labels?: string[];
-    /**
-     * Identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    extra?: object;
-    /**
-     * Identifiant de l'organisme rattaché
-     * @format uuid
-     */
-    organization?: string;
-    /**
-     * Identifiant de la communauté rattachée
-     * @format uuid
-     */
-    community: string;
-    /**
-     * Identifiant du datastore rattaché
-     * @format uuid
-     */
-    datastore: string;
-}
-
-export enum PermissionCreateDtoTypeEnum {
-    ACCOUNT = "ACCOUNT",
+/** Type de callback */
+export enum CallbackTypeEnum {
+    Email = "email",
+}
+
+/** Types de livraisons ayant cette vérification par défaut */
+export enum CheckingCreateDtoDefaultUploadsCheckEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
+}
+
+/**
+ * Priorité de la vérification
+ * @default "STANDARD"
+ */
+export enum CheckingCreateDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+    SANDBOX = "SANDBOX",
+    STRONG = "STRONG",
+    EXTRACTION = "EXTRACTION",
+    LIDAR = "LIDAR",
+}
+
+export enum CheckingExecutionExtendedDetailResponseDtoStatusEnum {
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+}
+
+export enum CheckingExecutionListResponseDtoStatusEnum {
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+}
+
+export enum CheckingExecutionStandardDetailResponseDtoStatusEnum {
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+}
+
+export enum CheckingExecutionUploadResponseDtoTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
+}
+
+/** Types de livraisons ayant cette vérification par défaut */
+export enum CheckingExtendedDetailResponseDtoDefaultUploadsCheckEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
+}
+
+/** Priorité de la vérification */
+export enum CheckingExtendedDetailResponseDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+    SANDBOX = "SANDBOX",
+    STRONG = "STRONG",
+    EXTRACTION = "EXTRACTION",
+    LIDAR = "LIDAR",
+}
+
+/** Types de livraisons ayant cette vérification par défaut */
+export enum CheckingStandardDetailResponseDtoDefaultUploadsCheckEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
+}
+
+/** Priorité de la vérification */
+export enum CheckingStandardDetailResponseDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+    SANDBOX = "SANDBOX",
+    STRONG = "STRONG",
+    EXTRACTION = "EXTRACTION",
+    LIDAR = "LIDAR",
+}
+
+/** Types de livraisons ayant cette vérification par défaut */
+export enum CheckingUpdateDtoDefaultUploadsCheckEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
+}
+
+/** Priorité de la vérification */
+export enum CheckingUpdateDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+    SANDBOX = "SANDBOX",
+    STRONG = "STRONG",
+    EXTRACTION = "EXTRACTION",
+    LIDAR = "LIDAR",
+}
+
+export enum CommunityAddUserDtoRightsEnum {
     COMMUNITY = "COMMUNITY",
+    PROCESSING = "PROCESSING",
+    ANNEX = "ANNEX",
+    BROADCAST = "BROADCAST",
+    UPLOAD = "UPLOAD",
 }
 
-export enum UserKeyCreateDtoUserKeyInfoDtoTypeEnum {
-    HASH = "HASH",
-    HEADER = "HEADER",
-    BASIC = "BASIC",
-    OAUTH2 = "OAUTH2",
+export enum CommunityMemberDtoRightsEnum {
+    COMMUNITY = "COMMUNITY",
+    PROCESSING = "PROCESSING",
+    ANNEX = "ANNEX",
+    BROADCAST = "BROADCAST",
+    UPLOAD = "UPLOAD",
 }
 
-/** Type du fichier statique */
-export enum StaticFileStandardDetailResponseDtoTypeEnum {
-    GEOSERVERFTL = "GEOSERVER-FTL",
-    GEOSERVERSTYLE = "GEOSERVER-STYLE",
-    ROK4STYLE = "ROK4-STYLE",
-    DERIVATIONSQL = "DERIVATION-SQL",
-}
-
-/** Type de l'URL du point d'accès */
-export enum EndpointUrlTypeEnum {
-    WMTS = "WMTS",
-    TMS = "TMS",
-    WMS = "WMS",
-    WFS = "WFS",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARY = "ITINERARY",
-    ISOCURVE = "ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    METADATA = "METADATA",
-    SEARCH = "SEARCH",
-}
-
-/** Type de configuration */
-export enum OfferingStandardDetailResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Statut de l'offre */
-export enum OfferingStandardDetailResponseDtoStatusEnum {
-    PUBLISHING = "PUBLISHING",
-    MODIFYING = "MODIFYING",
-    PUBLISHED = "PUBLISHED",
-    UNPUBLISHING = "UNPUBLISHING",
-    UNPUBLISHED = "UNPUBLISHED",
-    UNSTABLE = "UNSTABLE",
-}
-
-export enum MetadataStandardResponseDtoTypeEnum {
-    INSPIRE = "INSPIRE",
-    ISOAP = "ISOAP",
-}
-
-export enum MetadataStandardResponseDtoLevelEnum {
-    DATASET = "DATASET",
-    SERIES = "SERIES",
-}
-
-/** Type de configuration */
-export enum ConfigurationFullUpdateDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
+export enum CommunityUserResponseDtoRightsEnum {
+    COMMUNITY = "COMMUNITY",
+    PROCESSING = "PROCESSING",
+    ANNEX = "ANNEX",
+    BROADCAST = "BROADCAST",
+    UPLOAD = "UPLOAD",
 }
 
 /** Le type de métadonnées */
@@ -5034,6 +5291,7 @@ export enum ConfigurationMetadataTypeEnum {
     FGDC = "FGDC",
     TC211 = "TC211",
     Value19139 = "19139",
+    StyleSheet = "StyleSheet",
     Other = "Other",
 }
 
@@ -5063,46 +5321,180 @@ export enum ConfigurationWmsRasterDetailsContentInterpolationEnum {
     LANCZOS4 = "LANCZOS4",
 }
 
-/** Type de configuration */
-export enum ConfigurationStandardDetailResponseDtoTypeEnum {
+/** Type du point d'accès */
+export enum EndpointCreateDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
+    METADATA = "METADATA",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
 }
 
-export enum ConfigurationStandardDetailResponseDtoStatusEnum {
-    UNPUBLISHED = "UNPUBLISHED",
-    PUBLISHED = "PUBLISHED",
-    SYNCHRONIZING = "SYNCHRONIZING",
+/** Type du point d'accès */
+export enum EndpointDetailResponseDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    METADATA = "METADATA",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
 }
 
-export enum CommunityAddUserDtoRightsEnum {
+/** Type de l'URL du point d'accès */
+export enum EndpointUrlTypeEnum {
+    WMTS = "WMTS",
+    TMS = "TMS",
+    WMS = "WMS",
+    WFS = "WFS",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARY = "ITINERARY",
+    ISOCURVE = "ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    METADATA = "METADATA",
+    SEARCH = "SEARCH",
+    OAPIF = "OAPIF",
+}
+
+export enum MetadataExtendedResponseDtoLevelEnum {
+    DATASET = "DATASET",
+    SERIES = "SERIES",
+}
+
+export enum MetadataExtendedResponseDtoTypeEnum {
+    INSPIRE = "INSPIRE",
+    ISOAP = "ISOAP",
+}
+
+export enum MetadataStandardResponseDtoLevelEnum {
+    DATASET = "DATASET",
+    SERIES = "SERIES",
+}
+
+export enum MetadataStandardResponseDtoTypeEnum {
+    INSPIRE = "INSPIRE",
+    ISOAP = "ISOAP",
+}
+
+export enum MetadataUpdateDtoTypeEnum {
+    INSPIRE = "INSPIRE",
+    ISOAP = "ISOAP",
+}
+
+/** Type de famille à laquelle appartient la nomenclature */
+export enum NomenclatureAdminResponseDtoTypeEnum {
+    CRS = "CRS",
+    ZONE = "ZONE",
+    FORMAT = "FORMAT",
+    RESOLUTION = "RESOLUTION",
+    ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
+}
+
+/** Type de famille à laquelle appartient la nomenclature */
+export enum NomenclatureCreateDtoTypeEnum {
+    CRS = "CRS",
+    ZONE = "ZONE",
+    FORMAT = "FORMAT",
+    RESOLUTION = "RESOLUTION",
+    ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
+}
+
+/** Type de famille à laquelle appartient la nomenclature */
+export enum NomenclatureResponseDtoTypeEnum {
+    CRS = "CRS",
+    ZONE = "ZONE",
+    FORMAT = "FORMAT",
+    RESOLUTION = "RESOLUTION",
+    ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
+}
+
+export enum PermissionCreateDtoTypeEnum {
+    ACCOUNT = "ACCOUNT",
     COMMUNITY = "COMMUNITY",
-    PROCESSING = "PROCESSING",
-    ANNEX = "ANNEX",
-    BROADCAST = "BROADCAST",
-    UPLOAD = "UPLOAD",
 }
 
-/**
- * Priorité de traitement
- * @default "STANDARD"
- */
-export enum ProcessingCreateDtoPriorityEnum {
-    STANDARD = "STANDARD",
-    PREMIUM = "PREMIUM",
-    SANDBOX = "SANDBOX",
-    STRONG = "STRONG",
-    EXTRACTION = "EXTRACTION",
+export enum ProcessingExecutionExtendedDetailResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+    ABORTED = "ABORTED",
 }
 
-export enum ProcessingInputTypesDtoUploadEnum {
+/** Statut des exécutions à récupérer */
+export enum ProcessingExecutionExtendedListResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+    ABORTED = "ABORTED",
+}
+
+export enum ProcessingExecutionStandardDetailResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+    ABORTED = "ABORTED",
+}
+
+/** Statut des exécutions à récupérer */
+export enum ProcessingExecutionStandardListResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+    ABORTED = "ABORTED",
+}
+
+export enum ProcessingExecutionStoredDataDtoStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
+    UNSTABLE = "UNSTABLE",
+}
+
+export enum ProcessingExecutionStoredDataDtoTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
+    PYRAMID3DCOPC = "PYRAMID-3D-COPC",
+    PYRAMID3DEPT = "PYRAMID-3D-EPT",
+}
+
+export enum ProcessingExecutionUploadDtoStatusEnum {
+    CREATED = "CREATED",
+    OPEN = "OPEN",
+    CLOSED = "CLOSED",
+    CHECKING = "CHECKING",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    UNSTABLE = "UNSTABLE",
+    DELETED = "DELETED",
+}
+
+export enum ProcessingExecutionUploadDtoTypeEnum {
     VECTOR = "VECTOR",
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
@@ -5126,6 +5518,35 @@ export enum ProcessingInputTypesDtoStoredDataEnum {
     PYRAMID3DEPT = "PYRAMID-3D-EPT",
 }
 
+export enum ProcessingInputTypesDtoUploadEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
+}
+
+/** Priorité de traitement */
+export enum ProcessingListResponseDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+    SANDBOX = "SANDBOX",
+    STRONG = "STRONG",
+    EXTRACTION = "EXTRACTION",
+    LIDAR = "LIDAR",
+}
+
+export enum ProcessingOutputTypeStoredDataDtoStorageEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
+}
+
 /** Type de donnée stockée */
 export enum ProcessingOutputTypeStoredDataDtoStoredDataEnum {
     ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
@@ -5140,14 +5561,6 @@ export enum ProcessingOutputTypeStoredDataDtoStoredDataEnum {
     PYRAMID3DEPT = "PYRAMID-3D-EPT",
 }
 
-export enum ProcessingOutputTypeStoredDataDtoStorageEnum {
-    POSTGRESQL = "POSTGRESQL",
-    S3 = "S3",
-    FILESYSTEM = "FILESYSTEM",
-    OPENSEARCH = "OPENSEARCH",
-    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
-}
-
 /** Type de livraison */
 export enum ProcessingOutputTypeUploadDtoUploadEnum {
     VECTOR = "VECTOR",
@@ -5160,82 +5573,82 @@ export enum ProcessingOutputTypeUploadDtoUploadEnum {
     PYRAMID3D = "PYRAMID-3D",
 }
 
-/** Type de fichier(s) statique(s) attendu(s) pour ce paramètre */
-export enum ProcessingParameterStaticFileDtoStaticTypeEnum {
+/** Priorité de traitement */
+export enum ProcessingStandardDetailResponseDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+    SANDBOX = "SANDBOX",
+    STRONG = "STRONG",
+    EXTRACTION = "EXTRACTION",
+    LIDAR = "LIDAR",
+}
+
+/** Priorité de traitement */
+export enum ProcessingUpdateDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+    SANDBOX = "SANDBOX",
+    STRONG = "STRONG",
+    EXTRACTION = "EXTRACTION",
+    LIDAR = "LIDAR",
+}
+
+/** Type du fichier statique */
+export enum StaticFileCreateDtoTypeEnum {
     GEOSERVERFTL = "GEOSERVER-FTL",
     GEOSERVERSTYLE = "GEOSERVER-STYLE",
     ROK4STYLE = "ROK4-STYLE",
     DERIVATIONSQL = "DERIVATION-SQL",
 }
 
-/** Priorité de traitement */
-export enum ProcessingExtendedDetailResponseDtoPriorityEnum {
-    STANDARD = "STANDARD",
-    PREMIUM = "PREMIUM",
-    SANDBOX = "SANDBOX",
-    STRONG = "STRONG",
-    EXTRACTION = "EXTRACTION",
+/** Type du fichier statique */
+export enum StaticFileExtendedDetailResponseDtoTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
 }
 
-export enum UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum {
-    HASH = "HASH",
-    HEADER = "HEADER",
-    BASIC = "BASIC",
-    OAUTH2 = "OAUTH2",
+/** Type du fichier statique */
+export enum StaticFileExtendedListResponseDtoTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
 }
 
-/** Type de livraison */
-export enum UploadCreateDtoTypeEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
+/** Type du fichier statique */
+export enum StaticFileStandardDetailResponseDtoTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
 }
 
-/** Type de pyramide 3D */
-export enum UploadPyramid3DDetailsDtoPyramidTypeEnum {
-    COPC = "COPC",
-    EPT = "EPT",
+/** Type du fichier statique */
+export enum StaticFileStandardListResponseDtoTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
 }
 
-/** Type de données (pour le type EPT) */
-export enum UploadPyramid3DDetailsDtoDataTypeEnum {
-    Laszip = "laszip",
-    Zstandard = "zstandard",
-    Binary = "binary",
+/** Le type de stockage */
+export enum StorageCreateDtoTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
-/** Type de livraison */
-export enum UploadPrivateDetailResponseDtoTypeEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
-}
-
-/** Statut de la livraison */
-export enum UploadPrivateDetailResponseDtoStatusEnum {
-    CREATED = "CREATED",
-    OPEN = "OPEN",
-    CLOSED = "CLOSED",
-    CHECKING = "CHECKING",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    UNSTABLE = "UNSTABLE",
-    DELETED = "DELETED",
-}
-
-/** Type de callback */
-export enum CallbackTypeEnum {
-    Email = "email",
+/** Type de stockage */
+export enum StoredDataCreationDtoStorageTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
 export enum StoredDataDetailsRelationDtoTypeEnum {
@@ -5243,8 +5656,18 @@ export enum StoredDataDetailsRelationDtoTypeEnum {
     VIEW = "VIEW",
 }
 
+/** Statut de la donnée stockée */
+export enum StoredDataExtendedListResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
+    UNSTABLE = "UNSTABLE",
+}
+
 /** Type de donnée stockée */
-export enum StoredDataPrivateDetailResponseDtoTypeEnum {
+export enum StoredDataExtendedListResponseDtoTypeEnum {
     ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
     ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
     VECTORDB = "VECTOR-DB",
@@ -5267,6 +5690,20 @@ export enum StoredDataPrivateDetailResponseDtoStatusEnum {
     UNSTABLE = "UNSTABLE",
 }
 
+/** Type de donnée stockée */
+export enum StoredDataPrivateDetailResponseDtoTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
+    PYRAMID3DCOPC = "PYRAMID-3D-COPC",
+    PYRAMID3DEPT = "PYRAMID-3D-EPT",
+}
+
 export enum StoredDataRok4PyramidRasterDetailsDtoChannelsFormatEnum {
     UINT8 = "UINT8",
     UINT16 = "UINT16",
@@ -5283,284 +5720,8 @@ export enum StoredDataRok4PyramidRasterDetailsDtoCompressionEnum {
     JPG90 = "JPG90",
 }
 
-export enum StoredDataStorageDtoTypeEnum {
-    POSTGRESQL = "POSTGRESQL",
-    S3 = "S3",
-    FILESYSTEM = "FILESYSTEM",
-    OPENSEARCH = "OPENSEARCH",
-    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
-}
-
-/** Type du fichier statique */
-export enum StaticFileCreateDtoTypeEnum {
-    GEOSERVERFTL = "GEOSERVER-FTL",
-    GEOSERVERSTYLE = "GEOSERVER-STYLE",
-    ROK4STYLE = "ROK4-STYLE",
-    DERIVATIONSQL = "DERIVATION-SQL",
-}
-
-/** Type de stockage */
-export enum StoredDataCreationDtoStorageTypeEnum {
-    POSTGRESQL = "POSTGRESQL",
-    S3 = "S3",
-    FILESYSTEM = "FILESYSTEM",
-    OPENSEARCH = "OPENSEARCH",
-    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
-}
-
-export enum ProcessingExecutionStandardDetailResponseDtoStatusEnum {
-    CREATED = "CREATED",
-    WAITING = "WAITING",
-    PROGRESS = "PROGRESS",
-    SUCCESS = "SUCCESS",
-    FAILURE = "FAILURE",
-    ABORTED = "ABORTED",
-}
-
-export enum ProcessingExecutionStoredDataDtoTypeEnum {
-    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
-    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
-    VECTORDB = "VECTOR-DB",
-    ARCHIVE = "ARCHIVE",
-    GRAPHDB = "GRAPH-DB",
-    GRAPHOSRM = "GRAPH-OSRM",
-    GRAPHVALHALLA = "GRAPH-VALHALLA",
-    INDEX = "INDEX",
-    PYRAMID3DCOPC = "PYRAMID-3D-COPC",
-    PYRAMID3DEPT = "PYRAMID-3D-EPT",
-}
-
-export enum ProcessingExecutionStoredDataDtoStatusEnum {
-    CREATED = "CREATED",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    GENERATED = "GENERATED",
-    DELETED = "DELETED",
-    UNSTABLE = "UNSTABLE",
-}
-
-export enum ProcessingExecutionUploadDtoTypeEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
-}
-
-export enum ProcessingExecutionUploadDtoStatusEnum {
-    CREATED = "CREATED",
-    OPEN = "OPEN",
-    CLOSED = "CLOSED",
-    CHECKING = "CHECKING",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    UNSTABLE = "UNSTABLE",
-    DELETED = "DELETED",
-}
-
-/** Statut de l'offre */
-export enum PermissionOfferingResponseDtoStatusEnum {
-    PUBLISHING = "PUBLISHING",
-    MODIFYING = "MODIFYING",
-    PUBLISHED = "PUBLISHED",
-    UNPUBLISHING = "UNPUBLISHING",
-    UNPUBLISHED = "UNPUBLISHED",
-    UNSTABLE = "UNSTABLE",
-}
-
-/** Type de configuration */
-export enum ConfigurationCreateDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Le type de stockage */
-export enum StorageCreateDtoTypeEnum {
-    POSTGRESQL = "POSTGRESQL",
-    S3 = "S3",
-    FILESYSTEM = "FILESYSTEM",
-    OPENSEARCH = "OPENSEARCH",
-    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
-}
-
-/** Type de famille à laquelle appartient la nomenclature */
-export enum NomenclatureCreateDtoTypeEnum {
-    CRS = "CRS",
-    ZONE = "ZONE",
-    FORMAT = "FORMAT",
-    RESOLUTION = "RESOLUTION",
-    ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
-}
-
-/** Type de famille à laquelle appartient la nomenclature */
-export enum NomenclatureAdminResponseDtoTypeEnum {
-    CRS = "CRS",
-    ZONE = "ZONE",
-    FORMAT = "FORMAT",
-    RESOLUTION = "RESOLUTION",
-    ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
-}
-
-/** Type du point d'accès */
-export enum EndpointCreateDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    METADATA = "METADATA",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Type du point d'accès */
-export enum EndpointDetailResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    METADATA = "METADATA",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/**
- * Priorité de la vérification
- * @default "STANDARD"
- */
-export enum CheckingCreateDtoPriorityEnum {
-    STANDARD = "STANDARD",
-    PREMIUM = "PREMIUM",
-    SANDBOX = "SANDBOX",
-    STRONG = "STRONG",
-    EXTRACTION = "EXTRACTION",
-}
-
-/** Types de livraisons ayant cette vérification par défaut */
-export enum CheckingCreateDtoDefaultUploadsCheckEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
-}
-
-/** Priorité de la vérification */
-export enum CheckingExtendedDetailResponseDtoPriorityEnum {
-    STANDARD = "STANDARD",
-    PREMIUM = "PREMIUM",
-    SANDBOX = "SANDBOX",
-    STRONG = "STRONG",
-    EXTRACTION = "EXTRACTION",
-}
-
-/** Types de livraisons ayant cette vérification par défaut */
-export enum CheckingExtendedDetailResponseDtoDefaultUploadsCheckEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
-}
-
-export enum MetadataUpdateDtoTypeEnum {
-    INSPIRE = "INSPIRE",
-    ISOAP = "ISOAP",
-}
-
-export enum CheckingExecutionStandardDetailResponseDtoStatusEnum {
-    WAITING = "WAITING",
-    PROGRESS = "PROGRESS",
-    SUCCESS = "SUCCESS",
-    FAILURE = "FAILURE",
-}
-
-export enum CheckingExecutionUploadResponseDtoTypeEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
-}
-
-export enum CommunityMemberDtoRightsEnum {
-    COMMUNITY = "COMMUNITY",
-    PROCESSING = "PROCESSING",
-    ANNEX = "ANNEX",
-    BROADCAST = "BROADCAST",
-    UPLOAD = "UPLOAD",
-}
-
-/** Priorité de traitement */
-export enum ProcessingUpdateDtoPriorityEnum {
-    STANDARD = "STANDARD",
-    PREMIUM = "PREMIUM",
-    SANDBOX = "SANDBOX",
-    STRONG = "STRONG",
-    EXTRACTION = "EXTRACTION",
-}
-
-/** Priorité de la vérification */
-export enum CheckingUpdateDtoPriorityEnum {
-    STANDARD = "STANDARD",
-    PREMIUM = "PREMIUM",
-    SANDBOX = "SANDBOX",
-    STRONG = "STRONG",
-    EXTRACTION = "EXTRACTION",
-}
-
-/** Types de livraisons ayant cette vérification par défaut */
-export enum CheckingUpdateDtoDefaultUploadsCheckEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
-}
-
-/** Type de donnée stockée */
-export enum StoredDataStandardListResponseDtoTypeEnum {
-    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
-    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
-    VECTORDB = "VECTOR-DB",
-    ARCHIVE = "ARCHIVE",
-    GRAPHDB = "GRAPH-DB",
-    GRAPHOSRM = "GRAPH-OSRM",
-    GRAPHVALHALLA = "GRAPH-VALHALLA",
-    INDEX = "INDEX",
-    PYRAMID3DCOPC = "PYRAMID-3D-COPC",
-    PYRAMID3DEPT = "PYRAMID-3D-EPT",
-}
-
 /** Statut de la donnée stockée */
-export enum StoredDataStandardListResponseDtoStatusEnum {
+export enum StoredDataSharedDetailResponseDtoStatusEnum {
     CREATED = "CREATED",
     GENERATING = "GENERATING",
     MODIFYING = "MODIFYING",
@@ -5584,7 +5745,7 @@ export enum StoredDataSharedDetailResponseDtoTypeEnum {
 }
 
 /** Statut de la donnée stockée */
-export enum StoredDataSharedDetailResponseDtoStatusEnum {
+export enum StoredDataStandardListResponseDtoStatusEnum {
     CREATED = "CREATED",
     GENERATING = "GENERATING",
     MODIFYING = "MODIFYING",
@@ -5593,60 +5754,30 @@ export enum StoredDataSharedDetailResponseDtoStatusEnum {
     UNSTABLE = "UNSTABLE",
 }
 
-/** Type de configuration */
-export enum PermissionOfferingDetailsResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
+/** Type de donnée stockée */
+export enum StoredDataStandardListResponseDtoTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
+    PYRAMID3DCOPC = "PYRAMID-3D-COPC",
+    PYRAMID3DEPT = "PYRAMID-3D-EPT",
 }
 
-export enum UserKeyResponseDtoTypeEnum {
-    HASH = "HASH",
-    HEADER = "HEADER",
-    BASIC = "BASIC",
-    OAUTH2 = "OAUTH2",
-}
-
-/** Type de configuration */
-export enum OfferingStandardListResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Statut de l'offre */
-export enum OfferingStandardListResponseDtoStatusEnum {
-    PUBLISHING = "PUBLISHING",
-    MODIFYING = "MODIFYING",
-    PUBLISHED = "PUBLISHED",
-    UNPUBLISHING = "UNPUBLISHING",
-    UNPUBLISHED = "UNPUBLISHED",
-    UNSTABLE = "UNSTABLE",
-}
-
-/** Type de famille à laquelle appartient la nomenclature */
-export enum NomenclatureResponseDtoTypeEnum {
-    CRS = "CRS",
-    ZONE = "ZONE",
-    FORMAT = "FORMAT",
-    RESOLUTION = "RESOLUTION",
-    ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
+export enum StoredDataStorageDtoTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
 /** Type de livraison */
-export enum UploadExtendedListResponseDtoTypeEnum {
+export enum UploadCreateDtoTypeEnum {
     VECTOR = "VECTOR",
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
@@ -5669,93 +5800,8 @@ export enum UploadExtendedListResponseDtoStatusEnum {
     DELETED = "DELETED",
 }
 
-/** Type de donnée stockée */
-export enum StoredDataExtendedListResponseDtoTypeEnum {
-    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
-    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
-    VECTORDB = "VECTOR-DB",
-    ARCHIVE = "ARCHIVE",
-    GRAPHDB = "GRAPH-DB",
-    GRAPHOSRM = "GRAPH-OSRM",
-    GRAPHVALHALLA = "GRAPH-VALHALLA",
-    INDEX = "INDEX",
-    PYRAMID3DCOPC = "PYRAMID-3D-COPC",
-    PYRAMID3DEPT = "PYRAMID-3D-EPT",
-}
-
-/** Statut de la donnée stockée */
-export enum StoredDataExtendedListResponseDtoStatusEnum {
-    CREATED = "CREATED",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    GENERATED = "GENERATED",
-    DELETED = "DELETED",
-    UNSTABLE = "UNSTABLE",
-}
-
-/** Type du fichier statique */
-export enum StaticFileExtendedListResponseDtoTypeEnum {
-    GEOSERVERFTL = "GEOSERVER-FTL",
-    GEOSERVERSTYLE = "GEOSERVER-STYLE",
-    ROK4STYLE = "ROK4-STYLE",
-    DERIVATIONSQL = "DERIVATION-SQL",
-}
-
-/** Statut des exécutions à récupérer */
-export enum ProcessingExecutionExtendedListResponseDtoStatusEnum {
-    CREATED = "CREATED",
-    WAITING = "WAITING",
-    PROGRESS = "PROGRESS",
-    SUCCESS = "SUCCESS",
-    FAILURE = "FAILURE",
-    ABORTED = "ABORTED",
-}
-
-/** Type de configuration */
-export enum OfferingExtendedListResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Statut de l'offre */
-export enum OfferingExtendedListResponseDtoStatusEnum {
-    PUBLISHING = "PUBLISHING",
-    MODIFYING = "MODIFYING",
-    PUBLISHED = "PUBLISHED",
-    UNPUBLISHING = "UNPUBLISHING",
-    UNPUBLISHED = "UNPUBLISHED",
-    UNSTABLE = "UNSTABLE",
-}
-
-/** Type de configuration */
-export enum ConfigurationExtendedListResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Statut de la configuration */
-export enum ConfigurationExtendedListResponseDtoStatusEnum {
-    UNPUBLISHED = "UNPUBLISHED",
-    PUBLISHED = "PUBLISHED",
-    SYNCHRONIZING = "SYNCHRONIZING",
-}
-
 /** Type de livraison */
-export enum UploadStandardListResponseDtoTypeEnum {
+export enum UploadExtendedListResponseDtoTypeEnum {
     VECTOR = "VECTOR",
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
@@ -5764,6 +5810,43 @@ export enum UploadStandardListResponseDtoTypeEnum {
     HISTORICIMAGERY = "HISTORIC-IMAGERY",
     POINTCLOUD = "POINT-CLOUD",
     PYRAMID3D = "PYRAMID-3D",
+}
+
+/** Statut de la livraison */
+export enum UploadPrivateDetailResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    OPEN = "OPEN",
+    CLOSED = "CLOSED",
+    CHECKING = "CHECKING",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    UNSTABLE = "UNSTABLE",
+    DELETED = "DELETED",
+}
+
+/** Type de livraison */
+export enum UploadPrivateDetailResponseDtoTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
+}
+
+/** Type de données (pour le type EPT) */
+export enum UploadPyramid3DDetailsDtoDataTypeEnum {
+    Laszip = "laszip",
+    Zstandard = "zstandard",
+    Binary = "binary",
+}
+
+/** Type de pyramide 3D */
+export enum UploadPyramid3DDetailsDtoPyramidTypeEnum {
+    COPC = "COPC",
+    EPT = "EPT",
 }
 
 /** Statut de la livraison */
@@ -5779,7 +5862,7 @@ export enum UploadStandardListResponseDtoStatusEnum {
 }
 
 /** Type de livraison */
-export enum UploadSharedDetailResponseDtoTypeEnum {
+export enum UploadStandardListResponseDtoTypeEnum {
     VECTOR = "VECTOR",
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
@@ -5790,258 +5873,26 @@ export enum UploadSharedDetailResponseDtoTypeEnum {
     PYRAMID3D = "PYRAMID-3D",
 }
 
-/** Statut de la livraison */
-export enum UploadSharedDetailResponseDtoStatusEnum {
-    CREATED = "CREATED",
-    OPEN = "OPEN",
-    CLOSED = "CLOSED",
-    CHECKING = "CHECKING",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    UNSTABLE = "UNSTABLE",
-    DELETED = "DELETED",
-}
-
-/** Type du fichier statique */
-export enum StaticFileStandardListResponseDtoTypeEnum {
-    GEOSERVERFTL = "GEOSERVER-FTL",
-    GEOSERVERSTYLE = "GEOSERVER-STYLE",
-    ROK4STYLE = "ROK4-STYLE",
-    DERIVATIONSQL = "DERIVATION-SQL",
-}
-
-/** Priorité de traitement */
-export enum ProcessingListResponseDtoPriorityEnum {
-    STANDARD = "STANDARD",
-    PREMIUM = "PREMIUM",
-    SANDBOX = "SANDBOX",
-    STRONG = "STRONG",
-    EXTRACTION = "EXTRACTION",
-}
-
-/** Priorité de traitement */
-export enum ProcessingStandardDetailResponseDtoPriorityEnum {
-    STANDARD = "STANDARD",
-    PREMIUM = "PREMIUM",
-    SANDBOX = "SANDBOX",
-    STRONG = "STRONG",
-    EXTRACTION = "EXTRACTION",
-}
-
-/** Statut des exécutions à récupérer */
-export enum ProcessingExecutionStandardListResponseDtoStatusEnum {
-    CREATED = "CREATED",
-    WAITING = "WAITING",
-    PROGRESS = "PROGRESS",
-    SUCCESS = "SUCCESS",
-    FAILURE = "FAILURE",
-    ABORTED = "ABORTED",
-}
-
-/** Type de configuration */
-export enum ConfigurationStandardListResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Statut de la configuration */
-export enum ConfigurationStandardListResponseDtoStatusEnum {
-    UNPUBLISHED = "UNPUBLISHED",
-    PUBLISHED = "PUBLISHED",
-    SYNCHRONIZING = "SYNCHRONIZING",
-}
-
-/** Priorité de la vérification */
-export enum CheckingStandardDetailResponseDtoPriorityEnum {
-    STANDARD = "STANDARD",
-    PREMIUM = "PREMIUM",
-    SANDBOX = "SANDBOX",
-    STRONG = "STRONG",
-    EXTRACTION = "EXTRACTION",
-}
-
-/** Types de livraisons ayant cette vérification par défaut */
-export enum CheckingStandardDetailResponseDtoDefaultUploadsCheckEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
-}
-
-export enum CheckingExecutionListResponseDtoStatusEnum {
-    WAITING = "WAITING",
-    PROGRESS = "PROGRESS",
-    SUCCESS = "SUCCESS",
-    FAILURE = "FAILURE",
-}
-
-export enum CommunityUserResponseDtoRightsEnum {
-    COMMUNITY = "COMMUNITY",
-    PROCESSING = "PROCESSING",
-    ANNEX = "ANNEX",
-    BROADCAST = "BROADCAST",
-    UPLOAD = "UPLOAD",
-}
-
-/** Type de configuration */
-export enum OfferingCatalogResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Statut de l'offre */
-export enum OfferingCatalogResponseDtoStatusEnum {
-    PUBLISHING = "PUBLISHING",
-    MODIFYING = "MODIFYING",
-    PUBLISHED = "PUBLISHED",
-    UNPUBLISHING = "UNPUBLISHING",
-    UNPUBLISHED = "UNPUBLISHED",
-    UNSTABLE = "UNSTABLE",
-}
-
-/** Type de livraison */
-export enum UploadExtendedDetailResponseDtoTypeEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
-}
-
-/** Statut de la livraison */
-export enum UploadExtendedDetailResponseDtoStatusEnum {
-    CREATED = "CREATED",
-    OPEN = "OPEN",
-    CLOSED = "CLOSED",
-    CHECKING = "CHECKING",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    UNSTABLE = "UNSTABLE",
-    DELETED = "DELETED",
-}
-
-/** Type du fichier statique */
-export enum StaticFileExtendedDetailResponseDtoTypeEnum {
-    GEOSERVERFTL = "GEOSERVER-FTL",
-    GEOSERVERSTYLE = "GEOSERVER-STYLE",
-    ROK4STYLE = "ROK4-STYLE",
-    DERIVATIONSQL = "DERIVATION-SQL",
-}
-
-export enum ProcessingExecutionExtendedDetailResponseDtoStatusEnum {
-    CREATED = "CREATED",
-    WAITING = "WAITING",
-    PROGRESS = "PROGRESS",
-    SUCCESS = "SUCCESS",
-    FAILURE = "FAILURE",
-    ABORTED = "ABORTED",
-}
-
-/** Type de configuration */
-export enum OfferingExtendedDetailResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Statut de l'offre */
-export enum OfferingExtendedDetailResponseDtoStatusEnum {
-    PUBLISHING = "PUBLISHING",
-    MODIFYING = "MODIFYING",
-    PUBLISHED = "PUBLISHED",
-    UNPUBLISHING = "UNPUBLISHING",
-    UNPUBLISHED = "UNPUBLISHED",
-    UNSTABLE = "UNSTABLE",
-}
-
-export enum MetadataExtendedResponseDtoTypeEnum {
-    INSPIRE = "INSPIRE",
-    ISOAP = "ISOAP",
-}
-
-export enum MetadataExtendedResponseDtoLevelEnum {
-    DATASET = "DATASET",
-    SERIES = "SERIES",
-}
-
-/** Type de configuration */
-export enum ConfigurationExtendedDetailResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-export enum ConfigurationExtendedDetailResponseDtoStatusEnum {
-    UNPUBLISHED = "UNPUBLISHED",
-    PUBLISHED = "PUBLISHED",
-    SYNCHRONIZING = "SYNCHRONIZING",
-}
-
-export enum CheckingExecutionExtendedDetailResponseDtoStatusEnum {
-    WAITING = "WAITING",
-    PROGRESS = "PROGRESS",
-    SUCCESS = "SUCCESS",
-    FAILURE = "FAILURE",
-}
-
-/** Type de la clé */
-export enum GetUserKeysParamsTypeEnum {
+export enum UserKeyCreateDtoUserKeyInfoDtoTypeEnum {
     HASH = "HASH",
-    HEADER = "HEADER",
     BASIC = "BASIC",
     OAUTH2 = "OAUTH2",
 }
 
-export enum GetAll2ParamsFieldsEnum {
-    Name = "name",
-    Description = "description",
-    Type = "type",
-    Open = "open",
-    Status = "status",
-    Srs = "srs",
-    Contact = "contact",
-    Size = "size",
-    LastEvent = "last_event",
-    Tags = "tags",
-    Creation = "creation",
-    Bbox = "bbox",
+export enum UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum {
+    HASH = "HASH",
+    BASIC = "BASIC",
+    OAUTH2 = "OAUTH2",
 }
 
-/** Type de livraisons */
-export enum GetAll2ParamsTypeEnum {
+export enum UserKeyResponseDtoTypeEnum {
+    HASH = "HASH",
+    BASIC = "BASIC",
+    OAUTH2 = "OAUTH2",
+}
+
+/** Types de livraisons ayant cette vérification par défaut */
+export enum GetAll14ParamsDefaultUploadTypeEnum {
     VECTOR = "VECTOR",
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
@@ -6052,55 +5903,7 @@ export enum GetAll2ParamsTypeEnum {
     PYRAMID3D = "PYRAMID-3D",
 }
 
-/** Statut des livraisons */
-export enum GetAll2ParamsStatusEnum {
-    CREATED = "CREATED",
-    OPEN = "OPEN",
-    CLOSED = "CLOSED",
-    CHECKING = "CHECKING",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    UNSTABLE = "UNSTABLE",
-    DELETED = "DELETED",
-}
-
-/** Type du fichier statique */
-export enum GetAll4ParamsTypeEnum {
-    GEOSERVERFTL = "GEOSERVER-FTL",
-    GEOSERVERSTYLE = "GEOSERVER-STYLE",
-    ROK4STYLE = "ROK4-STYLE",
-    DERIVATIONSQL = "DERIVATION-SQL",
-}
-
-/** Statut des exécutions à récupérer */
-export enum GetAll6ParamsStatusEnum {
-    CREATED = "CREATED",
-    WAITING = "WAITING",
-    PROGRESS = "PROGRESS",
-    SUCCESS = "SUCCESS",
-    FAILURE = "FAILURE",
-    ABORTED = "ABORTED",
-}
-
-/** Quel type de métadonnées (INSPIRE, ISOAP...) veut-on voir */
-export enum GetAll9ParamsTypeEnum {
-    INSPIRE = "INSPIRE",
-    ISOAP = "ISOAP",
-}
-
-/** Quel niveau de métadonnées (lot, produit...) veut-on voir */
-export enum GetAll9ParamsLevelEnum {
-    DATASET = "DATASET",
-    SERIES = "SERIES",
-}
-
-/** Type de métadonnée */
-export enum Create4ParamsTypeEnum {
-    INSPIRE = "INSPIRE",
-    ISOAP = "ISOAP",
-}
-
-export enum GetAll10ParamsFieldsEnum {
+export enum GetAll28ParamsFieldsEnum {
     Name = "name",
     LayerName = "layer_name",
     Type = "type",
@@ -6114,7 +5917,7 @@ export enum GetAll10ParamsFieldsEnum {
 }
 
 /** Type de configuration */
-export enum GetAll10ParamsTypeEnum {
+export enum GetAll28ParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
     WMTSTMS = "WMTS-TMS",
@@ -6124,16 +5927,41 @@ export enum GetAll10ParamsTypeEnum {
     ALTIMETRY = "ALTIMETRY",
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
 }
 
 /** Statut des configurations */
-export enum GetAll10ParamsStatusEnum {
+export enum GetAll28ParamsStatusEnum {
     UNPUBLISHED = "UNPUBLISHED",
     PUBLISHED = "PUBLISHED",
     SYNCHRONIZING = "SYNCHRONIZING",
 }
 
-export enum GetOfferings1ParamsFieldsEnum {
+/** Type de point d'accès voulu */
+export enum GetAll11ParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    METADATA = "METADATA",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
+}
+
+/** Type de famille à laquelle appartient la nomenclature */
+export enum FindAllParamsTypeEnum {
+    CRS = "CRS",
+    ZONE = "ZONE",
+    FORMAT = "FORMAT",
+    RESOLUTION = "RESOLUTION",
+    ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
+}
+
+export enum GetAll27ParamsFieldsEnum {
     Open = "open",
     Available = "available",
     LayerName = "layer_name",
@@ -6148,16 +5976,41 @@ export enum GetOfferings1ParamsFieldsEnum {
     PublicActivity = "public_activity",
 }
 
-/** Type de stockage */
-export enum GetAll17ParamsTypeEnum {
-    POSTGRESQL = "POSTGRESQL",
-    S3 = "S3",
-    FILESYSTEM = "FILESYSTEM",
-    OPENSEARCH = "OPENSEARCH",
-    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
+/** Type de diffusion des offres */
+export enum GetAll27ParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
 }
 
-export enum GetAll19ParamsFieldsEnum {
+/** Statut des offres */
+export enum GetAll27ParamsStatusEnum {
+    PUBLISHING = "PUBLISHING",
+    MODIFYING = "MODIFYING",
+    PUBLISHED = "PUBLISHED",
+    UNPUBLISHING = "UNPUBLISHING",
+    UNSTABLE = "UNSTABLE",
+    UNPUBLISHED = "UNPUBLISHED",
+}
+
+export enum GetAll10ParamsFieldsEnum {
+    Name = "name",
+    Creation = "creation",
+    Siren = "siren",
+    Siret = "siret",
+    TvaIntracom = "tva_intracom",
+    EconomicalModel = "economical_model",
+    UploadsQuota = "uploads_quota",
+}
+
+export enum GetAll9ParamsFieldsEnum {
     Creation = "creation",
     Name = "name",
     Description = "description",
@@ -6167,7 +6020,7 @@ export enum GetAll19ParamsFieldsEnum {
 }
 
 /** Type de livraison en entrée */
-export enum GetAll19ParamsInputUploadTypeEnum {
+export enum GetAll9ParamsInputUploadTypeEnum {
     VECTOR = "VECTOR",
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
@@ -6179,7 +6032,7 @@ export enum GetAll19ParamsInputUploadTypeEnum {
 }
 
 /** Type de donnée stockée en entrée */
-export enum GetAll19ParamsInputStoredDataTypeEnum {
+export enum GetAll9ParamsInputStoredDataTypeEnum {
     ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
     ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
     VECTORDB = "VECTOR-DB",
@@ -6193,7 +6046,7 @@ export enum GetAll19ParamsInputStoredDataTypeEnum {
 }
 
 /** Type de livraison en sortie */
-export enum GetAll19ParamsOutputUploadTypeEnum {
+export enum GetAll9ParamsOutputUploadTypeEnum {
     VECTOR = "VECTOR",
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
@@ -6205,7 +6058,7 @@ export enum GetAll19ParamsOutputUploadTypeEnum {
 }
 
 /** Type de donnée stockée en sortie */
-export enum GetAll19ParamsOutputStoredDataTypeEnum {
+export enum GetAll9ParamsOutputStoredDataTypeEnum {
     ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
     ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
     VECTORDB = "VECTOR-DB",
@@ -6218,52 +6071,34 @@ export enum GetAll19ParamsOutputStoredDataTypeEnum {
     PYRAMID3DEPT = "PYRAMID-3D-EPT",
 }
 
-export enum GetAll22ParamsFieldsEnum {
-    Name = "name",
-    Creation = "creation",
-    Siren = "siren",
-    Siret = "siret",
-    TvaIntracom = "tva_intracom",
-    EconomicalModel = "economical_model",
-    UploadsQuota = "uploads_quota",
+/** Statut des exécutions à récupérer */
+export enum GetAll25ParamsStatusEnum {
+    CREATED = "CREATED",
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+    ABORTED = "ABORTED",
 }
 
-/** Type de famille à laquelle appartient la nomenclature */
-export enum FindAll1ParamsTypeEnum {
-    CRS = "CRS",
-    ZONE = "ZONE",
-    FORMAT = "FORMAT",
-    RESOLUTION = "RESOLUTION",
-    ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
-}
-
-/** Type de point d'accès voulu */
+/** Type du fichier statique */
 export enum GetAll24ParamsTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    METADATA = "METADATA",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
 }
 
-/** Types de livraisons ayant cette vérification par défaut */
-export enum GetAll28ParamsDefaultUploadTypeEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
+/** Type de stockage */
+export enum GetAll8ParamsTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
-export enum GetStoredDatasParamsFieldsEnum {
+export enum GetAll23ParamsFieldsEnum {
     Name = "name",
     Description = "description",
     Type = "type",
@@ -6281,7 +6116,7 @@ export enum GetStoredDatasParamsFieldsEnum {
 }
 
 /** Type de donnée stockée */
-export enum GetStoredDatasParamsTypeEnum {
+export enum GetAll23ParamsTypeEnum {
     ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
     ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
     VECTORDB = "VECTOR-DB",
@@ -6295,7 +6130,7 @@ export enum GetStoredDatasParamsTypeEnum {
 }
 
 /** Statut des données stockées */
-export enum GetStoredDatasParamsStatusEnum {
+export enum GetAll23ParamsStatusEnum {
     CREATED = "CREATED",
     GENERATING = "GENERATING",
     MODIFYING = "MODIFYING",
@@ -6304,29 +6139,7 @@ export enum GetStoredDatasParamsStatusEnum {
     UNSTABLE = "UNSTABLE",
 }
 
-/** Type de diffusion des offres permises */
-export enum GetUserPermissionsParamsTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Type de famille à laquelle appartient la nomenclature */
-export enum FindAllParamsTypeEnum {
-    CRS = "CRS",
-    ZONE = "ZONE",
-    FORMAT = "FORMAT",
-    RESOLUTION = "RESOLUTION",
-    ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
-}
-
-export enum GetActiveUploadsParamsFieldsEnum {
+export enum GetAll22ParamsFieldsEnum {
     Name = "name",
     Description = "description",
     Type = "type",
@@ -6342,7 +6155,7 @@ export enum GetActiveUploadsParamsFieldsEnum {
 }
 
 /** Type de livraisons */
-export enum GetActiveUploadsParamsTypeEnum {
+export enum GetAll22ParamsTypeEnum {
     VECTOR = "VECTOR",
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
@@ -6354,7 +6167,7 @@ export enum GetActiveUploadsParamsTypeEnum {
 }
 
 /** Statut des livraisons */
-export enum GetActiveUploadsParamsStatusEnum {
+export enum GetAll22ParamsStatusEnum {
     CREATED = "CREATED",
     OPEN = "OPEN",
     CLOSED = "CLOSED",
@@ -6365,63 +6178,93 @@ export enum GetActiveUploadsParamsStatusEnum {
     DELETED = "DELETED",
 }
 
-export enum GetActiveStoredDataParamsFieldsEnum {
-    Name = "name",
-    Description = "description",
-    Type = "type",
-    Open = "open",
-    Status = "status",
-    Srs = "srs",
-    Contact = "contact",
-    Edition = "edition",
-    Size = "size",
-    LastEvent = "last_event",
-    Tags = "tags",
-    Creation = "creation",
-    Bbox = "bbox",
-    PublicActivity = "public_activity",
-}
-
-/** Type de donnée stockée */
-export enum GetActiveStoredDataParamsTypeEnum {
-    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
-    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
-    VECTORDB = "VECTOR-DB",
+/** Type d'offre */
+export enum GetPublicOfferingsParamsTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
-    GRAPHDB = "GRAPH-DB",
-    GRAPHOSRM = "GRAPH-OSRM",
-    GRAPHVALHALLA = "GRAPH-VALHALLA",
+    ROK4PYRAMID = "ROK4-PYRAMID",
     INDEX = "INDEX",
-    PYRAMID3DCOPC = "PYRAMID-3D-COPC",
-    PYRAMID3DEPT = "PYRAMID-3D-EPT",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
 }
 
-/** Statut des données stockées */
-export enum GetActiveStoredDataParamsStatusEnum {
-    CREATED = "CREATED",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    GENERATED = "GENERATED",
-    DELETED = "DELETED",
-    UNSTABLE = "UNSTABLE",
+/** Filtre sur le type des offres permises */
+export enum GetCommunityPermissionsParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
 }
 
-/** Type du fichier statique */
-export enum GetStaticFilesParamsTypeEnum {
-    GEOSERVERFTL = "GEOSERVER-FTL",
-    GEOSERVERSTYLE = "GEOSERVER-STYLE",
-    ROK4STYLE = "ROK4-STYLE",
-    DERIVATIONSQL = "DERIVATION-SQL",
+/** Filtre sur les droits de l'utlisateur */
+export enum GetUsers1ParamsRightsEnum {
+    COMMUNITY = "COMMUNITY",
+    PROCESSING = "PROCESSING",
+    ANNEX = "ANNEX",
+    BROADCAST = "BROADCAST",
+    UPLOAD = "UPLOAD",
+}
+
+/** Types de livraisons ayant cette vérification par défaut */
+export enum GetAll19ParamsDefaultUploadTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
 }
 
 /** Statut des exécutions à récupérer */
-export enum GetProcessingExecutionsParamsStatusEnum {
-    CREATED = "CREATED",
+export enum GetAll20ParamsStatusEnum {
     WAITING = "WAITING",
     PROGRESS = "PROGRESS",
     SUCCESS = "SUCCESS",
     FAILURE = "FAILURE",
-    ABORTED = "ABORTED",
+}
+
+export enum GetAll6ParamsFieldsEnum {
+    Name = "name",
+    LayerName = "layer_name",
+    Type = "type",
+    Status = "status",
+    Attributions = "attributions",
+    Metadatas = "metadatas",
+    Tags = "tags",
+    Creation = "creation",
+    LastEvent = "last_event",
+    Update = "update",
+}
+
+/** Type de configuration */
+export enum GetAll6ParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
+}
+
+/** Statut des configurations */
+export enum GetAll6ParamsStatusEnum {
+    UNPUBLISHED = "UNPUBLISHED",
+    PUBLISHED = "PUBLISHED",
+    SYNCHRONIZING = "SYNCHRONIZING",
 }
 
 export enum GetOfferingsParamsFieldsEnum {
@@ -6439,31 +6282,8 @@ export enum GetOfferingsParamsFieldsEnum {
     PublicActivity = "public_activity",
 }
 
-/** Type de diffusion des offres */
-export enum GetOfferingsParamsTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Statut des offres */
-export enum GetOfferingsParamsStatusEnum {
-    PUBLISHING = "PUBLISHING",
-    MODIFYING = "MODIFYING",
-    PUBLISHED = "PUBLISHED",
-    UNPUBLISHING = "UNPUBLISHING",
-    UNPUBLISHED = "UNPUBLISHED",
-    UNSTABLE = "UNSTABLE",
-}
-
 /** Type du point d'accès */
-export enum GetEndpointsParamsTypeEnum {
+export enum GetEndpoints1ParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
     WMTSTMS = "WMTS-TMS",
@@ -6474,101 +6294,28 @@ export enum GetEndpointsParamsTypeEnum {
     ALTIMETRY = "ALTIMETRY",
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
 }
 
-export enum GetConfigurationsParamsFieldsEnum {
-    Name = "name",
-    LayerName = "layer_name",
-    Type = "type",
-    Status = "status",
-    Attributions = "attributions",
-    Metadatas = "metadatas",
-    Tags = "tags",
-    Creation = "creation",
-    LastEvent = "last_event",
-    Update = "update",
+/** Quel type de métadonnées (INSPIRE, ISOAP...) veut-on voir */
+export enum GetAll5ParamsTypeEnum {
+    INSPIRE = "INSPIRE",
+    ISOAP = "ISOAP",
 }
 
-/** Type de configuration */
-export enum GetConfigurationsParamsTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
+/** Quel niveau de métadonnées (lot, produit...) veut-on voir */
+export enum GetAll5ParamsLevelEnum {
+    DATASET = "DATASET",
+    SERIES = "SERIES",
 }
 
-/** Statut des configurations */
-export enum GetConfigurationsParamsStatusEnum {
-    UNPUBLISHED = "UNPUBLISHED",
-    PUBLISHED = "PUBLISHED",
-    SYNCHRONIZING = "SYNCHRONIZING",
+/** Type de métadonnée */
+export enum Create4ParamsTypeEnum {
+    INSPIRE = "INSPIRE",
+    ISOAP = "ISOAP",
 }
 
-export enum GetAll3ParamsFieldsEnum {
-    Name = "name",
-    Description = "description",
-    Type = "type",
-    Open = "open",
-    Status = "status",
-    Srs = "srs",
-    Contact = "contact",
-    Edition = "edition",
-    Size = "size",
-    LastEvent = "last_event",
-    Tags = "tags",
-    Creation = "creation",
-    Bbox = "bbox",
-    PublicActivity = "public_activity",
-}
-
-/** Type de donnée stockée */
-export enum GetAll3ParamsTypeEnum {
-    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
-    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
-    VECTORDB = "VECTOR-DB",
-    ARCHIVE = "ARCHIVE",
-    GRAPHDB = "GRAPH-DB",
-    GRAPHOSRM = "GRAPH-OSRM",
-    GRAPHVALHALLA = "GRAPH-VALHALLA",
-    INDEX = "INDEX",
-    PYRAMID3DCOPC = "PYRAMID-3D-COPC",
-    PYRAMID3DEPT = "PYRAMID-3D-EPT",
-}
-
-/** Statut des données stockées */
-export enum GetAll3ParamsStatusEnum {
-    CREATED = "CREATED",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    GENERATED = "GENERATED",
-    DELETED = "DELETED",
-    UNSTABLE = "UNSTABLE",
-}
-
-/** Type de stockage */
-export enum GetStoragesParamsTypeEnum {
-    POSTGRESQL = "POSTGRESQL",
-    S3 = "S3",
-    FILESYSTEM = "FILESYSTEM",
-    OPENSEARCH = "OPENSEARCH",
-    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
-}
-
-export enum GetAll5ParamsFieldsEnum {
-    Creation = "creation",
-    Name = "name",
-    Description = "description",
-    Priority = "priority",
-    InputTypes = "input_types",
-    OutputTypes = "output_types",
-}
-
-export enum GetAll8ParamsFieldsEnum {
+export enum GetAll18ParamsFieldsEnum {
     Open = "open",
     Available = "available",
     LayerName = "layer_name",
@@ -6584,7 +6331,7 @@ export enum GetAll8ParamsFieldsEnum {
 }
 
 /** Type de diffusion des offres */
-export enum GetAll8ParamsTypeEnum {
+export enum GetAll18ParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
     WMTSTMS = "WMTS-TMS",
@@ -6594,123 +6341,53 @@ export enum GetAll8ParamsTypeEnum {
     ALTIMETRY = "ALTIMETRY",
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
 }
 
 /** Statut des offres */
-export enum GetAll8ParamsStatusEnum {
+export enum GetAll18ParamsStatusEnum {
     PUBLISHING = "PUBLISHING",
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
-    UNPUBLISHED = "UNPUBLISHED",
     UNSTABLE = "UNSTABLE",
+    UNPUBLISHED = "UNPUBLISHED",
 }
 
-/** Type du point d'accès */
-export enum GetEndpoints1ParamsTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    METADATA = "METADATA",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Types de livraisons ayant cette vérification par défaut */
-export enum GetAll11ParamsDefaultUploadTypeEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
+export enum GetAll17ParamsFieldsEnum {
+    Creation = "creation",
+    Name = "name",
+    Description = "description",
+    Priority = "priority",
+    InputTypes = "input_types",
+    OutputTypes = "output_types",
 }
 
 /** Statut des exécutions à récupérer */
-export enum GetAll12ParamsStatusEnum {
+export enum GetAll3ParamsStatusEnum {
+    CREATED = "CREATED",
     WAITING = "WAITING",
     PROGRESS = "PROGRESS",
     SUCCESS = "SUCCESS",
     FAILURE = "FAILURE",
+    ABORTED = "ABORTED",
 }
 
-/** Filtre sur les droits de l'utlisateur */
-export enum GetUsers1ParamsRightsEnum {
-    COMMUNITY = "COMMUNITY",
-    PROCESSING = "PROCESSING",
-    ANNEX = "ANNEX",
-    BROADCAST = "BROADCAST",
-    UPLOAD = "UPLOAD",
+/** Type du fichier statique */
+export enum GetAll2ParamsTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
 }
 
-/** Filtre sur le type des offres permises */
-export enum GetCommunityPermissionsParamsTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
-}
-
-/** Type d'offre */
-export enum GetPublicOfferingsParamsTypeEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
-}
-
-export enum GetAll15ParamsFieldsEnum {
-    Name = "name",
-    Description = "description",
-    Type = "type",
-    Open = "open",
-    Status = "status",
-    Srs = "srs",
-    Contact = "contact",
-    Size = "size",
-    LastEvent = "last_event",
-    Tags = "tags",
-    Creation = "creation",
-    Bbox = "bbox",
-}
-
-/** Type de livraisons */
-export enum GetAll15ParamsTypeEnum {
-    VECTOR = "VECTOR",
-    RASTER = "RASTER",
-    ARCHIVE = "ARCHIVE",
-    ROK4PYRAMID = "ROK4-PYRAMID",
-    INDEX = "INDEX",
-    HISTORICIMAGERY = "HISTORIC-IMAGERY",
-    POINTCLOUD = "POINT-CLOUD",
-    PYRAMID3D = "PYRAMID-3D",
-}
-
-/** Statut des livraisons */
-export enum GetAll15ParamsStatusEnum {
-    CREATED = "CREATED",
-    OPEN = "OPEN",
-    CLOSED = "CLOSED",
-    CHECKING = "CHECKING",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    UNSTABLE = "UNSTABLE",
-    DELETED = "DELETED",
+/** Type de stockage */
+export enum GetStoragesParamsTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
 export enum GetAll16ParamsFieldsEnum {
@@ -6754,25 +6431,95 @@ export enum GetAll16ParamsStatusEnum {
     UNSTABLE = "UNSTABLE",
 }
 
-/** Type du fichier statique */
-export enum GetAll18ParamsTypeEnum {
-    GEOSERVERFTL = "GEOSERVER-FTL",
-    GEOSERVERSTYLE = "GEOSERVER-STYLE",
-    ROK4STYLE = "ROK4-STYLE",
-    DERIVATIONSQL = "DERIVATION-SQL",
+export enum GetAll1ParamsFieldsEnum {
+    Name = "name",
+    Description = "description",
+    Type = "type",
+    Open = "open",
+    Status = "status",
+    Srs = "srs",
+    Contact = "contact",
+    Size = "size",
+    LastEvent = "last_event",
+    Tags = "tags",
+    Creation = "creation",
+    Bbox = "bbox",
 }
 
-/** Statut des exécutions à récupérer */
-export enum GetAll20ParamsStatusEnum {
+/** Type de livraisons */
+export enum GetAll1ParamsTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
+}
+
+/** Statut des livraisons */
+export enum GetAll1ParamsStatusEnum {
     CREATED = "CREATED",
-    WAITING = "WAITING",
-    PROGRESS = "PROGRESS",
-    SUCCESS = "SUCCESS",
-    FAILURE = "FAILURE",
-    ABORTED = "ABORTED",
+    OPEN = "OPEN",
+    CLOSED = "CLOSED",
+    CHECKING = "CHECKING",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    UNSTABLE = "UNSTABLE",
+    DELETED = "DELETED",
 }
 
-export enum GetAll23ParamsFieldsEnum {
+export enum GetConfigurationsParamsFieldsEnum {
+    Name = "name",
+    LayerName = "layer_name",
+    Type = "type",
+    Status = "status",
+    Attributions = "attributions",
+    Metadatas = "metadatas",
+    Tags = "tags",
+    Creation = "creation",
+    LastEvent = "last_event",
+    Update = "update",
+}
+
+/** Type de configuration */
+export enum GetConfigurationsParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
+}
+
+/** Statut des configurations */
+export enum GetConfigurationsParamsStatusEnum {
+    UNPUBLISHED = "UNPUBLISHED",
+    PUBLISHED = "PUBLISHED",
+    SYNCHRONIZING = "SYNCHRONIZING",
+}
+
+/** Type du point d'accès */
+export enum GetEndpointsParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    METADATA = "METADATA",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
+}
+
+export enum GetOfferings1ParamsFieldsEnum {
     Open = "open",
     Available = "available",
     LayerName = "layer_name",
@@ -6788,7 +6535,7 @@ export enum GetAll23ParamsFieldsEnum {
 }
 
 /** Type de diffusion des offres */
-export enum GetAll23ParamsTypeEnum {
+export enum GetOfferings1ParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
     WMTSTMS = "WMTS-TMS",
@@ -6798,33 +6545,145 @@ export enum GetAll23ParamsTypeEnum {
     ALTIMETRY = "ALTIMETRY",
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
 }
 
 /** Statut des offres */
-export enum GetAll23ParamsStatusEnum {
+export enum GetOfferings1ParamsStatusEnum {
     PUBLISHING = "PUBLISHING",
     MODIFYING = "MODIFYING",
     PUBLISHED = "PUBLISHED",
     UNPUBLISHING = "UNPUBLISHING",
+    UNSTABLE = "UNSTABLE",
     UNPUBLISHED = "UNPUBLISHED",
+}
+
+/** Statut des exécutions à récupérer */
+export enum GetProcessingExecutionsParamsStatusEnum {
+    CREATED = "CREATED",
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+    ABORTED = "ABORTED",
+}
+
+/** Type du fichier statique */
+export enum GetStaticFilesParamsTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
+}
+
+export enum GetActiveStoredDataParamsFieldsEnum {
+    Name = "name",
+    Description = "description",
+    Type = "type",
+    Open = "open",
+    Status = "status",
+    Srs = "srs",
+    Contact = "contact",
+    Edition = "edition",
+    Size = "size",
+    LastEvent = "last_event",
+    Tags = "tags",
+    Creation = "creation",
+    Bbox = "bbox",
+    PublicActivity = "public_activity",
+}
+
+/** Type de donnée stockée */
+export enum GetActiveStoredDataParamsTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
+    PYRAMID3DCOPC = "PYRAMID-3D-COPC",
+    PYRAMID3DEPT = "PYRAMID-3D-EPT",
+}
+
+/** Statut des données stockées */
+export enum GetActiveStoredDataParamsStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
     UNSTABLE = "UNSTABLE",
 }
 
-export enum GetAll26ParamsFieldsEnum {
+export enum GetActiveUploadsParamsFieldsEnum {
     Name = "name",
-    LayerName = "layer_name",
+    Description = "description",
     Type = "type",
+    Open = "open",
     Status = "status",
-    Attributions = "attributions",
-    Metadatas = "metadatas",
+    Srs = "srs",
+    Contact = "contact",
+    Size = "size",
+    LastEvent = "last_event",
     Tags = "tags",
     Creation = "creation",
-    LastEvent = "last_event",
-    Update = "update",
+    Bbox = "bbox",
 }
 
-/** Type de configuration */
-export enum GetAll26ParamsTypeEnum {
+/** Type de livraisons */
+export enum GetActiveUploadsParamsTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
+    POINTCLOUD = "POINT-CLOUD",
+    PYRAMID3D = "PYRAMID-3D",
+}
+
+/** Statut des livraisons */
+export enum GetActiveUploadsParamsStatusEnum {
+    CREATED = "CREATED",
+    OPEN = "OPEN",
+    CLOSED = "CLOSED",
+    CHECKING = "CHECKING",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    UNSTABLE = "UNSTABLE",
+    DELETED = "DELETED",
+}
+
+/** Type de famille à laquelle appartient la nomenclature */
+export enum FindAll1ParamsTypeEnum {
+    CRS = "CRS",
+    ZONE = "ZONE",
+    FORMAT = "FORMAT",
+    RESOLUTION = "RESOLUTION",
+    ECONOMICAL_MODEL = "ECONOMICAL_MODEL",
+}
+
+export enum GetAllParamsFieldsEnum {
+    Name = "name",
+    Size = "size",
+    Description = "description",
+    Extra = "extra",
+    Labels = "labels",
+    PublicUrl = "public_url",
+    MimeType = "mime_type",
+}
+
+/** Type de la clé */
+export enum GetUserKeysParamsTypeEnum {
+    HASH = "HASH",
+    BASIC = "BASIC",
+    OAUTH2 = "OAUTH2",
+}
+
+/** Type de diffusion des offres permises */
+export enum GetUserPermissionsParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
     WMTSTMS = "WMTS-TMS",
@@ -6834,11 +6693,46 @@ export enum GetAll26ParamsTypeEnum {
     ALTIMETRY = "ALTIMETRY",
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
+    APIFEATURES = "API-FEATURES",
 }
 
-/** Statut des configurations */
-export enum GetAll26ParamsStatusEnum {
-    UNPUBLISHED = "UNPUBLISHED",
-    PUBLISHED = "PUBLISHED",
-    SYNCHRONIZING = "SYNCHRONIZING",
+export enum GetStoredDatasParamsFieldsEnum {
+    Name = "name",
+    Description = "description",
+    Type = "type",
+    Open = "open",
+    Status = "status",
+    Srs = "srs",
+    Contact = "contact",
+    Edition = "edition",
+    Size = "size",
+    LastEvent = "last_event",
+    Tags = "tags",
+    Creation = "creation",
+    Bbox = "bbox",
+    PublicActivity = "public_activity",
+}
+
+/** Type de donnée stockée */
+export enum GetStoredDatasParamsTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
+    PYRAMID3DCOPC = "PYRAMID-3D-COPC",
+    PYRAMID3DEPT = "PYRAMID-3D-EPT",
+}
+
+/** Statut des données stockées */
+export enum GetStoredDatasParamsStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
+    UNSTABLE = "UNSTABLE",
 }

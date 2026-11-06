@@ -184,7 +184,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
                                                     <strong className={fr.cx("fr-text--md", "fr-mb-2v")}>Services</strong>
                                                     <ul className={fr.cx("fr-m-0")}>
-                                                        {permission.offerings.map((offering) => (
+                                                        {permission.offerings?.map((offering) => (
                                                             <li key={offering._id}>
                                                                 <span className={fr.cx("fr-mr-3v")}>{offering.layer_name}</span>
                                                                 <Badge noIcon severity="info">

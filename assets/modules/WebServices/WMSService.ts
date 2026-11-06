@@ -20,7 +20,7 @@ class WMSService extends BaseService {
     constructor(service: Service) {
         super(service);
 
-        this.#requestInfo = getRequestInfo(service.urls[0].url);
+        this.#requestInfo = getRequestInfo((service.urls ?? [])[0].url);
         this.#parser = new WMSCapabilities();
     }
 

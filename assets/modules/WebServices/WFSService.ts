@@ -52,7 +52,7 @@ class WFSService extends BaseService {
 
     getLayerNames() {
         const layers: string[] = [];
-        this.service.urls.forEach((endpointUrl) => {
+        (this.service.urls ?? []).forEach((endpointUrl) => {
             const info = getRequestInfo(endpointUrl.url);
             layers.push(info.typeNames);
         });
@@ -62,7 +62,7 @@ class WFSService extends BaseService {
     async getLayers() {
         const layers: VectorLayer<VectorSource<Feature<Geometry>>>[] = [];
 
-        for (const descUrl of this.service.urls) {
+        for (const descUrl of this.service.urls ?? []) {
             const requestInfo = getRequestInfo(descUrl.url);
             if (!this.#featureTypes.length) {
                 // oxlint-disable-next-line no-await-in-loop -- types d’objets chargés une seule fois, au premier passage

@@ -184,10 +184,10 @@ export type Upload = UploadPrivateDetailResponseDto & {
 };
 
 export {
-    ConfigurationStandardDetailResponseDtoStatusEnum as ConfigurationStatusEnum,
-    ConfigurationStandardDetailResponseDtoTypeEnum as ConfigurationTypeEnum,
-    OfferingStandardDetailResponseDtoStatusEnum as OfferingStatusEnum,
-    OfferingStandardDetailResponseDtoTypeEnum as OfferingTypeEnum,
+    ConfigurationStatus as ConfigurationStatusEnum,
+    ConfigurationType as ConfigurationTypeEnum,
+    OfferingStatus as OfferingStatusEnum,
+    ConfigurationType as OfferingTypeEnum,
     UploadPrivateDetailResponseDtoStatusEnum as UploadStatusEnum,
     UploadPrivateDetailResponseDtoTypeEnum as UploadTypeEnum,
 } from "./entrepot";

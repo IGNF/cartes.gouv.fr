@@ -36,7 +36,7 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
         enabled: Boolean(service?._id),
     });
 
-    const offeringPermissions = permissions?.filter((permission) => permission.offerings.map((offering) => offering._id).includes(service?._id ?? ""));
+    const offeringPermissions = permissions?.filter((permission) => permission.offerings?.map((offering) => offering._id).includes(service?._id ?? ""));
     const isPermission = offeringPermissions?.some((permission) => permission.beneficiary?._id === api.alerts.communityId) ?? false;
 
     useEffect(() => {

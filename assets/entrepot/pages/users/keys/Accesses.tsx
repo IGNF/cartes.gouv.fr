@@ -53,7 +53,7 @@ const Accesses: FC<AccessesProps> = (props) => {
         // Trie des layer_name des offerings
         const temp: { permissionId: string; offering: PermissionOfferingResponseDto }[] = [];
         permissions.forEach((permission) => {
-            permission.offerings.forEach((offering) => {
+            permission.offerings?.forEach((offering) => {
                 temp.push({
                     permissionId: permission._id,
                     offering: offering,

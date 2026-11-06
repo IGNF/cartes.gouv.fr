@@ -1,4 +1,4 @@
-import { ConfigurationTypeEnum, OfferingTypeEnum } from "../../@types/app";
+import { ConfigurationTypeEnum } from "../../@types/app";
 import { type QueryParams } from "../Routing";
 
 /**
@@ -52,7 +52,7 @@ const RQKeys = {
         if (queryParams) keys.push(JSON.stringify(queryParams));
         return keys;
     },
-    datastore_layernames_list: (datastoreId: string, configurationType: ConfigurationTypeEnum | OfferingTypeEnum): string[] => [
+    datastore_layernames_list: (datastoreId: string, configurationType: ConfigurationTypeEnum): string[] => [
         "datastore",
         datastoreId,
         "layernames",
