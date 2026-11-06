@@ -8,6 +8,7 @@ import { tss } from "tss-react";
 
 import DatastoreSideMenu from "@/components/Layout/DatastoreSideMenu";
 import useBreadcrumb from "@/hooks/useBreadcrumb";
+import type { RouteId } from "@/router";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import Main from "./Main";
 
@@ -47,7 +48,11 @@ export default function DatastorePanelMain({ children }: PropsWithChildren) {
     );
 }
 
-const isTabsLayout = (match: { routeId: string }) => match.routeId.endsWith("/_onglets");
+const TABS_LAYOUTS = new Set<RouteId>([
+    "/_private/tableau-de-bord/entrepots/$datastoreId/_onglets",
+    "/_private/tableau-de-bord/communaute/$communityId/_onglets",
+]);
+const isTabsLayout = (match: { routeId: RouteId }) => TABS_LAYOUTS.has(match.routeId);
 
 /**
  * Enveloppe des états d’attente et de refus d’un layout de ressource : dans le panneau si les onglets sont dessous,

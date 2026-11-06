@@ -1,5 +1,5 @@
 import { hashKey } from "@tanstack/react-query";
-import { createRouter } from "@tanstack/react-router";
+import { createRouter, type RegisteredRouter, type RouteIds } from "@tanstack/react-router";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
@@ -41,6 +41,9 @@ queryClient.getQueryCache().subscribe((event) => {
     lastUser = event.query.state.data;
     void router.invalidate();
 });
+
+/** identifiant de route vérifié par le compilateur : un fichier de route renommé casse le type-check */
+export type RouteId = RouteIds<RegisteredRouter["routeTree"]>;
 
 declare module "@tanstack/react-router" {
     interface Register {

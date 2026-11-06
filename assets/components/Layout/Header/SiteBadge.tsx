@@ -2,8 +2,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { useMatches } from "@tanstack/react-router";
 
+import type { RouteId } from "@/router";
+
 // routes (layouts compris : un layout couvre toutes ses feuilles) où le badge « Publier » s’affiche
-const PUBLISH_ROUTE_IDS = new Set<string>([
+const PUBLISH_ROUTE_IDS = new Set<RouteId>([
     "/_private/_panneau",
     "/_private/tableau-de-bord/entrepots/$datastoreId",
     "/_private/tableau-de-bord/communaute/$communityId",
