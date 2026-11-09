@@ -182,7 +182,9 @@ class CswMetadataHelper
         $cswMetadata->thumbnailUrl = $this->xpathText($xpath, '/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString');
 
         // Frequency
-        $cswMetadata->frequencyCode = $this->xpathText($xpath, '/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceMaintenance/gmd:MD_MaintenanceInformation/gmd:maintenanceAndUpdateFrequency/gmd:MD_MaintenanceFrequencyCode/@codeListValue');
+        $frequencyCode = $this->xpathText($xpath, '/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceMaintenance/gmd:MD_MaintenanceInformation/gmd:maintenanceAndUpdateFrequency/gmd:MD_MaintenanceFrequencyCode/@codeListValue');
+        // fiches publiées avec l’ancienne faute de frappe « quaterly »
+        $cswMetadata->frequencyCode = 'quaterly' === $frequencyCode ? 'quarterly' : $frequencyCode;
 
         return $this->trim($cswMetadata);
     }
