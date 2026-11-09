@@ -4,6 +4,7 @@ namespace App\Entity\CswMetadata;
 
 use App\Exception\AppException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 /**
  * Classe représentant une métadonnée du catalogue GeoNetwork.
@@ -13,27 +14,38 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class CswMetadata
 {
+    #[SerializedName('file_identifier')]
     public ?string $fileIdentifier;
+    #[SerializedName('hierarchy_level')]
     public ?CswHierarchyLevel $hierarchyLevel;
     public ?CswLanguage $language;
     public ?string $charset;
     public ?string $title;
     public ?string $abstract;
+    #[SerializedName('creation_date')]
     public ?string $creationDate;
+    #[SerializedName('update_date')]
     public ?string $updateDate;
+    #[SerializedName('resource_genealogy')]
     public ?string $resourceGenealogy;
 
     /** @var array<string> */
+    #[SerializedName('inspire_keywords')]
     public ?array $inspireKeywords;
 
     /** @var array<string> */
+    #[SerializedName('free_keywords')]
     public ?array $freeKeywords;
 
     /** @var array<string> */
+    #[SerializedName('topic_categories')]
     public ?array $topicCategories;
 
+    #[SerializedName('contact_email')]
     public ?string $contactEmail;
+    #[SerializedName('organisation_name')]
     public ?string $organisationName;
+    #[SerializedName('organisation_email')]
     public ?string $organisationEmail;
 
     public ?string $resolution;
@@ -45,15 +57,19 @@ class CswMetadata
     public ?array $bbox;
 
     /** @var array<CswStyleFile> */
+    #[SerializedName('style_files')]
     public ?array $styleFiles;
 
     /** @var array<CswCapabilitiesFile> */
+    #[SerializedName('capabilities_files')]
     public ?array $capabilitiesFiles;
 
     /** @var array<CswDocument> */
     public ?array $documents;
 
+    #[SerializedName('thumbnail_url')]
     public ?string $thumbnailUrl;
+    #[SerializedName('frequency_code')]
     public ?string $frequencyCode;
 
     public function __construct()
