@@ -1,3 +1,5 @@
+import { AddressFieldsEnTranslations } from "@/components/Input/AddressFields.locale";
+import { AutocompleteSelectEnTranslations } from "@/components/Input/AutocompleteSelect.locale";
 import { KeyValueListEnTranslations } from "@/components/Input/KeyValueList.locale";
 import { ImageCropModalEnTranslations } from "@/components/Input/ImageCropModal/ImageCropModal.locale";
 import { ImageFieldUploadEnTranslations } from "@/components/Input/ImageFieldUpload.locale";
@@ -140,6 +142,8 @@ export const translations: Translations<"en"> = {
     ManageGridsDialog: ManageGridsDialogEnTranslations,
     alerts: AlertsEnTranslations,
     KeyValueList: KeyValueListEnTranslations,
+    AddressFields: AddressFieldsEnTranslations,
+    AutocompleteSelect: AutocompleteSelectEnTranslations,
     ImageCropModal: ImageCropModalEnTranslations,
     ImageFieldUpload: ImageFieldUploadEnTranslations,
     Stats: StatsEnTranslations,
