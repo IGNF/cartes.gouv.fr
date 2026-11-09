@@ -23,7 +23,7 @@ import {
     type ImageSize,
 } from "@/utils";
 
-import placeholder1x1 from "../../../img/placeholder.1x1.png";
+import placeholder1x1 from "@/img/placeholder.1x1.png";
 
 /** Largeur du cadre de recadrage (cf. maquette Figma) */
 const CROP_VIEWPORT_WIDTH = 212;
@@ -44,7 +44,7 @@ export function useImageCropModal(): ImageCropModalInstance {
 export const getImageErrorMessage = (t: TranslationFunction<"ImageCropModal", ComponentKey>, error: ImageFileValidationError): string => {
     switch (error.code) {
         case "file_too_large":
-            return t("error.fileTooLarge", { maxSizeMo: error.maxFileSizeMo });
+            return t("error.fileTooLarge", { maxSizeMb: error.maxFileSizeMb });
         case "invalid_format":
             return t("error.invalidFormat");
         case "resolution_too_low":
@@ -67,7 +67,7 @@ interface ImageCropModalProps {
     aspect?: number;
     /** Extensions acceptées, sans point */
     accept?: string[];
-    maxFileSizeMo?: number;
+    maxFileSizeMb?: number;
     minResolution?: ImageSize;
     /**
      * Image préchargée à l’ouverture : File (sélection dans le champ parent, ré-édition)
@@ -80,7 +80,7 @@ interface ImageCropModalProps {
 }
 
 export default function ImageCropModal(props: ImageCropModalProps) {
-    const { modal, title, aspect = 1, accept = ["jpg", "jpeg", "png"], maxFileSizeMo = 2, minResolution, initialImage, onSave, onCancel } = props;
+    const { modal, title, aspect = 1, accept = ["jpg", "jpeg", "png"], maxFileSizeMb = 2, minResolution, initialImage, onSave, onCancel } = props;
     const { classes } = useStyles();
     const { t } = useTranslation("ImageCropModal");
     const { t: tCommon } = useTranslation("Common");
@@ -109,9 +109,9 @@ export default function ImageCropModal(props: ImageCropModalProps) {
     }
 
     // contraintes lues à l’appel : un littéral inline du parent ne doit pas relancer le chargement
-    const constraintsRef = useRef({ accept, maxFileSizeMo, minResolution });
+    const constraintsRef = useRef({ accept, maxFileSizeMb, minResolution });
     useEffect(() => {
-        constraintsRef.current = { accept, maxFileSizeMo, minResolution };
+        constraintsRef.current = { accept, maxFileSizeMb, minResolution };
     });
 
     const loadFile = useCallback(async (file: File, isCancelled: () => boolean = () => false) => {
@@ -168,12 +168,12 @@ export default function ImageCropModal(props: ImageCropModalProps) {
         try {
             // source connue uniquement par URL (mode édition) : téléchargement préalable
             const sourceFile = source.file ?? (await urlToImageFile(source.url));
-            const cropped = await cropImageToFile(sourceFile, croppedAreaPixels, { maxFileSizeMo });
+            const cropped = await cropImageToFile(sourceFile, croppedAreaPixels, { maxFileSizeMb });
             onSave(cropped);
             modal.close();
         } catch (err) {
             const isTooLarge = err instanceof Error && "code" in err && err.code === "file_too_large";
-            setValidationErrors([isTooLarge ? { code: "file_too_large", maxFileSizeMo } : { code: "not_decodable" }]);
+            setValidationErrors([isTooLarge ? { code: "file_too_large", maxFileSizeMb } : { code: "not_decodable" }]);
         } finally {
             setIsSaving(false);
         }
@@ -271,7 +271,7 @@ export default function ImageCropModal(props: ImageCropModalProps) {
                 <div className={classes.uploadColumn}>
                     <Upload
                         label={t("addFile")}
-                        hint={t("fileHint", { formats: formatsList, maxSizeMo: maxFileSizeMo })}
+                        hint={t("fileHint", { formats: formatsList, maxSizeMb: maxFileSizeMb })}
                         state={validationErrors.length > 0 ? "error" : "default"}
                         stateRelatedMessage={validationErrors.length > 0 ? getImageErrorMessage(t, validationErrors[0]) : undefined}
                         nativeInputProps={{

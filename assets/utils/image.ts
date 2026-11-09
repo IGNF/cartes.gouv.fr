@@ -6,7 +6,7 @@ export type ImageSize = {
 };
 
 export type ImageFileValidationError =
-    | { code: "file_too_large"; maxFileSizeMo: number }
+    | { code: "file_too_large"; maxFileSizeMb: number }
     | { code: "invalid_format"; accept: string[] }
     | { code: "not_decodable" }
     | { code: "resolution_too_low"; min: ImageSize; actual: ImageSize };
@@ -15,7 +15,7 @@ export interface ImageFileConstraints {
     /** Extensions acceptées, sans point (ex : ["jpg", "jpeg", "png", "svg"]) */
     accept: string[];
     /** Taille maximale en Mo */
-    maxFileSizeMo: number;
+    maxFileSizeMb: number;
     /** Résolution minimale en pixels */
     minResolution?: ImageSize;
 }
@@ -58,11 +58,11 @@ export const acceptToInputAttribute = (accept: string[]): string => accept.map((
 
 /** Retourne des codes d’erreur (sans i18n) à traduire par le composant appelant */
 export const validateImageFile = async (file: File, constraints: ImageFileConstraints): Promise<ImageFileValidationError[]> => {
-    const { accept, maxFileSizeMo, minResolution } = constraints;
+    const { accept, maxFileSizeMb, minResolution } = constraints;
     const errors: ImageFileValidationError[] = [];
 
-    if (file.size / (1024 * 1024) > maxFileSizeMo) {
-        errors.push({ code: "file_too_large", maxFileSizeMo });
+    if (file.size / (1024 * 1024) > maxFileSizeMb) {
+        errors.push({ code: "file_too_large", maxFileSizeMb });
     }
 
     const extension = file.name.includes(".") ? (file.name.split(".").pop() ?? "").toLowerCase() : "";
@@ -106,10 +106,10 @@ const buildCroppedFileName = (originalName: string, mime: string): string => {
  * Recadre une image via canvas (SVG rasterisé en PNG) et retourne un nouveau File.
  *
  * @param area zone de recadrage en pixels naturels de l’image (croppedAreaPixels de react-easy-crop)
- * @param options.maxFileSizeMo si fourni, lève une erreur `{ code: "file_too_large" }` si le fichier produit dépasse cette taille
+ * @param options.maxFileSizeMb si fourni, lève une erreur `{ code: "file_too_large" }` si le fichier produit dépasse cette taille
  * @param options.outputSize taille cible (l’image n’est jamais agrandie)
  */
-export const cropImageToFile = async (source: File, area: Area, options?: { outputSize?: ImageSize; maxFileSizeMo?: number }): Promise<File> => {
+export const cropImageToFile = async (source: File, area: Area, options?: { outputSize?: ImageSize; maxFileSizeMb?: number }): Promise<File> => {
     const img = await loadImage(source);
 
     // jamais d’agrandissement : la sortie est bornée par la zone de recadrage
@@ -136,9 +136,9 @@ export const cropImageToFile = async (source: File, area: Area, options?: { outp
     const croppedFile = new File([blob], buildCroppedFileName(source.name, mime), { type: mime });
 
     // le ré-encodage PNG peut dépasser la limite d’origine
-    const maxFileSizeMo = options?.maxFileSizeMo;
-    if (maxFileSizeMo !== undefined && croppedFile.size / (1024 * 1024) > maxFileSizeMo) {
-        throw Object.assign(new Error("Fichier trop volumineux après recadrage"), { code: "file_too_large", maxFileSizeMo });
+    const maxFileSizeMb = options?.maxFileSizeMb;
+    if (maxFileSizeMb !== undefined && croppedFile.size / (1024 * 1024) > maxFileSizeMb) {
+        throw Object.assign(new Error("Fichier trop volumineux après recadrage"), { code: "file_too_large", maxFileSizeMb });
     }
 
     return croppedFile;

@@ -10,7 +10,7 @@ import { useTranslation } from "@/i18n/i18n";
 import { acceptToInputAttribute, fileToDataUrl, type ImageSize, validateImageFile } from "@/utils";
 import ImageCropModal, { getImageErrorMessage, useImageCropModal } from "./ImageCropModal/ImageCropModal";
 
-import placeholder1x1 from "../../img/placeholder.1x1.png";
+import placeholder1x1 from "@/img/placeholder.1x1.png";
 
 interface ImageFieldUploadProps {
     /** Nom du champ dans le formulaire parent ; la valeur du champ est le File recadré */
@@ -23,7 +23,7 @@ interface ImageFieldUploadProps {
     accept?: string[];
     /** Ratio largeur/hauteur du recadrage */
     aspect?: number;
-    maxFileSizeMo?: number;
+    maxFileSizeMb?: number;
     minResolution?: ImageSize;
     /** URL d’une image déjà enregistrée (mode édition) */
     existingUrl?: string;
@@ -42,7 +42,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
         modalTitle,
         accept = ["jpg", "jpeg", "png"],
         aspect = 1,
-        maxFileSizeMo = 2,
+        maxFileSizeMb = 2,
         minResolution,
         existingUrl,
         crop = true,
@@ -97,7 +97,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
             return;
         }
         if (!crop) {
-            void validateImageFile(file, { accept, maxFileSizeMo, minResolution }).then((errors) => {
+            void validateImageFile(file, { accept, maxFileSizeMb, minResolution }).then((errors) => {
                 setFileError(errors.length > 0 ? getImageErrorMessage(tCropModal, errors[0]) : undefined);
                 if (errors.length === 0) {
                     onChange(file);
@@ -191,7 +191,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                             title={modalTitle}
                             aspect={aspect}
                             accept={accept}
-                            maxFileSizeMo={maxFileSizeMo}
+                            maxFileSizeMb={maxFileSizeMb}
                             minResolution={minResolution}
                             initialImage={pendingImage}
                             onSave={(file) => onChange(file)}
