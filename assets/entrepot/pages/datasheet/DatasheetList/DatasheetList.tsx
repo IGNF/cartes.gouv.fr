@@ -31,6 +31,7 @@ import DatasheetListItem from "./DatasheetListItem";
 import NoData from "./NoData";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useCommunityRights from "@/hooks/useCommunityRights";
+import { hasRights } from "@/utils/membership";
 
 const filterTests = {
     [FilterEnum.ENABLED]: (d: Datasheet) => d.nb_publications > 0,
@@ -66,8 +67,10 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const datasheetCreationImpossible = Boolean(
         metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use
     );
-    // création proposée seulement quand le quota est connu et non atteint
-    const canCreateDatasheet = datastore !== undefined && !datasheetCreationImpossible;
+    const { communityMember, isSupervisor } = useCommunityRights();
+    const hasCreationRights = isSupervisor || hasRights(communityMember, [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING]);
+    // création proposée seulement avec les droits, quand le quota est connu et non atteint
+    const canCreateDatasheet = hasCreationRights && datastore !== undefined && !datasheetCreationImpossible;
 
     const { page, limit } = routeApi.useSearch();
     const navigate = routeApi.useNavigate();
@@ -83,13 +86,11 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     const { classes, cx } = useStyles();
 
-    const { userRights, isSupervisor } = useCommunityRights();
-
     const datastoreName = tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox });
 
     return (
         <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })}>
-            {isQuotaError && datastore === undefined && (
+            {hasCreationRights && isQuotaError && datastore === undefined && (
                 <div className={fr.cx("fr-mt-6v")}>
                     <Alert severity="error" small description={t("metadata_endpoint_quota_unavailable")} className={fr.cx("fr-mb-2v")} />
                     <Button priority="secondary" size="small" disabled={isQuotaFetching} onClick={() => void refetchQuota()}>
@@ -112,8 +113,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                             <Badge severity="info" noIcon={true}>
                                 {filteredItems.length ?? 0}
                             </Badge>
-                            {(isSupervisor ||
-                                (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) && userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) &&
+                            {hasCreationRights &&
                                 (isQuotaPending ? (
                                     <MuiDsfrThemeProvider>
                                         <MuiSkeleton variant="rectangular" width="16rem" height="2.5rem" className={fr.cx("fr-ml-auto")} />
