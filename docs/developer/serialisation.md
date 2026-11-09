@@ -5,7 +5,7 @@ Les clés JSON échangées avec le front sont en snake_case, en entrée comme en
 ## Règles
 
 - Propriété en snake_case (`technical_name`, cas de tous les DTO de requête) : aucun attribut.
-- Propriété en camelCase lue ou écrite par le sérialiseur (`CswMetadata`, `CswMetadataLayer`) : `#[SerializedName('snake_case')]` obligatoire, sinon la clé JSON passe en camelCase.
+- Propriété en camelCase lue ou écrite par le sérialiseur : `#[SerializedName('snake_case')]` obligatoire, sinon la clé JSON passe en camelCase. Aucune classe exposée n’en a besoin aujourd’hui : `CswMetadata` et `CswOnlineResource` sont en snake_case comme les DTO.
 - Les chemins des erreurs de validation (422, `violations[].propertyPath`) suivent les mêmes noms.
 
 ## Pièges

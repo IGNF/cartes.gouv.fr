@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\CswMetadata;
+namespace App\Dto\Metadata;
 
 class CswLanguage
 {

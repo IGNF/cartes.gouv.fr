@@ -4,8 +4,10 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Metadata\CswMetadata;
 use App\Exception\AppException;
-use App\Services\CswMetadataHelper;
+use App\Services\CswMetadataXmlReader;
+use App\Services\CswMetadataXmlWriter;
 use App\Services\EntrepotApi\MetadataApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/metadata',
@@ -24,7 +27,9 @@ class MetadataController extends AbstractController implements ApiControllerInte
 {
     public function __construct(
         private readonly MetadataApiService $metadataApiService,
-        private readonly CswMetadataHelper $cswMetadataHelper,
+        private readonly CswMetadataXmlReader $cswMetadataReader,
+        private readonly CswMetadataXmlWriter $cswMetadataWriter,
+        private readonly SerializerInterface $serializer,
     ) {
     }
 
@@ -43,11 +48,10 @@ class MetadataController extends AbstractController implements ApiControllerInte
     #[Route('/', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, Request $request): JsonResponse
     {
-        $metadataArray = json_decode($request->getContent(), true);
         $datasheetName = $request->query->get(CommonTags::DATASHEET_NAME);
 
-        $cswMetadata = $this->cswMetadataHelper->fromArray($metadataArray);
-        $filePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
+        $cswMetadata = $this->serializer->deserialize($request->getContent(), CswMetadata::class, 'json');
+        $filePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
 
         $metadata = $this->metadataApiService->add($datastoreId, $filePath);
         $metadata['csw_metadata'] = $cswMetadata;
@@ -67,7 +71,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
         $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
 
         $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
-        $metadata['csw_metadata'] = $this->cswMetadataHelper->fromXml($fileContent);
+        $metadata['csw_metadata'] = $this->cswMetadataReader->read($fileContent);
 
         return $this->json($metadata);
     }
@@ -89,7 +93,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
 
         $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
 
-        $metadata['csw_metadata'] = $this->cswMetadataHelper->fromXml($fileContent);
+        $metadata['csw_metadata'] = $this->cswMetadataReader->read($fileContent);
 
         return $this->json($metadata);
     }
@@ -102,7 +106,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
         $format = $request->query->get('format', 'xml');
 
         if ('json' === $format) {
-            $cswMetadata = $this->cswMetadataHelper->fromXml($xmlFileContent);
+            $cswMetadata = $this->cswMetadataReader->read($xmlFileContent);
 
             return $this->json($cswMetadata);
         }

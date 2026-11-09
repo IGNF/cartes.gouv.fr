@@ -2,7 +2,9 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Services\CswMetadataHelper;
+use App\Exception\AppException;
+use App\Exception\MissingCswMetadataException;
+use App\Services\CswMetadataXmlReader;
 use App\Services\GeonetworkApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,7 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class GeonetworkController extends AbstractController
 {
     public function __construct(
-        private readonly CswMetadataHelper $cswMetadataHelper,
+        private readonly CswMetadataXmlReader $cswMetadataReader,
         private readonly GeonetworkApiService $geonetworkApiService,
     ) {
     }
@@ -26,34 +28,15 @@ class GeonetworkController extends AbstractController
     #[Route('/{fileIdentifier}', name: 'get', methods: ['GET'])]
     public function get(string $fileIdentifier): JsonResponse
     {
-        // https://data.geopf.fr/csw
+        // https://data.geopf.fr/csw : réponse GetRecordById, enveloppe csw:GetRecordByIdResponse vide si inconnu
         $xml = $this->geonetworkApiService->getMetadataXml($fileIdentifier);
 
-        // supprime la balise csw:GetRecordByIdResponse
-        $xml = explode("\n", $xml);
-        $xml = array_filter($xml, fn ($l) => !str_contains($l, 'csw:GetRecordByIdResponse'));
-        $xml = implode("\n", $xml);
-
-        if ($this->isNotFound($xml)) {
-            return new JsonResponse([
-                'code' => Response::HTTP_NOT_FOUND,
-                'status' => 'Not Found',
-                'message' => sprintf('Aucune métadonnée trouvée avec le file_identifier "%s"', $fileIdentifier),
-                'details' => [],
-            ], Response::HTTP_NOT_FOUND);
+        try {
+            $cswMetadata = $this->cswMetadataReader->read($xml);
+        } catch (MissingCswMetadataException $e) {
+            throw new AppException(sprintf('Aucune métadonnée trouvée avec le file_identifier "%s"', $fileIdentifier), Response::HTTP_NOT_FOUND, previous: $e);
         }
 
-        $cswMetadata = $this->cswMetadataHelper->fromXml($xml);
-
         return $this->json($cswMetadata);
-    }
-
-    public function isNotFound(string $xml): bool
-    {
-        $xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>';
-
-        $xml = str_replace(["\r", "\n", $xmlHeader], '', $xml);
-
-        return empty($xml);
     }
 }
