@@ -68,7 +68,7 @@ const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
                 onBlur={onBlur}
             />
             <div className={fr.cx("fr-messages-group")} aria-live="polite">
-                {state !== "default" && (
+                {state !== "default" && stateRelatedMessage !== undefined && (
                     <p
                         className={fr.cx(
                             (() => {

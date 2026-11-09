@@ -8,7 +8,7 @@ import { useTranslation } from "@/i18n/i18n";
 type AddressInputProps = Omit<InputProps.RegularInput, "textArea" | "nativeTextAreaProps">;
 
 export interface AddressFieldsProps {
-    /** Override the fieldset legend. Defaults to the "Adresse postale" translation. */
+    /** Légende du groupe de champs, « Adresse postale » par défaut */
     legend?: string;
     /** Slot pour le champ « Numéro et voie » (généralement un AsyncAutocompleteSelect). */
     numberAndStreetnameSlot: ReactNode;

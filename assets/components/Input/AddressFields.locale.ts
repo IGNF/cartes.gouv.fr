@@ -6,7 +6,7 @@ export type I18n = typeof i18n;
 
 export const AddressFieldsFrTranslations: Translations<"fr">["AddressFields"] = {
     legend: "Adresse postale",
-    "field.postalCode": "Code Postal",
+    "field.postalCode": "Code postal",
     "field.city": "Ville ou commune",
 };
 
