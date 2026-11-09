@@ -24,7 +24,7 @@ Project vocabulary (membership, snapshot, grant-path...): `docs/developer/glossa
 
 ## Git
 
-- Commit messages: simple French, conventional-commit style (`feat:`, `fix:`, `chore:`...), one short line, no body unless truly necessary: the PR description carries the details.
+- Commit messages: simple French, conventional-commit style (`feat:`, `fix:`, `chore:`...), one short line ending with the issue number when there is one (`feat(publication): onglet flux #1118`), never with a closing keyword (`Closes`, `Fixes`), no body unless truly necessary: the PR description carries the details.
 - Small atomic commits: one logical concern per commit.
 - AI-assisted commits end with the trailer `Assisted-by: <model name and version> <noreply@anthropic.com>`, naming the model that actually generated the code (e.g. `Assisted-by: Claude Fable 5 <noreply@anthropic.com>`), instead of `Co-Authored-By: Claude...`.
 - Never commit on `main`: create a branch first. Branch names are short, in conventional-commit type/scope style, with the issue number when relevant (`feat/charts`, `fix/articles-scraper-1098-1089`).
