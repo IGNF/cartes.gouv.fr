@@ -12,11 +12,11 @@ import { useLang } from "../../i18n/i18n";
 
 const locales = { en: enGBLocale, fr: frLocale };
 
-type MuiSlotProps = NonNullable<MuiDatePickerProps<false>["slotProps"]>;
+type MuiSlotProps = NonNullable<MuiDatePickerProps["slotProps"]>;
 // Forme objet seulement : ces props sont fusionnées avec celles du bouton d’effacement
 type FieldSlotProps = Exclude<MuiSlotProps["field"], (...args: never[]) => unknown>;
 
-interface DatePickerProps extends Omit<MuiDatePickerProps<false>, "onChange" | "slotProps"> {
+interface DatePickerProps extends Omit<MuiDatePickerProps, "onChange" | "slotProps"> {
     slotProps?: Omit<MuiSlotProps, "field"> & { field?: FieldSlotProps };
     id?: string;
     label: string;
@@ -69,7 +69,7 @@ const DatePicker = (props: DatePickerProps) => {
                         value={value ?? null}
                         minDate={minDate}
                         onChange={(v, context) => {
-                            // MUI X v8 : ignorer toute valeur que MUI juge invalide (date
+                            // MUI X : ignorer toute valeur que MUI juge invalide (date
                             // incomplète, hors minDate/maxDate, disableFuture...). Pendant la
                             // frappe d'une année (ex. 2→0→2→5 pour "2025"), les valeurs
                             // intermédiaires hors bornes (0002, 0020, 0202) ne sont pas
