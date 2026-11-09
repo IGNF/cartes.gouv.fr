@@ -47,7 +47,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 #------------------------------------------------------------------------
 # Installer FrankenPHP et PHP (ZTS) depuis le dépôt deb officiel (https://frankenphp.dev/)
-# curl, dom, mbstring, opcache, openssl, xml… sont déjà intégrés au binaire
+# dom, mbstring, opcache, openssl, xml… sont déjà intégrés au binaire ; curl et fileinfo sont des paquets séparés depuis 8.5.12-4
 # apcu, zip (et xdebug en dev) ont leur propre version amont et ne sont pas épinglés
 #------------------------------------------------------------------------
 ARG frankenphp_version
@@ -63,6 +63,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     "frankenphp=${frankenphp_version}+php${php_branch}*" \
     "php-zts-embed=${php_zts_version}*" \
     "php-zts-cli=${php_zts_version}*" \
+    "php-zts-curl=${php_zts_version}*" \
+    "php-zts-fileinfo=${php_zts_version}*" \
     php-zts-apcu \
     "php-zts-intl=${php_zts_version}*" \
     "php-zts-sqlite3=${php_zts_version}*" \
