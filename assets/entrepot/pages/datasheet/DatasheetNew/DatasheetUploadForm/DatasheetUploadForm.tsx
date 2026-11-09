@@ -22,13 +22,12 @@ import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import defaultProjections from "../../../../../data/default_projections.json";
-import ignfProjections from "../../../../../data/ignf_projections.json";
 import { useTranslation } from "../../../../../i18n/i18n";
 import FileUploader from "../../../../../modules/FileUploader";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { getApiErrorMessage } from "../../../../../modules/apiError";
 import { ApiError } from "../../../../../modules/jsonFetch";
-import { delta, getFileExtension, looksLikeShapefileComponent, regex } from "../../../../../utils";
+import { delta, getFileExtension, looksLikeShapefileComponent, mapIgnfToEpsg, regex } from "../../../../../utils";
 import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
@@ -44,8 +43,6 @@ const getDataTechNameSuggestion = (fileName: string) => {
 
     return dataTechName;
 };
-
-const ignfProjectionsBySrid: Record<string, string> = ignfProjections;
 
 type DatasheetUploadFormProps = {
     datastoreId: string;
@@ -247,11 +244,9 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 fileUploader
                     .uploadComplete(uuid, file)
                     .then(async (data) => {
-                        const sridRaw = data?.srid;
-                        const sridMapped =
-                            typeof sridRaw === "string" && sridRaw !== "" && sridRaw in ignfProjections ? ignfProjectionsBySrid[sridRaw] : sridRaw;
+                        const sridMapped = mapIgnfToEpsg(data?.srid);
 
-                        if (typeof sridMapped === "string" && sridMapped.trim() !== "") {
+                        if (sridMapped !== undefined) {
                             setFormValue("data_srid", sridMapped, { shouldValidate: true });
                         } else {
                             setFormValue("data_srid", "", { shouldValidate: false, shouldDirty: false });

@@ -407,6 +407,12 @@ export type CswDocument = {
     url?: string;
 };
 
+export type CswMetadataTerritory = {
+    id: string;
+    title: string;
+    bbox: number[];
+};
+
 export type CswMetadata = {
     file_identifier?: string;
     hierarchy_level?: MetadataHierarchyLevel;

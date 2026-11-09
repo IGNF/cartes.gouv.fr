@@ -84,6 +84,10 @@ export type ComponentKey =
     | import("../components/Input/InputCollection/InputCollection.locale").I18n
     | import("../entrepot/pages/config/Alerts.locale").I18n
     | import("../components/Input/KeyValueList.locale").I18n
+    | import("../components/Input/AddressFields.locale").I18n
+    | import("../components/Input/AutocompleteSelect.locale").I18n
+    | import("../components/Input/ImageCropModal/ImageCropModal.locale").I18n
+    | import("../components/Input/ImageFieldUpload.locale").I18n
     | import("../entrepot/pages/stats/Stats.locale").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
