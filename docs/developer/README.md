@@ -18,6 +18,7 @@
 - Explication des workflows :
     - [Workflow d'intégration d'un upload vecteur](./workflows/upload-integration-vector/README.md)
 - [Authentification](./auth/README.md)
+- [Erreurs de l’API (Problem Details, validation 422)](./erreurs-api.md)
 - [Routage (TanStack Router)](./routing/README.md)
 
 ## Commandes utiles
