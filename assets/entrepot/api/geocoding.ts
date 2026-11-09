@@ -1,20 +1,18 @@
+import GeoJSON from "ol/format/GeoJSON";
+
 import { type CswMetadataTerritory } from "@/@types/app";
 import { jsonFetch } from "@/modules/jsonFetch";
-import { bboxFromGeoJsonString } from "@/utils/map";
 
-/** Champs extrafields retournés par l'API de géocodage pour les POI administratifs */
+/** Champs complémentaires (extrafields) des POI administratifs */
 type GeocodingExtrafields = {
     cleabs?: string;
 };
 
-/**
- * Propriétés d'un feature retourné par /geocodage/search.
- * Les champs POI (toponym, citycode, extrafields, truegeometry) sont présents avec index=poi.
- * Les champs BAN (label, housenumber, street, name, postcode, city) sont présents avec index=address.
- */
+/** Propriétés d’un objet renvoyé par /geocodage/search : champs POI avec index=poi, champs BAN avec index=address */
 type GeocodingFeatureProperties = {
     // --- POI administratif (index=poi) ---
-    name?: string;
+    /** Tableau pour les POI (ex. ["Lyon"]), chaîne pour la BAN */
+    name?: string | string[];
     toponym?: string;
     citycode?: string[];
     extrafields?: GeocodingExtrafields;
@@ -62,13 +60,21 @@ export type GeocodingAddress = {
 
 const BASE_URL = "https://data.geopf.fr/geocodage/search";
 
-/**
- * Recherche des unités administratives (communes, départements, régions) via l'API de
- * géocodage Géoplateforme et les convertit en territoires `{ id, title, bbox, insee }`.
- *
- * La bbox est dérivée du polygone retourné par `returntruegeometry=true` ; elle est vide
- * si la géométrie est absente ou non parsable.
- */
+/** Bbox [minLon, minLat, maxLon, maxLat] d’une géométrie GeoJSON sérialisée (EPSG:4326), undefined si illisible ou vide */
+export const bboxFromGeoJsonString = (geometry: string): number[] | undefined => {
+    try {
+        const parsed: unknown = JSON.parse(geometry);
+        const extent = new GeoJSON().readGeometry(parsed)?.getExtent();
+        // l’emprise d’une géométrie vide vaut [Infinity, Infinity, -Infinity, -Infinity]
+        return extent?.length === 4 && extent.every(Number.isFinite) ? extent : undefined;
+    } catch {
+        return undefined;
+    }
+};
+
+const firstName = (name?: string | string[]): string | undefined => (Array.isArray(name) ? name[0] : name);
+
+/** Communes, départements et régions ; les résultats sans identifiant ou sans emprise lisible sont écartés (le DTO les refuserait) */
 const searchAdminUnits = async (search: string, signal: AbortSignal): Promise<AdminUnitTerritory[]> => {
     const params = new URLSearchParams({
         q: search,
@@ -81,33 +87,22 @@ const searchAdminUnits = async (search: string, signal: AbortSignal): Promise<Ad
 
     const response = await jsonFetch<GeocodingResponse>(`${BASE_URL}?${params.toString()}`, { signal }, undefined, false, false);
 
-    return response.features.map((feature): AdminUnitTerritory => {
+    return response.features.flatMap((feature): AdminUnitTerritory[] => {
         const p = feature.properties;
 
-        // Identifiant stable BD TOPO ; fallback sur citycode si absent
+        // identifiant BD TOPO, à défaut le code commune
         const id = p.extrafields?.cleabs ?? (p.citycode?.join("-") || "");
+        const bbox = p.truegeometry ? bboxFromGeoJsonString(p.truegeometry) : undefined;
+        if (id === "" || bbox === undefined) {
+            return [];
+        }
 
-        // Libellé du territoire
-        const title = p.toponym ?? p.name ?? id;
-
-        // Bbox dérivée du polygone (best-effort)
-        const bbox = p.truegeometry ? (bboxFromGeoJsonString(p.truegeometry) ?? []) : [];
-
-        // Code INSEE de la collectivité (absent pour les EPCI), pour lever les homonymies dans la liste
-        const insee = p.citycode?.[0];
-
-        return { id, title, bbox, insee };
+        // code INSEE (absent pour les EPCI), pour distinguer les homonymes dans la liste
+        return [{ id, title: p.toponym ?? firstName(p.name) ?? id, bbox, insee: p.citycode?.[0] }];
     });
 };
 
-/**
- * Recherche des adresses précises (à la plaque de rue) via la Base Adresse Nationale (BAN)
- * intégrée à l'API de géocodage Géoplateforme.
- *
- * On utilise le même endpoint /geocodage/search qu'en mode POI (index=poi) plutôt que
- * /geocodage/completion, afin de rester cohérent avec searchAdminUnits et de bénéficier
- * de la même structure de réponse GeoJSON.
- */
+/** Adresses de la Base Adresse Nationale, par le même point d’accès /geocodage/search que searchAdminUnits */
 const searchAddresses = async (search: string, signal: AbortSignal): Promise<GeocodingAddress[]> => {
     const params = new URLSearchParams({
         q: search,
@@ -123,7 +118,7 @@ const searchAddresses = async (search: string, signal: AbortSignal): Promise<Geo
 
         // Pour les résultats de type « adresse », housenumber + street couvrent le cas nominal.
         // Pour les résultats de type « voie » (sans housenumber), name contient déjà « n° + voie ».
-        const street = p.street ?? p.name ?? "";
+        const street = p.street ?? firstName(p.name) ?? "";
 
         return {
             label: p.label ?? street,
