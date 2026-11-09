@@ -22,5 +22,6 @@ describe("parseIntegrationProgress", () => {
     it("détecte une étape en échec", () => {
         expect(integrationProgressHasFailure('{"a":"successful","b":"failed"}')).toBe(true);
         expect(integrationProgressHasFailure('{"a":"successful"}')).toBe(false);
+        expect(integrationProgressHasFailure(undefined)).toBe(false);
     });
 });

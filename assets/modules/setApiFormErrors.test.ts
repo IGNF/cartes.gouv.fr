@@ -16,6 +16,7 @@ describe("setApiFormErrors", () => {
                 { propertyPath: "producers[0].email", title: "E-mail invalide." },
                 { propertyPath: "producers[0].email", title: "Second message." },
                 { propertyPath: "title", title: "Obligatoire." },
+                { propertyPath: "a[0].b[1].c", title: "Imbriqué." },
             ]),
             setError
         );
@@ -24,6 +25,7 @@ describe("setApiFormErrors", () => {
         expect(setError.mock.calls).toEqual([
             ["producers.0.email", { type: "server", message: "E-mail invalide." }],
             ["title", { type: "server", message: "Obligatoire." }],
+            ["a.0.b.1.c", { type: "server", message: "Imbriqué." }],
         ]);
     });
 
