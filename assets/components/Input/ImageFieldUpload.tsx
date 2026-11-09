@@ -25,6 +25,8 @@ interface ImageFieldUploadProps {
     aspect?: number;
     maxFileSizeMb?: number;
     minResolution?: ImageSize;
+    /** Taille maximale de l’image recadrée produite */
+    outputSize?: ImageSize;
     /** URL d’une image déjà enregistrée (mode édition) */
     existingUrl?: string;
     /** false : le fichier choisi est pris tel quel après validation, sans modale de recadrage (ex : logo) */
@@ -44,6 +46,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
         aspect = 1,
         maxFileSizeMb = 2,
         minResolution,
+        outputSize,
         existingUrl,
         crop = true,
     } = props;
@@ -194,6 +197,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                             accept={accept}
                             maxFileSizeMb={maxFileSizeMb}
                             minResolution={minResolution}
+                            outputSize={outputSize}
                             initialImage={pendingImage}
                             onSave={(file, sourceFile) => {
                                 originalFileRef.current = sourceFile;

@@ -69,6 +69,8 @@ interface ImageCropModalProps {
     accept?: string[];
     maxFileSizeMb?: number;
     minResolution?: ImageSize;
+    /** Taille maximale du fichier produit (l’image n’est jamais agrandie) ; sans valeur, la zone recadrée garde ses pixels d’origine */
+    outputSize?: ImageSize;
     /**
      * Image préchargée à l’ouverture : File (sélection dans le champ parent, ré-édition)
      * ou URL (image déjà enregistrée). Le parent doit changer la référence pour recharger.
@@ -79,7 +81,7 @@ interface ImageCropModalProps {
 }
 
 export default function ImageCropModal(props: ImageCropModalProps) {
-    const { modal, title, aspect = 1, accept = ["jpg", "jpeg", "png"], maxFileSizeMb = 2, minResolution, initialImage, onSave } = props;
+    const { modal, title, aspect = 1, accept = ["jpg", "jpeg", "png"], maxFileSizeMb = 2, minResolution, outputSize, initialImage, onSave } = props;
     const { classes } = useStyles();
     const { t } = useTranslation("ImageCropModal");
     const { t: tCommon } = useTranslation("Common");
@@ -156,6 +158,9 @@ export default function ImageCropModal(props: ImageCropModalProps) {
     const handleFilePicked = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            // l’ancienne image ne doit pas rester enregistrable pendant la validation du nouveau fichier
+            replaceSource(undefined);
+            setValidationErrors([]);
             void loadFile(file);
         }
     };
@@ -168,7 +173,7 @@ export default function ImageCropModal(props: ImageCropModalProps) {
         try {
             // source connue uniquement par URL (mode édition) : téléchargement préalable
             const sourceFile = source.file ?? (await urlToImageFile(source.url));
-            const cropped = await cropImageToFile(sourceFile, croppedAreaPixels, { maxFileSizeMb });
+            const cropped = await cropImageToFile(sourceFile, croppedAreaPixels, { maxFileSizeMb, outputSize });
             onSave(cropped, sourceFile);
             modal.close();
         } catch (err) {

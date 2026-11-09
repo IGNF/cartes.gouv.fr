@@ -71,6 +71,7 @@ const DatePicker = (props: DatePickerProps) => {
                         }}
                         slots={{
                             openPickerIcon: CalendarIcon,
+                            ...datePickerProps.slots,
                         }}
                         timezone={"UTC"}
                         value={value ?? null}
