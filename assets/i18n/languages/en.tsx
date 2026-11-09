@@ -1,4 +1,6 @@
 import { KeyValueListEnTranslations } from "@/components/Input/KeyValueList.locale";
+import { ImageCropModalEnTranslations } from "@/components/Input/ImageCropModal/ImageCropModal.locale";
+import { ImageFieldUploadEnTranslations } from "@/components/Input/ImageFieldUpload.locale";
 import { CommunityInfoEnTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { StoredDataDeleteConfirmDialogEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { DatastoreAddEnTranslations } from "@/entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale";
@@ -138,5 +140,7 @@ export const translations: Translations<"en"> = {
     ManageGridsDialog: ManageGridsDialogEnTranslations,
     alerts: AlertsEnTranslations,
     KeyValueList: KeyValueListEnTranslations,
+    ImageCropModal: ImageCropModalEnTranslations,
+    ImageFieldUpload: ImageFieldUploadEnTranslations,
     Stats: StatsEnTranslations,
 };

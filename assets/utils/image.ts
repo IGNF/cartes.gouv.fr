@@ -43,6 +43,16 @@ export const getImageSize = async (image: File): Promise<ImageSize> => {
     return { width: img.naturalWidth, height: img.naturalHeight };
 };
 
+// URL data plutôt qu’URL objet : rien à révoquer, compatible avec le double montage du StrictMode
+export const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => (typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Lecture du fichier impossible")));
+        reader.onerror = () => reject(reader.error ?? new Error("Lecture du fichier impossible"));
+        reader.readAsDataURL(file);
+    });
+};
+
 /** Convertit une liste d’extensions en valeur d’attribut accept d’un input file (".jpg, .jpeg, .png") */
 export const acceptToInputAttribute = (accept: string[]): string => accept.map((ext) => `.${ext}`).join(", ");
 
