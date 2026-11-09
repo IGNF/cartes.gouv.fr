@@ -5,8 +5,7 @@ namespace App\Dto\Datasheet;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Une condition d'utilisation (encart dans la section licences).
- * Correspond à MD_LegalConstraints / MD_SecurityConstraints / MD_Constraints ISO 19139.
+ * Condition d’utilisation (section licences), MD_LegalConstraints / MD_SecurityConstraints / MD_Constraints en ISO 19139.
  */
 #[Assert\Cascade]
 class ResourceConditionDTO

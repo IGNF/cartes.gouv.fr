@@ -7,8 +7,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * Sous-contrainte d'utilisation (sous-encart dans la section licences).
- * Les règles conditionnelles (selon type) reproduisent les règles Yup `.when(type)`.
+ * Sous-contrainte d’utilisation (section licences) ; les champs obligatoires dépendent du type.
  */
 class SubConstraintDTO
 {
@@ -56,9 +55,7 @@ class SubConstraintDTO
     ) {
     }
 
-    /**
-     * Validation conditionnelle selon le type de contrainte (miroir des règles Yup `.when(type)`).
-     */
+    // champs obligatoires selon le type de contrainte
     #[Assert\Callback]
     public function validateConditionalFields(ExecutionContextInterface $context): void
     {

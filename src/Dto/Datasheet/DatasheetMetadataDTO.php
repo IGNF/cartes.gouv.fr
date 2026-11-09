@@ -7,17 +7,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * DTO de validation pour la fiche de données (nouveau formulaire Figma 2026).
- * Les noms de propriétés correspondent exactement aux champs du formulaire React.
+ * Métadonnées d’une fiche de données ; les noms de propriétés sont ceux des champs du formulaire.
  */
 #[Assert\Cascade]
 class DatasheetMetadataDTO
 {
-    // NOTE : « quaterly » est la graphie historique du vocabulaire frequency_code (cf. maintenance_frequency.json
-    // et l'API Entrepôt). Ne pas corriger ici sans corriger simultanément le fichier JSON et le mapping API.
     /** @var string[] */
     public const UPDATE_FREQUENCIES = [
-        'continual', 'daily', 'weekly', 'fortnightly', 'monthly', 'quaterly',
+        'continual', 'daily', 'weekly', 'fortnightly', 'monthly', 'quarterly',
         'biannually', 'annually', 'asNeeded', 'irregular', 'notPlanned', 'unknown',
     ];
 
@@ -46,12 +43,15 @@ class DatasheetMetadataDTO
         public readonly string $description = '',
 
         #[Assert\Count(min: 1, minMessage: 'Sélectionnez au moins une thématique')]
+        #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()])]
         public readonly array $themes = [],
 
         #[SerializedName('keywords_inspire')]
+        #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()])]
         public readonly array $keywords_inspire = [],
 
         #[SerializedName('keywords_additional')]
+        #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()])]
         public readonly array $keywords_additional = [],
 
         #[SerializedName('file_identifier')]
@@ -107,10 +107,7 @@ class DatasheetMetadataDTO
     ) {
     }
 
-    /**
-     * Vérifie que le premier producteur est bien de rôle "pointOfContact"
-     * (invariant structurel du formulaire — la 1ère carte est verrouillée côté UI).
-     */
+    // le premier producteur est le point de contact, verrouillé dans le formulaire
     #[Assert\Callback]
     public function validateFirstProducerRole(ExecutionContextInterface $context): void
     {
@@ -126,10 +123,7 @@ class DatasheetMetadataDTO
         }
     }
 
-    /**
-     * Vérifie que chaque rôle n'est attribué qu'à un seul producteur.
-     * Complète la validation côté frontend (filtrage dynamique dans ProducerSection).
-     */
+    // un rôle ne peut être attribué qu’à un seul producteur
     #[Assert\Callback]
     public function validateUniqueRoles(ExecutionContextInterface $context): void
     {

@@ -7,8 +7,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * DTO de validation de la déclaration de livraison (formulaire « Ajouter une donnée »).
- * Propriétés alignées sur DatasetAddFormValues (datasetAddSchema.ts) : les erreurs 422 se mappent 1:1 sur les champs React Hook Form.
+ * Déclaration de livraison (formulaire « Ajouter une donnée ») ; les noms de propriétés sont ceux des champs du formulaire.
  */
 class UploadAddDTO
 {
@@ -31,12 +30,12 @@ class UploadAddDTO
 
         #[SerializedName('data_upload_path')]
         #[Assert\NotBlank(message: 'Veuillez déposer un fichier de données')]
-        #[Assert\Regex(pattern: '#^[0-9a-f-]{36}/[^/\\\\]+$#', message: 'Chemin de fichier invalide')]
+        #[Assert\Regex(pattern: '#^[0-9a-f-]{36}/(?!\.\.?$)[^/\\\\]+$#', message: 'Chemin de fichier invalide')]
         public readonly string $data_upload_path = '',
 
         #[Assert\NotBlank(message: 'Le nom du jeu de données est obligatoire')]
         #[Assert\Length(max: self::DATASET_NAME_MAX_LENGTH, maxMessage: 'Le nom du jeu de données ne peut pas dépasser {{ limit }} caractères')]
-        // même pattern que regex.public_name (assets/utils/index.ts) — garder les deux synchronisés
+        // même motif que regex.public_name (assets/utils/index.ts) : garder les deux synchronisés
         #[Assert\Regex(pattern: '/^[A-Za-z_][A-Za-z0-9_.-]*$/', message: 'Le nom du jeu de données doit commencer par une lettre ou un underscore et ne contenir que des lettres non accentuées, chiffres, tirets, points ou underscores')]
         public readonly string $name = '',
 
@@ -79,23 +78,18 @@ class UploadAddDTO
     ) {
     }
 
-    /**
-     * Vérifie que la date de production n'est pas dans le futur (miroir du max(new Date()) du schéma yup).
-     * Comparaison lexicographique sûre sur des dates ISO, non exprimable en attribut constant.
-     */
+    // dates ISO : la comparaison de chaînes suffit
     #[Assert\Callback]
     public function validateProductionDate(ExecutionContextInterface $context): void
     {
-        if ('' !== $this->production_date && $this->production_date > date('Y-m-d')) {
+        if ('' !== $this->production_date && $this->production_date > (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d')) {
             $context->buildViolation('La date de production ne peut pas être dans le futur')
                 ->atPath('production_date')
                 ->addViolation();
         }
     }
 
-    /**
-     * Vérifie que les thématiques jointes tiennent dans une valeur de tag Entrepôt (miroir du test yup « themes-tag-length »).
-     */
+    // les thématiques jointes doivent tenir dans une valeur de tag Entrepôt
     #[Assert\Callback]
     public function validateThemesTagLength(ExecutionContextInterface $context): void
     {

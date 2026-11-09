@@ -5,8 +5,7 @@ namespace App\Dto\Datasheet;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Un territoire de l'emprise spatiale (section emprise du formulaire).
- * La bbox est envoyée par le front (déjà présente dans Territories.json) pour éviter un re-téléchargement côté serveur.
+ * Territoire de l’emprise spatiale ; le front envoie la bbox pour éviter un appel au géocodage côté serveur.
  */
 class TerritoryDTO
 {
@@ -21,6 +20,7 @@ class TerritoryDTO
         public readonly string $title = '',
 
         #[Assert\Count(exactly: 4, exactMessage: 'La bbox doit contenir exactement 4 coordonnées')]
+        #[Assert\All([new Assert\Type('numeric')])]
         public readonly array $bbox = [],
     ) {
     }
