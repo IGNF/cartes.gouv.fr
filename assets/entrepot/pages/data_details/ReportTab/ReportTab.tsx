@@ -18,9 +18,8 @@ type ReportTabProps = {
 };
 
 const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
-    let step = 1;
-
     const noUpload: boolean = !reportQuery?.data?.input_upload;
+    const firstProcessingStep = noUpload ? 1 : 3;
     const noProcessingExecutions: boolean | undefined = useMemo(() => {
         if (reportQuery?.data && "processing_executions" in reportQuery.data) {
             return reportQuery?.data?.processing_executions?.length === 0;
@@ -51,7 +50,7 @@ const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
 
                 {reportQuery?.data?.input_upload && (
                     <>
-                        <Accordion titleAs="h2" label={`${step++}. Données déposées`} defaultExpanded={true}>
+                        <Accordion titleAs="h2" label="1. Données déposées" defaultExpanded={true}>
                             <ul className={fr.cx("fr-raw-list")}>
                                 <li>
                                     <strong>Nom :</strong> {reportQuery.data?.input_upload?.name}
@@ -76,7 +75,7 @@ const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
                             </Accordion>
                         </Accordion>
 
-                        <Accordion titleAs="h2" label={`${step++}. Vérifications`} defaultExpanded={true}>
+                        <Accordion titleAs="h2" label="2. Vérifications" defaultExpanded={true}>
                             {reportQuery?.data?.input_upload.checks.map((check) => (
                                 <Accordion
                                     key={check._id}
@@ -97,13 +96,13 @@ const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
                 )}
 
                 {"processing_executions" in reportQuery.data &&
-                    reportQuery?.data?.processing_executions.map((procExec) => (
+                    reportQuery?.data?.processing_executions.map((procExec, index) => (
                         <Accordion
                             key={procExec._id}
                             titleAs="h3"
                             label={
                                 <>
-                                    <p>{`${step++}. Traitement : ${procExec.processing.name}`}</p>
+                                    <p>{`${firstProcessingStep + index}. Traitement : ${procExec.processing.name}`}</p>
                                     <ReportStatusBadge status={procExec.status} className={fr.cx("fr-ml-2w")} />
                                 </>
                             }
