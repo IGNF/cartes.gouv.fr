@@ -2,7 +2,6 @@
 
 namespace App\Dto\Datasheet;
 
-use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -41,13 +40,10 @@ class SubConstraintDTO
 
         public readonly bool $locked = false,
 
-        #[SerializedName('restriction_code')]
         public readonly ?string $restriction_code = null,
 
-        #[SerializedName('limitation_code')]
         public readonly ?string $limitation_code = null,
 
-        #[SerializedName('classification_code')]
         public readonly ?string $classification_code = null,
 
         public readonly ?string $url = null,

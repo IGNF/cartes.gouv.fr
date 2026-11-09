@@ -2,7 +2,6 @@
 
 namespace App\Dto\Datasheet;
 
-use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -46,15 +45,12 @@ class DatasheetMetadataDTO
         #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()])]
         public readonly array $themes = [],
 
-        #[SerializedName('keywords_inspire')]
         #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()])]
         public readonly array $keywords_inspire = [],
 
-        #[SerializedName('keywords_additional')]
         #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()])]
         public readonly array $keywords_additional = [],
 
-        #[SerializedName('file_identifier')]
         #[Assert\NotBlank(message: 'L’identifiant de fichier est obligatoire')]
         #[Assert\Regex(
             pattern: '/^[\w\-.]+$/',
@@ -68,12 +64,10 @@ class DatasheetMetadataDTO
         public readonly array $producers = [],
 
         // Section date
-        #[SerializedName('date_creation')]
         #[Assert\NotBlank(message: 'La date de création est obligatoire')]
         #[Assert\Date(message: 'La date de création {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
         public readonly string $date_creation = '',
 
-        #[SerializedName('update_frequency')]
         #[Assert\NotBlank(message: 'La fréquence de mise à jour est obligatoire')]
         #[Assert\Choice(choices: self::UPDATE_FREQUENCIES, message: 'La fréquence de mise à jour est invalide')]
         public readonly string $update_frequency = '',
@@ -84,16 +78,13 @@ class DatasheetMetadataDTO
         public readonly array $territories = [],
 
         // Section licences
-        #[SerializedName('resource_constraints')]
         #[Assert\Valid]
         #[Assert\Count(min: 1, minMessage: 'Ajoutez au moins une condition de licence')]
         public readonly array $resource_constraints = [],
 
         // Section informations sur les métadonnées
-        #[SerializedName('resource_genealogy')]
         public readonly ?string $resource_genealogy = null,
 
-        #[SerializedName('hierarchy_level')]
         #[Assert\NotBlank(message: 'Le type de données est obligatoire')]
         #[Assert\Choice(choices: self::HIERARCHY_LEVELS, message: 'Le type de données est invalide')]
         public readonly string $hierarchy_level = '',

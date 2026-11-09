@@ -2,7 +2,6 @@
 
 namespace App\Dto\Upload;
 
-use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -22,13 +21,11 @@ class UploadAddDTO
      * @param string[] $themes
      */
     public function __construct(
-        #[SerializedName('datasheet_name')]
         #[Assert\NotBlank(message: 'Le nom de la fiche de données est obligatoire')]
         #[Assert\Length(max: self::TAG_VALUE_MAX_LENGTH, maxMessage: 'Le nom de la fiche de données ne peut pas dépasser {{ limit }} caractères')]
         #[Assert\Regex(pattern: '/^[\wÀ-ÿ\-._~!$&\'()*+,;:@%\s]+$/u', message: 'Le nom de la fiche de données contient des caractères non autorisés')]
         public readonly string $datasheet_name = '',
 
-        #[SerializedName('data_upload_path')]
         #[Assert\NotBlank(message: 'Veuillez déposer un fichier de données')]
         #[Assert\Regex(pattern: '#^[0-9a-f-]{36}/(?!\.\.?$)[^/\\\\]+$#', message: 'Chemin de fichier invalide')]
         public readonly string $data_upload_path = '',
@@ -56,7 +53,6 @@ class UploadAddDTO
         )]
         public readonly string $producer = '',
 
-        #[SerializedName('producer_short')]
         #[Assert\Length(max: self::PRODUCER_SHORT_MAX_LENGTH, maxMessage: 'L’acronyme ne peut pas dépasser {{ limit }} caractères')]
         public readonly ?string $producer_short = null,
 
@@ -64,7 +60,6 @@ class UploadAddDTO
         #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()])]
         public readonly array $themes = [],
 
-        #[SerializedName('production_date')]
         #[Assert\NotBlank(message: 'La date de production est obligatoire')]
         #[Assert\Date(message: 'La date de production {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
         public readonly string $production_date = '',
@@ -73,7 +68,6 @@ class UploadAddDTO
         #[Assert\Length(max: self::TAG_VALUE_MAX_LENGTH, maxMessage: 'L’étendue spatiale ne peut pas dépasser {{ limit }} caractères')]
         public readonly string $zone = '',
 
-        #[SerializedName('email_notification')]
         public readonly bool $email_notification = true,
     ) {
     }
