@@ -207,7 +207,7 @@ export default function ImageCropModal(props: ImageCropModalProps) {
         >
             <div className={classes.columns}>
                 <div className={classes.cropColumn}>
-                    <div className={classes.cropContainer} style={{ height: CROP_VIEWPORT_WIDTH / aspect }} aria-hidden="true">
+                    <fieldset className={classes.cropContainer} style={{ height: CROP_VIEWPORT_WIDTH / aspect }} aria-label={t("dragHint")}>
                         {source ? (
                             <Cropper
                                 image={source.url}
@@ -225,7 +225,7 @@ export default function ImageCropModal(props: ImageCropModalProps) {
                         ) : (
                             <img src={placeholder1x1} alt="" className={classes.placeholderImg} />
                         )}
-                    </div>
+                    </fieldset>
                     <div className={classes.zoomRow}>
                         <Button
                             iconId="fr-icon-subtract-line"
@@ -303,6 +303,10 @@ const useStyles = tss.withName("ImageCropModal").create({
     cropContainer: {
         position: "relative",
         width: "100%",
+        margin: 0,
+        padding: 0,
+        border: 0,
+        minWidth: 0,
         backgroundColor: fr.colors.decisions.background.alt.grey.default,
     },
     placeholderImg: {

@@ -2,7 +2,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
-import { useHover } from "@mantine/hooks";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { tss } from "tss-react";
@@ -48,7 +47,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
         existingUrl,
         crop = true,
     } = props;
-    const { classes, cx } = useStyles();
+    const { classes } = useStyles();
     const { t } = useTranslation("ImageFieldUpload");
     const { t: tCropModal } = useTranslation("ImageCropModal");
 
@@ -63,8 +62,6 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
 
     // annuler ou fermer la modale abandonne le fichier choisi dedans : chaque ouverture repart de zéro
     useIsModalOpen(cropModal, { onConceal: () => setPendingImage(undefined) });
-
-    const { hovered: isHovered, ref: wrapperRef } = useHover<HTMLDivElement>();
 
     // erreur de validation du fichier pris sans recadrage
     const [fileError, setFileError] = useState<string | undefined>(undefined);
@@ -129,20 +126,19 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
 
                 return (
                     <div className={fr.cx("fr-input-group", !!errorMsg && "fr-input-group--error")}>
-                        <label className={fr.cx("fr-label")}>
-                            {label}
-                            {hintText && <span className={fr.cx("fr-hint-text")}>{hintText}</span>}
-                        </label>
+                        {/* sans aperçu, l’Upload porte le libellé et l’aide */}
+                        {showPreview && (
+                            <p className={fr.cx("fr-label")}>
+                                {label}
+                                {hintText && <span className={fr.cx("fr-hint-text")}>{hintText}</span>}
+                            </p>
+                        )}
 
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-1w")}>
                             <div className="fr-col-auto">
-                                <div ref={wrapperRef} className={classes.thumbnailWrapper} aria-hidden="true">
-                                    <img
-                                        src={previewUrl ?? placeholder1x1}
-                                        alt=""
-                                        className={cx(classes.img, isHovered && showPreview && classes.imgTransparent)}
-                                    />
-                                    {isHovered && showPreview && (
+                                <div className={classes.thumbnailWrapper}>
+                                    <img src={previewUrl ?? placeholder1x1} alt="" className={classes.img} />
+                                    {showPreview && (
                                         <div className={classes.hoverOverlay}>
                                             {crop && (
                                                 <Button
@@ -175,6 +171,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                             {!showPreview && (
                                 <div className={fr.cx("fr-col")}>
                                     <Upload
+                                        label={label}
                                         hint={hintText}
                                         state={errorMsg ? "error" : "default"}
                                         stateRelatedMessage={errorMsg}
@@ -188,7 +185,7 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                             )}
                         </div>
 
-                        {errorMsg && <p className={fr.cx("fr-error-text")}>{errorMsg}</p>}
+                        {showPreview && errorMsg && <p className={fr.cx("fr-error-text")}>{errorMsg}</p>}
 
                         <ImageCropModal
                             modal={cropModal}
@@ -216,14 +213,14 @@ const useStyles = tss.withName({ ImageFieldUpload }).create({
         width: "120px",
         height: "120px",
         display: "inline-block",
+        "&:hover img, &:focus-within img": {
+            opacity: 0.4,
+        },
     },
     img: {
         width: "100%",
         height: "100%",
         objectFit: "cover",
-    },
-    imgTransparent: {
-        opacity: 0.4,
         transition: "opacity 0.2s",
     },
     hoverOverlay: {
@@ -234,5 +231,9 @@ const useStyles = tss.withName({ ImageFieldUpload }).create({
         justifyContent: "center",
         gap: fr.spacing("1v"),
         backgroundColor: "rgba(0,0,0,0.08)",
+        opacity: 0,
+        "&:hover, &:focus-within": {
+            opacity: 1,
+        },
     },
 });
