@@ -14,6 +14,12 @@ Un DTO invalide (`#[MapRequestPayload]`, ou une `UnprocessableEntityHttpExceptio
 }
 ```
 
+Les formulaires multipart (fichier + champ JSON `data`) passent par `App\Services\MultipartPayloadMapper`, qui suit les mêmes règles que `#[MapRequestPayload]` :
+
+- un champ de type inattendu (`"producers": "x"`) donne un 422 avec une violation sur ce champ ; dans ce cas les contraintes du DTO ne sont pas évaluées, l’objet étant incomplet ;
+- sinon les contraintes du DTO sont évaluées et donnent un 422 en cas d’échec ;
+- un champ `data` absent ou un JSON illisible donne un 400 au message fixe, sans détail technique.
+
 `propertyPath` suit la notation Symfony (`[0]` pour un indice de tableau) ; `title` est le message traduit.
 
 Côté formulaire, `setApiFormErrors(error, setError)` (`assets/modules/setApiFormErrors.ts`) pose chaque violation sur le champ React Hook Form correspondant :

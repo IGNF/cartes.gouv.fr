@@ -15,6 +15,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Le mappeur multipart produit le même 422 que #[MapRequestPayload] : Problem Details avec `violations`.
@@ -30,7 +31,9 @@ final class MultipartPayloadMapperTest extends KernelTestCase
         $serializer = $container->get(SerializerInterface::class);
         /** @var ValidatorInterface $validator */
         $validator = $container->get(ValidatorInterface::class);
-        $this->mapper = new MultipartPayloadMapper($serializer, $validator);
+        /** @var TranslatorInterface $translator */
+        $translator = $container->get(TranslatorInterface::class);
+        $this->mapper = new MultipartPayloadMapper($serializer, $validator, $translator);
     }
 
     public function testInvalidPayloadAnswers422WithViolations(): void
@@ -84,6 +87,30 @@ final class MultipartPayloadMapperTest extends KernelTestCase
         $this->expectException(BadRequestHttpException::class);
 
         $this->mapper->map(new Request(), UploadAddDTO::class);
+    }
+
+    public function testMalformedJsonAnswers400WithFixedMessage(): void
+    {
+        try {
+            $this->mapper->map(new Request(request: ['data' => '{']), UploadAddDTO::class);
+            self::fail('Une BadRequestHttpException était attendue');
+        } catch (BadRequestHttpException $e) {
+            self::assertSame(sprintf(MultipartPayloadMapper::INVALID_DATA_MESSAGE, 'data'), $e->getMessage());
+            self::assertNotNull($e->getPrevious());
+        }
+    }
+
+    public function testWrongTypedFieldAnswers422WithViolation(): void
+    {
+        try {
+            $this->mapper->map($this->request(['producers' => 'x']), DatasheetMetadataDTO::class);
+            self::fail('Une UnprocessableEntityHttpException était attendue');
+        } catch (UnprocessableEntityHttpException $e) {
+            $previous = $e->getPrevious();
+            self::assertInstanceOf(ValidationFailedException::class, $previous);
+            $paths = array_map(static fn ($violation) => $violation->getPropertyPath(), iterator_to_array($previous->getViolations()));
+            self::assertContains('producers', $paths);
+        }
     }
 
     /**
