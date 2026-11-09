@@ -47,7 +47,13 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t: tCommon } = useTranslation("Common");
     const membership = useMembership({ datastoreId });
     // le quota vient du DTO entrepôt, chargé à part : la liste ne l’attend pas
-    const { data: datastore, isPending: isQuotaPending } = useQuery(datastoreQueryOptions(datastoreId));
+    const {
+        data: datastore,
+        isPending: isQuotaPending,
+        isError: isQuotaError,
+        isFetching: isQuotaFetching,
+        refetch: refetchQuota,
+    } = useQuery(datastoreQueryOptions(datastoreId));
 
     const datasheetListQuery = useQuery(datasheetListQueryOptions(datastoreId));
     const { data: datasheetList, dataUpdatedAt, isFetching, isLoading, refetch } = datasheetListQuery;
@@ -60,6 +66,8 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const datasheetCreationImpossible = Boolean(
         metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use
     );
+    // création proposée seulement quand le quota est connu et non atteint
+    const canCreateDatasheet = datastore !== undefined && !datasheetCreationImpossible;
 
     const { page, limit } = routeApi.useSearch();
     const navigate = routeApi.useNavigate();
@@ -81,6 +89,15 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     return (
         <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })}>
+            {isQuotaError && datastore === undefined && (
+                <div className={fr.cx("fr-mt-6v")}>
+                    <Alert severity="error" small description={t("metadata_endpoint_quota_unavailable")} className={fr.cx("fr-mb-2v")} />
+                    <Button priority="secondary" size="small" disabled={isQuotaFetching} onClick={() => void refetchQuota()}>
+                        {tCommon("retry")}
+                    </Button>
+                </div>
+            )}
+
             {datasheetList && datasheetList?.length > 0 && (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>
@@ -102,23 +119,21 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                         <MuiSkeleton variant="rectangular" width="16rem" height="2.5rem" className={fr.cx("fr-ml-auto")} />
                                     </MuiDsfrThemeProvider>
                                 ) : (
-                                    <Button
-                                        linkProps={
-                                            datasheetCreationImpossible
-                                                ? { href: undefined, "aria-hidden": true }
-                                                : { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement", params: { datastoreId } }
-                                        }
-                                        iconId="fr-icon-add-line"
-                                        iconPosition="right"
-                                        className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
-                                    >
-                                        {t("create_datasheet")}
-                                    </Button>
+                                    canCreateDatasheet && (
+                                        <Button
+                                            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement", params: { datastoreId } }}
+                                            iconId="fr-icon-add-line"
+                                            iconPosition="right"
+                                            className={fr.cx("fr-ml-auto")}
+                                        >
+                                            {t("create_datasheet")}
+                                        </Button>
+                                    )
                                 ))}
                         </div>
                     </div>
 
-                    {metadataEndpoint && datasheetCreationImpossible && (
+                    {datasheetCreationImpossible && (
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             <div className={fr.cx("fr-col")}>
                                 <Alert
@@ -307,7 +322,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                             )}
                         </>
                     ) : (
-                        <NoData datastoreId={datastoreId} />
+                        <NoData datastoreId={datastoreId} canCreate={canCreateDatasheet} />
                     )}
                 </>
             )}
