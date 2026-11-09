@@ -12,6 +12,8 @@ import { useLang } from "../../i18n/i18n";
 
 const locales = { en: enGBLocale, fr: frLocale };
 
+const CalendarIcon = () => <span className={fr.cx("fr-icon-calendar-line", "fr-icon--sm")} />;
+
 type MuiSlotProps = NonNullable<MuiDatePickerProps["slotProps"]>;
 // Forme objet seulement : ces props sont fusionnées avec celles du bouton d’effacement
 type FieldSlotProps = Exclude<MuiSlotProps["field"], (...args: never[]) => unknown>;
@@ -60,10 +62,15 @@ const DatePicker = (props: DatePickerProps) => {
                             ".MuiPickersInputBase-root": {
                                 paddingX: fr.spacing("4v"),
                                 backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+                                borderRadius: "0.25rem 0.25rem 0 0",
+                                boxShadow: "inset 0 -2px 0 0 var(--border-plain-grey)",
                             },
                             ".MuiPickersSectionList-root": {
                                 paddingY: fr.spacing("2v"),
                             },
+                        }}
+                        slots={{
+                            openPickerIcon: CalendarIcon,
                         }}
                         timezone={"UTC"}
                         value={value ?? null}
