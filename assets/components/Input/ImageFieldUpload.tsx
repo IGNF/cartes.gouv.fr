@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { useHover } from "@mantine/hooks";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
@@ -59,6 +60,9 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
     const [pendingImage, setPendingImage] = useState<File | string | undefined>(undefined);
     // fichier original conservé pour ré-éditer sans perte de qualité
     const originalFileRef = useRef<File | undefined>(undefined);
+
+    // annuler ou fermer la modale abandonne le fichier choisi dedans : chaque ouverture repart de zéro
+    useIsModalOpen(cropModal, { onConceal: () => setPendingImage(undefined) });
 
     const { hovered: isHovered, ref: wrapperRef } = useHover<HTMLDivElement>();
 
@@ -194,7 +198,10 @@ export default function ImageFieldUpload(props: ImageFieldUploadProps) {
                             maxFileSizeMb={maxFileSizeMb}
                             minResolution={minResolution}
                             initialImage={pendingImage}
-                            onSave={(file) => onChange(file)}
+                            onSave={(file, sourceFile) => {
+                                originalFileRef.current = sourceFile;
+                                onChange(file);
+                            }}
                         />
                     </div>
                 );

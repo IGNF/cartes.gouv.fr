@@ -74,13 +74,12 @@ interface ImageCropModalProps {
      * ou URL (image déjà enregistrée). Le parent doit changer la référence pour recharger.
      */
     initialImage?: File | string;
-    /** Reçoit le fichier recadré */
-    onSave: (file: File) => void;
-    onCancel?: () => void;
+    /** Reçoit le fichier recadré et le fichier source effectivement recadré */
+    onSave: (file: File, sourceFile: File) => void;
 }
 
 export default function ImageCropModal(props: ImageCropModalProps) {
-    const { modal, title, aspect = 1, accept = ["jpg", "jpeg", "png"], maxFileSizeMb = 2, minResolution, initialImage, onSave, onCancel } = props;
+    const { modal, title, aspect = 1, accept = ["jpg", "jpeg", "png"], maxFileSizeMb = 2, minResolution, initialImage, onSave } = props;
     const { classes } = useStyles();
     const { t } = useTranslation("ImageCropModal");
     const { t: tCommon } = useTranslation("Common");
@@ -93,12 +92,12 @@ export default function ImageCropModal(props: ImageCropModalProps) {
     const [validationErrors, setValidationErrors] = useState<ImageFileValidationError[]>([]);
     const [isSaving, setIsSaving] = useState(false);
 
-    const replaceSource = (newSource?: ImageSource) => {
+    const replaceSource = useCallback((newSource?: ImageSource) => {
         setSource(newSource);
         setCrop({ x: 0, y: 0 });
         setZoom(MIN_ZOOM);
         setCroppedAreaPixels(undefined);
-    };
+    }, []);
 
     // nouvelle image fournie par le parent : réinitialisation pendant le rendu, sans effet
     const [prevInitialImage, setPrevInitialImage] = useState(initialImage);
@@ -114,38 +113,39 @@ export default function ImageCropModal(props: ImageCropModalProps) {
         constraintsRef.current = { accept, maxFileSizeMb, minResolution };
     });
 
-    const loadFile = useCallback(async (file: File, isCancelled: () => boolean = () => false) => {
-        let errors = await validateImageFile(file, constraintsRef.current);
-        let url: string | undefined;
-        if (errors.length === 0) {
-            try {
-                url = await fileToDataUrl(file);
-            } catch {
-                errors = [{ code: "not_decodable" }];
+    // seul le dernier chargement lancé écrit l’état
+    const loadIdRef = useRef(0);
+    const loadFile = useCallback(
+        async (file: File) => {
+            const loadId = ++loadIdRef.current;
+            let errors = await validateImageFile(file, constraintsRef.current);
+            let url: string | undefined;
+            if (errors.length === 0) {
+                try {
+                    url = await fileToDataUrl(file);
+                } catch {
+                    errors = [{ code: "not_decodable" }];
+                }
             }
-        }
-        if (isCancelled()) {
-            return;
-        }
-        setValidationErrors(errors);
-        if (url !== undefined) {
-            setSource({ file, url });
-            setCrop({ x: 0, y: 0 });
-            setZoom(MIN_ZOOM);
-            setCroppedAreaPixels(undefined);
-        }
-    }, []);
+            if (loadId !== loadIdRef.current) {
+                return;
+            }
+            setValidationErrors(errors);
+            if (url !== undefined) {
+                replaceSource({ file, url });
+            }
+        },
+        [replaceSource]
+    );
 
     // fichier fourni par le parent : validation asynchrone, l’état n’est écrit qu’à la résolution
     useEffect(() => {
-        if (!(initialImage instanceof File)) {
-            return;
+        if (initialImage instanceof File) {
+            void loadFile(initialImage);
+        } else {
+            // invalide un chargement encore en cours pour l’image précédente
+            loadIdRef.current += 1;
         }
-        let cancelled = false;
-        void loadFile(initialImage, () => cancelled);
-        return () => {
-            cancelled = true;
-        };
     }, [initialImage, loadFile]);
 
     // les erreurs de validation ne survivent pas à une fermeture de la modale
@@ -169,7 +169,7 @@ export default function ImageCropModal(props: ImageCropModalProps) {
             // source connue uniquement par URL (mode édition) : téléchargement préalable
             const sourceFile = source.file ?? (await urlToImageFile(source.url));
             const cropped = await cropImageToFile(sourceFile, croppedAreaPixels, { maxFileSizeMb });
-            onSave(cropped);
+            onSave(cropped, sourceFile);
             modal.close();
         } catch (err) {
             const isTooLarge = err instanceof Error && "code" in err && err.code === "file_too_large";
@@ -192,7 +192,6 @@ export default function ImageCropModal(props: ImageCropModalProps) {
                     children: tCommon("cancel"),
                     priority: "secondary",
                     doClosesModal: true,
-                    onClick: () => onCancel?.(),
                     nativeButtonProps: { type: "button" },
                 },
                 {
