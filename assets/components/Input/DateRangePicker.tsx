@@ -45,7 +45,6 @@ const DateRangePicker = ({ startDate, endDate, onChange }: DateRangePickerProps)
     const [selectedShortcut, setSelectedShortcut] = useState<Shortcut>("1m");
 
     const handleShortcut = (shortcut: Exclude<Shortcut, "custom">) => {
-        // oxlint-disable-next-line react/purity -- appelé depuis un gestionnaire d’événement, pas pendant le rendu
         const today = stripTime(new Date());
         const start = new Date(today);
 
