@@ -13,6 +13,7 @@ const { i18n } = declareComponentKeys<
     | "create_datasheet"
     | "datasheet_creation_impossible"
     | "metadata_endpoint_quota_reached"
+    | "metadata_endpoint_quota_unavailable"
     | { K: "services_published"; P: { nbServices?: number }; R: string }
     | "no_services_published"
     | "sandbox_datastore_explanation_title"
@@ -32,6 +33,8 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     create_datasheet: "Créer une fiche de données",
     datasheet_creation_impossible: "Création d’une nouvelle fiche de données impossible",
     metadata_endpoint_quota_reached: "Quota du point d’accès de métadonnées atteint",
+    metadata_endpoint_quota_unavailable:
+        "Le quota du point d’accès de métadonnées n’a pas pu être vérifié : la création de fiches de données est indisponible.",
     services_published: ({ nbServices }) => `Publié (${nbServices})`,
     no_services_published: "Non publié",
     sandbox_datastore_explanation_title: "Tester vos données avant de les publier !",
@@ -84,6 +87,7 @@ export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = 
     create_datasheet: undefined,
     datasheet_creation_impossible: undefined,
     metadata_endpoint_quota_reached: undefined,
+    metadata_endpoint_quota_unavailable: undefined,
     services_published: undefined,
     no_services_published: undefined,
     sandbox_datastore_explanation_title: undefined,

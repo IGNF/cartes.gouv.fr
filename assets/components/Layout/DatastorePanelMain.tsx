@@ -59,15 +59,11 @@ export function useTabsLayoutBelow(): boolean {
     return useChildMatches({ select: (matches) => matches.some(isTabsLayout) });
 }
 
-/**
- * Enveloppe des états d’attente et de refus d’un layout de ressource : dans le panneau si les onglets sont dessous,
- * nue si le panneau est déjà au-dessus, pleine page sinon.
- */
+/** enveloppe du refus de droits d’une ressource : nue sous les onglets, pleine page sinon */
 export function useResourceStateWrapper(): (node: ReactNode) => ReactNode {
-    const tabsBelow = useTabsLayoutBelow();
     const tabsAbove = useParentMatches({ select: (matches) => matches.some(isTabsLayout) });
 
-    return (node) => (tabsBelow ? <DatastorePanelMain>{node}</DatastorePanelMain> : tabsAbove ? node : <Main>{node}</Main>);
+    return (node) => (tabsAbove ? node : <Main>{node}</Main>);
 }
 
 const useStyles = tss.withName({ DatastorePanelMain }).create({

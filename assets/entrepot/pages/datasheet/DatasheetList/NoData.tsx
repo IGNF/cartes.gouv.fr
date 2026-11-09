@@ -7,9 +7,10 @@ import { externalLink } from "@/router/externalUrls";
 
 type NoDataProps = {
     datastoreId: string;
+    canCreate: boolean;
 };
 
-export default function NoData({ datastoreId }: NoDataProps) {
+export default function NoData({ datastoreId, canCreate }: NoDataProps) {
     const { classes, cx } = useStyles();
 
     return (
@@ -27,12 +28,16 @@ export default function NoData({ datastoreId }: NoDataProps) {
                             linkProps: externalLink("helpProducerGuideCreateDatasheet"),
                             priority: "secondary",
                         },
-                        {
-                            children: "Créer une fiche de données",
-                            linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement", params: { datastoreId } },
-                            iconId: "fr-icon-arrow-right-s-line",
-                            iconPosition: "right",
-                        },
+                        ...(canCreate
+                            ? [
+                                  {
+                                      children: "Créer une fiche de données",
+                                      linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement" as const, params: { datastoreId } },
+                                      iconId: "fr-icon-arrow-right-s-line" as const,
+                                      iconPosition: "right" as const,
+                                  },
+                              ]
+                            : []),
                     ]}
                     inlineLayoutWhen="md and up"
                 />

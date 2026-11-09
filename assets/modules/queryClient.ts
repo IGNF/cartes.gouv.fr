@@ -32,10 +32,18 @@ function revalidateUserOnAccessError(error: unknown, queryKey?: QueryKey): void 
     revalidateUser();
 }
 
+// une erreur 4xx ne change pas en réessayant : page d’erreur sans attendre
+export function shouldRetry(failureCount: number, error: unknown): boolean {
+    const status = (error as Partial<ApiError> | null)?.status;
+    if (typeof status === "number" && status >= 400 && status < 500) return false;
+    return failureCount < 3;
+}
+
 /**
  * L'instance de QueryClient utilisée dans toute l'application.
  */
 export const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: shouldRetry } },
     queryCache: new QueryCache({ onError: (error, query) => revalidateUserOnAccessError(error, query.queryKey) }),
     mutationCache: new MutationCache({ onError: (error) => revalidateUserOnAccessError(error) }),
 });

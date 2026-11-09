@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
@@ -12,7 +12,7 @@ import { symToStr } from "tsafe/symToStr";
 import { AnyObjectSchema } from "yup";
 
 import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
-import { useDatastore } from "@/contexts/datastore";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidRaster, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
@@ -57,7 +57,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
     const [currentStep, setCurrentStep] = useState(STEPS.METADATA_UPLOAD);
 
     const queryClient = useQueryClient();
-    const { datastore } = useDatastore();
+    const { data: datastore } = useSuspenseQuery(datastoreQueryOptions(datastoreId));
 
     const createServiceMutation = useMutation<Service, ApiError>({
         mutationFn: () => {

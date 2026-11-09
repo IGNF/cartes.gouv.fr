@@ -11,7 +11,9 @@ import { useEffect, useId, useMemo, useState } from "react";
 import { tss } from "tss-react";
 
 import DatastoreMain from "@/components/Layout/DatastoreMain";
+import { communityMembersQueryOptions } from "@/hooks/queries/communityQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
+import useMembership from "@/hooks/useMembership";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
 import { UserRightsResponseDto } from "../../../../@types/app";
@@ -19,7 +21,6 @@ import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
-import { useCommunity } from "../../../../contexts/community";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
@@ -30,6 +31,7 @@ import { AddMember, addMemberModal } from "../AddMember/AddMember";
 import { complete, rightTypes, UserRights } from "../UserRights";
 
 type CommunityMembersProps = {
+    communityId: string;
     userId?: string;
 };
 
@@ -55,7 +57,7 @@ const getName = (member: UserDto) => {
     return name.replace(/\s+/g, "") === "" ? member.email : name;
 };
 
-function CommunityMembers({ userId }: CommunityMembersProps) {
+function CommunityMembers({ communityId, userId }: CommunityMembersProps) {
     // Traductions
     const { t: tCommon } = useTranslation("Common");
     const { t: tRights } = useTranslation("Rights");
@@ -65,19 +67,10 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     // const [members, setMembers] = useState<Member[]>([]);
     const [currentMember, setCurrentMember] = useState<string | undefined>(undefined);
 
-    // Data
-    const community = useCommunity();
+    const communitySupervisor = useMembership({ communityId })?.community?.supervisor;
 
     // Les membres de cette communauté
-    const { data: communityMembers, isLoading } = useQuery({
-        queryKey: RQKeys.community_members(community._id),
-        queryFn: ({ signal }) => api.community.getMembers(community._id, { signal }),
-        staleTime: 20000,
-    });
-
-    const communitySupervisor = useMemo(() => {
-        return community?.supervisor._id;
-    }, [community]);
+    const { data: communityMembers, isLoading } = useQuery(communityMembersQueryOptions(communityId));
 
     const communityMemberIds = useMemo(() => {
         return communityMembers?.map((member) => member.user._id) ?? [];
@@ -127,12 +120,11 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     // Suppression d'un utilisateur
     const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<{ user: string } | undefined, ApiError, string>({
         mutationFn: (user_id: string) => {
-            if (community._id) return api.community.removeMember(community._id, user_id);
-            return Promise.resolve(undefined);
+            return api.community.removeMember(communityId, user_id);
         },
         onSuccess: (response) => {
             if (response) {
-                queryClient.setQueryData(RQKeys.community_members(community._id), () => {
+                queryClient.setQueryData(RQKeys.community_members(communityId), () => {
                     return communityMembers?.filter((member) => member.user._id !== response.user);
                 });
             }
@@ -142,12 +134,11 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     // Modification des droits d'un utilisateur
     const { isPending: isModifyPending, mutate: mutateModify } = useMutation<UserRightsResponseDto | undefined, ApiError, updateMember>({
         mutationFn: (datas) => {
-            if (community._id) return api.community.updateMember(community._id, datas);
-            return Promise.resolve(undefined);
+            return api.community.updateMember(communityId, datas);
         },
         onSuccess: (response) => {
             if (response) {
-                queryClient.setQueryData<CommunityUserResponseDto[]>(RQKeys.community_members(community._id), (communityMembers) => {
+                queryClient.setQueryData<CommunityUserResponseDto[]>(RQKeys.community_members(communityId), (communityMembers) => {
                     communityMembers?.forEach((member) => {
                         if (member.user._id === response.user) {
                             member.rights = response.rights; // Mise a jour des droits
@@ -342,7 +333,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                     )}
                 </>
             )}
-            <AddMember communityId={community._id} communityMemberIds={communityMemberIds} userId={userId} />
+            <AddMember communityId={communityId} communityMemberIds={communityMemberIds} userId={userId} />
             <ConfirmDialog
                 title={t("confirm_remove")}
                 onConfirm={() => {

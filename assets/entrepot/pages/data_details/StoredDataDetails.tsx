@@ -16,7 +16,6 @@ import { getApiErrorTitle, getApiErrorDescription } from "../../../modules/apiEr
 import api from "../../api";
 import StoredDataPreviewTab from "./PreviewTab/StoredDataPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
-import { useDatastore } from "../../../contexts/datastore";
 import Main from "../../../components/Layout/Main";
 
 const FINAL_STATUSES = new Set<StoredDataStatusEnum | undefined>([StoredDataStatusEnum.DELETED, StoredDataStatusEnum.GENERATED, StoredDataStatusEnum.UNSTABLE]);
@@ -26,11 +25,10 @@ type StoredDataDetailsProps = {
     storedDataId: string;
 };
 const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedDataId }) => {
-    const { datastore } = useDatastore();
     const { t: tCommon } = useTranslation("Common");
     // le libellé « Espace Découverte » vient de l’appartenance, le DTO ne porte plus is_sandbox
-    const membership = useMembership({ datastoreId: datastore?._id });
-    const datastoreName = tCommon("datastore_name", { name: datastore?.name, isSandbox: membership?.isSandbox });
+    const membership = useMembership({ datastoreId });
+    const datastoreName = tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox });
 
     const reportQuery = useQuery<StoredDataReport, ApiError>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
