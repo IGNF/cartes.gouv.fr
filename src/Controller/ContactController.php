@@ -52,7 +52,10 @@ class ContactController extends AbstractController
         try {
             $limit = $contactUsLimiter->create($request->getClientIp())->consume();
         } finally {
-            $lock?->release();
+            try {
+                $lock?->release();
+            } catch (LockException) {
+            }
         }
         if (!$limit->isAccepted()) {
             throw new AppException('Trop de demandes, réessayez plus tard', Response::HTTP_TOO_MANY_REQUESTS, headers: ['Retry-After' => (string) max(1, $limit->getRetryAfter()->getTimestamp() - time())]);
