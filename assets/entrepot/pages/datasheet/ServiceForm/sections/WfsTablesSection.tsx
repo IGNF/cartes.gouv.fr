@@ -14,9 +14,11 @@ const inspireKeywords = getInspireKeywords();
 type WfsTablesSectionProps = {
     /** état du chargement des tables de la base choisie */
     status: "idle" | "pending" | "error" | "success";
+    /** la base choisie, une fois lue, n’a aucune table géométrique */
+    noGeometricTable: boolean;
 };
 
-export default function WfsTablesSection({ status }: WfsTablesSectionProps) {
+export default function WfsTablesSection({ status, noGeometricTable }: WfsTablesSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
         register,
@@ -29,14 +31,15 @@ export default function WfsTablesSection({ status }: WfsTablesSectionProps) {
     if (status === "idle") {
         return <p className={fr.cx("fr-text--sm", tablesError !== undefined && "fr-error-text")}>{t("tables.no_stored_data")}</p>;
     }
-    if (status === "pending") {
-        return <LoadingText as="p" message={t("tables.loading")} withSpinnerIcon />;
-    }
     if (status === "error") {
         return <p className={fr.cx("fr-error-text")}>{t("tables.load_error")}</p>;
     }
-    if (tables.length === 0) {
+    if (noGeometricTable) {
         return <p className={fr.cx("fr-text--sm")}>{t("tables.none")}</p>;
+    }
+    // les lignes du formulaire arrivent un rendu après la lecture de la base
+    if (status === "pending" || tables.length === 0) {
+        return <LoadingText as="p" message={t("tables.loading")} withSpinnerIcon />;
     }
 
     return (

@@ -156,7 +156,10 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                         />
                     </MetadataSection>
                     <MetadataSection title={t("section.tables")}>
-                        <WfsTablesSection status={storedDataId === "" ? "idle" : vectorDbQuery.status} />
+                        <WfsTablesSection
+                            status={storedDataId === "" ? "idle" : vectorDbQuery.status}
+                            noGeometricTable={vectorDbQuery.data !== undefined && defaultTables(vectorDbQuery.data).length === 0}
+                        />
                     </MetadataSection>
                     <MetadataSection title={t("section.access")}>
                         <AccessSection availableAccesses={availableAccesses} />
