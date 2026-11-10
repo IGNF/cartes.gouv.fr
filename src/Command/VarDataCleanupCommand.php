@@ -25,6 +25,9 @@ class VarDataCleanupCommand extends Command
      */
     public const ARTICLES_DIR_NAME = 'articles';
 
+    // fichiers verrous de l'application (framework.lock) : les fichiers de plus de 24h sont supprimés, le dossier est gardé
+    public const LOCKS_DIR_NAME = 'locks';
+
     private readonly string $directory;
     private readonly Filesystem $fs;
 
@@ -82,7 +85,7 @@ class VarDataCleanupCommand extends Command
 
         $finder
             ->in($this->directory)
-            ->exclude(self::ARTICLES_DIR_NAME)
+            ->exclude([self::ARTICLES_DIR_NAME, self::LOCKS_DIR_NAME])
             ->directories()
             ->filter(function (SplFileInfo $directory) {
                 $tmpFinder = new Finder();
