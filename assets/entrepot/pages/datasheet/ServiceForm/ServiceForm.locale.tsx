@@ -5,6 +5,7 @@ const { i18n } = declareComponentKeys<
     | "title"
     | "mandatory_fields"
     | "loading"
+    | "load_error"
     | "publishing"
     | "error_title"
     | "metadata_missing.title"
@@ -93,6 +94,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     title: "Créer un flux",
     mandatory_fields: "Sauf mention contraire « (optionnel) » dans le label, tous les champs sont obligatoires.",
     loading: "Chargement de la fiche de données",
+    load_error: "La fiche de données n’a pas pu être chargée",
     publishing: "Publication du flux en cours",
     error_title: "Le flux n’a pas été publié",
     "metadata_missing.title": "Renseignez d’abord la description de la fiche de données",
@@ -183,6 +185,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     title: "Create a service",
     mandatory_fields: "Unless marked “(optional)”, all fields are mandatory.",
     loading: "Loading the datasheet",
+    load_error: "The datasheet could not be loaded",
     publishing: "Publishing the service",
     error_title: "The service was not published",
     "metadata_missing.title": "Fill in the datasheet description first",

@@ -59,7 +59,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
             return <LoadingText as="p" message={t("loading")} withSpinnerIcon />;
         }
         if (datasheetQuery.isError) {
-            return <Alert severity="error" title={t("loading")} description={getApiErrorMessage(datasheetQuery.error)} small />;
+            return <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(datasheetQuery.error)} small />;
         }
         if (metadataQuery.isError) {
             return metadataQuery.error.status === 404 ? (
@@ -76,7 +76,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
                     }
                 />
             ) : (
-                <Alert severity="error" title={t("loading")} description={getApiErrorMessage(metadataQuery.error)} small />
+                <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(metadataQuery.error)} small />
             );
         }
         return (
