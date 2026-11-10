@@ -212,8 +212,15 @@ final class EntrepotMockResponseFactory
             return $this->json($this->find('metadata', $matches[1]) ?? []);
         }
 
-        if ('POST' === $method && 1 === preg_match('#^metadata/([\w-]+)/tags$#', $relative, $matches)) {
-            return $this->json($this->update('metadata', $matches[1], fn (array $item) => ['tags' => [...$item['tags'], ...json_decode($body, true, flags: JSON_THROW_ON_ERROR)]] + $item));
+        if ('POST' === $method && 1 === preg_match('#^(metadata|uploads|stored_data)/([\w-]+)/tags$#', $relative, $matches)) {
+            return $this->json($this->update($matches[1], $matches[2], fn (array $item) => ['tags' => [...$item['tags'], ...json_decode($body, true, flags: JSON_THROW_ON_ERROR)]] + $item));
+        }
+
+        if ('POST' === $method && 'uploads' === $relative) {
+            $upload = ['_id' => 'upload-'.self::$nextId++, 'status' => 'OPEN', 'tags' => [], ...json_decode($body, true, flags: JSON_THROW_ON_ERROR)];
+            self::$store['uploads'][] = $upload;
+
+            return $this->json($upload, 201);
         }
 
         if ('POST' === $method && 'annexes' === $relative) {
