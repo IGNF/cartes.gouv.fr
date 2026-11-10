@@ -24,13 +24,8 @@ const getAll = async (datastoreId: string, query: QueryParams = {}, otherOptions
 
 const add = (datastoreId: string, data: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_add", { datastoreId });
-    return jsonFetch<Upload>(
-        url,
-        {
-            method: "POST",
-        },
-        data
-    );
+    // corps lu par #[MapRequestPayload] : il exige le type JSON
+    return jsonFetch<Upload>(url, { method: "POST", headers: { "Content-Type": "application/json" } }, data);
 };
 
 const getFileTree = (datastoreId: string, uploadId: string) => {
