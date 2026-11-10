@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Dto\Datasheet\DatasheetMetadataDTO;
+use App\Dto\Datasheet\ResourceConditionDTO;
+use App\Dto\Datasheet\SubConstraintDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswLanguage;
 use App\Dto\Metadata\CswMetadata;
@@ -38,11 +40,43 @@ class DatasheetMetadataMapper
         $metadata->themes = array_values($dto->themes);
         $metadata->producers = array_values($dto->producers);
         $metadata->territories = array_values($dto->territories);
-        $metadata->resource_constraints = array_values($dto->resource_constraints);
+        $metadata->resource_constraints = array_values(array_map($this->accessPairsFirst(...), $dto->resource_constraints));
         $metadata->scale = $dto->scale;
         $metadata->resolution = $dto->resolution;
         $metadata->update_frequency = $dto->update_frequency;
 
         return $metadata;
+    }
+
+    /**
+     * Le XML range les restrictions d’accès avant celles d’usage et le lecteur reforme les paires dans cet ordre :
+     * chaque restriction garde sa compagne qui la suit, les paires d’accès passent devant, le reste ensuite.
+     */
+    private function accessPairsFirst(ResourceConditionDTO $condition): ResourceConditionDTO
+    {
+        $constraints = array_values($condition->constraints);
+        $pairs = [];
+        $others = [];
+        for ($i = 0, $count = count($constraints); $i < $count; ++$i) {
+            $constraint = $constraints[$i];
+            if (!in_array($constraint->type, ['accessConstraints', 'useConstraints'], true)) {
+                $others[] = $constraint;
+                continue;
+            }
+
+            $pair = [$constraint];
+            $companionType = 'otherRestrictions' === $constraint->restriction_code ? 'otherConstraints' : 'useLimitation';
+            $next = $constraints[$i + 1] ?? null;
+            if ($next instanceof SubConstraintDTO && $next->type === $companionType) {
+                $pair[] = $next;
+                ++$i;
+            }
+            $pairs[] = $pair;
+        }
+
+        // tri stable : l’ordre saisi est gardé dans chaque groupe
+        usort($pairs, fn (array $a, array $b) => ('accessConstraints' === $b[0]->type) <=> ('accessConstraints' === $a[0]->type));
+
+        return new ResourceConditionDTO($condition->type, [...array_merge(...$pairs), ...$others]);
     }
 }

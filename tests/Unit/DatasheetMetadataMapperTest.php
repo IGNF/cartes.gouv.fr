@@ -43,7 +43,7 @@ final class DatasheetMetadataMapperTest extends TestCase
         self::assertSame(['environment'], $metadata->themes);
         self::assertSame($dto->producers, $metadata->producers);
         self::assertSame($dto->territories, $metadata->territories);
-        self::assertSame($dto->resource_constraints, $metadata->resource_constraints);
+        self::assertEquals($dto->resource_constraints, $metadata->resource_constraints);
         self::assertSame(25000, $metadata->scale);
         self::assertSame(2.5, $metadata->resolution);
         self::assertSame('monthly', $metadata->update_frequency);
@@ -67,12 +67,29 @@ final class DatasheetMetadataMapperTest extends TestCase
         self::assertSame('Titre', $existing->name);
     }
 
+    // le XML et le lecteur placent les paires d’accès avant celles d’usage : le mappeur écrit dans cet ordre
+    public function testAccessPairsComeBeforeUsePairs(): void
+    {
+        $useRestriction = new SubConstraintDTO('useConstraints', restriction_code: 'license');
+        $useText = new SubConstraintDTO('useLimitation', description: 'Licence X');
+        $accessRestriction = new SubConstraintDTO('accessConstraints', restriction_code: 'restricted');
+        $accessText = new SubConstraintDTO('useLimitation', description: 'Accès réservé');
+        $loose = new SubConstraintDTO('useLimitation', description: 'Ajoutée à la main');
+
+        $metadata = $this->mapper->map($this->dto(constraints: [new ResourceConditionDTO('legal', [$loose, $useRestriction, $useText, $accessRestriction, $accessText])]));
+
+        self::assertSame([$accessRestriction, $accessText, $useRestriction, $useText, $loose], $metadata->resource_constraints[0]->constraints);
+    }
+
     public function testEmptyResolutionStaysNull(): void
     {
         self::assertNull($this->mapper->map($this->dto(resolution: null))->resolution);
     }
 
-    private function dto(?float $resolution = 2.5): DatasheetMetadataDTO
+    /**
+     * @param ResourceConditionDTO[]|null $constraints
+     */
+    private function dto(?float $resolution = 2.5, ?array $constraints = null): DatasheetMetadataDTO
     {
         return new DatasheetMetadataDTO(
             name: 'Fiche',
@@ -87,7 +104,7 @@ final class DatasheetMetadataMapperTest extends TestCase
             territories: [new TerritoryDTO('COMMUNE_TEST_1', 'Commune test', [2.25, 48.8, 2.45, 48.9])],
             scale: 25000,
             resolution: $resolution,
-            resource_constraints: [new ResourceConditionDTO('other', [new SubConstraintDTO('useLimitation', description: 'Usage interne')])],
+            resource_constraints: $constraints ?? [new ResourceConditionDTO('other', [new SubConstraintDTO('useLimitation', description: 'Usage interne')])],
             resource_genealogy: 'Généalogie',
             hierarchy_level: 'dataset',
             language: new CswLanguage('eng', 'english'),
