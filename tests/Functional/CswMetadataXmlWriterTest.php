@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use App\Dto\Datasheet\ProducerDTO;
+use App\Dto\Datasheet\TerritoryDTO;
 use App\Dto\Metadata\CswMetadata;
 use App\Dto\Metadata\CswOnlineResource;
 use App\Dto\Metadata\CswOnlineResourceType;
@@ -53,6 +54,18 @@ final class CswMetadataXmlWriterTest extends KernelTestCase
         $read = self::getContainer()->get(CswMetadataXmlReader::class)->read($this->writer()->toXml($metadata));
 
         self::assertEquals([$pointOfContact, $metadata->producers[2]], $read->producers);
+    }
+
+    public function testSmallDecimalsAreWrittenWithoutScientificNotation(): void
+    {
+        $metadata = new CswMetadata();
+        $metadata->territories = [new TerritoryDTO('COMMUNE_TEST_1', 'Commune test', [0.00001, -0.00002, 2.5, 49.0])];
+        $metadata->resolution = 0.00005;
+
+        $xml = $this->writer()->toXml($metadata);
+
+        self::assertStringNotContainsString('E-', $xml);
+        self::assertEquals($metadata, self::getContainer()->get(CswMetadataXmlReader::class)->read($xml));
     }
 
     public function testResourceWithoutNameWritesNoEmptyElement(): void

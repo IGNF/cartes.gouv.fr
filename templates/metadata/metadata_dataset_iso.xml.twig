@@ -222,7 +222,7 @@
                     <gmd:spatialResolution>
                         <gmd:MD_Resolution>
                             <gmd:distance>
-                                <gco:Distance uom="m">{{ resolution }}</gco:Distance>
+                                <gco:Distance uom="m">{{ _self.decimal(resolution) }}</gco:Distance>
                             </gmd:distance>
                         </gmd:MD_Resolution>
                     </gmd:spatialResolution>
@@ -249,16 +249,16 @@
                             <gmd:geographicElement>
                                 <gmd:EX_GeographicBoundingBox>
                                     <gmd:westBoundLongitude>
-                                        <gco:Decimal>{{ territory.bbox[0] }}</gco:Decimal>
+                                        <gco:Decimal>{{ _self.decimal(territory.bbox[0]) }}</gco:Decimal>
                                     </gmd:westBoundLongitude>
                                     <gmd:eastBoundLongitude>
-                                        <gco:Decimal>{{ territory.bbox[2] }}</gco:Decimal>
+                                        <gco:Decimal>{{ _self.decimal(territory.bbox[2]) }}</gco:Decimal>
                                     </gmd:eastBoundLongitude>
                                     <gmd:southBoundLatitude>
-                                        <gco:Decimal>{{ territory.bbox[1] }}</gco:Decimal>
+                                        <gco:Decimal>{{ _self.decimal(territory.bbox[1]) }}</gco:Decimal>
                                     </gmd:southBoundLatitude>
                                     <gmd:northBoundLatitude>
-                                        <gco:Decimal>{{ territory.bbox[3] }}</gco:Decimal>
+                                        <gco:Decimal>{{ _self.decimal(territory.bbox[3]) }}</gco:Decimal>
                                     </gmd:northBoundLatitude>
                                 </gmd:EX_GeographicBoundingBox>
                             </gmd:geographicElement>
@@ -449,3 +449,6 @@
         </gmd:role>
     </gmd:CI_ResponsibleParty>
 {% endmacro %}
+
+{# gco:Decimal n’accepte pas la notation scientifique que PHP produit sous 0,0001 #}
+{% macro decimal(value) %}{{ value|number_format(8, '.', '')|trim('0', 'right')|trim('.', 'right') }}{% endmacro %}
