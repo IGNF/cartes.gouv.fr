@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
 import type { Datasheet, DatasheetDetailed, Metadata, Service } from "@/@types/app";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import TertiaryNavigation from "@/components/Layout/TertiaryNavigation";
 import LoadingText from "@/components/Utils/LoadingText";
@@ -16,6 +17,7 @@ import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { blockingProcessingStatuses } from "@/hooks/queries/useStoredDataUseProcessings";
 import useCatalogueDatasheetUrl from "@/hooks/useCatalogueDatasheetUrl";
+import useCommunityRights from "@/hooks/useCommunityRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -53,6 +55,17 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { classes } = useStyles();
+
+    const { userRights, isSupervisor } = useCommunityRights();
+    const hasRights = (...rights: CommunityMemberDtoRightsEnum[]) => isSupervisor || rights.every((right) => userRights?.includes(right));
+    const canBroadcast = hasRights(CommunityMemberDtoRightsEnum.BROADCAST);
+    // même règle que l’ancienne fiche
+    const canDelete = hasRights(
+        CommunityMemberDtoRightsEnum.ANNEX,
+        CommunityMemberDtoRightsEnum.UPLOAD,
+        CommunityMemberDtoRightsEnum.PROCESSING,
+        CommunityMemberDtoRightsEnum.BROADCAST
+    );
 
     const deleteMutation = useMutation<null, ApiError>({
         mutationFn: () => api.datasheet.remove(datastoreId, datasheetName),
@@ -173,7 +186,7 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
             <DatasetTabNext
                 datastoreId={datastoreId}
                 datasheetName={datasheetName}
-                hasMetadata={metadata !== undefined}
+                hasMetadata={metadataQuery.isSuccess ? true : metadataQuery.error?.status === 404 ? false : undefined}
                 onDeleteDatasheet={() => deleteModal.open()}
             />
         ),
@@ -210,6 +223,8 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
                 catalogueUrl={catalogueUrl}
                 published={published}
                 canPublish={metadata !== undefined}
+                canBroadcast={canBroadcast}
+                canDelete={canDelete}
                 onPublish={() => publishModal.open()}
                 onUnpublish={() => unpublishModal.open()}
                 onDelete={() => deleteModal.open()}
@@ -270,15 +285,17 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
                         <>
                             <p className={fr.cx("fr-mb-1v")}>{tView("datasheet_confirm_delete_modal.text")}</p>
                             <ul>
-                                {datasheet?.vector_db_list?.length ? <li>{datasheet.vector_db_list.length} base(s) de données</li> : null}
+                                {datasheet?.vector_db_list?.length ? <li>{t("delete_modal.vector_db", { count: datasheet.vector_db_list.length })}</li> : null}
                                 {datasheet?.pyramid_vector_list?.length ? (
-                                    <li>{datasheet.pyramid_vector_list.length} pyramide(s) de tuiles vectorielles</li>
+                                    <li>{t("delete_modal.pyramid_vector", { count: datasheet.pyramid_vector_list.length })}</li>
                                 ) : null}
-                                {datasheet?.pyramid_raster_list?.length ? <li>{datasheet.pyramid_raster_list.length} pyramide(s) de tuiles raster</li> : null}
-                                {serviceListQuery.data?.length ? <li>{serviceListQuery.data.length} service(s)</li> : null}
-                                {datasheet?.upload_list?.length ? <li>{datasheet.upload_list.length} livraison(s)</li> : null}
-                                {metadata && <li>La métadonnée associée ({metadata.file_identifier})</li>}
-                                {documentsListQuery.data?.length ? <li>{documentsListQuery.data.length} document(s) associé(s)</li> : null}
+                                {datasheet?.pyramid_raster_list?.length ? (
+                                    <li>{t("delete_modal.pyramid_raster", { count: datasheet.pyramid_raster_list.length })}</li>
+                                ) : null}
+                                {serviceListQuery.data?.length ? <li>{t("delete_modal.services", { count: serviceListQuery.data.length })}</li> : null}
+                                {datasheet?.upload_list?.length ? <li>{t("delete_modal.uploads", { count: datasheet.upload_list.length })}</li> : null}
+                                {metadata && <li>{t("delete_modal.metadata", { fileIdentifier: metadata.file_identifier })}</li>}
+                                {documentsListQuery.data?.length ? <li>{t("delete_modal.documents", { count: documentsListQuery.data.length })}</li> : null}
                             </ul>
                             {processingExecutionsQueries.some((query) => (query.data?.length ?? 0) > 0) && (
                                 <p>{tView("processing_in_progress_deletion_warning")}</p>

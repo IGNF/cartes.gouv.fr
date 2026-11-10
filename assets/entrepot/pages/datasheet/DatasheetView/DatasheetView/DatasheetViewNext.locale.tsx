@@ -25,6 +25,13 @@ const { i18n } = declareComponentKeys<
     | "publish_error"
     | "unpublish_error"
     | "delete_error"
+    | { K: "delete_modal.vector_db"; P: { count: number }; R: string }
+    | { K: "delete_modal.pyramid_vector"; P: { count: number }; R: string }
+    | { K: "delete_modal.pyramid_raster"; P: { count: number }; R: string }
+    | { K: "delete_modal.services"; P: { count: number }; R: string }
+    | { K: "delete_modal.uploads"; P: { count: number }; R: string }
+    | { K: "delete_modal.documents"; P: { count: number }; R: string }
+    | { K: "delete_modal.metadata"; P: { fileIdentifier: string }; R: string }
 >()("DatasheetViewNext");
 
 export type I18n = typeof i18n;
@@ -55,6 +62,13 @@ export const DatasheetViewNextFrTranslations: Translations<"fr">["DatasheetViewN
     publish_error: "La fiche de données n’a pas été publiée",
     unpublish_error: "La fiche de données n’a pas été dépubliée",
     delete_error: "La fiche de données n’a pas été supprimée",
+    "delete_modal.vector_db": ({ count }) => `${count} base(s) de données`,
+    "delete_modal.pyramid_vector": ({ count }) => `${count} pyramide(s) de tuiles vectorielles`,
+    "delete_modal.pyramid_raster": ({ count }) => `${count} pyramide(s) de tuiles raster`,
+    "delete_modal.services": ({ count }) => `${count} service(s)`,
+    "delete_modal.uploads": ({ count }) => `${count} livraison(s)`,
+    "delete_modal.documents": ({ count }) => `${count} document(s) associé(s)`,
+    "delete_modal.metadata": ({ fileIdentifier }) => `La métadonnée associée (${fileIdentifier})`,
 };
 
 export const DatasheetViewNextEnTranslations: Translations<"en">["DatasheetViewNext"] = {
@@ -83,4 +97,11 @@ export const DatasheetViewNextEnTranslations: Translations<"en">["DatasheetViewN
     publish_error: "The datasheet was not published",
     unpublish_error: "The datasheet was not unpublished",
     delete_error: "The datasheet was not deleted",
+    "delete_modal.vector_db": ({ count }) => `${count} database(s)`,
+    "delete_modal.pyramid_vector": ({ count }) => `${count} vector tile pyramid(s)`,
+    "delete_modal.pyramid_raster": ({ count }) => `${count} raster tile pyramid(s)`,
+    "delete_modal.services": ({ count }) => `${count} service(s)`,
+    "delete_modal.uploads": ({ count }) => `${count} upload(s)`,
+    "delete_modal.documents": ({ count }) => `${count} associated document(s)`,
+    "delete_modal.metadata": ({ fileIdentifier }) => `The associated metadata (${fileIdentifier})`,
 };

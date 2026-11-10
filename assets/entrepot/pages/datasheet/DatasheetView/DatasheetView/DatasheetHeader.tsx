@@ -15,13 +15,16 @@ type DatasheetHeaderProps = {
     published: boolean;
     /** publier exige une fiche de métadonnées */
     canPublish: boolean;
+    /** droit BROADCAST : publier et dépublier */
+    canBroadcast: boolean;
+    canDelete: boolean;
     onPublish: () => void;
     onUnpublish: () => void;
     onDelete: () => void;
 };
 
 export default function DatasheetHeader(props: DatasheetHeaderProps) {
-    const { name, thumbnailUrl, catalogueUrl, published, canPublish, onPublish, onUnpublish, onDelete } = props;
+    const { name, thumbnailUrl, catalogueUrl, published, canPublish, canBroadcast, canDelete, onPublish, onUnpublish, onDelete } = props;
     const { t } = useTranslation("DatasheetViewNext");
     const { classes, cx } = useStyles();
 
@@ -52,20 +55,27 @@ export default function DatasheetHeader(props: DatasheetHeaderProps) {
                 ) : (
                     <>
                         <Badge noIcon>{t("not_published")}</Badge>
-                        <Button
-                            priority="primary"
-                            onClick={() => onPublish()}
-                            disabled={!canPublish}
-                            title={canPublish ? undefined : t("publish_requires_description")}
-                        >
-                            {t("publish")}
-                        </Button>
+                        {canBroadcast && (
+                            <Button
+                                priority="primary"
+                                onClick={() => onPublish()}
+                                disabled={!canPublish}
+                                title={canPublish ? undefined : t("publish_requires_description")}
+                            >
+                                {t("publish")}
+                            </Button>
+                        )}
                     </>
                 )}
-                <MenuList
-                    menuOpenButtonProps={{ iconId: "ri-more-2-line", priority: "tertiary no outline", title: t("other_actions") }}
-                    items={[published && { text: t("unpublish"), onClick: () => onUnpublish() }, { text: t("delete"), onClick: () => onDelete() }]}
-                />
+                {((published && canBroadcast) || canDelete) && (
+                    <MenuList
+                        menuOpenButtonProps={{ iconId: "ri-more-2-line", priority: "tertiary no outline", title: t("other_actions") }}
+                        items={[
+                            published && canBroadcast && { text: t("unpublish"), onClick: () => onUnpublish() },
+                            canDelete && { text: t("delete"), onClick: () => onDelete() },
+                        ]}
+                    />
+                )}
             </div>
         </div>
     );

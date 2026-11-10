@@ -48,8 +48,8 @@ type DatasetRow = {
 type DatasetTabNextProps = {
     datastoreId: string;
     datasheetName: string;
-    /** une fiche avec fiche de métadonnées survit à la suppression de sa dernière livraison */
-    hasMetadata: boolean;
+    /** une fiche avec fiche de métadonnées survit à la suppression de sa dernière livraison ; undefined tant qu’on ne sait pas */
+    hasMetadata: boolean | undefined;
     /** ouvre la confirmation de suppression de la fiche entière */
     onDeleteDatasheet: () => void;
 };
@@ -113,7 +113,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                     </Badge>
                 ),
                 action: (
-                    <>
+                    <div className={classes.actions}>
                         {failed ? (
                             <Button
                                 priority="secondary"
@@ -143,16 +143,16 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                         )}
                         {canAddData && (
                             <Button
-                                className={fr.cx("fr-ml-2v")}
                                 iconId="fr-icon-delete-line"
                                 priority="secondary"
                                 size="small"
+                                disabled={hasMetadata === undefined}
                                 onClick={() => (deletingRemovesDatasheet ? onDeleteDatasheet() : deleteUploadMutate(upload._id))}
                             >
                                 {t("delete")}
                             </Button>
                         )}
-                    </>
+                    </div>
                 ),
             }));
 
@@ -185,7 +185,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
             rows: [...uploadRows, ...storedDataRows].sort((a, b) => (b.creation ?? "").localeCompare(a.creation ?? "")),
             hasIntegrationInProgress: uploads.some(({ inProgress }) => inProgress),
         };
-    }, [datasheet, datasheetName, datastoreId, hasMetadata, canAddData, failedUploadIds, deleteUploadMutate, onDeleteDatasheet, t]);
+    }, [datasheet, datasheetName, datastoreId, hasMetadata, canAddData, classes.actions, failedUploadIds, deleteUploadMutate, onDeleteDatasheet, t]);
 
     const filteredRows = typeFilter === "all" ? rows : rows.filter((row) => row.type === typeFilter);
     const segment = ({ value, label }: (typeof FILTERS)[number]) => ({
@@ -283,6 +283,11 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
 }
 
 const useStyles = tss.withName({ DatasetTabNext }).create({
+    actions: {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: fr.spacing("1w"),
+    },
     empty: {
         display: "flex",
         justifyContent: "center",
