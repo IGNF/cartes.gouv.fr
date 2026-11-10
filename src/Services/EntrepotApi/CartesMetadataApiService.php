@@ -102,11 +102,13 @@ class CartesMetadataApiService
     /**
      * Remplace les champs saisis ; crée la fiche de métadonnées si elle manque, avec les ressources en ligne des flux existants.
      *
+     * @param \Closure(): DatasheetServices $loadServices appelée seulement si la fiche de métadonnées manque
+     *
      * @return array<mixed> métadonnée de l’Entrepôt, avec `csw_metadata`
      *
      * @throws AppException 404 si la fiche de données n’existe pas, 400 si l’identifiant change, 409 si l’identifiant est pris
      */
-    public function replace(string $datastoreId, string $datasheetName, DatasheetMetadataDTO $dto, DatasheetServices $services, ?UploadedFile $thumbnail, bool $deleteThumbnail): array
+    public function replace(string $datastoreId, string $datasheetName, DatasheetMetadataDTO $dto, \Closure $loadServices, ?UploadedFile $thumbnail, bool $deleteThumbnail): array
     {
         $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
         if (null === $apiMetadata) {
@@ -115,7 +117,7 @@ class CartesMetadataApiService
             }
 
             $metadata = $this->mapper->map($dto);
-            $this->replaceServiceResources($metadata, $datastoreId, $services);
+            $this->replaceServiceResources($metadata, $datastoreId, $loadServices());
 
             // vignette déjà déposée depuis l’en-tête de la fiche : gardée, remplacée ou supprimée comme pour une fiche existante
             $oldThumbnails = $this->thumbnailAnnexes($datastoreId, $datasheetName);

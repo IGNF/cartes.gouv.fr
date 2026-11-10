@@ -64,13 +64,12 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     public function replace(string $datastoreId, string $datasheetName, Request $request): JsonResponse
     {
         $dto = $this->multipartPayloadMapper->map($request, DatasheetMetadataDTO::class);
-        $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
 
         return $this->json($this->cartesMetadataApiService->replace(
             $datastoreId,
             $datasheetName,
             $dto,
-            $services,
+            fn () => $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName),
             $this->thumbnail($request),
             $request->request->getBoolean('delete_thumbnail'),
         ));

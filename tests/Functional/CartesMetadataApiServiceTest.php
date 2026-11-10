@@ -187,7 +187,7 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
     {
         $this->seedExistingMetadata();
 
-        $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', $this->noServices());
+        $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', $this->noServices()());
 
         $written = $this->readWritten('metadata-1');
         self::assertSame([], $written->resourcesOfType(CswOnlineResourceType::Layer));
@@ -199,7 +199,7 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
 
     public function testRefreshWithoutMetadataWritesNothing(): void
     {
-        $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', $this->noServices());
+        $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', $this->noServices()());
 
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
@@ -262,9 +262,12 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
         }
     }
 
-    private function noServices(): DatasheetServices
+    /**
+     * @return \Closure(): DatasheetServices
+     */
+    private function noServices(): \Closure
     {
-        return new DatasheetServices([], []);
+        return fn () => new DatasheetServices([], []);
     }
 
     private function dto(string $fileIdentifier = 'ign.fiche', string $description = 'Description'): DatasheetMetadataDTO
