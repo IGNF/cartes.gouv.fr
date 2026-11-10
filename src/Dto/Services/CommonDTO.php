@@ -2,7 +2,7 @@
 
 namespace App\Dto\Services;
 
-use App\Entity\CswMetadata\CswLanguage;
+use App\Dto\Metadata\CswLanguage;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class CommonDTO

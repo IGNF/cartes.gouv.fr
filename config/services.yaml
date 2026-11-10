@@ -33,7 +33,6 @@ services:
         resource: "../src/"
         exclude:
             - "../src/DependencyInjection/"
-            - "../src/Entity/"
             - "../src/Kernel.php"
             # classe du service exception_listener de FrameworkBundle, pas un abonné de plus
             - "../src/Listener/StatusAwareErrorListener.php"

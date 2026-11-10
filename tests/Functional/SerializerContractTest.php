@@ -5,6 +5,8 @@ namespace App\Tests\Functional;
 use App\Dto\Datastore\PermissionDTO;
 use App\Dto\Datastore\UpdatePermissionDTO;
 use App\Dto\Espaceco\Members\AddMembersDTO;
+use App\Dto\Metadata\CswLanguage;
+use App\Dto\Metadata\CswMetadata;
 use App\Dto\Services\CommonDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
@@ -14,14 +16,7 @@ use App\Dto\Services\Wfs\WfsTableDTO;
 use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
 use App\Dto\User\AccessDTO;
 use App\Dto\User\UserKeyDTO;
-use App\Entity\CswMetadata\CswCapabilitiesFile;
-use App\Entity\CswMetadata\CswDocument;
-use App\Entity\CswMetadata\CswHierarchyLevel;
-use App\Entity\CswMetadata\CswLanguage;
-use App\Entity\CswMetadata\CswMetadata;
-use App\Entity\CswMetadata\CswMetadataLayer;
-use App\Entity\CswMetadata\CswStyleFile;
-use App\Services\CswMetadataHelper;
+use App\Tests\Support\CswMetadataFixtures;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -35,55 +30,35 @@ final class SerializerContractTest extends KernelTestCase
 {
     public function testCswMetadataIsExposedInSnakeCase(): void
     {
+        /** @var array<string, mixed> $json */
+        $json = self::getContainer()->get('serializer')->normalize(CswMetadataFixtures::full());
+
         self::assertSame([
-            'file_identifier' => 'fid',
-            'hierarchy_level' => 'dataset',
-            'language' => ['code' => 'fre', 'language' => 'français'],
-            'charset' => 'utf8',
-            'title' => 'Titre',
-            'abstract' => 'Résumé',
-            'creation_date' => '2024-01-15',
-            'update_date' => '2024-02-01T10:00:00',
-            'resource_genealogy' => 'Généalogie',
-            'inspire_keywords' => ['Occupation des terres'],
-            'free_keywords' => ['libre'],
-            'topic_categories' => ['planningCadastre'],
-            'contact_email' => 'contact@example.test',
-            'organisation_name' => 'Organisation',
-            'organisation_email' => 'orga@example.test',
-            'resolution' => '100',
-            'layers' => [[
-                'name' => 'ns:couche',
-                'gmd_online_resource_protocol' => 'OGC:WFS',
-                'gmd_online_resource_url' => 'https://data.example.test/wfs',
-                'offering_id' => 'off-1',
-                'open' => true,
-                'description' => 'Couche',
-            ]],
-            'bbox' => ['west' => -5.5, 'east' => 9.5, 'south' => 41.5, 'north' => 51.5],
-            'style_files' => [['name' => 'style', 'description' => 'Style', 'url' => 'https://example.test/style.json']],
-            'capabilities_files' => [['name' => 'caps', 'description' => 'Caps', 'url' => 'https://example.test/caps.xml']],
-            'documents' => [['name' => 'doc', 'description' => null, 'url' => 'https://example.test/doc.pdf']],
-            'thumbnail_url' => 'https://example.test/thumb.png',
-            'frequency_code' => 'monthly',
-        ], self::getContainer()->get('serializer')->normalize($this->fullCswMetadata()));
+            'file_identifier', 'hierarchy_level', 'language', 'charset', 'title', 'abstract', 'creation_date', 'resource_genealogy',
+            'inspire_keywords', 'free_keywords', 'topic_categories', 'contact_email', 'organisation_name', 'organisation_email', 'resolution',
+            'online_resources', 'bbox', 'thumbnail_url', 'frequency_code',
+        ], array_keys($json));
+        self::assertSame('dataset', $json['hierarchy_level']);
+        self::assertSame(['code' => 'fre', 'language' => 'français'], $json['language']);
+        self::assertSame([
+            'type' => 'layer',
+            'name' => 'couche_privee',
+            'url' => 'https://data.example.test/wms-v',
+            'protocol' => 'OGC:WMS',
+            'description' => 'couche_privee - Accès restreint',
+            'open' => false,
+        ], $json['online_resources'][1]);
+        self::assertSame('document', $json['online_resources'][5]['type']);
     }
 
-    public function testCswMetadataSurvivesArrayRoundTrip(): void
+    // chemin de MetadataController::add : le JSON du front redevient une CswMetadata identique
+    public function testCswMetadataSurvivesJsonRoundTrip(): void
     {
-        $helper = self::getContainer()->get(CswMetadataHelper::class);
-        $metadata = $this->fullCswMetadata();
+        /** @var Serializer $serializer */
+        $serializer = self::getContainer()->get('serializer');
+        $metadata = CswMetadataFixtures::full();
 
-        self::assertEquals($metadata, $helper->fromArray($helper->toArray($metadata)));
-    }
-
-    // le gabarit twig du XML lit les clés produites par le sérialiseur
-    public function testCswMetadataSurvivesXmlRoundTrip(): void
-    {
-        $helper = self::getContainer()->get(CswMetadataHelper::class);
-        $metadata = $helper->fromXml((string) file_get_contents(__DIR__.'/../Fixture/metadata/md-1.xml'));
-
-        self::assertEquals($metadata, $helper->fromXml($helper->toXml($metadata)));
+        self::assertEquals($metadata, $serializer->deserialize($serializer->serialize($metadata, 'json'), CswMetadata::class, 'json'));
     }
 
     /**
@@ -196,33 +171,5 @@ final class SerializerContractTest extends KernelTestCase
     private static function wfsTablePayload(): array
     {
         return ['native_name' => 'table', 'title' => 'Titre', 'description' => 'Description', 'public_name' => 'publique', 'keywords' => ['mot']];
-    }
-
-    private function fullCswMetadata(): CswMetadata
-    {
-        $metadata = new CswMetadata();
-        $metadata->fileIdentifier = 'fid';
-        $metadata->hierarchyLevel = CswHierarchyLevel::Dataset;
-        $metadata->title = 'Titre';
-        $metadata->abstract = 'Résumé';
-        $metadata->creationDate = '2024-01-15';
-        $metadata->updateDate = '2024-02-01T10:00:00';
-        $metadata->resourceGenealogy = 'Généalogie';
-        $metadata->inspireKeywords = ['Occupation des terres'];
-        $metadata->freeKeywords = ['libre'];
-        $metadata->topicCategories = ['planningCadastre'];
-        $metadata->contactEmail = 'contact@example.test';
-        $metadata->organisationName = 'Organisation';
-        $metadata->organisationEmail = 'orga@example.test';
-        $metadata->resolution = '100';
-        $metadata->layers = [new CswMetadataLayer('ns:couche', 'OGC:WFS', 'https://data.example.test/wfs', 'off-1', true, 'Couche')];
-        $metadata->bbox = ['west' => -5.5, 'east' => 9.5, 'south' => 41.5, 'north' => 51.5];
-        $metadata->styleFiles = [new CswStyleFile('style', 'Style', 'https://example.test/style.json')];
-        $metadata->capabilitiesFiles = [new CswCapabilitiesFile('caps', 'Caps', 'https://example.test/caps.xml')];
-        $metadata->documents = [new CswDocument('doc', null, 'https://example.test/doc.pdf')];
-        $metadata->thumbnailUrl = 'https://example.test/thumb.png';
-        $metadata->frequencyCode = 'monthly';
-
-        return $metadata;
     }
 }

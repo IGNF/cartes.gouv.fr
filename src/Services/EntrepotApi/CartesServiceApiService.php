@@ -14,8 +14,6 @@ use App\Constants\EntrepotApi\PermissionTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Dto\Datasheet\DatasheetServices;
 use App\Dto\Services\CommonDTO;
-use App\Entity\CswMetadata\CswMetadata;
-use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\CapabilitiesService;
@@ -516,13 +514,10 @@ class CartesServiceApiService
 
         // Création ou mise à jour de metadata
         $formData = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
-        $apiMetadata = $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $services, $formData);
+        $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $services, $formData);
 
         // Synchronisation des autres services de la même fiche de données
-        /** @var CswMetadata */
-        $cswMetadata = $apiMetadata['csw_metadata'];
-
-        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::CONFIG_THEME], $cswMetadata, $dto, $services);
+        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::CONFIG_THEME], $dto, $services);
 
         return $offering;
     }
@@ -530,10 +525,9 @@ class CartesServiceApiService
     /**
      * @param array<mixed> $offering
      */
-    private function synchroniseSiblingServices(string $datastoreId, array $offering, string $configTheme, CswMetadata $cswMetadata, CommonDTO $dto, DatasheetServices $services): void
+    private function synchroniseSiblingServices(string $datastoreId, array $offering, string $configTheme, CommonDTO $dto, DatasheetServices $services): void
     {
-        $siblingServices = array_map(fn (CswMetadataLayer $layer) => $layer->offeringId, $cswMetadata->layers ?? []);
-        $siblingServices = array_filter($siblingServices, fn (string $serviceId) => $serviceId !== $offering['_id']);
+        $siblingServices = array_filter(array_keys($services->offeringsById), fn (string $serviceId) => $serviceId !== $offering['_id']);
         $keywords = [...$dto->category, ...$dto->keywords, ...$dto->free_keywords];
 
         $capabilitiesUpdateArgs = [];

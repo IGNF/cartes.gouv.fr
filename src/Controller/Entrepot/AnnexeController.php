@@ -5,7 +5,8 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
-use App\Services\CswMetadataHelper;
+use App\Services\CswMetadataXmlReader;
+use App\Services\CswMetadataXmlWriter;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\MetadataApiService;
@@ -34,7 +35,8 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         private AnnexeApiService $annexeApiService,
         private MetadataApiService $metadataApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
-        private CswMetadataHelper $metadataHelper,
+        private CswMetadataXmlReader $cswMetadataReader,
+        private CswMetadataXmlWriter $cswMetadataWriter,
         private RSSFeed $rssFeed,
     ) {
     }
@@ -162,10 +164,10 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         }
 
         $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
-        $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
-        $cswMetadata->thumbnailUrl = $annexe['url'];
+        $cswMetadata = $this->cswMetadataReader->read($xmlFileContent);
+        $cswMetadata->thumbnail_url = $annexe['url'];
 
-        $xmlFilePath = $this->metadataHelper->saveToFile($cswMetadata);
+        $xmlFilePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $metadata['_id'], $xmlFilePath);
 
         return new JsonResponse($annexe);
@@ -183,10 +185,10 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         }
 
         $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
-        $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
-        $cswMetadata->thumbnailUrl = null;
+        $cswMetadata = $this->cswMetadataReader->read($xmlFileContent);
+        $cswMetadata->thumbnail_url = null;
 
-        $xmlFilePath = $this->metadataHelper->saveToFile($cswMetadata);
+        $xmlFilePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $metadata['_id'], $xmlFilePath);
 
         return $response;

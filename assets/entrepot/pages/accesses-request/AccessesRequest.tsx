@@ -54,7 +54,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
     });
 
     const privateLayers = useMemo(
-        () => metadataQuery.data?.layers?.filter((l) => !l.open).sort((a, b) => (a.name && b.name ? a.name.localeCompare(b.name) : 0)) ?? [],
+        () => metadataQuery.data?.online_resources?.filter((r) => r.type === "layer" && !r.open).sort((a, b) => a.name.localeCompare(b.name)) ?? [],
         [metadataQuery.data]
     );
     const catalogueDatasheetUrl = useMemo(() => `${catalogueUrl}/dataset/${fileIdentifier}`, [fileIdentifier]);
@@ -207,9 +207,9 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                                                 >
                                                     {layer.name}
                                                 </span>
-                                                {layer.gmd_online_resource_protocol && (
+                                                {layer.protocol && (
                                                     <Badge noIcon={true} severity={"info"} className={fr.cx("fr-py-1v", "fr-px-2v")} small as="span">
-                                                        {gmdProtocolToServiceType(layer.gmd_online_resource_protocol)}
+                                                        {gmdProtocolToServiceType(layer.protocol)}
                                                     </Badge>
                                                 )}
                                             </div>

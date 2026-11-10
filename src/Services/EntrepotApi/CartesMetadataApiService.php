@@ -7,15 +7,14 @@ use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Dto\Datasheet\DatasheetServices;
-use App\Entity\CswMetadata\CswCapabilitiesFile;
-use App\Entity\CswMetadata\CswDocument;
-use App\Entity\CswMetadata\CswHierarchyLevel;
-use App\Entity\CswMetadata\CswLanguage;
-use App\Entity\CswMetadata\CswMetadata;
-use App\Entity\CswMetadata\CswMetadataLayer;
-use App\Entity\CswMetadata\CswStyleFile;
+use App\Dto\Metadata\CswHierarchyLevel;
+use App\Dto\Metadata\CswLanguage;
+use App\Dto\Metadata\CswMetadata;
+use App\Dto\Metadata\CswOnlineResource;
+use App\Dto\Metadata\CswOnlineResourceType;
 use App\Exception\AppException;
-use App\Services\CswMetadataHelper;
+use App\Services\CswMetadataXmlReader;
+use App\Services\CswMetadataXmlWriter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,7 +31,8 @@ class CartesMetadataApiService
         private readonly DatastoreApiService $datastoreApiService,
         private readonly AnnexeApiService $annexeApiService,
         private readonly MetadataApiService $metadataApiService,
-        private readonly CswMetadataHelper $cswMetadataHelper,
+        private readonly CswMetadataXmlReader $cswMetadataReader,
+        private readonly CswMetadataXmlWriter $cswMetadataWriter,
         private readonly CartesStylesApiService $cartesStylesApiService,
         private readonly StoredDataApiService $storedDataApiService,
     ) {
@@ -84,16 +84,14 @@ class CartesMetadataApiService
 
         $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
 
-        $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
-        $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $services);
-        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $services->configurationsById);
-        $cswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $services);
+        $cswMetadata = $this->cswMetadataReader->read($apiMetadataXml);
+        $this->replaceServiceResources($cswMetadata, $datastoreId, $services);
 
-        $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
+        $xmlFilePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
 
         // dépublie la metadata (sans la supprimer) s'il n'y a plus de services publiés
-        if (0 === count($cswMetadata->layers) && isset($apiMetadata['endpoints'][0]['_id'])) {
+        if ([] === $cswMetadata->resourcesOfType(CswOnlineResourceType::Layer) && isset($apiMetadata['endpoints'][0]['_id'])) {
             $this->metadataApiService->unpublish($datastoreId, $cswMetadata->requireFileIdentifier(), $apiMetadata['endpoints'][0]['_id'])->await();
         }
     }
@@ -110,10 +108,10 @@ class CartesMetadataApiService
 
         $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
 
-        $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
-        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $configurations);
+        $cswMetadata = $this->cswMetadataReader->read($apiMetadataXml);
+        $cswMetadata->replaceResources([CswOnlineResourceType::Style], $this->getStyleFiles($datastoreId, $configurations));
 
-        $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
+        $xmlFilePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
     }
 
@@ -129,10 +127,10 @@ class CartesMetadataApiService
 
         $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
 
-        $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
-        $cswMetadata->documents = $this->toCswDocuments($documents);
+        $cswMetadata = $this->cswMetadataReader->read($apiMetadataXml);
+        $cswMetadata->replaceResources([CswOnlineResourceType::Document], $this->toCswDocuments($documents));
 
-        $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
+        $xmlFilePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
     }
 
@@ -175,10 +173,10 @@ class CartesMetadataApiService
         // Ajout de l'etiquette si elle n'existe pas deja
         $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
         if (!is_null($thumbnailUrl)) {
-            $newCswMetadata->thumbnailUrl = $thumbnailUrl;
+            $newCswMetadata->thumbnail_url = $thumbnailUrl;
         }
 
-        $newMetadataFilePath = $this->cswMetadataHelper->saveToFile($newCswMetadata);
+        $newMetadataFilePath = $this->cswMetadataWriter->saveToFile($newCswMetadata);
 
         $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
         $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], [
@@ -203,20 +201,20 @@ class CartesMetadataApiService
         $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
 
         $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $oldApiMetadata['_id'])->text();
-        $oldCswMetadata = $this->cswMetadataHelper->fromXml($oldMetadataFileXml);
+        $oldCswMetadata = $this->cswMetadataReader->read($oldMetadataFileXml);
 
         $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $services, $oldCswMetadata, $formData);
 
         // Mise a jour de l'etiquette
         $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
-        if ($newCswMetadata->thumbnailUrl !== $thumbnailUrl) {
-            $newCswMetadata->thumbnailUrl = $thumbnailUrl;
+        if ($newCswMetadata->thumbnail_url !== $thumbnailUrl) {
+            $newCswMetadata->thumbnail_url = $thumbnailUrl;
         }
 
-        $newMetadataFilePath = $this->cswMetadataHelper->saveToFile($newCswMetadata);
+        $newMetadataFilePath = $this->cswMetadataWriter->saveToFile($newCswMetadata);
 
         // suppression et recréation de métadonnées si changement de file_identifier
-        if ($oldCswMetadata->fileIdentifier !== $newCswMetadata->fileIdentifier) {
+        if ($oldCswMetadata->file_identifier !== $newCswMetadata->file_identifier) {
             $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->requireFileIdentifier(), $metadataEndpoint['_id'])->await();
             $this->metadataApiService->delete($datastoreId, $oldApiMetadata['_id'])->await();
 
@@ -248,7 +246,6 @@ class CartesMetadataApiService
 
         $newCswMetadata = $oldCswMetadata instanceof CswMetadata ? clone $oldCswMetadata : new CswMetadata();
 
-        $layers = $this->getMetadataLayers($datastoreId, $services);
         $bbox = $this->getBbox($datastoreId, $datasheetName);
 
         if ($formData) {
@@ -256,34 +253,45 @@ class CartesMetadataApiService
                  new CswLanguage($formData['language']['code'], $formData['language']['language'])
                  : CswLanguage::default();
 
-            $newCswMetadata->fileIdentifier = $formData['identifier'];
-            $newCswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom('' === $formData['hierarchy_level'] ? 'dataset' : $formData['hierarchy_level']);
+            $newCswMetadata->file_identifier = $formData['identifier'];
+            $newCswMetadata->hierarchy_level = CswHierarchyLevel::tryFrom('' === $formData['hierarchy_level'] ? 'dataset' : $formData['hierarchy_level']);
 
             $newCswMetadata->language = $language;
             $newCswMetadata->charset = $formData['charset'];
             $newCswMetadata->title = $formData['public_name'];
             $newCswMetadata->abstract = $formData['description'];
-            $newCswMetadata->creationDate = $formData['creation_date'];
-            $newCswMetadata->topicCategories = $formData['category'] ?? [];
-            $newCswMetadata->inspireKeywords = $formData['keywords'] ?? [];
-            $newCswMetadata->freeKeywords = $formData['free_keywords'] ?? [];
-            $newCswMetadata->contactEmail = $formData['email_contact'];
-            $newCswMetadata->organisationName = $formData['organization'];
-            $newCswMetadata->organisationEmail = $formData['organization_email'];
-            $newCswMetadata->resourceGenealogy = $formData['resource_genealogy'];
+            $newCswMetadata->creation_date = $formData['creation_date'];
+            $newCswMetadata->topic_categories = $formData['category'] ?? [];
+            $newCswMetadata->inspire_keywords = $formData['keywords'] ?? [];
+            $newCswMetadata->free_keywords = $formData['free_keywords'] ?? [];
+            $newCswMetadata->contact_email = $formData['email_contact'];
+            $newCswMetadata->organisation_name = $formData['organization'];
+            $newCswMetadata->organisation_email = $formData['organization_email'];
+            $newCswMetadata->resource_genealogy = $formData['resource_genealogy'];
             $newCswMetadata->resolution = $formData['resolution'] ?? null;
-            $newCswMetadata->frequencyCode = $formData['frequency_code'] ?? null;
-            $newCswMetadata->layers = $layers;
+            $newCswMetadata->frequency_code = $formData['frequency_code'] ?? null;
             $newCswMetadata->bbox = $bbox;
-            $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $services->configurationsById);
-            $newCswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $services);
+            $this->replaceServiceResources($newCswMetadata, $datastoreId, $services);
         }
 
         return $newCswMetadata;
     }
 
+    // couches, styles et GetCapabilities rebâtis depuis l’API ; documents et autres ressources conservés
+    private function replaceServiceResources(CswMetadata $cswMetadata, string $datastoreId, DatasheetServices $services): void
+    {
+        $cswMetadata->replaceResources(
+            [CswOnlineResourceType::Layer, CswOnlineResourceType::Style, CswOnlineResourceType::Capabilities],
+            [
+                ...$this->getMetadataLayers($datastoreId, $services),
+                ...$this->getStyleFiles($datastoreId, $services->configurationsById),
+                ...$this->getCapabilitiesFiles($datastoreId, $services),
+            ],
+        );
+    }
+
     /**
-     * @return array<CswMetadataLayer>
+     * @return list<CswOnlineResource>
      */
     private function getMetadataLayers(string $datastoreId, DatasheetServices $services): array
     {
@@ -311,7 +319,7 @@ class CartesMetadataApiService
                     $gmdOnlineResourceProtocol = 'OGC:WMS';
                     $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
 
-                    $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['_id'], $offering['open']);
+                    $layers[] = CswOnlineResource::layer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['open']);
                     break;
 
                 case ConfigurationTypes::WMTSTMS:
@@ -346,7 +354,7 @@ class CartesMetadataApiService
                             // la version 1.0.0 du TMS est aussi écrite en dur
                             // dans le composant UserKeyLink pour créer une URL de 'capabilities'
                         }
-                        $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['_id'], $offering['open']);
+                        $layers[] = CswOnlineResource::layer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['open']);
                     }
 
                     break;
@@ -360,18 +368,18 @@ class CartesMetadataApiService
      * @param array<mixed> $configuration configuration détaillée (type_infos)
      * @param array<mixed> $offering
      *
-     * @return array<CswMetadataLayer>
+     * @return list<CswOnlineResource>
      */
     private function getWfsSubLayers(array $configuration, array $offering, string $serviceEndpointUrl): array
     {
         $configRelations = $configuration['type_infos']['used_data'][0]['relations'];
 
-        return array_map(function ($relation) use ($offering, $serviceEndpointUrl) {
+        return array_values(array_map(function ($relation) use ($offering, $serviceEndpointUrl) {
             $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
             $gmdOnlineResourceProtocol = 'OGC:WFS';
 
-            return new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($serviceEndpointUrl), $offering['_id'], $offering['open']);
-        }, $configRelations);
+            return CswOnlineResource::layer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($serviceEndpointUrl), $offering['open']);
+        }, $configRelations));
     }
 
     /**
@@ -387,7 +395,7 @@ class CartesMetadataApiService
      *
      * @param array<array<mixed>> $configurations configurations détaillées de la fiche
      *
-     * @return array<CswStyleFile>
+     * @return list<CswOnlineResource>
      */
     private function getStyleFiles(string $datastoreId, array $configurations): array
     {
@@ -412,11 +420,7 @@ class CartesMetadataApiService
                     $description = sprintf('Style pour la couche %s', $layer['name']);
                 }
 
-                $styleFiles[] = new CswStyleFile(
-                    $name,
-                    $description,
-                    $layer['url']
-                );
+                $styleFiles[] = CswOnlineResource::style($name, $description, $layer['url']);
             }
         }
 
@@ -424,7 +428,7 @@ class CartesMetadataApiService
     }
 
     /**
-     * @return array<mixed>
+     * @return list<CswOnlineResource>
      */
     private function getCapabilitiesFiles(string $datastoreId, DatasheetServices $services): array
     {
@@ -448,10 +452,12 @@ class CartesMetadataApiService
 
             $annexes = $this->annexeApiService->getAll($datastoreId, null, "/$technicalName/capabilities.xml")->resolve();
             if (1 === count($annexes)) {
-                $capabilitiesFiles[] = new CswCapabilitiesFile(
+                $capabilitiesFiles[] = CswOnlineResource::capabilities(
                     "GetCapabilities - $type",
                     $endpoint['name'],
-                    "$annexeUrl/$datastoreName/$technicalName/capabilities.xml"
+                    "$annexeUrl/$datastoreName/$technicalName/capabilities.xml",
+                    self::CAPABILITIES_SERVICES[$type],
+                    $this->serviceUrls($services, $type),
                 );
             }
         }
@@ -459,18 +465,45 @@ class CartesMetadataApiService
         return $capabilitiesFiles;
     }
 
+    /** @var array<string, 'WFS'|'WMS'|'WMTS'> type de configuration => service OGC du GetCapabilities */
+    private const CAPABILITIES_SERVICES = [
+        ConfigurationTypes::WFS => 'WFS',
+        ConfigurationTypes::WMSVECTOR => 'WMS',
+        ConfigurationTypes::WMSRASTER => 'WMS',
+        ConfigurationTypes::WMTSTMS => 'WMTS',
+    ];
+
+    /**
+     * URL des offerings de ce type de configuration, où lire la version du service.
+     *
+     * @return list<string>
+     */
+    private function serviceUrls(DatasheetServices $services, string $configurationType): array
+    {
+        $urls = [];
+        foreach ($services->offeringsById as $offering) {
+            if (($services->configurationOfOffering($offering['_id'])['type'] ?? null) !== $configurationType) {
+                continue;
+            }
+            foreach ($offering['urls'] ?? [] as $url) {
+                // une offering WMTS-TMS expose une URL par protocole : seule celle du WMTS compte
+                if (ConfigurationTypes::WMTSTMS !== $configurationType || 'WMTS' === ($url['type'] ?? null)) {
+                    $urls[] = $url['url'] ?? '';
+                }
+            }
+        }
+
+        return $urls;
+    }
+
     /**
      * @param array<mixed> $documents
      *
-     * @return CswDocument[]
+     * @return list<CswOnlineResource>
      */
     private function toCswDocuments(array $documents): array
     {
-        return array_map(fn ($doc) => new CswDocument(
-            $doc['name'],
-            $doc['description'] ?? null,
-            $doc['url'],
-        ), $documents);
+        return array_values(array_map(fn ($doc) => CswOnlineResource::document($doc['name'], $doc['description'] ?? null, $doc['url']), $documents));
     }
 
     /**

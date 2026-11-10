@@ -94,6 +94,7 @@ class Utils
         }
 
         parse_str($parsed['query'], $res);
+        $res = array_change_key_case($res);
 
         return isset($res['version']) && is_string($res['version']) ? $res['version'] : '';
     }

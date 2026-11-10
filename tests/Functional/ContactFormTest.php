@@ -154,10 +154,10 @@ final class ContactFormTest extends WebTestCase
             'file_identifier' => 'fid-1',
             'email_contact' => 'producteur@example.test',
             'layers' => [[
+                'type' => 'layer',
                 'name' => 'couche_b',
-                'gmd_online_resource_protocol' => 'OGC:WMS',
-                'gmd_online_resource_url' => 'https://data.example.test/wms-v/ows',
-                'offering_id' => 'off-2',
+                'url' => 'https://data.example.test/wms-v/ows',
+                'protocol' => 'OGC:WMS',
                 'open' => false,
                 'description' => 'couche_b - Accès restreint',
             ]],
@@ -170,6 +170,8 @@ final class ContactFormTest extends WebTestCase
         self::assertEmailCount(2);
         self::assertEmailAddressContains($this->sentEmail(0), 'To', 'producteur@example.test');
         self::assertEmailHtmlBodyContains($this->sentEmail(0), 'https://catalogue.test/dataset/fid-1');
+        // type du service, lu dans le protocole de la couche
+        self::assertEmailHtmlBodyContains($this->sentEmail(0), 'WMS');
     }
 
     private function sentEmail(int $index): RawMessage
