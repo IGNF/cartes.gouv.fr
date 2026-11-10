@@ -6,6 +6,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { useStyles } from "tss-react";
 
 import Main from "@/components/Layout/Main";
+import LoadingText from "@/components/Utils/LoadingText";
+import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
@@ -71,6 +73,14 @@ export default function DatasheetCreate({ datastoreId }: DatasheetCreateProps) {
                     />
                 )}
             />
+
+            {createMutation.isPending && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={t("submitting")} withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
         </Main>
     );
 }
