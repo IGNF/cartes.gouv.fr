@@ -7,6 +7,7 @@ import { DatasheetSectionsFrTranslations } from "@/entrepot/pages/datasheet/form
 import { DescriptionTabFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DescriptionTab/DescriptionTab.locale";
 import { DatasheetViewNextFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetViewNext.locale";
 import { DatasetTabNextFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetTabNext/DatasetTabNext.locale";
+import { ServicesListTabNextFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/ServiceListTab/ServicesListTabNext.locale";
 import { DatasetAddFrTranslations } from "@/entrepot/pages/datasheet/DatasetAdd/DatasetAdd.locale";
 import { DatasheetCreateFrTranslations } from "@/entrepot/pages/datasheet/DatasheetCreate/DatasheetCreate.locale";
 import { CommunityInfoFrTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
@@ -155,6 +156,7 @@ export const translations: Translations<"fr"> = {
     DescriptionTab: DescriptionTabFrTranslations,
     DatasheetViewNext: DatasheetViewNextFrTranslations,
     DatasetTabNext: DatasetTabNextFrTranslations,
+    ServicesListTabNext: ServicesListTabNextFrTranslations,
     DatasetAdd: DatasetAddFrTranslations,
     Stats: StatsFrTranslations,
 };

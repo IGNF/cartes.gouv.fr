@@ -92,6 +92,7 @@ export type ComponentKey =
     | import("../entrepot/pages/datasheet/DatasheetView/DescriptionTab/DescriptionTab.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetViewNext.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetTabNext/DatasetTabNext.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/ServiceListTab/ServicesListTabNext.locale").I18n
     | import("../entrepot/pages/datasheet/DatasetAdd/DatasetAdd.locale").I18n
     | import("../entrepot/pages/stats/Stats.locale").I18n;
 
