@@ -14,6 +14,8 @@ type GeocodingFeatureProperties = {
     /** Tableau pour les POI (ex. ["Lyon"]), chaîne pour la BAN */
     name?: string | string[];
     toponym?: string;
+    /** ex. ["administratif", "département"] */
+    category?: string[];
     citycode?: string[];
     extrafields?: GeocodingExtrafields;
     /** Géométrie polygonale sérialisée en JSON (chaîne), présente si returntruegeometry=true */
@@ -42,6 +44,16 @@ type GeocodingResponse = {
 /** Territoire issu de la recherche d'unités administratives, enrichi du code INSEE (affichage uniquement, non persisté) */
 export type AdminUnitTerritory = CswMetadataTerritory & {
     insee?: string;
+    /** code de zone de téléchargement : D001 (département), R11 (région), code INSEE (commune) */
+    zoneCode?: string;
+};
+
+/** préfixe D ou R des départements et régions, sur trois chiffres pour les départements (#1100) */
+export const zoneCode = (category: string | undefined, insee: string | undefined): string | undefined => {
+    if (insee === undefined) return undefined;
+    if (category === "département") return `D${insee.padStart(3, "0")}`;
+    if (category === "région") return `R${insee}`;
+    return category === "commune" ? insee : undefined;
 };
 
 /** Adresse BAN retournée par searchAddresses, déjà décomposée en champs formulaire */
@@ -98,7 +110,8 @@ const searchAdminUnits = async (search: string, signal: AbortSignal): Promise<Ad
         }
 
         // code INSEE (absent pour les EPCI), pour distinguer les homonymes dans la liste
-        return [{ id, title: p.toponym ?? firstName(p.name) ?? id, bbox, insee: p.citycode?.[0] }];
+        const insee = p.citycode?.[0];
+        return [{ id, title: p.toponym ?? firstName(p.name) ?? id, bbox, insee, zoneCode: zoneCode(p.category?.[1], insee) }];
     });
 };
 

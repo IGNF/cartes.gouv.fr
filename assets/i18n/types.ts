@@ -35,7 +35,6 @@ export type ComponentKey =
     | import("../entrepot/pages/communities/CommunityInfo/CommunityInfo.locale").I18n
     | import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage.locale").I18n
     | import("../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale").I18n
-    | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegration.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale").I18n
@@ -91,6 +90,9 @@ export type ComponentKey =
     | import("../entrepot/pages/datasheet/forms/sections.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetCreate/DatasheetCreate.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DescriptionTab/DescriptionTab.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetViewNext.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DatasetTabNext/DatasetTabNext.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasetAdd/DatasetAdd.locale").I18n
     | import("../entrepot/pages/stats/Stats.locale").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;

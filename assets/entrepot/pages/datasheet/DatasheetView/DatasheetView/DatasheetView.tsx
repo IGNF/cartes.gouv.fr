@@ -47,7 +47,7 @@ export const deleteUploadConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
-const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName");
+const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/");
 
 type DatasheetViewProps = {
     datastoreId: string;

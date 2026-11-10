@@ -53,9 +53,8 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
                     <Button
                         iconId="fr-icon-add-line"
                         linkProps={{
-                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement",
-                            params: { datastoreId },
-                            search: { datasheetName: datasheet.name },
+                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement",
+                            params: { datastoreId, datasheetName: datasheet.name },
                         }}
                     >
                         Ajouter un fichier de données

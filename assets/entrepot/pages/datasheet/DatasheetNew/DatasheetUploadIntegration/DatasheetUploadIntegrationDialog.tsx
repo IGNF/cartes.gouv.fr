@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { UseQueryResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { FC, useEffect, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo } from "react";
 
 import { Upload } from "@/@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
@@ -68,9 +68,11 @@ type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
     datasheetName: string | undefined;
     uploadId: string;
+    /** fiche de retour : nouvelle vue ou ancienne (par défaut) */
+    datasheetView?: "nouvelle";
 };
 
-const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId }) => {
+const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId, datasheetView }) => {
     const { t } = useTranslation("DatasheetUploadIntegration");
 
     const queryClient = useQueryClient();
@@ -111,18 +113,31 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
 
     const integrationStatus = useMemo(() => getIntegrationStatus(integrationProgress), [integrationProgress]);
 
+    // onglet Données de la fiche, dans la vue d’où vient l’utilisateur
+    const goToDatasheet = useCallback(
+        (name: string) =>
+            datasheetView === "nouvelle"
+                ? navigate({
+                      to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
+                      params: { datastoreId, datasheetName: name },
+                      search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
+                  })
+                : navigate({
+                      to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                      params: { datastoreId, datasheetName: name },
+                      search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
+                  }),
+        [datasheetView, datastoreId, navigate]
+    );
+
     useEffect(() => {
         if (integrationStatus === "all_successful" && upload?.tags?.datasheet_name) {
             void queryClient.invalidateQueries({
                 queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
             });
-            void navigate({
-                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                params: { datastoreId, datasheetName: upload.tags.datasheet_name },
-                search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
-            });
+            void goToDatasheet(upload.tags.datasheet_name);
         }
-    }, [integrationStatus, datastoreId, upload?.tags?.datasheet_name, queryClient, navigate]);
+    }, [integrationStatus, datastoreId, upload?.tags?.datasheet_name, queryClient, goToDatasheet]);
 
     return (
         <div className={fr.cx("fr-container")}>
@@ -178,11 +193,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                         void queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                                         });
-                                        void navigate({
-                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                                            params: { datastoreId, datasheetName: upload.tags.datasheet_name },
-                                            search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
-                                        });
+                                        void goToDatasheet(upload.tags.datasheet_name);
                                     }
                                 },
                             },
@@ -203,11 +214,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                         void queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                                         });
-                                        void navigate({
-                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                                            params: { datastoreId, datasheetName: upload.tags.datasheet_name },
-                                            search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
-                                        });
+                                        void goToDatasheet(upload.tags.datasheet_name);
                                     }
                                 },
                             },

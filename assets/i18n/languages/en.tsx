@@ -5,6 +5,9 @@ import { ImageCropModalEnTranslations } from "@/components/Input/ImageCropModal/
 import { ImageFieldUploadEnTranslations } from "@/components/Input/ImageFieldUpload.locale";
 import { DatasheetSectionsEnTranslations } from "@/entrepot/pages/datasheet/forms/sections.locale";
 import { DescriptionTabEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DescriptionTab/DescriptionTab.locale";
+import { DatasheetViewNextEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetViewNext.locale";
+import { DatasetTabNextEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetTabNext/DatasetTabNext.locale";
+import { DatasetAddEnTranslations } from "@/entrepot/pages/datasheet/DatasetAdd/DatasetAdd.locale";
 import { DatasheetCreateEnTranslations } from "@/entrepot/pages/datasheet/DatasheetCreate/DatasheetCreate.locale";
 import { CommunityInfoEnTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { StoredDataDeleteConfirmDialogEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
@@ -23,7 +26,6 @@ import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities
 import { RightsEnTranslations } from "../../entrepot/pages/communities/Rights.locale";
 import { AlertsEnTranslations } from "../../entrepot/pages/config/Alerts.locale";
 import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale";
-import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale";
 import { DatasheetUploadIntegrationEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegration.locale";
 import { PyramidRasterListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale";
 import { PyramidVectorListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale";
@@ -124,7 +126,6 @@ export const translations: Translations<"en"> = {
     ManageCommunityValidations: ManageCommunityValidationsEnTranslations,
     AutofillKeywords: AutofillKeywordsEnTranslations,
     AutofillDialog: AutofillDialogEnTranslations,
-    DatasheetUploadForm: DatasheetUploadFormEnTranslations,
     DatasheetList: DatasheetListEnTranslations,
     AccessRestrictions: AccessRestrictionsEnTranslations,
     LoginDisabled: LoginDisabledEnTranslations,
@@ -152,5 +153,8 @@ export const translations: Translations<"en"> = {
     DatasheetSections: DatasheetSectionsEnTranslations,
     DatasheetCreate: DatasheetCreateEnTranslations,
     DescriptionTab: DescriptionTabEnTranslations,
+    DatasheetViewNext: DatasheetViewNextEnTranslations,
+    DatasetTabNext: DatasetTabNextEnTranslations,
+    DatasetAdd: DatasetAddEnTranslations,
     Stats: StatsEnTranslations,
 };

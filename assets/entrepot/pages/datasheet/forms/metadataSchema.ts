@@ -80,7 +80,7 @@ const DATASHEET_NAME_REGEX = new RegExp(regex.datasheet_name.source);
 const FILE_IDENTIFIER_REGEX = new RegExp(regex.file_identifier.source);
 
 // pages voisines de donnees/$datasheetName : une fiche de ce nom serait inatteignable
-const RESERVED_DATASHEET_NAMES = new Set(["creer", "televersement", "integration"]);
+const RESERVED_DATASHEET_NAMES = new Set(["creer", "integration"]);
 
 const isRestriction = (type: SubConstraintType) => type === "useConstraints" || type === "accessConstraints";
 
