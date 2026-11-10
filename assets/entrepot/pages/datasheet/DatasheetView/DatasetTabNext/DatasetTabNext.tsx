@@ -4,7 +4,7 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
-import Table from "@codegouvfr/react-dsfr/Table";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery } from "@tanstack/react-query";
 import { ReactNode, useMemo, useState } from "react";
 import { tss } from "tss-react";
@@ -12,6 +12,7 @@ import { tss } from "tss-react";
 import { DatasheetDetailed, StoredDataStatusEnum } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum, StoredDataPrivateDetailResponseDtoTypeEnum as StoredDataTypeEnum } from "@/@types/entrepot";
 import StoredDataStatusBadge from "@/components/Utils/Badges/StoredDataStatusBadge";
+import CardRowsTable from "@/components/Utils/CardRowsTable";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
@@ -27,14 +28,21 @@ import DatasheetViewTab from "../../DatasheetViewTab";
 import DatasetAddBanners from "./DatasetAddBanners";
 
 type StoredDataType = `${StoredDataTypeEnum.VECTORDB | StoredDataTypeEnum.ROK4PYRAMIDVECTOR | StoredDataTypeEnum.ROK4PYRAMIDRASTER}`;
-type TypeFilter = "all" | StoredDataType;
+type TypeFilter = "all" | "vector" | "raster";
 
 const FILTERS = [
     { value: "all", label: "filter.all" },
-    { value: "VECTOR-DB", label: "filter.vector_db" },
-    { value: "ROK4-PYRAMID-VECTOR", label: "filter.pyramid_vector" },
-    { value: "ROK4-PYRAMID-RASTER", label: "filter.pyramid_raster" },
+    { value: "vector", label: "filter.vector" },
+    { value: "raster", label: "filter.raster" },
 ] as const satisfies { value: TypeFilter; label: string }[];
+
+const TYPE_LABELS = {
+    "VECTOR-DB": "type.vector_db",
+    "ROK4-PYRAMID-VECTOR": "type.pyramid_vector",
+    "ROK4-PYRAMID-RASTER": "type.pyramid_raster",
+} as const satisfies Record<StoredDataType, string>;
+
+const COLUMN_WIDTHS = [undefined, "11rem", "15rem", "10rem", "14rem"];
 
 type DatasetRow = {
     id: string;
@@ -56,7 +64,7 @@ type DatasetTabNextProps = {
 
 export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata, onDeleteDatasheet }: DatasetTabNextProps) {
     const { t } = useTranslation("DatasetTabNext");
-    const { classes } = useStyles();
+    const { classes, cx } = useStyles();
     const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
 
     const { userRights, isSupervisor } = useCommunityRights();
@@ -116,7 +124,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                     <div className={classes.actions}>
                         {failed ? (
                             <Button
-                                priority="secondary"
+                                priority="tertiary"
                                 size="small"
                                 linkProps={{
                                     to: "/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport",
@@ -129,7 +137,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                         ) : (
                             canAddData && (
                                 <Button
-                                    priority="secondary"
+                                    priority="tertiary"
                                     size="small"
                                     linkProps={{
                                         to: "/tableau-de-bord/entrepots/$datastoreId/donnees/integration",
@@ -144,7 +152,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                         {canAddData && (
                             <Button
                                 iconId="fr-icon-delete-line"
-                                priority="secondary"
+                                priority="tertiary"
                                 size="small"
                                 disabled={hasMetadata === undefined}
                                 onClick={() => (deletingRemovesDatasheet ? onDeleteDatasheet() : deleteUploadMutate(upload._id))}
@@ -166,7 +174,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                 status: <StoredDataStatusBadge status={storedData.status} />,
                 action: (
                     <Button
-                        priority="secondary"
+                        priority="tertiary"
                         size="small"
                         linkProps={{
                             to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
@@ -187,7 +195,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
         };
     }, [datasheet, datasheetName, datastoreId, hasMetadata, canAddData, classes.actions, failedUploadIds, deleteUploadMutate, onDeleteDatasheet, t]);
 
-    const filteredRows = typeFilter === "all" ? rows : rows.filter((row) => row.type === typeFilter);
+    const filteredRows = typeFilter === "all" ? rows : rows.filter((row) => (row.type === "ROK4-PYRAMID-RASTER" ? "raster" : "vector") === typeFilter);
     const segment = ({ value, label }: (typeof FILTERS)[number]) => ({
         label: t(label),
         nativeInputProps: { checked: typeFilter === value, onChange: () => setTypeFilter(value) },
@@ -235,7 +243,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                                     hideLegend
                                     legend={t("filter_legend")}
                                     name="dataset-type-filter"
-                                    segments={[segment(FILTERS[0]), segment(FILTERS[1]), segment(FILTERS[2]), segment(FILTERS[3])]}
+                                    segments={[segment(FILTERS[0]), segment(FILTERS[1]), segment(FILTERS[2])]}
                                 />
                             </div>
                             {canAddData && (
@@ -245,25 +253,20 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                             )}
                         </div>
 
-                        <p className={fr.cx("fr-text--sm", "fr-mt-3w", "fr-mb-1w")}>{t("results", { count: filteredRows.length })}</p>
+                        <p className={cx(fr.cx("fr-text--xs", "fr-mt-3w", "fr-mb-1w"), classes.results)}>{t("results", { count: filteredRows.length })}</p>
 
-                        <Table
+                        <CardRowsTable
                             caption={t("caption")}
                             noCaption
-                            fixed
+                            columnWidths={COLUMN_WIDTHS}
                             headers={[t("column.name"), t("column.type"), t("column.creation"), t("column.status"), t("column.action")]}
                             data={filteredRows.map((row) => [
                                 <span key={`name-${row.id}`} title={row.name}>
                                     {row.name}
                                 </span>,
-                                <Badge
-                                    key={`type-${row.id}`}
-                                    small
-                                    noIcon
-                                    className={fr.cx(row.type === "ROK4-PYRAMID-RASTER" ? "fr-badge--purple-glycine" : "fr-badge--blue-cumulus")}
-                                >
-                                    {row.type === "ROK4-PYRAMID-RASTER" ? t("type.raster") : t("type.vector")}
-                                </Badge>,
+                                <Tag key={`type-${row.id}`} small>
+                                    {t(TYPE_LABELS[row.type])}
+                                </Tag>,
                                 row.creation ? formatDateFromISO(row.creation) : "",
                                 row.status,
                                 row.action,
@@ -286,7 +289,11 @@ const useStyles = tss.withName({ DatasetTabNext }).create({
     actions: {
         display: "flex",
         flexWrap: "wrap",
+        justifyContent: "center",
         gap: fr.spacing("1w"),
+    },
+    results: {
+        color: fr.colors.decisions.text.mention.grey.default,
     },
     empty: {
         display: "flex",
