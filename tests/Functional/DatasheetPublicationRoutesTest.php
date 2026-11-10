@@ -51,6 +51,18 @@ final class DatasheetPublicationRoutesTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 
+    public function testUnpublishingAnUnpublishedMetadataCallsNothingUpstream(): void
+    {
+        EntrepotMockResponseFactory::seed('metadata', ['_id' => 'metadata-1', 'file_identifier' => 'ign.fiche', 'tags' => ['datasheet_name' => 'Fiche'], 'endpoints' => []]);
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('DELETE', self::PUBLISH_URL);
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
     public function testPublishingWithoutMetadataAnswers404(): void
     {
         $client = self::createClient();
