@@ -5,6 +5,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import Table from "@codegouvfr/react-dsfr/Table";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery } from "@tanstack/react-query";
 import { ReactNode, useMemo, useState } from "react";
 import { tss } from "tss-react";
@@ -27,14 +28,19 @@ import DatasheetViewTab from "../../DatasheetViewTab";
 import DatasetAddBanners from "./DatasetAddBanners";
 
 type StoredDataType = `${StoredDataTypeEnum.VECTORDB | StoredDataTypeEnum.ROK4PYRAMIDVECTOR | StoredDataTypeEnum.ROK4PYRAMIDRASTER}`;
-type TypeFilter = "all" | StoredDataType;
+type TypeFilter = "all" | "vector" | "raster";
 
 const FILTERS = [
     { value: "all", label: "filter.all" },
-    { value: "VECTOR-DB", label: "filter.vector_db" },
-    { value: "ROK4-PYRAMID-VECTOR", label: "filter.pyramid_vector" },
-    { value: "ROK4-PYRAMID-RASTER", label: "filter.pyramid_raster" },
+    { value: "vector", label: "filter.vector" },
+    { value: "raster", label: "filter.raster" },
 ] as const satisfies { value: TypeFilter; label: string }[];
+
+const TYPE_LABELS = {
+    "VECTOR-DB": "type.vector_db",
+    "ROK4-PYRAMID-VECTOR": "type.pyramid_vector",
+    "ROK4-PYRAMID-RASTER": "type.pyramid_raster",
+} as const satisfies Record<StoredDataType, string>;
 
 type DatasetRow = {
     id: string;
@@ -56,7 +62,7 @@ type DatasetTabNextProps = {
 
 export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata, onDeleteDatasheet }: DatasetTabNextProps) {
     const { t } = useTranslation("DatasetTabNext");
-    const { classes } = useStyles();
+    const { classes, cx } = useStyles();
     const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
 
     const { userRights, isSupervisor } = useCommunityRights();
@@ -116,7 +122,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                     <div className={classes.actions}>
                         {failed ? (
                             <Button
-                                priority="secondary"
+                                priority="tertiary"
                                 size="small"
                                 linkProps={{
                                     to: "/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport",
@@ -129,7 +135,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                         ) : (
                             canAddData && (
                                 <Button
-                                    priority="secondary"
+                                    priority="tertiary"
                                     size="small"
                                     linkProps={{
                                         to: "/tableau-de-bord/entrepots/$datastoreId/donnees/integration",
@@ -144,7 +150,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                         {canAddData && (
                             <Button
                                 iconId="fr-icon-delete-line"
-                                priority="secondary"
+                                priority="tertiary"
                                 size="small"
                                 disabled={hasMetadata === undefined}
                                 onClick={() => (deletingRemovesDatasheet ? onDeleteDatasheet() : deleteUploadMutate(upload._id))}
@@ -166,7 +172,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                 status: <StoredDataStatusBadge status={storedData.status} />,
                 action: (
                     <Button
-                        priority="secondary"
+                        priority="tertiary"
                         size="small"
                         linkProps={{
                             to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
@@ -187,7 +193,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
         };
     }, [datasheet, datasheetName, datastoreId, hasMetadata, canAddData, classes.actions, failedUploadIds, deleteUploadMutate, onDeleteDatasheet, t]);
 
-    const filteredRows = typeFilter === "all" ? rows : rows.filter((row) => row.type === typeFilter);
+    const filteredRows = typeFilter === "all" ? rows : rows.filter((row) => (row.type === "ROK4-PYRAMID-RASTER" ? "raster" : "vector") === typeFilter);
     const segment = ({ value, label }: (typeof FILTERS)[number]) => ({
         label: t(label),
         nativeInputProps: { checked: typeFilter === value, onChange: () => setTypeFilter(value) },
@@ -235,7 +241,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                                     hideLegend
                                     legend={t("filter_legend")}
                                     name="dataset-type-filter"
-                                    segments={[segment(FILTERS[0]), segment(FILTERS[1]), segment(FILTERS[2]), segment(FILTERS[3])]}
+                                    segments={[segment(FILTERS[0]), segment(FILTERS[1]), segment(FILTERS[2])]}
                                 />
                             </div>
                             {canAddData && (
@@ -245,9 +251,10 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                             )}
                         </div>
 
-                        <p className={fr.cx("fr-text--sm", "fr-mt-3w", "fr-mb-1w")}>{t("results", { count: filteredRows.length })}</p>
+                        <p className={cx(fr.cx("fr-text--xs", "fr-mt-3w", "fr-mb-1w"), classes.results)}>{t("results", { count: filteredRows.length })}</p>
 
                         <Table
+                            className={classes.table}
                             caption={t("caption")}
                             noCaption
                             fixed
@@ -256,14 +263,9 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                                 <span key={`name-${row.id}`} title={row.name}>
                                     {row.name}
                                 </span>,
-                                <Badge
-                                    key={`type-${row.id}`}
-                                    small
-                                    noIcon
-                                    className={fr.cx(row.type === "ROK4-PYRAMID-RASTER" ? "fr-badge--purple-glycine" : "fr-badge--blue-cumulus")}
-                                >
-                                    {row.type === "ROK4-PYRAMID-RASTER" ? t("type.raster") : t("type.vector")}
-                                </Badge>,
+                                <Tag key={`type-${row.id}`} small>
+                                    {t(TYPE_LABELS[row.type])}
+                                </Tag>,
                                 row.creation ? formatDateFromISO(row.creation) : "",
                                 row.status,
                                 row.action,
@@ -286,7 +288,69 @@ const useStyles = tss.withName({ DatasetTabNext }).create({
     actions: {
         display: "flex",
         flexWrap: "wrap",
+        justifyContent: "center",
         gap: fr.spacing("1w"),
+    },
+    results: {
+        color: fr.colors.decisions.text.mention.grey.default,
+    },
+    // mise en page de la maquette : en-tête bleu, lignes en cartes blanches sur fond gris
+    table: {
+        "&.fr-table > table": {
+            borderCollapse: "separate",
+            borderSpacing: `0 ${fr.spacing("1w")}`,
+            paddingInline: fr.spacing("1w"),
+            backgroundColor: fr.colors.decisions.background.alt.grey.default,
+            // masque l’espacement au-dessus de l’en-tête et celui ajouté sous le corps remonté
+            clipPath: `inset(${fr.spacing("1w")} 0 ${fr.spacing("1w")} 0 round 0.25rem)`,
+        },
+        // Chrome double l’espacement entre l’en-tête et le corps
+        "&.fr-table > table tbody": {
+            position: "relative",
+            top: `-${fr.spacing("1w")}`,
+        },
+        "&.fr-table > table thead, &.fr-table > table tbody, &.fr-table > table tbody tr": {
+            backgroundColor: "transparent",
+            backgroundImage: "none",
+        },
+        "&.fr-table > table thead::after, &.fr-table > table tbody::after": {
+            display: "none",
+        },
+        "&.fr-table > table th, &.fr-table > table td": {
+            padding: fr.spacing("2w"),
+            fontSize: "1rem",
+            whiteSpace: "nowrap",
+            backgroundImage: "none",
+        },
+        "&.fr-table > table th:not(:first-of-type), &.fr-table > table td:not(:first-of-type)": {
+            textAlign: "center",
+        },
+        "&.fr-table > table thead th": {
+            fontWeight: 500,
+            backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.default,
+        },
+        // l’en-tête couvre aussi la marge latérale grise
+        "&.fr-table > table thead th:first-of-type": {
+            boxShadow: `-${fr.spacing("1w")} 0 0 ${fr.colors.decisions.background.actionLow.blueFrance.default}`,
+        },
+        "&.fr-table > table thead th:last-of-type": {
+            boxShadow: `${fr.spacing("1w")} 0 0 ${fr.colors.decisions.background.actionLow.blueFrance.default}`,
+        },
+        "&.fr-table > table thead th:nth-of-type(2)": { width: "11rem" },
+        "&.fr-table > table thead th:nth-of-type(3)": { width: "15rem" },
+        "&.fr-table > table thead th:nth-of-type(4)": { width: "10rem" },
+        "&.fr-table > table thead th:nth-of-type(5)": { width: "14rem" },
+        "&.fr-table > table tbody td": {
+            backgroundColor: fr.colors.decisions.background.default.grey.default,
+        },
+        "&.fr-table > table tbody td:first-of-type": {
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            borderRadius: "0.25rem 0 0 0.25rem",
+        },
+        "&.fr-table > table tbody td:last-of-type": {
+            borderRadius: "0 0.25rem 0.25rem 0",
+        },
     },
     empty: {
         display: "flex",

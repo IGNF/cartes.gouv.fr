@@ -8,9 +8,8 @@ const { i18n } = declareComponentKeys<
     | "load_error"
     | "filter_legend"
     | "filter.all"
-    | "filter.vector_db"
-    | "filter.pyramid_vector"
-    | "filter.pyramid_raster"
+    | "filter.vector"
+    | "filter.raster"
     | { K: "results"; P: { count: number }; R: string }
     | "caption"
     | "column.name"
@@ -18,8 +17,9 @@ const { i18n } = declareComponentKeys<
     | "column.creation"
     | "column.status"
     | "column.action"
-    | "type.vector"
-    | "type.raster"
+    | "type.vector_db"
+    | "type.pyramid_vector"
+    | "type.pyramid_raster"
     | "status.failed"
     | "status.in_progress"
     | "view"
@@ -47,9 +47,8 @@ export const DatasetTabNextFrTranslations: Translations<"fr">["DatasetTabNext"] 
     load_error: "La fiche de données n’a pas pu être chargée",
     filter_legend: "Filtrer par type de donnée",
     "filter.all": "Tous",
-    "filter.vector_db": "Bases de données vecteur",
-    "filter.pyramid_vector": "Pyramides de tuiles vectorielles",
-    "filter.pyramid_raster": "Raster",
+    "filter.vector": "Vecteur",
+    "filter.raster": "Raster",
     results: ({ count }) => `${count} résultat${count > 1 ? "s" : ""}`,
     caption: "Jeux de données",
     "column.name": "Jeu de données",
@@ -57,8 +56,9 @@ export const DatasetTabNextFrTranslations: Translations<"fr">["DatasetTabNext"] 
     "column.creation": "Date de création",
     "column.status": "Statut",
     "column.action": "Action",
-    "type.vector": "Vecteur",
-    "type.raster": "Raster",
+    "type.vector_db": "Base vecteur",
+    "type.pyramid_vector": "Pyramide vecteur",
+    "type.pyramid_raster": "Pyramide raster",
     "status.failed": "Échoué",
     "status.in_progress": "En cours",
     view: "Consulter",
@@ -84,9 +84,8 @@ export const DatasetTabNextEnTranslations: Translations<"en">["DatasetTabNext"] 
     load_error: "The datasheet could not be loaded",
     filter_legend: "Filter by data type",
     "filter.all": "All",
-    "filter.vector_db": "Vector databases",
-    "filter.pyramid_vector": "Vector tile pyramids",
-    "filter.pyramid_raster": "Raster",
+    "filter.vector": "Vector",
+    "filter.raster": "Raster",
     results: ({ count }) => `${count} result${count > 1 ? "s" : ""}`,
     caption: "Datasets",
     "column.name": "Dataset",
@@ -94,8 +93,9 @@ export const DatasetTabNextEnTranslations: Translations<"en">["DatasetTabNext"] 
     "column.creation": "Creation date",
     "column.status": "Status",
     "column.action": "Action",
-    "type.vector": "Vector",
-    "type.raster": "Raster",
+    "type.vector_db": "Vector database",
+    "type.pyramid_vector": "Vector pyramid",
+    "type.pyramid_raster": "Raster pyramid",
     "status.failed": "Failed",
     "status.in_progress": "In progress",
     view: "View",
