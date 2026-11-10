@@ -13,6 +13,18 @@ Certaines entités portent une propriété `tags`, qui est un dictionnaire clé/
 | `integration_progress`     | progression de l'intégration en base de données (envoi du fichier téléversé à l'API, attente des vérifications et puis le traitement d'intégration en BD) | json(1) |
 | `integration_current_step` | numéro de l'étape courante de integration_progress                                                                                                        | number  |
 
+Tags métier posés à la déclaration de livraison (formulaire « Ajouter une donnée ») et recopiés sur la donnée stockée à l'intégration :
+
+| tag                  | description                                                |              |
+| -------------------- | ---------------------------------------------------------- | ------------ |
+| `producer`           | nom de l'organisme producteur                              | string       |
+| `producer_short`     | acronyme de l'organisme (optionnel)                        | string       |
+| `production_year`    | année de production, dérivée de `date`                     | integer      |
+| `date`               | date de production                                         | `YYYY-MM-DD` |
+| `theme`              | thématiques séparées par `, ` (99 caractères max)          | string       |
+| `zone`               | étendue spatiale, pour le téléchargement (ex : `D001 Ain`) | string       |
+| `email_notification` | courriel à la fin de l'intégration (livraison seulement)   | boolean      |
+
 (1) structure de json (chaîne json encodée) :
 
 ```json
@@ -36,6 +48,8 @@ Certaines entités portent une propriété `tags`, qui est un dictionnaire clé/
 | `datasheet_name`  | pareil que `datasheet_name` de `upload` | string  |
 | `producer`        | tag pour l'index de recherche           | string  |
 | `production_year` | tag pour l'index de recherche           | integer |
+
+Les `VECTOR-DB` intégrées depuis le formulaire « Ajouter une donnée » portent aussi `producer_short`, `date`, `theme` et `zone` (voir `upload`).
 
 ### tags spécifiques aux stored_data du type `VECTOR-DB`
 

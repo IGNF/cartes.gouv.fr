@@ -80,7 +80,12 @@ Le workflow a 3 étapes fixes. Chaque étape est un couple (nom, statut).
     - data_upload_path
     - datasheet_name
     - producer
+    - producer_short (optionnel)
     - production_year
+    - date
+    - theme
+    - zone
+    - email_notification
     - proc_int_id
     - vectordb_id
     - integration_progress
@@ -89,8 +94,7 @@ Le workflow a 3 étapes fixes. Chaque étape est un couple (nom, statut).
     - upload_id
     - proc_int_id
     - datasheet_name
-    - producer (optionnel)
-    - production_year (optionnel)
+    - producer, producer_short, production_year, date, theme, zone : recopiés de l'upload quand il les porte (`UploadIntegrationWorkflow::forwardedTags`)
 
 ## Exemple de integration_progress
 
