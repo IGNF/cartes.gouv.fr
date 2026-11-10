@@ -15,6 +15,7 @@ export default function CardRowsTable({ columnWidths, className, ...tableProps }
 }
 
 const NO_WIDTHS: (string | undefined)[] = [];
+const FLEXIBLE_COLUMN_MIN_WIDTH = "15rem";
 const blue = fr.colors.decisions.background.actionLow.blueFrance.default;
 
 const useStyles = tss
@@ -33,6 +34,10 @@ const useStyles = tss
                 backgroundColor: fr.colors.decisions.background.alt.grey.default,
                 // masque l’espacement au-dessus de l’en-tête et celui ajouté sous le corps remonté
                 clipPath: `inset(${fr.spacing("1w")} 0 ${fr.spacing("1w")} 0 round 0.25rem)`,
+                // les colonnes sans largeur gardent de la place : le tableau défile au lieu de les écraser
+                ...(columnWidths.length > 0 && {
+                    minWidth: `calc(${columnWidths.map((width) => width ?? FLEXIBLE_COLUMN_MIN_WIDTH).join(" + ")} + 2 * ${fr.spacing("1w")})`,
+                }),
             },
             // Chrome double l’espacement entre l’en-tête et le corps
             "&.fr-table > table tbody": {
