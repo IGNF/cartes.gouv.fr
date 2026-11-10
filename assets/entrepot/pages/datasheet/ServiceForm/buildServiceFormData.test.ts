@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildServiceFormData, mapTableViolationPaths } from "./buildServiceFormData";
+import { buildServiceFormData, mapServiceViolationPaths } from "./buildServiceFormData";
 import { serviceFormDefaultValues, type ServiceFormOutput } from "./serviceFormSchema";
 
 const values: ServiceFormOutput = {
@@ -49,19 +49,20 @@ describe("buildServiceFormData", () => {
     });
 });
 
-describe("mapTableViolationPaths", () => {
-    it("ramène l’index d’une table envoyée à son index dans le formulaire", () => {
-        const error = mapTableViolationPaths(
+describe("mapServiceViolationPaths", () => {
+    it("ramène les tables envoyées à leur index dans le formulaire et le fichier logo à son champ", () => {
+        const error = mapServiceViolationPaths(
             {
                 status: 422,
                 title: "Validation Failed",
                 violations: [
                     { propertyPath: "tables[0].public_name", title: "invalide" },
                     { propertyPath: "technical_name", title: "invalide" },
+                    { propertyPath: "attribution_logo", title: "invalide" },
                 ],
             },
             values.tables
         );
-        expect(error.violations?.map((violation) => violation.propertyPath)).toEqual(["tables[1].public_name", "technical_name"]);
+        expect(error.violations?.map((violation) => violation.propertyPath)).toEqual(["tables[1].public_name", "technical_name", "attribution.logo"]);
     });
 });

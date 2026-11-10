@@ -17,7 +17,7 @@ import { setApiFormErrors } from "@/modules/setApiFormErrors";
 import { delta } from "@/utils/delta";
 import MetadataSection from "../forms/MetadataSection";
 import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
-import { mapTableViolationPaths } from "./buildServiceFormData";
+import { mapServiceViolationPaths } from "./buildServiceFormData";
 import AccessSection from "./sections/AccessSection";
 import ServiceDescriptionSection from "./sections/ServiceDescriptionSection";
 import ServiceTypeSection from "./sections/ServiceTypeSection";
@@ -138,7 +138,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
         try {
             await onSubmit(values);
         } catch (error) {
-            if (isApiError(error)) setApiFormErrors(mapTableViolationPaths(error, values.tables), setError);
+            if (isApiError(error)) setApiFormErrors(mapServiceViolationPaths(error, values.tables), setError);
         }
     });
 

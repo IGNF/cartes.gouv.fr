@@ -34,19 +34,18 @@ export function buildServiceFormData(type: ServiceType, values: ServiceFormOutpu
 }
 
 /**
- * Le back ne reçoit que les tables cochées : `tables[i]` d’une erreur 422 désigne la i-ème table cochée du formulaire.
+ * Ramène les chemins d’une erreur 422 sur les champs du formulaire : le back ne reçoit que les tables cochées
+ * (`tables[i]` = i-ème table cochée) et le logo voyage comme fichier `attribution_logo`.
  */
-export function mapTableViolationPaths(error: ApiError, tables: readonly { selected: boolean }[]): ApiError {
+export function mapServiceViolationPaths(error: ApiError, tables: readonly { selected: boolean }[]): ApiError {
     const formIndexes = tables.flatMap((table, index) => (table.selected ? [index] : []));
+    const toFormPath = (path: string) =>
+        path === "attribution_logo"
+            ? "attribution.logo"
+            : path.replace(/^tables\[(\d+)\]/, (match, sent: string) => {
+                  const formIndex = formIndexes[Number(sent)];
+                  return formIndex === undefined ? match : `tables[${formIndex}]`;
+              });
 
-    return {
-        ...error,
-        violations: error.violations?.map((violation) => ({
-            ...violation,
-            propertyPath: violation.propertyPath.replace(/^tables\[(\d+)\]/, (match, sent: string) => {
-                const formIndex = formIndexes[Number(sent)];
-                return formIndex === undefined ? match : `tables[${formIndex}]`;
-            }),
-        })),
-    };
+    return { ...error, violations: error.violations?.map((violation) => ({ ...violation, propertyPath: toFormPath(violation.propertyPath) })) };
 }
