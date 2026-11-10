@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Dto\Datasheet\ProducerDTO;
+use App\Dto\Datasheet\ResourceConditionDTO;
+use App\Dto\Datasheet\SubConstraintDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswLanguage;
 use App\Dto\Metadata\CswMetadata;
@@ -66,6 +68,7 @@ class CswMetadataXmlReader
         $metadata->scale = null === $scale ? null : (int) $scale;
 
         $metadata->producers = $this->producers($xpath, $root);
+        $metadata->resource_constraints = $this->resourceConstraints($xpath, $root);
         $metadata->themes = $this->texts($xpath, self::IDENTIFICATION.'/gmd:topicCategory/gmd:MD_TopicCategoryCode', $root);
         [$metadata->keywords_inspire, $metadata->keywords_additional] = $this->keywords($xpath, $root);
         $metadata->bbox = $this->bbox($xpath, $root);
@@ -210,6 +213,76 @@ class CswMetadataXmlReader
             $this->text($xpath, $address.'gmd:postalCode/gco:CharacterString', $party),
             $this->text($xpath, $address.'gmd:city/gco:CharacterString', $party),
         );
+    }
+
+    /**
+     * @return list<ResourceConditionDTO>
+     */
+    private function resourceConstraints(\DOMXPath $xpath, \DOMElement $root): array
+    {
+        $types = ['MD_LegalConstraints' => 'legal', 'MD_SecurityConstraints' => 'security', 'MD_Constraints' => 'other'];
+        $conditions = [];
+        foreach ($this->elements($xpath, self::IDENTIFICATION.'/gmd:resourceConstraints/*', $root) as $element) {
+            $type = $types[$element->localName] ?? null;
+            if (null === $type) {
+                continue;
+            }
+            $constraints = $this->pairedSubConstraints($this->subConstraints($xpath, $element));
+            if ([] !== $constraints) {
+                $conditions[] = new ResourceConditionDTO($type, $constraints);
+            }
+        }
+
+        return $conditions;
+    }
+
+    /**
+     * @return list<SubConstraintDTO> dans l’ordre du fichier (ordre ISO 19139)
+     */
+    private function subConstraints(\DOMXPath $xpath, \DOMElement $element): array
+    {
+        $constraints = [];
+        foreach ($this->elements($xpath, 'gmd:*', $element) as $child) {
+            $code = $this->text($xpath, '*/@codeListValue', $child);
+            $anchor = $this->text($xpath, 'gmx:Anchor/@xlink:href', $child);
+            $text = $this->text($xpath, 'gmx:Anchor|gco:CharacterString', $child);
+
+            $constraints[] = match ($child->localName) {
+                'useLimitation' => new SubConstraintDTO('useLimitation', url: $anchor, description: $text),
+                'useConstraints', 'accessConstraints' => new SubConstraintDTO($child->localName, restriction_code: $code),
+                // le code INSPIRE est le dernier segment de l’URI du vocabulaire
+                'otherConstraints' => new SubConstraintDTO('otherConstraints', limitation_code: null !== $anchor ? basename($anchor) : $text),
+                'classification' => new SubConstraintDTO('classification', classification_code: $code),
+                default => null,
+            };
+        }
+
+        return array_values(array_filter($constraints));
+    }
+
+    /**
+     * Le formulaire attend chaque restriction d’usage ou d’accès suivie de sa compagne : otherConstraints pour otherRestrictions, useLimitation sinon.
+     *
+     * @param list<SubConstraintDTO> $constraints
+     *
+     * @return list<SubConstraintDTO>
+     */
+    private function pairedSubConstraints(array $constraints): array
+    {
+        $ofType = fn (string ...$types) => array_values(array_filter($constraints, fn (SubConstraintDTO $c) => in_array($c->type, $types, true)));
+        $limitations = $ofType('useLimitation');
+        $others = $ofType('otherConstraints');
+
+        $paired = [];
+        foreach ($ofType('accessConstraints', 'useConstraints') as $restriction) {
+            $paired[] = $restriction;
+            $companion = 'otherRestrictions' === $restriction->restriction_code ? array_shift($others) : array_shift($limitations);
+            if (null !== $companion) {
+                $paired[] = $companion;
+            }
+        }
+
+        return [...$paired, ...$limitations, ...$others, ...$ofType('classification')];
     }
 
     /**

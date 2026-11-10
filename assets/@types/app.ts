@@ -410,6 +410,20 @@ export type CswMetadataProducer = {
     address_city?: string | null;
 };
 
+export type CswMetadataSubConstraint = {
+    type: string;
+    restriction_code?: string | null;
+    limitation_code?: string | null;
+    classification_code?: string | null;
+    url?: string | null;
+    description?: string | null;
+};
+
+export type CswMetadataResourceConstraint = {
+    type: string;
+    constraints: CswMetadataSubConstraint[];
+};
+
 export type CswMetadata = {
     file_identifier?: string;
     hierarchy_level?: MetadataHierarchyLevel;
@@ -424,6 +438,7 @@ export type CswMetadata = {
     keywords_additional?: string[];
     update_frequency?: string;
     producers?: CswMetadataProducer[];
+    resource_constraints?: CswMetadataResourceConstraint[];
     scale?: number;
     online_resources?: CswOnlineResource[];
     bbox?: BoundingBox | null;

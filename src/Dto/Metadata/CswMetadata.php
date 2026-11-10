@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dto\Metadata;
 
 use App\Dto\Datasheet\ProducerDTO;
+use App\Dto\Datasheet\ResourceConditionDTO;
 use App\Exception\AppException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -37,6 +38,9 @@ class CswMetadata
 
     /** @var list<ProducerDTO> le premier est le point de contact ; le rôle contact est le contact des métadonnées (gmd:contact) */
     public array $producers = [];
+
+    /** @var list<ResourceConditionDTO> chaque restriction d’usage ou d’accès est suivie de sa sous-contrainte compagne */
+    public array $resource_constraints = [];
 
     public ?int $scale = null;
 

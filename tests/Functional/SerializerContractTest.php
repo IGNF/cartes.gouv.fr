@@ -37,7 +37,7 @@ final class SerializerContractTest extends KernelTestCase
 
         self::assertSame([
             'file_identifier', 'hierarchy_level', 'language', 'charset', 'name', 'description', 'date_creation', 'resource_genealogy',
-            'keywords_inspire', 'keywords_additional', 'themes', 'producers', 'scale',
+            'keywords_inspire', 'keywords_additional', 'themes', 'producers', 'resource_constraints', 'scale',
             'online_resources', 'bbox', 'thumbnail_url', 'update_frequency',
         ], array_keys($json));
         self::assertSame('dataset', $json['hierarchy_level']);

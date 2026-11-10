@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Support;
 
 use App\Dto\Datasheet\ProducerDTO;
+use App\Dto\Datasheet\ResourceConditionDTO;
+use App\Dto\Datasheet\SubConstraintDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswMetadata;
 use App\Dto\Metadata\CswOnlineResource;
@@ -43,6 +45,24 @@ final class CswMetadataFixtures
             new ProducerDTO('Gestionnaire', 'gestion@example.test', 'custodian'),
             new ProducerDTO('Auteur', 'auteur@example.test', 'author'),
             new ProducerDTO('Contact', 'contact@example.test', 'contact'),
+        ];
+        // ordre de relecture : chaque restriction suivie de sa compagne
+        $metadata->resource_constraints = [
+            new ResourceConditionDTO('legal', [
+                new SubConstraintDTO('accessConstraints', restriction_code: 'otherRestrictions'),
+                new SubConstraintDTO('otherConstraints', limitation_code: 'INSPIRE_Directive_Article13_1b'),
+                new SubConstraintDTO('useConstraints', restriction_code: 'license'),
+                new SubConstraintDTO('useLimitation', url: 'https://www.etalab.gouv.fr/licence-ouverte-open-licence/', description: 'Licence Ouverte 2.0'),
+            ]),
+            new ResourceConditionDTO('legal', [
+                new SubConstraintDTO('accessConstraints', restriction_code: 'otherRestrictions'),
+                new SubConstraintDTO('otherConstraints', limitation_code: 'conditionsUnknown'),
+            ]),
+            new ResourceConditionDTO('security', [
+                new SubConstraintDTO('useLimitation', description: 'Diffusion restreinte'),
+                new SubConstraintDTO('classification', classification_code: 'restricted'),
+            ]),
+            new ResourceConditionDTO('other', [new SubConstraintDTO('useLimitation', description: 'Usage interne')]),
         ];
         $metadata->scale = 100;
         $metadata->bbox = ['west' => -5.5, 'east' => 9.5, 'south' => 41.0, 'north' => 51.5];

@@ -39,7 +39,7 @@
         <gco:DateTime>{{ date_stamp }}</gco:DateTime>
     </gmd:dateStamp>
 
-    {% if name is not empty or description is not empty or producers|length or themes|length or keywords_inspire|length or keywords_additional|length or scale is not empty or date_creation is not empty or thumbnail_url is not empty or update_frequency is not empty or bbox %}
+    {% if name is not empty or description is not empty or producers|length or resource_constraints|length or themes|length or keywords_inspire|length or keywords_additional|length or scale is not empty or date_creation is not empty or thumbnail_url is not empty or update_frequency is not empty or bbox %}
         <gmd:identificationInfo>
             <gmd:MD_DataIdentification>
                 {% if name is not empty %}
@@ -149,6 +149,44 @@
                         </gmd:MD_Keywords>
                     </gmd:descriptiveKeywords>
                 {% endif %}
+
+                {# conditions d’utilisation ; sous-contraintes dans l’ordre des séquences MD_LegalConstraints et MD_SecurityConstraints #}
+                {% set constraint_elements = {legal: 'gmd:MD_LegalConstraints', security: 'gmd:MD_SecurityConstraints', other: 'gmd:MD_Constraints'} %}
+                {% set public_access_labels = {noLimitations: 'Aucune limitation', conditionsUnknown: 'Conditions inconnues'} %}
+                {% for condition in resource_constraints %}
+                    <gmd:resourceConstraints>
+                        <{{ constraint_elements[condition.type] }}>
+                            {% for sub in condition.constraints|filter(c => c.type == 'useLimitation') %}
+                                <gmd:useLimitation>
+                                    {% if sub.url is not empty %}
+                                        <gmx:Anchor xlink:href="{{ sub.url }}">{{ sub.description }}</gmx:Anchor>
+                                    {% else %}
+                                        <gco:CharacterString>{{ sub.description }}</gco:CharacterString>
+                                    {% endif %}
+                                </gmd:useLimitation>
+                            {% endfor %}
+                            {% for restriction_type in ['accessConstraints', 'useConstraints'] %}
+                                {% for sub in condition.constraints|filter(c => c.type == restriction_type) %}
+                                    <gmd:{{ restriction_type }}>
+                                        <gmd:MD_RestrictionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode" codeListValue="{{ sub.restriction_code }}">{{ sub.restriction_code }}</gmd:MD_RestrictionCode>
+                                    </gmd:{{ restriction_type }}>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for sub in condition.constraints|filter(c => c.type == 'otherConstraints') %}
+                                <gmd:otherConstraints>
+                                    {# conditionsUnknown appartient à la liste ConditionsApplyingToAccessAndUse, les autres codes à LimitationsOnPublicAccess #}
+                                    {% set codelist = sub.limitation_code == 'conditionsUnknown' ? 'ConditionsApplyingToAccessAndUse' : 'LimitationsOnPublicAccess' %}
+                                    <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/{{ codelist }}/{{ sub.limitation_code }}">{{ public_access_labels[sub.limitation_code] ?? sub.limitation_code }}</gmx:Anchor>
+                                </gmd:otherConstraints>
+                            {% endfor %}
+                            {% for sub in condition.constraints|filter(c => c.type == 'classification') %}
+                                <gmd:classification>
+                                    <gmd:MD_ClassificationCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ClassificationCode" codeListValue="{{ sub.classification_code }}">{{ sub.classification_code }}</gmd:MD_ClassificationCode>
+                                </gmd:classification>
+                            {% endfor %}
+                        </{{ constraint_elements[condition.type] }}>
+                    </gmd:resourceConstraints>
+                {% endfor %}
 
                 <gmd:spatialRepresentationType>
                     <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" />

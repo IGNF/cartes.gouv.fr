@@ -40,8 +40,6 @@ class SubConstraintDTO
         #[Assert\Choice(choices: self::TYPES, message: 'Le type de contrainte est invalide')]
         public readonly string $type = '',
 
-        public readonly bool $locked = false,
-
         public readonly ?string $restriction_code = null,
 
         public readonly ?string $limitation_code = null,
