@@ -89,6 +89,7 @@
         "vite-plugin-symfony": "^8.0",
         "vitest": "^5.0.5",
         "yup": "^1.2.0",
+        "zod": "^4.6.7",
         "zustand": "^5.0.0"
     },
     "overrides": {
