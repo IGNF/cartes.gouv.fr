@@ -89,11 +89,22 @@ final class CswMetadataXmlReaderTest extends TestCase
         self::assertCount(5, $metadata->online_resources);
     }
 
-    public function testEmptyCswEnvelopeIsReportedAsMissingMetadata(): void
+    #[DataProvider('documentsWithoutMetadata')]
+    public function testDocumentWithoutMetadataIsReportedAsMissing(string $xml): void
     {
         $this->expectException(MissingCswMetadataException::class);
 
-        $this->reader->read($this->cswEnvelope(''));
+        $this->reader->read($xml);
+    }
+
+    /**
+     * @return iterable<string, array{0: string}>
+     */
+    public static function documentsWithoutMetadata(): iterable
+    {
+        yield 'enveloppe CSW vide' => ['<?xml version="1.0" encoding="UTF-8"?><csw:GetRecordByIdResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"></csw:GetRecordByIdResponse>'];
+        yield 'corps vide' => [''];
+        yield 'déclaration XML seule' => ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"];
     }
 
     public function testMalformedXmlIsRejectedWithTheParserMessage(): void

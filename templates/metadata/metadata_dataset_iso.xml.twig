@@ -271,9 +271,11 @@
                                             <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceType/other">other</gmx:Anchor>
                                         </gmd:applicationProfile>
                                     {% endif %}
-                                    <gmd:name>
-                                        <gco:CharacterString>{{ resource.name }}</gco:CharacterString>
-                                    </gmd:name>
+                                    {% if resource.name is not empty %}
+                                        <gmd:name>
+                                            <gco:CharacterString>{{ resource.name }}</gco:CharacterString>
+                                        </gmd:name>
+                                    {% endif %}
                                     {% if resource.type == 'layer' and not resource.open %}
                                         <gmd:description>
                                             <gmx:Anchor xlink:href="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode_restricted">{{ resource.description ?: resource.name ~ ' - Accès restreint' }}</gmx:Anchor>

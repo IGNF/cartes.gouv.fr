@@ -3,6 +3,8 @@
 namespace App\Tests\Functional;
 
 use App\Dto\Metadata\CswMetadata;
+use App\Dto\Metadata\CswOnlineResource;
+use App\Dto\Metadata\CswOnlineResourceType;
 use App\Services\CswMetadataXmlReader;
 use App\Services\CswMetadataXmlWriter;
 use App\Tests\Support\CswMetadataFixtures;
@@ -31,6 +33,14 @@ final class CswMetadataXmlWriterTest extends KernelTestCase
         $metadata = CswMetadataFixtures::full();
 
         self::assertEquals($metadata, self::getContainer()->get(CswMetadataXmlReader::class)->read($this->writer()->toXml($metadata)));
+    }
+
+    public function testResourceWithoutNameWritesNoEmptyElement(): void
+    {
+        $metadata = new CswMetadata();
+        $metadata->online_resources = [new CswOnlineResource(CswOnlineResourceType::Other, '', 'https://example.test')];
+
+        self::assertStringNotContainsString('gmd:name', $this->writer()->toXml($metadata));
     }
 
     // un fichier d’avant la refonte garde la nature de ses ressources après une réécriture

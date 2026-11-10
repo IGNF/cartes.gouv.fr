@@ -76,6 +76,11 @@ class CswMetadataXmlReader
      */
     private function load(string $xml): array
     {
+        // corps vide ou réduit à la déclaration XML : réponse CSW sans enregistrement
+        if ('' === trim((string) preg_replace('/^\s*<\?xml[^>]*\?>/', '', $xml))) {
+            throw new MissingCswMetadataException();
+        }
+
         $previous = libxml_use_internal_errors(true);
         libxml_clear_errors();
         $document = new \DOMDocument();
