@@ -239,7 +239,7 @@
                     </gmd:topicCategory>
                 {% endfor %}
 
-                {# une emprise par territoire : libellé, rectangle WGS84 et identifiant géographique (BD TOPO ou code commune) #}
+                {# une emprise par territoire : libellé, rectangle WGS84 et identifiant géographique, comme la donneuse #}
                 {% for territory in territories %}
                     <gmd:extent>
                         <gmd:EX_Extent>
@@ -266,6 +266,23 @@
                                 <gmd:EX_GeographicDescription>
                                     <gmd:geographicIdentifier>
                                         <gmd:MD_Identifier>
+                                            <gmd:authority>
+                                                <gmd:CI_Citation>
+                                                    <gmd:title>
+                                                        <gco:CharacterString>ISO 3166 alpha 3</gco:CharacterString>
+                                                    </gmd:title>
+                                                    <gmd:date>
+                                                        <gmd:CI_Date>
+                                                            <gmd:date>
+                                                                <gco:Date>1974</gco:Date>
+                                                            </gmd:date>
+                                                            <gmd:dateType>
+                                                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                                                            </gmd:dateType>
+                                                        </gmd:CI_Date>
+                                                    </gmd:date>
+                                                </gmd:CI_Citation>
+                                            </gmd:authority>
                                             <gmd:code>
                                                 <gco:CharacterString>{{ territory.id }}</gco:CharacterString>
                                             </gmd:code>
