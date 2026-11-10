@@ -4,7 +4,6 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
-import Table from "@codegouvfr/react-dsfr/Table";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery } from "@tanstack/react-query";
 import { ReactNode, useMemo, useState } from "react";
@@ -13,6 +12,7 @@ import { tss } from "tss-react";
 import { DatasheetDetailed, StoredDataStatusEnum } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum, StoredDataPrivateDetailResponseDtoTypeEnum as StoredDataTypeEnum } from "@/@types/entrepot";
 import StoredDataStatusBadge from "@/components/Utils/Badges/StoredDataStatusBadge";
+import CardRowsTable from "@/components/Utils/CardRowsTable";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
@@ -41,6 +41,8 @@ const TYPE_LABELS = {
     "ROK4-PYRAMID-VECTOR": "type.pyramid_vector",
     "ROK4-PYRAMID-RASTER": "type.pyramid_raster",
 } as const satisfies Record<StoredDataType, string>;
+
+const COLUMN_WIDTHS = [undefined, "11rem", "15rem", "10rem", "14rem"];
 
 type DatasetRow = {
     id: string;
@@ -253,11 +255,10 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
 
                         <p className={cx(fr.cx("fr-text--xs", "fr-mt-3w", "fr-mb-1w"), classes.results)}>{t("results", { count: filteredRows.length })}</p>
 
-                        <Table
-                            className={classes.table}
+                        <CardRowsTable
                             caption={t("caption")}
                             noCaption
-                            fixed
+                            columnWidths={COLUMN_WIDTHS}
                             headers={[t("column.name"), t("column.type"), t("column.creation"), t("column.status"), t("column.action")]}
                             data={filteredRows.map((row) => [
                                 <span key={`name-${row.id}`} title={row.name}>
@@ -293,68 +294,6 @@ const useStyles = tss.withName({ DatasetTabNext }).create({
     },
     results: {
         color: fr.colors.decisions.text.mention.grey.default,
-    },
-    // mise en page de la maquette : en-tête bleu, lignes en cartes blanches sur fond gris
-    table: {
-        // la mise en page fixe retire le défilement DSFR : le tableau défile dans son conteneur
-        "&.fr-table": {
-            overflowX: "auto",
-        },
-        "&.fr-table > table": {
-            borderCollapse: "separate",
-            borderSpacing: `0 ${fr.spacing("1w")}`,
-            paddingInline: fr.spacing("1w"),
-            backgroundColor: fr.colors.decisions.background.alt.grey.default,
-            // masque l’espacement au-dessus de l’en-tête et celui ajouté sous le corps remonté
-            clipPath: `inset(${fr.spacing("1w")} 0 ${fr.spacing("1w")} 0 round 0.25rem)`,
-        },
-        // Chrome double l’espacement entre l’en-tête et le corps
-        "&.fr-table > table tbody": {
-            position: "relative",
-            top: `-${fr.spacing("1w")}`,
-        },
-        "&.fr-table > table thead, &.fr-table > table tbody, &.fr-table > table tbody tr": {
-            backgroundColor: "transparent",
-            backgroundImage: "none",
-        },
-        "&.fr-table > table thead::after, &.fr-table > table tbody::after": {
-            display: "none",
-        },
-        "&.fr-table > table th, &.fr-table > table td": {
-            padding: fr.spacing("2w"),
-            fontSize: "1rem",
-            whiteSpace: "nowrap",
-            backgroundImage: "none",
-        },
-        "&.fr-table > table th:not(:first-of-type), &.fr-table > table td:not(:first-of-type)": {
-            textAlign: "center",
-        },
-        "&.fr-table > table thead th": {
-            fontWeight: 500,
-            backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.default,
-        },
-        // l’en-tête couvre aussi la marge latérale grise
-        "&.fr-table > table thead th:first-of-type": {
-            boxShadow: `-${fr.spacing("1w")} 0 0 ${fr.colors.decisions.background.actionLow.blueFrance.default}`,
-        },
-        "&.fr-table > table thead th:last-of-type": {
-            boxShadow: `${fr.spacing("1w")} 0 0 ${fr.colors.decisions.background.actionLow.blueFrance.default}`,
-        },
-        "&.fr-table > table thead th:nth-of-type(2)": { width: "11rem" },
-        "&.fr-table > table thead th:nth-of-type(3)": { width: "15rem" },
-        "&.fr-table > table thead th:nth-of-type(4)": { width: "10rem" },
-        "&.fr-table > table thead th:nth-of-type(5)": { width: "14rem" },
-        "&.fr-table > table tbody td": {
-            backgroundColor: fr.colors.decisions.background.default.grey.default,
-        },
-        "&.fr-table > table tbody td:first-of-type": {
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            borderRadius: "0.25rem 0 0 0.25rem",
-        },
-        "&.fr-table > table tbody td:last-of-type": {
-            borderRadius: "0 0.25rem 0.25rem 0",
-        },
     },
     empty: {
         display: "flex",
