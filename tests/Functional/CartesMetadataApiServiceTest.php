@@ -50,7 +50,7 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
 
     public function testCreationWritesAnUnpublishedMetadataTaggedWithTheDatasheetName(): void
     {
-        $apiMetadata = $this->service->create(self::DATASTORE_ID, self::dto(), null);
+        $apiMetadata = $this->service->create(self::DATASTORE_ID, $this->dto(), null);
 
         self::assertSame(['datasheet_name' => 'Fiche'], $apiMetadata['tags']);
         $written = $this->readWritten($apiMetadata['_id']);
@@ -63,7 +63,7 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
     {
         EntrepotMockResponseFactory::seed('uploads', ['_id' => 'upload-1', 'tags' => ['datasheet_name' => 'Fiche']]);
 
-        $this->assertHttpError(409, fn () => $this->service->create(self::DATASTORE_ID, self::dto(), null));
+        $this->assertHttpError(409, fn () => $this->service->create(self::DATASTORE_ID, $this->dto(), null));
         self::assertSame([], EntrepotMockResponseFactory::stored('metadata'));
     }
 
@@ -71,7 +71,7 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
     {
         EntrepotMockResponseFactory::seed('metadata', ['_id' => 'metadata-autre', 'file_identifier' => 'ign.fiche', 'tags' => ['datasheet_name' => 'Autre']]);
 
-        $this->assertHttpError(409, fn () => $this->service->create(self::DATASTORE_ID, self::dto(), $this->thumbnail()));
+        $this->assertHttpError(409, fn () => $this->service->create(self::DATASTORE_ID, $this->dto(), $this->thumbnail()));
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
     }
 
@@ -79,14 +79,14 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
     {
         EntrepotMockResponseFactory::failNext('POST metadata');
 
-        $this->assertHttpError(500, fn () => $this->service->create(self::DATASTORE_ID, self::dto(), $this->thumbnail()));
+        $this->assertHttpError(500, fn () => $this->service->create(self::DATASTORE_ID, $this->dto(), $this->thumbnail()));
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
         self::assertCount(1, $this->requestsTo('annexes/annexe-1', 'DELETE'));
     }
 
     public function testCreationWithAThumbnailWritesItsUrl(): void
     {
-        $apiMetadata = $this->service->create(self::DATASTORE_ID, self::dto(), $this->thumbnail());
+        $apiMetadata = $this->service->create(self::DATASTORE_ID, $this->dto(), $this->thumbnail());
 
         $annexes = EntrepotMockResponseFactory::stored('annexes');
         self::assertCount(1, $annexes);
@@ -99,7 +99,7 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
     {
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'stored-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
 
-        $apiMetadata = $this->service->replace(self::DATASTORE_ID, 'Fiche', self::dto(), self::noServices(), null, false);
+        $apiMetadata = $this->service->replace(self::DATASTORE_ID, 'Fiche', $this->dto(), $this->noServices(), null, false);
 
         self::assertSame(['datasheet_name' => 'Fiche'], $apiMetadata['tags']);
         self::assertSame('Fiche', $this->readWritten($apiMetadata['_id'])->name);
@@ -107,21 +107,21 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
 
     public function testReplacementOfAnUnknownDatasheetAnswers404(): void
     {
-        $this->assertHttpError(404, fn () => $this->service->replace(self::DATASTORE_ID, 'Fiche', self::dto(), self::noServices(), null, false));
+        $this->assertHttpError(404, fn () => $this->service->replace(self::DATASTORE_ID, 'Fiche', $this->dto(), $this->noServices(), null, false));
     }
 
     public function testReplacementKeepsTheOnlineResourcesAndRefusesAnotherFileIdentifier(): void
     {
         $this->seedExistingMetadata();
 
-        $this->service->replace(self::DATASTORE_ID, 'Fiche', self::dto(description: 'Nouvelle description'), self::noServices(), null, false);
+        $this->service->replace(self::DATASTORE_ID, 'Fiche', $this->dto(description: 'Nouvelle description'), $this->noServices(), null, false);
 
         $written = $this->readWritten('metadata-1');
         self::assertSame('Nouvelle description', $written->description);
         self::assertCount(1, $written->resourcesOfType(CswOnlineResourceType::Layer));
         self::assertSame('https://annexes.example.test/ancienne.png', $written->thumbnail_url);
 
-        $this->assertHttpError(400, fn () => $this->service->replace(self::DATASTORE_ID, 'Fiche', self::dto(fileIdentifier: 'ign.autre'), self::noServices(), null, false));
+        $this->assertHttpError(400, fn () => $this->service->replace(self::DATASTORE_ID, 'Fiche', $this->dto(fileIdentifier: 'ign.autre'), $this->noServices(), null, false));
     }
 
     public function testReplacementDeletesTheThumbnailOnRequest(): void
@@ -129,7 +129,7 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
         $this->seedExistingMetadata();
         EntrepotMockResponseFactory::seed('annexes', ['_id' => 'annexe-ancienne', 'paths' => ['thumbnail/ancienne.png'], 'labels' => ['datasheet_name=Fiche', 'type=thumbnail']]);
 
-        $this->service->replace(self::DATASTORE_ID, 'Fiche', self::dto(), self::noServices(), null, true);
+        $this->service->replace(self::DATASTORE_ID, 'Fiche', $this->dto(), $this->noServices(), null, true);
 
         self::assertNull($this->readWritten('metadata-1')->thumbnail_url);
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
@@ -140,7 +140,7 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
     {
         $this->seedExistingMetadata();
 
-        $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', self::noServices());
+        $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', $this->noServices());
 
         $written = $this->readWritten('metadata-1');
         self::assertSame([], $written->resourcesOfType(CswOnlineResourceType::Layer));
@@ -152,7 +152,7 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
 
     public function testRefreshWithoutMetadataWritesNothing(): void
     {
-        $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', self::noServices());
+        $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', $this->noServices());
 
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
@@ -210,12 +210,12 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
         }
     }
 
-    private static function noServices(): DatasheetServices
+    private function noServices(): DatasheetServices
     {
         return new DatasheetServices([], []);
     }
 
-    private static function dto(string $fileIdentifier = 'ign.fiche', string $description = 'Description'): DatasheetMetadataDTO
+    private function dto(string $fileIdentifier = 'ign.fiche', string $description = 'Description'): DatasheetMetadataDTO
     {
         return new DatasheetMetadataDTO(
             name: 'Fiche',

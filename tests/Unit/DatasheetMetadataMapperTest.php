@@ -27,7 +27,7 @@ final class DatasheetMetadataMapperTest extends TestCase
 
     public function testCreationCopiesEveryEnteredField(): void
     {
-        $dto = self::dto();
+        $dto = $this->dto();
 
         $metadata = $this->mapper->map($dto);
 
@@ -55,7 +55,7 @@ final class DatasheetMetadataMapperTest extends TestCase
     {
         $existing = CswMetadataFixtures::full();
 
-        $metadata = $this->mapper->map(self::dto(), $existing);
+        $metadata = $this->mapper->map($this->dto(), $existing);
 
         self::assertSame('fid', $metadata->file_identifier);
         self::assertEquals($existing->online_resources, $metadata->online_resources);
@@ -69,10 +69,10 @@ final class DatasheetMetadataMapperTest extends TestCase
 
     public function testEmptyResolutionStaysNull(): void
     {
-        self::assertNull($this->mapper->map(self::dto(resolution: null))->resolution);
+        self::assertNull($this->mapper->map($this->dto(resolution: null))->resolution);
     }
 
-    private static function dto(?float $resolution = 2.5): DatasheetMetadataDTO
+    private function dto(?float $resolution = 2.5): DatasheetMetadataDTO
     {
         return new DatasheetMetadataDTO(
             name: 'Fiche',

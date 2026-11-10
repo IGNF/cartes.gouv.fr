@@ -135,7 +135,7 @@ final class EntrepotMockResponseFactory
 
         if (self::ENTREPOT_HOST === $host && str_starts_with($path, $datastorePath)) {
             $response = $this->datastoreResponse($method, substr($path, strlen($datastorePath)), (string) parse_url($url, PHP_URL_QUERY), $options);
-            if (null !== $response) {
+            if ($response instanceof MockResponse) {
                 return $response;
             }
         }
