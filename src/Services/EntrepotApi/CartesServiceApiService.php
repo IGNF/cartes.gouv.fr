@@ -569,11 +569,9 @@ class CartesServiceApiService
                         $configRequestBody['type_infos']['keywords'] = $keywords;
                     }
 
+                    // attribution entière, logo compris : le PUT efface tout champ absent du corps
                     if (isset($configuration['attribution']['title']) && isset($configuration['attribution']['url'])) {
-                        $configRequestBody['attribution'] = [
-                            'title' => $configuration['attribution']['title'],
-                            'url' => $configuration['attribution']['url'],
-                        ];
+                        $configRequestBody['attribution'] = $configuration['attribution'];
                     }
 
                     $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody)->array();
