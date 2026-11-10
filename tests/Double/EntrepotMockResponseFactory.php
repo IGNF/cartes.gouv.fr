@@ -14,6 +14,7 @@ final class EntrepotMockResponseFactory
     public const DATASTORE_ID = 'ds-1';
     // fichier de métadonnée dont l’Entrepôt répond 502 en texte brut
     public const METADATA_ID_UPSTREAM_DOWN = 'upstream-down';
+    public const METADATA_ENDPOINT_ID = 'endpoint-metadata';
     private const ENTREPOT_HOST = 'entrepot.test';
     private const METADATA_FIXTURES_DIR = __DIR__.'/../Fixture/metadata';
 
@@ -106,6 +107,11 @@ final class EntrepotMockResponseFactory
         $host = (string) parse_url($url, PHP_URL_HOST);
         $path = (string) parse_url($url, PHP_URL_PATH);
 
+        // jeton du compte de service (SandboxService)
+        if ('POST' === $method && str_ends_with($path, '/token')) {
+            return $this->json(['access_token' => FakeKeycloakClient::ACCESS_TOKEN, 'expires_in' => 300]);
+        }
+
         // l’Entrepôt autorise par le jeton de l’utilisateur : une requête sans le jeton attendu est refusée comme en vrai
         $authorization = $options['normalized_headers']['authorization'][0] ?? '';
         if ('Authorization: Bearer '.FakeKeycloakClient::ACCESS_TOKEN !== $authorization) {
@@ -129,6 +135,11 @@ final class EntrepotMockResponseFactory
                 'keys_quota' => 10,
                 'keys_use' => 0,
             ]);
+        }
+
+        // communauté du bac à sable : son datastore n’est pas celui des tests
+        if (self::ENTREPOT_HOST === $host && 'GET' === $method && str_ends_with($path, '/communities/sandbox-community')) {
+            return $this->json(['_id' => 'sandbox-community', 'datastore' => ['_id' => 'sandbox-datastore']]);
         }
 
         $datastorePath = '/api/datastores/'.self::DATASTORE_ID;
@@ -163,7 +174,9 @@ final class EntrepotMockResponseFactory
         }
 
         if ('GET' === $method && '' === $relative) {
-            return $this->json(['_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => 'community-1']]);
+            return $this->json(['_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => 'community-1'], 'endpoints' => [
+                ['endpoint' => ['_id' => self::METADATA_ENDPOINT_ID, 'type' => 'METADATA', 'open' => true, 'urls' => [['type' => 'CSW', 'url' => 'https://csw.test/csw']]]],
+            ]]);
         }
 
         parse_str($queryString, $query);
@@ -172,6 +185,28 @@ final class EntrepotMockResponseFactory
             $items = array_values(array_filter(self::$store[$relative] ?? [], fn (array $item) => $this->matches($item, $query)));
 
             return $this->json($items, 200, ['content-range' => sprintf('0-%d/%d', max(count($items) - 1, 0), count($items))]);
+        }
+
+        if ('GET' === $method && 1 === preg_match('#^(processings/executions|stored_data|uploads)/([\w-]+)$#', $relative, $matches)) {
+            $item = $this->find($matches[1], $matches[2]);
+
+            return null === $item ? $this->json(['error' => 'NotFound'], 404) : $this->json($item);
+        }
+
+        // vérifications d’une livraison : clé « checks » de l’entité semée
+        if ('GET' === $method && 1 === preg_match('#^uploads/([\w-]+)/checks$#', $relative, $matches)) {
+            return $this->json(($this->find('uploads', $matches[1])['checks'] ?? []) + ['asked' => [], 'in_progress' => [], 'passed' => [], 'failed' => []]);
+        }
+
+        if ('GET' === $method && 1 === preg_match('#^uploads/[\w-]+/tree$#', $relative)) {
+            return $this->json([]);
+        }
+
+        if ('DELETE' === $method && 1 === preg_match('#^uploads/([\w-]+)/tags$#', $relative, $matches)) {
+            self::$writeRequests[] = ['method' => $method, 'path' => '/api/datastores/'.self::DATASTORE_ID.$path, 'body' => ''];
+            $this->update('uploads', $matches[1], fn (array $item) => ['tags' => array_diff_key($item['tags'], array_flip(explode(',', is_string($query['tags'] ?? null) ? $query['tags'] : '')))] + $item);
+
+            return new MockResponse('', ['http_code' => 204]);
         }
 
         if ('HEAD' === $method && 'metadata' === $relative) {
@@ -212,8 +247,50 @@ final class EntrepotMockResponseFactory
             return $this->json($this->find('metadata', $matches[1]) ?? []);
         }
 
-        if ('POST' === $method && 1 === preg_match('#^metadata/([\w-]+)/tags$#', $relative, $matches)) {
-            return $this->json($this->update('metadata', $matches[1], fn (array $item) => ['tags' => [...$item['tags'], ...json_decode($body, true, flags: JSON_THROW_ON_ERROR)]] + $item));
+        if ('POST' === $method && 1 === preg_match('#^(metadata|uploads|stored_data)/([\w-]+)/tags$#', $relative, $matches)) {
+            return $this->json($this->update($matches[1], $matches[2], fn (array $item) => ['tags' => [...$item['tags'], ...json_decode($body, true, flags: JSON_THROW_ON_ERROR)]] + $item));
+        }
+
+        if ('POST' === $method && 'uploads' === $relative) {
+            $upload = ['_id' => 'upload-'.self::$nextId++, 'status' => 'OPEN', 'tags' => [], ...json_decode($body, true, flags: JSON_THROW_ON_ERROR)];
+            self::$store['uploads'][] = $upload;
+
+            return $this->json($upload, 201);
+        }
+
+        // fichiers d’une livraison puis fermeture : les vérifications démarrent
+        if ('POST' === $method && 1 === preg_match('#^uploads/([\w-]+)/(data|md5|close)$#', $relative, $matches)) {
+            if ('close' === $matches[2]) {
+                $this->update('uploads', $matches[1], fn (array $item) => ['status' => 'CHECKING'] + $item);
+            }
+
+            return new MockResponse('', ['http_code' => 204]);
+        }
+
+        if ('POST' === $method && 'processings/executions' === $relative) {
+            $storedData = ['_id' => 'stored-data-'.self::$nextId++, 'status' => 'CREATED', 'tags' => []];
+            $execution = ['_id' => 'execution-'.self::$nextId++, 'status' => 'CREATED', 'output' => ['stored_data' => $storedData]];
+            self::$store['stored_data'][] = $storedData;
+            self::$store['processings/executions'][] = $execution;
+
+            return $this->json($execution, 201);
+        }
+
+        if ('POST' === $method && 1 === preg_match('#^processings/executions/([\w-]+)/launch$#', $relative, $matches)) {
+            $this->update('processings/executions', $matches[1], fn (array $item) => ['status' => 'WAITING'] + $item);
+
+            return new MockResponse('', ['http_code' => 204]);
+        }
+
+        if ('POST' === $method && 1 === preg_match('#^metadata/(publication|unpublication)$#', $relative, $matches)) {
+            $request = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+            foreach (self::$store['metadata'] ?? [] as $index => $item) {
+                if (in_array($item['file_identifier'] ?? null, $request['file_identifiers'], true)) {
+                    self::$store['metadata'][$index]['endpoints'] = 'publication' === $matches[1] ? [['_id' => $request['endpoint']]] : [];
+                }
+            }
+
+            return new MockResponse('', ['http_code' => 204]);
         }
 
         if ('POST' === $method && 'annexes' === $relative) {
@@ -228,7 +305,16 @@ final class EntrepotMockResponseFactory
             return $this->json($this->update('annexes', $matches[1], fn (array $item) => json_decode($body, true, flags: JSON_THROW_ON_ERROR) + $item));
         }
 
-        if ('DELETE' === $method && 1 === preg_match('#^(annexes|metadata)/([\w-]+)$#', $relative, $matches)) {
+        // une exécution non lancée emporte sa donnée stockée de sortie
+        if ('DELETE' === $method && 1 === preg_match('#^processings/executions/([\w-]+)$#', $relative, $matches)) {
+            $outputId = $this->find('processings/executions', $matches[1])['output']['stored_data']['_id'] ?? null;
+            self::$store['processings/executions'] = array_values(array_filter(self::$store['processings/executions'] ?? [], fn (array $item) => $item['_id'] !== $matches[1]));
+            self::$store['stored_data'] = array_values(array_filter(self::$store['stored_data'] ?? [], fn (array $item) => $item['_id'] !== $outputId));
+
+            return new MockResponse('', ['http_code' => 204]);
+        }
+
+        if ('DELETE' === $method && 1 === preg_match('#^(annexes|metadata|uploads|stored_data)/([\w-]+)$#', $relative, $matches)) {
             self::$store[$matches[1]] = array_values(array_filter(self::$store[$matches[1]] ?? [], fn (array $item) => $item['_id'] !== $matches[2]));
 
             return new MockResponse('', ['http_code' => 204]);

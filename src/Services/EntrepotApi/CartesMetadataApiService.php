@@ -27,7 +27,7 @@ use Symfony\Component\Uid\Uuid;
 /**
  * Fiche de métadonnées d’une fiche de données : le formulaire écrit les champs saisis, les flux et documents ne rafraîchissent que les ressources en ligne.
  *
- * Aucune méthode ne publie ni ne dépublie la fiche de métadonnées.
+ * Seules publish() et unpublish(), actions explicites de l’utilisateur, changent l’état de publication de la fiche de métadonnées.
  */
 class CartesMetadataApiService
 {
@@ -66,6 +66,38 @@ class CartesMetadataApiService
         }
 
         return $metadataList[0];
+    }
+
+    /**
+     * Sans effet si la fiche de métadonnées est déjà publiée.
+     *
+     * @return list<array<mixed>> points d’accès de publication après l’opération (la relecture de l’Entrepôt peut être en retard)
+     */
+    public function publish(string $datastoreId, string $datasheetName): array
+    {
+        $apiMetadata = $this->requireMetadata($datastoreId, $datasheetName);
+        if ([] !== ($apiMetadata['endpoints'] ?? [])) {
+            return $apiMetadata['endpoints'];
+        }
+
+        $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, ['type' => 'METADATA', 'open' => true]);
+        if ([] === $endpoints) {
+            throw new AppException('Aucun point d’accès de métadonnées ouvert sur cet entrepôt', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        $this->metadataApiService->publish($datastoreId, $apiMetadata['file_identifier'], $endpoints[0]['endpoint']['_id'])->await();
+
+        return [$endpoints[0]['endpoint']];
+    }
+
+    // dépublie de tous les points d’accès ; sans effet si elle n’est pas publiée
+    public function unpublish(string $datastoreId, string $datasheetName): void
+    {
+        $apiMetadata = $this->requireMetadata($datastoreId, $datasheetName);
+
+        foreach ($apiMetadata['endpoints'] ?? [] as $endpoint) {
+            $this->metadataApiService->unpublish($datastoreId, $apiMetadata['file_identifier'], $endpoint['_id'])->await();
+        }
     }
 
     // l’Entrepôt répond 204 si l’identifiant est libre, 409 s’il est pris
@@ -541,6 +573,15 @@ class CartesMetadataApiService
     private function toCswDocuments(array $documents): array
     {
         return array_values(array_map(fn ($doc) => CswOnlineResource::document($doc['name'], $doc['description'] ?? null, $doc['url']), $documents));
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function requireMetadata(string $datastoreId, string $datasheetName): array
+    {
+        return $this->getMetadataByDatasheetName($datastoreId, $datasheetName)
+            ?? throw new AppException("La fiche de données [$datasheetName] n’a pas de fiche de métadonnées", Response::HTTP_NOT_FOUND);
     }
 
     /**

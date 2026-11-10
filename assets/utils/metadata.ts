@@ -1,9 +1,17 @@
-import type { CswMetadata, CswMetadataProducer, CswMetadataTerritory } from "@/@types/app";
+import type { CswMetadata, CswMetadataProducer, CswMetadataTerritory, Metadata } from "@/@types/app";
 import type { BoundingBox } from "@/@types/entrepot";
 
 // Themes et mot cles INSPIRE
 import inspireKeywords from "@/data/thematic-inspire.json";
 import categories from "@/data/topic_categories.json";
+
+/** organisme gestionnaire de la donnée, à défaut le point de contact */
+export const getMetadataCustodianName = (metadata: Metadata | undefined): string | undefined => {
+    const producers = metadata?.csw_metadata?.producers;
+    const custodian = producers?.find((producer) => producer.role === "custodian") ?? producers?.find((producer) => producer.role === "pointOfContact");
+
+    return custodian?.organization_name;
+};
 
 export const getInspireKeywords = () => {
     // récupérer et applatir tous les sous-tableaux

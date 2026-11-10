@@ -1,0 +1,115 @@
+import { declareComponentKeys } from "@/i18n";
+import { type Translations } from "@/i18n/types";
+
+const { i18n } = declareComponentKeys<
+    | "title"
+    | "add"
+    | "no_data"
+    | "load_error"
+    | "filter_legend"
+    | "filter.all"
+    | "filter.vector_db"
+    | "filter.pyramid_vector"
+    | "filter.pyramid_raster"
+    | { K: "results"; P: { count: number }; R: string }
+    | "caption"
+    | "column.name"
+    | "column.type"
+    | "column.creation"
+    | "column.status"
+    | "column.action"
+    | "type.vector"
+    | "type.raster"
+    | "status.failed"
+    | "status.in_progress"
+    | "view"
+    | "view_report"
+    | "resume_integration"
+    | "delete"
+    | "deleting"
+    | "delete_error"
+    | "loading_notice.title"
+    | "loading_notice.description"
+    | "banner.vector_only"
+    | "banner.raster_help"
+    | "banner.help_link"
+    | "banner.tools"
+    | "banner.api"
+    | "banner.qgis"
+>()("DatasetTabNext");
+
+export type I18n = typeof i18n;
+
+export const DatasetTabNextFrTranslations: Translations<"fr">["DatasetTabNext"] = {
+    title: "Données",
+    add: "Ajouter une donnée",
+    no_data: "Aucune donnée",
+    load_error: "La fiche de données n’a pas pu être chargée",
+    filter_legend: "Filtrer par type de donnée",
+    "filter.all": "Tous",
+    "filter.vector_db": "Bases de données vecteur",
+    "filter.pyramid_vector": "Pyramides de tuiles vectorielles",
+    "filter.pyramid_raster": "Raster",
+    results: ({ count }) => `${count} résultat${count > 1 ? "s" : ""}`,
+    caption: "Jeux de données",
+    "column.name": "Jeu de données",
+    "column.type": "Type",
+    "column.creation": "Date de création",
+    "column.status": "Statut",
+    "column.action": "Action",
+    "type.vector": "Vecteur",
+    "type.raster": "Raster",
+    "status.failed": "Échoué",
+    "status.in_progress": "En cours",
+    view: "Consulter",
+    view_report: "Voir le rapport",
+    resume_integration: "Reprendre l’intégration",
+    delete: "Supprimer",
+    deleting: "Suppression de la livraison en cours",
+    delete_error: "La livraison n’a pas été supprimée",
+    "loading_notice.title": "Donnée en cours de chargement",
+    "loading_notice.description": "Vous recevrez un courriel vous indiquant la fin du chargement.",
+    "banner.vector_only": "Ajouter uniquement vos données vecteur depuis cartes.gouv.fr",
+    "banner.raster_help": "Pour ajouter vos données raster",
+    "banner.help_link": "Consulter l’aide",
+    "banner.tools": "Ajouter vos données directement depuis vos outils :",
+    "banner.api": "Depuis une API",
+    "banner.qgis": "Depuis QGIS",
+};
+
+export const DatasetTabNextEnTranslations: Translations<"en">["DatasetTabNext"] = {
+    title: "Data",
+    add: "Add data",
+    no_data: "No data",
+    load_error: "The datasheet could not be loaded",
+    filter_legend: "Filter by data type",
+    "filter.all": "All",
+    "filter.vector_db": "Vector databases",
+    "filter.pyramid_vector": "Vector tile pyramids",
+    "filter.pyramid_raster": "Raster",
+    results: ({ count }) => `${count} result${count > 1 ? "s" : ""}`,
+    caption: "Datasets",
+    "column.name": "Dataset",
+    "column.type": "Type",
+    "column.creation": "Creation date",
+    "column.status": "Status",
+    "column.action": "Action",
+    "type.vector": "Vector",
+    "type.raster": "Raster",
+    "status.failed": "Failed",
+    "status.in_progress": "In progress",
+    view: "View",
+    view_report: "View report",
+    resume_integration: "Resume integration",
+    delete: "Delete",
+    deleting: "Deleting the upload",
+    delete_error: "The upload was not deleted",
+    "loading_notice.title": "Data being loaded",
+    "loading_notice.description": "You will receive an email when loading is complete.",
+    "banner.vector_only": "Only vector data can be added from cartes.gouv.fr",
+    "banner.raster_help": "To add raster data",
+    "banner.help_link": "See the help",
+    "banner.tools": "Add data directly from your tools:",
+    "banner.api": "From an API",
+    "banner.qgis": "From QGIS",
+};

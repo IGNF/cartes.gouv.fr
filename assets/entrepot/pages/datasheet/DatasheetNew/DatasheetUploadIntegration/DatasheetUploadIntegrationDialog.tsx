@@ -1,13 +1,17 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
-import { UseQueryResult, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { FC, useEffect, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo } from "react";
 
-import { Upload } from "@/@types/app";
+import { UploadIntegration } from "@/@types/app";
+import { getApiErrorMessage } from "@/modules/apiError";
+import { type ApiError } from "@/modules/jsonFetch";
+import { shouldAdvanceIntegration } from "@/utils";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n";
-import { parseIntegrationProgress } from "../../../../../utils";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 import { DatasheetViewActiveTabEnum } from "../../DatasheetView/DatasheetView/types";
@@ -32,101 +36,124 @@ const getStepIcon = (status: string) => {
     return icon;
 };
 
-type IntegrationStatus = "at_least_one_failure" | "proc_int_launched" | "all_successful";
-
-const getIntegrationStatus = (integrationProgress: Record<string, string> | null): IntegrationStatus | undefined => {
-    if (!integrationProgress) {
-        return undefined;
-    }
-
-    const stepStatuses = Object.values(integrationProgress);
-
-    if (stepStatuses.includes("failed")) {
-        // au moins une étape a échoué
-        return "at_least_one_failure";
-    }
-
-    if (integrationProgress["integration_processing"] === "in_progress") {
-        // le traitement d'intégration en bd a été lancé
-        return "proc_int_launched";
-    }
-
-    // Le backend garantit 3 étapes au total.
-    const allSuccessful = stepStatuses.length === 3 && stepStatuses.every((s) => s === "successful");
-    if (allSuccessful) {
-        // toutes les étapes sont terminées avec succès
-        return "all_successful";
-    }
+// étape affichée « en cours » pendant que son action s’exécute côté serveur
+const STEP_OF_ACTION: Partial<Record<NonNullable<UploadIntegration["next_action"]>, string>> = {
+    send_files: "send_files_api",
+    launch_processing: "integration_processing",
 };
 
-const isIntegrationFinished = (rawProgress: string | undefined): boolean => {
-    const status = getIntegrationStatus(parseIntegrationProgress(rawProgress));
-    return status === "at_least_one_failure" || status === "all_successful";
-};
+// plus rien ne changera : échec, ou réussite une fois la livraison supprimée
+const isIntegrationFinished = (integration: UploadIntegration | undefined): boolean =>
+    integration?.status === "failed" || (integration?.status === "successful" && integration.next_action === null);
 
 type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
     datasheetName: string | undefined;
     uploadId: string;
+    /** fiche de retour : nouvelle vue ou ancienne (par défaut) */
+    datasheetView?: "nouvelle";
 };
 
-const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId }) => {
+const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId, datasheetView }) => {
     const { t } = useTranslation("DatasheetUploadIntegration");
+    const { t: tCommon } = useTranslation("Common");
 
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+    const queryKey = RQKeys.datastore_upload_integration(datastoreId, uploadId);
 
-    // définition des query
-    // query qui "ping" ou "poll" et récupère le progress en boucle
-    // oxlint-disable-next-line @tanstack/query/exhaustive-deps
-    const pingIntProgQuery: UseQueryResult<Awaited<ReturnType<typeof api.upload.getIntegrationProgress>>> = useQuery({
-        queryKey: RQKeys.datastore_upload_integration(datastoreId, uploadId),
-        queryFn: ({ signal }) =>
-            pingIntProgQuery.data === undefined
-                ? api.upload.getIntegrationProgress(datastoreId, uploadId, { signal })
-                : api.upload.pingIntegrationProgress(datastoreId, uploadId, { signal }),
-        refetchInterval: (query) => (isIntegrationFinished(query.state.data?.integration_progress) ? false : 3000),
+    // exécute la prochaine action ; sa réponse remplace l’état lu
+    const advance = useMutation<UploadIntegration, ApiError>({
+        mutationFn: () => api.upload.advanceIntegration(datastoreId, uploadId),
+        onSuccess: (state) => queryClient.setQueryData(queryKey, state),
+    });
+    const { mutate: advanceMutate, isPending: isAdvancing, isError: advanceFailed, data: advancedState } = advance;
+
+    // lecture seule, en boucle ; suspendue pendant une action et après une erreur (lecture ou action)
+    const integrationQuery = useQuery<UploadIntegration, ApiError>({
+        queryKey,
+        queryFn: ({ signal }) => api.upload.getIntegration(datastoreId, uploadId, { signal }),
+        refetchInterval: (query) => (isIntegrationFinished(query.state.data) || query.state.status === "error" || isAdvancing || advanceFailed ? false : 3000),
         refetchIntervalInBackground: true,
-        // le ping fait avancer l’intégration côté serveur : pas d’appel au retour sur l’onglet
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
         staleTime: 0,
         refetchOnMount: "always",
+        retry: false,
     });
+    const integration = integrationQuery.data;
 
-    // mise à jour de integrationProgress et integrationCurrentStep à chaque refetch de pingIntProgQuery
-    const {
-        integrationProgress,
-        upload,
-    }: {
-        integrationProgress: Record<string, string> | null;
-        upload: Upload | undefined;
-    } = useMemo(
-        () => ({
-            upload: pingIntProgQuery?.data?.upload,
-            integrationProgress: parseIntegrationProgress(pingIntProgQuery?.data?.integration_progress),
-        }),
-        [pingIntProgQuery?.data]
+    // une action attend : on l’exécute, une seule à la fois ; l’état renvoyé par une action attend la lecture suivante
+    useEffect(() => {
+        if (shouldAdvanceIntegration(integration, advancedState, isAdvancing, advanceFailed)) {
+            advanceMutate();
+        }
+    }, [integration, advancedState, isAdvancing, advanceFailed, advanceMutate]);
+
+    const steps = useMemo(() => {
+        if (!integration) return undefined;
+        const runningStep = isAdvancing && integration.next_action ? STEP_OF_ACTION[integration.next_action] : undefined;
+        return Object.entries(integration.steps).map(([step, status]) => [step, step === runningStep ? "in_progress" : status] as const);
+    }, [integration, isAdvancing]);
+
+    const failed = integration?.status === "failed";
+    const successful = integration?.status === "successful";
+    const processingLaunched = integration?.steps["integration_processing"] === "in_progress";
+    const integrationDatasheetName = integration?.datasheet_name ?? undefined;
+    const error = advance.error ?? integrationQuery.error;
+
+    // onglet Données de la fiche, dans la vue d’où vient l’utilisateur
+    const goToDatasheet = useCallback(
+        (name: string) =>
+            datasheetView === "nouvelle"
+                ? navigate({
+                      to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
+                      params: { datastoreId, datasheetName: name },
+                      search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
+                  })
+                : navigate({
+                      to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                      params: { datastoreId, datasheetName: name },
+                      search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
+                  }),
+        [datasheetView, datastoreId, navigate]
     );
 
-    const integrationStatus = useMemo(() => getIntegrationStatus(integrationProgress), [integrationProgress]);
-
+    // réussite : retour à la fiche une fois la livraison supprimée (ou la suppression abandonnée)
     useEffect(() => {
-        if (integrationStatus === "all_successful" && upload?.tags?.datasheet_name) {
-            void queryClient.invalidateQueries({
-                queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
-            });
-            void navigate({
-                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                params: { datastoreId, datasheetName: upload.tags.datasheet_name },
-                search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
-            });
+        if (successful && integrationDatasheetName && (integration?.next_action === null || advanceFailed)) {
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, integrationDatasheetName) });
+            void goToDatasheet(integrationDatasheetName);
         }
-    }, [integrationStatus, datastoreId, upload?.tags?.datasheet_name, queryClient, navigate]);
+    }, [successful, integration?.next_action, advanceFailed, datastoreId, integrationDatasheetName, queryClient, goToDatasheet]);
 
     return (
         <div className={fr.cx("fr-container")}>
-            {integrationStatus === "at_least_one_failure" ? (
+            {error && !successful && (
+                <Alert
+                    className={fr.cx("fr-mb-2w")}
+                    severity="error"
+                    title={t("integration_error")}
+                    description={
+                        <>
+                            <p>{getApiErrorMessage(error)}</p>
+                            <Button
+                                priority="secondary"
+                                size="small"
+                                onClick={() => {
+                                    advance.reset();
+                                    void integrationQuery.refetch();
+                                }}
+                            >
+                                {tCommon("retry")}
+                            </Button>
+                        </>
+                    }
+                    small
+                />
+            )}
+
+            {failed ? (
                 <div className={fr.cx("fr-grid-row")}>
                     <div className={fr.cx("fr-col")}>
                         <h6 className={fr.cx("fr-h6")}>
@@ -153,37 +180,28 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
 
             <div className={fr.cx("fr-grid-row", "fr-px-4w")}>
                 <div className={fr.cx("fr-col", "fr-col--middle")}>
-                    {integrationProgress &&
-                        Object.entries(integrationProgress).map(([step, status]) => (
-                            <div className={fr.cx("fr-grid-row")} key={step}>
-                                <p>
-                                    {getStepIcon(status)}
-                                    &nbsp;{t("step_title", { step_name: step })} : {t("step_status_text", { step_status: status })}
-                                </p>
-                            </div>
-                        ))}
+                    {steps?.map(([step, status]) => (
+                        <div className={fr.cx("fr-grid-row")} key={step}>
+                            <p>
+                                {getStepIcon(status)}
+                                &nbsp;{t("step_title", { step_name: step })} : {t("step_status_text", { step_status: status })}
+                            </p>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            {integrationStatus === "proc_int_launched" && <p>{t("continue_browsing_data_not_ready")}</p>}
+            {processingLaunched && <p>{t("continue_browsing_data_not_ready")}</p>}
 
-            {(integrationStatus === "all_successful" || integrationStatus === "proc_int_launched") && upload?.tags?.datasheet_name !== undefined && (
+            {(successful || processingLaunched) && integrationDatasheetName !== undefined && (
                 <div className={fr.cx("fr-grid-row")}>
                     <ButtonsGroup
                         buttons={[
                             {
                                 children: "Consulter la fiche de données",
                                 onClick: () => {
-                                    if (upload?.tags?.datasheet_name) {
-                                        void queryClient.refetchQueries({
-                                            queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
-                                        });
-                                        void navigate({
-                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                                            params: { datastoreId, datasheetName: upload.tags.datasheet_name },
-                                            search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
-                                        });
-                                    }
+                                    void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, integrationDatasheetName) });
+                                    void goToDatasheet(integrationDatasheetName);
                                 },
                             },
                         ]}
@@ -192,23 +210,15 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                 </div>
             )}
 
-            {integrationStatus === "at_least_one_failure" && upload?.tags?.datasheet_name !== undefined && (
+            {failed && integrationDatasheetName !== undefined && (
                 <div className={fr.cx("fr-grid-row")}>
                     <ButtonsGroup
                         buttons={[
                             {
                                 children: t("view_datasheet"),
                                 onClick: () => {
-                                    if (upload?.tags?.datasheet_name) {
-                                        void queryClient.refetchQueries({
-                                            queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
-                                        });
-                                        void navigate({
-                                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                                            params: { datastoreId, datasheetName: upload.tags.datasheet_name },
-                                            search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
-                                        });
-                                    }
+                                    void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, integrationDatasheetName) });
+                                    void goToDatasheet(integrationDatasheetName);
                                 },
                             },
                         ]}
@@ -217,7 +227,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                 </div>
             )}
 
-            {integrationStatus === "at_least_one_failure" && upload?.tags?.vectordb_id !== undefined && (
+            {failed && integration?.vectordb_id && (
                 <div className={fr.cx("fr-grid-row")}>
                     <ButtonsGroup
                         buttons={[
@@ -225,7 +235,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                 children: t("check_error_report"),
                                 linkProps: {
                                     to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
-                                    params: { datastoreId, storedDataId: upload.tags.vectordb_id },
+                                    params: { datastoreId, storedDataId: integration.vectordb_id },
                                     search: { datasheetName },
                                 },
                             },

@@ -110,17 +110,4 @@ class MetadataController extends AbstractController implements ApiControllerInte
 
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
-
-    #[Route('/{metadataId}/unpublish', name: 'unpublish', methods: ['DELETE'])]
-    public function unpublish(string $datastoreId, string $metadataId): JsonResponse
-    {
-        $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
-
-        $endpointId = $metadata['endpoints'][0]['_id'] ?? null;
-        if (null !== $endpointId) {
-            $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $endpointId)->await();
-        }
-
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-    }
 }

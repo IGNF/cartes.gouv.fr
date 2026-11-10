@@ -10,6 +10,7 @@ const { i18n } = declareComponentKeys<
     | "view_datasheet"
     | "check_error_report"
     | "back_to_datasheet_list"
+    | "integration_error"
     | "integration_page.title"
 >()("DatasheetUploadIntegration");
 export type I18n = typeof i18n;
@@ -47,6 +48,7 @@ export const DatasheetUploadIntegrationFrTranslations: Translations<"fr">["Datas
     view_datasheet: "Consulter la fiche de données",
     check_error_report: "Voir le rapport d’erreur",
     back_to_datasheet_list: "Revenir à mes données",
+    integration_error: "L’intégration est interrompue",
 
     "integration_page.title": "Intégration des données",
 };
@@ -60,6 +62,7 @@ export const DatasheetUploadIntegrationEnTranslations: Translations<"en">["Datas
     view_datasheet: undefined,
     check_error_report: undefined,
     back_to_datasheet_list: undefined,
+    integration_error: undefined,
 
     "integration_page.title": undefined,
 };

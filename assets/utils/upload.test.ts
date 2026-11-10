@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { integrationProgressHasFailure, mapIgnfToEpsg, parseIntegrationProgress } from "./upload";
+import { type UploadIntegration } from "@/@types/app";
+import { mapIgnfToEpsg, shouldAdvanceIntegration } from "./upload";
 
 describe("mapIgnfToEpsg", () => {
     it("convertit un code IGNF connu", () => expect(mapIgnfToEpsg("IGNF:LAMB93")).toBe("EPSG:2154"));
@@ -12,16 +13,21 @@ describe("mapIgnfToEpsg", () => {
     });
 });
 
-describe("parseIntegrationProgress", () => {
-    it("lit un objet JSON", () => expect(parseIntegrationProgress('{"send_files":"successful"}')).toEqual({ send_files: "successful" }));
-    it("renvoie null pour un JSON invalide, un tableau ou une valeur absente", () => {
-        expect(parseIntegrationProgress("{")).toBeNull();
-        expect(parseIntegrationProgress("[]")).toBeNull();
-        expect(parseIntegrationProgress(undefined)).toBeNull();
+describe("shouldAdvanceIntegration", () => {
+    const waiting: UploadIntegration = { steps: {}, status: "waiting", next_action: "send_files", vectordb_id: null, datasheet_name: "Fiche" };
+    const idle: UploadIntegration = { ...waiting, status: "in_progress", next_action: null };
+
+    it("envoie quand une action attend", () => expect(shouldAdvanceIntegration(waiting, undefined, false, false)).toBe(true));
+    it("n’envoie rien sans action en attente ni sans état", () => {
+        expect(shouldAdvanceIntegration(idle, undefined, false, false)).toBe(false);
+        expect(shouldAdvanceIntegration(undefined, undefined, false, false)).toBe(false);
     });
-    it("détecte une étape en échec", () => {
-        expect(integrationProgressHasFailure('{"a":"successful","b":"failed"}')).toBe(true);
-        expect(integrationProgressHasFailure('{"a":"successful"}')).toBe(false);
-        expect(integrationProgressHasFailure(undefined)).toBe(false);
+    it("n’envoie pas pendant une action ni après une erreur", () => {
+        expect(shouldAdvanceIntegration(waiting, undefined, true, false)).toBe(false);
+        expect(shouldAdvanceIntegration(waiting, undefined, false, true)).toBe(false);
+    });
+    it("attend la lecture suivante quand l’état vient du dernier envoi", () => {
+        expect(shouldAdvanceIntegration(waiting, waiting, false, false)).toBe(false);
+        expect(shouldAdvanceIntegration({ ...waiting }, waiting, false, false)).toBe(true);
     });
 });

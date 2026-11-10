@@ -24,11 +24,12 @@ import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { type ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../../modules/apiError";
 import api from "../../../../api";
-import DatasheetThumbnail from "../DatasheetThumbnail";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { DatasheetViewActiveTabEnum } from "./types";
+
+import placeholder1x1 from "@/img/placeholder.1x1.png";
 
 const DatasetListTab = lazy(() => import("../DatasetListTab/DatasetListTab"));
 const DocumentsTab = lazy(() => import("../DocumentsTab/DocumentsTab"));
@@ -46,7 +47,7 @@ export const deleteUploadConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
-const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName");
+const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/");
 
 type DatasheetViewProps = {
     datastoreId: string;
@@ -142,7 +143,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const { userRights, isSupervisor } = useCommunityRights();
 
     return (
-        <Main title={`Données ${datasheetName}`} breadcrumbSeparator="fullWidth">
+        <Main title={`Données ${datasheetName}`}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-5w", "fr-mb-4w")}>
                 <Button
                     iconId="fr-icon-arrow-left-s-line"
@@ -195,11 +196,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-2")}>
-                            <DatasheetThumbnail
-                                datastoreId={datastoreId}
-                                datasheetName={datasheetName}
-                                datasheet={datasheetQuery.data}
-                                canEditThumbnail={isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)}
+                            {/* lecture seule : la vignette se modifie dans l’onglet Description */}
+                            <img
+                                className={fr.cx("fr-responsive-img")}
+                                loading="lazy"
+                                src={datasheetQuery.data.thumbnail?.url ?? placeholder1x1}
+                                alt={`Vignette de la fiche de données ${datasheetName}`}
                             />
                         </div>
                         <div className={fr.cx("fr-col")}>

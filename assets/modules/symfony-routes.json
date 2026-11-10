@@ -287,72 +287,6 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_api_annexe_thumbnail_add": {
-            "tokens": [
-                [
-                    "text",
-                    "\/annexe\/thumbnail_add"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "POST"
-            ],
-            "schemes": []
-        },
-        "cartesgouvfr_api_annexe_thumbnail_delete": {
-            "tokens": [
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "annexeId",
-                    true
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datasheetName",
-                    true
-                ],
-                [
-                    "text",
-                    "\/annexe\/thumbnail_delete"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "DELETE"
-            ],
-            "schemes": []
-        },
         "cartesgouvfr_api_annexe_delete": {
             "tokens": [
                 [
@@ -602,6 +536,80 @@
             "hosttokens": [],
             "methods": [
                 "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_publish": {
+            "tokens": [
+                [
+                    "text",
+                    "\/publish"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_unpublish": {
+            "tokens": [
+                [
+                    "text",
+                    "\/publish"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
             ],
             "schemes": []
         },
@@ -1402,43 +1410,6 @@
         },
         "cartesgouvfr_api_metadata_delete": {
             "tokens": [
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "metadataId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/metadata"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "DELETE"
-            ],
-            "schemes": []
-        },
-        "cartesgouvfr_api_metadata_unpublish": {
-            "tokens": [
-                [
-                    "text",
-                    "\/unpublish"
-                ],
                 [
                     "variable",
                     "\/",
@@ -2749,11 +2720,11 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_api_upload_integration_progress": {
+        "cartesgouvfr_api_upload_integration": {
             "tokens": [
                 [
                     "text",
-                    "\/integration_progress"
+                    "\/integration"
                 ],
                 [
                     "variable",
@@ -2783,6 +2754,43 @@
             "hosttokens": [],
             "methods": [
                 "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_upload_integration_advance": {
+            "tokens": [
+                [
+                    "text",
+                    "\/integration"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "uploadId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/upload"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
             ],
             "schemes": []
         },
