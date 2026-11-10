@@ -536,9 +536,9 @@ class CartesMetadataApiService
     }
 
     /**
-     * @return array{west: float, south: float, east: float, north: float}
+     * @return array{west: float, south: float, east: float, north: float}|null
      */
-    private function getBbox(string $datastoreId, string $datasheetName): array
+    private function getBbox(string $datastoreId, string $datasheetName): ?array
     {
         $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
             'tags' => [
@@ -559,17 +559,21 @@ class CartesMetadataApiService
     /**
      * @param array<mixed> $features
      *
-     * @return array{west: float, south: float, east: float, north: float}
+     * @return array{west: float, south: float, east: float, north: float}|null null si aucune coordonnée n’a été lue
      */
-    private function getBboxFromFeatures(array $features): array
+    private function getBboxFromFeatures(array $features): ?array
     {
         $minLat = $minLng = PHP_FLOAT_MAX;
-        $maxLat = $maxLng = PHP_FLOAT_MIN;
+        $maxLat = $maxLng = -PHP_FLOAT_MAX;
 
         foreach ($features as $feature) {
             if (isset($feature['geometry']['coordinates'])) {
                 $this->processCoordinates($feature['geometry']['coordinates'], $minLat, $minLng, $maxLat, $maxLng);
             }
+        }
+
+        if (PHP_FLOAT_MAX === $minLat) {
+            return null;
         }
 
         return [
