@@ -152,7 +152,19 @@
 
                 {# conditions d’utilisation ; sous-contraintes dans l’ordre des séquences MD_LegalConstraints et MD_SecurityConstraints #}
                 {% set constraint_elements = {legal: 'gmd:MD_LegalConstraints', security: 'gmd:MD_SecurityConstraints', other: 'gmd:MD_Constraints'} %}
-                {% set public_access_labels = {noLimitations: 'Aucune limitation', conditionsUnknown: 'Conditions inconnues'} %}
+                {# libellés de #1050 #}
+                {% set public_access_labels = {
+                    noLimitations: 'Aucun des articles de la loi ne peut être invoqué pour justifier d’une restriction d’accès public.',
+                    conditionsUnknown: 'Conditions inconnues',
+                    INSPIRE_Directive_Article13_1a: 'La confidentialité des travaux des autorités publiques, lorsque cette confidentialité est prévue par la loi.',
+                    INSPIRE_Directive_Article13_1b: 'Les relations internationales, la sécurité publique ou la défense nationale.',
+                    INSPIRE_Directive_Article13_1c: 'La bonne marche de la justice, la possibilité pour toute personne d’être jugée équitablement ou la capacité d’une autorité publique d’effectuer une enquête d’ordre pénal ou disciplinaire.',
+                    INSPIRE_Directive_Article13_1d: 'La confidentialité des informations commerciales ou industrielles, lorsque cette confidentialité est prévue par la législation nationale ou communautaire afin de protéger un intérêt économique légitime, notamment l’intérêt public lié à la préservation de la confidentialité des statistiques et du secret fiscal.',
+                    INSPIRE_Directive_Article13_1e: 'Les droits de propriété intellectuelle.',
+                    INSPIRE_Directive_Article13_1f: 'La confidentialité des données à caractère personnel et/ou des fichiers concernant une personne physique lorsque cette personne n’a pas consenti à la divulgation de ces informations au public, lorsque la confidentialité de ce type d’information est prévue par la législation nationale ou communautaire.',
+                    INSPIRE_Directive_Article13_1g: 'Les intérêts ou la protection de toute personne qui a fourni les informations demandées sur une base volontaire sans y être contrainte par la loi ou sans que la loi puisse l’y contraindre, à moins que cette personne n’ait consenti à la divulgation de ces données.',
+                    INSPIRE_Directive_Article13_1h: 'La protection de l’environnement auquel ces informations ont trait, comme par exemple la localisation d’espèces rares.',
+                } %}
                 {% for condition in resource_constraints %}
                     <gmd:resourceConstraints>
                         <{{ constraint_elements[condition.type] }}>
