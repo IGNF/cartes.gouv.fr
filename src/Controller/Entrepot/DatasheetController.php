@@ -84,7 +84,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         }
 
         $violations = $this->validator->startContext()->atPath('thumbnail')->validate($thumbnail, new Assert\File(
-            maxSize: '2M',
             mimeTypes: ['image/jpeg', 'image/png', 'image/svg+xml', 'image/svg'],
             mimeTypesMessage: 'La vignette doit être une image JPEG, PNG ou SVG',
         ))->getViolations();

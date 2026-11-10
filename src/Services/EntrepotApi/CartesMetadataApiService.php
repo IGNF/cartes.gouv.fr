@@ -104,14 +104,10 @@ class CartesMetadataApiService
      *
      * @return array<mixed> métadonnée de l’Entrepôt, avec `csw_metadata`
      *
-     * @throws AppException 404 si la fiche de données n’existe pas, 400 si le nom ou l’identifiant change, 409 si l’identifiant est pris
+     * @throws AppException 404 si la fiche de données n’existe pas, 400 si l’identifiant change, 409 si l’identifiant est pris
      */
     public function replace(string $datastoreId, string $datasheetName, DatasheetMetadataDTO $dto, DatasheetServices $services, ?UploadedFile $thumbnail, bool $deleteThumbnail): array
     {
-        if ($dto->name !== $datasheetName) {
-            throw new AppException('Le nom d’une fiche de données ne peut pas être modifié', Response::HTTP_BAD_REQUEST, ['field' => 'name']);
-        }
-
         $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
         if (null === $apiMetadata) {
             if (!$this->datasheetExists($datastoreId, $datasheetName)) {
