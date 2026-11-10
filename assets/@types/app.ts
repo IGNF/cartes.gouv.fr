@@ -384,27 +384,15 @@ export type KeyFormValuesType = {
     accesses: AccessCreateDto[];
 };
 
-export type CswMetadataLayer = {
-    name?: string;
-    gmd_online_resource_protocol?: string;
-    gmd_online_resource_url?: string;
-    offering_id?: string;
-    open?: boolean;
-    description?: string;
-};
+export type CswOnlineResourceType = "layer" | "style" | "capabilities" | "document" | "other";
 
-export type CswStyleFile = {
-    name?: string;
-    description?: string;
-    url?: string;
-};
-
-export type CswCapabilitiesFile = CswStyleFile;
-
-export type CswDocument = {
-    name?: string;
-    description?: string | null;
-    url?: string;
+export type CswOnlineResource = {
+    type: CswOnlineResourceType;
+    name: string;
+    url: string;
+    protocol: string | null;
+    description: string | null;
+    open: boolean;
 };
 
 export type CswMetadata = {
@@ -424,11 +412,8 @@ export type CswMetadata = {
     organisation_name?: string;
     organisation_email?: string;
     resolution?: string;
-    layers?: CswMetadataLayer[];
+    online_resources?: CswOnlineResource[];
     bbox?: BoundingBox | null;
-    style_files?: CswStyleFile[];
-    capabilities_files?: CswCapabilitiesFile[];
-    documents?: CswDocument[];
     thumbnail_url?: string;
 };
 

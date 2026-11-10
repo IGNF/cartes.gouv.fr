@@ -9,7 +9,7 @@ import { FC, useMemo } from "react";
 import { catalogueUrl } from "@/env";
 import useMembership from "@/hooks/useMembership";
 import { getThematicCategories } from "@/utils";
-import { MetadataHierarchyLevel, type Metadata } from "../../../../../@types/app";
+import { MetadataHierarchyLevel, type CswOnlineResourceType, type Metadata } from "../../../../../@types/app";
 import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipboard";
@@ -61,6 +61,8 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
 
         return `${catalogueUrl}/dataset/${metadata?.file_identifier}`;
     }, [metadata?.file_identifier, isSandbox, datastoreQuery.data?.endpoints, metadata?.endpoints]);
+
+    const resourcesOfType = (type: CswOnlineResourceType) => metadata?.csw_metadata?.online_resources?.filter((r) => r.type === type) ?? [];
 
     const isPublished = useMemo(
         () => metadataQuery.data?.endpoints?.length !== undefined && metadataQuery.data?.endpoints?.length > 0,
@@ -200,92 +202,54 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Accès à la ressource"}>
-                            {metadata.csw_metadata?.layers?.map((layer) => (
+                            {resourcesOfType("layer").map((layer) => (
                                 <MetadataField
-                                    key={`${layer.offering_id}_${layer.name}`}
+                                    key={`${layer.protocol}_${layer.name}`}
                                     title={layer.name}
                                     content={
                                         <TextCopyToClipboard
                                             label={
                                                 <span>
-                                                    <strong>{"Type"}</strong> : {layer.gmd_online_resource_protocol}
+                                                    <strong>{"Type"}</strong> : {layer.protocol}
                                                 </span>
                                             }
-                                            text={layer.gmd_online_resource_url ?? ""}
+                                            text={layer.url}
                                         />
                                     }
                                 />
-                            )) ?? ""}
+                            ))}
                         </Accordion>
 
-                        <Accordion titleAs="h2" defaultExpanded={true} label={"Fichiers de style"}>
-                            {metadata.csw_metadata?.style_files?.map((styleFile) => (
-                                <MetadataField
-                                    key={`${styleFile.url}`}
-                                    title={styleFile.name}
-                                    content={
-                                        <TextCopyToClipboard
-                                            label={
-                                                styleFile?.description !== "" ? (
-                                                    <span>
-                                                        <strong>Description</strong> : {styleFile.description}
-                                                    </span>
-                                                ) : (
-                                                    ""
-                                                )
-                                            }
-                                            text={styleFile.url ?? ""}
-                                        />
-                                    }
-                                />
-                            )) ?? ""}
-                        </Accordion>
-
-                        <Accordion titleAs="h2" defaultExpanded={true} label={"GetCapabilities"}>
-                            {metadata.csw_metadata?.capabilities_files?.map((capFile) => (
-                                <MetadataField
-                                    key={`${capFile.url}`}
-                                    title={capFile.name}
-                                    content={
-                                        <TextCopyToClipboard
-                                            label={
-                                                capFile?.description !== "" ? (
-                                                    <span>
-                                                        <strong>Description</strong> : {capFile.description}
-                                                    </span>
-                                                ) : (
-                                                    ""
-                                                )
-                                            }
-                                            text={capFile.url ?? ""}
-                                        />
-                                    }
-                                />
-                            )) ?? ""}
-                        </Accordion>
-
-                        <Accordion titleAs="h2" defaultExpanded={true} label={"Documents"}>
-                            {metadata.csw_metadata?.documents?.map((document) => (
-                                <MetadataField
-                                    key={`${document.url}`}
-                                    title={document.name}
-                                    content={
-                                        <TextCopyToClipboard
-                                            label={
-                                                document?.description !== null && document?.description !== "" ? (
-                                                    <span>
-                                                        <strong>Description</strong> : {document.description}
-                                                    </span>
-                                                ) : (
-                                                    ""
-                                                )
-                                            }
-                                            text={document.url ?? ""}
-                                        />
-                                    }
-                                />
-                            )) ?? ""}
-                        </Accordion>
+                        {(
+                            [
+                                ["style", "Fichiers de style"],
+                                ["capabilities", "GetCapabilities"],
+                                ["document", "Documents"],
+                            ] as const
+                        ).map(([type, label]) => (
+                            <Accordion key={type} titleAs="h2" defaultExpanded={true} label={label}>
+                                {resourcesOfType(type).map((resource) => (
+                                    <MetadataField
+                                        key={resource.url}
+                                        title={resource.name}
+                                        content={
+                                            <TextCopyToClipboard
+                                                label={
+                                                    resource.description ? (
+                                                        <span>
+                                                            <strong>Description</strong> : {resource.description}
+                                                        </span>
+                                                    ) : (
+                                                        ""
+                                                    )
+                                                }
+                                                text={resource.url}
+                                            />
+                                        }
+                                    />
+                                ))}
+                            </Accordion>
+                        ))}
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Informations sur les métadonnées"}>
                             <MetadataField

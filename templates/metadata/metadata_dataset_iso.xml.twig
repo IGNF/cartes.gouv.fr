@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?><gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gml="http://www.opengis.net/gml" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="{{ file_identifier }}" xsi:schemaLocation="http://www.isotc211.org/2005/gmd https://www.isotc211.org/2005/gmd/gmd.xsd http://www.isotc211.org/2005/gmx https://www.isotc211.org/2005/gmx/gmx.xsd http://www.isotc211.org/2005/srv http://schemas.opengis.net/iso/19139/20060504/srv/srv.xsd">
-    <gmd:fileIdentifier>
-        {# Identificateur de ressource unique #}
-        <gco:CharacterString>{{ file_identifier }}</gco:CharacterString>
-    </gmd:fileIdentifier>
+<?xml version="1.0" encoding="UTF-8"?><gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gml="http://www.opengis.net/gml" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" {% if file_identifier is not empty %}uuid="{{ file_identifier }}" {% endif %}xsi:schemaLocation="http://www.isotc211.org/2005/gmd https://www.isotc211.org/2005/gmd/gmd.xsd http://www.isotc211.org/2005/gmx https://www.isotc211.org/2005/gmx/gmx.xsd http://www.isotc211.org/2005/srv http://schemas.opengis.net/iso/19139/20060504/srv/srv.xsd">
+    {% if file_identifier is not empty %}
+        <gmd:fileIdentifier>
+            {# Identificateur de ressource unique #}
+            <gco:CharacterString>{{ file_identifier }}</gco:CharacterString>
+        </gmd:fileIdentifier>
+    {% endif %}
     <gmd:language>
         <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="{{ language.code }}">{{ language.language }}</gmd:LanguageCode>
     </gmd:language>
@@ -25,10 +27,10 @@
         <gco:CharacterString>{{ hierarchy_level_name }}</gco:CharacterString>
     </gmd:hierarchyLevelName>
 
-    {% if title is defined or abstract is defined or organisation_name is defined or organisation_email is defined or thematic_categories is defined or resolution is defined or creation_date is defined %}
+    {% if title is not empty or abstract is not empty or organisation_name is not empty or organisation_email is not empty or topic_categories|length or inspire_keywords|length or free_keywords|length or resolution is not empty or creation_date is not empty or thumbnail_url is not empty or frequency_code is not empty or bbox %}
         <gmd:identificationInfo>
             <gmd:MD_DataIdentification>
-                {% if title is defined %}
+                {% if title is not empty %}
                     <gmd:citation>
                         <gmd:CI_Citation>
                             <gmd:title>
@@ -36,7 +38,7 @@
                                 <gco:CharacterString>{{ title }}</gco:CharacterString>
                             </gmd:title>
 
-                            {% if creation_date is defined %}
+                            {% if creation_date is not empty %}
                                 <gmd:date>
                                     <gmd:CI_Date>
                                         <gmd:date>
@@ -52,34 +54,36 @@
                     </gmd:citation>
                 {% endif %}
 
-                {% if abstract is defined %}
+                {% if abstract is not empty %}
                     <gmd:abstract>
                         {# résumé #}
                         <gco:CharacterString>{{ abstract }}</gco:CharacterString>
                     </gmd:abstract>
                 {% endif %}
 
-                {% if organisation_email is defined or organisation_name is defined %}
+                {% if organisation_email is not empty or organisation_name is not empty %}
                     {# email de contact sur les métadonnées #}
                     <gmd:pointOfContact>
                         <gmd:CI_ResponsibleParty>
-                            {% if organisation_name is defined %}
+                            {% if organisation_name is not empty %}
                                 <gmd:organisationName>
                                     <gco:CharacterString>{{ organisation_name }}</gco:CharacterString>
                                 </gmd:organisationName>
                             {% endif %}
 
-                            <gmd:contactInfo>
-                                <gmd:CI_Contact>
-                                    <gmd:address>
-                                        <gmd:CI_Address>
-                                            <gmd:electronicMailAddress>
-                                                <gco:CharacterString>{{ organisation_email }}</gco:CharacterString>
-                                            </gmd:electronicMailAddress>
-                                        </gmd:CI_Address>
-                                    </gmd:address>
-                                </gmd:CI_Contact>
-                            </gmd:contactInfo>
+                            {% if organisation_email is not empty %}
+                                <gmd:contactInfo>
+                                    <gmd:CI_Contact>
+                                        <gmd:address>
+                                            <gmd:CI_Address>
+                                                <gmd:electronicMailAddress>
+                                                    <gco:CharacterString>{{ organisation_email }}</gco:CharacterString>
+                                                </gmd:electronicMailAddress>
+                                            </gmd:CI_Address>
+                                        </gmd:address>
+                                    </gmd:CI_Contact>
+                                </gmd:contactInfo>
+                            {% endif %}
                         </gmd:CI_ResponsibleParty>
                     </gmd:pointOfContact>
                 {% endif %}
@@ -206,7 +210,7 @@
         </gmd:identificationInfo>
     {% endif %}
 
-    {% if contact_email is defined %}
+    {% if contact_email is not empty %}
         {# responsable de la ressource #}
         <gmd:contact>
             <gmd:CI_ResponsibleParty>
@@ -225,13 +229,11 @@
         </gmd:contact>
     {% endif %}
 
-    {% if update_date is defined %}
-        <gmd:dateStamp>
-            <gco:DateTime>{{ update_date }}</gco:DateTime>
-        </gmd:dateStamp>
-    {% endif %}
+    <gmd:dateStamp>
+        <gco:DateTime>{{ date_stamp }}</gco:DateTime>
+    </gmd:dateStamp>
 
-    {% if resource_genealogy is defined %}
+    {% if resource_genealogy is not empty %}
         <gmd:dataQualityInfo>
             <gmd:DQ_DataQuality>
                 <gmd:lineage>
@@ -245,82 +247,48 @@
         </gmd:dataQualityInfo>
     {% endif %}
 
-    {% if layers is defined or style_files is defined or capabilities_files is defined or documents is defined %}
+    {% if online_resources|length %}
         <gmd:distributionInfo>
             <gmd:MD_Distribution>
                 <gmd:transferOptions>
                     <gmd:MD_DigitalTransferOptions>
                         {# https://cnig.gouv.fr/IMG/pdf/guide_recherche_inspire.pdf #}
-                        {# Le champ linkage précise l’adresse du service, le champ « protocol » précise de quel type de service il s’agit (OGC:WMS, OGC:WFS, OGC:WMTS, OGC:CSW) et le champ « name » contient le nom de la couche. #}
-                        {% for layer in layers %}
-                            <gmd:onLine type="offering" offeringId="{{ layer.offering_id }}" offeringOpen="{{ layer.open }}">
+                        {# linkage : adresse de la ressource ; protocol : nature de la ressource (OGC:WMS, OGC:WFS, OGC:WMTS, TMS pour une couche ; vocabulaire OSGeo pour les fichiers) ; name : nom de la couche ou du fichier #}
+                        {% set functions = {style: 'download', capabilities: 'information', document: 'information'} %}
+                        {% for resource in online_resources %}
+                            <gmd:onLine>
                                 <gmd:CI_OnlineResource>
                                     <gmd:linkage>
-                                        <gmd:URL>{{ layer.gmd_online_resource_url }}</gmd:URL>
+                                        <gmd:URL>{{ resource.url }}</gmd:URL>
                                     </gmd:linkage>
-                                    <gmd:protocol>
-                                        <gco:CharacterString>{{ layer.gmd_online_resource_protocol }}</gco:CharacterString>
-                                    </gmd:protocol>
-                                    <gmd:name>
-                                        <gco:CharacterString>{{ layer.name }}</gco:CharacterString>
-                                    </gmd:name>
-                                    {% if layer.open == false %}
+                                    {% if resource.protocol is not empty %}
+                                        <gmd:protocol>
+                                            <gco:CharacterString>{{ resource.protocol }}</gco:CharacterString>
+                                        </gmd:protocol>
+                                    {% endif %}
+                                    {% if resource.type == 'layer' and not resource.open %}
                                         <gmd:applicationProfile>
                                             <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceType/other">other</gmx:Anchor>
                                         </gmd:applicationProfile>
+                                    {% endif %}
+                                    {% if resource.name is not empty %}
+                                        <gmd:name>
+                                            <gco:CharacterString>{{ resource.name }}</gco:CharacterString>
+                                        </gmd:name>
+                                    {% endif %}
+                                    {% if resource.type == 'layer' and not resource.open %}
                                         <gmd:description>
-                                            <gmx:Anchor xlink:href="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode_restricted">{{ layer.name }} - Accès restreint</gmx:Anchor>
+                                            <gmx:Anchor xlink:href="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode_restricted">{{ resource.description ?: resource.name ~ ' - Accès restreint' }}</gmx:Anchor>
+                                        </gmd:description>
+                                    {% elseif resource.description is not empty %}
+                                        <gmd:description>
+                                            <gco:CharacterString>{{ resource.description }}</gco:CharacterString>
                                         </gmd:description>
                                     {% endif %}
-                                </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                        {% endfor %}
-
-                        {% for style_file in style_files %}
-                            <gmd:onLine type="style">
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>{{ style_file.url }}</gmd:URL>
-                                    </gmd:linkage>
-                                    <gmd:name>
-                                        <gco:CharacterString>{{ style_file.name }}</gco:CharacterString>
-                                    </gmd:name>
-                                    <gmd:description>
-                                        <gco:CharacterString>{{ style_file.description }}</gco:CharacterString>
-                                    </gmd:description>
-                                </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                        {% endfor %}
-
-                        {% for capabilities_file in capabilities_files %}
-                            <gmd:onLine type="getcapabilities">
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>{{ capabilities_file.url }}</gmd:URL>
-                                    </gmd:linkage>
-                                    <gmd:name>
-                                        <gco:CharacterString>{{ capabilities_file.name }}</gco:CharacterString>
-                                    </gmd:name>
-                                    <gmd:description>
-                                        <gco:CharacterString>{{ capabilities_file.description }}</gco:CharacterString>
-                                    </gmd:description>
-                                </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                        {% endfor %}
-
-                        {% for document in documents %}
-                            <gmd:onLine type="document">
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>{{ document.url }}</gmd:URL>
-                                    </gmd:linkage>
-                                    <gmd:name>
-                                        <gco:CharacterString>{{ document.name }}</gco:CharacterString>
-                                    </gmd:name>
-                                    {% if document.description is defined and document.description is not empty %}
-                                        <gmd:description>
-                                            <gco:CharacterString>{{ document.description }}</gco:CharacterString>
-                                        </gmd:description>
+                                    {% if functions[resource.type] is defined %}
+                                        <gmd:function>
+                                            <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="{{ functions[resource.type] }}">{{ functions[resource.type] }}</gmd:CI_OnLineFunctionCode>
+                                        </gmd:function>
                                     {% endif %}
                                 </gmd:CI_OnlineResource>
                             </gmd:onLine>
