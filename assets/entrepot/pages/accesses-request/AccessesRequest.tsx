@@ -144,7 +144,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                             </div>
                             <div>
                                 <strong>{t("data_details.data_name")}</strong>
-                                {metadataQuery.data?.title}
+                                {metadataQuery.data?.name}
                             </div>
                         </div>
                         <hr className={fr.cx("fr-mt-10v", "fr-pb-10v")} />
