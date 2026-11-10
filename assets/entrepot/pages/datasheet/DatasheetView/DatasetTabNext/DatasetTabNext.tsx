@@ -296,6 +296,10 @@ const useStyles = tss.withName({ DatasetTabNext }).create({
     },
     // mise en page de la maquette : en-tête bleu, lignes en cartes blanches sur fond gris
     table: {
+        // la mise en page fixe retire le défilement DSFR : le tableau défile dans son conteneur
+        "&.fr-table": {
+            overflowX: "auto",
+        },
         "&.fr-table > table": {
             borderCollapse: "separate",
             borderSpacing: `0 ${fr.spacing("1w")}`,
