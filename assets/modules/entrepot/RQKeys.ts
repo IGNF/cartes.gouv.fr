@@ -45,6 +45,13 @@ const RQKeys = {
     datastore_datasheet: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName],
     search_territories: (search: string): string[] => ["geocoding", "territories", search],
     search_addresses: (search: string): string[] => ["geocoding", "addresses", search],
+    datastore_metadata_file_identifier_availability: (datastoreId: string, fileIdentifier: string): string[] => [
+        "datastore",
+        datastoreId,
+        "metadata",
+        "file_identifier",
+        fileIdentifier,
+    ],
     datastore_datasheet_metadata: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName, "metadata"],
     datastore_datasheet_service_list: (datastoreId: string, datasheetName: string) => ["datastore", datastoreId, "datasheet", datasheetName, "services"],
 

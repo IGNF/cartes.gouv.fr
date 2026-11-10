@@ -1,7 +1,7 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { DevTool } from "@hookform/devtools";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useMemo } from "react";
 import { type FieldPath, FormProvider, useForm } from "react-hook-form";
 
@@ -9,7 +9,9 @@ import api from "@/entrepot/api";
 import { datasheetListQueryOptions } from "@/hooks/queries/datasheetListQueryOptions";
 import { useTranslation } from "@/i18n/i18n";
 import { isApiError } from "@/modules/apiError";
+import RQKeys from "@/modules/entrepot/RQKeys";
 import { setApiFormErrors } from "@/modules/setApiFormErrors";
+import { delta } from "@/utils/delta";
 import MetadataSection from "./MetadataSection";
 import MetadataSectionsContainer from "./MetadataSectionsContainer";
 import { buildMetadataSchema, defaultMetadataValues, type MetadataFormValues, type MetadataValues } from "./metadataSchema";
@@ -48,6 +50,7 @@ export default function MetadataForm({
 }: MetadataFormProps) {
     const { t } = useTranslation("DatasheetSections");
     const isEditMode = mode === "edit";
+    const queryClient = useQueryClient();
 
     // aide à la saisie seulement : la création revérifie le nom (409)
     const datasheetListQuery = useQuery({ ...datasheetListQueryOptions(datastoreId), throwOnError: false, retry: false, enabled: !isEditMode });
@@ -58,9 +61,15 @@ export default function MetadataForm({
                 t,
                 isEditMode,
                 existingDatasheetNames: datasheetListQuery.data?.map((datasheet) => datasheet.name) ?? [],
-                isFileIdentifierAvailable: (fileIdentifier) => api.metadata.isFileIdentifierAvailable(datastoreId, fileIdentifier),
+                // le résolveur valide tout le formulaire à chaque changement : une requête par identifiant, la création revérifie
+                isFileIdentifierAvailable: (fileIdentifier) =>
+                    queryClient.query({
+                        queryKey: RQKeys.datastore_metadata_file_identifier_availability(datastoreId, fileIdentifier),
+                        queryFn: () => api.metadata.isFileIdentifierAvailable(datastoreId, fileIdentifier),
+                        staleTime: delta.minutes(1),
+                    }),
             }),
-        [t, isEditMode, datasheetListQuery.data, datastoreId]
+        [t, isEditMode, datasheetListQuery.data, datastoreId, queryClient]
     );
 
     const form = useForm<MetadataFormValues, unknown, MetadataValues>({
