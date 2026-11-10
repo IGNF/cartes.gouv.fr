@@ -92,7 +92,9 @@ describe("buildMetadataSchema", () => {
         const isFileIdentifierAvailable = async () => false;
 
         expect(await issuePaths(valid(), { isFileIdentifierAvailable })).toEqual(["file_identifier validation.fileIdentifier.unique"]);
-        expect(await issuePaths(valid(), { isFileIdentifierAvailable, isEditMode: true })).toEqual([]);
+        expect(await issuePaths(valid(), { isFileIdentifierAvailable, isEditMode: true, fileIdentifierLocked: true })).toEqual([]);
+        // fiche sans fiche de métadonnées : l’enregistrement la crée, l’identifiant saisi est vérifié
+        expect(await issuePaths(valid(), { isFileIdentifierAvailable, isEditMode: true })).toEqual(["file_identifier validation.fileIdentifier.unique"]);
     });
 
     it("refuse un nom de fiche déjà pris en création", async () => {

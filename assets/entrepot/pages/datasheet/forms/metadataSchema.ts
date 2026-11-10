@@ -121,12 +121,14 @@ const subConstraintSchema = (t: T) => {
 type SchemaDeps = {
     t: T;
     isEditMode: boolean;
+    /** identifiant déjà enregistré : pas de contrôle de disponibilité */
+    fileIdentifierLocked?: boolean;
     existingDatasheetNames: string[];
     /** true si l’identifiant est libre ; une erreur autre qu’un identifiant pris ne bloque pas */
     isFileIdentifierAvailable: (fileIdentifier: string) => Promise<boolean>;
 };
 
-export const buildMetadataSchema = ({ t, isEditMode, existingDatasheetNames, isFileIdentifierAvailable }: SchemaDeps) =>
+export const buildMetadataSchema = ({ t, isEditMode, fileIdentifierLocked = false, existingDatasheetNames, isFileIdentifierAvailable }: SchemaDeps) =>
     z.object({
         // section description
         name: z
@@ -147,7 +149,7 @@ export const buildMetadataSchema = ({ t, isEditMode, existingDatasheetNames, isF
             .trim()
             .min(1, t("validation.fileIdentifier.required"))
             .regex(FILE_IDENTIFIER_REGEX, t("validation.fileIdentifier.chars"))
-            .refine(async (fileIdentifier) => isEditMode || (await isFileIdentifierAvailable(fileIdentifier)), t("validation.fileIdentifier.unique")),
+            .refine(async (fileIdentifier) => fileIdentifierLocked || (await isFileIdentifierAvailable(fileIdentifier)), t("validation.fileIdentifier.unique")),
 
         // section producteurs ; la première carte est le point de contact
         producers: z

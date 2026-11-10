@@ -16,11 +16,13 @@ const THUMBNAIL_ACCEPT = ["jpg", "jpeg", "png", "svg"] as const;
 
 type DescriptionSectionProps = {
     isEditMode?: boolean;
+    /** identifiant déjà enregistré dans la fiche de métadonnées, non modifiable */
+    fileIdentifierLocked?: boolean;
     /** URL de la vignette déjà enregistrée (mode édition) */
     existingThumbnailUrl?: string;
 };
 
-export default function DescriptionSection({ isEditMode = false, existingThumbnailUrl }: DescriptionSectionProps) {
+export default function DescriptionSection({ isEditMode = false, fileIdentifierLocked = false, existingThumbnailUrl }: DescriptionSectionProps) {
     const { t } = useTranslation("DatasheetSections");
     const {
         register,
@@ -57,7 +59,7 @@ export default function DescriptionSection({ isEditMode = false, existingThumbna
                 nativeInputProps={{
                     ...register("file_identifier"),
                 }}
-                disabled={isEditMode}
+                disabled={fileIdentifierLocked}
             />
 
             <Controller

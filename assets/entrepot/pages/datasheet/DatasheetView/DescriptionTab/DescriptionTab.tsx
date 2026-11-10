@@ -58,6 +58,7 @@ export default function DescriptionTab({ datastoreId, datasheetName, metadataQue
                 disabled={!canEdit}
                 defaultValues={mapMetadataToFormValues(csw, datasheetName)}
                 existingThumbnailUrl={csw?.thumbnail_url}
+                fileIdentifierLocked={!!csw?.file_identifier}
                 onSubmit={(values) => replaceMutation.mutateAsync(values)}
                 renderTopActions={({ isSubmitting }) => (
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-2w")}>

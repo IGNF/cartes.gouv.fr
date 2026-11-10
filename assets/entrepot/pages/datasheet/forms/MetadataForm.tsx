@@ -36,6 +36,8 @@ type MetadataFormProps = {
     renderBottomActions?: (state: ActionsRenderProps) => ReactNode;
     /** vignette déjà enregistrée (modification) */
     existingThumbnailUrl?: string;
+    /** identifiant déjà enregistré : non modifiable et non revérifié ; sans fiche de métadonnées, l’enregistrement la crée */
+    fileIdentifierLocked?: boolean;
 };
 
 export default function MetadataForm({
@@ -47,6 +49,7 @@ export default function MetadataForm({
     renderTopActions,
     renderBottomActions,
     existingThumbnailUrl,
+    fileIdentifierLocked = false,
 }: MetadataFormProps) {
     const { t } = useTranslation("DatasheetSections");
     const isEditMode = mode === "edit";
@@ -60,6 +63,7 @@ export default function MetadataForm({
             buildMetadataSchema({
                 t,
                 isEditMode,
+                fileIdentifierLocked,
                 existingDatasheetNames: datasheetListQuery.data?.map((datasheet) => datasheet.name) ?? [],
                 // le résolveur valide tout le formulaire à chaque changement : une requête par identifiant, la création revérifie
                 isFileIdentifierAvailable: (fileIdentifier) =>
@@ -69,7 +73,7 @@ export default function MetadataForm({
                         staleTime: delta.minutes(1),
                     }),
             }),
-        [t, isEditMode, datasheetListQuery.data, datastoreId, queryClient]
+        [t, isEditMode, fileIdentifierLocked, datasheetListQuery.data, datastoreId, queryClient]
     );
 
     const form = useForm<MetadataFormValues, unknown, MetadataValues>({
@@ -149,7 +153,11 @@ export default function MetadataForm({
 
                     <MetadataSectionsContainer>
                         <MetadataSection title={t("section.description")}>
-                            <DescriptionSection isEditMode={isEditMode} existingThumbnailUrl={existingThumbnailUrl} />
+                            <DescriptionSection
+                                isEditMode={isEditMode}
+                                fileIdentifierLocked={fileIdentifierLocked}
+                                existingThumbnailUrl={existingThumbnailUrl}
+                            />
                         </MetadataSection>
                         <MetadataSection title={t("section.producer")}>
                             <ProducerSection />
