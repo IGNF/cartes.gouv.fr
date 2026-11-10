@@ -76,7 +76,7 @@ class UploadAddDTO
     #[Assert\Callback]
     public function validateProductionDate(ExecutionContextInterface $context): void
     {
-        if ('' !== $this->production_date && $this->production_date > (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d')) {
+        if ('' !== $this->production_date && $this->production_date > (new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris')))->format('Y-m-d')) {
             $context->buildViolation('La date de production ne peut pas être dans le futur')
                 ->atPath('production_date')
                 ->addViolation();
