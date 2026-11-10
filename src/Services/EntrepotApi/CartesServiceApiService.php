@@ -668,7 +668,17 @@ class CartesServiceApiService
                 }
                 $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open'])->array();
             } catch (\Throwable $th) {
-                $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
+                // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée
+                try {
+                    $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
+                } catch (ApiException $e) {
+                    $this->logger->warning('{class}: Failed to remove configuration {configurationId} after a failed publication: {error}', [
+                        'class' => self::class,
+                        'configurationId' => $configuration['_id'],
+                        'exception' => $e,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
                 throw $th;
             }
         } catch (\Throwable $th) {

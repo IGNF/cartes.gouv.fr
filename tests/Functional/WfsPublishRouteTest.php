@@ -181,6 +181,19 @@ final class WfsPublishRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('configurations'));
     }
 
+    public function testOriginalErrorIsReturnedWhenTheRollbackFails(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('POST configurations/configuration-1/offerings');
+        EntrepotMockResponseFactory::failNext('DELETE configurations/configuration-1');
+
+        $this->post($client, $this->payload());
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertStringContainsString('POST configurations/configuration-1/offerings', $this->jsonResponse($client)['detail']);
+    }
+
     private function client(): KernelBrowser
     {
         $client = self::createClient();
