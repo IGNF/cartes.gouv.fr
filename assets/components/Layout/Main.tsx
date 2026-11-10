@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Breadcrumb, BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import { useHead } from "@unhead/react";
-import { PropsWithChildren, memo } from "react";
+import { PropsWithChildren, ReactNode, memo } from "react";
 
 import { IUseAlert } from "@/hooks/useAlert";
 import useBreadcrumb from "@/hooks/useBreadcrumb";
@@ -15,10 +15,12 @@ export interface MainProps {
     classes?: Partial<Record<"container", string>>;
     /** séparateur sous le fil d’Ariane : à la largeur du conteneur ou de la page */
     breadcrumbSeparator?: "container" | "fullWidth";
+    /** contenu pleine largeur sous le conteneur (ex : fond coloré des onglets) */
+    fullWidthContent?: ReactNode;
 }
 
 function Main(props: PropsWithChildren<MainProps>) {
-    const { children, customBreadcrumbProps, noticeProps, title, classes, breadcrumbSeparator } = props;
+    const { children, customBreadcrumbProps, noticeProps, title, classes, breadcrumbSeparator, fullWidthContent } = props;
 
     useHead({
         titleTemplate: "%s | cartes.gouv.fr",
@@ -51,6 +53,7 @@ function Main(props: PropsWithChildren<MainProps>) {
 
                 {children}
             </div>
+            {fullWidthContent}
         </main>
     );
 }
