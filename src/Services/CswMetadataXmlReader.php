@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Dto\Metadata\CswHierarchyLevel;
@@ -30,14 +32,13 @@ class CswMetadataXmlReader
     private const TEXT_FIELDS = [
         'file_identifier' => 'gmd:fileIdentifier/gco:CharacterString',
         'charset' => 'gmd:characterSet/gmd:MD_CharacterSetCode/@codeListValue',
-        'title' => self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString',
-        'abstract' => self::IDENTIFICATION.'/gmd:abstract/gco:CharacterString',
-        'creation_date' => self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="creation"]/gmd:date/gco:Date',
+        'name' => self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString',
+        'description' => self::IDENTIFICATION.'/gmd:abstract/gco:CharacterString',
+        'date_creation' => self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="creation"]/gmd:date/gco:Date',
         'resource_genealogy' => 'gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:statement/gco:CharacterString',
         'contact_email' => 'gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString',
         'organisation_name' => self::IDENTIFICATION.'/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString',
         'organisation_email' => self::IDENTIFICATION.'/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString',
-        'resolution' => self::IDENTIFICATION.'/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer',
         'thumbnail_url' => self::IDENTIFICATION.'/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString',
     ];
 
@@ -61,10 +62,13 @@ class CswMetadataXmlReader
 
         $frequencyCode = $this->text($xpath, self::IDENTIFICATION.'/gmd:resourceMaintenance/gmd:MD_MaintenanceInformation/gmd:maintenanceAndUpdateFrequency/gmd:MD_MaintenanceFrequencyCode/@codeListValue', $root);
         // fiches publiées avec l’ancienne faute de frappe « quaterly »
-        $metadata->frequency_code = 'quaterly' === $frequencyCode ? 'quarterly' : $frequencyCode;
+        $metadata->update_frequency = 'quaterly' === $frequencyCode ? 'quarterly' : $frequencyCode;
 
-        $metadata->topic_categories = $this->texts($xpath, self::IDENTIFICATION.'/gmd:topicCategory/gmd:MD_TopicCategoryCode', $root);
-        [$metadata->inspire_keywords, $metadata->free_keywords] = $this->keywords($xpath, $root);
+        $scale = $this->text($xpath, self::IDENTIFICATION.'/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer', $root);
+        $metadata->scale = null === $scale ? null : (int) $scale;
+
+        $metadata->themes = $this->texts($xpath, self::IDENTIFICATION.'/gmd:topicCategory/gmd:MD_TopicCategoryCode', $root);
+        [$metadata->keywords_inspire, $metadata->keywords_additional] = $this->keywords($xpath, $root);
         $metadata->bbox = $this->bbox($xpath, $root);
         $metadata->online_resources = $this->onlineResources($xpath, $root);
 

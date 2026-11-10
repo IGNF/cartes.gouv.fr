@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Dto\Metadata;
 
 use App\Exception\AppException;
@@ -18,25 +20,25 @@ class CswMetadata
     public ?CswHierarchyLevel $hierarchy_level = CswHierarchyLevel::Series;
     public ?CswLanguage $language;
     public ?string $charset = 'utf8';
-    public ?string $title = null;
-    public ?string $abstract = null;
-    public ?string $creation_date = null;
+    public ?string $name = null;
+    public ?string $description = null;
+    public ?string $date_creation = null;
     public ?string $resource_genealogy = null;
 
     /** @var list<string> */
-    public array $inspire_keywords = [];
+    public array $keywords_inspire = [];
 
     /** @var list<string> */
-    public array $free_keywords = [];
+    public array $keywords_additional = [];
 
     /** @var list<string> */
-    public array $topic_categories = [];
+    public array $themes = [];
 
     public ?string $contact_email = null;
     public ?string $organisation_name = null;
     public ?string $organisation_email = null;
 
-    public ?string $resolution = null;
+    public ?int $scale = null;
 
     /** @var list<CswOnlineResource> couches, styles, GetCapabilities et documents, dans cet ordre */
     public array $online_resources = [];
@@ -45,7 +47,7 @@ class CswMetadata
     public ?array $bbox = null;
 
     public ?string $thumbnail_url = null;
-    public ?string $frequency_code = 'unknown';
+    public ?string $update_frequency = 'unknown';
 
     public function __construct()
     {

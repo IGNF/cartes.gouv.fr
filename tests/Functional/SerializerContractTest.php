@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Functional;
 
 use App\Dto\Datastore\PermissionDTO;
@@ -34,9 +36,9 @@ final class SerializerContractTest extends KernelTestCase
         $json = self::getContainer()->get('serializer')->normalize(CswMetadataFixtures::full());
 
         self::assertSame([
-            'file_identifier', 'hierarchy_level', 'language', 'charset', 'title', 'abstract', 'creation_date', 'resource_genealogy',
-            'inspire_keywords', 'free_keywords', 'topic_categories', 'contact_email', 'organisation_name', 'organisation_email', 'resolution',
-            'online_resources', 'bbox', 'thumbnail_url', 'frequency_code',
+            'file_identifier', 'hierarchy_level', 'language', 'charset', 'name', 'description', 'date_creation', 'resource_genealogy',
+            'keywords_inspire', 'keywords_additional', 'themes', 'contact_email', 'organisation_name', 'organisation_email', 'scale',
+            'online_resources', 'bbox', 'thumbnail_url', 'update_frequency',
         ], array_keys($json));
         self::assertSame('dataset', $json['hierarchy_level']);
         self::assertSame(['code' => 'fre', 'language' => 'français'], $json['language']);

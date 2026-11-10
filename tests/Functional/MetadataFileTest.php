@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Functional;
 
 use App\Tests\Double\EntrepotMockResponseFactory;
@@ -39,7 +41,7 @@ final class MetadataFileTest extends WebTestCase
         $json = $this->jsonResponse($client);
 
         self::assertSame('synthetic-file-identifier', $json['file_identifier']);
-        self::assertSame('Jeu synthétique', $json['title']);
+        self::assertSame('Jeu synthétique', $json['name']);
         self::assertSame(['layer', 'layer', 'style', 'capabilities', 'document'], array_column($json['online_resources'], 'type'));
         self::assertFalse($json['online_resources'][1]['open']);
     }

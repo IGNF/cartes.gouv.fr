@@ -258,18 +258,18 @@ class CartesMetadataApiService
 
             $newCswMetadata->language = $language;
             $newCswMetadata->charset = $formData['charset'];
-            $newCswMetadata->title = $formData['public_name'];
-            $newCswMetadata->abstract = $formData['description'];
-            $newCswMetadata->creation_date = $formData['creation_date'];
-            $newCswMetadata->topic_categories = $formData['category'] ?? [];
-            $newCswMetadata->inspire_keywords = $formData['keywords'] ?? [];
-            $newCswMetadata->free_keywords = $formData['free_keywords'] ?? [];
+            $newCswMetadata->name = $formData['public_name'];
+            $newCswMetadata->description = $formData['description'];
+            $newCswMetadata->date_creation = $formData['creation_date'];
+            $newCswMetadata->themes = $formData['category'] ?? [];
+            $newCswMetadata->keywords_inspire = $formData['keywords'] ?? [];
+            $newCswMetadata->keywords_additional = $formData['free_keywords'] ?? [];
             $newCswMetadata->contact_email = $formData['email_contact'];
             $newCswMetadata->organisation_name = $formData['organization'];
             $newCswMetadata->organisation_email = $formData['organization_email'];
             $newCswMetadata->resource_genealogy = $formData['resource_genealogy'];
-            $newCswMetadata->resolution = $formData['resolution'] ?? null;
-            $newCswMetadata->frequency_code = $formData['frequency_code'] ?? null;
+            $newCswMetadata->scale = is_numeric($formData['resolution'] ?? null) ? (int) $formData['resolution'] : null;
+            $newCswMetadata->update_frequency = $formData['frequency_code'] ?? null;
             $newCswMetadata->bbox = $bbox;
             $this->replaceServiceResources($newCswMetadata, $datastoreId, $services);
         }

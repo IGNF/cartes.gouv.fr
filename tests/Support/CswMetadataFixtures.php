@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Support;
 
 use App\Dto\Metadata\CswHierarchyLevel;
@@ -27,17 +29,17 @@ final class CswMetadataFixtures
         $metadata = new CswMetadata();
         $metadata->file_identifier = 'fid';
         $metadata->hierarchy_level = CswHierarchyLevel::Dataset;
-        $metadata->title = 'Titre';
-        $metadata->abstract = 'Résumé';
-        $metadata->creation_date = '2024-01-15';
+        $metadata->name = 'Titre';
+        $metadata->description = 'Résumé';
+        $metadata->date_creation = '2024-01-15';
         $metadata->resource_genealogy = 'Généalogie';
-        $metadata->inspire_keywords = ['Occupation des terres'];
-        $metadata->free_keywords = ['libre', 'autre'];
-        $metadata->topic_categories = ['planningCadastre', 'environment'];
+        $metadata->keywords_inspire = ['Occupation des terres'];
+        $metadata->keywords_additional = ['libre', 'autre'];
+        $metadata->themes = ['planningCadastre', 'environment'];
         $metadata->contact_email = 'contact@example.test';
         $metadata->organisation_name = 'Organisation';
         $metadata->organisation_email = 'orga@example.test';
-        $metadata->resolution = '100';
+        $metadata->scale = 100;
         $metadata->bbox = ['west' => -5.5, 'east' => 9.5, 'south' => 41.0, 'north' => 51.5];
         $metadata->online_resources = [
             CswOnlineResource::layer('ns:couche', 'OGC:WFS', 'https://data.example.test/wfs', true),
@@ -51,7 +53,7 @@ final class CswMetadataFixtures
             new CswOnlineResource(CswOnlineResourceType::Other, 'Service ArcGIS', 'https://arcgis.example.test/rest', 'ESRI:ArcGIS', 'Hors catalogue'),
         ];
         $metadata->thumbnail_url = 'https://annexes.example.test/thumb.png';
-        $metadata->frequency_code = 'monthly';
+        $metadata->update_frequency = 'monthly';
 
         return $metadata;
     }

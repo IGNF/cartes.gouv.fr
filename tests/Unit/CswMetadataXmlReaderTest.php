@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Unit;
 
 use App\Dto\Metadata\CswHierarchyLevel;
@@ -30,20 +32,20 @@ final class CswMetadataXmlReaderTest extends TestCase
         self::assertSame(CswHierarchyLevel::Dataset, $metadata->hierarchy_level);
         self::assertEquals(new CswLanguage('fre', 'français'), $metadata->language);
         self::assertSame('utf8', $metadata->charset);
-        self::assertSame('Jeu synthétique', $metadata->title);
-        self::assertSame('Résumé synthétique', $metadata->abstract);
-        self::assertSame('2024-01-15', $metadata->creation_date);
+        self::assertSame('Jeu synthétique', $metadata->name);
+        self::assertSame('Résumé synthétique', $metadata->description);
+        self::assertSame('2024-01-15', $metadata->date_creation);
         self::assertSame('Généalogie synthétique', $metadata->resource_genealogy);
-        self::assertSame(['Occupation des terres'], $metadata->inspire_keywords);
-        self::assertSame(['mot libre', 'autre'], $metadata->free_keywords);
-        self::assertSame(['planningCadastre'], $metadata->topic_categories);
+        self::assertSame(['Occupation des terres'], $metadata->keywords_inspire);
+        self::assertSame(['mot libre', 'autre'], $metadata->keywords_additional);
+        self::assertSame(['planningCadastre'], $metadata->themes);
         self::assertSame('contact@example.test', $metadata->contact_email);
         self::assertSame('Organisation test', $metadata->organisation_name);
         self::assertSame('orga@example.test', $metadata->organisation_email);
-        self::assertSame('100', $metadata->resolution);
+        self::assertSame(100, $metadata->scale);
         self::assertSame(['west' => -5.5, 'east' => 9.5, 'south' => 41.0, 'north' => 51.5], $metadata->bbox);
         self::assertSame('https://annexes.example.test/thumb.png', $metadata->thumbnail_url);
-        self::assertSame('monthly', $metadata->frequency_code);
+        self::assertSame('monthly', $metadata->update_frequency);
 
         self::assertSame(
             [CswOnlineResourceType::Layer, CswOnlineResourceType::Layer, CswOnlineResourceType::Style, CswOnlineResourceType::Capabilities, CswOnlineResourceType::Document],
@@ -146,7 +148,7 @@ final class CswMetadataXmlReaderTest extends TestCase
     {
         $xml = str_replace('codeListValue="monthly"', 'codeListValue="quaterly"', CswMetadataFixtures::xml('md-legacy-type-attributes'));
 
-        self::assertSame('quarterly', $this->reader->read($xml)->frequency_code);
+        self::assertSame('quarterly', $this->reader->read($xml)->update_frequency);
     }
 
     /**

@@ -43,7 +43,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
     const isSandbox = useMembership({ datastoreId })?.isSandbox === true;
 
     const frequencyCode = useMemo(() => {
-        const code = metadata?.csw_metadata?.frequency_code;
+        const code = metadata?.csw_metadata?.update_frequency;
         return code ? frequencyCodesByCode[code] : frequencyCodes["unknown"];
     }, [metadata]);
 
@@ -133,12 +133,12 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                             <MetadataField
                                 title={"Intitulé (nom public)"}
                                 hintText={"Nom caractéristique et souvent unique sous lequel la ressource est connue"}
-                                content={metadata.csw_metadata?.title}
+                                content={metadata.csw_metadata?.name}
                             />
                             <MetadataField
                                 title={"Résumé"}
                                 hintText={"Bref résumé narratif du contenu de la ressource"}
-                                content={metadata.csw_metadata?.abstract}
+                                content={metadata.csw_metadata?.description}
                                 markdown={true}
                             />
                             <MetadataField title={"Contexte"} hintText={"Identifiant du datastore"} content={datastoreId} />
@@ -151,7 +151,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                 title={"Catégories thématiques"}
                                 content={
                                     <div className={fr.cx("fr-tags-group")}>
-                                        {metadata.csw_metadata?.topic_categories?.map((keyword) => (
+                                        {metadata.csw_metadata?.themes?.map((keyword) => (
                                             <Tag key={keyword}>{thematicCategories.find((c) => c.code === keyword)?.text ?? keyword}</Tag>
                                         ))}
                                     </div>
@@ -161,7 +161,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                 title={"Mots clés INSPIRE"}
                                 content={
                                     <div className={fr.cx("fr-tags-group")}>
-                                        {metadata.csw_metadata?.inspire_keywords?.map((keyword) => (
+                                        {metadata.csw_metadata?.keywords_inspire?.map((keyword) => (
                                             <Tag key={keyword}>{keyword}</Tag>
                                         ))}
                                     </div>
@@ -171,7 +171,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                 title={"Mots clés libres"}
                                 content={
                                     <div className={fr.cx("fr-tags-group")}>
-                                        {metadata.csw_metadata?.free_keywords?.map((keyword) => (
+                                        {metadata.csw_metadata?.keywords_additional?.map((keyword) => (
                                             <Tag key={keyword}>{keyword}</Tag>
                                         ))}
                                     </div>
@@ -188,7 +188,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Référence temporelle"}>
-                            <MetadataField title={"Date de la création de la ressource"} content={metadata.csw_metadata?.creation_date} />
+                            <MetadataField title={"Date de la création de la ressource"} content={metadata.csw_metadata?.date_creation} />
                             <MetadataField title={"Fréquence de mise à jour"} content={frequencyCode} />
                         </Accordion>
 
