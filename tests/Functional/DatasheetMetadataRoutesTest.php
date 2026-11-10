@@ -65,6 +65,22 @@ final class DatasheetMetadataRoutesTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
     }
 
+    // le motif du nom ne vaut qu’à la création : un titre déjà enregistré reste modifiable
+    public function testNamePatternAppliesToCreationOnly(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+        $payload = ['name' => 'Plan d’urbanisme / 2024'] + $this->payload();
+
+        $client->xmlHttpRequest('POST', self::DATASTORE_URL.'/datasheet', ['data' => json_encode($payload, JSON_THROW_ON_ERROR)]);
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['name'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'stored-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Plan d’urbanisme / 2024']]);
+        $client->xmlHttpRequest('POST', self::DATASTORE_URL.'/datasheet/'.rawurlencode('Plan d’urbanisme / 2024'), ['data' => json_encode($payload, JSON_THROW_ON_ERROR)]);
+        self::assertResponseIsSuccessful();
+    }
+
     public function testFileIdentifierCheckAnswers204WhenFreeAnd409WhenTaken(): void
     {
         $client = self::createClient();

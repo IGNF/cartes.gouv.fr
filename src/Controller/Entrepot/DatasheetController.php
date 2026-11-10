@@ -54,7 +54,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, Request $request): JsonResponse
     {
-        $dto = $this->multipartPayloadMapper->map($request, DatasheetMetadataDTO::class);
+        $dto = $this->multipartPayloadMapper->map($request, DatasheetMetadataDTO::class, groups: ['Default', DatasheetMetadataDTO::CREATION]);
 
         return $this->json($this->cartesMetadataApiService->create($datastoreId, $dto, $this->thumbnail($request)), Response::HTTP_CREATED);
     }

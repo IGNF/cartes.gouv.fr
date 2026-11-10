@@ -23,6 +23,9 @@ class DatasheetMetadataDTO
     /** @var int[] dénominateurs d’échelle proposés par le formulaire (assets/data/md_resolutions.json) */
     public const SCALES = [100, 200, 500, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000, 5000000, 10000000];
 
+    /** groupe de validation des contraintes propres à la création */
+    public const CREATION = 'creation';
+
     /** @var string[] */
     public const HIERARCHY_LEVELS = ['dataset', 'series'];
 
@@ -38,9 +41,11 @@ class DatasheetMetadataDTO
         // Section description
         #[Assert\NotBlank(message: 'Le nom de la fiche de données est obligatoire')]
         #[Assert\Length(max: 99, maxMessage: 'Le nom ne peut pas dépasser 99 caractères')]
+        // à la création seulement : le nom devient l’étiquette de la fiche, les titres déjà enregistrés gardent leurs caractères
         #[Assert\Regex(
             pattern: '/^[\wÀ-ÿ\-._~!$&\'()*+,;:@%\s]+$/u',
-            message: 'Le nom contient des caractères non autorisés'
+            message: 'Le nom contient des caractères non autorisés',
+            groups: [self::CREATION],
         )]
         public readonly string $name = '',
 

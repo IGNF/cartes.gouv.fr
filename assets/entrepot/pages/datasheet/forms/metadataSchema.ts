@@ -136,7 +136,8 @@ export const buildMetadataSchema = ({ t, isEditMode, fileIdentifierLocked = fals
             .trim()
             .min(1, t("validation.name.required"))
             .max(99, t("validation.name.max"))
-            .regex(DATASHEET_NAME_REGEX, t("validation.name.chars"))
+            // le nom devient l’étiquette de la fiche à la création ; les titres déjà enregistrés gardent leurs caractères
+            .refine((name) => isEditMode || DATASHEET_NAME_REGEX.test(name), t("validation.name.chars"))
             .refine((name) => isEditMode || !existingDatasheetNames.includes(name), t("validation.name.unique")),
         description: z.string().trim().min(1, t("validation.description")),
         // undefined = vignette inchangée ; null = supprimée ; File = nouvelle

@@ -97,6 +97,13 @@ describe("buildMetadataSchema", () => {
         expect(await issuePaths(valid(), { isFileIdentifierAvailable, isEditMode: true })).toEqual(["file_identifier validation.fileIdentifier.unique"]);
     });
 
+    it("n’applique le motif du nom qu’à la création", async () => {
+        const values = { ...valid(), name: "Plan d’urbanisme / 2024" };
+
+        expect(await issuePaths(values)).toEqual(["name validation.name.chars"]);
+        expect(await issuePaths(values, { isEditMode: true, fileIdentifierLocked: true })).toEqual([]);
+    });
+
     it("refuse un nom de fiche déjà pris en création", async () => {
         expect(await issuePaths(valid(), { existingDatasheetNames: ["Fiche"] })).toEqual(["name validation.name.unique"]);
     });
