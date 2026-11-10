@@ -2,7 +2,8 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { DevTool } from "@hookform/devtools";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useEffect, useMemo } from "react";
+import { useBlocker } from "@tanstack/react-router";
+import { type ReactNode, useMemo } from "react";
 import { type FieldPath, FormProvider, useForm } from "react-hook-form";
 
 import api from "@/entrepot/api";
@@ -94,16 +95,9 @@ export default function MetadataForm({
 
     // isDirty compare tout l’arbre des valeurs et vaut true dès le chargement : seuls les champs modifiés comptent
     const isDirty = Object.keys(dirtyFields).length > 0;
-    // modification : alerte du navigateur si l’on quitte la page avec des changements non enregistrés
+    // modification : confirmation avant de quitter avec des changements non enregistrés (onglet, lien, fermeture de la page)
     const warnOnLeave = isEditMode && isDirty && !isSubmitting;
-    useEffect(() => {
-        if (!warnOnLeave) {
-            return;
-        }
-        const onBeforeUnload = (event: BeforeUnloadEvent) => event.preventDefault();
-        window.addEventListener("beforeunload", onBeforeUnload);
-        return () => window.removeEventListener("beforeunload", onBeforeUnload);
-    }, [warnOnLeave]);
+    useBlocker({ shouldBlockFn: () => !window.confirm(t("leave_confirm")), enableBeforeUnload: warnOnLeave, disabled: !warnOnLeave });
 
     const submit = handleSubmit(async (values) => {
         try {

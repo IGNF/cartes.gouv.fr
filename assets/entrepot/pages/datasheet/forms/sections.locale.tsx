@@ -98,6 +98,7 @@ const { i18n } = declareComponentKeys<
     | "field.scale.placeholder"
     | "field.resolution"
     | "field.resolution.hint"
+    | "leave_confirm"
     // Messages de validation
     | "validation.name.required"
     | "validation.name.max"
@@ -334,6 +335,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "validation.hierarchyLevel": "Le type de données est obligatoire",
     "validation.language": "La langue est obligatoire",
     "validation.charset": "Le jeu de caractères est obligatoire",
+    leave_confirm: "Les modifications non enregistrées seront perdues. Quitter quand même ?",
 };
 
 export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSections"] = {
@@ -534,4 +536,5 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "validation.hierarchyLevel": "The data type is required",
     "validation.language": "The language is required",
     "validation.charset": "The character set is required",
+    leave_confirm: "Unsaved changes will be lost. Leave anyway?",
 };
