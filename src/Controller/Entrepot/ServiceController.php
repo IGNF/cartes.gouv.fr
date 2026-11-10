@@ -108,7 +108,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
-            $this->cartesMetadataApiService->updateLayers($datastoreId, $datasheetName, $services);
+            $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $services);
         }
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);

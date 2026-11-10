@@ -512,9 +512,8 @@ class CartesServiceApiService
         // Services de la fiche (dont celui qui vient d'être écrit), chargés une fois pour la métadonnée et la synchronisation
         $services = $this->getDatasheetServices($datastoreId, $datasheetName);
 
-        // Création ou mise à jour de metadata
-        $formData = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
-        $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $services, $formData);
+        // la publication d’un flux ne touche qu’aux ressources en ligne de la fiche de métadonnées
+        $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $services);
 
         // Synchronisation des autres services de la même fiche de données
         $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::CONFIG_THEME], $dto, $services);

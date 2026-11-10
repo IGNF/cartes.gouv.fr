@@ -7,6 +7,7 @@ use App\Exception\AppException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -29,6 +30,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     public function __construct(
         private readonly AnnexeApiService $annexeApiService,
         private readonly CartesMetadataApiService $cartesMetadataApiService,
+        private readonly LoggerInterface $logger,
         private readonly Filesystem $fs,
         ParameterBagInterface $parameters,
     ) {
@@ -105,10 +107,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
         $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
 
-        try {
-            $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documentsList);
-        } catch (\Exception) {
-        }
+        $this->updateMetadataDocuments($datastoreId, $datasheetName, $documentsList);
 
         return $this->json($documentsList);
     }
@@ -140,10 +139,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
         $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
 
-        try {
-            $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documentsList);
-        } catch (\Exception) {
-        }
+        $this->updateMetadataDocuments($datastoreId, $datasheetName, $documentsList);
 
         return $this->json($documentsList);
     }
@@ -175,10 +171,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             $this->updateListAnnexe($datastoreId, $listAnnexe, $newDocumentsList);
         }
 
-        try {
-            $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $newDocumentsList);
-        } catch (\Exception) {
-        }
+        $this->updateMetadataDocuments($datastoreId, $datasheetName, $newDocumentsList);
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
@@ -220,5 +213,19 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         $this->fs->dumpFile($tempFilePath, $json);
 
         $this->annexeApiService->replaceFile($datastoreId, $listAnnexe['_id'], $tempFilePath);
+    }
+
+    /**
+     * Le document est déjà enregistré : un échec de mise à jour de la fiche de métadonnées est journalisé, pas renvoyé.
+     *
+     * @param array<mixed> $documents
+     */
+    private function updateMetadataDocuments(string $datastoreId, string $datasheetName, array $documents): void
+    {
+        try {
+            $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName, $documents);
+        } catch (\Exception $e) {
+            $this->logger->error('Mise à jour des documents de la fiche de métadonnées {datasheetName} impossible : {error}', ['datasheetName' => $datasheetName, 'error' => $e->getMessage(), 'exception' => $e]);
+        }
     }
 }

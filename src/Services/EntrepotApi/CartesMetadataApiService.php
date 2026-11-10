@@ -1,32 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
+use App\Dto\Datasheet\DatasheetMetadataDTO;
 use App\Dto\Datasheet\DatasheetServices;
-use App\Dto\Datasheet\ProducerDTO;
-use App\Dto\Metadata\CswHierarchyLevel;
-use App\Dto\Metadata\CswLanguage;
 use App\Dto\Metadata\CswMetadata;
 use App\Dto\Metadata\CswOnlineResource;
 use App\Dto\Metadata\CswOnlineResourceType;
+use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\CswMetadataXmlReader;
 use App\Services\CswMetadataXmlWriter;
+use App\Services\DatasheetMetadataMapper;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Uid\Uuid;
 
 /**
- * Service qui crée ou met à jour une métadonnée.
+ * Fiche de métadonnées d’une fiche de données : le formulaire écrit les champs saisis, les flux et documents ne rafraîchissent que les ressources en ligne.
  *
- * - apiMetadata : objet metadata issu de l'API Entrepot
- * - cswMetadata : objet metadata issu du fichier lié à la metadata API
+ * Aucune méthode ne publie ni ne dépublie la fiche de métadonnées.
  */
 class CartesMetadataApiService
 {
+    private const THUMBNAIL_LABEL = 'type=thumbnail';
+
     public function __construct(
         private readonly ParameterBagInterface $parameterBag,
         private readonly DatastoreApiService $datastoreApiService,
@@ -36,6 +42,9 @@ class CartesMetadataApiService
         private readonly CswMetadataXmlWriter $cswMetadataWriter,
         private readonly CartesStylesApiService $cartesStylesApiService,
         private readonly StoredDataApiService $storedDataApiService,
+        private readonly UploadApiService $uploadApiService,
+        private readonly DatasheetMetadataMapper $mapper,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -59,41 +68,96 @@ class CartesMetadataApiService
         return $metadataList[0];
     }
 
-    public function getThumbnailUrl(string $datastoreId, string $datasheetName): ?string
+    // l’Entrepôt répond 204 si l’identifiant est libre, 409 s’il est pris
+    public function isFileIdentifierAvailable(string $datastoreId, string $fileIdentifier): bool
     {
-        $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, [
-            sprintf('%s=%s', CommonTags::DATASHEET_NAME, $datasheetName),
-            'type=thumbnail',
-        ])->resolve();
+        try {
+            $this->metadataApiService->checkFileIdentifier($datastoreId, $fileIdentifier)->await();
 
-        if (0 === count($annexeList)) {
-            return null;
+            return true;
+        } catch (ApiException $e) {
+            if (Response::HTTP_CONFLICT === $e->getStatusCode()) {
+                return false;
+            }
+            throw $e;
         }
-
-        return $this->annexeApiService->getAbsoluteUrl($datastoreId, $annexeList[0]);
     }
 
     /**
-     * Met à jour la liste des flux si une métadonnée existante fait référence à une fiche de données, sinon fait rien.
+     * Crée la fiche de données par sa fiche de métadonnées, non publiée ; la vignette est déposée d’abord et supprimée si l’écriture échoue.
+     *
+     * @return array<mixed> métadonnée de l’Entrepôt, avec `csw_metadata`
+     *
+     * @throws AppException 409 si le nom ou l’identifiant de fichier est déjà pris
      */
-    public function updateLayers(string $datastoreId, string $datasheetName, DatasheetServices $services): void
+    public function create(string $datastoreId, DatasheetMetadataDTO $dto, ?UploadedFile $thumbnail): array
     {
-        $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
-        if (!$apiMetadata) {
-            return;
+        if ($this->datasheetExists($datastoreId, $dto->name)) {
+            throw new AppException(sprintf('La fiche de données « %s » existe déjà', $dto->name), Response::HTTP_CONFLICT, ['field' => 'name']);
         }
 
-        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
+        return $this->createMetadata($datastoreId, $dto->name, $this->mapper->map($dto), $thumbnail);
+    }
 
-        $cswMetadata = $this->cswMetadataReader->read($apiMetadataXml);
-        $this->replaceServiceResources($cswMetadata, $datastoreId, $services);
+    /**
+     * Remplace les champs saisis ; crée la fiche de métadonnées si elle manque, avec les ressources en ligne des flux existants.
+     *
+     * @return array<mixed> métadonnée de l’Entrepôt, avec `csw_metadata`
+     *
+     * @throws AppException 404 si la fiche de données n’existe pas, 400 si le nom ou l’identifiant change, 409 si l’identifiant est pris
+     */
+    public function replace(string $datastoreId, string $datasheetName, DatasheetMetadataDTO $dto, DatasheetServices $services, ?UploadedFile $thumbnail, bool $deleteThumbnail): array
+    {
+        if ($dto->name !== $datasheetName) {
+            throw new AppException('Le nom d’une fiche de données ne peut pas être modifié', Response::HTTP_BAD_REQUEST, ['field' => 'name']);
+        }
 
-        $xmlFilePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
-        $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
+        $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
+        if (null === $apiMetadata) {
+            if (!$this->datasheetExists($datastoreId, $datasheetName)) {
+                throw new AppException(sprintf('La fiche de données « %s » n’existe pas', $datasheetName), Response::HTTP_NOT_FOUND);
+            }
 
-        // dépublie la metadata (sans la supprimer) s'il n'y a plus de services publiés
-        if ([] === $cswMetadata->resourcesOfType(CswOnlineResourceType::Layer) && isset($apiMetadata['endpoints'][0]['_id'])) {
-            $this->metadataApiService->unpublish($datastoreId, $cswMetadata->requireFileIdentifier(), $apiMetadata['endpoints'][0]['_id'])->await();
+            $metadata = $this->mapper->map($dto);
+            $this->replaceServiceResources($metadata, $datastoreId, $services);
+
+            return $this->createMetadata($datastoreId, $datasheetName, $metadata, $thumbnail);
+        }
+
+        $existing = $this->readMetadata($datastoreId, $apiMetadata);
+        if (null !== $existing->file_identifier && $existing->file_identifier !== $dto->file_identifier) {
+            throw new AppException('L’identifiant de fichier ne peut pas être modifié', Response::HTTP_BAD_REQUEST, ['field' => 'file_identifier']);
+        }
+
+        $metadata = $this->mapper->map($dto, $existing);
+        $oldThumbnails = $thumbnail instanceof UploadedFile || $deleteThumbnail ? $this->thumbnailAnnexes($datastoreId, $datasheetName) : [];
+        if ($deleteThumbnail) {
+            $metadata->thumbnail_url = null;
+        }
+
+        $newThumbnail = null;
+        if ($thumbnail instanceof UploadedFile) {
+            $newThumbnail = $this->addThumbnail($datastoreId, $datasheetName, $thumbnail);
+            $metadata->thumbnail_url = $this->annexeApiService->getAbsoluteUrl($datastoreId, $newThumbnail);
+        }
+
+        $apiMetadata = $this->withThumbnailRollback($datastoreId, $newThumbnail, fn () => $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $this->cswMetadataWriter->saveToFile($metadata)));
+        $this->removeAnnexes($datastoreId, $oldThumbnails);
+
+        $apiMetadata['csw_metadata'] = $metadata;
+
+        return $apiMetadata;
+    }
+
+    /**
+     * Couches, styles et GetCapabilities rebâtis depuis les flux de la fiche ; rien si la fiche n’a pas de fiche de métadonnées.
+     */
+    public function refreshOnlineResources(string $datastoreId, string $datasheetName, DatasheetServices $services): void
+    {
+        $updated = $this->rewrite($datastoreId, $datasheetName, fn (CswMetadata $metadata) => $this->replaceServiceResources($metadata, $datastoreId, $services));
+
+        if (!$updated) {
+            $this->logger->info('Fiche {datasheetName} sans fiche de métadonnées : ressources en ligne non mises à jour', ['datasheetName' => $datasheetName]);
         }
     }
 
@@ -102,18 +166,7 @@ class CartesMetadataApiService
      */
     public function updateStyleFiles(string $datastoreId, string $datasheetName, array $configurations): void
     {
-        $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
-        if (!$apiMetadata) {
-            return;
-        }
-
-        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
-
-        $cswMetadata = $this->cswMetadataReader->read($apiMetadataXml);
-        $cswMetadata->replaceResources([CswOnlineResourceType::Style], $this->getStyleFiles($datastoreId, $configurations));
-
-        $xmlFilePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
-        $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
+        $this->rewrite($datastoreId, $datasheetName, fn (CswMetadata $metadata) => $metadata->replaceResources([CswOnlineResourceType::Style], $this->getStyleFiles($datastoreId, $configurations)));
     }
 
     /**
@@ -121,159 +174,129 @@ class CartesMetadataApiService
      */
     public function updateDocuments(string $datastoreId, string $datasheetName, array $documents): void
     {
-        $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
-        if (!$apiMetadata) {
-            return;
-        }
-
-        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text();
-
-        $cswMetadata = $this->cswMetadataReader->read($apiMetadataXml);
-        $cswMetadata->replaceResources([CswOnlineResourceType::Document], $this->toCswDocuments($documents));
-
-        $xmlFilePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
-        $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
+        $this->rewrite($datastoreId, $datasheetName, fn (CswMetadata $metadata) => $metadata->replaceResources([CswOnlineResourceType::Document], $this->toCswDocuments($documents)));
     }
 
     /**
-     * Crée ou met à jour la métadonnée liée à la fiche de données.
+     * Seul chemin de modification d’une fiche existante : téléchargement, lecture, modification, écriture.
      *
-     * @param array<mixed> $formData
+     * @param \Closure(CswMetadata): void $modify
      *
-     * @return array<mixed>
+     * @return bool false si la fiche n’a pas de fiche de métadonnées
      */
-    public function createOrUpdate(string $datastoreId, string $datasheetName, DatasheetServices $services, ?array $formData = null): array
+    private function rewrite(string $datastoreId, string $datasheetName, \Closure $modify): bool
     {
         $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
-
         if (null === $apiMetadata) {
-            // nouvelle métadonnée à créer
+            return false;
+        }
 
-            if (null === $formData) { // n'est pas censé arriver
-                throw new AppException('formData doit être non null si création de la métadonnée', Response::HTTP_INTERNAL_SERVER_ERROR);
+        $metadata = $this->readMetadata($datastoreId, $apiMetadata);
+        $modify($metadata);
+        $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $this->cswMetadataWriter->saveToFile($metadata));
+
+        return true;
+    }
+
+    /**
+     * @param array<mixed> $apiMetadata
+     */
+    private function readMetadata(string $datastoreId, array $apiMetadata): CswMetadata
+    {
+        return $this->cswMetadataReader->read($this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id'])->text());
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function createMetadata(string $datastoreId, string $datasheetName, CswMetadata $metadata, ?UploadedFile $thumbnail): array
+    {
+        $fileIdentifier = $metadata->requireFileIdentifier();
+        if (!$this->isFileIdentifierAvailable($datastoreId, $fileIdentifier)) {
+            throw new AppException(sprintf('L’identifiant de fichier « %s » est déjà utilisé', $fileIdentifier), Response::HTTP_CONFLICT, ['field' => 'file_identifier']);
+        }
+
+        $annexe = null;
+        if ($thumbnail instanceof UploadedFile) {
+            $annexe = $this->addThumbnail($datastoreId, $datasheetName, $thumbnail);
+            $metadata->thumbnail_url = $this->annexeApiService->getAbsoluteUrl($datastoreId, $annexe);
+        }
+
+        $apiMetadata = $this->withThumbnailRollback($datastoreId, $annexe, function () use ($datastoreId, $datasheetName, $metadata) {
+            $apiMetadata = $this->metadataApiService->add($datastoreId, $this->cswMetadataWriter->saveToFile($metadata));
+
+            return $this->metadataApiService->addTags($datastoreId, $apiMetadata['_id'], [CommonTags::DATASHEET_NAME => $datasheetName])->array();
+        });
+        $apiMetadata['csw_metadata'] = $metadata;
+
+        return $apiMetadata;
+    }
+
+    // une fiche de données existe par ses livraisons, ses données stockées ou sa fiche de métadonnées
+    private function datasheetExists(string $datastoreId, string $datasheetName): bool
+    {
+        $query = ['tags' => [CommonTags::DATASHEET_NAME => $datasheetName]];
+
+        return [] !== $this->uploadApiService->getAll($datastoreId, [...$query, 'fields' => 'status'])->resolve()
+            || [] !== $this->storedDataApiService->getAll($datastoreId, [...$query, 'fields' => 'type'])->resolve()
+            || null !== $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
+    }
+
+    /**
+     * @return array<mixed> annexe créée
+     */
+    private function addThumbnail(string $datastoreId, string $datasheetName, UploadedFile $thumbnail): array
+    {
+        // chemin unique : l’ancienne vignette reste en place jusqu’à l’écriture de la fiche
+        $path = sprintf('thumbnail/%s.%s', Uuid::v4(), $thumbnail->guessExtension() ?? 'bin');
+
+        return $this->annexeApiService->add($datastoreId, $thumbnail->getRealPath(), [$path], [CommonTags::DATASHEET_NAME."=$datasheetName", self::THUMBNAIL_LABEL]);
+    }
+
+    /**
+     * @return list<array<mixed>>
+     */
+    private function thumbnailAnnexes(string $datastoreId, string $datasheetName): array
+    {
+        return array_values($this->annexeApiService->getAll($datastoreId, null, null, [CommonTags::DATASHEET_NAME."=$datasheetName", self::THUMBNAIL_LABEL])->resolve());
+    }
+
+    /**
+     * Exécute l’écriture de la fiche ; en cas d’échec, supprime la vignette qui vient d’être déposée.
+     *
+     * @template T
+     *
+     * @param array<mixed>|null $annexe
+     * @param \Closure(): T     $write
+     *
+     * @return T
+     */
+    private function withThumbnailRollback(string $datastoreId, ?array $annexe, \Closure $write): mixed
+    {
+        try {
+            return $write();
+        } catch (\Throwable $e) {
+            if (null !== $annexe) {
+                $this->removeAnnexes($datastoreId, [$annexe]);
             }
-
-            return $this->createMetadata($datastoreId, $datasheetName, $services, $formData);
+            throw $e;
         }
-        // une métadonnée existe déjà qu'on va mettre à jour
-
-        return $this->updateMetadata($datastoreId, $datasheetName, $services, $apiMetadata, $formData);
     }
 
     /**
-     * @param array<mixed> $formData
+     * Un échec est journalisé sans être renvoyé : la fiche est déjà écrite, l’annexe reste seulement en trop.
      *
-     * @return array<mixed>
+     * @param list<array<mixed>> $annexes
      */
-    private function createMetadata(string $datastoreId, string $datasheetName, DatasheetServices $services, array $formData): array
+    private function removeAnnexes(string $datastoreId, array $annexes): void
     {
-        $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
-
-        $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $services, null, $formData);
-
-        // Ajout de l'etiquette si elle n'existe pas deja
-        $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
-        if (!is_null($thumbnailUrl)) {
-            $newCswMetadata->thumbnail_url = $thumbnailUrl;
+        foreach ($annexes as $annexe) {
+            try {
+                $this->annexeApiService->remove($datastoreId, $annexe['_id'])->await();
+            } catch (\Throwable $e) {
+                $this->logger->error('Suppression de l’annexe {annexeId} impossible : {error}', ['annexeId' => $annexe['_id'], 'error' => $e->getMessage(), 'exception' => $e]);
+            }
         }
-
-        $newMetadataFilePath = $this->cswMetadataWriter->saveToFile($newCswMetadata);
-
-        $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
-        $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], [
-            CommonTags::DATASHEET_NAME => $datasheetName,
-        ])->array();
-
-        $this->metadataApiService->publish($datastoreId, $newCswMetadata->requireFileIdentifier(), $metadataEndpoint['_id'])->await();
-
-        $newApiMetadata['csw_metadata'] = $newCswMetadata;
-
-        return $newApiMetadata;
-    }
-
-    /**
-     * @param array<mixed> $oldApiMetadata
-     * @param array<mixed> $formData
-     *
-     * @return array<mixed>
-     */
-    private function updateMetadata(string $datastoreId, string $datasheetName, DatasheetServices $services, array $oldApiMetadata, ?array $formData = null): array
-    {
-        $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
-
-        $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $oldApiMetadata['_id'])->text();
-        $oldCswMetadata = $this->cswMetadataReader->read($oldMetadataFileXml);
-
-        $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $services, $oldCswMetadata, $formData);
-
-        // Mise a jour de l'etiquette
-        $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
-        if ($newCswMetadata->thumbnail_url !== $thumbnailUrl) {
-            $newCswMetadata->thumbnail_url = $thumbnailUrl;
-        }
-
-        $newMetadataFilePath = $this->cswMetadataWriter->saveToFile($newCswMetadata);
-
-        // suppression et recréation de métadonnées si changement de file_identifier
-        if ($oldCswMetadata->file_identifier !== $newCswMetadata->file_identifier) {
-            $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->requireFileIdentifier(), $metadataEndpoint['_id'])->await();
-            $this->metadataApiService->delete($datastoreId, $oldApiMetadata['_id'])->await();
-
-            $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
-        } else {
-            $newApiMetadata = $this->metadataApiService->replaceFile($datastoreId, $oldApiMetadata['_id'], $newMetadataFilePath);
-        }
-        $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], $oldApiMetadata['tags'])->array();
-
-        if (0 === count($newApiMetadata['endpoints'])) { // la métadonnée n'est pas déjà publiée
-            $this->metadataApiService->publish($datastoreId, $newCswMetadata->requireFileIdentifier(), $metadataEndpoint['_id'])->await();
-        }
-
-        $newApiMetadata['csw_metadata'] = $newCswMetadata;
-
-        return $newApiMetadata;
-    }
-
-    /**
-     * Construit l'objet metadata du catalogue pour une création ou modification. Si création, $formData est obligatoire. Si modification, $oldCswMetadata est obligatoire mais $formData est optionnel.
-     *
-     * @param ?array<mixed> $formData
-     */
-    private function getNewCswMetadata(string $datastoreId, string $datasheetName, DatasheetServices $services, ?CswMetadata $oldCswMetadata = null, ?array $formData = null): CswMetadata
-    {
-        if (!$oldCswMetadata instanceof CswMetadata && null === $formData) {
-            throw new AppException('oldCswMetadata et formData ne peuvent pas être null à la fois', Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        $newCswMetadata = $oldCswMetadata instanceof CswMetadata ? clone $oldCswMetadata : new CswMetadata();
-
-        if ($formData) {
-            $language = $formData['language'] ?
-                 new CswLanguage($formData['language']['code'], $formData['language']['language'])
-                 : CswLanguage::default();
-
-            $newCswMetadata->file_identifier = $formData['identifier'];
-            $newCswMetadata->hierarchy_level = CswHierarchyLevel::tryFrom('' === $formData['hierarchy_level'] ? 'dataset' : $formData['hierarchy_level']);
-
-            $newCswMetadata->language = $language;
-            $newCswMetadata->charset = $formData['charset'];
-            $newCswMetadata->name = $formData['public_name'];
-            $newCswMetadata->description = $formData['description'];
-            $newCswMetadata->date_creation = $formData['creation_date'];
-            $newCswMetadata->themes = $formData['category'] ?? [];
-            $newCswMetadata->keywords_inspire = $formData['keywords'] ?? [];
-            $newCswMetadata->keywords_additional = $formData['free_keywords'] ?? [];
-            $newCswMetadata->producers = [
-                new ProducerDTO($formData['organization'] ?? '', $formData['organization_email'] ?? '', 'pointOfContact'),
-                new ProducerDTO($formData['organization'] ?? '', $formData['email_contact'] ?? '', 'contact'),
-            ];
-            $newCswMetadata->resource_genealogy = $formData['resource_genealogy'];
-            $newCswMetadata->scale = is_numeric($formData['resolution'] ?? null) ? (int) $formData['resolution'] : null;
-            $newCswMetadata->update_frequency = $formData['frequency_code'] ?? null;
-            $this->replaceServiceResources($newCswMetadata, $datastoreId, $services);
-        }
-
-        return $newCswMetadata;
     }
 
     // couches, styles et GetCapabilities rebâtis depuis l’API ; documents et autres ressources conservés
@@ -516,21 +539,5 @@ class CartesMetadataApiService
         ]);
 
         return (1 === count($endpoints)) ? $endpoints[0]['endpoint'] : null;
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    private function getMetadataEndpoint(string $datastoreId): array
-    {
-        $endpointsList = $this->datastoreApiService->getEndpointsList($datastoreId, [
-            'type' => 'METADATA',
-            'open' => true,
-        ]);
-        if (0 === count($endpointsList)) {
-            throw new AppException("Point d'accès (endpoint) métadonnées n'a pas été trouvé", Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        return $endpointsList[0]['endpoint'];
     }
 }
