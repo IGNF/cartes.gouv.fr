@@ -15,6 +15,8 @@ final class EntrepotMockResponseFactory
     // fichier de métadonnée dont l’Entrepôt répond 502 en texte brut
     public const METADATA_ID_UPSTREAM_DOWN = 'upstream-down';
     public const METADATA_ENDPOINT_ID = 'endpoint-metadata';
+    public const WFS_PUBLIC_ENDPOINT_ID = 'endpoint-wfs-public';
+    public const WFS_PRIVATE_ENDPOINT_ID = 'endpoint-wfs-private';
     private const ENTREPOT_HOST = 'entrepot.test';
     private const METADATA_FIXTURES_DIR = __DIR__.'/../Fixture/metadata';
 
@@ -176,21 +178,29 @@ final class EntrepotMockResponseFactory
         if ('GET' === $method && '' === $relative) {
             return $this->json(['_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => 'community-1'], 'endpoints' => [
                 ['endpoint' => ['_id' => self::METADATA_ENDPOINT_ID, 'type' => 'METADATA', 'open' => true, 'urls' => [['type' => 'CSW', 'url' => 'https://csw.test/csw']]]],
+                ['endpoint' => ['_id' => self::WFS_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wfs-public', 'type' => 'WFS', 'open' => true, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/public']]]],
+                ['endpoint' => ['_id' => self::WFS_PRIVATE_ENDPOINT_ID, 'technical_name' => 'wfs-private', 'type' => 'WFS', 'open' => false, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/private']]]],
             ]]);
         }
 
         parse_str($queryString, $query);
 
-        if ('GET' === $method && 1 === preg_match('#^(processings/executions|offerings|configurations|metadata|statics|annexes|stored_data|uploads)$#', $relative)) {
+        if ('GET' === $method && 1 === preg_match('#^(processings/executions|offerings|configurations|metadata|statics|annexes|stored_data|uploads|permissions)$#', $relative)) {
             $items = array_values(array_filter(self::$store[$relative] ?? [], fn (array $item) => $this->matches($item, $query)));
 
             return $this->json($items, 200, ['content-range' => sprintf('0-%d/%d', max(count($items) - 1, 0), count($items))]);
         }
 
-        if ('GET' === $method && 1 === preg_match('#^(processings/executions|stored_data|uploads)/([\w-]+)$#', $relative, $matches)) {
+        if ('GET' === $method && 1 === preg_match('#^(processings/executions|stored_data|uploads|configurations|offerings)/([\w-]+)$#', $relative, $matches)) {
             $item = $this->find($matches[1], $matches[2]);
 
             return null === $item ? $this->json(['error' => 'NotFound'], 404) : $this->json($item);
+        }
+
+        if ('GET' === $method && 1 === preg_match('#^configurations/([\w-]+)/offerings$#', $relative, $matches)) {
+            $items = array_values(array_filter(self::$store['offerings'] ?? [], fn (array $item) => ($item['configuration']['_id'] ?? null) === $matches[1]));
+
+            return $this->json($items, 200, ['content-range' => sprintf('0-%d/%d', max(count($items) - 1, 0), count($items))]);
         }
 
         // vérifications d’une livraison : clé « checks » de l’entité semée
@@ -247,8 +257,54 @@ final class EntrepotMockResponseFactory
             return $this->json($this->find('metadata', $matches[1]) ?? []);
         }
 
-        if ('POST' === $method && 1 === preg_match('#^(metadata|uploads|stored_data)/([\w-]+)/tags$#', $relative, $matches)) {
+        if ('POST' === $method && 1 === preg_match('#^(metadata|uploads|stored_data|configurations)/([\w-]+)/tags$#', $relative, $matches)) {
             return $this->json($this->update($matches[1], $matches[2], fn (array $item) => ['tags' => [...$item['tags'], ...json_decode($body, true, flags: JSON_THROW_ON_ERROR)]] + $item));
+        }
+
+        // comme l’Entrepôt (vérifié le 10/11/2026) : la création ignore `extra`, seul un PATCH l’écrit en remplaçant l’objet entier
+        if ('POST' === $method && 'configurations' === $relative) {
+            $request = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+            unset($request['extra']);
+            $configuration = ['_id' => 'configuration-'.self::$nextId++, 'status' => 'UNPUBLISHED', 'tags' => [], ...$request];
+            self::$store['configurations'][] = $configuration;
+
+            return $this->json($configuration, 201);
+        }
+
+        if ('PATCH' === $method && 1 === preg_match('#^configurations/([\w-]+)$#', $relative, $matches)) {
+            return $this->json($this->update('configurations', $matches[1], fn (array $item) => json_decode($body, true, flags: JSON_THROW_ON_ERROR) + $item));
+        }
+
+        if ('POST' === $method && 1 === preg_match('#^configurations/([\w-]+)/offerings$#', $relative, $matches)) {
+            $request = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+            $configuration = $this->find('configurations', $matches[1]) ?? [];
+            $offering = [
+                '_id' => 'offering-'.self::$nextId++,
+                'type' => $configuration['type'] ?? null,
+                'layer_name' => $configuration['layer_name'] ?? null,
+                'open' => $request['open'],
+                'status' => 'PUBLISHING',
+                'endpoint' => ['_id' => $request['endpoint']],
+                'configuration' => ['_id' => $matches[1]],
+                'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/'.($request['open'] ? 'public' : 'private')]],
+            ];
+            self::$store['offerings'][] = $offering;
+
+            return $this->json($offering, 201);
+        }
+
+        // POST /permissions renvoie la liste des permissions créées, une par communauté (vérifié le 10/11/2026)
+        if ('POST' === $method && 'permissions' === $relative) {
+            $request = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+            $created = array_values(array_map(fn (string $communityId) => [
+                '_id' => 'permission-'.self::$nextId++,
+                'licence' => $request['licence'],
+                'offerings' => array_map(fn (string $id) => ['_id' => $id], $request['offerings']),
+                'beneficiary' => ['_id' => $communityId],
+            ], $request['communities']));
+            self::$store['permissions'] = [...(self::$store['permissions'] ?? []), ...$created];
+
+            return $this->json($created);
         }
 
         if ('POST' === $method && 'uploads' === $relative) {
@@ -314,7 +370,7 @@ final class EntrepotMockResponseFactory
             return new MockResponse('', ['http_code' => 204]);
         }
 
-        if ('DELETE' === $method && 1 === preg_match('#^(annexes|metadata|uploads|stored_data)/([\w-]+)$#', $relative, $matches)) {
+        if ('DELETE' === $method && 1 === preg_match('#^(annexes|metadata|uploads|stored_data|configurations|permissions)/([\w-]+)$#', $relative, $matches)) {
             self::$store[$matches[1]] = array_values(array_filter(self::$store[$matches[1]] ?? [], fn (array $item) => $item['_id'] !== $matches[2]));
 
             return new MockResponse('', ['http_code' => 204]);
@@ -323,7 +379,7 @@ final class EntrepotMockResponseFactory
         return null;
     }
 
-    // filtres de liste de l’Entrepôt : tags[clé]=valeur, labels[]=clé=valeur
+    // filtres de liste de l’Entrepôt : tags[clé]=valeur, labels[]=clé=valeur, path
     /**
      * @param array<mixed> $item
      * @param array<mixed> $query
@@ -334,6 +390,10 @@ final class EntrepotMockResponseFactory
             if (($item['tags'][$key] ?? null) !== $value) {
                 return false;
             }
+        }
+
+        if (isset($query['path']) && !in_array($query['path'], $item['paths'] ?? [], true)) {
+            return false;
         }
 
         return [] === array_diff((array) ($query['labels'] ?? []), $item['labels'] ?? []);

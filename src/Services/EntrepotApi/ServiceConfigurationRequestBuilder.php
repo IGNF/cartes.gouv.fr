@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\EntrepotApi;
 
+use App\Dto\Services\Form\ServiceAttributionFormDTO;
 use App\Dto\Services\Form\ServiceFormDTO;
 
 /** Corps de la requête de création d’une configuration Entrepôt depuis le formulaire de publication. */
@@ -28,7 +29,7 @@ class ServiceConfigurationRequestBuilder
             'metadata' => $configMetadata,
         ];
 
-        if (null !== $dto->attribution) {
+        if ($dto->attribution instanceof ServiceAttributionFormDTO) {
             $body['attribution'] = [
                 'title' => $dto->attribution->title,
                 'url' => $dto->attribution->url,

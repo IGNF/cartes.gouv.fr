@@ -4,6 +4,8 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\Form\WfsFormDTO;
+use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Dto\Services\Wfs\WfsServiceDTO;
 use App\Dto\Services\Wfs\WfsTableDTO;
 use App\Services\CapabilitiesService;
@@ -11,11 +13,20 @@ use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\ServiceImageAnnexeService;
+use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/stored_data/{storedDataId}/wfs',
@@ -31,8 +42,84 @@ class WfsController extends ServiceController implements ApiControllerInterface
         CapabilitiesService $capabilitiesService,
         CartesMetadataApiService $cartesMetadataApiService,
         SandboxService $sandboxService,
+        private readonly MultipartPayloadMapper $multipartPayloadMapper,
+        private readonly ValidatorInterface $validator,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
+    }
+
+    /**
+     * Publication depuis le nouveau formulaire : multipart avec le champ JSON `data` (WfsFormDTO) et les fichiers `thumbnail`, `attribution_logo`.
+     */
+    #[Route('/publish', name: 'publish', methods: ['POST'])]
+    public function publish(string $datastoreId, string $storedDataId, Request $request): JsonResponse
+    {
+        $dto = $this->multipartPayloadMapper->map($request, WfsFormDTO::class);
+        [$thumbnail, $attributionLogo] = $this->imageFiles($request, 'thumbnail', 'attribution_logo');
+
+        $offering = $this->cartesServiceApiService->publishFromForm(
+            $datastoreId,
+            $storedDataId,
+            $dto,
+            ConfigurationTypes::WFS,
+            $this->getFormConfigTypeInfos($dto, $storedDataId),
+            $thumbnail,
+            $attributionLogo,
+        );
+
+        return $this->json($offering, Response::HTTP_CREATED);
+    }
+
+    /**
+     * Fichiers image facultatifs de la requête, validés ensemble : 422 au chemin du champ, comme les erreurs du DTO.
+     *
+     * @return list<UploadedFile|null>
+     */
+    private function imageFiles(Request $request, string ...$fields): array
+    {
+        $files = [];
+        $validator = $this->validator->startContext();
+        foreach ($fields as $field) {
+            $file = $request->files->get($field);
+            $file = $file instanceof UploadedFile ? $file : null;
+            $files[] = $file;
+            if ($file instanceof UploadedFile) {
+                $validator->atPath($field)->validate($file, new Assert\File(
+                    maxSize: ServiceImageAnnexeService::MAX_SIZE,
+                    mimeTypes: ServiceImageAnnexeService::MIME_TYPES,
+                    maxSizeMessage: 'L’image ne peut pas dépasser {{ limit }} {{ suffix }}',
+                    mimeTypesMessage: 'L’image doit être au format jpg ou png',
+                ));
+            }
+        }
+
+        $violations = $validator->getViolations();
+        if (count($violations) > 0) {
+            throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($files, $violations));
+        }
+
+        return $files;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getFormConfigTypeInfos(WfsFormDTO $dto, string $storedDataId): array
+    {
+        $relations = array_map(fn (WfsTableFormDTO $table) => array_filter([
+            'native_name' => $table->native_name,
+            'public_name' => $table->public_name,
+            'title' => $table->title,
+            'abstract' => $table->description,
+            'keywords' => $table->keywords,
+        ], fn ($value) => [] !== $value), $dto->tables);
+
+        return [
+            'used_data' => [[
+                'relations' => $relations,
+                'stored_data' => $storedDataId,
+            ]],
+        ];
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]

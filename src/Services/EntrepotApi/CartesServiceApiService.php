@@ -15,6 +15,7 @@ use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Constants\ServiceAccess;
 use App\Dto\Datasheet\DatasheetServices;
 use App\Dto\Services\CommonDTO;
+use App\Dto\Services\Form\ServiceAttributionFormDTO;
 use App\Dto\Services\Form\ServiceFormDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
@@ -652,8 +653,8 @@ class CartesServiceApiService
         $logo = null;
         try {
             // dépôts dans le try : un échec du second ne doit pas laisser le premier orphelin
-            $thumbnailUrl = null !== $thumbnail ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
-            $logo = null !== $attributionLogo && null !== $dto->attribution
+            $thumbnailUrl = $thumbnail instanceof UploadedFile ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
+            $logo = $attributionLogo instanceof UploadedFile && $dto->attribution instanceof ServiceAttributionFormDTO
                 ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
                 : null;
 
@@ -692,7 +693,7 @@ class CartesServiceApiService
      */
     private function removeImageAnnexesQuietly(string $datastoreId, array $urls): void
     {
-        foreach (array_filter($urls, 'is_string') as $url) {
+        foreach (array_filter($urls, is_string(...)) as $url) {
             try {
                 $this->serviceImageAnnexeService->removeByUrl($datastoreId, $url);
             } catch (ApiException $e) {
