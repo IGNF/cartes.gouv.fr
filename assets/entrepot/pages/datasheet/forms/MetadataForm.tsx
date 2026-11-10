@@ -2,7 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { DevTool } from "@hookform/devtools";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { type ReactNode, useMemo } from "react";
+import { type ReactNode, useEffect, useMemo } from "react";
 import { type FieldPath, FormProvider, useForm } from "react-hook-form";
 
 import api from "@/entrepot/api";
@@ -78,6 +78,17 @@ export default function MetadataForm({
         setError,
         reset,
     } = form;
+
+    // modification : alerte du navigateur si l’on quitte la page avec des changements non enregistrés
+    const warnOnLeave = isEditMode && isDirty && !isSubmitting;
+    useEffect(() => {
+        if (!warnOnLeave) {
+            return;
+        }
+        const onBeforeUnload = (event: BeforeUnloadEvent) => event.preventDefault();
+        window.addEventListener("beforeunload", onBeforeUnload);
+        return () => window.removeEventListener("beforeunload", onBeforeUnload);
+    }, [warnOnLeave]);
 
     const submit = handleSubmit(async (values) => {
         try {
