@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit;
 
+use App\Dto\Datasheet\ProducerDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswLanguage;
 use App\Dto\Metadata\CswOnlineResource;
@@ -39,9 +40,11 @@ final class CswMetadataXmlReaderTest extends TestCase
         self::assertSame(['Occupation des terres'], $metadata->keywords_inspire);
         self::assertSame(['mot libre', 'autre'], $metadata->keywords_additional);
         self::assertSame(['planningCadastre'], $metadata->themes);
-        self::assertSame('contact@example.test', $metadata->contact_email);
-        self::assertSame('Organisation test', $metadata->organisation_name);
-        self::assertSame('orga@example.test', $metadata->organisation_email);
+        // organisation unique sans rôle, contact des métadonnées réduit à son adresse électronique
+        self::assertEquals([
+            new ProducerDTO('Organisation test', 'orga@example.test', 'pointOfContact'),
+            new ProducerDTO('', 'contact@example.test', 'contact'),
+        ], $metadata->producers);
         self::assertSame(100, $metadata->scale);
         self::assertSame(['west' => -5.5, 'east' => 9.5, 'south' => 41.0, 'north' => 51.5], $metadata->bbox);
         self::assertSame('https://annexes.example.test/thumb.png', $metadata->thumbnail_url);

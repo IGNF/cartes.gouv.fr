@@ -15,7 +15,7 @@
         <gmd:MD_ScopeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_ScopeCode" codeListValue="{{ hierarchy_level }}">{{ hierarchy_level }}</gmd:MD_ScopeCode>
     </gmd:hierarchyLevel>
 
-    {# généalogie de la ressource #}
+    {# libellé du niveau hiérarchique #}
     {% set hierarchy_level_name = '' %}
     {% if hierarchy_level == 'dataset' %}
         {% set hierarchy_level_name = 'Jeu de données' %}
@@ -27,7 +27,19 @@
         <gco:CharacterString>{{ hierarchy_level_name }}</gco:CharacterString>
     </gmd:hierarchyLevelName>
 
-    {% if name is not empty or description is not empty or organisation_name is not empty or organisation_email is not empty or themes|length or keywords_inspire|length or keywords_additional|length or scale is not empty or date_creation is not empty or thumbnail_url is not empty or update_frequency is not empty or bbox %}
+    {# contact des métadonnées : producteur de rôle contact, sinon le point de contact #}
+    {% if producers|length %}
+        {% set metadata_contact = (producers|filter(p => p.role == 'contact')|first) ?: producers|first %}
+        <gmd:contact>
+            {{ _self.responsible_party(metadata_contact, 'pointOfContact') }}
+        </gmd:contact>
+    {% endif %}
+
+    <gmd:dateStamp>
+        <gco:DateTime>{{ date_stamp }}</gco:DateTime>
+    </gmd:dateStamp>
+
+    {% if name is not empty or description is not empty or producers|length or themes|length or keywords_inspire|length or keywords_additional|length or scale is not empty or date_creation is not empty or thumbnail_url is not empty or update_frequency is not empty or bbox %}
         <gmd:identificationInfo>
             <gmd:MD_DataIdentification>
                 {% if name is not empty %}
@@ -61,31 +73,37 @@
                     </gmd:abstract>
                 {% endif %}
 
-                {% if organisation_email is not empty or organisation_name is not empty %}
-                    {# email de contact sur les métadonnées #}
+                {# un point de contact par producteur ; le rôle contact est écrit dans gmd:contact #}
+                {% for producer in producers|filter(p => p.role != 'contact') %}
                     <gmd:pointOfContact>
-                        <gmd:CI_ResponsibleParty>
-                            {% if organisation_name is not empty %}
-                                <gmd:organisationName>
-                                    <gco:CharacterString>{{ organisation_name }}</gco:CharacterString>
-                                </gmd:organisationName>
-                            {% endif %}
-
-                            {% if organisation_email is not empty %}
-                                <gmd:contactInfo>
-                                    <gmd:CI_Contact>
-                                        <gmd:address>
-                                            <gmd:CI_Address>
-                                                <gmd:electronicMailAddress>
-                                                    <gco:CharacterString>{{ organisation_email }}</gco:CharacterString>
-                                                </gmd:electronicMailAddress>
-                                            </gmd:CI_Address>
-                                        </gmd:address>
-                                    </gmd:CI_Contact>
-                                </gmd:contactInfo>
-                            {% endif %}
-                        </gmd:CI_ResponsibleParty>
+                        {{ _self.responsible_party(producer, producer.role) }}
                     </gmd:pointOfContact>
+                {% endfor %}
+
+                {% if update_frequency %}
+                    <gmd:resourceMaintenance>
+                        <gmd:MD_MaintenanceInformation>
+                            <gmd:maintenanceAndUpdateFrequency>
+                                <gmd:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{ update_frequency }}" />
+                            </gmd:maintenanceAndUpdateFrequency>
+                        </gmd:MD_MaintenanceInformation>
+                    </gmd:resourceMaintenance>
+                {% endif %}
+
+                {% if thumbnail_url %}
+                    <gmd:graphicOverview>
+                        <gmd:MD_BrowseGraphic>
+                            <gmd:fileName>
+                                <gco:CharacterString>{{ thumbnail_url }}</gco:CharacterString>
+                            </gmd:fileName>
+                            <gmd:fileDescription>
+                                <gco:CharacterString>Aperçu</gco:CharacterString>
+                            </gmd:fileDescription>
+                            <gmd:fileType>
+                                <gco:CharacterString>{{ thumbnail_url|split('.')|last }}</gco:CharacterString>
+                            </gmd:fileType>
+                        </gmd:MD_BrowseGraphic>
+                    </gmd:graphicOverview>
                 {% endif %}
 
                 {% if keywords_inspire|length %}
@@ -132,39 +150,9 @@
                     </gmd:descriptiveKeywords>
                 {% endif %}
 
-                {% if themes|length %}
-                    {% for topic in themes %}
-                        <gmd:topicCategory>
-                            <gmd:MD_TopicCategoryCode>{{ topic }}</gmd:MD_TopicCategoryCode>
-                        </gmd:topicCategory>
-                    {% endfor %}
-                {% endif %}
-
-                {% if thumbnail_url %}
-                    <gmd:graphicOverview>
-                        <gmd:MD_BrowseGraphic>
-                            <gmd:fileName>
-                                <gco:CharacterString>{{ thumbnail_url }}</gco:CharacterString>
-                            </gmd:fileName>
-                            <gmd:fileDescription>
-                                <gco:CharacterString>Aperçu</gco:CharacterString>
-                            </gmd:fileDescription>
-                            <gmd:fileType>
-                                <gco:CharacterString>{{ thumbnail_url|split('.')|last }}</gco:CharacterString>
-                            </gmd:fileType>
-                        </gmd:MD_BrowseGraphic>
-                    </gmd:graphicOverview>
-                {% endif %}
-
-                {% if update_frequency %}
-                    <gmd:resourceMaintenance>
-                        <gmd:MD_MaintenanceInformation>
-                            <gmd:maintenanceAndUpdateFrequency>
-                                <gmd:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{ update_frequency }}" />
-                            </gmd:maintenanceAndUpdateFrequency>
-                        </gmd:MD_MaintenanceInformation>
-                    </gmd:resourceMaintenance>
-                {% endif %}
+                <gmd:spatialRepresentationType>
+                    <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" />
+                </gmd:spatialRepresentationType>
 
                 {% if scale %}
                     <gmd:spatialResolution>
@@ -179,6 +167,17 @@
                         </gmd:MD_Resolution>
                     </gmd:spatialResolution>
                 {% endif %}
+
+                {# langue de la ressource, obligatoire dans MD_DataIdentification #}
+                <gmd:language>
+                    <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="{{ language.code }}">{{ language.language }}</gmd:LanguageCode>
+                </gmd:language>
+
+                {% for topic in themes %}
+                    <gmd:topicCategory>
+                        <gmd:MD_TopicCategoryCode>{{ topic }}</gmd:MD_TopicCategoryCode>
+                    </gmd:topicCategory>
+                {% endfor %}
 
                 {% if bbox %}
                     <gmd:extent>
@@ -203,48 +202,8 @@
                     </gmd:extent>
                 {% endif %}
 
-                <gmd:spatialRepresentationType>
-                    <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" />
-                </gmd:spatialRepresentationType>
             </gmd:MD_DataIdentification>
         </gmd:identificationInfo>
-    {% endif %}
-
-    {% if contact_email is not empty %}
-        {# responsable de la ressource #}
-        <gmd:contact>
-            <gmd:CI_ResponsibleParty>
-                <gmd:contactInfo>
-                    <gmd:CI_Contact>
-                        <gmd:address>
-                            <gmd:CI_Address>
-                                <gmd:electronicMailAddress>
-                                    <gco:CharacterString>{{ contact_email }}</gco:CharacterString>
-                                </gmd:electronicMailAddress>
-                            </gmd:CI_Address>
-                        </gmd:address>
-                    </gmd:CI_Contact>
-                </gmd:contactInfo>
-            </gmd:CI_ResponsibleParty>
-        </gmd:contact>
-    {% endif %}
-
-    <gmd:dateStamp>
-        <gco:DateTime>{{ date_stamp }}</gco:DateTime>
-    </gmd:dateStamp>
-
-    {% if resource_genealogy is not empty %}
-        <gmd:dataQualityInfo>
-            <gmd:DQ_DataQuality>
-                <gmd:lineage>
-                    <gmd:LI_Lineage>
-                        <gmd:statement>
-                            <gco:CharacterString>{{ resource_genealogy }}</gco:CharacterString>
-                        </gmd:statement>
-                    </gmd:LI_Lineage>
-                </gmd:lineage>
-            </gmd:DQ_DataQuality>
-        </gmd:dataQualityInfo>
     {% endif %}
 
     {% if online_resources|length %}
@@ -298,4 +257,68 @@
             </gmd:MD_Distribution>
         </gmd:distributionInfo>
     {% endif %}
+
+    {% if resource_genealogy is not empty %}
+        <gmd:dataQualityInfo>
+            <gmd:DQ_DataQuality>
+                {# gmd:scope est obligatoire dans DQ_DataQuality #}
+                <gmd:scope>
+                    <gmd:DQ_Scope>
+                        <gmd:level>
+                            <gmd:MD_ScopeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode" codeListValue="{{ hierarchy_level }}">{{ hierarchy_level }}</gmd:MD_ScopeCode>
+                        </gmd:level>
+                    </gmd:DQ_Scope>
+                </gmd:scope>
+                <gmd:lineage>
+                    <gmd:LI_Lineage>
+                        <gmd:statement>
+                            <gco:CharacterString>{{ resource_genealogy }}</gco:CharacterString>
+                        </gmd:statement>
+                    </gmd:LI_Lineage>
+                </gmd:lineage>
+            </gmd:DQ_DataQuality>
+        </gmd:dataQualityInfo>
+    {% endif %}
 </gmd:MD_Metadata>
+
+{# éléments ci-dessus dans l’ordre des séquences ISO 19139 (MD_Metadata, MD_DataIdentification, CI_Address) #}
+{% macro responsible_party(producer, role) %}
+    <gmd:CI_ResponsibleParty>
+        {% if producer.organization_name is not empty %}
+            <gmd:organisationName>
+                <gco:CharacterString>{{ producer.organization_name }}</gco:CharacterString>
+            </gmd:organisationName>
+        {% endif %}
+        <gmd:contactInfo>
+            <gmd:CI_Contact>
+                <gmd:address>
+                    <gmd:CI_Address>
+                        {% if producer.address_number_and_streetname is not empty %}
+                            <gmd:deliveryPoint>
+                                <gco:CharacterString>{{ producer.address_number_and_streetname }}</gco:CharacterString>
+                            </gmd:deliveryPoint>
+                        {% endif %}
+                        {% if producer.address_city is not empty %}
+                            <gmd:city>
+                                <gco:CharacterString>{{ producer.address_city }}</gco:CharacterString>
+                            </gmd:city>
+                        {% endif %}
+                        {% if producer.address_postal_code is not empty %}
+                            <gmd:postalCode>
+                                <gco:CharacterString>{{ producer.address_postal_code }}</gco:CharacterString>
+                            </gmd:postalCode>
+                        {% endif %}
+                        {% if producer.organization_email is not empty %}
+                            <gmd:electronicMailAddress>
+                                <gco:CharacterString>{{ producer.organization_email }}</gco:CharacterString>
+                            </gmd:electronicMailAddress>
+                        {% endif %}
+                    </gmd:CI_Address>
+                </gmd:address>
+            </gmd:CI_Contact>
+        </gmd:contactInfo>
+        <gmd:role>
+            <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="{{ role }}">{{ role }}</gmd:CI_RoleCode>
+        </gmd:role>
+    </gmd:CI_ResponsibleParty>
+{% endmacro %}

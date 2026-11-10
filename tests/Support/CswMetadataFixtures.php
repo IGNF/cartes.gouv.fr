@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Support;
 
+use App\Dto\Datasheet\ProducerDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswMetadata;
 use App\Dto\Metadata\CswOnlineResource;
@@ -36,9 +37,13 @@ final class CswMetadataFixtures
         $metadata->keywords_inspire = ['Occupation des terres'];
         $metadata->keywords_additional = ['libre', 'autre'];
         $metadata->themes = ['planningCadastre', 'environment'];
-        $metadata->contact_email = 'contact@example.test';
-        $metadata->organisation_name = 'Organisation';
-        $metadata->organisation_email = 'orga@example.test';
+        // ordre de relecture : points de contact dans l’ordre écrit, puis le contact des métadonnées
+        $metadata->producers = [
+            new ProducerDTO('Organisation', 'orga@example.test', 'pointOfContact', '1 rue de l’Exemple', '75000', 'Ville'),
+            new ProducerDTO('Gestionnaire', 'gestion@example.test', 'custodian'),
+            new ProducerDTO('Auteur', 'auteur@example.test', 'author'),
+            new ProducerDTO('Contact', 'contact@example.test', 'contact'),
+        ];
         $metadata->scale = 100;
         $metadata->bbox = ['west' => -5.5, 'east' => 9.5, 'south' => 41.0, 'north' => 51.5];
         $metadata->online_resources = [

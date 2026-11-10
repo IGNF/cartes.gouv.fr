@@ -7,6 +7,7 @@ use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Dto\Datasheet\DatasheetServices;
+use App\Dto\Datasheet\ProducerDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswLanguage;
 use App\Dto\Metadata\CswMetadata;
@@ -264,9 +265,10 @@ class CartesMetadataApiService
             $newCswMetadata->themes = $formData['category'] ?? [];
             $newCswMetadata->keywords_inspire = $formData['keywords'] ?? [];
             $newCswMetadata->keywords_additional = $formData['free_keywords'] ?? [];
-            $newCswMetadata->contact_email = $formData['email_contact'];
-            $newCswMetadata->organisation_name = $formData['organization'];
-            $newCswMetadata->organisation_email = $formData['organization_email'];
+            $newCswMetadata->producers = [
+                new ProducerDTO($formData['organization'] ?? '', $formData['organization_email'] ?? '', 'pointOfContact'),
+                new ProducerDTO($formData['organization'] ?? '', $formData['email_contact'] ?? '', 'contact'),
+            ];
             $newCswMetadata->resource_genealogy = $formData['resource_genealogy'];
             $newCswMetadata->scale = is_numeric($formData['resolution'] ?? null) ? (int) $formData['resolution'] : null;
             $newCswMetadata->update_frequency = $formData['frequency_code'] ?? null;

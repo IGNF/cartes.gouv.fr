@@ -1,6 +1,7 @@
 import { format as datefnsFormat } from "date-fns";
 
 import { Datastore, EndpointTypeEnum, Metadata, MetadataFormValuesType, MetadataHierarchyLevel, Service, StoredData } from "../../../../@types/app";
+import { getMetadataContact } from "@/utils/metadata";
 import { ConfigurationWfsDetailsContent, ConfigurationWmsVectorDetailsContent } from "../../../../@types/entrepot";
 import { getProjectionCode, removeDiacritics } from "../../../../utils";
 import { PyramidVectorTmsServiceFormValuesType } from "../tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm";
@@ -34,9 +35,9 @@ const getMetadataFormDefaultValues = (metadata?: Metadata, datastore?: Datastore
         creation_date: metadata?.csw_metadata?.date_creation,
         resource_genealogy: metadata?.csw_metadata?.resource_genealogy ?? "",
         hierarchy_level: metadata?.csw_metadata?.hierarchy_level ?? MetadataHierarchyLevel.Dataset,
-        email_contact: metadata?.csw_metadata?.contact_email,
-        organization: metadata?.csw_metadata?.organisation_name,
-        organization_email: metadata?.csw_metadata?.organisation_email,
+        email_contact: getMetadataContact(metadata?.csw_metadata)?.organization_email,
+        organization: metadata?.csw_metadata?.producers?.[0]?.organization_name,
+        organization_email: metadata?.csw_metadata?.producers?.[0]?.organization_email,
         category: metadata?.csw_metadata?.themes ?? [],
         // category: (metadata?.csw_metadata?.themes ?? []).map((cat) => {
         //     const thematicCategory = thematicCategories.find((c) => c.code === cat || c.text === cat);

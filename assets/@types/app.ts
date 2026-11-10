@@ -401,6 +401,15 @@ export type CswMetadataTerritory = {
     bbox: number[];
 };
 
+export type CswMetadataProducer = {
+    organization_name: string;
+    organization_email: string;
+    role: string;
+    address_number_and_streetname?: string | null;
+    address_postal_code?: string | null;
+    address_city?: string | null;
+};
+
 export type CswMetadata = {
     file_identifier?: string;
     hierarchy_level?: MetadataHierarchyLevel;
@@ -414,9 +423,7 @@ export type CswMetadata = {
     keywords_inspire?: string[];
     keywords_additional?: string[];
     update_frequency?: string;
-    contact_email?: string;
-    organisation_name?: string;
-    organisation_email?: string;
+    producers?: CswMetadataProducer[];
     scale?: number;
     online_resources?: CswOnlineResource[];
     bbox?: BoundingBox | null;

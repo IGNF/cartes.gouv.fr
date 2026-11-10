@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dto\Metadata;
 
+use App\Dto\Datasheet\ProducerDTO;
 use App\Exception\AppException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -34,9 +35,8 @@ class CswMetadata
     /** @var list<string> */
     public array $themes = [];
 
-    public ?string $contact_email = null;
-    public ?string $organisation_name = null;
-    public ?string $organisation_email = null;
+    /** @var list<ProducerDTO> le premier est le point de contact ; le rôle contact est le contact des métadonnées (gmd:contact) */
+    public array $producers = [];
 
     public ?int $scale = null;
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Dto\Datasheet\ProducerDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswLanguage;
 use App\Dto\Metadata\CswMetadata;
@@ -36,9 +37,6 @@ class CswMetadataXmlReader
         'description' => self::IDENTIFICATION.'/gmd:abstract/gco:CharacterString',
         'date_creation' => self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="creation"]/gmd:date/gco:Date',
         'resource_genealogy' => 'gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:statement/gco:CharacterString',
-        'contact_email' => 'gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString',
-        'organisation_name' => self::IDENTIFICATION.'/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString',
-        'organisation_email' => self::IDENTIFICATION.'/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString',
         'thumbnail_url' => self::IDENTIFICATION.'/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString',
     ];
 
@@ -67,6 +65,7 @@ class CswMetadataXmlReader
         $scale = $this->text($xpath, self::IDENTIFICATION.'/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer', $root);
         $metadata->scale = null === $scale ? null : (int) $scale;
 
+        $metadata->producers = $this->producers($xpath, $root);
         $metadata->themes = $this->texts($xpath, self::IDENTIFICATION.'/gmd:topicCategory/gmd:MD_TopicCategoryCode', $root);
         [$metadata->keywords_inspire, $metadata->keywords_additional] = $this->keywords($xpath, $root);
         $metadata->bbox = $this->bbox($xpath, $root);
@@ -166,6 +165,51 @@ class CswMetadataXmlReader
         }
 
         return [$inspire, $free];
+    }
+
+    /**
+     * Points de contact de la ressource, puis le contact des métadonnées sous le rôle contact.
+     *
+     * @return list<ProducerDTO>
+     */
+    private function producers(\DOMXPath $xpath, \DOMElement $root): array
+    {
+        $producers = [];
+        foreach ($this->elements($xpath, self::IDENTIFICATION.'/gmd:pointOfContact/gmd:CI_ResponsibleParty', $root) as $party) {
+            // fichier d’avant la refonte : organisation unique sans rôle
+            $producers[] = $this->producer($xpath, $party, $this->text($xpath, 'gmd:role/gmd:CI_RoleCode/@codeListValue', $party) ?: 'pointOfContact');
+        }
+        // le formulaire verrouille le point de contact en première position
+        usort($producers, fn (ProducerDTO $a, ProducerDTO $b) => ('pointOfContact' === $b->role) <=> ('pointOfContact' === $a->role));
+
+        $contact = $this->elements($xpath, 'gmd:contact/gmd:CI_ResponsibleParty', $root)[0] ?? null;
+        if (null !== $contact) {
+            $producers[] = $this->producer($xpath, $contact, 'contact');
+        }
+
+        // gestionnaire et contact sont copiés du point de contact à la soumission : la copie est repliée à la lecture
+        $pointOfContact = $producers[0] ?? null;
+
+        return array_values(array_filter($producers, fn (ProducerDTO $producer) => !(
+            $pointOfContact instanceof ProducerDTO
+            && 'pointOfContact' === $pointOfContact->role
+            && in_array($producer->role, ['contact', 'custodian'], true)
+            && $producer->sameOrganizationAs($pointOfContact)
+        )));
+    }
+
+    private function producer(\DOMXPath $xpath, \DOMElement $party, string $role): ProducerDTO
+    {
+        $address = 'gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/';
+
+        return new ProducerDTO(
+            $this->text($xpath, 'gmd:organisationName/gco:CharacterString', $party) ?? '',
+            $this->text($xpath, $address.'gmd:electronicMailAddress/gco:CharacterString', $party) ?? '',
+            $role,
+            $this->text($xpath, $address.'gmd:deliveryPoint/gco:CharacterString', $party),
+            $this->text($xpath, $address.'gmd:postalCode/gco:CharacterString', $party),
+            $this->text($xpath, $address.'gmd:city/gco:CharacterString', $party),
+        );
     }
 
     /**

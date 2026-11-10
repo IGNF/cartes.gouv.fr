@@ -10,6 +10,7 @@ import { catalogueUrl } from "@/env";
 import useMembership from "@/hooks/useMembership";
 import { getThematicCategories } from "@/utils";
 import { MetadataHierarchyLevel, type CswOnlineResourceType, type Metadata } from "../../../../../@types/app";
+import { getMetadataContact } from "@/utils/metadata";
 import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipboard";
@@ -193,12 +194,12 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Contact sur les métadonnées"}>
-                            <MetadataField title={"Adresse électronique"} content={metadata.csw_metadata?.contact_email} />
+                            <MetadataField title={"Adresse électronique"} content={getMetadataContact(metadata.csw_metadata)?.organization_email} />
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Responsable de la ressource"}>
-                            <MetadataField title={"Organisme"} content={metadata.csw_metadata?.organisation_name} />
-                            <MetadataField title={"Adresse électronique"} content={metadata.csw_metadata?.organisation_email} />
+                            <MetadataField title={"Organisme"} content={metadata.csw_metadata?.producers?.[0]?.organization_name} />
+                            <MetadataField title={"Adresse électronique"} content={metadata.csw_metadata?.producers?.[0]?.organization_email} />
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Accès à la ressource"}>
