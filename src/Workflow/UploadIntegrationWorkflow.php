@@ -284,7 +284,7 @@ class UploadIntegrationWorkflow
             ],
         ];
 
-        if (isset($upload['tags']['email_notification']) && filter_var($upload['tags']['email_notification'], FILTER_VALIDATE_BOOLEAN)) {
+        if (isset($upload['tags'][CommonTags::EMAIL_NOTIFICATION]) && filter_var($upload['tags'][CommonTags::EMAIL_NOTIFICATION], FILTER_VALIDATE_BOOLEAN)) {
             /** @var User|null */
             $user = $this->security->getUser();
             $userEmail = $user?->getEmail();
@@ -318,19 +318,33 @@ class UploadIntegrationWorkflow
         $tags = [
             'upload_id' => $upload['_id'],
             'proc_int_id' => $processingExec['_id'],
-            CommonTags::DATASHEET_NAME => $upload['tags'][CommonTags::DATASHEET_NAME],
+            ...self::forwardedTags($upload['tags']),
         ];
-        if (isset($upload['tags'][CommonTags::PRODUCER])) {
-            $tags[CommonTags::PRODUCER] = $upload['tags'][CommonTags::PRODUCER];
-        }
-        if (isset($upload['tags'][CommonTags::PRODUCTION_YEAR])) {
-            $tags[CommonTags::PRODUCTION_YEAR] = $upload['tags'][CommonTags::PRODUCTION_YEAR];
-        }
         $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], $tags)->await();
 
         $this->processingApiService->launchExecution($datastoreId, $processingExec['_id'])->await();
 
         return true;
+    }
+
+    /**
+     * Tags métier de la livraison recopiés sur la donnée stockée.
+     *
+     * @param array<string, mixed> $uploadTags
+     *
+     * @return array<string, mixed>
+     */
+    public static function forwardedTags(array $uploadTags): array
+    {
+        return array_intersect_key($uploadTags, array_flip([
+            CommonTags::DATASHEET_NAME,
+            CommonTags::PRODUCER,
+            CommonTags::PRODUCER_SHORT,
+            CommonTags::PRODUCTION_YEAR,
+            CommonTags::PRODUCTION_DATE,
+            CommonTags::THEME_CATEGORIES,
+            CommonTags::ZONE,
+        ]));
     }
 
     /**
