@@ -114,6 +114,44 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
         self::assertSame('Fiche', $this->readWritten($apiMetadata['_id'])->name);
     }
 
+    public function testCreationFromReplacementKeepsTheExistingThumbnail(): void
+    {
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'stored-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
+        $this->seedOldThumbnail();
+
+        $apiMetadata = $this->service->replace(self::DATASTORE_ID, 'Fiche', $this->dto(), $this->noServices(), null, false);
+
+        self::assertStringEndsWith('thumbnail/ancienne.png', (string) $this->readWritten($apiMetadata['_id'])->thumbnail_url);
+        self::assertSame(['annexe-ancienne'], array_column(EntrepotMockResponseFactory::stored('annexes'), '_id'));
+    }
+
+    public function testCreationFromReplacementReplacesTheExistingThumbnail(): void
+    {
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'stored-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
+        $this->seedOldThumbnail();
+
+        $apiMetadata = $this->service->replace(self::DATASTORE_ID, 'Fiche', $this->dto(), $this->noServices(), $this->thumbnail(), false);
+
+        $annexes = EntrepotMockResponseFactory::stored('annexes');
+        self::assertCount(1, $annexes);
+        self::assertNotSame('annexe-ancienne', $annexes[0]['_id']);
+        self::assertStringEndsWith($annexes[0]['paths'][0], (string) $this->readWritten($apiMetadata['_id'])->thumbnail_url);
+    }
+
+    // nouvelle vignette écrite d’abord, ancienne supprimée ensuite
+    public function testReplacementReplacesTheThumbnail(): void
+    {
+        $this->seedExistingMetadata();
+        $this->seedOldThumbnail();
+
+        $this->service->replace(self::DATASTORE_ID, 'Fiche', $this->dto(), $this->noServices(), $this->thumbnail(), false);
+
+        $annexes = EntrepotMockResponseFactory::stored('annexes');
+        self::assertCount(1, $annexes);
+        self::assertNotSame('annexe-ancienne', $annexes[0]['_id']);
+        self::assertStringEndsWith($annexes[0]['paths'][0], (string) $this->readWritten('metadata-1')->thumbnail_url);
+    }
+
     public function testReplacementOfAnUnknownDatasheetAnswers404(): void
     {
         $this->assertHttpError(404, fn () => $this->service->replace(self::DATASTORE_ID, 'Fiche', $this->dto(), $this->noServices(), null, false));
@@ -136,7 +174,7 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
     public function testReplacementDeletesTheThumbnailOnRequest(): void
     {
         $this->seedExistingMetadata();
-        EntrepotMockResponseFactory::seed('annexes', ['_id' => 'annexe-ancienne', 'paths' => ['thumbnail/ancienne.png'], 'labels' => ['datasheet_name=Fiche', 'type=thumbnail']]);
+        $this->seedOldThumbnail();
 
         $this->service->replace(self::DATASTORE_ID, 'Fiche', $this->dto(), $this->noServices(), null, true);
 
@@ -164,6 +202,11 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
         $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', $this->noServices());
 
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    private function seedOldThumbnail(): void
+    {
+        EntrepotMockResponseFactory::seed('annexes', ['_id' => 'annexe-ancienne', 'paths' => ['thumbnail/ancienne.png'], 'labels' => ['datasheet_name=Fiche', 'type=thumbnail']]);
     }
 
     private function seedExistingMetadata(): void

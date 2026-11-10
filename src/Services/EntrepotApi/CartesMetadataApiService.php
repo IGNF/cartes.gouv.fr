@@ -117,7 +117,18 @@ class CartesMetadataApiService
             $metadata = $this->mapper->map($dto);
             $this->replaceServiceResources($metadata, $datastoreId, $services);
 
-            return $this->createMetadata($datastoreId, $datasheetName, $metadata, $thumbnail);
+            // vignette déjà déposée depuis l’en-tête de la fiche : gardée, remplacée ou supprimée comme pour une fiche existante
+            $oldThumbnails = $this->thumbnailAnnexes($datastoreId, $datasheetName);
+            if (!$thumbnail instanceof UploadedFile && !$deleteThumbnail && [] !== $oldThumbnails) {
+                $metadata->thumbnail_url = $this->annexeApiService->getAbsoluteUrl($datastoreId, $oldThumbnails[0]);
+            }
+
+            $apiMetadata = $this->createMetadata($datastoreId, $datasheetName, $metadata, $thumbnail);
+            if ($thumbnail instanceof UploadedFile || $deleteThumbnail) {
+                $this->removeAnnexes($datastoreId, $oldThumbnails);
+            }
+
+            return $apiMetadata;
         }
 
         $existing = $this->readMetadata($datastoreId, $apiMetadata);
