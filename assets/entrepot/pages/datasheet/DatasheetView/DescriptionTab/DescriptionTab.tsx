@@ -63,16 +63,15 @@ export default function DescriptionTab({ datastoreId, datasheetName, metadataQue
                 existingThumbnailUrl={csw?.thumbnail_url}
                 fileIdentifierLocked={!!csw?.file_identifier}
                 onSubmit={(values) => replaceMutation.mutateAsync(values)}
-                renderTopActions={({ isSubmitting }) => (
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-2w")}>
-                        <h2 className={fr.cx("fr-h4", "fr-col", "fr-mb-0")}>{t("title")}</h2>
-                        {canEdit && (
-                            <Button type="submit" disabled={isSubmitting} iconId="fr-icon-save-line">
+                renderTopActions={({ isSubmitting }) =>
+                    canEdit && (
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mb-5w")}>
+                            <Button type="submit" priority="secondary" disabled={isSubmitting}>
                                 {isSubmitting ? t("saving") : t("save")}
                             </Button>
-                        )}
-                    </div>
-                )}
+                        </div>
+                    )
+                }
             />
         </>
     );

@@ -1,12 +1,11 @@
 import { declareComponentKeys } from "@/i18n";
 import { type Translations } from "@/i18n/types";
 
-const { i18n } = declareComponentKeys<"title" | "save" | "saving" | "saved" | "error_title" | "read_only">()("DescriptionTab");
+const { i18n } = declareComponentKeys<"save" | "saving" | "saved" | "error_title" | "read_only">()("DescriptionTab");
 
 export type I18n = typeof i18n;
 
 export const DescriptionTabFrTranslations: Translations<"fr">["DescriptionTab"] = {
-    title: "Description",
     save: "Enregistrer",
     saving: "Enregistrement en cours",
     saved: "Les modifications ont été enregistrées.",
@@ -15,7 +14,6 @@ export const DescriptionTabFrTranslations: Translations<"fr">["DescriptionTab"] 
 };
 
 export const DescriptionTabEnTranslations: Translations<"en">["DescriptionTab"] = {
-    title: "Description",
     save: "Save",
     saving: "Saving",
     saved: "Your changes have been saved.",
