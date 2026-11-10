@@ -1,7 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { FC, useCallback, useEffect, useMemo } from "react";
@@ -10,31 +9,11 @@ import { UploadIntegration } from "@/@types/app";
 import { getApiErrorMessage } from "@/modules/apiError";
 import { type ApiError } from "@/modules/jsonFetch";
 import { shouldAdvanceIntegration } from "@/utils";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 import { DatasheetViewActiveTabEnum } from "../../DatasheetView/DatasheetView/types";
-
-const getStepIcon = (status: string) => {
-    let icon = <span className={fr.cx("fr-icon-time-line")} />;
-
-    switch (status) {
-        case "in_progress":
-            icon = <LoadingIcon />;
-            break;
-        case "successful":
-            icon = <span className={fr.cx("fr-icon-checkbox-line")} />;
-            break;
-        case "failed":
-            icon = <span className={fr.cx("fr-icon-close-circle-line")} />;
-            break;
-        case "waiting":
-        default:
-            break;
-    }
-    return icon;
-};
+import DatasheetUploadIntegrationView from "./DatasheetUploadIntegrationView";
 
 // étape affichée « en cours » pendant que son action s’exécute côté serveur
 const STEP_OF_ACTION: Partial<Record<NonNullable<UploadIntegration["next_action"]>, string>> = {
@@ -153,102 +132,22 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                 />
             )}
 
-            {failed ? (
-                <div className={fr.cx("fr-grid-row")}>
-                    <div className={fr.cx("fr-col")}>
-                        <h6 className={fr.cx("fr-h6")}>
-                            <i className={fr.cx("fr-icon-close-circle-line", "fr-icon--lg")} /> {"L’intégration de vos données a échoué"}
-                        </h6>
-                    </div>
-                </div>
-            ) : (
-                <>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <div className={fr.cx("fr-col")}>
-                            <h6 className={fr.cx("fr-h6")}>
-                                <LoadingIcon largeIcon={true} /> {t("data_integration_in_progress")}
-                            </h6>
-                        </div>
-                    </div>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <div className={fr.cx("fr-col")}>
-                            <p>{t("long_operation_information")}</p>
-                        </div>
-                    </div>
-                </>
-            )}
-
-            <div className={fr.cx("fr-grid-row", "fr-px-4w")}>
-                <div className={fr.cx("fr-col", "fr-col--middle")}>
-                    {steps?.map(([step, status]) => (
-                        <div className={fr.cx("fr-grid-row")} key={step}>
-                            <p>
-                                {getStepIcon(status)}
-                                &nbsp;{t("step_title", { step_name: step })} : {t("step_status_text", { step_status: status })}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {processingLaunched && <p>{t("continue_browsing_data_not_ready")}</p>}
-
-            {(successful || processingLaunched) && integrationDatasheetName !== undefined && (
-                <div className={fr.cx("fr-grid-row")}>
-                    <ButtonsGroup
-                        buttons={[
-                            {
-                                children: "Consulter la fiche de données",
-                                onClick: () => {
-                                    void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, integrationDatasheetName) });
-                                    void goToDatasheet(integrationDatasheetName);
-                                },
-                            },
-                        ]}
-                        inlineLayoutWhen="always"
-                    />
-                </div>
-            )}
-
-            {failed && integrationDatasheetName !== undefined && (
-                <div className={fr.cx("fr-grid-row")}>
-                    <ButtonsGroup
-                        buttons={[
-                            {
-                                children: t("view_datasheet"),
-                                onClick: () => {
-                                    void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, integrationDatasheetName) });
-                                    void goToDatasheet(integrationDatasheetName);
-                                },
-                            },
-                        ]}
-                        inlineLayoutWhen="always"
-                    />
-                </div>
-            )}
-
-            {failed && integration?.vectordb_id && (
-                <div className={fr.cx("fr-grid-row")}>
-                    <ButtonsGroup
-                        buttons={[
-                            {
-                                children: t("check_error_report"),
-                                linkProps: {
-                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
-                                    params: { datastoreId, storedDataId: integration.vectordb_id },
-                                    search: { datasheetName },
-                                },
-                            },
-                            {
-                                children: t("back_to_datasheet_list"),
-                                linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } },
-                                priority: "secondary",
-                            },
-                        ]}
-                        inlineLayoutWhen="always"
-                    />
-                </div>
-            )}
+            <DatasheetUploadIntegrationView
+                datastoreId={datastoreId}
+                datasheetName={datasheetName}
+                steps={steps}
+                failed={failed}
+                processingLaunched={processingLaunched}
+                vectorDbId={integration?.vectordb_id ?? undefined}
+                onDatasheetViewClick={
+                    (successful || processingLaunched || failed) && integrationDatasheetName !== undefined
+                        ? () => {
+                              void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, integrationDatasheetName) });
+                              void goToDatasheet(integrationDatasheetName);
+                          }
+                        : undefined
+                }
+            />
         </div>
     );
 };
