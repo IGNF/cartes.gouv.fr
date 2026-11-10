@@ -221,7 +221,13 @@ class CartesMetadataApiService
         $apiMetadata = $this->withThumbnailRollback($datastoreId, $annexe, function () use ($datastoreId, $datasheetName, $metadata) {
             $apiMetadata = $this->metadataApiService->add($datastoreId, $this->cswMetadataWriter->saveToFile($metadata));
 
-            return $this->metadataApiService->addTags($datastoreId, $apiMetadata['_id'], [CommonTags::DATASHEET_NAME => $datasheetName])->array();
+            try {
+                return $this->metadataApiService->addTags($datastoreId, $apiMetadata['_id'], [CommonTags::DATASHEET_NAME => $datasheetName])->array();
+            } catch (\Throwable $e) {
+                // sans étiquette, aucune fiche ne la montre et son identifiant resterait pris
+                $this->metadataApiService->delete($datastoreId, $apiMetadata['_id'])->await();
+                throw $e;
+            }
         });
         $apiMetadata['csw_metadata'] = $metadata;
 

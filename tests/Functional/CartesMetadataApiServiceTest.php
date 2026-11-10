@@ -84,6 +84,15 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
         self::assertCount(1, $this->requestsTo('annexes/annexe-1', 'DELETE'));
     }
 
+    // une fiche de métadonnées sans étiquette resterait invisible et garderait son identifiant
+    public function testUntaggedMetadataIsDeletedWhenTaggingFails(): void
+    {
+        EntrepotMockResponseFactory::failNext('POST metadata/metadata-1/tags');
+
+        $this->assertHttpError(500, fn () => $this->service->create(self::DATASTORE_ID, $this->dto(), null));
+        self::assertSame([], EntrepotMockResponseFactory::stored('metadata'));
+    }
+
     public function testCreationWithAThumbnailWritesItsUrl(): void
     {
         $apiMetadata = $this->service->create(self::DATASTORE_ID, $this->dto(), $this->thumbnail());
