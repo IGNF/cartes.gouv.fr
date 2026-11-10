@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace App\Dto\Services\Form;
 
 use App\Constants\ServiceAccess;
+use App\Dto\Upload\UploadAddDTO;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /** Champs communs du formulaire de publication d’un flux. */
 abstract class ServiceFormDTO
 {
-    /** limite Entrepôt d’une valeur de tag : les thématiques sont jointes par « , » dans le tag `theme` */
-    public const TAG_VALUE_MAX_LENGTH = 99;
-
     /**
      * @param string[] $themes
      */
@@ -40,8 +38,8 @@ abstract class ServiceFormDTO
     #[Assert\Callback]
     public function validateThemesTagLength(ExecutionContextInterface $context): void
     {
-        if (mb_strlen(implode(', ', $this->themes)) > self::TAG_VALUE_MAX_LENGTH) {
-            $context->buildViolation(sprintf('Retirez des thématiques : la sélection dépasse la limite de %d caractères', self::TAG_VALUE_MAX_LENGTH))
+        if (mb_strlen(implode(', ', $this->themes)) > UploadAddDTO::TAG_VALUE_MAX_LENGTH) {
+            $context->buildViolation(sprintf('Retirez des thématiques : la sélection dépasse la limite de %d caractères', UploadAddDTO::TAG_VALUE_MAX_LENGTH))
                 ->atPath('themes')
                 ->addViolation();
         }
