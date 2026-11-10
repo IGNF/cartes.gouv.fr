@@ -50,6 +50,21 @@ final class DatasheetMetadataRoutesTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('metadata'));
     }
 
+    public function testThumbnailOver2MbAnswers422OnTheThumbnailField(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+        $path = (string) tempnam(sys_get_temp_dir(), 'vignette');
+        // PNG valide suivi de 2 Mo de remplissage : le type passe, la taille non
+        file_put_contents($path, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', true).str_repeat("\0", 2 * 1024 * 1024));
+
+        $client->xmlHttpRequest('POST', self::DATASTORE_URL.'/datasheet', ['data' => json_encode(self::payload(), JSON_THROW_ON_ERROR)], ['thumbnail' => new UploadedFile($path, 'vignette.png', 'image/png', null, true)]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['thumbnail'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
+    }
+
     public function testFileIdentifierCheckAnswers204WhenFreeAnd409WhenTaken(): void
     {
         $client = self::createClient();
