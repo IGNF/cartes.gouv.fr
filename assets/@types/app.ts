@@ -126,6 +126,8 @@ export interface StoredData extends StoredDataPrivateDetailResponseDto {
         datasheet_name?: string;
         producer?: string;
         production_year?: string;
+        /** thématiques choisies au dépôt, jointes par « , » */
+        theme?: string;
     };
 }
 export {

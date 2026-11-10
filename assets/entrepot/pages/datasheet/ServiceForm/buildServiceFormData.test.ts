@@ -22,7 +22,7 @@ const values: ServiceFormOutput = {
     ],
 };
 
-const payloadOf = (formData: FormData) => JSON.parse(formData.get("data") as string);
+const payloadOf = (formData: FormData) => JSON.parse(formData.get("data") as string) as Record<string, unknown>;
 
 describe("buildServiceFormData", () => {
     it("n’envoie que les tables cochées et aucune attribution quand la case est décochée", () => {
