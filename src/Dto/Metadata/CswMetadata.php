@@ -6,6 +6,7 @@ namespace App\Dto\Metadata;
 
 use App\Dto\Datasheet\ProducerDTO;
 use App\Dto\Datasheet\ResourceConditionDTO;
+use App\Dto\Datasheet\TerritoryDTO;
 use App\Exception\AppException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -25,6 +26,8 @@ class CswMetadata
     public ?string $name = null;
     public ?string $description = null;
     public ?string $date_creation = null;
+    public ?string $date_publication = null;
+    public ?string $date_revision = null;
     public ?string $resource_genealogy = null;
 
     /** @var list<string> */
@@ -42,13 +45,16 @@ class CswMetadata
     /** @var list<ResourceConditionDTO> chaque restriction d’usage ou d’accès est suivie de sa sous-contrainte compagne */
     public array $resource_constraints = [];
 
+    // dénominateur de l’échelle équivalente (md_resolutions.json)
     public ?int $scale = null;
+    // distance au sol en mètres
+    public ?float $resolution = null;
 
     /** @var list<CswOnlineResource> couches, styles, GetCapabilities et documents, dans cet ordre */
     public array $online_resources = [];
 
-    /** @var array{west: float, east: float, south: float, north: float}|null */
-    public ?array $bbox = null;
+    /** @var list<TerritoryDTO> une emprise par territoire, avec son identifiant géographique */
+    public array $territories = [];
 
     public ?string $thumbnail_url = null;
     public ?string $update_frequency = 'unknown';

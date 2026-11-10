@@ -46,7 +46,8 @@ final class CswMetadataXmlReaderTest extends TestCase
             new ProducerDTO('', 'contact@example.test', 'contact'),
         ], $metadata->producers);
         self::assertSame(100, $metadata->scale);
-        self::assertSame(['west' => -5.5, 'east' => 9.5, 'south' => 41.0, 'north' => 51.5], $metadata->bbox);
+        // emprise calculée sans identifiant géographique : ignorée
+        self::assertSame([], $metadata->territories);
         self::assertSame('https://annexes.example.test/thumb.png', $metadata->thumbnail_url);
         self::assertSame('monthly', $metadata->update_frequency);
 
@@ -132,9 +133,9 @@ final class CswMetadataXmlReaderTest extends TestCase
         $this->reader->read(CswMetadataFixtures::xml('md-legacy-no-language'));
     }
 
-    public function testMissingBboxCoordinateIsRejectedNamingIt(): void
+    public function testMissingTerritoryCoordinateIsRejectedNamingIt(): void
     {
-        $xml = preg_replace('#<gmd:northBoundLatitude>.*?</gmd:northBoundLatitude>#s', '', CswMetadataFixtures::xml('md-legacy-type-attributes'));
+        $xml = preg_replace('#<gmd:northBoundLatitude>.*?</gmd:northBoundLatitude>#s', '', CswMetadataFixtures::xml('expected-full'));
 
         $this->expectException(InvalidCswMetadataException::class);
         $this->expectExceptionMessage('northBoundLatitude');

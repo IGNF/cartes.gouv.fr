@@ -19,6 +19,9 @@ class DatasheetMetadataDTO
         'biannually', 'annually', 'asNeeded', 'irregular', 'notPlanned', 'unknown',
     ];
 
+    /** @var int[] dénominateurs d’échelle proposés par le formulaire (assets/data/md_resolutions.json) */
+    public const SCALES = [100, 200, 500, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000, 5000000, 10000000];
+
     /** @var string[] */
     public const HIERARCHY_LEVELS = ['dataset', 'series'];
 
@@ -78,6 +81,13 @@ class DatasheetMetadataDTO
         #[Assert\Valid]
         #[Assert\Count(min: 1, minMessage: 'Sélectionnez au moins un territoire')]
         public readonly array $territories = [],
+
+        #[Assert\NotNull(message: 'L’échelle est obligatoire')]
+        #[Assert\Choice(choices: self::SCALES, message: 'L’échelle est invalide')]
+        public readonly ?int $scale = null,
+
+        #[Assert\Positive(message: 'La résolution doit être un nombre positif')]
+        public readonly ?float $resolution = null,
 
         // Section licences
         #[Assert\Valid]

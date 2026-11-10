@@ -36,9 +36,9 @@ final class SerializerContractTest extends KernelTestCase
         $json = self::getContainer()->get('serializer')->normalize(CswMetadataFixtures::full());
 
         self::assertSame([
-            'file_identifier', 'hierarchy_level', 'language', 'charset', 'name', 'description', 'date_creation', 'resource_genealogy',
-            'keywords_inspire', 'keywords_additional', 'themes', 'producers', 'resource_constraints', 'scale',
-            'online_resources', 'bbox', 'thumbnail_url', 'update_frequency',
+            'file_identifier', 'hierarchy_level', 'language', 'charset', 'name', 'description', 'date_creation', 'date_publication', 'date_revision',
+            'resource_genealogy', 'keywords_inspire', 'keywords_additional', 'themes', 'producers', 'resource_constraints', 'scale', 'resolution',
+            'online_resources', 'territories', 'thumbnail_url', 'update_frequency',
         ], array_keys($json));
         self::assertSame('dataset', $json['hierarchy_level']);
         self::assertSame(['code' => 'fre', 'language' => 'français'], $json['language']);

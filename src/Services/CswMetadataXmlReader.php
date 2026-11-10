@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Dto\Datasheet\ProducerDTO;
 use App\Dto\Datasheet\ResourceConditionDTO;
 use App\Dto\Datasheet\SubConstraintDTO;
+use App\Dto\Datasheet\TerritoryDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswLanguage;
 use App\Dto\Metadata\CswMetadata;
@@ -28,6 +29,7 @@ class CswMetadataXmlReader
     ];
 
     private const IDENTIFICATION = 'gmd:identificationInfo/gmd:MD_DataIdentification';
+    private const CITATION_DATE = self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date';
     private const ONLINE_RESOURCES = 'gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine';
     private const RESTRICTED_ACCESS_PROFILE = 'http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceType/other';
 
@@ -37,7 +39,9 @@ class CswMetadataXmlReader
         'charset' => 'gmd:characterSet/gmd:MD_CharacterSetCode/@codeListValue',
         'name' => self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString',
         'description' => self::IDENTIFICATION.'/gmd:abstract/gco:CharacterString',
-        'date_creation' => self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="creation"]/gmd:date/gco:Date',
+        'date_creation' => self::CITATION_DATE.'[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="creation"]/gmd:date/gco:Date',
+        'date_publication' => self::CITATION_DATE.'[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="publication"]/gmd:date/gco:Date',
+        'date_revision' => self::CITATION_DATE.'[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="revision"]/gmd:date/gco:Date',
         'resource_genealogy' => 'gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:statement/gco:CharacterString',
         'thumbnail_url' => self::IDENTIFICATION.'/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString',
     ];
@@ -64,14 +68,17 @@ class CswMetadataXmlReader
         // fiches publiées avec l’ancienne faute de frappe « quaterly »
         $metadata->update_frequency = 'quaterly' === $frequencyCode ? 'quarterly' : $frequencyCode;
 
+        // premier bloc de chaque sorte : échelle équivalente, distance en mètres
         $scale = $this->text($xpath, self::IDENTIFICATION.'/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer', $root);
         $metadata->scale = null === $scale ? null : (int) $scale;
+        $resolution = $this->text($xpath, self::IDENTIFICATION.'/gmd:spatialResolution/gmd:MD_Resolution/gmd:distance/gco:Distance', $root);
+        $metadata->resolution = null === $resolution ? null : (float) $resolution;
 
         $metadata->producers = $this->producers($xpath, $root);
         $metadata->resource_constraints = $this->resourceConstraints($xpath, $root);
         $metadata->themes = $this->texts($xpath, self::IDENTIFICATION.'/gmd:topicCategory/gmd:MD_TopicCategoryCode', $root);
         [$metadata->keywords_inspire, $metadata->keywords_additional] = $this->keywords($xpath, $root);
-        $metadata->bbox = $this->bbox($xpath, $root);
+        $metadata->territories = $this->territories($xpath, $root);
         $metadata->online_resources = $this->onlineResources($xpath, $root);
 
         return $metadata;
@@ -286,27 +293,33 @@ class CswMetadataXmlReader
     }
 
     /**
-     * @return array{west: float, east: float, south: float, north: float}|null
+     * @return list<TerritoryDTO>
      */
-    private function bbox(\DOMXPath $xpath, \DOMElement $root): ?array
+    private function territories(\DOMXPath $xpath, \DOMElement $root): array
     {
-        $bbox = $this->elements($xpath, self::IDENTIFICATION.'/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', $root)[0] ?? null;
-        if (null === $bbox) {
-            return null;
+        $territories = [];
+        foreach ($this->elements($xpath, self::IDENTIFICATION.'/gmd:extent/gmd:EX_Extent', $root) as $extent) {
+            $id = $this->text($xpath, 'gmd:geographicElement/gmd:EX_GeographicDescription/gmd:geographicIdentifier/gmd:MD_Identifier/gmd:code/gco:CharacterString', $extent);
+            $box = $this->elements($xpath, 'gmd:geographicElement/gmd:EX_GeographicBoundingBox', $extent)[0] ?? null;
+            // emprise calculée d’avant la refonte, sans identifiant géographique : ignorée
+            if (null === $id || null === $box) {
+                continue;
+            }
+
+            $coordinate = function (string $tagName) use ($xpath, $box): float {
+                $value = $this->text($xpath, "gmd:$tagName/gco:Decimal", $box);
+
+                return (float) ($value ?? throw new InvalidCswMetadataException("coordonnée $tagName absente de l’emprise"));
+            };
+
+            $territories[] = new TerritoryDTO(
+                $id,
+                $this->text($xpath, 'gmd:description/gco:CharacterString', $extent) ?? $id,
+                [$coordinate('westBoundLongitude'), $coordinate('southBoundLatitude'), $coordinate('eastBoundLongitude'), $coordinate('northBoundLatitude')],
+            );
         }
 
-        $coordinate = function (string $tagName) use ($xpath, $bbox): float {
-            $value = $this->text($xpath, "gmd:$tagName/gco:Decimal", $bbox);
-
-            return floatval($value ?? throw new InvalidCswMetadataException("coordonnée $tagName absente de l’emprise"));
-        };
-
-        return [
-            'west' => $coordinate('westBoundLongitude'),
-            'east' => $coordinate('eastBoundLongitude'),
-            'south' => $coordinate('southBoundLatitude'),
-            'north' => $coordinate('northBoundLatitude'),
-        ];
+        return $territories;
     }
 
     /**

@@ -7,6 +7,7 @@ namespace App\Tests\Support;
 use App\Dto\Datasheet\ProducerDTO;
 use App\Dto\Datasheet\ResourceConditionDTO;
 use App\Dto\Datasheet\SubConstraintDTO;
+use App\Dto\Datasheet\TerritoryDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswMetadata;
 use App\Dto\Metadata\CswOnlineResource;
@@ -35,6 +36,8 @@ final class CswMetadataFixtures
         $metadata->name = 'Titre';
         $metadata->description = 'Résumé';
         $metadata->date_creation = '2024-01-15';
+        $metadata->date_publication = '2024-02-01';
+        $metadata->date_revision = '2024-03-01';
         $metadata->resource_genealogy = 'Généalogie';
         $metadata->keywords_inspire = ['Occupation des terres'];
         $metadata->keywords_additional = ['libre', 'autre'];
@@ -65,7 +68,11 @@ final class CswMetadataFixtures
             new ResourceConditionDTO('other', [new SubConstraintDTO('useLimitation', description: 'Usage interne')]),
         ];
         $metadata->scale = 100;
-        $metadata->bbox = ['west' => -5.5, 'east' => 9.5, 'south' => 41.0, 'north' => 51.5];
+        $metadata->territories = [
+            new TerritoryDTO('COMMUNE_TEST_1', 'Commune test', [2.25, 48.8, 2.45, 48.9]),
+            new TerritoryDTO('COMMUNE_TEST_2', 'Commune d’outre-mer', [-61.8, 15.8, -61.0, 16.5]),
+        ];
+        $metadata->resolution = 0.5;
         $metadata->online_resources = [
             CswOnlineResource::layer('ns:couche', 'OGC:WFS', 'https://data.example.test/wfs', true),
             CswOnlineResource::layer('couche_privee', 'OGC:WMS', 'https://data.example.test/wms-v', false, 'couche_privee - Accès restreint'),

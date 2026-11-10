@@ -10,7 +10,7 @@ import { catalogueUrl } from "@/env";
 import useMembership from "@/hooks/useMembership";
 import { getThematicCategories } from "@/utils";
 import { MetadataHierarchyLevel, type CswOnlineResourceType, type Metadata } from "../../../../../@types/app";
-import { getMetadataContact } from "@/utils/metadata";
+import { getMetadataContact, getTerritoriesBbox } from "@/utils/metadata";
 import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipboard";
@@ -63,6 +63,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
         return `${catalogueUrl}/dataset/${metadata?.file_identifier}`;
     }, [metadata?.file_identifier, isSandbox, datastoreQuery.data?.endpoints, metadata?.endpoints]);
 
+    const territoriesBbox = getTerritoriesBbox(metadata?.csw_metadata?.territories);
     const resourcesOfType = (type: CswOnlineResourceType) => metadata?.csw_metadata?.online_resources?.filter((r) => r.type === type) ?? [];
 
     const isPublished = useMemo(
@@ -181,7 +182,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Délimitation géographique (localisation physique de la donnée)"}>
-                            <MetadataField content={!!metadata.csw_metadata?.bbox && <ExtentMap bbox={metadata.csw_metadata?.bbox} />} />
+                            <MetadataField content={territoriesBbox && <ExtentMap bbox={territoriesBbox} />} />
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Qualité"}>

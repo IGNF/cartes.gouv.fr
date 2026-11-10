@@ -39,7 +39,7 @@
         <gco:DateTime>{{ date_stamp }}</gco:DateTime>
     </gmd:dateStamp>
 
-    {% if name is not empty or description is not empty or producers|length or resource_constraints|length or themes|length or keywords_inspire|length or keywords_additional|length or scale is not empty or date_creation is not empty or thumbnail_url is not empty or update_frequency is not empty or bbox %}
+    {% if name is not empty or description is not empty or producers|length or resource_constraints|length or themes|length or keywords_inspire|length or keywords_additional|length or scale is not empty or resolution is not empty or territories|length or date_creation is not empty or thumbnail_url is not empty or update_frequency is not empty %}
         <gmd:identificationInfo>
             <gmd:MD_DataIdentification>
                 {% if name is not empty %}
@@ -50,18 +50,18 @@
                                 <gco:CharacterString>{{ name }}</gco:CharacterString>
                             </gmd:title>
 
-                            {% if date_creation is not empty %}
+                            {% for date_type, date in {creation: date_creation, publication: date_publication, revision: date_revision}|filter(d => d is not empty) %}
                                 <gmd:date>
                                     <gmd:CI_Date>
                                         <gmd:date>
-                                            <gco:Date>{{ date_creation }}</gco:Date>
+                                            <gco:Date>{{ date }}</gco:Date>
                                         </gmd:date>
                                         <gmd:dateType>
-                                            <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
+                                            <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="{{ date_type }}">{{ date_type }}</gmd:CI_DateTypeCode>
                                         </gmd:dateType>
                                     </gmd:CI_Date>
                                 </gmd:date>
-                            {% endif %}
+                            {% endfor %}
                         </gmd:CI_Citation>
                     </gmd:citation>
                 {% endif %}
@@ -206,6 +206,16 @@
                     </gmd:spatialResolution>
                 {% endif %}
 
+                {% if resolution %}
+                    <gmd:spatialResolution>
+                        <gmd:MD_Resolution>
+                            <gmd:distance>
+                                <gco:Distance uom="m">{{ resolution }}</gco:Distance>
+                            </gmd:distance>
+                        </gmd:MD_Resolution>
+                    </gmd:spatialResolution>
+                {% endif %}
+
                 {# langue de la ressource, obligatoire dans MD_DataIdentification #}
                 <gmd:language>
                     <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="{{ language.code }}">{{ language.language }}</gmd:LanguageCode>
@@ -217,28 +227,43 @@
                     </gmd:topicCategory>
                 {% endfor %}
 
-                {% if bbox %}
+                {# une emprise par territoire : libellé, rectangle WGS84 et identifiant géographique (BD TOPO ou code commune) #}
+                {% for territory in territories %}
                     <gmd:extent>
                         <gmd:EX_Extent>
+                            <gmd:description>
+                                <gco:CharacterString>{{ territory.title }}</gco:CharacterString>
+                            </gmd:description>
                             <gmd:geographicElement>
                                 <gmd:EX_GeographicBoundingBox>
                                     <gmd:westBoundLongitude>
-                                        <gco:Decimal>{{ bbox.west }}</gco:Decimal>
+                                        <gco:Decimal>{{ territory.bbox[0] }}</gco:Decimal>
                                     </gmd:westBoundLongitude>
                                     <gmd:eastBoundLongitude>
-                                        <gco:Decimal>{{ bbox.east }}</gco:Decimal>
+                                        <gco:Decimal>{{ territory.bbox[2] }}</gco:Decimal>
                                     </gmd:eastBoundLongitude>
                                     <gmd:southBoundLatitude>
-                                        <gco:Decimal>{{ bbox.south }}</gco:Decimal>
+                                        <gco:Decimal>{{ territory.bbox[1] }}</gco:Decimal>
                                     </gmd:southBoundLatitude>
                                     <gmd:northBoundLatitude>
-                                        <gco:Decimal>{{ bbox.north }}</gco:Decimal>
+                                        <gco:Decimal>{{ territory.bbox[3] }}</gco:Decimal>
                                     </gmd:northBoundLatitude>
                                 </gmd:EX_GeographicBoundingBox>
                             </gmd:geographicElement>
+                            <gmd:geographicElement>
+                                <gmd:EX_GeographicDescription>
+                                    <gmd:geographicIdentifier>
+                                        <gmd:MD_Identifier>
+                                            <gmd:code>
+                                                <gco:CharacterString>{{ territory.id }}</gco:CharacterString>
+                                            </gmd:code>
+                                        </gmd:MD_Identifier>
+                                    </gmd:geographicIdentifier>
+                                </gmd:EX_GeographicDescription>
+                            </gmd:geographicElement>
                         </gmd:EX_Extent>
                     </gmd:extent>
-                {% endif %}
+                {% endfor %}
 
             </gmd:MD_DataIdentification>
         </gmd:identificationInfo>

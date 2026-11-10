@@ -433,6 +433,8 @@ export type CswMetadata = {
     name?: string;
     description?: string;
     date_creation?: string;
+    date_publication?: string;
+    date_revision?: string;
     themes?: string[];
     keywords_inspire?: string[];
     keywords_additional?: string[];
@@ -440,8 +442,9 @@ export type CswMetadata = {
     producers?: CswMetadataProducer[];
     resource_constraints?: CswMetadataResourceConstraint[];
     scale?: number;
+    resolution?: number;
     online_resources?: CswOnlineResource[];
-    bbox?: BoundingBox | null;
+    territories?: CswMetadataTerritory[];
     thumbnail_url?: string;
 };
 
