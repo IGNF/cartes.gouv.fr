@@ -104,6 +104,11 @@ describe("buildMetadataSchema", () => {
         expect(await issuePaths(values, { isEditMode: true, fileIdentifierLocked: true })).toEqual([]);
     });
 
+    it("refuse en création un nom réservé par une page voisine", async () => {
+        expect(await issuePaths({ ...valid(), name: "creer" })).toEqual(["name validation.name.reserved"]);
+        expect(await issuePaths({ ...valid(), name: "creer" }, { isEditMode: true, fileIdentifierLocked: true })).toEqual([]);
+    });
+
     it("refuse un nom de fiche déjà pris en création", async () => {
         expect(await issuePaths(valid(), { existingDatasheetNames: ["Fiche"] })).toEqual(["name validation.name.unique"]);
     });

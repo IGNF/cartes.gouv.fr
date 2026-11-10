@@ -104,6 +104,7 @@ const { i18n } = declareComponentKeys<
     | "validation.name.required"
     | "validation.name.max"
     | "validation.name.chars"
+    | "validation.name.reserved"
     | "validation.name.unique"
     | "validation.description"
     | "validation.themes"
@@ -307,6 +308,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "validation.name.required": "Le nom de la fiche de données est obligatoire",
     "validation.name.max": "Le nom ne peut pas dépasser 99 caractères",
     "validation.name.chars": "Le nom contient des caractères non autorisés",
+    "validation.name.reserved": "Ce nom est réservé, choisissez-en un autre",
     "validation.name.unique": "Une fiche de données portant ce nom existe déjà",
     "validation.description": "La description est obligatoire",
     "validation.themes": "Sélectionnez au moins une thématique",
@@ -509,6 +511,7 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "validation.name.required": "The datasheet name is required",
     "validation.name.max": "The name cannot exceed 99 characters",
     "validation.name.chars": "The name contains forbidden characters",
+    "validation.name.reserved": "This name is reserved, choose another one",
     "validation.name.unique": "A datasheet with this name already exists",
     "validation.description": "The description is required",
     "validation.themes": "Select at least one theme",

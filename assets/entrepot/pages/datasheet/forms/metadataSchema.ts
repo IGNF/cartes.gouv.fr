@@ -79,6 +79,9 @@ export type Territory = { id: string; title: string; bbox: number[] };
 const DATASHEET_NAME_REGEX = new RegExp(regex.datasheet_name.source);
 const FILE_IDENTIFIER_REGEX = new RegExp(regex.file_identifier.source);
 
+// pages voisines de donnees/$datasheetName : une fiche de ce nom serait inatteignable
+const RESERVED_DATASHEET_NAMES = new Set(["creer", "televersement", "integration"]);
+
 const isRestriction = (type: SubConstraintType) => type === "useConstraints" || type === "accessConstraints";
 
 // champ texte facultatif : une saisie vide vaut « absent »
@@ -138,6 +141,7 @@ export const buildMetadataSchema = ({ t, isEditMode, fileIdentifierLocked = fals
             .max(99, t("validation.name.max"))
             // le nom devient l’étiquette de la fiche à la création ; les titres déjà enregistrés gardent leurs caractères
             .refine((name) => isEditMode || DATASHEET_NAME_REGEX.test(name), t("validation.name.chars"))
+            .refine((name) => isEditMode || !RESERVED_DATASHEET_NAMES.has(name), t("validation.name.reserved"))
             .refine((name) => isEditMode || !existingDatasheetNames.includes(name), t("validation.name.unique")),
         description: z.string().trim().min(1, t("validation.description")),
         // undefined = vignette inchangée ; null = supprimée ; File = nouvelle
