@@ -116,7 +116,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
 
     const filteredServices = useMemo(() => sortedServices.filter((service) => matchesTypeFilter(service, typeFilter)), [sortedServices, typeFilter]);
 
-    const { paginatedItems: pageServices, totalPages: pageCount } = usePagination(filteredServices, page, LIMIT);
+    const { paginatedItems: pageServices, totalPages: pageCount, page: currentPage } = usePagination(filteredServices, page, LIMIT);
 
     const segment = ({ value, label }: (typeof FILTERS)[number]) => ({
         label: label ?? t("filter.all"),
@@ -333,7 +333,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                             <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-4w")}>
                                 <Pagination
                                     count={pageCount}
-                                    defaultPage={page}
+                                    defaultPage={currentPage}
                                     showFirstLast
                                     getPageLinkProps={(pageNumber) => ({
                                         href: "#",
