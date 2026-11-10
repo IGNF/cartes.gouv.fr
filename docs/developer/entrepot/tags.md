@@ -4,14 +4,15 @@ Certaines entités portent une propriété `tags`, qui est un dictionnaire clé/
 
 ## `upload`
 
-| tag                        | description                                                                                                                                               |         |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `datasheet_name`           | nom de la fiche de donnée                                                                                                                                 | string  |
-| `proc_int_id`              | identifiant de l'exécution du traitement "Intégration de données vecteur livrées en base"                                                                 | uuidv4  |
-| `vectordb_id`              | identifiant de la donnée stockée en sortie du traitement `proc_int_id`                                                                                    | uuidv4  |
-| `data_upload_path`         | chemin vers le fichier téléversé                                                                                                                          |         |
-| `integration_progress`     | progression de l'intégration en base de données (envoi du fichier téléversé à l'API, attente des vérifications et puis le traitement d'intégration en BD) | json(1) |
-| `integration_current_step` | numéro de l'étape courante de integration_progress                                                                                                        | number  |
+| tag                | description                                                                               |             |
+| ------------------ | ----------------------------------------------------------------------------------------- | ----------- |
+| `datasheet_name`   | nom de la fiche de donnée                                                                 | string      |
+| `proc_int_id`      | identifiant de l'exécution du traitement "Intégration de données vecteur livrées en base" | uuidv4      |
+| `vectordb_id`      | identifiant de la donnée stockée en sortie du traitement `proc_int_id`                    | uuidv4      |
+| `data_upload_path` | chemin vers le fichier téléversé                                                          |             |
+| `file_tree`        | arborescence des fichiers, écrite juste avant la suppression de la livraison              | json encodé |
+
+La progression de l'intégration n'est pas un tag : le backend la calcule à chaque lecture (voir [workflow d'intégration](../workflows/upload-integration-vector/README.md)). Les livraisons antérieures portent encore `integration_progress` et `integration_current_step`, que plus rien ne lit.
 
 Tags métier posés à la déclaration de livraison (formulaire « Ajouter une donnée ») et recopiés sur la donnée stockée à l'intégration :
 
@@ -24,17 +25,6 @@ Tags métier posés à la déclaration de livraison (formulaire « Ajouter une d
 | `theme`              | thématiques séparées par `, ` (99 caractères max)          | string       |
 | `zone`               | étendue spatiale, pour le téléchargement (ex : `D001 Ain`) | string       |
 | `email_notification` | courriel à la fin de l'intégration (livraison seulement)   | boolean      |
-
-(1) structure de json (chaîne json encodée) :
-
-```json
-// nom de l'étape : statut [waiting, in_progress, successful, failed]
-{
-    "send_files_api": "successful",
-    "wait_checks": "successful",
-    "integration_processing": "successful"
-}
-```
 
 ## `stored_data`
 
