@@ -259,7 +259,9 @@ class CartesServiceApiService
 
         $configuration = $this->waitForConfigurationUnpublished($datastoreId, $offering['configuration']['_id']);
 
-        // vignette et logo d’attribution du flux : annexes sans autre usage ; un échec n’empêche pas la suppression du flux
+        $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
+
+        // vignette et logo d’attribution, après la configuration qui les référence ; un échec n’empêche pas la suppression du flux
         try {
             $this->serviceImageAnnexeService->removeServiceImages($datastoreId, $configuration);
         } catch (ApiException $e) {
@@ -270,8 +272,6 @@ class CartesServiceApiService
                 'error' => $e->getMessage(),
             ]);
         }
-
-        $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
 
         if ($removeStyleFiles) {
             $this->removeStyleFiles($datastoreId, $configuration);
