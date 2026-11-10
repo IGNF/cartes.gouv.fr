@@ -88,7 +88,18 @@ class UploadController extends AbstractController implements ApiControllerInterf
             $tags[CommonTags::PRODUCER_SHORT] = trim($dto->producer_short);
         }
 
-        $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags)->array();
+        try {
+            $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags)->array();
+        } catch (ApiException $e) {
+            // sans datasheet_name, aucune fiche ne liste la livraison : on la retire plutôt que de la laisser compter dans le quota
+            try {
+                $this->uploadApiService->remove($datastoreId, $upload['_id'], $upload)->await();
+            } catch (ApiException) {
+                // l’erreur d’origine prime sur celle de la suppression
+            }
+
+            throw $e;
+        }
 
         // le front fait ensuite avancer l’intégration (routes integration)
         return $this->json($upload);

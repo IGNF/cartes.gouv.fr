@@ -48,6 +48,18 @@ final class UploadAddRouteTest extends WebTestCase
         ], $upload['tags']);
     }
 
+    public function testUploadIsRemovedWhenItsTagsCannotBeWritten(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+        EntrepotMockResponseFactory::failNext('POST uploads/upload-1/tags');
+
+        $this->post($client, $this->payload());
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame([], EntrepotMockResponseFactory::stored('uploads'));
+    }
+
     public function testInvalidFieldsAnswer422FieldByFieldWithoutCallingTheEntrepot(): void
     {
         $client = self::createClient();
