@@ -45,13 +45,14 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
 
     const publishMutation = useMutation<Service, ApiError, ServiceFormOutput>({
         mutationFn: (values) => api.wfs.publish(datastoreId, values.stored_data_id, buildServiceFormData(type, values)),
-        onSuccess: async () => {
+        // aussi après un échec : le flux peut exister si l’erreur survient après la création de l’offre
+        onSettled: () => {
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             // sinon un second flux au même nom passe le contrôle du formulaire
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WFS) });
-            await navigate({ ...servicesTab, search: { activeTab: "services" } });
         },
+        onSuccess: () => navigate({ ...servicesTab, search: { activeTab: "services" } }),
     });
 
     const renderContent = () => {

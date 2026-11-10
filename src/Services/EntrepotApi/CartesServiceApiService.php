@@ -678,6 +678,7 @@ class CartesServiceApiService
 
         $offering['configuration'] = $configuration;
 
+        // shortcut: aucune annulation si les permissions ou la métadonnée échouent après la création de l’offre (comme saveService), à reprendre au ticket de nettoyage
         $this->handleAccessPermissions($datastoreId, $offering, $dto->access);
         $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
 
