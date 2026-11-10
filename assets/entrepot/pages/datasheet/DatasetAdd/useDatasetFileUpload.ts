@@ -40,6 +40,8 @@ export default function useDatasetFileUpload({ onFileSelected, onUploadSuccess }
 
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = () => {
         setFileError(undefined);
+        // l’envoi précédent n’est plus le courant : son finally ne remettra pas l’état à zéro
+        setUploadInProgress(false);
         currentUploadRef.current = undefined;
         onFileSelected();
 
