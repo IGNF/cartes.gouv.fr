@@ -27,7 +27,7 @@ export default function DatasetAddPage({ datastoreId, datasheetName }: DatasetAd
     });
 
     return (
-        <Main title={`${t("title")} - ${datasheetName}`} breadcrumbSeparator="container">
+        <Main title={`${t("title")} - ${datasheetName}`}>
             {/* sans fiche de métadonnées (404), pas de producteur proposé */}
             {metadataQuery.isPending ? (
                 <LoadingText as="p" withSpinnerIcon />

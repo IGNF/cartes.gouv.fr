@@ -188,7 +188,7 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
     return (
         <Main
             title={datasheetName}
-            breadcrumbSeparator="fullWidth"
+            breadcrumbSeparator
             fullWidthContent={
                 <div className={classes.tabBackground}>
                     <div className={fr.cx("fr-container", "fr-py-5w")}>

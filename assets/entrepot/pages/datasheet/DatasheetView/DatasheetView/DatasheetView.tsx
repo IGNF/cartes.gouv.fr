@@ -143,7 +143,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const { userRights, isSupervisor } = useCommunityRights();
 
     return (
-        <Main title={`Données ${datasheetName}`} breadcrumbSeparator="fullWidth">
+        <Main title={`Données ${datasheetName}`}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-5w", "fr-mb-4w")}>
                 <Button
                     iconId="fr-icon-arrow-left-s-line"
