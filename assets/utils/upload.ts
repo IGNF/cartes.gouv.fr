@@ -17,10 +17,11 @@ export const mapIgnfToEpsg = (sridRaw: unknown): string | undefined => {
 /**
  * Faut-il envoyer le POST d’avancement de l’intégration ? Une action attend, aucune n’est en cours ni en échec,
  * et l’état ne vient pas du dernier POST (celui-là attend la lecture suivante, sinon le dialogue boucle).
+ * Une intégration en échec n’avance plus : la suppression de sa livraison est laissée à l’onglet Données.
  */
 export const shouldAdvanceIntegration = (
     integration: UploadIntegration | undefined,
     lastAdvancedState: UploadIntegration | undefined,
     isAdvancing: boolean,
     hasFailed: boolean
-): boolean => !!integration?.next_action && integration !== lastAdvancedState && !isAdvancing && !hasFailed;
+): boolean => !!integration?.next_action && integration.status !== "failed" && integration !== lastAdvancedState && !isAdvancing && !hasFailed;

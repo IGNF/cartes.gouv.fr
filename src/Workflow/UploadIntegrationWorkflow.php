@@ -71,8 +71,13 @@ class UploadIntegrationWorkflow
         if (JobStatuses::SUCCESSFUL === $steps[self::STEP_SEND_FILES_API]) {
             $steps[self::STEP_WAIT_CHECKS] = $this->computeWaitChecksStatus($datastoreId, $upload);
         }
+        $storedDataStatus = null;
         if (JobStatuses::SUCCESSFUL === $steps[self::STEP_WAIT_CHECKS]) {
-            $steps[self::STEP_PROCESSING] = $this->computeProcessingStatus($datastoreId, $upload);
+            // lue seulement si le lancement a posé ses deux tags ; une donnée stockée supprimée répond encore, avec le statut DELETED
+            if (isset($upload['tags']['vectordb_id'], $upload['tags']['proc_int_id'])) {
+                $storedDataStatus = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id'])->array()['status'];
+            }
+            $steps[self::STEP_PROCESSING] = $this->computeProcessingStatus($datastoreId, $upload, $storedDataStatus);
         }
 
         // statut global : celui de la première étape non réussie
@@ -89,7 +94,8 @@ class UploadIntegrationWorkflow
             $nextAction = self::ACTION_SEND_FILES;
         } elseif (JobStatuses::SUCCESSFUL === $steps[self::STEP_WAIT_CHECKS] && JobStatuses::WAITING === $steps[self::STEP_PROCESSING]) {
             $nextAction = self::ACTION_LAUNCH_PROCESSING;
-        } elseif (JobStatuses::SUCCESSFUL === $status) {
+        } elseif (JobStatuses::SUCCESSFUL === $status || StoredDataStatuses::DELETED === $storedDataStatus) {
+            // donnée générée, ou supprimée par l'utilisateur : la livraison ne sert plus
             $nextAction = self::ACTION_DELETE_UPLOAD;
         }
 
@@ -227,7 +233,7 @@ class UploadIntegrationWorkflow
      *
      * @param array<mixed> $upload
      */
-    private function computeProcessingStatus(string $datastoreId, array $upload): string
+    private function computeProcessingStatus(string $datastoreId, array $upload, ?string $storedDataStatus): string
     {
         $hasProcExecId = isset($upload['tags']['proc_int_id']);
         $hasVectorDbId = isset($upload['tags']['vectordb_id']);
@@ -242,17 +248,16 @@ class UploadIntegrationWorkflow
         }
 
         $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags']['proc_int_id'])->array();
-        $vectordb = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id'])->array();
 
         if (in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS], true)) {
             return JobStatuses::IN_PROGRESS;
         }
 
         if (ProcessingStatuses::SUCCESS === $processingExec['status']) {
-            if (StoredDataStatuses::GENERATED === $vectordb['status']) {
+            if (StoredDataStatuses::GENERATED === $storedDataStatus) {
                 return JobStatuses::SUCCESSFUL;
             }
-            if (in_array($vectordb['status'], [StoredDataStatuses::CREATED, StoredDataStatuses::GENERATING, StoredDataStatuses::MODIFYING], true)) {
+            if (in_array($storedDataStatus, [StoredDataStatuses::CREATED, StoredDataStatuses::GENERATING, StoredDataStatuses::MODIFYING], true)) {
                 return JobStatuses::IN_PROGRESS;
             }
 

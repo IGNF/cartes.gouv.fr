@@ -6,11 +6,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DatasheetDetailed, StoredDataStatusEnum } from "@/@types/app";
 import api from "@/entrepot/api";
+import RQKeys from "@/modules/entrepot/RQKeys";
 import useUploadIntegrations from "./useUploadIntegrations";
 
 vi.mock("@/entrepot/api", () => ({
     default: { upload: { getIntegration: vi.fn(), advanceIntegration: vi.fn() } },
 }));
+
+const navigate = vi.fn();
+vi.mock("@tanstack/react-router", () => ({ useNavigate: () => navigate }));
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -23,6 +27,8 @@ const datasheet = {
         upload("failed"),
         upload("generated", { vectordb_id: "sd-generated" }),
         upload("generating", { vectordb_id: "sd-generating" }),
+        // donnée stockée supprimée : absente de la liste
+        upload("deleted", { vectordb_id: "sd-deleted" }),
         upload("other-sheet", { datasheet_name: "autre" }),
     ],
     vector_db_list: [
@@ -35,8 +41,7 @@ describe("useUploadIntegrations", () => {
     let root: Root;
     let failedIds: Set<string>;
 
-    const render = async (canAdvance: boolean) => {
-        const queryClient = new QueryClient();
+    const render = async (canAdvance: boolean, queryClient = new QueryClient()) => {
         function Probe() {
             failedIds = useUploadIntegrations("ds", datasheet, canAdvance);
             return null;
@@ -68,6 +73,7 @@ describe("useUploadIntegrations", () => {
         vi.mocked(api.upload.advanceIntegration)
             .mockReset()
             .mockResolvedValue({} as never);
+        navigate.mockReset();
     });
 
     afterEach(() => act(() => root.unmount()));
@@ -84,12 +90,27 @@ describe("useUploadIntegrations", () => {
         ).toEqual(["failed", "waiting"]);
     });
 
-    it("nettoie une seule fois la livraison dont la donnée stockée est générée", async () => {
+    it("nettoie une seule fois les livraisons dont la donnée stockée est générée ou absente de la liste", async () => {
         const rerender = await render(true);
         await rerender();
 
-        expect(api.upload.advanceIntegration).toHaveBeenCalledTimes(1);
-        expect(api.upload.advanceIntegration).toHaveBeenCalledWith("ds", "generated");
+        expect(vi.mocked(api.upload.advanceIntegration).mock.calls).toEqual([
+            ["ds", "generated"],
+            ["ds", "deleted"],
+        ]);
+        expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it("revient à la liste des fiches quand le nettoyage a vidé la fiche", async () => {
+        const queryClient = new QueryClient();
+        // relecture de la fiche après le nettoyage : 404
+        await queryClient
+            .query({ queryKey: RQKeys.datastore_datasheet("ds", "fiche"), queryFn: () => Promise.reject({ status: 404 }), retry: false })
+            .catch(() => undefined);
+
+        await render(true, queryClient);
+
+        expect(navigate).toHaveBeenCalledWith({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId: "ds" } });
     });
 
     it("ne nettoie rien sans les droits", async () => {
