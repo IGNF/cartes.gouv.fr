@@ -186,7 +186,7 @@ final class EntrepotMockResponseFactory
 
         if (in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
             $body = $this->drainBody($options['body'] ?? '');
-            self::$writeRequests[] = ['method' => $method, 'path' => $path, 'body' => $body];
+            self::$writeRequests[] = ['method' => $method, 'path' => '/api/datastores/'.self::DATASTORE_ID.$path, 'body' => $body];
 
             return $this->write($method, $relative, $body);
         }

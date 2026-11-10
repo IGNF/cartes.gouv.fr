@@ -6,19 +6,28 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Datasheet\DatasheetMetadataDTO;
 use App\Exception\AppException;
 use App\Services\EntrepotApi\AnnexeApiService;
+use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\CartesStoredDataApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
+use App\Services\MultipartPayloadMapper;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/datasheet',
@@ -35,7 +44,55 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly MetadataApiService $metadataApiService,
         private readonly CartesStoredDataApiService $cartesStoredDataApiService,
+        private readonly CartesMetadataApiService $cartesMetadataApiService,
+        private readonly MultipartPayloadMapper $multipartPayloadMapper,
+        private readonly ValidatorInterface $validator,
     ) {
+    }
+
+    // multipart : champ `data` (DatasheetMetadataDTO en JSON) et fichier `thumbnail` facultatif
+    #[Route('', name: 'add', methods: ['POST'])]
+    public function add(string $datastoreId, Request $request): JsonResponse
+    {
+        $dto = $this->multipartPayloadMapper->map($request, DatasheetMetadataDTO::class);
+
+        return $this->json($this->cartesMetadataApiService->create($datastoreId, $dto, $this->thumbnail($request)), Response::HTTP_CREATED);
+    }
+
+    // remplacement complet des champs saisis ; vignette : fichier `thumbnail` = remplacer, champ `delete_thumbnail` = supprimer, aucun = garder
+    #[Route('/{datasheetName}', name: 'replace', methods: ['POST'])]
+    public function replace(string $datastoreId, string $datasheetName, Request $request): JsonResponse
+    {
+        $dto = $this->multipartPayloadMapper->map($request, DatasheetMetadataDTO::class);
+        $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
+
+        return $this->json($this->cartesMetadataApiService->replace(
+            $datastoreId,
+            $datasheetName,
+            $dto,
+            $services,
+            $this->thumbnail($request),
+            $request->request->getBoolean('delete_thumbnail'),
+        ));
+    }
+
+    private function thumbnail(Request $request): ?UploadedFile
+    {
+        $thumbnail = $request->files->get('thumbnail');
+        if (null === $thumbnail) {
+            return null;
+        }
+
+        $violations = $this->validator->startContext()->atPath('thumbnail')->validate($thumbnail, new Assert\File(
+            maxSize: '2M',
+            mimeTypes: ['image/jpeg', 'image/png', 'image/svg+xml', 'image/svg'],
+            mimeTypesMessage: 'La vignette doit être une image JPEG, PNG ou SVG',
+        ))->getViolations();
+        if (count($violations) > 0) {
+            throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($thumbnail, $violations));
+        }
+
+        return $thumbnail;
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]

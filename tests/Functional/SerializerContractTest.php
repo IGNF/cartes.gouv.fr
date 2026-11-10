@@ -8,7 +8,6 @@ use App\Dto\Datastore\PermissionDTO;
 use App\Dto\Datastore\UpdatePermissionDTO;
 use App\Dto\Espaceco\Members\AddMembersDTO;
 use App\Dto\Metadata\CswLanguage;
-use App\Dto\Metadata\CswMetadata;
 use App\Dto\Services\CommonDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
@@ -51,16 +50,6 @@ final class SerializerContractTest extends KernelTestCase
             'open' => false,
         ], $json['online_resources'][1]);
         self::assertSame('document', $json['online_resources'][5]['type']);
-    }
-
-    // chemin de MetadataController::add : le JSON du front redevient une CswMetadata identique
-    public function testCswMetadataSurvivesJsonRoundTrip(): void
-    {
-        /** @var Serializer $serializer */
-        $serializer = self::getContainer()->get('serializer');
-        $metadata = CswMetadataFixtures::full();
-
-        self::assertEquals($metadata, $serializer->deserialize($serializer->serialize($metadata, 'json'), CswMetadata::class, 'json'));
     }
 
     /**

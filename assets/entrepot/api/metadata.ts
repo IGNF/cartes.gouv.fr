@@ -2,17 +2,6 @@ import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 import { Metadata } from "../../@types/app";
 
-const add = (datastoreId: string, body: object, queryParams: QueryParams = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_add", { datastoreId, ...queryParams });
-    return jsonFetch(
-        url,
-        {
-            method: "POST",
-        },
-        body
-    );
-};
-
 const getList = (datastoreId: string, queryParams: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_get_list", { datastoreId, ...queryParams });
     return jsonFetch<Omit<Metadata, "csw_metadata">[]>(url, {
@@ -43,7 +32,6 @@ const remove = (datastoreId: string, metadataId: string) => {
 };
 
 const metadata = {
-    add,
     getById,
     getByDatasheetName,
     getList,

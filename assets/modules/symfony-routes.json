@@ -546,6 +546,65 @@
             ],
             "schemes": []
         },
+        "cartesgouvfr_api_datasheet_add": {
+            "tokens": [
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_replace": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
         "cartesgouvfr_api_datasheet_get_list": {
             "tokens": [
                 [
@@ -1184,6 +1243,32 @@
             ],
             "schemes": []
         },
+        "cartesgouvfr_api_metadata_check_file_identifier_availability": {
+            "tokens": [
+                [
+                    "text",
+                    "\/metadata"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "HEAD"
+            ],
+            "schemes": []
+        },
         "cartesgouvfr_api_metadata_get_list": {
             "tokens": [
                 [
@@ -1207,32 +1292,6 @@
             "hosttokens": [],
             "methods": [
                 "GET"
-            ],
-            "schemes": []
-        },
-        "cartesgouvfr_api_metadata_add": {
-            "tokens": [
-                [
-                    "text",
-                    "\/metadata\/"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "POST"
             ],
             "schemes": []
         },
