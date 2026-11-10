@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dto\Datasheet;
 
+use App\Dto\Metadata\CswLanguage;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -103,7 +104,7 @@ class DatasheetMetadataDTO
 
         #[Assert\NotNull(message: 'La langue est obligatoire')]
         #[Assert\Valid]
-        public readonly ?LanguageDTO $language = null,
+        public readonly ?CswLanguage $language = null,
 
         #[Assert\NotBlank(message: 'Le jeu de caractères est obligatoire')]
         public readonly string $charset = '',
