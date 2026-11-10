@@ -8,7 +8,7 @@ type MetadataSectionProps = {
 export default function MetadataSection({ title, children }: PropsWithChildren<MetadataSectionProps>) {
     return (
         <section className={fr.cx("fr-col-12")}>
-            {title && <h2 className={fr.cx("fr-h5", "fr-mb-3w")}>{title}</h2>}
+            {title && <h2 className={fr.cx("fr-h6", "fr-mb-3w")}>{title}</h2>}
             {children}
         </section>
     );

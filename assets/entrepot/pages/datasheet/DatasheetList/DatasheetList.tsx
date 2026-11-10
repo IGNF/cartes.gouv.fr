@@ -121,7 +121,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 ) : (
                                     canCreateDatasheet && (
                                         <Button
-                                            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement", params: { datastoreId } }}
+                                            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees/creer", params: { datastoreId } }}
                                             iconId="fr-icon-add-line"
                                             iconPosition="right"
                                             className={fr.cx("fr-ml-auto")}

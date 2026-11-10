@@ -178,7 +178,7 @@ export default function ConditionCard({ conditionIndex, onRemoveCondition }: Con
                     >
                         {t("license.remove")}
                     </Button>
-                    {/* Chevron repli/dépli — Figma */}
+                    {/* chevron repli et dépli */}
                     <Button
                         iconId={collapsed ? "fr-icon-arrow-down-s-line" : "fr-icon-arrow-up-s-line"}
                         priority="tertiary no outline"

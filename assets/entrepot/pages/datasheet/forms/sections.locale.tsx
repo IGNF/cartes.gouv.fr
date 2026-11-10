@@ -140,7 +140,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "section.producer": "Producteur",
     "section.date": "Date",
     "section.spatialCoverage": "Emprise spatiale",
-    "section.license": "Licences et conditions d'utilisation",
+    "section.license": "Licences et conditions d’utilisation",
     "section.metadataInfo": "À propos de la donnée",
 
     "field.name": "Nom de la fiche de données",
@@ -154,8 +154,8 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.fileIdentifier": "Identifiant unique",
     "field.fileIdentifier.hint": "Format attendu : sans caractères spéciaux et sans espaces. Exemple : IGN_BD-ORTHO",
 
-    "field.organizationName": "Nom de l'organisme",
-    "field.organizationName.hint": "Utilisez l'auto-complétion ou saisissez directement un nom",
+    "field.organizationName": "Nom de l’organisme",
+    "field.organizationName.hint": "Utilisez l’auto-complétion ou saisissez directement un nom",
     "field.organizationEmail": "Adresse électronique de contact",
     "field.organizationEmail.hint": "Format attendu : nom@domaine.fr",
     "field.producerRole": "Rôle",
@@ -225,9 +225,9 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "license.constraint.card.title": "Contrainte",
     "license.subConstraintType": ({ type }) => {
         const labels: Record<SubConstraintType, string> = {
-            useConstraints: "Contrainte d'usage",
-            accessConstraints: "Contrainte d'accès",
-            useLimitation: "Limite d'usage",
+            useConstraints: "Contrainte d’usage",
+            accessConstraints: "Contrainte d’accès",
+            useLimitation: "Limite d’usage",
             otherConstraints: "Autre contrainte",
             classification: "Classification",
         };
@@ -240,11 +240,11 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.constraintUrl": "URL (optionnel)",
     "field.constraintUrl.hint": "Lien vers la licence ou les conditions complètes",
     "field.constraintDescription": "Description",
-    "field.constraintDescription.hint": "Décrivez les conditions d'utilisation",
+    "field.constraintDescription.hint": "Décrivez les conditions d’utilisation",
     "field.constraintRestriction": "Restriction",
     "license.restrictionCode": ({ code }) => {
         const labels: Record<RestrictionCode, string> = {
-            copyright: "Droit d'auteur",
+            copyright: "Droit d’auteur",
             patent: "Brevet",
             patentPending: "Brevet en cours",
             trademark: "Marque déposée",
@@ -266,8 +266,8 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
             INSPIRE_Directive_Article13_1d: "Article 13(1)(d) – Confidentialité des informations commerciales ou industrielles",
             INSPIRE_Directive_Article13_1e: "Article 13(1)(e) – Droits de propriété intellectuelle",
             INSPIRE_Directive_Article13_1f: "Article 13(1)(f) – Confidentialité des données à caractère personnel",
-            INSPIRE_Directive_Article13_1g: "Article 13(1)(g) – Intérêts ou protection du fournisseur volontaire d'informations",
-            INSPIRE_Directive_Article13_1h: "Article 13(1)(h) – Protection de l'environnement",
+            INSPIRE_Directive_Article13_1g: "Article 13(1)(g) – Intérêts ou protection du fournisseur volontaire d’informations",
+            INSPIRE_Directive_Article13_1h: "Article 13(1)(h) – Protection de l’environnement",
         };
         return labels[code];
     },
@@ -295,7 +295,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.language": "Langue de la donnée et ses métadonnées",
     "field.charset": "Jeu de caractères de la donnée et ses métadonnées",
     "field.charset.info":
-        "Le jeu de caractères de la donnée restitue les caractères spécifiques d'une langue, comme les accents ou les caractères spéciaux. Le format UTF-8 est couramment utilisé pour le français.",
+        "Le jeu de caractères de la donnée restitue les caractères spécifiques d’une langue, comme les accents ou les caractères spéciaux. Le format UTF-8 est couramment utilisé pour le français.",
     "field.scale": "Échelle",
     "field.scale.info": "Échelle à laquelle la visualisation des données est la plus pertinente",
     "field.scale.option": ({ scale }) => `1:${scale.toLocaleString("fr-FR")}`,
