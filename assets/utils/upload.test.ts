@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { integrationProgressHasFailure, mapIgnfToEpsg, parseIntegrationProgress } from "./upload";
+import { mapIgnfToEpsg } from "./upload";
 
 describe("mapIgnfToEpsg", () => {
     it("convertit un code IGNF connu", () => expect(mapIgnfToEpsg("IGNF:LAMB93")).toBe("EPSG:2154"));
@@ -9,19 +9,5 @@ describe("mapIgnfToEpsg", () => {
         expect(mapIgnfToEpsg("")).toBeUndefined();
         expect(mapIgnfToEpsg("  ")).toBeUndefined();
         expect(mapIgnfToEpsg(42)).toBeUndefined();
-    });
-});
-
-describe("parseIntegrationProgress", () => {
-    it("lit un objet JSON", () => expect(parseIntegrationProgress('{"send_files":"successful"}')).toEqual({ send_files: "successful" }));
-    it("renvoie null pour un JSON invalide, un tableau ou une valeur absente", () => {
-        expect(parseIntegrationProgress("{")).toBeNull();
-        expect(parseIntegrationProgress("[]")).toBeNull();
-        expect(parseIntegrationProgress(undefined)).toBeNull();
-    });
-    it("détecte une étape en échec", () => {
-        expect(integrationProgressHasFailure('{"a":"successful","b":"failed"}')).toBe(true);
-        expect(integrationProgressHasFailure('{"a":"successful"}')).toBe(false);
-        expect(integrationProgressHasFailure(undefined)).toBe(false);
     });
 });

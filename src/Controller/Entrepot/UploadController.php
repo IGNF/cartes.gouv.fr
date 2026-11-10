@@ -90,7 +90,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
 
         $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags)->array();
 
-        // le front suit ensuite l’intégration en base via integration_progress
+        // le front fait ensuite avancer l’intégration (routes integration)
         return $this->json($upload);
     }
 
@@ -108,51 +108,21 @@ class UploadController extends AbstractController implements ApiControllerInterf
         return $this->json($fileTree);
     }
 
-    #[Route('/{uploadId}/integration_progress', name: 'integration_progress', methods: ['GET'])]
-    public function integrationProgress(
-        string $datastoreId,
-        string $uploadId,
-        UploadIntegrationWorkflow $uploadIntegrationWorkflow,
-        #[MapQueryParameter] bool $getOnlyProgress = false,
-    ): JsonResponse {
+    #[Route('/{uploadId}/integration', name: 'integration', methods: ['GET'])]
+    public function integration(string $datastoreId, string $uploadId, UploadIntegrationWorkflow $uploadIntegrationWorkflow): JsonResponse
+    {
         $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
-        $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
 
-        // relecture seulement si une étape a été déclenchée
-        if (false === $getOnlyProgress && $uploadIntegrationWorkflow->advanceIfPossible($datastoreId, $upload, $progress)) {
-            $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
-            $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
-        }
+        return $this->json($uploadIntegrationWorkflow->getState($datastoreId, $upload));
+    }
 
-        $currentStepIndex = $uploadIntegrationWorkflow->getCurrentStepIndex($progress);
+    #[Route('/{uploadId}/integration', name: 'integration_advance', methods: ['POST'])]
+    public function advanceIntegration(string $datastoreId, string $uploadId, UploadIntegrationWorkflow $uploadIntegrationWorkflow): JsonResponse
+    {
+        // l'envoi d'un gros fichier vers l'Entrepôt dépasse max_execution_time
+        set_time_limit(0);
 
-        $progressJson = json_encode($progress);
-        $stepString = (string) $currentStepIndex;
-        $existingProgressJson = $upload['tags'][UploadTags::INTEGRATION_PROGRESS] ?? null;
-        $existingStepString = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? (string) $upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP] : null;
-
-        $uploadTags = [
-            UploadTags::INTEGRATION_PROGRESS => $progressJson,
-            UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
-        ];
-
-        // mise à jour état des étapes de l'intégration uniquement si changement
-        if ($existingProgressJson !== $progressJson || $existingStepString !== $stepString) {
-            $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags)->await();
-        }
-
-        // supprime livraison si intégration terminée
-        if (false === $getOnlyProgress && $uploadIntegrationWorkflow->isIntegrationCompleted($progress)) {
-            $this->uploadApiService->remove($datastoreId, $uploadId, $upload)->await();
-        }
-
-        // retourne l'upload complet + tags de progression pour que le frontend ait les données
-        // même après suppression de l'upload (pour avoir accès à datasheet_name, vectordb_id, etc.)
-        return $this->json([
-            'upload' => $upload,
-            UploadTags::INTEGRATION_PROGRESS => $progressJson,
-            UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
-        ]);
+        return $this->json($uploadIntegrationWorkflow->advance($datastoreId, $uploadId));
     }
 
     #[Route('/{uploadId}', name: 'delete', methods: ['DELETE'])]

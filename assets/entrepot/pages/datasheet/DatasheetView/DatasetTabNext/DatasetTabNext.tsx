@@ -16,12 +16,13 @@ import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import useDeleteUploadMutation from "@/hooks/queries/useDeleteUploadMutation";
+import useUploadIntegrations from "@/hooks/queries/useUploadIntegrations";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
-import { formatDateFromISO, parseIntegrationProgress } from "@/utils";
+import { formatDateFromISO } from "@/utils";
 import DatasheetViewTab from "../../DatasheetViewTab";
 import DatasetAddBanners from "./DatasetAddBanners";
 
@@ -71,6 +72,8 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
     });
     const datasheet = datasheetQuery.data;
 
+    const failedUploadIds = useUploadIntegrations(datastoreId, datasheet, canAddData ?? false);
+
     const deleteUpload = useDeleteUploadMutation(datastoreId, datasheetName);
     const { mutate: deleteUploadMutate } = deleteUpload;
 
@@ -83,10 +86,9 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
         const uploads = (datasheet.upload_list ?? [])
             .filter((upload) => upload.type === "VECTOR" && upload.tags.datasheet_name === datasheetName)
             .map((upload) => {
-                const progress = parseIntegrationProgress(upload.tags.integration_progress);
-                const failed = Object.values(progress ?? {}).includes("failed");
-                const notLaunched = progress === null || progress["integration_processing"] === "waiting";
-                // le tag n’avance que pendant le suivi : on lit l’état réel de la donnée stockée produite
+                const failed = failedUploadIds.has(upload._id);
+                const notLaunched = upload.tags.vectordb_id === undefined;
+                // traitement lancé : la donnée stockée produite porte l’état
                 const vectorDb = vectorDbs.find((storedData) => storedData._id === upload.tags.vectordb_id);
                 const inProgress =
                     !notLaunched && !failed && (vectorDb?.status === StoredDataStatusEnum.CREATED || vectorDb?.status === StoredDataStatusEnum.GENERATING);
@@ -183,7 +185,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
             rows: [...uploadRows, ...storedDataRows].sort((a, b) => (b.creation ?? "").localeCompare(a.creation ?? "")),
             hasIntegrationInProgress: uploads.some(({ inProgress }) => inProgress),
         };
-    }, [datasheet, datasheetName, datastoreId, hasMetadata, canAddData, deleteUploadMutate, onDeleteDatasheet, t]);
+    }, [datasheet, datasheetName, datastoreId, hasMetadata, canAddData, failedUploadIds, deleteUploadMutate, onDeleteDatasheet, t]);
 
     const filteredRows = typeFilter === "all" ? rows : rows.filter((row) => row.type === typeFilter);
     const segment = ({ value, label }: (typeof FILTERS)[number]) => ({

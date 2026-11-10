@@ -2720,11 +2720,11 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_api_upload_integration_progress": {
+        "cartesgouvfr_api_upload_integration": {
             "tokens": [
                 [
                     "text",
-                    "\/integration_progress"
+                    "\/integration"
                 ],
                 [
                     "variable",
@@ -2754,6 +2754,43 @@
             "hosttokens": [],
             "methods": [
                 "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_upload_integration_advance": {
+            "tokens": [
+                [
+                    "text",
+                    "\/integration"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "uploadId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/upload"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
             ],
             "schemes": []
         },

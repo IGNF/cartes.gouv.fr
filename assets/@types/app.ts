@@ -169,6 +169,16 @@ export interface PyramidRaster extends StoredData {
     type_infos?: StoredDataRok4PyramidRasterDetailsDto;
 }
 
+/** état de l’intégration d’une livraison, calculé par le backend à chaque lecture */
+export type UploadIntegration = {
+    steps: Record<string, string>;
+    status: "waiting" | "in_progress" | "failed" | "successful";
+    /** action que le POST d’avancement exécuterait, null s’il n’y a rien à faire */
+    next_action: "send_files" | "launch_processing" | "delete_upload" | null;
+    vectordb_id: string | null;
+    datasheet_name: string | null;
+};
+
 /** upload (livraison) */
 export type Upload = UploadPrivateDetailResponseDto & {
     tags: {
@@ -176,8 +186,6 @@ export type Upload = UploadPrivateDetailResponseDto & {
         proc_int_id?: string;
         vectordb_id?: string;
         data_upload_path?: string;
-        integration_progress?: string;
-        integration_current_step?: string;
         producer?: string;
         production_year?: string;
     };

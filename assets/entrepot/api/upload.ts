@@ -1,7 +1,7 @@
 import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 import { UploadReport } from "../../@types/app";
-import { Upload, UploadTree } from "../../@types/app";
+import { Upload, UploadIntegration, UploadTree } from "../../@types/app";
 
 const getList = async (datastoreId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", { datastoreId, ...query });
@@ -41,22 +41,15 @@ const get = (datastoreId: string, uploadId: string, otherOptions: RequestInit = 
     });
 };
 
-type IntegrationProgress = { integration_progress?: string; integration_current_step?: string; upload?: Upload };
-
-const getIntegrationProgress = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_integration_progress", { datastoreId, uploadId, getOnlyProgress: true });
-    return jsonFetch<IntegrationProgress>(url, {
-        method: "GET",
-        ...otherOptions,
-    });
+const getIntegration = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_integration", { datastoreId, uploadId });
+    return jsonFetch<UploadIntegration>(url, { ...otherOptions });
 };
 
-const pingIntegrationProgress = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_integration_progress", { datastoreId, uploadId, getOnlyProgress: false });
-    return jsonFetch<IntegrationProgress>(url, {
-        method: "GET",
-        ...otherOptions,
-    });
+/** exécute la prochaine action de l’intégration (envoi des fichiers, lancement du traitement, suppression de la livraison) */
+const advanceIntegration = (datastoreId: string, uploadId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_integration_advance", { datastoreId, uploadId });
+    return jsonFetch<UploadIntegration>(url, { method: "POST" });
 };
 
 const remove = (datastoreId: string, uploadId: string) => {
@@ -76,8 +69,8 @@ const upload = {
     getAll,
     add,
     get,
-    getIntegrationProgress,
-    pingIntegrationProgress,
+    getIntegration,
+    advanceIntegration,
     getFileTree,
     remove,
     getUploadReport,

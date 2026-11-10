@@ -9,6 +9,7 @@ import UnfinishedUploadList from "./UnfinishedUploadList";
 import VectorDbList from "./VectorDbList/VectorDbList";
 import PyramidRasterList from "./PyramidRasterList/PyramidRasterList";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useUploadIntegrations from "@/hooks/queries/useUploadIntegrations";
 import useCommunityRights from "@/hooks/useCommunityRights";
 
 type DataListTabProps = {
@@ -23,21 +24,8 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
         return (
             datasheet.upload_list
                 ?.filter((upload) => upload.type === "VECTOR")
-                ?.filter((upload) => {
-                    if (upload.tags.datasheet_name !== datasheet.name) {
-                        return false;
-                    }
-                    if (upload.tags.integration_progress === undefined) {
-                        return true;
-                    }
-
-                    try {
-                        const integrationProgress = JSON.parse(upload.tags.integration_progress) as Record<string, string>;
-                        return "integration_processing" in integrationProgress && integrationProgress["integration_processing"] === "waiting";
-                    } catch {
-                        return false;
-                    }
-                }) ?? []
+                // traitement pas encore lancé ; ensuite la donnée stockée prend le relais
+                ?.filter((upload) => upload.tags.datasheet_name === datasheet.name && upload.tags.vectordb_id === undefined) ?? []
         );
     }, [datasheet]);
 
@@ -45,10 +33,13 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
         (datasheet.vector_db_list?.length || 0) + (datasheet.pyramid_vector_list?.length || 0) + (datasheet.pyramid_raster_list?.length || 0);
 
     const { userRights, isSupervisor } = useCommunityRights();
+    const canAddData =
+        isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) && userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING));
+    const failedUploadIds = useUploadIntegrations(datastoreId, datasheet, canAddData ?? false);
 
     return (
         <>
-            {(isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) && userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
+            {canAddData && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
                     <Button
                         iconId="fr-icon-add-line"
@@ -68,6 +59,7 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
                         <UnfinishedUploadList
                             datastoreId={datastoreId}
                             uploadList={unfinishedUploads}
+                            failedUploadIds={failedUploadIds}
                             nbPublications={nbPublications}
                             datasheetName={datasheet.name}
                         />

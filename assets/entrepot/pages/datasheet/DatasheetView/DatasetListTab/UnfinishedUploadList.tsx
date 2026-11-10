@@ -14,16 +14,17 @@ import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useCommunityRights from "@/hooks/useCommunityRights";
-import { integrationProgressHasFailure } from "@/utils";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;
     uploadList: DatasheetUploadItem[];
+    /** livraisons dont une vérification a échoué */
+    failedUploadIds: Set<string>;
     nbPublications: number;
     datasheetName: string;
 };
 
-const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList, nbPublications, datasheetName }) => {
+const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList, failedUploadIds, nbPublications, datasheetName }) => {
     const { t } = useTranslation("DatastoreManageStorage");
 
     const queryClient = useQueryClient();
@@ -57,7 +58,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
             </div>
 
             {uploadList.map((upload) => {
-                const failureCase = integrationProgressHasFailure(upload.tags.integration_progress);
+                const failureCase = failedUploadIds.has(upload._id);
 
                 return (
                     <div key={upload._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
