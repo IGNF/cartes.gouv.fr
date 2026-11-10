@@ -45,8 +45,8 @@ export default function DescriptionSection({ isEditMode = false, fileIdentifierL
                 label={t("field.name")}
                 state={errors.name ? "error" : "default"}
                 stateRelatedMessage={errors.name?.message}
-                nativeInputProps={{ ...register("name") }}
-                disabled={isEditMode}
+                // lecture seule et non disabled : register() renvoie disabled: false, et un champ désactivé ne serait pas envoyé
+                nativeInputProps={{ ...register("name"), readOnly: isEditMode }}
             />
 
             <Input
@@ -54,10 +54,7 @@ export default function DescriptionSection({ isEditMode = false, fileIdentifierL
                 hintText={t("field.fileIdentifier.hint")}
                 state={errors.file_identifier ? "error" : "info"}
                 stateRelatedMessage={errors.file_identifier?.message ?? t("field.fileIdentifier.info")}
-                nativeInputProps={{
-                    ...register("file_identifier"),
-                }}
-                disabled={fileIdentifierLocked}
+                nativeInputProps={{ ...register("file_identifier"), readOnly: fileIdentifierLocked }}
             />
 
             <Controller
