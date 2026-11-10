@@ -42,8 +42,8 @@ Une étape n'est calculée que si la précédente a réussi.
 
 - send_files_api
     - successful : livraison en CLOSED ou CHECKING
-    - waiting : livraison en OPEN
-    - failed : autre statut
+    - waiting : livraison en OPEN, fichier téléversé encore présent
+    - failed : autre statut, ou fichier téléversé supprimé par le nettoyage quotidien de `var/data` (fichiers de plus d'un jour)
 
 - wait_checks
     - failed : au moins une vérification en FAILED
@@ -79,7 +79,7 @@ Une seule action par appel.
 
 Le `POST` prend un verrou par livraison (`upload_integration_{uploadId}`), sans attendre. Un second appel simultané n'exécute rien et renvoie l'état courant.
 
-Les fichiers verrous sont dans `var/data/locks` (`framework.lock`), sur le volume partagé entre les pods : le verrou vaut pour toute l'application, pas pour un seul pod. Si ce stockage est indisponible, le `POST` répond 503 et n'exécute rien. Le `GET` ne dépend pas du verrou.
+Les fichiers verrous sont dans `var/data/locks` (`framework.lock`), sur le volume partagé entre les pods : le verrou vaut pour toute l'application, pas pour un seul pod. Le nettoyage quotidien de `var/data` ne les supprime pas : la date d'un fichier verrou ne change pas tant qu'il est tenu. Si ce stockage est indisponible, le `POST` répond 503 et n'exécute rien. Le `GET` ne dépend pas du verrou.
 
 ## Côté navigateur
 

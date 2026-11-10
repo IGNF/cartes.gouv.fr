@@ -17,6 +17,7 @@ use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
 use App\Services\SandboxService;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Lock\Exception\ExceptionInterface as LockException;
@@ -45,6 +46,8 @@ class UploadIntegrationWorkflow
         private readonly UrlGeneratorInterface $urlGenerator,
         #[AutowireServiceClosure('lock.factory')]
         private readonly \Closure $lockFactory,
+        #[Autowire(param: 'upload_path')]
+        private readonly string $uploadPath,
     ) {
     }
 
@@ -128,9 +131,6 @@ class UploadIntegrationWorkflow
 
             switch ($state['next_action']) {
                 case self::ACTION_SEND_FILES:
-                    if (!isset($upload['tags'][UploadTags::DATA_UPLOAD_PATH])) {
-                        throw new AppException('Missing data_upload_path tag on upload', JsonResponse::HTTP_INTERNAL_SERVER_ERROR, ['message' => 'Missing required tag: data_upload_path']);
-                    }
                     $this->uploadApiService->addFile($datastoreId, $uploadId, $upload['tags'][UploadTags::DATA_UPLOAD_PATH]);
                     break;
 
@@ -160,8 +160,8 @@ class UploadIntegrationWorkflow
     /**
      * L'étape est considérée comme (sachant qu'un upload est OPEN à sa création) :
      * - SUCCESSFUL : si le statut de l'upload est CLOSED ou CHECKING
-     * - WAITING : si le statut de l'upload est OPEN
-     * - FAILED : dans les autres cas
+     * - WAITING : si le statut de l'upload est OPEN et que le fichier téléversé est encore là
+     * - FAILED : dans les autres cas (le nettoyage quotidien de var/data supprime les fichiers de plus d'un jour)
      *
      * @param array<mixed> $upload
      */
@@ -171,7 +171,8 @@ class UploadIntegrationWorkflow
             return JobStatuses::SUCCESSFUL;
         }
 
-        if (UploadStatuses::OPEN === $upload['status']) {
+        $uploadedFile = $upload['tags'][UploadTags::DATA_UPLOAD_PATH] ?? null;
+        if (UploadStatuses::OPEN === $upload['status'] && null !== $uploadedFile && file_exists("$this->uploadPath/$uploadedFile")) {
             return JobStatuses::WAITING;
         }
 

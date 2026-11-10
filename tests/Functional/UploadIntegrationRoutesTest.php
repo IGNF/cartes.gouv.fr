@@ -38,6 +38,7 @@ final class UploadIntegrationRoutesTest extends WebTestCase
         $client = self::createClient();
         $this->logIn($client);
         $this->seedUpload($upload);
+        $this->dumpUploadedFile();
         if (null !== $executionStatus) {
             EntrepotMockResponseFactory::seed('processings/executions', ['_id' => 'execution-a', 'status' => $executionStatus]);
             EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'stored-data-a', 'status' => $storedDataStatus, 'tags' => []]);
@@ -70,13 +71,29 @@ final class UploadIntegrationRoutesTest extends WebTestCase
         yield 'donnée stockée générée' => [$launched, ['status' => 'successful', 'next_action' => 'delete_upload', 'steps' => ['successful', 'successful', 'successful']], 'SUCCESS', 'GENERATED'];
     }
 
+    // le nettoyage quotidien de var/data a supprimé le fichier avant l'envoi
+    public function testOpenUploadWithoutItsUploadedFileHasFailed(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+        $this->seedUpload(['status' => 'OPEN']);
+        (new Filesystem())->remove($this->uploadedFilePath());
+
+        $client->xmlHttpRequest('POST', self::URL);
+
+        self::assertResponseIsSuccessful();
+        $state = $this->jsonResponse($client);
+        self::assertSame('failed', $state['status']);
+        self::assertNull($state['next_action']);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
     public function testAdvanceSendsTheUploadedFileThenClosesTheUpload(): void
     {
         $client = self::createClient();
         $this->logIn($client);
         $this->seedUpload(['status' => 'OPEN']);
-        $path = self::getContainer()->getParameter('upload_path').'/'.self::UPLOADED_FILE;
-        (new Filesystem())->dumpFile($path, '{"type":"FeatureCollection","features":[]}');
+        $path = $this->dumpUploadedFile();
 
         $client->xmlHttpRequest('POST', self::URL);
 
@@ -219,6 +236,19 @@ final class UploadIntegrationRoutesTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSame('successful', $this->jsonResponse($client)['status']);
         self::assertCount(1, EntrepotMockResponseFactory::stored('uploads'));
+    }
+
+    private function uploadedFilePath(): string
+    {
+        return self::getContainer()->getParameter('upload_path').'/'.self::UPLOADED_FILE;
+    }
+
+    private function dumpUploadedFile(): string
+    {
+        $path = $this->uploadedFilePath();
+        (new Filesystem())->dumpFile($path, '{"type":"FeatureCollection","features":[]}');
+
+        return $path;
     }
 
     /** @param array<mixed> $upload */
