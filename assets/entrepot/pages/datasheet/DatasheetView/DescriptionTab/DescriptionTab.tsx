@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { type UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { type Metadata } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
@@ -23,6 +24,8 @@ type DescriptionTabProps = {
 export default function DescriptionTab({ datastoreId, datasheetName, metadataQuery }: DescriptionTabProps) {
     const { t } = useTranslation("DescriptionTab");
     const queryClient = useQueryClient();
+    // incrémenté à chaque enregistrement : le formulaire repart des valeurs enregistrées, pas d’un simple rechargement de la requête
+    const [savedVersion, setSavedVersion] = useState(0);
     const { userRights, isSupervisor } = useCommunityRights();
     // fiche de métadonnées = publication (BROADCAST), vignette = annexe (ANNEX)
     const canEdit = isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST) && userRights.includes(CommunityMemberDtoRightsEnum.ANNEX));
@@ -31,6 +34,7 @@ export default function DescriptionTab({ datastoreId, datasheetName, metadataQue
         mutationFn: (values: MetadataValues) => api.datasheet.replace(datastoreId, datasheetName, buildMetadataFormData(values)),
         onSuccess: (metadata) => {
             queryClient.setQueryData(RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName), metadata);
+            setSavedVersion((version) => version + 1);
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
         },
@@ -51,8 +55,7 @@ export default function DescriptionTab({ datastoreId, datasheetName, metadataQue
             {replaceMutation.isSuccess && <Alert className={fr.cx("fr-mb-4w")} severity="success" description={t("saved")} small closable />}
 
             <MetadataForm
-                // remonté après un enregistrement : les valeurs enregistrées deviennent l’état initial
-                key={metadataQuery.dataUpdatedAt}
+                key={savedVersion}
                 datastoreId={datastoreId}
                 mode="edit"
                 disabled={!canEdit}
