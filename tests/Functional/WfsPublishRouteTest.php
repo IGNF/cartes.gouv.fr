@@ -143,6 +143,19 @@ final class WfsPublishRouteTest extends WebTestCase
         self::assertSame(['attribution_logo'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
     }
 
+    public function testUnreadableImageWithAPngSignatureAnswers422(): void
+    {
+        $client = $this->client();
+        $path = (string) tempnam(sys_get_temp_dir(), 'vignette');
+        // signature PNG suivie de contenu illisible : le type détecté est bon, les dimensions non
+        file_put_contents($path, "\x89PNG\r\n\x1a\n".str_repeat('x', 64));
+
+        $this->post($client, $this->payload(), ['thumbnail' => new UploadedFile($path, 'vignette.png', 'image/png', null, true)]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['thumbnail'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+    }
+
     public function testAnnexesAreRemovedWhenTheConfigurationCannotBeCreated(): void
     {
         $this->seedMetadata();

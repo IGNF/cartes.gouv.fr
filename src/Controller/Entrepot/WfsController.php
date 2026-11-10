@@ -84,11 +84,14 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $file = $file instanceof UploadedFile ? $file : null;
             $files[] = $file;
             if ($file instanceof UploadedFile) {
-                $validator->atPath($field)->validate($file, new Assert\File(
+                // minWidth oblige à lire les dimensions : un fichier au bon type mais illisible est refusé
+                $validator->atPath($field)->validate($file, new Assert\Image(
                     maxSize: ServiceImageAnnexeService::MAX_SIZE,
                     mimeTypes: ServiceImageAnnexeService::MIME_TYPES,
+                    minWidth: 1,
                     maxSizeMessage: 'L’image ne peut pas dépasser {{ limit }} {{ suffix }}',
                     mimeTypesMessage: 'L’image doit être au format jpg ou png',
+                    sizeNotDetectedMessage: 'L’image est illisible',
                 ));
             }
         }
