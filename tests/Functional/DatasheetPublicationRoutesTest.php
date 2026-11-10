@@ -29,7 +29,8 @@ final class DatasheetPublicationRoutesTest extends WebTestCase
         $this->logIn($client);
 
         $client->xmlHttpRequest('POST', self::PUBLISH_URL);
-        self::assertResponseStatusCodeSame(204);
+        self::assertResponseIsSuccessful();
+        self::assertSame([EntrepotMockResponseFactory::METADATA_ENDPOINT_ID], array_column($this->jsonResponse($client), '_id'));
         self::assertSame([['_id' => EntrepotMockResponseFactory::METADATA_ENDPOINT_ID]], EntrepotMockResponseFactory::stored('metadata')[0]['endpoints']);
 
         $client->xmlHttpRequest('DELETE', self::PUBLISH_URL);
@@ -45,7 +46,8 @@ final class DatasheetPublicationRoutesTest extends WebTestCase
 
         $client->xmlHttpRequest('POST', self::PUBLISH_URL);
 
-        self::assertResponseStatusCodeSame(204);
+        self::assertResponseIsSuccessful();
+        self::assertSame([['_id' => 'endpoint-metadata']], $this->jsonResponse($client));
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 

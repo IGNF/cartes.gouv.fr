@@ -43,9 +43,10 @@ const remove = (datastoreId: string, datasheetName: string) => {
     });
 };
 
+// renvoie les points d’accès de publication
 const publish = (datastoreId: string, datasheetName: string) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_publish", { datastoreId, datasheetName });
-    return jsonFetch<null>(url, { method: "POST" });
+    return jsonFetch<NonNullable<Metadata["endpoints"]>>(url, { method: "POST" });
 };
 
 const unpublish = (datastoreId: string, datasheetName: string) => {

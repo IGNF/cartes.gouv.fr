@@ -129,16 +129,18 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
     const published = (metadata?.endpoints?.length ?? 0) > 0;
     const catalogueUrl = useCatalogueDatasheetUrl(datastoreId, metadata);
 
-    const onPublicationSuccess = () => queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
+    // pas de relecture : l’Entrepôt peut renvoyer l’ancien état de publication quelques secondes
+    const setEndpoints = (endpoints: Metadata["endpoints"]) =>
+        queryClient.setQueryData<Metadata>(RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName), (current) => current && { ...current, endpoints });
 
-    const publishMutation = useMutation<null, ApiError>({
+    const publishMutation = useMutation<Metadata["endpoints"], ApiError>({
         mutationFn: () => api.datasheet.publish(datastoreId, datasheetName),
-        onSuccess: onPublicationSuccess,
+        onSuccess: (endpoints) => setEndpoints(endpoints),
     });
 
     const unpublishMutation = useMutation<null, ApiError>({
         mutationFn: () => api.datasheet.unpublish(datastoreId, datasheetName),
-        onSuccess: onPublicationSuccess,
+        onSuccess: () => setEndpoints([]),
     });
 
     const pendingMessage = publishMutation.isPending

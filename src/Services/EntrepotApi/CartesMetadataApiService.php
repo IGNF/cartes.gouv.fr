@@ -68,12 +68,16 @@ class CartesMetadataApiService
         return $metadataList[0];
     }
 
-    // sans effet si la fiche de métadonnées est déjà publiée
-    public function publish(string $datastoreId, string $datasheetName): void
+    /**
+     * Sans effet si la fiche de métadonnées est déjà publiée.
+     *
+     * @return list<array<mixed>> points d’accès de publication après l’opération (la relecture de l’Entrepôt peut être en retard)
+     */
+    public function publish(string $datastoreId, string $datasheetName): array
     {
         $apiMetadata = $this->requireMetadata($datastoreId, $datasheetName);
         if ([] !== ($apiMetadata['endpoints'] ?? [])) {
-            return;
+            return $apiMetadata['endpoints'];
         }
 
         $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, ['type' => 'METADATA', 'open' => true]);
@@ -82,6 +86,8 @@ class CartesMetadataApiService
         }
 
         $this->metadataApiService->publish($datastoreId, $apiMetadata['file_identifier'], $endpoints[0]['endpoint']['_id'])->await();
+
+        return [$endpoints[0]['endpoint']];
     }
 
     // dépublie de tous les points d’accès ; sans effet si elle n’est pas publiée

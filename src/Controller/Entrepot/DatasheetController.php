@@ -75,12 +75,11 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ));
     }
 
+    // répond les points d’accès de publication : la fiche de métadonnées relue juste après peut ne pas encore les porter
     #[Route('/{datasheetName}/publish', name: 'publish', methods: ['POST'])]
-    public function publish(string $datastoreId, string $datasheetName): Response
+    public function publish(string $datastoreId, string $datasheetName): JsonResponse
     {
-        $this->cartesMetadataApiService->publish($datastoreId, $datasheetName);
-
-        return new Response(null, Response::HTTP_NO_CONTENT);
+        return $this->json($this->cartesMetadataApiService->publish($datastoreId, $datasheetName));
     }
 
     #[Route('/{datasheetName}/publish', name: 'unpublish', methods: ['DELETE'])]
