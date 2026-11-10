@@ -44,6 +44,10 @@ export default function DescriptionTab({ datastoreId, datasheetName, metadataQue
     if (metadataQuery.isPending && metadataQuery.fetchStatus !== "idle") {
         return null;
     }
+    // erreur autre que 404 : un formulaire vide ferait écraser la fiche de métadonnées existante
+    if (metadataQuery.isError && metadataQuery.error.status !== 404) {
+        return <Alert severity="error" description={getApiErrorMessage(metadataQuery.error)} small />;
+    }
     const csw = metadataQuery.data?.csw_metadata;
 
     return (
