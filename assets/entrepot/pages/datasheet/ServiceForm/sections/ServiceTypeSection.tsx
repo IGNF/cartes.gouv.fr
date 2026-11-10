@@ -82,7 +82,9 @@ const useStyles = tss.withName({ ServiceTypeSection }).create({
         "&:hover": { backgroundColor: fr.colors.decisions.background.default.grey.hover },
         "&:has(input:checked)": {
             borderColor: fr.colors.decisions.border.default.blueFrance.default,
-            boxShadow: `inset 0 0 0 1px ${fr.colors.decisions.border.default.blueFrance.default}`,
+            // un contour survit au mode couleurs forcées, contrairement au fond et à l’ombre
+            outline: `2px solid ${fr.colors.decisions.border.default.blueFrance.default}`,
+            outlineOffset: "-2px",
             backgroundColor: fr.colors.decisions.background.contrast.blueFrance.default,
         },
         "&:has(input:focus-visible)": {
