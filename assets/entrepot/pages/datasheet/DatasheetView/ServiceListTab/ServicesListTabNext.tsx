@@ -26,7 +26,7 @@ import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
-import { exploreMapsLayerUrl, externalLinkToUrl, externalUrls } from "@/router/externalUrls";
+import { externalLinkToUrl, externalUrls } from "@/router/externalUrls";
 import {
     editableOfferingTypes,
     formatDateFromISO,
@@ -158,10 +158,6 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
             const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId, now);
             const exploreMapsAvailability = getExploreMapsAvailability({ service, services: sortedServices, visibleOnCartesGouv, now });
             const exploreMapsLayerParam = getExploreMapsLayerParam(service);
-            const exploreMapsLink =
-                exploreMapsAvailability === "available" && exploreMapsLayerParam !== undefined
-                    ? externalLinkToUrl(exploreMapsLayerUrl(exploreMapsLayerParam), t("menu.explore"))
-                    : undefined;
 
             return [
                 <span key={`name-${service._id}`} className={classes.name}>
@@ -216,9 +212,6 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                             disabled: offeringUnavailable || !service.share_url,
                             onClick: () => openCopyUrlDialog(service),
                         },
-                        exploreMapsLink
-                            ? { text: t("menu.explore"), iconId: "ri-external-link-line", linkProps: exploreMapsLink }
-                            : { text: t("menu.explore"), iconId: "ri-external-link-line", disabled: true, onClick: () => {} },
                         editable &&
                             canBroadcast && {
                                 text: t("menu.edit"),

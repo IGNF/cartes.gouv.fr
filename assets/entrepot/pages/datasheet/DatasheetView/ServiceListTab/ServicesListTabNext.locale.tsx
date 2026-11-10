@@ -27,7 +27,7 @@ const { i18n } = declareComponentKeys<
     | "view"
     | "menu.open"
     | "menu.copy_url"
-    | "menu.explore"
+    | "explore.link_title"
     | "menu.edit"
     | "menu.delete"
     | "access.public"
@@ -79,7 +79,7 @@ export const ServicesListTabNextFrTranslations: Translations<"fr">["ServicesList
     view: "Consulter",
     "menu.open": "Autres actions",
     "menu.copy_url": "Copier l’URL",
-    "menu.explore": "Voir dans Explorer les cartes",
+    "explore.link_title": "Voir dans Explorer les cartes",
     "menu.edit": "Mettre à jour",
     "menu.delete": "Supprimer",
     "access.public": "Public",
@@ -129,7 +129,7 @@ export const ServicesListTabNextEnTranslations: Translations<"en">["ServicesList
     view: "View",
     "menu.open": "More actions",
     "menu.copy_url": "Copy URL",
-    "menu.explore": "View in Explore maps",
+    "explore.link_title": "View in Explore maps",
     "menu.edit": "Update",
     "menu.delete": "Delete",
     "access.public": "Public",

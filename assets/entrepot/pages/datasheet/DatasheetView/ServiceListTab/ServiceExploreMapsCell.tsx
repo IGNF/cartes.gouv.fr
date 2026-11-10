@@ -21,7 +21,7 @@ export default function ServiceExploreMapsCell({ availability, layerParam }: Ser
     }
 
     if (availability === "available" && layerParam !== undefined) {
-        return <a {...externalLinkToUrl(exploreMapsLayerUrl(layerParam), t("menu.explore"))}>{t("explore.link")}</a>;
+        return <a {...externalLinkToUrl(exploreMapsLayerUrl(layerParam), t("explore.link_title"))}>{t("explore.link")}</a>;
     }
 
     return <span title={t("explore.unavailable_title")}>-</span>;
