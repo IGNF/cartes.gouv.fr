@@ -20,6 +20,7 @@ import useCatalogueDatasheetUrl from "@/hooks/useCatalogueDatasheetUrl";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
+import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
 import { searchAwareActiveOptions } from "@/router/AppLink";
@@ -88,13 +89,7 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
         enabled,
     });
 
-    const metadataQuery = useQuery<Metadata, ApiError>({
-        queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
-        staleTime: 60000,
-        retry: false,
-        enabled,
-    });
+    const metadataQuery = useQuery({ ...datasheetMetadataQueryOptions(datastoreId, datasheetName), enabled });
 
     const serviceListQuery = useQuery<Service[], ApiError>({
         queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
