@@ -28,6 +28,7 @@ const breadcrumbNameByRouteId = {
     "/_private/tableau-de-bord/entrepots/$datastoreId/permissions/ajout": "datastore_add_permission",
     "/_private/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification": "datastore_edit_permission",
     "/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/donnees/": "datasheet_list",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/creer": "datastore_datasheet_create",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/televersement": "datastore_datasheet_upload",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/integration": "datastore_datasheet_upload_integration",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName": "datastore_datasheet_view",
@@ -177,6 +178,9 @@ const getBreadcrumb = (
                 segments: [...publishProps.segments, { label: t("datastore_selection"), linkProps: { to: "/tableau-de-bord/entrepots" } }],
                 currentPageLabel: tCommon("datastore_name", { name: community?.name, isSandbox }),
             };
+
+        case "datastore_datasheet_create":
+            return { ...datastoreBaseProps, currentPageLabel: t("datastore_create_datasheet") };
 
         case "datastore_datasheet_upload": {
             const breadcrumbProps: BreadcrumbProps = {
