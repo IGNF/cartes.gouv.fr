@@ -130,6 +130,34 @@ final class UploadIntegrationRoutesTest extends WebTestCase
         yield 'lancement' => ['POST processings/executions/execution-2/launch'];
     }
 
+    public function testInterruptedLaunchKeepsTheTagsWhenTheExecutionCannotBeDeleted(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+        $this->seedUpload(['status' => 'CLOSED', 'checks' => ['passed' => [['_id' => 'c']]]]);
+        // lancement en erreur alors que l’Entrepôt l’a peut-être accepté : l’exécution ne se laisse plus supprimer
+        EntrepotMockResponseFactory::failNext('POST processings/executions/execution-2/launch');
+        EntrepotMockResponseFactory::failNext('DELETE processings/executions/execution-2');
+
+        $client->xmlHttpRequest('POST', self::URL);
+
+        self::assertResponseStatusCodeSame(500);
+        $tags = EntrepotMockResponseFactory::stored('uploads')[0]['tags'];
+        self::assertSame('stored-data-1', $tags['vectordb_id']);
+        self::assertSame('execution-2', $tags['proc_int_id']);
+    }
+
+    public function testAdvanceOnAnUnknownUploadAnswers404(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('POST', self::URL);
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
     public function testAdvanceRunsNothingWhileAnotherRequestHoldsTheLock(): void
     {
         $client = self::createClient();

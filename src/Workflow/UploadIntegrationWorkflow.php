@@ -108,6 +108,9 @@ class UploadIntegrationWorkflow
      */
     public function advance(string $datastoreId, string $uploadId): array
     {
+        // avant le verrou : un identifiant inconnu répond 404 sans laisser de fichier verrou
+        $this->uploadApiService->get($datastoreId, $uploadId)->array();
+
         try {
             $lock = ($this->lockFactory)()->createLock("upload_integration_$uploadId");
             $acquired = $lock->acquire();
@@ -333,13 +336,15 @@ class UploadIntegrationWorkflow
     {
         // au mieux : l'erreur d'origine est celle qui remonte
         try {
-            $this->uploadApiService->removeTags($datastoreId, $uploadId, ['vectordb_id', 'proc_int_id'])->await();
+            // supprimer l'exécution non lancée supprime aussi sa donnée stockée de sortie (mesuré le 10/11/2026)
+            $this->processingApiService->removeExecution($datastoreId, $executionId)->await();
         } catch (ApiException) {
+            // suppression refusée : l'exécution a pu démarrer, les tags restent pour que l'état la suive
+            return;
         }
 
-        // supprimer l'exécution non lancée supprime aussi sa donnée stockée de sortie (mesuré le 10/11/2026)
         try {
-            $this->processingApiService->removeExecution($datastoreId, $executionId)->await();
+            $this->uploadApiService->removeTags($datastoreId, $uploadId, ['vectordb_id', 'proc_int_id'])->await();
         } catch (ApiException) {
         }
     }
