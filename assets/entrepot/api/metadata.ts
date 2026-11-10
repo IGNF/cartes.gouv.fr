@@ -1,6 +1,17 @@
 import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
-import { jsonFetch } from "../../modules/jsonFetch";
+import { type ApiError, apiFetch, jsonFetch } from "../../modules/jsonFetch";
 import { Metadata } from "../../@types/app";
+
+// false seulement si l’identifiant est pris (409) : toute autre erreur ne bloque pas, la création revérifie
+const isFileIdentifierAvailable = async (datastoreId: string, fileIdentifier: string): Promise<boolean> => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_check_file_identifier_availability", { datastoreId, file_identifier: fileIdentifier });
+    try {
+        await apiFetch(url, { method: "HEAD" });
+        return true;
+    } catch (error) {
+        return (error as ApiError).status !== 409;
+    }
+};
 
 const getList = (datastoreId: string, queryParams: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_get_list", { datastoreId, ...queryParams });
@@ -32,6 +43,7 @@ const remove = (datastoreId: string, metadataId: string) => {
 };
 
 const metadata = {
+    isFileIdentifierAvailable,
     getById,
     getByDatasheetName,
     getList,

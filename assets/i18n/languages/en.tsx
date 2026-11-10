@@ -3,6 +3,7 @@ import { AutocompleteSelectEnTranslations } from "@/components/Input/Autocomplet
 import { KeyValueListEnTranslations } from "@/components/Input/KeyValueList.locale";
 import { ImageCropModalEnTranslations } from "@/components/Input/ImageCropModal/ImageCropModal.locale";
 import { ImageFieldUploadEnTranslations } from "@/components/Input/ImageFieldUpload.locale";
+import { DatasheetSectionsEnTranslations } from "@/entrepot/pages/datasheet/forms/sections.locale";
 import { CommunityInfoEnTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { StoredDataDeleteConfirmDialogEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { DatastoreAddEnTranslations } from "@/entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale";
@@ -146,5 +147,6 @@ export const translations: Translations<"en"> = {
     AutocompleteSelect: AutocompleteSelectEnTranslations,
     ImageCropModal: ImageCropModalEnTranslations,
     ImageFieldUpload: ImageFieldUploadEnTranslations,
+    DatasheetSections: DatasheetSectionsEnTranslations,
     Stats: StatsEnTranslations,
 };

@@ -88,6 +88,7 @@ export type ComponentKey =
     | import("../components/Input/AutocompleteSelect.locale").I18n
     | import("../components/Input/ImageCropModal/ImageCropModal.locale").I18n
     | import("../components/Input/ImageFieldUpload.locale").I18n
+    | import("../entrepot/pages/datasheet/forms/sections.locale").I18n
     | import("../entrepot/pages/stats/Stats.locale").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
