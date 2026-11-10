@@ -31,7 +31,7 @@ import { DatasheetViewActiveTabEnum } from "./types";
 
 const DescriptionTab = lazy(() => import("../DescriptionTab/DescriptionTab"));
 const DatasetTabNext = lazy(() => import("../DatasetTabNext/DatasetTabNext"));
-const ServicesListTab = lazy(() => import("../ServiceListTab/ServicesListTab"));
+const ServicesListTabNext = lazy(() => import("../ServiceListTab/ServicesListTabNext"));
 
 export const DATASHEET_VIEW_NEXT_TABS = [
     DatasheetViewActiveTabEnum.Description,
@@ -185,11 +185,8 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
                 onDeleteDatasheet={() => deleteModal.open()}
             />
         ),
-        // ancien onglet jusqu’au ticket 04
-        [DatasheetViewActiveTabEnum.Services]: datasheet && (
-            <DatasheetViewTab>
-                <ServicesListTab datastoreId={datastoreId} datasheet={datasheet} servicesListQuery={serviceListQuery} />
-            </DatasheetViewTab>
+        [DatasheetViewActiveTabEnum.Services]: (
+            <ServicesListTabNext datastoreId={datastoreId} datasheetName={datasheetName} serviceListQuery={serviceListQuery} />
         ),
     };
 
