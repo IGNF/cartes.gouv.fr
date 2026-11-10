@@ -1,12 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { Metadata } from "@/@types/app";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
-import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n";
-import RQKeys from "@/modules/entrepot/RQKeys";
-import { type ApiError } from "@/modules/jsonFetch";
+import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
 import { getMetadataCustodianName } from "@/utils";
 import DatasetAddForm from "./DatasetAddForm";
 
@@ -19,12 +16,7 @@ type DatasetAddPageProps = {
 export default function DatasetAddPage({ datastoreId, datasheetName }: DatasetAddPageProps) {
     const { t } = useTranslation("DatasetAdd");
 
-    const metadataQuery = useQuery<Metadata, ApiError>({
-        queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
-        staleTime: 60000,
-        retry: false,
-    });
+    const metadataQuery = useQuery(datasheetMetadataQueryOptions(datastoreId, datasheetName));
 
     return (
         <Main title={`${t("title")} - ${datasheetName}`}>

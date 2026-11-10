@@ -65,15 +65,16 @@ Le statut de la livraison ne dit pas si les vérifications ont réussi : une liv
 
 Une seule action par appel.
 
-| `next_action`       | Condition                                          | Action                                                                             |
-| ------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `send_files`        | livraison en OPEN                                  | envoi des fichiers et de leurs md5 à l'Entrepôt, puis fermeture de la livraison    |
-| `launch_processing` | vérifications réussies, traitement pas encore créé | création de l'exécution, tags sur la livraison et sur la donnée stockée, lancement |
-| `delete_upload`     | les trois étapes ont réussi                        | suppression de la livraison                                                        |
+| `next_action`       | Condition                                              | Action                                                                             |
+| ------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `send_files`        | livraison en OPEN                                      | envoi des fichiers et de leurs md5 à l'Entrepôt, puis fermeture de la livraison    |
+| `launch_processing` | vérifications réussies, traitement pas encore créé     | création de l'exécution, tags sur la livraison et sur la donnée stockée, lancement |
+| `delete_upload`     | les trois étapes ont réussi, ou donnée stockée DELETED | suppression de la livraison                                                        |
 
 - Envoi des fichiers : pas de limite de temps (`set_time_limit(0)`), un gros fichier dépasse `max_execution_time`.
 - Lancement interrompu : si l'écriture des tags ou le lancement échoue, l'exécution créée est supprimée, puis les tags `proc_int_id` et `vectordb_id` sont retirés de la livraison. Si l'Entrepôt refuse la suppression (l'exécution a pu démarrer), les tags restent : l'état suit alors l'exécution réelle. Supprimer une exécution non lancée supprime aussi sa donnée stockée de sortie ; l'inverse est refusé (409). L'erreur d'origine remonte.
 - Suppression : un échec ne change pas l'état `successful`. La suppression est retentée à la prochaine ouverture de la fiche.
+- Donnée stockée supprimée : l'Entrepôt la renvoie encore, avec le statut DELETED. L'état est `failed` et `next_action` vaut `delete_upload` : la livraison ne sert plus. Une donnée stockée UNSTABLE garde sa livraison, pour le rapport.
 
 ## Verrou
 
@@ -83,10 +84,11 @@ Les fichiers verrous sont dans `var/data/locks` (`framework.lock`), sur le volum
 
 ## Côté navigateur
 
-- Page de suivi (`DatasheetUploadIntegrationDialog`) : lit le `GET` toutes les 3 secondes et envoie le `POST` dès que `next_action` n'est pas `null`. Jamais deux `POST` à la fois. Après une erreur (lecture ou action), elle s'arrête et affiche l'erreur avec un bouton « Réessayer ».
+- Page de suivi (`DatasheetUploadIntegrationDialog`) : lit le `GET` toutes les 3 secondes et envoie le `POST` dès que `next_action` n'est pas `null` et que l'état n'est pas `failed`. Jamais deux `POST` à la fois. Après une erreur (lecture ou action), elle s'arrête et affiche l'erreur avec un bouton « Réessayer ».
 - Onglet Données (`useUploadIntegrations`) :
     - une livraison sans tag `vectordb_id` n'est pas lancée : sa ligne lit le `GET` pour savoir si une vérification a échoué (« Voir le rapport ») ou non (« Reprendre l'intégration ») ;
-    - une livraison dont la donnée stockée est GENERATED n'est pas affichée : l'onglet envoie le `POST` qui la supprime.
+    - une livraison dont la donnée stockée est GENERATED, ou absente de la liste de la fiche, n'est pas affichée : l'onglet envoie le `POST`, qui la supprime si la donnée stockée est GENERATED ou DELETED ;
+    - si la fiche n'existe plus après ce nettoyage (404), l'onglet renvoie à la liste des fiches.
 
 ## Tags utilisés
 

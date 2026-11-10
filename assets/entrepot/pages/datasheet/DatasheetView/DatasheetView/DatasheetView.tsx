@@ -12,10 +12,11 @@ import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
 import LoadingText from "@/components/Utils/LoadingText";
+import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
 import { blockingProcessingStatuses } from "@/hooks/queries/useStoredDataUseProcessings";
 import { delta } from "@/utils";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
-import type { Datasheet, DatasheetDetailed, Metadata, Service } from "../../../../../@types/app";
+import type { Datasheet, DatasheetDetailed, Service } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../../components/Utils/Wait";
@@ -100,13 +101,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         }
     }, [serviceListQuery.data, datastoreId, queryClient]);
 
-    const metadataQuery = useQuery<Metadata, ApiError>({
-        queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
-        enabled: !datasheetDeleteMutation.isPending,
-        staleTime: 60000,
-        retry: false,
-    });
+    const metadataQuery = useQuery({ ...datasheetMetadataQueryOptions(datastoreId, datasheetName), enabled: !datasheetDeleteMutation.isPending });
 
     const documentsListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_documents_list(datastoreId, datasheetName),

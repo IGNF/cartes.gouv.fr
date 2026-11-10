@@ -68,6 +68,10 @@ final class UploadIntegrationRoutesTest extends WebTestCase
         yield 'vérifications réussies' => [['status' => 'CLOSED', 'checks' => ['passed' => [['_id' => 'c']]]], ['status' => 'waiting', 'next_action' => 'launch_processing', 'steps' => ['successful', 'successful', 'waiting']]];
         yield 'traitement en cours' => [$launched, ['status' => 'in_progress', 'next_action' => null, 'steps' => ['successful', 'successful', 'in_progress']], 'PROGRESS', 'GENERATING'];
         yield 'traitement en échec' => [$launched, ['status' => 'failed', 'next_action' => null, 'steps' => ['successful', 'successful', 'failed']], 'FAILURE', 'UNSTABLE'];
+        // tag posé à la main, sans exécution : pas de lecture de la donnée stockée
+        yield 'vectordb_id seul' => [['status' => 'CLOSED', 'checks' => ['passed' => [['_id' => 'c']]], 'tags' => ['vectordb_id' => 'inconnue']], ['status' => 'failed', 'next_action' => null, 'steps' => ['successful', 'successful', 'failed']]];
+        // mesuré le 10/11/2026 : une donnée stockée supprimée répond encore, avec le statut DELETED
+        yield 'donnée stockée supprimée' => [$launched, ['status' => 'failed', 'next_action' => 'delete_upload', 'steps' => ['successful', 'successful', 'failed']], 'SUCCESS', 'DELETED'];
         yield 'donnée stockée générée' => [$launched, ['status' => 'successful', 'next_action' => 'delete_upload', 'steps' => ['successful', 'successful', 'successful']], 'SUCCESS', 'GENERATED'];
     }
 
@@ -209,6 +213,32 @@ final class UploadIntegrationRoutesTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 
+    public function testAdvanceDeletesTheUploadOnceItsStoredDataIsDeleted(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+        $this->seedLaunchedUpload('FAILURE', 'DELETED');
+
+        $client->xmlHttpRequest('POST', self::URL);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame([], EntrepotMockResponseFactory::stored('uploads'));
+    }
+
+    // le rapport de la livraison reste consultable
+    public function testAdvanceKeepsTheUploadOfAFailedStoredData(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+        $this->seedLaunchedUpload('FAILURE', 'UNSTABLE');
+
+        $client->xmlHttpRequest('POST', self::URL);
+
+        self::assertResponseIsSuccessful();
+        self::assertNull($this->jsonResponse($client)['next_action']);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
     public function testAdvanceDeletesTheUploadOnceTheStoredDataIsGenerated(): void
     {
         $client = self::createClient();
@@ -260,8 +290,13 @@ final class UploadIntegrationRoutesTest extends WebTestCase
 
     private function seedGeneratedUpload(): void
     {
+        $this->seedLaunchedUpload('SUCCESS', 'GENERATED');
+    }
+
+    private function seedLaunchedUpload(string $executionStatus, string $storedDataStatus): void
+    {
         $this->seedUpload(['status' => 'CLOSED', 'checks' => ['passed' => [['_id' => 'c']]], 'tags' => ['vectordb_id' => 'stored-data-a', 'proc_int_id' => 'execution-a']]);
-        EntrepotMockResponseFactory::seed('processings/executions', ['_id' => 'execution-a', 'status' => 'SUCCESS']);
-        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'stored-data-a', 'status' => 'GENERATED', 'tags' => []]);
+        EntrepotMockResponseFactory::seed('processings/executions', ['_id' => 'execution-a', 'status' => $executionStatus]);
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'stored-data-a', 'status' => $storedDataStatus, 'tags' => []]);
     }
 }

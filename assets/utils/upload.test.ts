@@ -26,6 +26,8 @@ describe("shouldAdvanceIntegration", () => {
         expect(shouldAdvanceIntegration(waiting, undefined, true, false)).toBe(false);
         expect(shouldAdvanceIntegration(waiting, undefined, false, true)).toBe(false);
     });
+    it("n’envoie pas pour une intégration en échec, même avec une action en attente", () =>
+        expect(shouldAdvanceIntegration({ ...waiting, status: "failed", next_action: "delete_upload" }, undefined, false, false)).toBe(false));
     it("attend la lecture suivante quand l’état vient du dernier envoi", () => {
         expect(shouldAdvanceIntegration(waiting, waiting, false, false)).toBe(false);
         expect(shouldAdvanceIntegration({ ...waiting }, waiting, false, false)).toBe(true);
