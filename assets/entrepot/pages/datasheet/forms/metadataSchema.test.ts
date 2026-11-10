@@ -147,6 +147,20 @@ describe("withLockedFlags et mapMetadataToFormValues", () => {
 
         expect(values.date_creation?.getDate()).toBe(15);
         expect(values.name).toBe("Fiche");
-        expect(values.resource_constraints?.[0].constraints[0]).toEqual({ type: "useLimitation", description: "Usage interne", locked: true });
+        expect(values.resource_constraints?.[0].constraints[0]).toEqual({ type: "useLimitation", url: "", description: "Usage interne", locked: true });
+    });
+
+    // valeurs initiales égales à celles du DOM : le formulaire n’est pas modifié dès son chargement
+    it("lit les champs texte vides en chaîne vide et les nombres absents en undefined", () => {
+        const values = mapMetadataToFormValues(
+            {
+                producers: [{ organization_name: "Organisme", organization_email: "orga@example.test", role: "pointOfContact", address_city: null }],
+                scale: null as unknown as undefined,
+            },
+            "Fiche"
+        );
+
+        expect(values.producers?.[0]).toMatchObject({ address_number_and_streetname: "", address_postal_code: "", address_city: "" });
+        expect(values.scale).toBeUndefined();
     });
 });

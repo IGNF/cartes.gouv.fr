@@ -361,9 +361,10 @@ export function mapMetadataToFormValues(csw: CswMetadata | undefined, datasheetN
         organization_name: producer.organization_name,
         organization_email: producer.organization_email,
         role: (PRODUCER_ROLES as readonly string[]).includes(producer.role) ? (producer.role as ProducerRole) : "pointOfContact",
-        address_number_and_streetname: producer.address_number_and_streetname ?? undefined,
-        address_postal_code: producer.address_postal_code ?? undefined,
-        address_city: producer.address_city ?? undefined,
+        // champs texte : "" comme dans le DOM, sinon le formulaire serait modifié dès son chargement
+        address_number_and_streetname: producer.address_number_and_streetname ?? "",
+        address_postal_code: producer.address_postal_code ?? "",
+        address_city: producer.address_city ?? "",
     }));
 
     return {
@@ -382,14 +383,20 @@ export function mapMetadataToFormValues(csw: CswMetadata | undefined, datasheetN
             ? (csw.update_frequency as UpdateFrequency)
             : undefined,
         territories: csw.territories ?? [],
-        scale: csw.scale,
-        resolution: csw.resolution,
+        // le serveur envoie null pour une valeur absente
+        scale: csw.scale ?? undefined,
+        resolution: csw.resolution ?? undefined,
         resource_constraints: (csw.resource_constraints ?? []).map((condition) =>
             withLockedFlags({
                 type: condition.type as ConstraintType,
                 // le serveur envoie null pour les champs absents, le schéma les attend absents
                 constraints: condition.constraints.map(
-                    (sub) => ({ ...Object.fromEntries(Object.entries(sub).filter(([, value]) => value !== null)), locked: false }) as SubConstraintFormValues
+                    (sub) =>
+                        ({
+                            ...Object.fromEntries(Object.entries(sub).filter(([, value]) => value !== null)),
+                            ...(sub.type === "useLimitation" ? { url: sub.url ?? "" } : {}),
+                            locked: false,
+                        }) as SubConstraintFormValues
                 ),
             })
         ),

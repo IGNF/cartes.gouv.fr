@@ -67,7 +67,12 @@ export default function SpatialCoverageSection() {
                 hintText={t("field.resolution.hint")}
                 state={errors.resolution ? "error" : "default"}
                 stateRelatedMessage={errors.resolution?.message}
-                nativeInputProps={{ type: "number", step: "any", min: 0, ...register("resolution", { valueAsNumber: true }) }}
+                nativeInputProps={{
+                    type: "number",
+                    step: "any",
+                    min: 0,
+                    ...register("resolution", { setValueAs: (value: string) => (value === "" ? undefined : Number(value)) }),
+                }}
             />
         </div>
     );

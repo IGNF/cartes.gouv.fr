@@ -73,12 +73,14 @@ export default function MetadataForm({
 
     const {
         handleSubmit,
-        formState: { isSubmitting, isDirty },
+        formState: { isSubmitting, dirtyFields },
         control,
         setError,
         reset,
     } = form;
 
+    // isDirty compare tout l’arbre des valeurs et vaut true dès le chargement : seuls les champs modifiés comptent
+    const isDirty = Object.keys(dirtyFields).length > 0;
     // modification : alerte du navigateur si l’on quitte la page avec des changements non enregistrés
     const warnOnLeave = isEditMode && isDirty && !isSubmitting;
     useEffect(() => {
