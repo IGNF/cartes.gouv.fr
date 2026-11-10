@@ -1,3 +1,4 @@
+import { type UploadIntegration } from "@/@types/app";
 import ignfProjections from "@/data/ignf_projections.json";
 
 const ignfProjectionsBySrid: Record<string, string> = ignfProjections;
@@ -12,3 +13,14 @@ export const mapIgnfToEpsg = (sridRaw: unknown): string | undefined => {
 
     return typeof srid === "string" && srid.trim() !== "" ? srid : undefined;
 };
+
+/**
+ * Faut-il envoyer le POST d’avancement de l’intégration ? Une action attend, aucune n’est en cours ni en échec,
+ * et l’état ne vient pas du dernier POST (celui-là attend la lecture suivante, sinon le dialogue boucle).
+ */
+export const shouldAdvanceIntegration = (
+    integration: UploadIntegration | undefined,
+    lastAdvancedState: UploadIntegration | undefined,
+    isAdvancing: boolean,
+    hasFailed: boolean
+): boolean => !!integration?.next_action && integration !== lastAdvancedState && !isAdvancing && !hasFailed;

@@ -72,7 +72,7 @@ Une seule action par appel.
 | `delete_upload`     | les trois étapes ont réussi                        | suppression de la livraison                                                        |
 
 - Envoi des fichiers : pas de limite de temps (`set_time_limit(0)`), un gros fichier dépasse `max_execution_time`.
-- Lancement interrompu : si l'écriture des tags ou le lancement échoue, les tags `proc_int_id` et `vectordb_id` sont retirés de la livraison et l'exécution créée est supprimée. Supprimer une exécution non lancée supprime aussi sa donnée stockée de sortie ; l'inverse est refusé (409). L'erreur d'origine remonte.
+- Lancement interrompu : si l'écriture des tags ou le lancement échoue, l'exécution créée est supprimée, puis les tags `proc_int_id` et `vectordb_id` sont retirés de la livraison. Si l'Entrepôt refuse la suppression (l'exécution a pu démarrer), les tags restent : l'état suit alors l'exécution réelle. Supprimer une exécution non lancée supprime aussi sa donnée stockée de sortie ; l'inverse est refusé (409). L'erreur d'origine remonte.
 - Suppression : un échec ne change pas l'état `successful`. La suppression est retentée à la prochaine ouverture de la fiche.
 
 ## Verrou
@@ -83,7 +83,7 @@ Les fichiers verrous sont dans `var/data/locks` (`framework.lock`), sur le volum
 
 ## Côté navigateur
 
-- Page de suivi (`DatasheetUploadIntegrationDialog`) : lit le `GET` toutes les 3 secondes et envoie le `POST` dès que `next_action` n'est pas `null`. Jamais deux `POST` à la fois. Après une erreur du `POST`, elle s'arrête et affiche l'erreur.
+- Page de suivi (`DatasheetUploadIntegrationDialog`) : lit le `GET` toutes les 3 secondes et envoie le `POST` dès que `next_action` n'est pas `null`. Jamais deux `POST` à la fois. Après une erreur (lecture ou action), elle s'arrête et affiche l'erreur avec un bouton « Réessayer ».
 - Onglet Données (`useUploadIntegrations`) :
     - une livraison sans tag `vectordb_id` n'est pas lancée : sa ligne lit le `GET` pour savoir si une vérification a échoué (« Voir le rapport ») ou non (« Reprendre l'intégration ») ;
     - une livraison dont la donnée stockée est GENERATED n'est pas affichée : l'onglet envoie le `POST` qui la supprime.

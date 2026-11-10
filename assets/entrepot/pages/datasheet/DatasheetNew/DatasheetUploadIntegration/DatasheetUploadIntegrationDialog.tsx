@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -8,6 +9,7 @@ import { FC, useCallback, useEffect, useMemo } from "react";
 import { UploadIntegration } from "@/@types/app";
 import { getApiErrorMessage } from "@/modules/apiError";
 import { type ApiError } from "@/modules/jsonFetch";
+import { shouldAdvanceIntegration } from "@/utils";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
@@ -54,6 +56,7 @@ type DatasheetUploadIntegrationDialogProps = {
 
 const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId, datasheetView }) => {
     const { t } = useTranslation("DatasheetUploadIntegration");
+    const { t: tCommon } = useTranslation("Common");
 
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -66,11 +69,11 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     });
     const { mutate: advanceMutate, isPending: isAdvancing, isError: advanceFailed, data: advancedState } = advance;
 
-    // lecture seule, en boucle ; suspendue pendant une action et après une erreur
+    // lecture seule, en boucle ; suspendue pendant une action et après une erreur (lecture ou action)
     const integrationQuery = useQuery<UploadIntegration, ApiError>({
         queryKey,
         queryFn: ({ signal }) => api.upload.getIntegration(datastoreId, uploadId, { signal }),
-        refetchInterval: (query) => (isIntegrationFinished(query.state.data) || isAdvancing || advanceFailed ? false : 3000),
+        refetchInterval: (query) => (isIntegrationFinished(query.state.data) || query.state.status === "error" || isAdvancing || advanceFailed ? false : 3000),
         refetchIntervalInBackground: true,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
@@ -82,7 +85,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
 
     // une action attend : on l’exécute, une seule à la fois ; l’état renvoyé par une action attend la lecture suivante
     useEffect(() => {
-        if (integration?.next_action && integration !== advancedState && !isAdvancing && !advanceFailed) {
+        if (shouldAdvanceIntegration(integration, advancedState, isAdvancing, advanceFailed)) {
             advanceMutate();
         }
     }, [integration, advancedState, isAdvancing, advanceFailed, advanceMutate]);
@@ -127,7 +130,27 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     return (
         <div className={fr.cx("fr-container")}>
             {error && !successful && (
-                <Alert className={fr.cx("fr-mb-2w")} severity="error" title={t("integration_error")} description={getApiErrorMessage(error)} small />
+                <Alert
+                    className={fr.cx("fr-mb-2w")}
+                    severity="error"
+                    title={t("integration_error")}
+                    description={
+                        <>
+                            <p>{getApiErrorMessage(error)}</p>
+                            <Button
+                                priority="secondary"
+                                size="small"
+                                onClick={() => {
+                                    advance.reset();
+                                    void integrationQuery.refetch();
+                                }}
+                            >
+                                {tCommon("retry")}
+                            </Button>
+                        </>
+                    }
+                    small
+                />
             )}
 
             {failed ? (
