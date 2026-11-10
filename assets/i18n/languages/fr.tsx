@@ -3,6 +3,9 @@ import { AutocompleteSelectFrTranslations } from "@/components/Input/Autocomplet
 import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
 import { ImageCropModalFrTranslations } from "@/components/Input/ImageCropModal/ImageCropModal.locale";
 import { ImageFieldUploadFrTranslations } from "@/components/Input/ImageFieldUpload.locale";
+import { DatasheetSectionsFrTranslations } from "@/entrepot/pages/datasheet/forms/sections.locale";
+import { DescriptionTabFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DescriptionTab/DescriptionTab.locale";
+import { DatasheetCreateFrTranslations } from "@/entrepot/pages/datasheet/DatasheetCreate/DatasheetCreate.locale";
 import { CommunityInfoFrTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { StoredDataDeleteConfirmDialogFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { DatastoreAddFrTranslations } from "@/entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale";
@@ -146,5 +149,8 @@ export const translations: Translations<"fr"> = {
     AutocompleteSelect: AutocompleteSelectFrTranslations,
     ImageCropModal: ImageCropModalFrTranslations,
     ImageFieldUpload: ImageFieldUploadFrTranslations,
+    DatasheetSections: DatasheetSectionsFrTranslations,
+    DatasheetCreate: DatasheetCreateFrTranslations,
+    DescriptionTab: DescriptionTabFrTranslations,
     Stats: StatsFrTranslations,
 };

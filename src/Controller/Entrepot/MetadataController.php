@@ -4,19 +4,18 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
-use App\Dto\Metadata\CswMetadata;
 use App\Exception\AppException;
 use App\Services\CswMetadataXmlReader;
-use App\Services\CswMetadataXmlWriter;
+use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\MetadataApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
-use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/metadata',
@@ -28,9 +27,17 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function __construct(
         private readonly MetadataApiService $metadataApiService,
         private readonly CswMetadataXmlReader $cswMetadataReader,
-        private readonly CswMetadataXmlWriter $cswMetadataWriter,
-        private readonly SerializerInterface $serializer,
+        private readonly CartesMetadataApiService $cartesMetadataApiService,
     ) {
+    }
+
+    // 204 si l’identifiant est libre, 409 s’il est pris ; déclarée avant get_list, dont la route GET répond aussi à HEAD
+    #[Route('', name: 'check_file_identifier_availability', methods: ['HEAD'])]
+    public function checkFileIdentifierAvailability(string $datastoreId, #[MapQueryParameter('file_identifier')] string $fileIdentifier): Response
+    {
+        $available = $this->cartesMetadataApiService->isFileIdentifierAvailable($datastoreId, $fileIdentifier);
+
+        return new Response(null, $available ? Response::HTTP_NO_CONTENT : Response::HTTP_CONFLICT);
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
@@ -43,26 +50,6 @@ class MetadataController extends AbstractController implements ApiControllerInte
         $metadataList = $this->metadataApiService->getAll($datastoreId, $query)->resolve();
 
         return $this->json($metadataList);
-    }
-
-    #[Route('/', name: 'add', methods: ['POST'])]
-    public function add(string $datastoreId, Request $request): JsonResponse
-    {
-        $datasheetName = $request->query->get(CommonTags::DATASHEET_NAME);
-
-        $cswMetadata = $this->serializer->deserialize($request->getContent(), CswMetadata::class, 'json');
-        $filePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
-
-        $metadata = $this->metadataApiService->add($datastoreId, $filePath);
-        $metadata['csw_metadata'] = $cswMetadata;
-
-        if (null !== $datasheetName) {
-            $metadata = $this->metadataApiService->addTags($datastoreId, $metadata['_id'], [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ])->array();
-        }
-
-        return $this->json($metadata);
     }
 
     #[Route('/{metadataId}', name: 'get', methods: ['GET'], requirements: ['metadataId' => Requirement::UUID_V4])]

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Dto\Datasheet;
 
 use Symfony\Component\Validator\Constraints as Assert;
@@ -30,5 +32,12 @@ class ProducerDTO
 
         public readonly ?string $address_city = null,
     ) {
+    }
+
+    // même organisme, adresse comprise, quel que soit le rôle
+    public function sameOrganizationAs(self $other): bool
+    {
+        return [$this->organization_name, $this->organization_email, $this->address_number_and_streetname, $this->address_postal_code, $this->address_city]
+            === [$other->organization_name, $other->organization_email, $other->address_number_and_streetname, $other->address_postal_code, $other->address_city];
     }
 }

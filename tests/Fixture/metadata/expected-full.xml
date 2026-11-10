@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gml="http://www.opengis.net/gml" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="fid" xsi:schemaLocation="http://www.isotc211.org/2005/gmd https://www.isotc211.org/2005/gmd/gmd.xsd http://www.isotc211.org/2005/gmx https://www.isotc211.org/2005/gmx/gmx.xsd http://www.isotc211.org/2005/srv http://schemas.opengis.net/iso/19139/20060504/srv/srv.xsd">
-            <gmd:fileIdentifier>
-                        <gco:CharacterString>fid</gco:CharacterString>
-        </gmd:fileIdentifier>
-        <gmd:language>
+<?xml version="1.0" encoding="UTF-8"?>
+<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gml="http://www.opengis.net/gml" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="fid" xsi:schemaLocation="http://www.isotc211.org/2005/gmd https://www.isotc211.org/2005/gmd/gmd.xsd http://www.isotc211.org/2005/gmx https://www.isotc211.org/2005/gmx/gmx.xsd http://www.isotc211.org/2005/srv http://schemas.opengis.net/iso/19139/20060504/srv/srv.xsd">
+    <gmd:fileIdentifier>
+        <gco:CharacterString>fid</gco:CharacterString>
+    </gmd:fileIdentifier>
+    <gmd:language>
         <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="fre">français</gmd:LanguageCode>
     </gmd:language>
     <gmd:characterSet>
@@ -11,331 +12,573 @@
     <gmd:hierarchyLevel>
         <gmd:MD_ScopeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset">dataset</gmd:MD_ScopeCode>
     </gmd:hierarchyLevel>
-
-                        
     <gmd:hierarchyLevelName>
         <gco:CharacterString>Jeu de données</gco:CharacterString>
     </gmd:hierarchyLevelName>
-
-            <gmd:identificationInfo>
-            <gmd:MD_DataIdentification>
-                                    <gmd:citation>
+    <gmd:contact>
+        <gmd:CI_ResponsibleParty>
+            <gmd:organisationName>
+                <gco:CharacterString>Contact</gco:CharacterString>
+            </gmd:organisationName>
+            <gmd:contactInfo>
+                <gmd:CI_Contact>
+                    <gmd:address>
+                        <gmd:CI_Address>
+                            <gmd:electronicMailAddress>
+                                <gco:CharacterString>contact@example.test</gco:CharacterString>
+                            </gmd:electronicMailAddress>
+                        </gmd:CI_Address>
+                    </gmd:address>
+                </gmd:CI_Contact>
+            </gmd:contactInfo>
+            <gmd:role>
+                <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+            </gmd:role>
+        </gmd:CI_ResponsibleParty>
+    </gmd:contact>
+    <gmd:dateStamp>
+        <gco:DateTime>2026-11-09T12:00:00</gco:DateTime>
+    </gmd:dateStamp>
+    <gmd:identificationInfo>
+        <gmd:MD_DataIdentification>
+            <gmd:citation>
+                <gmd:CI_Citation>
+                    <gmd:title>
+                        <gco:CharacterString>Titre</gco:CharacterString>
+                    </gmd:title>
+                    <gmd:date>
+                        <gmd:CI_Date>
+                            <gmd:date>
+                                <gco:Date>2024-01-15</gco:Date>
+                            </gmd:date>
+                            <gmd:dateType>
+                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
+                            </gmd:dateType>
+                        </gmd:CI_Date>
+                    </gmd:date>
+                    <gmd:date>
+                        <gmd:CI_Date>
+                            <gmd:date>
+                                <gco:Date>2024-02-01</gco:Date>
+                            </gmd:date>
+                            <gmd:dateType>
+                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                            </gmd:dateType>
+                        </gmd:CI_Date>
+                    </gmd:date>
+                    <gmd:date>
+                        <gmd:CI_Date>
+                            <gmd:date>
+                                <gco:Date>2024-03-01</gco:Date>
+                            </gmd:date>
+                            <gmd:dateType>
+                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
+                            </gmd:dateType>
+                        </gmd:CI_Date>
+                    </gmd:date>
+                </gmd:CI_Citation>
+            </gmd:citation>
+            <gmd:abstract>
+                <gco:CharacterString>Résumé</gco:CharacterString>
+            </gmd:abstract>
+            <gmd:pointOfContact>
+                <gmd:CI_ResponsibleParty>
+                    <gmd:organisationName>
+                        <gco:CharacterString>Organisation</gco:CharacterString>
+                    </gmd:organisationName>
+                    <gmd:contactInfo>
+                        <gmd:CI_Contact>
+                            <gmd:address>
+                                <gmd:CI_Address>
+                                    <gmd:deliveryPoint>
+                                        <gco:CharacterString>1 rue de l’Exemple</gco:CharacterString>
+                                    </gmd:deliveryPoint>
+                                    <gmd:city>
+                                        <gco:CharacterString>Ville</gco:CharacterString>
+                                    </gmd:city>
+                                    <gmd:postalCode>
+                                        <gco:CharacterString>75000</gco:CharacterString>
+                                    </gmd:postalCode>
+                                    <gmd:electronicMailAddress>
+                                        <gco:CharacterString>orga@example.test</gco:CharacterString>
+                                    </gmd:electronicMailAddress>
+                                </gmd:CI_Address>
+                            </gmd:address>
+                        </gmd:CI_Contact>
+                    </gmd:contactInfo>
+                    <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+                    </gmd:role>
+                </gmd:CI_ResponsibleParty>
+            </gmd:pointOfContact>
+            <gmd:pointOfContact>
+                <gmd:CI_ResponsibleParty>
+                    <gmd:organisationName>
+                        <gco:CharacterString>Gestionnaire</gco:CharacterString>
+                    </gmd:organisationName>
+                    <gmd:contactInfo>
+                        <gmd:CI_Contact>
+                            <gmd:address>
+                                <gmd:CI_Address>
+                                    <gmd:electronicMailAddress>
+                                        <gco:CharacterString>gestion@example.test</gco:CharacterString>
+                                    </gmd:electronicMailAddress>
+                                </gmd:CI_Address>
+                            </gmd:address>
+                        </gmd:CI_Contact>
+                    </gmd:contactInfo>
+                    <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="custodian">custodian</gmd:CI_RoleCode>
+                    </gmd:role>
+                </gmd:CI_ResponsibleParty>
+            </gmd:pointOfContact>
+            <gmd:pointOfContact>
+                <gmd:CI_ResponsibleParty>
+                    <gmd:organisationName>
+                        <gco:CharacterString>Auteur</gco:CharacterString>
+                    </gmd:organisationName>
+                    <gmd:contactInfo>
+                        <gmd:CI_Contact>
+                            <gmd:address>
+                                <gmd:CI_Address>
+                                    <gmd:electronicMailAddress>
+                                        <gco:CharacterString>auteur@example.test</gco:CharacterString>
+                                    </gmd:electronicMailAddress>
+                                </gmd:CI_Address>
+                            </gmd:address>
+                        </gmd:CI_Contact>
+                    </gmd:contactInfo>
+                    <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+                    </gmd:role>
+                </gmd:CI_ResponsibleParty>
+            </gmd:pointOfContact>
+            <gmd:resourceMaintenance>
+                <gmd:MD_MaintenanceInformation>
+                    <gmd:maintenanceAndUpdateFrequency>
+                        <gmd:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="monthly"/>
+                    </gmd:maintenanceAndUpdateFrequency>
+                </gmd:MD_MaintenanceInformation>
+            </gmd:resourceMaintenance>
+            <gmd:graphicOverview>
+                <gmd:MD_BrowseGraphic>
+                    <gmd:fileName>
+                        <gco:CharacterString>https://annexes.example.test/thumb.png</gco:CharacterString>
+                    </gmd:fileName>
+                    <gmd:fileDescription>
+                        <gco:CharacterString>Aperçu</gco:CharacterString>
+                    </gmd:fileDescription>
+                    <gmd:fileType>
+                        <gco:CharacterString>png</gco:CharacterString>
+                    </gmd:fileType>
+                </gmd:MD_BrowseGraphic>
+            </gmd:graphicOverview>
+            <gmd:descriptiveKeywords>
+                <gmd:MD_Keywords>
+                    <gmd:keyword>
+                        <gco:CharacterString>Occupation des terres</gco:CharacterString>
+                    </gmd:keyword>
+                    <gmd:thesaurusName>
                         <gmd:CI_Citation>
                             <gmd:title>
-                                                                <gco:CharacterString>Titre</gco:CharacterString>
+                                <gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
                             </gmd:title>
-
-                                                            <gmd:date>
-                                    <gmd:CI_Date>
-                                        <gmd:date>
-                                            <gco:Date>2024-01-15</gco:Date>
-                                        </gmd:date>
-                                        <gmd:dateType>
-                                            <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
-                                        </gmd:dateType>
-                                    </gmd:CI_Date>
-                                </gmd:date>
-                                                    </gmd:CI_Citation>
-                    </gmd:citation>
-                
-                                    <gmd:abstract>
-                                                <gco:CharacterString>Résumé</gco:CharacterString>
-                    </gmd:abstract>
-                
-                                                        <gmd:pointOfContact>
-                        <gmd:CI_ResponsibleParty>
-                                                            <gmd:organisationName>
-                                    <gco:CharacterString>Organisation</gco:CharacterString>
-                                </gmd:organisationName>
-                            
-                                                            <gmd:contactInfo>
-                                    <gmd:CI_Contact>
-                                        <gmd:address>
-                                            <gmd:CI_Address>
-                                                <gmd:electronicMailAddress>
-                                                    <gco:CharacterString>orga@example.test</gco:CharacterString>
-                                                </gmd:electronicMailAddress>
-                                            </gmd:CI_Address>
-                                        </gmd:address>
-                                    </gmd:CI_Contact>
-                                </gmd:contactInfo>
-                                                    </gmd:CI_ResponsibleParty>
-                    </gmd:pointOfContact>
-                
-                                    <gmd:descriptiveKeywords>
-                        <gmd:MD_Keywords><gmd:keyword>
-                                    <gco:CharacterString>Occupation des terres</gco:CharacterString>
-                                </gmd:keyword><gmd:thesaurusName>
+                            <gmd:date>
+                                <gmd:CI_Date>
+                                    <gmd:date>
+                                        <gco:Date>2008-06-01</gco:Date>
+                                    </gmd:date>
+                                    <gmd:dateType>
+                                        <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication"/>
+                                    </gmd:dateType>
+                                </gmd:CI_Date>
+                            </gmd:date>
+                        </gmd:CI_Citation>
+                    </gmd:thesaurusName>
+                </gmd:MD_Keywords>
+            </gmd:descriptiveKeywords>
+            <gmd:descriptiveKeywords>
+                <gmd:MD_Keywords>
+                    <gmd:keyword>
+                        <gco:CharacterString>libre</gco:CharacterString>
+                    </gmd:keyword>
+                    <gmd:keyword>
+                        <gco:CharacterString>autre</gco:CharacterString>
+                    </gmd:keyword>
+                    <gmd:type>
+                        <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+                    </gmd:type>
+                </gmd:MD_Keywords>
+            </gmd:descriptiveKeywords>
+            <gmd:resourceConstraints>
+                <gmd:MD_LegalConstraints>
+                    <gmd:useLimitation>
+                        <gmx:Anchor xlink:href="https://www.etalab.gouv.fr/licence-ouverte-open-licence/">Licence Ouverte 2.0</gmx:Anchor>
+                    </gmd:useLimitation>
+                    <gmd:accessConstraints>
+                        <gmd:MD_RestrictionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
+                    </gmd:accessConstraints>
+                    <gmd:useConstraints>
+                        <gmd:MD_RestrictionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode" codeListValue="license">license</gmd:MD_RestrictionCode>
+                    </gmd:useConstraints>
+                    <gmd:otherConstraints>
+                        <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1b">Les relations internationales, la sécurité publique ou la défense nationale.</gmx:Anchor>
+                    </gmd:otherConstraints>
+                </gmd:MD_LegalConstraints>
+            </gmd:resourceConstraints>
+            <gmd:resourceConstraints>
+                <gmd:MD_LegalConstraints>
+                    <gmd:accessConstraints>
+                        <gmd:MD_RestrictionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
+                    </gmd:accessConstraints>
+                    <gmd:otherConstraints>
+                        <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/conditionsUnknown">Conditions inconnues</gmx:Anchor>
+                    </gmd:otherConstraints>
+                </gmd:MD_LegalConstraints>
+            </gmd:resourceConstraints>
+            <gmd:resourceConstraints>
+                <gmd:MD_SecurityConstraints>
+                    <gmd:useLimitation>
+                        <gco:CharacterString>Diffusion restreinte</gco:CharacterString>
+                    </gmd:useLimitation>
+                    <gmd:classification>
+                        <gmd:MD_ClassificationCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ClassificationCode" codeListValue="restricted">restricted</gmd:MD_ClassificationCode>
+                    </gmd:classification>
+                </gmd:MD_SecurityConstraints>
+            </gmd:resourceConstraints>
+            <gmd:resourceConstraints>
+                <gmd:MD_Constraints>
+                    <gmd:useLimitation>
+                        <gco:CharacterString>Usage interne</gco:CharacterString>
+                    </gmd:useLimitation>
+                </gmd:MD_Constraints>
+            </gmd:resourceConstraints>
+            <gmd:spatialRepresentationType>
+                <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector"/>
+            </gmd:spatialRepresentationType>
+            <gmd:spatialResolution>
+                <gmd:MD_Resolution>
+                    <gmd:equivalentScale>
+                        <gmd:MD_RepresentativeFraction>
+                            <gmd:denominator>
+                                <gco:Integer>100</gco:Integer>
+                            </gmd:denominator>
+                        </gmd:MD_RepresentativeFraction>
+                    </gmd:equivalentScale>
+                </gmd:MD_Resolution>
+            </gmd:spatialResolution>
+            <gmd:spatialResolution>
+                <gmd:MD_Resolution>
+                    <gmd:distance>
+                        <gco:Distance uom="m">0.5</gco:Distance>
+                    </gmd:distance>
+                </gmd:MD_Resolution>
+            </gmd:spatialResolution>
+            <gmd:language>
+                <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="fre">français</gmd:LanguageCode>
+            </gmd:language>
+            <gmd:topicCategory>
+                <gmd:MD_TopicCategoryCode>planningCadastre</gmd:MD_TopicCategoryCode>
+            </gmd:topicCategory>
+            <gmd:topicCategory>
+                <gmd:MD_TopicCategoryCode>environment</gmd:MD_TopicCategoryCode>
+            </gmd:topicCategory>
+            <gmd:extent>
+                <gmd:EX_Extent>
+                    <gmd:description>
+                        <gco:CharacterString>Commune test</gco:CharacterString>
+                    </gmd:description>
+                    <gmd:geographicElement>
+                        <gmd:EX_GeographicBoundingBox>
+                            <gmd:westBoundLongitude>
+                                <gco:Decimal>2.25</gco:Decimal>
+                            </gmd:westBoundLongitude>
+                            <gmd:eastBoundLongitude>
+                                <gco:Decimal>2.45</gco:Decimal>
+                            </gmd:eastBoundLongitude>
+                            <gmd:southBoundLatitude>
+                                <gco:Decimal>48.8</gco:Decimal>
+                            </gmd:southBoundLatitude>
+                            <gmd:northBoundLatitude>
+                                <gco:Decimal>48.9</gco:Decimal>
+                            </gmd:northBoundLatitude>
+                        </gmd:EX_GeographicBoundingBox>
+                    </gmd:geographicElement>
+                    <gmd:geographicElement>
+                        <gmd:EX_GeographicDescription>
+                            <gmd:geographicIdentifier>
+                                <gmd:MD_Identifier>
+                                    <gmd:authority>
+                                        <gmd:CI_Citation>
+                                            <gmd:title>
+                                                <gco:CharacterString>ISO 3166 alpha 3</gco:CharacterString>
+                                            </gmd:title>
+                                            <gmd:date>
+                                                <gmd:CI_Date>
+                                                    <gmd:date>
+                                                        <gco:Date>1974</gco:Date>
+                                                    </gmd:date>
+                                                    <gmd:dateType>
+                                                        <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication"/>
+                                                    </gmd:dateType>
+                                                </gmd:CI_Date>
+                                            </gmd:date>
+                                        </gmd:CI_Citation>
+                                    </gmd:authority>
+                                    <gmd:code>
+                                        <gco:CharacterString>COMMUNE_TEST_1</gco:CharacterString>
+                                    </gmd:code>
+                                </gmd:MD_Identifier>
+                            </gmd:geographicIdentifier>
+                        </gmd:EX_GeographicDescription>
+                    </gmd:geographicElement>
+                </gmd:EX_Extent>
+            </gmd:extent>
+            <gmd:extent>
+                <gmd:EX_Extent>
+                    <gmd:description>
+                        <gco:CharacterString>Commune d’outre-mer</gco:CharacterString>
+                    </gmd:description>
+                    <gmd:geographicElement>
+                        <gmd:EX_GeographicBoundingBox>
+                            <gmd:westBoundLongitude>
+                                <gco:Decimal>-61.8</gco:Decimal>
+                            </gmd:westBoundLongitude>
+                            <gmd:eastBoundLongitude>
+                                <gco:Decimal>-61</gco:Decimal>
+                            </gmd:eastBoundLongitude>
+                            <gmd:southBoundLatitude>
+                                <gco:Decimal>15.8</gco:Decimal>
+                            </gmd:southBoundLatitude>
+                            <gmd:northBoundLatitude>
+                                <gco:Decimal>16.5</gco:Decimal>
+                            </gmd:northBoundLatitude>
+                        </gmd:EX_GeographicBoundingBox>
+                    </gmd:geographicElement>
+                    <gmd:geographicElement>
+                        <gmd:EX_GeographicDescription>
+                            <gmd:geographicIdentifier>
+                                <gmd:MD_Identifier>
+                                    <gmd:authority>
+                                        <gmd:CI_Citation>
+                                            <gmd:title>
+                                                <gco:CharacterString>ISO 3166 alpha 3</gco:CharacterString>
+                                            </gmd:title>
+                                            <gmd:date>
+                                                <gmd:CI_Date>
+                                                    <gmd:date>
+                                                        <gco:Date>1974</gco:Date>
+                                                    </gmd:date>
+                                                    <gmd:dateType>
+                                                        <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication"/>
+                                                    </gmd:dateType>
+                                                </gmd:CI_Date>
+                                            </gmd:date>
+                                        </gmd:CI_Citation>
+                                    </gmd:authority>
+                                    <gmd:code>
+                                        <gco:CharacterString>COMMUNE_TEST_2</gco:CharacterString>
+                                    </gmd:code>
+                                </gmd:MD_Identifier>
+                            </gmd:geographicIdentifier>
+                        </gmd:EX_GeographicDescription>
+                    </gmd:geographicElement>
+                </gmd:EX_Extent>
+            </gmd:extent>
+        </gmd:MD_DataIdentification>
+    </gmd:identificationInfo>
+    <gmd:distributionInfo>
+        <gmd:MD_Distribution>
+            <gmd:transferOptions>
+                <gmd:MD_DigitalTransferOptions>
+                    <gmd:onLine>
+                        <gmd:CI_OnlineResource>
+                            <gmd:linkage>
+                                <gmd:URL>https://data.example.test/wfs</gmd:URL>
+                            </gmd:linkage>
+                            <gmd:protocol>
+                                <gco:CharacterString>OGC:WFS</gco:CharacterString>
+                            </gmd:protocol>
+                            <gmd:name>
+                                <gco:CharacterString>ns:couche</gco:CharacterString>
+                            </gmd:name>
+                        </gmd:CI_OnlineResource>
+                    </gmd:onLine>
+                    <gmd:onLine>
+                        <gmd:CI_OnlineResource>
+                            <gmd:linkage>
+                                <gmd:URL>https://data.example.test/wms-v</gmd:URL>
+                            </gmd:linkage>
+                            <gmd:protocol>
+                                <gco:CharacterString>OGC:WMS</gco:CharacterString>
+                            </gmd:protocol>
+                            <gmd:applicationProfile>
+                                <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceType/other">other</gmx:Anchor>
+                            </gmd:applicationProfile>
+                            <gmd:name>
+                                <gco:CharacterString>couche_privee</gco:CharacterString>
+                            </gmd:name>
+                            <gmd:description>
+                                <gmx:Anchor xlink:href="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode_restricted">couche_privee - Accès restreint</gmx:Anchor>
+                            </gmd:description>
+                        </gmd:CI_OnlineResource>
+                    </gmd:onLine>
+                    <gmd:onLine>
+                        <gmd:CI_OnlineResource>
+                            <gmd:linkage>
+                                <gmd:URL>https://data.example.test/tms/1.0.0</gmd:URL>
+                            </gmd:linkage>
+                            <gmd:protocol>
+                                <gco:CharacterString>TMS</gco:CharacterString>
+                            </gmd:protocol>
+                            <gmd:name>
+                                <gco:CharacterString>tuiles</gco:CharacterString>
+                            </gmd:name>
+                        </gmd:CI_OnlineResource>
+                    </gmd:onLine>
+                    <gmd:onLine>
+                        <gmd:CI_OnlineResource>
+                            <gmd:linkage>
+                                <gmd:URL>https://annexes.example.test/style.json</gmd:URL>
+                            </gmd:linkage>
+                            <gmd:protocol>
+                                <gco:CharacterString>WWW:DOWNLOAD-1.0-http--download</gco:CharacterString>
+                            </gmd:protocol>
+                            <gmd:name>
+                                <gco:CharacterString>Style sombre</gco:CharacterString>
+                            </gmd:name>
+                            <gmd:description>
+                                <gco:CharacterString>Style pour la couche ns:couche</gco:CharacterString>
+                            </gmd:description>
+                            <gmd:function>
+                                <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
+                            </gmd:function>
+                        </gmd:CI_OnlineResource>
+                    </gmd:onLine>
+                    <gmd:onLine>
+                        <gmd:CI_OnlineResource>
+                            <gmd:linkage>
+                                <gmd:URL>https://annexes.example.test/wfs/capabilities.xml</gmd:URL>
+                            </gmd:linkage>
+                            <gmd:protocol>
+                                <gco:CharacterString>OGC:WFS-2.0.0-http-get-capabilities</gco:CharacterString>
+                            </gmd:protocol>
+                            <gmd:name>
+                                <gco:CharacterString>GetCapabilities - WFS</gco:CharacterString>
+                            </gmd:name>
+                            <gmd:description>
+                                <gco:CharacterString>Service WFS</gco:CharacterString>
+                            </gmd:description>
+                            <gmd:function>
+                                <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+                            </gmd:function>
+                        </gmd:CI_OnlineResource>
+                    </gmd:onLine>
+                    <gmd:onLine>
+                        <gmd:CI_OnlineResource>
+                            <gmd:linkage>
+                                <gmd:URL>https://annexes.example.test/notice.pdf</gmd:URL>
+                            </gmd:linkage>
+                            <gmd:protocol>
+                                <gco:CharacterString>WWW:LINK-1.0-http--link</gco:CharacterString>
+                            </gmd:protocol>
+                            <gmd:name>
+                                <gco:CharacterString>Notice</gco:CharacterString>
+                            </gmd:name>
+                            <gmd:function>
+                                <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+                            </gmd:function>
+                        </gmd:CI_OnlineResource>
+                    </gmd:onLine>
+                    <gmd:onLine>
+                        <gmd:CI_OnlineResource>
+                            <gmd:linkage>
+                                <gmd:URL>https://example.test</gmd:URL>
+                            </gmd:linkage>
+                            <gmd:protocol>
+                                <gco:CharacterString>WWW:LINK-1.0-http--link</gco:CharacterString>
+                            </gmd:protocol>
+                            <gmd:name>
+                                <gco:CharacterString>Site</gco:CharacterString>
+                            </gmd:name>
+                            <gmd:description>
+                                <gco:CharacterString>Site du producteur</gco:CharacterString>
+                            </gmd:description>
+                            <gmd:function>
+                                <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+                            </gmd:function>
+                        </gmd:CI_OnlineResource>
+                    </gmd:onLine>
+                    <gmd:onLine>
+                        <gmd:CI_OnlineResource>
+                            <gmd:linkage>
+                                <gmd:URL>https://arcgis.example.test/rest</gmd:URL>
+                            </gmd:linkage>
+                            <gmd:protocol>
+                                <gco:CharacterString>ESRI:ArcGIS</gco:CharacterString>
+                            </gmd:protocol>
+                            <gmd:name>
+                                <gco:CharacterString>Service ArcGIS</gco:CharacterString>
+                            </gmd:name>
+                            <gmd:description>
+                                <gco:CharacterString>Hors catalogue</gco:CharacterString>
+                            </gmd:description>
+                        </gmd:CI_OnlineResource>
+                    </gmd:onLine>
+                </gmd:MD_DigitalTransferOptions>
+            </gmd:transferOptions>
+        </gmd:MD_Distribution>
+    </gmd:distributionInfo>
+    <gmd:dataQualityInfo>
+        <gmd:DQ_DataQuality>
+            <gmd:scope>
+                <gmd:DQ_Scope>
+                    <gmd:level>
+                        <gmd:MD_ScopeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset">dataset</gmd:MD_ScopeCode>
+                    </gmd:level>
+                </gmd:DQ_Scope>
+            </gmd:scope>
+            <gmd:report>
+                <gmd:DQ_DomainConsistency>
+                    <gmd:nameOfMeasure>
+                        <gco:CharacterString>Value domain conformance</gco:CharacterString>
+                    </gmd:nameOfMeasure>
+                    <gmd:result>
+                        <gmd:DQ_ConformanceResult>
+                            <gmd:specification>
                                 <gmd:CI_Citation>
                                     <gmd:title>
-                                        <gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
+                                        <gco:CharacterString>Commission Regulation (EU) No 1089/2010 of 23 November 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards interoperability of spatial data sets and services</gco:CharacterString>
                                     </gmd:title>
                                     <gmd:date>
                                         <gmd:CI_Date>
                                             <gmd:date>
-                                                <gco:Date>2008-06-01</gco:Date>
+                                                <gco:Date>2010-12-08</gco:Date>
                                             </gmd:date>
                                             <gmd:dateType>
-                                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication"/>
                                             </gmd:dateType>
                                         </gmd:CI_Date>
                                     </gmd:date>
                                 </gmd:CI_Citation>
-                            </gmd:thesaurusName>
-                        </gmd:MD_Keywords>
-                    </gmd:descriptiveKeywords>
-                
-                                    <gmd:descriptiveKeywords>
-                        <gmd:MD_Keywords><gmd:keyword>
-                                    <gco:CharacterString>libre</gco:CharacterString>
-                                </gmd:keyword><gmd:keyword>
-                                    <gco:CharacterString>autre</gco:CharacterString>
-                                </gmd:keyword><gmd:type>
-                                <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
-                            </gmd:type>
-                        </gmd:MD_Keywords>
-                    </gmd:descriptiveKeywords>
-                
-                                                            <gmd:topicCategory>
-                            <gmd:MD_TopicCategoryCode>planningCadastre</gmd:MD_TopicCategoryCode>
-                        </gmd:topicCategory>
-                                            <gmd:topicCategory>
-                            <gmd:MD_TopicCategoryCode>environment</gmd:MD_TopicCategoryCode>
-                        </gmd:topicCategory>
-                                    
-                                    <gmd:graphicOverview>
-                        <gmd:MD_BrowseGraphic>
-                            <gmd:fileName>
-                                <gco:CharacterString>https://annexes.example.test/thumb.png</gco:CharacterString>
-                            </gmd:fileName>
-                            <gmd:fileDescription>
-                                <gco:CharacterString>Aperçu</gco:CharacterString>
-                            </gmd:fileDescription>
-                            <gmd:fileType>
-                                <gco:CharacterString>png</gco:CharacterString>
-                            </gmd:fileType>
-                        </gmd:MD_BrowseGraphic>
-                    </gmd:graphicOverview>
-                
-                                    <gmd:resourceMaintenance>
-                        <gmd:MD_MaintenanceInformation>
-                            <gmd:maintenanceAndUpdateFrequency>
-                                <gmd:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="monthly" />
-                            </gmd:maintenanceAndUpdateFrequency>
-                        </gmd:MD_MaintenanceInformation>
-                    </gmd:resourceMaintenance>
-                
-                                    <gmd:spatialResolution>
-                        <gmd:MD_Resolution>
-                            <gmd:equivalentScale>
-                                <gmd:MD_RepresentativeFraction>
-                                    <gmd:denominator>
-                                        <gco:Integer>100</gco:Integer>
-                                    </gmd:denominator>
-                                </gmd:MD_RepresentativeFraction>
-                            </gmd:equivalentScale>
-                        </gmd:MD_Resolution>
-                    </gmd:spatialResolution>
-                
-                                    <gmd:extent>
-                        <gmd:EX_Extent>
-                            <gmd:geographicElement>
-                                <gmd:EX_GeographicBoundingBox>
-                                    <gmd:westBoundLongitude>
-                                        <gco:Decimal>-5.5</gco:Decimal>
-                                    </gmd:westBoundLongitude>
-                                    <gmd:eastBoundLongitude>
-                                        <gco:Decimal>9.5</gco:Decimal>
-                                    </gmd:eastBoundLongitude>
-                                    <gmd:southBoundLatitude>
-                                        <gco:Decimal>41</gco:Decimal>
-                                    </gmd:southBoundLatitude>
-                                    <gmd:northBoundLatitude>
-                                        <gco:Decimal>51.5</gco:Decimal>
-                                    </gmd:northBoundLatitude>
-                                </gmd:EX_GeographicBoundingBox>
-                            </gmd:geographicElement>
-                        </gmd:EX_Extent>
-                    </gmd:extent>
-                
-                <gmd:spatialRepresentationType>
-                    <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" />
-                </gmd:spatialRepresentationType>
-            </gmd:MD_DataIdentification>
-        </gmd:identificationInfo>
-    
-                    <gmd:contact>
-            <gmd:CI_ResponsibleParty>
-                <gmd:contactInfo>
-                    <gmd:CI_Contact>
-                        <gmd:address>
-                            <gmd:CI_Address>
-                                <gmd:electronicMailAddress>
-                                    <gco:CharacterString>contact@example.test</gco:CharacterString>
-                                </gmd:electronicMailAddress>
-                            </gmd:CI_Address>
-                        </gmd:address>
-                    </gmd:CI_Contact>
-                </gmd:contactInfo>
-            </gmd:CI_ResponsibleParty>
-        </gmd:contact>
-    
-    <gmd:dateStamp>
-        <gco:DateTime>2026-11-09T12:00:00</gco:DateTime>
-    </gmd:dateStamp>
-
-            <gmd:dataQualityInfo>
-            <gmd:DQ_DataQuality>
-                <gmd:lineage>
-                    <gmd:LI_Lineage>
-                        <gmd:statement>
-                            <gco:CharacterString>Généalogie</gco:CharacterString>
-                        </gmd:statement>
-                    </gmd:LI_Lineage>
-                </gmd:lineage>
-            </gmd:DQ_DataQuality>
-        </gmd:dataQualityInfo>
-    
-            <gmd:distributionInfo>
-            <gmd:MD_Distribution>
-                <gmd:transferOptions>
-                    <gmd:MD_DigitalTransferOptions>
-                                                                                                                            <gmd:onLine>
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>https://data.example.test/wfs</gmd:URL>
-                                    </gmd:linkage>
-                                                                            <gmd:protocol>
-                                            <gco:CharacterString>OGC:WFS</gco:CharacterString>
-                                        </gmd:protocol>
-                                                                                                            <gmd:name>
-                                        <gco:CharacterString>ns:couche</gco:CharacterString>
-                                    </gmd:name>
-                                                                                                        </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                                                    <gmd:onLine>
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>https://data.example.test/wms-v</gmd:URL>
-                                    </gmd:linkage>
-                                                                            <gmd:protocol>
-                                            <gco:CharacterString>OGC:WMS</gco:CharacterString>
-                                        </gmd:protocol>
-                                                                                                                <gmd:applicationProfile>
-                                            <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceType/other">other</gmx:Anchor>
-                                        </gmd:applicationProfile>
-                                                                        <gmd:name>
-                                        <gco:CharacterString>couche_privee</gco:CharacterString>
-                                    </gmd:name>
-                                                                            <gmd:description>
-                                            <gmx:Anchor xlink:href="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode_restricted">couche_privee - Accès restreint</gmx:Anchor>
-                                        </gmd:description>
-                                                                                                        </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                                                    <gmd:onLine>
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>https://data.example.test/tms/1.0.0</gmd:URL>
-                                    </gmd:linkage>
-                                                                            <gmd:protocol>
-                                            <gco:CharacterString>TMS</gco:CharacterString>
-                                        </gmd:protocol>
-                                                                                                            <gmd:name>
-                                        <gco:CharacterString>tuiles</gco:CharacterString>
-                                    </gmd:name>
-                                                                                                        </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                                                    <gmd:onLine>
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>https://annexes.example.test/style.json</gmd:URL>
-                                    </gmd:linkage>
-                                                                            <gmd:protocol>
-                                            <gco:CharacterString>WWW:DOWNLOAD-1.0-http--download</gco:CharacterString>
-                                        </gmd:protocol>
-                                                                                                            <gmd:name>
-                                        <gco:CharacterString>Style sombre</gco:CharacterString>
-                                    </gmd:name>
-                                                                            <gmd:description>
-                                            <gco:CharacterString>Style pour la couche ns:couche</gco:CharacterString>
-                                        </gmd:description>
-                                                                                                                <gmd:function>
-                                            <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
-                                        </gmd:function>
-                                                                    </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                                                    <gmd:onLine>
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>https://annexes.example.test/wfs/capabilities.xml</gmd:URL>
-                                    </gmd:linkage>
-                                                                            <gmd:protocol>
-                                            <gco:CharacterString>OGC:WFS-2.0.0-http-get-capabilities</gco:CharacterString>
-                                        </gmd:protocol>
-                                                                                                            <gmd:name>
-                                        <gco:CharacterString>GetCapabilities - WFS</gco:CharacterString>
-                                    </gmd:name>
-                                                                            <gmd:description>
-                                            <gco:CharacterString>Service WFS</gco:CharacterString>
-                                        </gmd:description>
-                                                                                                                <gmd:function>
-                                            <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
-                                        </gmd:function>
-                                                                    </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                                                    <gmd:onLine>
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>https://annexes.example.test/notice.pdf</gmd:URL>
-                                    </gmd:linkage>
-                                                                            <gmd:protocol>
-                                            <gco:CharacterString>WWW:LINK-1.0-http--link</gco:CharacterString>
-                                        </gmd:protocol>
-                                                                                                            <gmd:name>
-                                        <gco:CharacterString>Notice</gco:CharacterString>
-                                    </gmd:name>
-                                                                                                                <gmd:function>
-                                            <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
-                                        </gmd:function>
-                                                                    </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                                                    <gmd:onLine>
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>https://example.test</gmd:URL>
-                                    </gmd:linkage>
-                                                                            <gmd:protocol>
-                                            <gco:CharacterString>WWW:LINK-1.0-http--link</gco:CharacterString>
-                                        </gmd:protocol>
-                                                                                                            <gmd:name>
-                                        <gco:CharacterString>Site</gco:CharacterString>
-                                    </gmd:name>
-                                                                            <gmd:description>
-                                            <gco:CharacterString>Site du producteur</gco:CharacterString>
-                                        </gmd:description>
-                                                                                                                <gmd:function>
-                                            <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
-                                        </gmd:function>
-                                                                    </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                                                    <gmd:onLine>
-                                <gmd:CI_OnlineResource>
-                                    <gmd:linkage>
-                                        <gmd:URL>https://arcgis.example.test/rest</gmd:URL>
-                                    </gmd:linkage>
-                                                                            <gmd:protocol>
-                                            <gco:CharacterString>ESRI:ArcGIS</gco:CharacterString>
-                                        </gmd:protocol>
-                                                                                                            <gmd:name>
-                                        <gco:CharacterString>Service ArcGIS</gco:CharacterString>
-                                    </gmd:name>
-                                                                            <gmd:description>
-                                            <gco:CharacterString>Hors catalogue</gco:CharacterString>
-                                        </gmd:description>
-                                                                                                        </gmd:CI_OnlineResource>
-                            </gmd:onLine>
-                                            </gmd:MD_DigitalTransferOptions>
-                </gmd:transferOptions>
-            </gmd:MD_Distribution>
-        </gmd:distributionInfo>
-    </gmd:MD_Metadata>
+                            </gmd:specification>
+                            <gmd:explanation>
+                                <gco:CharacterString>Dataset is conformant to the Inspire data specification.</gco:CharacterString>
+                            </gmd:explanation>
+                            <gmd:pass>
+                                <gco:Boolean>true</gco:Boolean>
+                            </gmd:pass>
+                        </gmd:DQ_ConformanceResult>
+                    </gmd:result>
+                </gmd:DQ_DomainConsistency>
+            </gmd:report>
+            <gmd:lineage>
+                <gmd:LI_Lineage>
+                    <gmd:statement>
+                        <gco:CharacterString>Généalogie</gco:CharacterString>
+                    </gmd:statement>
+                </gmd:LI_Lineage>
+            </gmd:lineage>
+        </gmd:DQ_DataQuality>
+    </gmd:dataQualityInfo>
+</gmd:MD_Metadata>

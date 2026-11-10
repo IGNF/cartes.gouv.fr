@@ -6,6 +6,7 @@ import { getFileExtension } from "../../../../../utils";
 
 const { i18n } = declareComponentKeys<
     | "tab_label.metadata"
+    | "tab_label.description"
     | { K: "tab_label.datasets"; P: { num: number }; R: string }
     | { K: "tab_label.services"; P: { num: number }; R: string }
     | { K: "tab_label.documents"; P: { num: number }; R: string }
@@ -56,6 +57,7 @@ export type I18n = typeof i18n;
 
 export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = {
     "tab_label.metadata": "Métadonnées",
+    "tab_label.description": "Description",
     "tab_label.datasets": ({ num }) => `Jeux de données (${num})`,
     "tab_label.services": ({ num }) => `Services (${num})`,
     "tab_label.documents": ({ num }) => `Documents (${num})`,
@@ -169,6 +171,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
 
 export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = {
     "tab_label.metadata": "Metadata",
+    "tab_label.description": "Description",
     "tab_label.datasets": ({ num }) => `Datasets (${num})`,
     "tab_label.services": ({ num }) => `Services (${num})`,
     "tab_label.documents": ({ num }) => `Documents (${num})`,

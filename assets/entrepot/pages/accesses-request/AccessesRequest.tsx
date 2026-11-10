@@ -15,6 +15,7 @@ import * as yup from "yup";
 import { catalogueUrl } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { CswMetadata } from "../../../@types/app";
+import { getMetadataContact } from "@/utils/metadata";
 import Main from "../../../components/Layout/Main";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
@@ -85,7 +86,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
     const onSubmit = (formData: yup.InferType<typeof schema>) => {
         const data = {
             file_identifier: fileIdentifier,
-            email_contact: metadataQuery.data?.contact_email,
+            email_contact: getMetadataContact(metadataQuery.data)?.organization_email,
             layers: privateLayers.filter((layer) => formData.layers.includes(layer.name)),
             myself: formData.beneficiaries.includes(MYSELF),
             beneficiaries: myCommunities.filter((c) => formData.beneficiaries.includes(c?._id)),
@@ -131,11 +132,11 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                         >
                             <div>
                                 <strong>{t("data_details.producer")}</strong>
-                                {metadataQuery.data?.organisation_name}
+                                {metadataQuery.data?.producers?.[0]?.organization_name}
                             </div>
                             <div>
                                 <strong>{t("data_details.contact_email")}</strong>
-                                {metadataQuery.data?.contact_email}
+                                {getMetadataContact(metadataQuery.data)?.organization_email}
                             </div>
                             <div>
                                 <strong>{t("data_details.subject")}</strong>
@@ -143,7 +144,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                             </div>
                             <div>
                                 <strong>{t("data_details.data_name")}</strong>
-                                {metadataQuery.data?.title}
+                                {metadataQuery.data?.name}
                             </div>
                         </div>
                         <hr className={fr.cx("fr-mt-10v", "fr-pb-10v")} />

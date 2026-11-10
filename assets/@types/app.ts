@@ -401,25 +401,50 @@ export type CswMetadataTerritory = {
     bbox: number[];
 };
 
+export type CswMetadataProducer = {
+    organization_name: string;
+    organization_email: string;
+    role: string;
+    address_number_and_streetname?: string | null;
+    address_postal_code?: string | null;
+    address_city?: string | null;
+};
+
+export type CswMetadataSubConstraint = {
+    type: string;
+    restriction_code?: string | null;
+    limitation_code?: string | null;
+    classification_code?: string | null;
+    url?: string | null;
+    description?: string | null;
+};
+
+export type CswMetadataResourceConstraint = {
+    type: string;
+    constraints: CswMetadataSubConstraint[];
+};
+
 export type CswMetadata = {
     file_identifier?: string;
     hierarchy_level?: MetadataHierarchyLevel;
     resource_genealogy?: string;
     language?: LanguageType;
     charset?: string;
-    title?: string;
-    abstract?: string;
-    creation_date?: string;
-    topic_categories?: string[];
-    inspire_keywords?: string[];
-    free_keywords?: string[];
-    frequency_code?: string;
-    contact_email?: string;
-    organisation_name?: string;
-    organisation_email?: string;
-    resolution?: string;
+    name?: string;
+    description?: string;
+    date_creation?: string;
+    date_publication?: string;
+    date_revision?: string;
+    themes?: string[];
+    keywords_inspire?: string[];
+    keywords_additional?: string[];
+    update_frequency?: string;
+    producers?: CswMetadataProducer[];
+    resource_constraints?: CswMetadataResourceConstraint[];
+    scale?: number;
+    resolution?: number;
     online_resources?: CswOnlineResource[];
-    bbox?: BoundingBox | null;
+    territories?: CswMetadataTerritory[];
     thumbnail_url?: string;
 };
 

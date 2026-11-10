@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Dto\Datasheet;
 
+use App\Dto\Metadata\CswLanguage;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -16,6 +19,12 @@ class DatasheetMetadataDTO
         'continual', 'daily', 'weekly', 'fortnightly', 'monthly', 'quarterly',
         'biannually', 'annually', 'asNeeded', 'irregular', 'notPlanned', 'unknown',
     ];
+
+    /** @var int[] dénominateurs d’échelle proposés par le formulaire (assets/data/md_resolutions.json) */
+    public const SCALES = [100, 200, 500, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000, 5000000, 10000000];
+
+    /** groupe de validation des contraintes propres à la création */
+    public const CREATION = 'creation';
 
     /** @var string[] */
     public const HIERARCHY_LEVELS = ['dataset', 'series'];
@@ -32,9 +41,11 @@ class DatasheetMetadataDTO
         // Section description
         #[Assert\NotBlank(message: 'Le nom de la fiche de données est obligatoire')]
         #[Assert\Length(max: 99, maxMessage: 'Le nom ne peut pas dépasser 99 caractères')]
+        // à la création seulement : le nom devient l’étiquette de la fiche, les titres déjà enregistrés gardent leurs caractères
         #[Assert\Regex(
             pattern: '/^[\wÀ-ÿ\-._~!$&\'()*+,;:@%\s]+$/u',
-            message: 'Le nom contient des caractères non autorisés'
+            message: 'Le nom contient des caractères non autorisés',
+            groups: [self::CREATION],
         )]
         public readonly string $name = '',
 
@@ -77,6 +88,13 @@ class DatasheetMetadataDTO
         #[Assert\Count(min: 1, minMessage: 'Sélectionnez au moins un territoire')]
         public readonly array $territories = [],
 
+        #[Assert\NotNull(message: 'L’échelle est obligatoire')]
+        #[Assert\Choice(choices: self::SCALES, message: 'L’échelle est invalide')]
+        public readonly ?int $scale = null,
+
+        #[Assert\Positive(message: 'La résolution doit être un nombre positif')]
+        public readonly ?float $resolution = null,
+
         // Section licences
         #[Assert\Valid]
         #[Assert\Count(min: 1, minMessage: 'Ajoutez au moins une condition de licence')]
@@ -91,7 +109,7 @@ class DatasheetMetadataDTO
 
         #[Assert\NotNull(message: 'La langue est obligatoire')]
         #[Assert\Valid]
-        public readonly ?LanguageDTO $language = null,
+        public readonly ?CswLanguage $language = null,
 
         #[Assert\NotBlank(message: 'Le jeu de caractères est obligatoire')]
         public readonly string $charset = '',

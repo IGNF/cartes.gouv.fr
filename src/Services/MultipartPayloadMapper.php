@@ -35,14 +35,15 @@ class MultipartPayloadMapper
     /**
      * @template T of object
      *
-     * @param class-string<T> $dtoClass
+     * @param class-string<T>   $dtoClass
+     * @param list<string>|null $groups   groupes de validation, Default si null
      *
      * @return T
      *
      * @throws BadRequestHttpException          champ absent ou JSON illisible
      * @throws UnprocessableEntityHttpException erreurs de type ou de validation, avec une ValidationFailedException en `previous`
      */
-    public function map(Request $request, string $dtoClass, string $field = 'data'): object
+    public function map(Request $request, string $dtoClass, string $field = 'data', ?array $groups = null): object
     {
         $json = $request->request->get($field);
         if (!is_string($json) || '' === $json) {
@@ -75,7 +76,7 @@ class MultipartPayloadMapper
             throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($dto, $violations));
         }
 
-        $violations = $this->validator->validate($dto);
+        $violations = $this->validator->validate($dto, null, $groups);
         if (count($violations) > 0) {
             throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($dto, $violations));
         }

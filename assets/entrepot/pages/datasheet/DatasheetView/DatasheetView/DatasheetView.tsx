@@ -33,6 +33,7 @@ import { DatasheetViewActiveTabEnum } from "./types";
 const DatasetListTab = lazy(() => import("../DatasetListTab/DatasetListTab"));
 const DocumentsTab = lazy(() => import("../DocumentsTab/DocumentsTab"));
 const MetadataTab = lazy(() => import("../MetadataTab/MetadataTab"));
+const DescriptionTab = lazy(() => import("../DescriptionTab/DescriptionTab"));
 const ServicesListTab = lazy(() => import("../ServiceListTab/ServicesListTab"));
 
 const deleteDataConfirmModal = createModal({
@@ -141,8 +142,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const { userRights, isSupervisor } = useCommunityRights();
 
     return (
-        <Main title={`Données ${datasheetName}`}>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+        <Main title={`Données ${datasheetName}`} breadcrumbSeparator="fullWidth">
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-5w", "fr-mb-4w")}>
                 <Button
                     iconId="fr-icon-arrow-left-s-line"
                     priority="tertiary no outline"
@@ -235,6 +236,10 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         tabId: DatasheetViewActiveTabEnum.Metadata,
                                     },
                                     {
+                                        label: t("tab_label.description"),
+                                        tabId: DatasheetViewActiveTabEnum.Description,
+                                    },
+                                    {
                                         label: t("tab_label.datasets", {
                                             num:
                                                 (datasheetQuery.data?.vector_db_list?.length || 0) +
@@ -262,6 +267,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         switch (activeTab) {
                                             case DatasheetViewActiveTabEnum.Metadata:
                                                 return <MetadataTab datastoreId={datastoreId} metadataQuery={metadataQuery} />;
+                                            case DatasheetViewActiveTabEnum.Description:
+                                                return <DescriptionTab datastoreId={datastoreId} datasheetName={datasheetName} metadataQuery={metadataQuery} />;
 
                                             case DatasheetViewActiveTabEnum.Dataset:
                                                 return <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;

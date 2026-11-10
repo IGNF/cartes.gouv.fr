@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Dto\Datasheet;
 
 use Symfony\Component\Validator\Constraints as Assert;
@@ -37,8 +39,6 @@ class SubConstraintDTO
         #[Assert\NotBlank(message: 'Le type de contrainte est obligatoire')]
         #[Assert\Choice(choices: self::TYPES, message: 'Le type de contrainte est invalide')]
         public readonly string $type = '',
-
-        public readonly bool $locked = false,
 
         public readonly ?string $restriction_code = null,
 

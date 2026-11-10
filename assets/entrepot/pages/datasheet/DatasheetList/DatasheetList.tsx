@@ -68,7 +68,8 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
         metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use
     );
     const { communityMember, isSupervisor } = useCommunityRights();
-    const hasCreationRights = isSupervisor || hasRights(communityMember, [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING]);
+    // droits de la page de création : fiche de métadonnées (BROADCAST) et vignette (ANNEX)
+    const hasCreationRights = isSupervisor || hasRights(communityMember, [CommunityMemberDtoRightsEnum.BROADCAST, CommunityMemberDtoRightsEnum.ANNEX]);
     // création proposée seulement avec les droits, quand le quota est connu et non atteint
     const canCreateDatasheet = hasCreationRights && datastore !== undefined && !datasheetCreationImpossible;
 
@@ -121,7 +122,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 ) : (
                                     canCreateDatasheet && (
                                         <Button
-                                            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement", params: { datastoreId } }}
+                                            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees/creer", params: { datastoreId } }}
                                             iconId="fr-icon-add-line"
                                             iconPosition="right"
                                             className={fr.cx("fr-ml-auto")}
