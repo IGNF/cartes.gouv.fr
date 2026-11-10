@@ -35,7 +35,7 @@ export default function DatasheetCreate({ datastoreId }: DatasheetCreateProps) {
     });
 
     return (
-        <Main title={t("title")}>
+        <Main title={t("title")} breadcrumbSeparator="container">
             <div className={cx(fr.cx("fr-pt-5w"), sectionGutter)}>
                 <h1>{t("title")}</h1>
                 <p className={fr.cx("fr-info-text", "fr-mb-1v")}>{t("already_published_info")}</p>

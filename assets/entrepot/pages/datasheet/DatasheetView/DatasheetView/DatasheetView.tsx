@@ -142,8 +142,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const { userRights, isSupervisor } = useCommunityRights();
 
     return (
-        <Main title={`Données ${datasheetName}`}>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+        <Main title={`Données ${datasheetName}`} breadcrumbSeparator="fullWidth">
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-5w", "fr-mb-4w")}>
                 <Button
                     iconId="fr-icon-arrow-left-s-line"
                     priority="tertiary no outline"

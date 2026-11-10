@@ -13,10 +13,12 @@ export interface MainProps {
     noticeProps?: IUseAlert;
     title?: string;
     classes?: Partial<Record<"container", string>>;
+    /** séparateur sous le fil d’Ariane : à la largeur du conteneur ou de la page */
+    breadcrumbSeparator?: "container" | "fullWidth";
 }
 
 function Main(props: PropsWithChildren<MainProps>) {
-    const { children, customBreadcrumbProps, noticeProps, title, classes } = props;
+    const { children, customBreadcrumbProps, noticeProps, title, classes, breadcrumbSeparator } = props;
 
     useHead({
         titleTemplate: "%s | cartes.gouv.fr",
@@ -24,13 +26,26 @@ function Main(props: PropsWithChildren<MainProps>) {
     });
     const breadcrumbProps = useBreadcrumb(customBreadcrumbProps);
 
+    const container = classes?.container ?? fr.cx("fr-container");
+    // avec séparateur, 24 px au-dessus et au-dessous du fil d’Ariane comme la maquette
+    const breadcrumb = breadcrumbProps && <Breadcrumb {...breadcrumbProps} className={fr.cx(breadcrumbSeparator && "fr-my-3w")} />;
+    // la ligne de fr-hr est un fond : il lui faut une hauteur non nulle
+    const separator = <hr className={fr.cx("fr-hr", "fr-pb-1v")} />;
+
     return (
         <main id="main" role="main">
             {/* doit être le premier élément atteignable après le lien d'évitement (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/bandeau-d-information-importante */}
             {noticeProps && <Notice isClosable {...noticeProps} />}
 
-            <div className={classes?.container ?? fr.cx("fr-container")}>
-                {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
+            {breadcrumbSeparator === "fullWidth" && (
+                <>
+                    <div className={container}>{breadcrumb}</div>
+                    {separator}
+                </>
+            )}
+            <div className={container}>
+                {breadcrumbSeparator !== "fullWidth" && breadcrumb}
+                {breadcrumbSeparator === "container" && separator}
 
                 <SessionExpiredAlert />
 
