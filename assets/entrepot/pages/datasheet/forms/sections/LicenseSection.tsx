@@ -66,9 +66,7 @@ export default function LicenseSection() {
                 ))}
                 {errors.resource_constraints && (
                     <p className={fr.cx("fr-error-text", "fr-my-4v")}>
-                        {Array.isArray(errors.resource_constraints)
-                            ? "Veuillez corriger les erreurs dans les conditions de licence."
-                            : errors.resource_constraints.message}
+                        {Array.isArray(errors.resource_constraints) ? t("license.errors") : errors.resource_constraints.message}
                     </p>
                 )}
             </div>

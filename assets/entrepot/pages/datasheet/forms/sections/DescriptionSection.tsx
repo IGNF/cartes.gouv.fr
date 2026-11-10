@@ -53,9 +53,7 @@ export default function DescriptionSection({ isEditMode = false, fileIdentifierL
                 label={t("field.fileIdentifier")}
                 hintText={t("field.fileIdentifier.hint")}
                 state={errors.file_identifier ? "error" : "info"}
-                stateRelatedMessage={
-                    errors.file_identifier?.message ?? "Cet identifiant unique est associé à votre donnée et s'affichera dans l'URL de votre fiche de donnée. "
-                }
+                stateRelatedMessage={errors.file_identifier?.message ?? t("field.fileIdentifier.info")}
                 nativeInputProps={{
                     ...register("file_identifier"),
                 }}

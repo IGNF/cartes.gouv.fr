@@ -99,6 +99,8 @@ const { i18n } = declareComponentKeys<
     | "field.resolution"
     | "field.resolution.hint"
     | "leave_confirm"
+    | "field.fileIdentifier.info"
+    | "license.errors"
     // Messages de validation
     | "validation.name.required"
     | "validation.name.max"
@@ -336,6 +338,8 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "validation.language": "La langue est obligatoire",
     "validation.charset": "Le jeu de caractères est obligatoire",
     leave_confirm: "Les modifications non enregistrées seront perdues. Quitter quand même ?",
+    "field.fileIdentifier.info": "Cet identifiant unique est associé à votre donnée et s’affichera dans l’URL de votre fiche de données.",
+    "license.errors": "Veuillez corriger les erreurs dans les conditions de licence.",
 };
 
 export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSections"] = {
@@ -537,4 +541,6 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "validation.language": "The language is required",
     "validation.charset": "The character set is required",
     leave_confirm: "Unsaved changes will be lost. Leave anyway?",
+    "field.fileIdentifier.info": "This unique identifier is linked to your data and will appear in the URL of your datasheet.",
+    "license.errors": "Please fix the errors in the license conditions.",
 };
