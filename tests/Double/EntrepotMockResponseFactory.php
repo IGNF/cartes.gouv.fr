@@ -14,6 +14,7 @@ final class EntrepotMockResponseFactory
     public const DATASTORE_ID = 'ds-1';
     // fichier de métadonnée dont l’Entrepôt répond 502 en texte brut
     public const METADATA_ID_UPSTREAM_DOWN = 'upstream-down';
+    public const METADATA_ENDPOINT_ID = 'endpoint-metadata';
     private const ENTREPOT_HOST = 'entrepot.test';
     private const METADATA_FIXTURES_DIR = __DIR__.'/../Fixture/metadata';
 
@@ -163,7 +164,9 @@ final class EntrepotMockResponseFactory
         }
 
         if ('GET' === $method && '' === $relative) {
-            return $this->json(['_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => 'community-1']]);
+            return $this->json(['_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => 'community-1'], 'endpoints' => [
+                ['endpoint' => ['_id' => self::METADATA_ENDPOINT_ID, 'type' => 'METADATA', 'open' => true, 'urls' => [['type' => 'CSW', 'url' => 'https://csw.test/csw']]]],
+            ]]);
         }
 
         parse_str($queryString, $query);
@@ -221,6 +224,17 @@ final class EntrepotMockResponseFactory
             self::$store['uploads'][] = $upload;
 
             return $this->json($upload, 201);
+        }
+
+        if ('POST' === $method && 1 === preg_match('#^metadata/(publication|unpublication)$#', $relative, $matches)) {
+            $request = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+            foreach (self::$store['metadata'] ?? [] as $index => $item) {
+                if (in_array($item['file_identifier'] ?? null, $request['file_identifiers'], true)) {
+                    self::$store['metadata'][$index]['endpoints'] = 'publication' === $matches[1] ? [['_id' => $request['endpoint']]] : [];
+                }
+            }
+
+            return new MockResponse('', ['http_code' => 204]);
         }
 
         if ('POST' === $method && 'annexes' === $relative) {

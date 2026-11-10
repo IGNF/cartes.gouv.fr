@@ -605,6 +605,80 @@
             ],
             "schemes": []
         },
+        "cartesgouvfr_api_datasheet_publish": {
+            "tokens": [
+                [
+                    "text",
+                    "\/publish"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_unpublish": {
+            "tokens": [
+                [
+                    "text",
+                    "\/publish"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
         "cartesgouvfr_api_datasheet_get_list": {
             "tokens": [
                 [
@@ -1402,43 +1476,6 @@
         },
         "cartesgouvfr_api_metadata_delete": {
             "tokens": [
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "metadataId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/metadata"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "DELETE"
-            ],
-            "schemes": []
-        },
-        "cartesgouvfr_api_metadata_unpublish": {
-            "tokens": [
-                [
-                    "text",
-                    "\/unpublish"
-                ],
                 [
                     "variable",
                     "\/",

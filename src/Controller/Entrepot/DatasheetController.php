@@ -75,6 +75,22 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ));
     }
 
+    #[Route('/{datasheetName}/publish', name: 'publish', methods: ['POST'])]
+    public function publish(string $datastoreId, string $datasheetName): Response
+    {
+        $this->cartesMetadataApiService->publish($datastoreId, $datasheetName);
+
+        return new Response(null, Response::HTTP_NO_CONTENT);
+    }
+
+    #[Route('/{datasheetName}/publish', name: 'unpublish', methods: ['DELETE'])]
+    public function unpublish(string $datastoreId, string $datasheetName): Response
+    {
+        $this->cartesMetadataApiService->unpublish($datastoreId, $datasheetName);
+
+        return new Response(null, Response::HTTP_NO_CONTENT);
+    }
+
     private function thumbnail(Request $request): ?UploadedFile
     {
         $thumbnail = $request->files->get('thumbnail');
