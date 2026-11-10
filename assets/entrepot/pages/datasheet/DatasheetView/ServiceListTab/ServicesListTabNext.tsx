@@ -97,6 +97,8 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
 
     const { userRights, isSupervisor } = useCommunityRights();
     const canBroadcast = isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
+    // la page « Créer un flux » dépose vignette et logo en annexes
+    const canCreate = canBroadcast && (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
 
     // permissions de l’entrepôt, pour repérer les flux privés visibles sur cartes.gouv.fr ; en cas d’échec, ces flux s’affichent « Privé »
     const permissionsQuery = useQuery<DatastorePermission[], ApiError>({
@@ -242,9 +244,11 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         return <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceListQuery.error)} small />;
     }
 
-    // shortcut: bouton désactivé tant que la page « Ajouter un flux » n’existe pas, à brancher au ticket 04b
     const createButton = (
-        <Button iconId="fr-icon-add-line" disabled title={t("create_disabled")}>
+        <Button
+            iconId="fr-icon-add-line"
+            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout", params: { datastoreId, datasheetName } }}
+        >
             {t("create")}
         </Button>
     );
@@ -278,7 +282,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
 
                 {sortedServices.length === 0 ? (
                     <div className={classes.empty}>
-                        {canBroadcast ? (
+                        {canCreate ? (
                             <>
                                 {createButton}
                                 <span className={classes.separator}>{t("or")}</span>
@@ -297,7 +301,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                                 name="service-type-filter"
                                 segments={[segment(FILTERS[0]), segment(FILTERS[1]), segment(FILTERS[2]), segment(FILTERS[3]), segment(FILTERS[4])]}
                             />
-                            {canBroadcast && (
+                            {canCreate && (
                                 <div className={classes.actions}>
                                     {referenceButton}
                                     {createButton}

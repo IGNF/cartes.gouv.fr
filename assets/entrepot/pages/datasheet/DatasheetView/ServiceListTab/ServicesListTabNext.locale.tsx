@@ -6,7 +6,6 @@ const { i18n } = declareComponentKeys<
     | "banner.title"
     | "banner.link"
     | "create"
-    | "create_disabled"
     | "or"
     | "reference_existing"
     | "no_service"
@@ -58,7 +57,6 @@ export const ServicesListTabNextFrTranslations: Translations<"fr">["ServicesList
     "banner.title": "Chaque type de flux est adapté à un besoin particulier. Renseignez-vous avant de publier.",
     "banner.link": "Comparer les différents flux dans l’aide",
     create: "Créer un flux",
-    create_disabled: "Disponible prochainement",
     or: "ou",
     reference_existing: "Référencer un flux existant",
     no_service: "Aucun flux",
@@ -108,7 +106,6 @@ export const ServicesListTabNextEnTranslations: Translations<"en">["ServicesList
     "banner.title": "Each service type fits a specific need. Learn more before publishing.",
     "banner.link": "Compare service types in the help",
     create: "Create a service",
-    create_disabled: "Coming soon",
     or: "or",
     reference_existing: "Reference an existing service",
     no_service: "No service",
