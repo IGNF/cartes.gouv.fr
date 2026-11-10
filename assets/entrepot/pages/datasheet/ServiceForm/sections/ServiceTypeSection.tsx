@@ -24,13 +24,9 @@ export default function ServiceTypeSection({ value, onChange }: ServiceTypeSecti
     const { classes, cx } = useStyles();
 
     return (
-        <fieldset className={fr.cx("fr-fieldset")} aria-labelledby="service-type-legend service-type-hint">
-            <legend id="service-type-legend" className={fr.cx("fr-fieldset__legend")}>
-                {t("type.legend")}
-                <span id="service-type-hint" className={fr.cx("fr-hint-text")}>
-                    {t("type.hint")}
-                </span>
-            </legend>
+        <fieldset className={fr.cx("fr-fieldset")}>
+            {/* le titre de section affiche déjà « Type de flux » : légende gardée pour les lecteurs d’écran */}
+            <legend className={fr.cx("fr-fieldset__legend", "fr-sr-only")}>{t("type.legend")}</legend>
             <div className={cx(fr.cx("fr-fieldset__element"), classes.cards)}>
                 {SERVICE_TYPES.map((type) => (
                     <div key={type} className={cx(fr.cx("fr-radio-group"), classes.card)}>
@@ -79,6 +75,8 @@ const useStyles = tss.withName({ ServiceTypeSection }).create({
     },
     card: {
         margin: 0,
+        // la règle DSFR des groupes radio limite la largeur au contenu
+        "&&": { maxWidth: "none" },
         padding: fr.spacing("2w"),
         border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
         "&:has(input:checked)": {

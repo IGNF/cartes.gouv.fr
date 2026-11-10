@@ -17,7 +17,6 @@ const { i18n } = declareComponentKeys<
     | "section.tables"
     | "section.access"
     | "type.legend"
-    | "type.hint"
     | "type.help_link"
     | "type.wfs"
     | "type.wms"
@@ -106,7 +105,6 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "section.tables": "Tables",
     "section.access": "Droits et accès",
     "type.legend": "Type de flux",
-    "type.hint": "Chaque type de flux est adapté à un besoin particulier.",
     "type.help_link": "Comment choisir le type de flux à publier ?",
     "type.wfs": "Flux WFS",
     "type.wms": "Flux WMS",
@@ -197,7 +195,6 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "section.tables": "Tables",
     "section.access": "Rights and access",
     "type.legend": "Service type",
-    "type.hint": "Each service type suits a particular need.",
     "type.help_link": "How to choose the type of service to publish?",
     "type.wfs": "WFS service",
     "type.wms": "WMS service",
