@@ -282,10 +282,14 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
 
                 {sortedServices.length === 0 ? (
                     <div className={classes.empty}>
-                        {canCreate ? (
+                        {canBroadcast ? (
                             <>
-                                {createButton}
-                                <span className={classes.separator}>{t("or")}</span>
+                                {canCreate && (
+                                    <>
+                                        {createButton}
+                                        <span className={classes.separator}>{t("or")}</span>
+                                    </>
+                                )}
                                 {referenceButton}
                             </>
                         ) : (
@@ -301,10 +305,10 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                                 name="service-type-filter"
                                 segments={[segment(FILTERS[0]), segment(FILTERS[1]), segment(FILTERS[2]), segment(FILTERS[3]), segment(FILTERS[4])]}
                             />
-                            {canCreate && (
+                            {canBroadcast && (
                                 <div className={classes.actions}>
                                     {referenceButton}
-                                    {createButton}
+                                    {canCreate && createButton}
                                 </div>
                             )}
                         </div>
