@@ -6,6 +6,8 @@ import { useState } from "react";
 
 import { type Metadata } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import LoadingText from "@/components/Utils/LoadingText";
+import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { useTranslation } from "@/i18n/i18n";
@@ -77,6 +79,14 @@ export default function DescriptionTab({ datastoreId, datasheetName, metadataQue
                     )
                 }
             />
+
+            {replaceMutation.isPending && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={t("saving")} withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
         </>
     );
 }
