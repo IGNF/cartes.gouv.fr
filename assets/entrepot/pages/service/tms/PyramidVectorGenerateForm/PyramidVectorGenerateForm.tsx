@@ -135,7 +135,10 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, dat
     const selectedVectorDbId = form.watch("vectordb_id") ?? "";
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, selectedVectorDbId),
-        queryFn: selectedVectorDbId === "" ? skipToken : ({ signal }) => api.storedData.get<VectorDb>(datastoreId, selectedVectorDbId, { signal }),
+        // base absente de la liste (présélection non générée ou d’une autre fiche) : rien à charger
+        queryFn: !vectorDbs.some((vectorDb) => vectorDb._id === selectedVectorDbId)
+            ? skipToken
+            : ({ signal }) => api.storedData.get<VectorDb>(datastoreId, selectedVectorDbId, { signal }),
         staleTime: 600000,
     });
     const {
@@ -265,7 +268,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, dat
                         stateRelatedMessage={errors.technical_name?.message}
                     />
                 </div>
-                {vectorDbQuery.isPending && selectedVectorDbId !== "" && <LoadingText as="p" message={t("stored_data.loading")} withSpinnerIcon />}
+                {vectorDbQuery.isLoading && <LoadingText as="p" message={t("stored_data.loading")} withSpinnerIcon />}
                 {vectorDbQuery.isError && (
                     <Alert severity="error" small description={`${t("stored_data.fetch_failed")} : ${getApiErrorMessage(vectorDbQuery.error)}`} />
                 )}
