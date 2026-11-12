@@ -99,12 +99,13 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         $pyramid = EntrepotMockResponseFactory::stored('stored_data')[1];
         self::assertSame([
             'datasheet_name' => 'Fiche',
+            'producer' => 'Producteur',
+            'production_year' => '2026',
+            'zone' => 'Ardennes',
             'upload_id' => 'upload-1',
             'proc_int_id' => 'proc-int-1',
             'vectordb_id' => 'vectordb-1',
             'proc_pyr_creat_id' => 'execution-2',
-            'producer' => 'Producteur',
-            'production_year' => '2026',
         ], $pyramid['tags']);
         $annexe = EntrepotMockResponseFactory::stored('annexes')[0];
         self::assertSame(['/legend/stored-data-1.png'], $annexe['paths']);
@@ -129,7 +130,7 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         EntrepotMockResponseFactory::seed('stored_data', [
             '_id' => 'vectordb-1',
             'type' => 'VECTOR-DB',
-            'tags' => ['datasheet_name' => 'Fiche', 'upload_id' => 'upload-1', 'proc_int_id' => 'proc-int-1', 'producer' => 'Producteur', 'production_year' => '2026'],
+            'tags' => ['datasheet_name' => 'Fiche', 'upload_id' => 'upload-1', 'proc_int_id' => 'proc-int-1', 'producer' => 'Producteur', 'production_year' => '2026', 'zone' => 'Ardennes', 'integration_progress' => 'ignoré'],
         ]);
     }
 

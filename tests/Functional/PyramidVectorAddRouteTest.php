@@ -25,7 +25,7 @@ final class PyramidVectorAddRouteTest extends WebTestCase
         EntrepotMockResponseFactory::seed('stored_data', [
             '_id' => 'vectordb-1',
             'type' => 'VECTOR-DB',
-            'tags' => ['datasheet_name' => 'Fiche', 'upload_id' => 'upload-1', 'proc_int_id' => 'proc-int-1', 'producer' => 'Producteur', 'production_year' => '2026'],
+            'tags' => ['datasheet_name' => 'Fiche', 'upload_id' => 'upload-1', 'proc_int_id' => 'proc-int-1', 'producer' => 'Producteur', 'production_year' => '2026', 'zone' => 'Ardennes', 'integration_progress' => 'ignoré'],
         ]);
     }
 
@@ -56,15 +56,31 @@ final class PyramidVectorAddRouteTest extends WebTestCase
 
         self::assertSame([
             'datasheet_name' => 'Fiche',
+            'producer' => 'Producteur',
+            'production_year' => '2026',
+            'zone' => 'Ardennes',
             'upload_id' => 'upload-1',
             'proc_int_id' => 'proc-int-1',
             'vectordb_id' => 'vectordb-1',
             'proc_pyr_creat_id' => 'execution-2',
             'is_sample' => 'false',
-            'producer' => 'Producteur',
-            'production_year' => '2026',
         ], EntrepotMockResponseFactory::stored('stored_data')[1]['tags']);
         self::assertSame('WAITING', EntrepotMockResponseFactory::stored('processings/executions')[0]['status']);
+    }
+
+    public function testVectorDbWithoutLineageTagsStillGetsAPyramid(): void
+    {
+        EntrepotMockResponseFactory::reset();
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vectordb-1', 'type' => 'VECTOR-DB', 'tags' => []]);
+        $client = $this->client();
+
+        $this->post($client);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(
+            ['vectordb_id' => 'vectordb-1', 'proc_pyr_creat_id' => 'execution-2', 'is_sample' => 'false'],
+            EntrepotMockResponseFactory::stored('stored_data')[1]['tags'],
+        );
     }
 
     private function client(): KernelBrowser

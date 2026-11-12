@@ -25,6 +25,7 @@ use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
 use App\Services\ServiceFormFileValidator;
 use App\Utils;
+use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -145,22 +146,17 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
         $pyramidId = $processingExecution['output']['stored_data']['_id'];
 
-        $pyramidTags = [
-            CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
-            StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID],
-            StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID],
+        // base vecteur créée hors du parcours de dépôt : tags de lignée absents
+        $pyramidTags = array_filter([
+            ...UploadIntegrationWorkflow::forwardedTags($vectordb['tags'] ?? []),
+            StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID] ?? null,
+            StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
             StoredDataTags::VECTORDB_ID => $vectorDbId,
             StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
-        ];
-        if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
-            $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
-        }
-        if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
-            $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
-        }
+        ], fn ($value) => null !== $value);
 
         $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
-        $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
+        $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME] ?? null);
         $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
 
         $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
@@ -361,7 +357,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     /**
      * @return array<mixed>
      */
-    private function saveLegendInAnnexe(string $datastoreId, string $storedDataId, string $legendFilePath, string $datasheetName): array
+    private function saveLegendInAnnexe(string $datastoreId, string $storedDataId, string $legendFilePath, ?string $datasheetName): array
     {
         $path = "/legend/{$storedDataId}.png";
 
@@ -372,10 +368,10 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             return $this->annexeApiService->replaceFile($datastoreId, $existingAnnexe['_id'], $legendFilePath);
         }
 
-        $labels = [
-            CommonTags::DATASHEET_NAME.'='.$datasheetName,
-            'type=legend',
-        ];
+        $labels = ['type=legend'];
+        if (null !== $datasheetName) {
+            $labels[] = CommonTags::DATASHEET_NAME.'='.$datasheetName;
+        }
 
         return $this->annexeApiService->add($datastoreId, $legendFilePath, [$path], $labels, true);
     }

@@ -16,6 +16,7 @@ use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
+use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -111,20 +112,15 @@ final class PyramidVectorController extends AbstractController implements ApiCon
         $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
         $pyramidId = $processingExecution['output']['stored_data']['_id'];
 
-        $pyramidTags = [
-            CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
-            StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID],
-            StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID],
+        // base vecteur créée hors du parcours de dépôt : tags de lignée absents
+        $pyramidTags = array_filter([
+            ...UploadIntegrationWorkflow::forwardedTags($vectordb['tags'] ?? []),
+            StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID] ?? null,
+            StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
             StoredDataTags::VECTORDB_ID => $dto->vectordb_id,
             StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
             StoredDataTags::IS_SAMPLE => is_null($dto->area) ? 'false' : 'true',
-        ];
-        if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
-            $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
-        }
-        if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
-            $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
-        }
+        ], fn ($value) => null !== $value);
 
         $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
         $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
