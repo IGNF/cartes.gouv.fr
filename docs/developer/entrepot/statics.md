@@ -34,3 +34,13 @@ config_[configuration_id]_style_[type_config]
 | ------------------ | --------------------------------------------------------------------- | ------ |
 | `configuration_id` | identifiant de la `configuration`                                     | uuidv4 |
 | `type_config`      | type de configuration, `wmsr` pour WMS-RASTER et `wmts` pour WMTS-TMS | string |
+
+## Nom temporaire à la création
+
+L’identifiant de la configuration n’existe pas encore au dépôt du fichier SLD : il est d’abord nommé `config_tmp_[uuid]_style_wmsv_[table_name]`.
+
+La route `publish` du formulaire de flux WMS vecteur renomme les fichiers juste après la création de la configuration, avant l’offre (rappel `onConfigurationCreated` de `CartesServiceApiService::publishFromForm`). Si le renommage échoue, la configuration est supprimée.
+
+Si la publication échoue avant la création de l’offre, le rappel `onRollback` supprime les fichiers. Après la création de l’offre, ils sont conservés même si une étape suivante échoue (permissions, capabilities, ressources en ligne de la métadonnée) : le flux les utilise. Un échec de suppression est journalisé.
+
+Les anciennes routes `add` renomment en fin de traitement : un échec après la création de l’offre laisse le fichier sous son nom temporaire.

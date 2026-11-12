@@ -1,9 +1,11 @@
 import { type TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { z } from "zod";
 
+import { ConfigurationTypeEnum } from "@/@types/app";
 import { type ComponentKey } from "@/i18n/types";
 import { regex } from "@/utils";
 import { TAG_VALUE_MAX_LENGTH } from "../DatasetAdd/datasetAddSchema";
+import { type SldError, validateSld } from "./validateSld";
 
 type T = TranslationFunction<"ServiceForm", ComponentKey>;
 
@@ -11,7 +13,15 @@ export const SERVICE_TYPES = ["wfs", "wms", "tms", "wmts"] as const;
 export type ServiceType = (typeof SERVICE_TYPES)[number];
 
 /** types dont le formulaire est livré ; les autres cartes restent visibles mais désactivées */
-export const IMPLEMENTED_SERVICE_TYPES: readonly ServiceType[] = ["wfs"];
+export const IMPLEMENTED_SERVICE_TYPES: readonly ServiceType[] = ["wfs", "wms"];
+
+/** type de configuration Entrepôt (et d’endpoint) du type de flux */
+export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeEnum> = {
+    wfs: ConfigurationTypeEnum.WFS,
+    wms: ConfigurationTypeEnum.WMSVECTOR,
+    tms: ConfigurationTypeEnum.WMTSTMS,
+    wmts: ConfigurationTypeEnum.WMTSTMS,
+};
 
 export const SERVICE_ACCESSES = ["public", "restricted_visible", "restricted"] as const;
 export type ServiceAccess = (typeof SERVICE_ACCESSES)[number];
@@ -21,6 +31,12 @@ export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;
 
 export const SERVICE_IMAGE_ACCEPT = ["jpg", "jpeg", "png"];
 export const SERVICE_IMAGE_MAX_SIZE_MB = 5;
+
+/** même limite que WmsVectorFormDTO */
+export const SERVICE_DESCRIPTION_MAX_LENGTH = 300;
+
+/** même limite que ServiceFormDTO::TABLES_MAX */
+export const SERVICE_TABLES_MAX = 10;
 
 type SchemaDeps = {
     t: T;
@@ -36,6 +52,32 @@ type SchemaDeps = {
 // undefined : inchangée, null : supprimée, File : nouvelle image
 const imageFile = z.instanceof(File).nullish();
 
+// fichier modifié ou déplacé sur le disque après son choix : le navigateur refuse de le lire
+type StyleFileError = SldError | { code: "unreadable" };
+
+// un même fichier n’est relu qu’une fois par table, même quand le formulaire revalide à chaque changement
+const sldValidations = new WeakMap<File, Map<string, Promise<StyleFileError[]>>>();
+// shortcut: lu en UTF-8 ; noms de table GeoPackage en ASCII (GpkgFormatHandler), autres formats non contrôlés, à revoir si un nom accentué est refusé à tort
+const validateSldFile = (file: File, tableName: string): Promise<StyleFileError[]> => {
+    const byTable = sldValidations.get(file) ?? new Map<string, Promise<StyleFileError[]>>();
+    sldValidations.set(file, byTable);
+    const validation =
+        byTable.get(tableName) ??
+        file
+            .text()
+            .then((text) => validateSld(text, tableName))
+            .catch((): StyleFileError[] => {
+                // échec non gardé : le prochain envoi relit le fichier
+                byTable.delete(tableName);
+                return [{ code: "unreadable" }];
+            });
+    byTable.set(tableName, validation);
+    return validation;
+};
+
+const sldErrorMessage = (t: T, error: StyleFileError): string =>
+    error.code === "layer_name" ? t("validation.table.style.layer_name", { expected: error.expected }) : t(`validation.table.style.${error.code}`);
+
 export const buildServiceFormSchema = ({ t, type, existingLayerNames, layerNamePrefix, availableAccesses }: SchemaDeps) => {
     const tableSchema = z
         .object({
@@ -45,10 +87,23 @@ export const buildServiceFormSchema = ({ t, type, existingLayerNames, layerNameP
             public_name: z.string().trim(),
             description: z.string().trim(),
             keywords: z.array(z.string()),
+            // fichier SLD (WMS vecteur)
+            style: z.instanceof(File).optional(),
         })
         // champs obligatoires seulement sur les tables cochées
-        .superRefine((table, ctx) => {
+        .superRefine(async (table, ctx) => {
             if (!table.selected) return;
+            if (type === "wms") {
+                if (table.style === undefined) {
+                    ctx.addIssue({ code: "custom", path: ["style"], message: t("validation.table.style.required") });
+                } else if (!table.style.name.toLowerCase().endsWith(".sld")) {
+                    ctx.addIssue({ code: "custom", path: ["style"], message: t("validation.table.style.extension") });
+                } else {
+                    const [error] = await validateSldFile(table.style, table.native_name);
+                    if (error !== undefined) ctx.addIssue({ code: "custom", path: ["style"], message: sldErrorMessage(t, error) });
+                }
+            }
+            if (type !== "wfs") return;
             if (table.title === "") ctx.addIssue({ code: "custom", path: ["title"], message: t("validation.table.title.required") });
             if (table.public_name === "") {
                 ctx.addIssue({ code: "custom", path: ["public_name"], message: t("validation.table.public_name.required") });
@@ -95,9 +150,24 @@ export const buildServiceFormSchema = ({ t, type, existingLayerNames, layerNameP
             .min(1, t("validation.themes.required"))
             .refine((themes) => themes.join(", ").length <= TAG_VALUE_MAX_LENGTH, t("validation.themes.max", { max: TAG_VALUE_MAX_LENGTH })),
         // une entrée par table géométrique de la base choisie, cochée ou non
-        tables:
+        // WFS : pas de description du flux, chaque table a la sienne
+        description:
             type === "wfs"
-                ? z.array(tableSchema).refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))
+                ? z.string()
+                : z
+                      .string()
+                      .trim()
+                      .min(1, t("validation.description.required"))
+                      .max(SERVICE_DESCRIPTION_MAX_LENGTH, t("validation.description.max", { max: SERVICE_DESCRIPTION_MAX_LENGTH })),
+        tables:
+            type === "wfs" || type === "wms"
+                ? z
+                      .array(tableSchema)
+                      .refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))
+                      .refine(
+                          (tables) => tables.filter((table) => table.selected).length <= SERVICE_TABLES_MAX,
+                          t("validation.tables.max", { max: SERVICE_TABLES_MAX })
+                      )
                 : z.array(tableSchema),
         access: z.enum(SERVICE_ACCESSES).refine((access) => availableAccesses.includes(access), t("validation.access.unavailable")),
         attribution: attributionSchema,
@@ -112,6 +182,7 @@ export const serviceFormDefaultValues: ServiceFormValues = {
     stored_data_id: "",
     title: "",
     technical_name: "",
+    description: "",
     thumbnail: undefined,
     themes: [],
     tables: [],

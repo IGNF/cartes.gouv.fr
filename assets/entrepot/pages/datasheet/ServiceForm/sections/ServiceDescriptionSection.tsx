@@ -16,9 +16,11 @@ type ServiceDescriptionSectionProps = {
     /** données stockées compatibles avec le type de flux choisi */
     storedDataOptions: DatasheetStoredDataItem[];
     onStoredDataChange: (storedDataId: string) => void;
+    /** description du flux, sauf en WFS où chaque table a la sienne */
+    withDescription: boolean;
 };
 
-export default function ServiceDescriptionSection({ storedDataOptions, onStoredDataChange }: ServiceDescriptionSectionProps) {
+export default function ServiceDescriptionSection({ storedDataOptions, onStoredDataChange, withDescription }: ServiceDescriptionSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
         register,
@@ -70,6 +72,16 @@ export default function ServiceDescriptionSection({ storedDataOptions, onStoredD
                 stateRelatedMessage={errors.title?.message}
                 nativeInputProps={register("title")}
             />
+
+            {withDescription && (
+                <Input
+                    label={t("description.label")}
+                    textArea
+                    state={errors.description ? "error" : "default"}
+                    stateRelatedMessage={errors.description?.message}
+                    nativeTextAreaProps={{ ...register("description"), rows: 3 }}
+                />
+            )}
 
             <Input
                 label={t("technical_name.label")}

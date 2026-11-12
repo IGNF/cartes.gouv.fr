@@ -5,7 +5,7 @@ import { queryOptions, skipToken, useQuery, useQueryClient } from "@tanstack/rea
 import { useMemo } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { ConfigurationTypeEnum, type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum, type VectorDb } from "@/@types/app";
+import { type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum, type VectorDb } from "@/@types/app";
 import api from "@/entrepot/api";
 import { filterGeometricRelations } from "@/helpers";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
@@ -21,10 +21,12 @@ import { mapServiceViolationPaths } from "./buildServiceFormData";
 import AccessSection from "./sections/AccessSection";
 import ServiceDescriptionSection from "./sections/ServiceDescriptionSection";
 import ServiceTypeSection from "./sections/ServiceTypeSection";
-import WfsTablesSection from "./sections/WfsTablesSection";
+import StylesSection from "./sections/StylesSection";
+import TablesSection from "./sections/TablesSection";
 import {
     buildServiceFormSchema,
     SERVICE_ACCESSES,
+    SERVICE_CONFIGURATION_TYPES,
     type ServiceAccess,
     serviceFormDefaultValues,
     type ServiceFormOutput,
@@ -32,14 +34,6 @@ import {
     type ServiceTableFormValues,
     type ServiceType,
 } from "./serviceFormSchema";
-
-// type de configuration Entrepôt (et d’endpoint) du type de flux
-const configurationTypes: Record<ServiceType, ConfigurationTypeEnum> = {
-    wfs: ConfigurationTypeEnum.WFS,
-    wms: ConfigurationTypeEnum.WMSVECTOR,
-    tms: ConfigurationTypeEnum.WMTSTMS,
-    wmts: ConfigurationTypeEnum.WMTSTMS,
-};
 
 // sans jeu choisi, la requête ne part pas et rien n’est mis en cache
 const vectorDbQueryOptions = (datastoreId: string, storedDataId: string) =>
@@ -58,6 +52,7 @@ const defaultTables = (vectorDb: VectorDb): ServiceTableFormValues[] =>
         public_name: relation.name.toLowerCase(),
         description: "",
         keywords: [],
+        style: undefined,
     }));
 
 type ServiceFormProps = {
@@ -74,7 +69,7 @@ type ServiceFormProps = {
 export default function ServiceForm({ datastoreId, datasheetName, datasheet, type, onTypeChange, onSubmit }: ServiceFormProps) {
     const { t } = useTranslation("ServiceForm");
     const queryClient = useQueryClient();
-    const configurationType = configurationTypes[type];
+    const configurationType = SERVICE_CONFIGURATION_TYPES[type];
 
     const { data: datastore } = useQuery(datastoreQueryOptions(datastoreId));
     const existingLayerNamesQuery = useQuery<string[], ApiError>({
@@ -153,14 +148,21 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                         <ServiceDescriptionSection
                             storedDataOptions={(datasheet.vector_db_list ?? []).filter((item) => item.status === StoredDataStatusEnum.GENERATED)}
                             onStoredDataChange={loadTables}
+                            withDescription={type !== "wfs"}
                         />
                     </MetadataSection>
                     <MetadataSection title={t("section.tables")}>
-                        <WfsTablesSection
+                        <TablesSection
                             status={storedDataId === "" ? "idle" : vectorDbQuery.status}
                             noGeometricTable={vectorDbQuery.data !== undefined && defaultTables(vectorDbQuery.data).length === 0}
+                            detailed={type === "wfs"}
                         />
                     </MetadataSection>
+                    {type === "wms" && (
+                        <MetadataSection title={t("section.styles")}>
+                            <StylesSection />
+                        </MetadataSection>
+                    )}
                     <MetadataSection title={t("section.access")}>
                         <AccessSection availableAccesses={availableAccesses} />
                     </MetadataSection>

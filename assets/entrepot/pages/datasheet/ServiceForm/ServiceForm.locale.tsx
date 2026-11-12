@@ -16,6 +16,7 @@ const { i18n } = declareComponentKeys<
     | "section.type"
     | "section.description"
     | "section.tables"
+    | "section.styles"
     | "section.access"
     | "type.legend"
     | "type.help_link"
@@ -35,6 +36,7 @@ const { i18n } = declareComponentKeys<
     | "title.hint"
     | "technical_name.label"
     | "technical_name.hint"
+    | "description.label"
     | { K: "image.hint"; P: { max: number }; R: string }
     | "thumbnail.label"
     | "thumbnail.modal_title"
@@ -53,6 +55,13 @@ const { i18n } = declareComponentKeys<
     | "table.description.label"
     | "table.keywords.label"
     | "table.keywords.hint"
+    | "styles.label"
+    | "styles.hint"
+    | "styles.no_table"
+    | "styles.no_file"
+    | "styles.browse"
+    | "styles.change"
+    | { K: "styles.remove"; P: { table: string }; R: string }
     | "access.legend"
     | "access.public"
     | "access.public.hint"
@@ -78,10 +87,24 @@ const { i18n } = declareComponentKeys<
     | "validation.themes.required"
     | { K: "validation.themes.max"; P: { max: number }; R: string }
     | "validation.tables.required"
+    | { K: "validation.tables.max"; P: { max: number }; R: string }
     | "validation.table.title.required"
     | "validation.table.public_name.required"
     | "validation.table.public_name.chars"
     | "validation.table.description.required"
+    | "validation.description.required"
+    | { K: "validation.description.max"; P: { max: number }; R: string }
+    | "validation.table.style.required"
+    | "validation.table.style.extension"
+    | "validation.table.style.empty"
+    | "validation.table.style.unreadable"
+    | "validation.table.style.malformed"
+    | "validation.table.style.root"
+    | "validation.table.style.version"
+    | "validation.table.style.named_layer_count"
+    | { K: "validation.table.style.layer_name"; P: { expected: string }; R: string }
+    | "validation.table.style.no_rule"
+    | "validation.table.style.rule_without_symbolizer"
     | "validation.access.unavailable"
     | "validation.attribution.text.required"
     | "validation.attribution.url.required"
@@ -105,6 +128,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "section.type": "Type de flux",
     "section.description": "Description du flux",
     "section.tables": "Tables",
+    "section.styles": "Styles",
     "section.access": "Droits et accès",
     "type.legend": "Type de flux",
     "type.help_link": "Comment choisir le type de flux à publier ?",
@@ -125,6 +149,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "technical_name.label": "Nom technique du flux",
     "technical_name.hint":
         "Le nom technique du flux ne doit pas contenir d’espace ni de caractères spéciaux et doit être unique. Il permet d’identifier le flux dans les services qui l’utiliseront.",
+    "description.label": "Description",
     "image.hint": ({ max }) => `Taille maximale : ${max} Mo. Formats supportés : jpg, png.`,
     "thumbnail.label": "Vignette (optionnel)",
     "thumbnail.modal_title": "Ajouter une vignette",
@@ -144,6 +169,13 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "table.description.label": "Résumé de la table",
     "table.keywords.label": "Mot-clés (optionnels)",
     "table.keywords.hint": "Utilisez l’auto-complétion ou saisissez librement des mots-clés en appuyant sur Entrée après chaque mot.",
+    "styles.label": "Ajouter un fichier de style",
+    "styles.hint": "Format supporté : SLD.",
+    "styles.no_table": "Cochez d’abord une ou plusieurs tables.",
+    "styles.no_file": "Aucun fichier sélectionné.",
+    "styles.browse": "Parcourir…",
+    "styles.change": "Modifier",
+    "styles.remove": ({ table }) => `Retirer le fichier de style de la table ${table}`,
     "access.legend": "Accès",
     "access.public": "Accès libre pour tous",
     "access.public.hint": "En acceptant, le service sera accessible à tout utilisateur, dans cartes.gouv.fr ou tout autre outil tiers.",
@@ -171,10 +203,25 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "validation.themes.required": "Sélectionnez au moins une thématique",
     "validation.themes.max": ({ max }) => `Retirez des thématiques : la sélection dépasse la limite de ${max} caractères`,
     "validation.tables.required": "Veuillez choisir au moins une table",
+    "validation.tables.max": ({ max }) => `Choisissez au plus ${max} tables`,
     "validation.table.title.required": "Le titre de la table est obligatoire",
     "validation.table.public_name.required": "Le nom technique de la table est obligatoire",
     "validation.table.public_name.chars": "Le nom technique de la table ne doit contenir que des minuscules, chiffres, tirets, points et tirets bas",
     "validation.table.description.required": "Le résumé de la table est obligatoire",
+    "validation.description.required": "La description du flux est obligatoire",
+    "validation.description.max": ({ max }) => `La description du flux ne peut pas dépasser ${max} caractères`,
+    "validation.table.style.required": "Le fichier de style de la table est obligatoire",
+    "validation.table.style.extension": "Le fichier de style doit être au format SLD",
+    "validation.table.style.empty": "Le fichier de style est vide",
+    "validation.table.style.unreadable": "Le fichier de style n’a pas pu être lu : choisissez-le à nouveau",
+    "validation.table.style.malformed": "Le fichier de style n’est pas un XML valide",
+    "validation.table.style.root":
+        "Le fichier n’est pas un style SLD : la racine doit être StyledLayerDescriptor dans l’espace de noms http://www.opengis.net/sld",
+    "validation.table.style.version": "Le SLD doit être en version 1.0.0",
+    "validation.table.style.named_layer_count": "Le SLD doit contenir exactement un NamedLayer et aucun UserLayer",
+    "validation.table.style.layer_name": ({ expected }) => `Le nom du NamedLayer doit être celui de la table : ${expected}`,
+    "validation.table.style.no_rule": "Le SLD doit contenir au moins une règle (Rule)",
+    "validation.table.style.rule_without_symbolizer": "Chaque règle (Rule) du SLD doit contenir au moins un symboliseur",
     "validation.access.unavailable": "Ce type d’accès n’est pas disponible pour cet entrepôt",
     "validation.attribution.text.required": "Le texte de l’attribution est obligatoire",
     "validation.attribution.url.required": "L’URL de l’attribution est obligatoire",
@@ -196,6 +243,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "section.type": "Service type",
     "section.description": "Service description",
     "section.tables": "Tables",
+    "section.styles": "Styles",
     "section.access": "Rights and access",
     "type.legend": "Service type",
     "type.help_link": "How to choose the type of service to publish?",
@@ -215,6 +263,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "title.hint": "Short, non-technical title that tells users what the service is about",
     "technical_name.label": "Service technical name",
     "technical_name.hint": "The technical name must be unique and contain no spaces or special characters. It identifies the service in the tools that use it.",
+    "description.label": "Description",
     "image.hint": ({ max }) => `Maximum size: ${max} MB. Supported formats: jpg, png.`,
     "thumbnail.label": "Thumbnail (optional)",
     "thumbnail.modal_title": "Add a thumbnail",
@@ -234,6 +283,13 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "table.description.label": "Table summary",
     "table.keywords.label": "Keywords (optional)",
     "table.keywords.hint": "Use autocompletion or type free keywords, pressing Enter after each one.",
+    "styles.label": "Add a style file",
+    "styles.hint": "Supported format: SLD.",
+    "styles.no_table": "Select one or more tables first.",
+    "styles.no_file": "No file selected.",
+    "styles.browse": "Browse…",
+    "styles.change": "Change",
+    "styles.remove": ({ table }) => `Remove the style file of table ${table}`,
     "access.legend": "Access",
     "access.public": "Open access for everyone",
     "access.public.hint": "The service will be available to any user, in cartes.gouv.fr or any third-party tool.",
@@ -260,10 +316,24 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "validation.themes.required": "Select at least one theme",
     "validation.themes.max": ({ max }) => `Remove themes: the selection exceeds the ${max} character limit`,
     "validation.tables.required": "Please choose at least one table",
+    "validation.tables.max": ({ max }) => `Choose at most ${max} tables`,
     "validation.table.title.required": "The table title is required",
     "validation.table.public_name.required": "The table technical name is required",
     "validation.table.public_name.chars": "The table technical name may only contain lowercase letters, digits, hyphens, dots and underscores",
     "validation.table.description.required": "The table summary is required",
+    "validation.description.required": "The service description is required",
+    "validation.description.max": ({ max }) => `The service description cannot exceed ${max} characters`,
+    "validation.table.style.required": "The table style file is required",
+    "validation.table.style.extension": "The style file must be an SLD file",
+    "validation.table.style.empty": "The style file is empty",
+    "validation.table.style.unreadable": "The style file could not be read: select it again",
+    "validation.table.style.malformed": "The style file is not valid XML",
+    "validation.table.style.root": "The file is not an SLD style: the root must be StyledLayerDescriptor in the http://www.opengis.net/sld namespace",
+    "validation.table.style.version": "The SLD must be version 1.0.0",
+    "validation.table.style.named_layer_count": "The SLD must contain exactly one NamedLayer and no UserLayer",
+    "validation.table.style.layer_name": ({ expected }) => `The NamedLayer name must be the table name: ${expected}`,
+    "validation.table.style.no_rule": "The SLD must contain at least one Rule",
+    "validation.table.style.rule_without_symbolizer": "Each SLD Rule must contain at least one symbolizer",
     "validation.access.unavailable": "This access type is not available for this datastore",
     "validation.attribution.text.required": "The attribution text is required",
     "validation.attribution.url.required": "The attribution URL is required",

@@ -47,6 +47,22 @@ describe("buildServiceFormData", () => {
         const formData = buildServiceFormData("wfs", { ...values, attribution: { enabled: false, title: "", url: "", logo: new File(["x"], "logo.png") } });
         expect(formData.get("attribution_logo")).toBeNull();
     });
+
+    it("WMS vecteur : envoie la description, les noms des tables cochées et un fichier de style par table", () => {
+        const style = new File(["<sld/>"], "communes.sld");
+        const tables = values.tables.map((table) => ({ ...table, style: table.selected ? style : new File(["x"], "brouillon.sld") }));
+        const formData = buildServiceFormData("wms", { ...values, description: "Les communes", tables });
+        const payload = payloadOf(formData);
+        expect(payload.description).toBe("Les communes");
+        expect(payload.selected_tables).toEqual(["communes"]);
+        expect(payload).not.toHaveProperty("tables");
+        expect(formData.get("style_files[communes]")).toBe(style);
+        expect(formData.get("style_files[brouillon]")).toBeNull();
+    });
+
+    it("WFS : n’envoie pas de description du flux", () => {
+        expect(payloadOf(buildServiceFormData("wfs", { ...values, description: "ignorée" }))).not.toHaveProperty("description");
+    });
 });
 
 describe("mapServiceViolationPaths", () => {
@@ -64,5 +80,20 @@ describe("mapServiceViolationPaths", () => {
             values.tables
         );
         expect(error.violations?.map((violation) => violation.propertyPath)).toEqual(["tables[1].public_name", "technical_name", "attribution.logo"]);
+    });
+
+    it("ramène le fichier de style d’une table à son champ et la liste des tables cochées aux tables", () => {
+        const error = mapServiceViolationPaths(
+            {
+                status: 422,
+                title: "Validation Failed",
+                violations: [
+                    { propertyPath: "style_files[communes]", title: "invalide" },
+                    { propertyPath: "selected_tables", title: "invalide" },
+                ],
+            },
+            values.tables
+        );
+        expect(error.violations?.map((violation) => violation.propertyPath)).toEqual(["tables[1].style", "tables"]);
     });
 });

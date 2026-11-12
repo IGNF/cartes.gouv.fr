@@ -3,7 +3,7 @@ import { type ServiceFormOutput, type ServiceType } from "./serviceFormSchema";
 
 /**
  * Requête multipart des routes `publish` : champ `data` (JSON lu par MultipartPayloadMapper côté Symfony)
- * et fichiers `thumbnail`, `attribution_logo`. La donnée stockée voyage dans l’URL.
+ * et fichiers `thumbnail`, `attribution_logo`, `style_files[<table>]` (WMS vecteur). La donnée stockée voyage dans l’URL.
  */
 export function buildServiceFormData(type: ServiceType, values: ServiceFormOutput): FormData {
     const { attribution } = values;
@@ -15,14 +15,29 @@ export function buildServiceFormData(type: ServiceType, values: ServiceFormOutpu
         attribution: attribution.enabled ? { title: attribution.title, url: attribution.url } : null,
     };
 
+    const selectedTables = values.tables.filter((table) => table.selected);
     if (type === "wfs") {
-        payload.tables = values.tables
-            .filter((table) => table.selected)
-            .map(({ native_name, title, public_name, description, keywords }) => ({ native_name, title, public_name, description, keywords }));
+        payload.tables = selectedTables.map(({ native_name, title, public_name, description, keywords }) => ({
+            native_name,
+            title,
+            public_name,
+            description,
+            keywords,
+        }));
+    } else {
+        payload.description = values.description;
+    }
+    if (type === "wms") {
+        payload.selected_tables = selectedTables.map((table) => table.native_name);
     }
 
     const formData = new FormData();
     formData.set("data", JSON.stringify(payload));
+    if (type === "wms") {
+        for (const table of selectedTables) {
+            if (table.style instanceof File) formData.set(`style_files[${table.native_name}]`, table.style);
+        }
+    }
     if (values.thumbnail instanceof File) {
         formData.set("thumbnail", values.thumbnail);
     }
@@ -35,17 +50,24 @@ export function buildServiceFormData(type: ServiceType, values: ServiceFormOutpu
 
 /**
  * Ramène les chemins d’une erreur 422 sur les champs du formulaire : le back ne reçoit que les tables cochées
- * (`tables[i]` = i-ème table cochée) et le logo voyage comme fichier `attribution_logo`.
+ * (`tables[i]` = i-ème table cochée, `selected_tables` = leurs noms), le logo voyage comme fichier `attribution_logo`
+ * et le style d’une table comme fichier `style_files[<table>]`.
  */
-export function mapServiceViolationPaths(error: ApiError, tables: readonly { selected: boolean }[]): ApiError {
+export function mapServiceViolationPaths(error: ApiError, tables: readonly { native_name: string; selected: boolean }[]): ApiError {
     const formIndexes = tables.flatMap((table, index) => (table.selected ? [index] : []));
-    const toFormPath = (path: string) =>
-        path === "attribution_logo"
-            ? "attribution.logo"
-            : path.replace(/^tables\[(\d+)\]/, (match, sent: string) => {
-                  const formIndex = formIndexes[Number(sent)];
-                  return formIndex === undefined ? match : `tables[${formIndex}]`;
-              });
+    const toFormPath = (path: string) => {
+        if (path === "attribution_logo") return "attribution.logo";
+        if (path === "selected_tables") return "tables";
+        const styleTable = /^style_files\[(.*)\]$/.exec(path)?.[1];
+        if (styleTable !== undefined) {
+            const formIndex = tables.findIndex((table) => table.native_name === styleTable);
+            return formIndex === -1 ? path : `tables[${formIndex}].style`;
+        }
+        return path.replace(/^tables\[(\d+)\]/, (match, sent: string) => {
+            const formIndex = formIndexes[Number(sent)];
+            return formIndex === undefined ? match : `tables[${formIndex}]`;
+        });
+    };
 
     return { ...error, violations: error.violations?.map((violation) => ({ ...violation, propertyPath: toFormPath(violation.propertyPath) })) };
 }

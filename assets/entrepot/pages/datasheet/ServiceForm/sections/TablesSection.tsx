@@ -11,14 +11,16 @@ import { type ServiceFormValues } from "../serviceFormSchema";
 
 const inspireKeywords = getInspireKeywords();
 
-type WfsTablesSectionProps = {
+type TablesSectionProps = {
     /** état du chargement des tables de la base choisie */
     status: "idle" | "pending" | "error" | "success";
     /** la base choisie, une fois lue, n’a aucune table géométrique */
     noGeometricTable: boolean;
+    /** titre, nom technique, résumé et mots-clés par table cochée (WFS) */
+    detailed: boolean;
 };
 
-export default function WfsTablesSection({ status, noGeometricTable }: WfsTablesSectionProps) {
+export default function TablesSection({ status, noGeometricTable, detailed }: TablesSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
         register,
@@ -56,7 +58,7 @@ export default function WfsTablesSection({ status, noGeometricTable }: WfsTables
             />
 
             {tables.map((table, index) =>
-                table.selected ? (
+                detailed && table.selected ? (
                     <fieldset key={table.native_name} className={fr.cx("fr-fieldset", "fr-mb-4w")}>
                         <legend className={fr.cx("fr-fieldset__legend", "fr-text--bold")}>{table.native_name}</legend>
                         <div className={fr.cx("fr-fieldset__element")}>

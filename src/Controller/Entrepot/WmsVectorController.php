@@ -5,14 +5,19 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\Form\WmsVectorFormDTO;
 use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
 use App\Exception\AppException;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StaticApiService;
+use App\Services\MultipartPayloadMapper;
+use App\Services\ServiceFormFileValidator;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,7 +37,102 @@ final class WmsVectorController extends AbstractController implements ApiControl
         private readonly ConfigurationApiService $configurationApiService,
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly StaticApiService $staticApiService,
+        private readonly MultipartPayloadMapper $multipartPayloadMapper,
+        private readonly ServiceFormFileValidator $serviceFormFileValidator,
+        private readonly Filesystem $filesystem,
+        private readonly LoggerInterface $logger,
     ) {
+    }
+
+    /**
+     * Publication depuis le nouveau formulaire : multipart avec le champ JSON `data` (WmsVectorFormDTO), un fichier SLD `style_files[<table>]` par table et les fichiers `thumbnail`, `attribution_logo`.
+     */
+    #[Route('/publish', name: 'publish', methods: ['POST'])]
+    public function publish(string $datastoreId, string $storedDataId, Request $request): JsonResponse
+    {
+        $dto = $this->multipartPayloadMapper->map($request, WmsVectorFormDTO::class);
+        [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
+        $styleFiles = $this->serviceFormFileValidator->styleFiles($request, $dto->selected_tables);
+
+        /** @var array<string, string> $staticIds identifiant du fichier statique par nom de table */
+        $staticIds = [];
+        $removeStyleFiles = function () use ($datastoreId, &$staticIds): void {
+            foreach ($staticIds as $staticId) {
+                try {
+                    $this->staticApiService->delete($datastoreId, $staticId)->await();
+                } catch (\Throwable $e) {
+                    $this->logger->warning('{class}: Failed to remove style file {staticId} after a failed publication: {error}', [
+                        'class' => self::class,
+                        'staticId' => $staticId,
+                        'exception' => $e,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        };
+
+        $tmpDirs = [];
+        try {
+            // nom temporaire : l’identifiant de la configuration n’existe pas encore
+            $tmpConfigId = Uuid::v4();
+            try {
+                foreach ($styleFiles as $tableName => $file) {
+                    $tmpDirs[] = $tmpDir = $this->getParameter('style_files_path').'/'.Uuid::v4();
+                    $file = $file->move($tmpDir, $file->getClientOriginalName());
+                    $staticIds[$tableName] = $this->staticApiService->add(
+                        $datastoreId,
+                        $file->getPathname(),
+                        sprintf('config_tmp_%s_style_wmsv_%s', $tmpConfigId, $tableName),
+                        StaticFileTypes::GEOSERVER_STYLE,
+                    )['_id'];
+                }
+            } catch (\Throwable $th) {
+                $removeStyleFiles();
+                throw $th;
+            }
+
+            $offering = $this->cartesServiceApiService->publishFromForm(
+                $datastoreId,
+                $storedDataId,
+                $dto,
+                ConfigurationTypes::WMSVECTOR,
+                $this->getFormConfigTypeInfos($dto, $staticIds, $storedDataId),
+                $thumbnail,
+                $attributionLogo,
+                // renommage avant l’offre : un échec annule encore la configuration
+                function (string $configurationId) use ($datastoreId, $staticIds): void {
+                    foreach ($staticIds as $tableName => $staticId) {
+                        $this->staticApiService->modifyInfo($datastoreId, $staticId, [
+                            'name' => sprintf('config_%s_style_wmsv_%s', $configurationId, $tableName),
+                        ])->await();
+                    }
+                },
+                // après l’offre, les fichiers restent : le flux les utilise
+                $removeStyleFiles,
+            );
+        } finally {
+            $this->filesystem->remove($tmpDirs);
+        }
+
+        return $this->json($offering, Response::HTTP_CREATED);
+    }
+
+    /**
+     * @param array<string, string> $staticIds
+     *
+     * @return array<mixed>
+     */
+    private function getFormConfigTypeInfos(WmsVectorFormDTO $dto, array $staticIds, string $storedDataId): array
+    {
+        return [
+            'title' => $dto->title,
+            'abstract' => $dto->description,
+            'keywords' => $dto->themes,
+            'used_data' => [[
+                'relations' => array_map(fn (string $tableName) => ['name' => $tableName, 'style' => $staticIds[$tableName]], $dto->selected_tables),
+                'stored_data' => $storedDataId,
+            ]],
+        ];
     }
 
     #[Route('', name: 'add', methods: ['POST'])]

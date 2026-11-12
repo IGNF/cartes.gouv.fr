@@ -17,19 +17,20 @@ final class EntrepotMockResponseFactory
     public const METADATA_ENDPOINT_ID = 'endpoint-metadata';
     public const WFS_PUBLIC_ENDPOINT_ID = 'endpoint-wfs-public';
     public const WFS_PRIVATE_ENDPOINT_ID = 'endpoint-wfs-private';
+    public const WMSV_PUBLIC_ENDPOINT_ID = 'endpoint-wmsv-public';
     private const ENTREPOT_HOST = 'entrepot.test';
     private const METADATA_FIXTURES_DIR = __DIR__.'/../Fixture/metadata';
 
     /** @var list<array{method: string, path: string, body: string}> requêtes d’écriture reçues, conservées entre redémarrages du noyau */
     private static array $writeRequests = [];
 
-    /** @var array<string, list<array<mixed>>> entités par collection (metadata, annexes, uploads, stored_data, offerings, configurations), conservées entre redémarrages du noyau */
+    /** @var array<string, list<array<mixed>>> entités par collection (metadata, annexes, statics, uploads, stored_data, offerings, configurations), conservées entre redémarrages du noyau */
     private static array $store = [];
 
     /** @var array<string, string> contenu XML des métadonnées écrites, par identifiant */
     private static array $metadataFiles = [];
 
-    /** @var list<string> requêtes « MÉTHODE chemin » qui répondent 500 à leur prochain passage */
+    /** @var list<array{string, int}> requêtes « MÉTHODE chemin » qui répondent 500, après le nombre de passages réussis indiqué */
     private static array $failures = [];
 
     private static int $nextId = 1;
@@ -74,10 +75,10 @@ final class EntrepotMockResponseFactory
         return self::$metadataFiles[$metadataId] ?? null;
     }
 
-    // la prochaine requête « MÉTHODE chemin relatif au datastore » répond 500 (ex. « POST metadata »)
-    public static function failNext(string $request): void
+    // la prochaine requête « MÉTHODE chemin relatif au datastore » répond 500 (ex. « POST metadata »), après $passes passages réussis
+    public static function failNext(string $request, int $passes = 0): void
     {
-        self::$failures[] = $request;
+        self::$failures[] = [$request, $passes];
     }
 
     // GET users/me répond pour un autre utilisateur jusqu’au prochain reset()
@@ -168,9 +169,15 @@ final class EntrepotMockResponseFactory
     private function datastoreResponse(string $method, string $path, string $queryString, array $options): ?MockResponse
     {
         $relative = ltrim($path, '/');
-        $failure = array_search("$method $relative", self::$failures, true);
-        if (false !== $failure) {
-            array_splice(self::$failures, $failure, 1);
+        foreach (self::$failures as $index => [$request, $passes]) {
+            if ("$method $relative" !== $request) {
+                continue;
+            }
+            if ($passes > 0) {
+                self::$failures[$index][1] = $passes - 1;
+                break;
+            }
+            array_splice(self::$failures, $index, 1);
 
             return $this->json(['error' => 'Internal Server Error', 'error_description' => "Échec simulé de $method $relative"], 500);
         }
@@ -180,6 +187,7 @@ final class EntrepotMockResponseFactory
                 ['endpoint' => ['_id' => self::METADATA_ENDPOINT_ID, 'type' => 'METADATA', 'open' => true, 'urls' => [['type' => 'CSW', 'url' => 'https://csw.test/csw']]]],
                 ['endpoint' => ['_id' => self::WFS_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wfs-public', 'type' => 'WFS', 'open' => true, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/public']]]],
                 ['endpoint' => ['_id' => self::WFS_PRIVATE_ENDPOINT_ID, 'technical_name' => 'wfs-private', 'type' => 'WFS', 'open' => false, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/private']]]],
+                ['endpoint' => ['_id' => self::WMSV_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wmsv-public', 'type' => 'WMS-VECTOR', 'open' => true, 'urls' => [['type' => 'WMS', 'url' => 'https://wms.test/public']]]],
             ]]);
         }
 
@@ -357,8 +365,16 @@ final class EntrepotMockResponseFactory
             return $this->json($annexe, 201);
         }
 
-        if ('PATCH' === $method && 1 === preg_match('#^annexes/([\w-]+)$#', $relative, $matches)) {
-            return $this->json($this->update('annexes', $matches[1], fn (array $item) => json_decode($body, true, flags: JSON_THROW_ON_ERROR) + $item));
+        if ('POST' === $method && 'statics' === $relative) {
+            preg_match('#name="name"\r\n\r\n([^\r]*)#', $body, $matches);
+            $static = ['_id' => 'static-'.self::$nextId++, 'name' => $matches[1] ?? null];
+            self::$store['statics'][] = $static;
+
+            return $this->json($static, 201);
+        }
+
+        if ('PATCH' === $method && 1 === preg_match('#^(annexes|statics)/([\w-]+)$#', $relative, $matches)) {
+            return $this->json($this->update($matches[1], $matches[2], fn (array $item) => json_decode($body, true, flags: JSON_THROW_ON_ERROR) + $item));
         }
 
         // une exécution non lancée emporte sa donnée stockée de sortie
@@ -370,7 +386,7 @@ final class EntrepotMockResponseFactory
             return new MockResponse('', ['http_code' => 204]);
         }
 
-        if ('DELETE' === $method && 1 === preg_match('#^(annexes|metadata|uploads|stored_data|configurations|permissions)/([\w-]+)$#', $relative, $matches)) {
+        if ('DELETE' === $method && 1 === preg_match('#^(annexes|statics|metadata|uploads|stored_data|configurations|permissions)/([\w-]+)$#', $relative, $matches)) {
             self::$store[$matches[1]] = array_values(array_filter(self::$store[$matches[1]] ?? [], fn (array $item) => $item['_id'] !== $matches[2]));
 
             return new MockResponse('', ['http_code' => 204]);
