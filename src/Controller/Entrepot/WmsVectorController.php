@@ -7,7 +7,6 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\Form\WmsVectorFormDTO;
 use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
-use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -61,7 +60,7 @@ final class WmsVectorController extends AbstractController implements ApiControl
             foreach ($staticIds as $staticId) {
                 try {
                     $this->staticApiService->delete($datastoreId, $staticId)->await();
-                } catch (ApiException $e) {
+                } catch (\Throwable $e) {
                     $this->logger->warning('{class}: Failed to remove style file {staticId} after a failed publication: {error}', [
                         'class' => self::class,
                         'staticId' => $staticId,

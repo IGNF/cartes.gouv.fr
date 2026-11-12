@@ -678,7 +678,7 @@ class CartesServiceApiService
                 // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée
                 try {
                     $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
-                } catch (ApiException $e) {
+                } catch (\Throwable $e) {
                     $this->logger->warning('{class}: Failed to remove configuration {configurationId} after a failed publication: {error}', [
                         'class' => self::class,
                         'configurationId' => $configuration['_id'],
@@ -717,7 +717,7 @@ class CartesServiceApiService
         foreach (array_filter($urls, is_string(...)) as $url) {
             try {
                 $this->serviceImageAnnexeService->removeByUrl($datastoreId, $url);
-            } catch (ApiException $e) {
+            } catch (\Throwable $e) {
                 $this->logger->warning('{class}: Failed to remove orphan annex {url}: {error}', [
                     'class' => self::class,
                     'url' => $url,
