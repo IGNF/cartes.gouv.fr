@@ -1,5 +1,4 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import Badge from "@codegouvfr/react-dsfr/Badge";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 
 import type { Service } from "@/@types/app";
 import { useTranslation } from "@/i18n";
@@ -15,25 +14,23 @@ export default function ServiceAccessBadge({ service, visibleOnCartesGouv }: Ser
 
     if (service.open) {
         return (
-            <Badge small noIcon className={fr.cx("fr-badge--blue-cumulus")}>
+            <Tag small as="span">
                 {t("access.public")}
-            </Badge>
+            </Tag>
         );
     }
 
     if (visibleOnCartesGouv) {
         return (
-            <span title={t("access.private_visible_title")}>
-                <Badge small noIcon className={fr.cx("fr-badge--purple-glycine")}>
-                    {t("access.private_visible")}
-                </Badge>
-            </span>
+            <Tag small as="span" title={t("access.private_visible_title")}>
+                {t("access.private_visible")}
+            </Tag>
         );
     }
 
     return (
-        <Badge small noIcon className={fr.cx("fr-badge--purple-glycine")}>
+        <Tag small as="span">
             {t("access.private")}
-        </Badge>
+        </Tag>
     );
 }
