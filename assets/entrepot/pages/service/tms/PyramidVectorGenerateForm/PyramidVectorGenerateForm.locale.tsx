@@ -58,7 +58,7 @@ export const PyramidVectorGenerateFormFrTranslations: Translations<"fr">["Pyrami
     "step_zoom_levels.error.bounds": ({ min, max }) => `Les niveaux de zoom doivent être compris entre ${min} et ${max}.`,
     "step_generalisation.tippecanoe_option.label": "Choisissez une option de généralisation",
     "step_generalisation.tippecanoe_option.error.required": "L'option de généralisation est obligatoire",
-    generate_pyramid: "Générer la pyramide complète",
+    generate_pyramid: "Générer la pyramide",
     pyramid_creation_launch_in_progress: "Demande de création de la pyramide de tuiles en cours ...",
     "vector_db.label": "Base de données vecteur",
     "vector_db.placeholder": "Sélectionnez une base de données",

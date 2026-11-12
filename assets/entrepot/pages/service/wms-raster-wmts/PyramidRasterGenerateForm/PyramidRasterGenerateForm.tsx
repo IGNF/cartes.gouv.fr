@@ -13,7 +13,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { OfferingTypeEnum, type PyramidRaster, type Service } from "@/@types/app";
+import { OfferingTypeEnum, type Service } from "@/@types/app";
 import type { ConfigurationWmsVectorDetailsContent } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
@@ -130,7 +130,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     const serviceQuery = useServiceQuery(datastoreId, selectedOfferingId, selectedOfferingId === "" ? { queryFn: skipToken } : undefined);
     const bbox = (serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent | undefined)?.bbox;
 
-    const generatePyramidRasterMutation = useMutation<PyramidRaster, ApiError>({
+    const generatePyramidRasterMutation = useMutation<unknown, ApiError>({
         mutationFn: () => {
             const formData = {
                 ...getFormValues(),
@@ -296,8 +296,10 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                             disabled: currentStep === STEPS.TECHNICAL_NAME,
                         },
                         {
-                            children: currentStep < Object.values(STEPS).length ? tCommon("continue") : tCommon("publish"),
+                            children: currentStep < Object.values(STEPS).length ? tCommon("continue") : t("generate"),
                             onClick: () => void nextStep(),
+                            // l’emprise du flux choisi est encore en chargement
+                            disabled: selectedOfferingId !== "" && serviceQuery.isPending,
                         },
                     ]}
                     inlineLayoutWhen="always"
