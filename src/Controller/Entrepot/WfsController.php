@@ -11,20 +11,15 @@ use App\Dto\Services\Wfs\WfsTableDTO;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
-use App\Services\EntrepotApi\ServiceImageAnnexeService;
 use App\Services\MultipartPayloadMapper;
+use App\Services\ServiceFormFileValidator;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Exception\ValidationFailedException;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/stored_data/{storedDataId}/wfs',
@@ -37,7 +32,7 @@ final class WfsController extends AbstractController implements ApiControllerInt
         private readonly ConfigurationApiService $configurationApiService,
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly MultipartPayloadMapper $multipartPayloadMapper,
-        private readonly ValidatorInterface $validator,
+        private readonly ServiceFormFileValidator $serviceFormFileValidator,
     ) {
     }
 
@@ -48,7 +43,7 @@ final class WfsController extends AbstractController implements ApiControllerInt
     public function publish(string $datastoreId, string $storedDataId, Request $request): JsonResponse
     {
         $dto = $this->multipartPayloadMapper->map($request, WfsFormDTO::class);
-        [$thumbnail, $attributionLogo] = $this->imageFiles($request, 'thumbnail', 'attribution_logo');
+        [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
 
         $offering = $this->cartesServiceApiService->publishFromForm(
             $datastoreId,
@@ -61,40 +56,6 @@ final class WfsController extends AbstractController implements ApiControllerInt
         );
 
         return $this->json($offering, Response::HTTP_CREATED);
-    }
-
-    /**
-     * Fichiers image facultatifs de la requête, validés ensemble : 422 au chemin du champ, comme les erreurs du DTO.
-     *
-     * @return list<UploadedFile|null>
-     */
-    private function imageFiles(Request $request, string ...$fields): array
-    {
-        $files = [];
-        $validator = $this->validator->startContext();
-        foreach ($fields as $field) {
-            $file = $request->files->get($field);
-            $file = $file instanceof UploadedFile ? $file : null;
-            $files[] = $file;
-            if ($file instanceof UploadedFile) {
-                // minWidth oblige à lire les dimensions : un fichier au bon type mais illisible est refusé
-                $validator->atPath($field)->validate($file, new Assert\Image(
-                    maxSize: ServiceImageAnnexeService::MAX_SIZE,
-                    mimeTypes: ServiceImageAnnexeService::MIME_TYPES,
-                    minWidth: 1,
-                    maxSizeMessage: 'L’image ne peut pas dépasser {{ limit }} {{ suffix }}',
-                    mimeTypesMessage: 'L’image doit être au format jpg ou png',
-                    sizeNotDetectedMessage: 'L’image est illisible',
-                ));
-            }
-        }
-
-        $violations = $validator->getViolations();
-        if (count($violations) > 0) {
-            throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($files, $violations));
-        }
-
-        return $files;
     }
 
     /**
