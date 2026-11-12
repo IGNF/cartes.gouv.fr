@@ -191,6 +191,9 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
 
         $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
+        if (StoredDataTypes::ROK4_PYRAMID_RASTER !== ($pyramid['type'] ?? null)) {
+            throw new AppException('La donnée choisie n’est pas une pyramide raster', Response::HTTP_BAD_REQUEST);
+        }
         $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
         $configType = ConfigurationTypes::WMSRASTER === $type ? 'wmsr' : 'wmts';
         // nom temporaire : l’identifiant de la configuration n’existe pas encore

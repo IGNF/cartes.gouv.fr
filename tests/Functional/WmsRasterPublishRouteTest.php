@@ -88,6 +88,18 @@ final class WmsRasterPublishRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
     }
 
+    public function testStoredDataOtherThanARasterPyramidAnswers400WithoutWriting(): void
+    {
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vectordb-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
+        $this->seedMetadata();
+        $client = $this->client();
+
+        $client->xmlHttpRequest('POST', str_replace('pyramid-1', 'vectordb-1', self::PUBLISH_URL).'?type=WMS-RASTER', ['data' => json_encode($this->payload(), JSON_THROW_ON_ERROR)]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
     public function testUnknownTypeAnswers400WithoutWriting(): void
     {
         $client = $this->client();
