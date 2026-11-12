@@ -13,6 +13,7 @@ use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\ServiceImageAnnexeService;
 use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
@@ -133,7 +134,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
     ): JsonResponse {
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WFS, $dto, $typeInfos);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody);
 
@@ -157,7 +158,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody, $oldOffering);
 

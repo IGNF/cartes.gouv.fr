@@ -17,6 +17,7 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StaticApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
@@ -189,7 +190,7 @@ class PyramidRasterController extends ServiceController implements ApiController
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type);
-        $configRequestBody = $this->getConfigRequestBody($type, $dto, $typeInfos);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto($type, $dto, $typeInfos);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody);
 
@@ -224,7 +225,7 @@ class PyramidRasterController extends ServiceController implements ApiController
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type, $oldConfiguration['_id']);
-        $configRequestBody = $this->getConfigRequestBody($type, $dto, $typeInfos, $oldConfiguration);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto($type, $dto, $typeInfos, $oldConfiguration);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody, $oldOffering);
 
@@ -238,7 +239,7 @@ class PyramidRasterController extends ServiceController implements ApiController
      */
     private function getConfigTypeInfos(CommonDTO $dto, string $datastoreId, array $pyramid, string $serviceType, ?string $configurationId = null): array
     {
-        $levels = $this->getPyramidZoomLevels($pyramid);
+        $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
         $configType = ConfigurationTypes::WMSRASTER === $serviceType ? 'wmsr' : 'wmts';
 
         $legendStatic = $this->saveLegendInStatic($datastoreId, $pyramid, $configType, $levels, $configurationId);

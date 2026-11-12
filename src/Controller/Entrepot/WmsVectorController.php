@@ -12,6 +12,7 @@ use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StaticApiService;
 use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
@@ -60,7 +61,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody);
         $configuration = $offering['configuration'];
@@ -100,7 +101,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos, $oldConfiguration);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos, $oldConfiguration);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody, $oldOffering);
 

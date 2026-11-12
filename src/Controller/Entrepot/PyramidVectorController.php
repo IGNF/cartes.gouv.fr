@@ -15,6 +15,7 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
@@ -150,7 +151,7 @@ class PyramidVectorController extends ServiceController implements ApiController
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $pyramid);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMTSTMS, $dto, $typeInfos);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WMTSTMS, $dto, $typeInfos);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, ConfigurationTypes::WMTSTMS, $configRequestBody);
 
@@ -173,7 +174,7 @@ class PyramidVectorController extends ServiceController implements ApiController
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $pyramid);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMTSTMS, $dto, $typeInfos, $oldConfiguration);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WMTSTMS, $dto, $typeInfos, $oldConfiguration);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, ConfigurationTypes::WMTSTMS, $configRequestBody, $oldOffering);
 
@@ -188,7 +189,7 @@ class PyramidVectorController extends ServiceController implements ApiController
     private function getConfigTypeInfos(PyramidVectorTmsServiceDTO $dto, array $pyramid): array
     {
         // Recherche de bottom_level et top_level
-        $levels = $this->getPyramidZoomLevels($pyramid);
+        $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
 
         return [
             'title' => $dto->service_name,
