@@ -13,6 +13,7 @@ const { i18n } = declareComponentKeys<
     | "technical_name.label"
     | "technical_name.explanation"
     | "technical_name.error.mandatory"
+    | "technical_name.error.regex"
     | "zoom_range.lead_text"
     | "zoom_range.explanation"
     | "zoom_range.error"
@@ -42,6 +43,8 @@ export const PyramidRasterGenerateFormFrTranslations: Translations<"fr">["Pyrami
     "technical_name.explanation":
         "II s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite.",
     "technical_name.error.mandatory": "Le nom technique de la pyramide de tuiles raster est obligatoire",
+    "technical_name.error.regex":
+        "Le nom technique doit commencer par une lettre ou un underscore et ne contenir que des lettres, chiffres, tirets (-), underscores (_) ou points (.)",
     "zoom_range.lead_text": "Choisissez les niveaux de pyramide à générer",
     "zoom_range.explanation":
         "Les niveaux de zoom de la pyramide de tuiles raster sont prédéfinis. Choisissez la borne minimum de votre pyramide de tuiles en vous aidant de la carte de gauche et le zoom maximum en vous aidant de la carte de droite. Tous les niveaux intermédiaires seront générés.",
@@ -58,6 +61,7 @@ export const PyramidRasterGenerateFormEnTranslations: Translations<"en">["Pyrami
     "wmsv-service.bbox_not_found": undefined,
     back_to_datasheet: undefined,
     "technical_name.error.mandatory": undefined,
+    "technical_name.error.regex": undefined,
     "technical_name.lead_text": undefined,
     "technical_name.label": undefined,
     "technical_name.explanation": undefined,

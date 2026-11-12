@@ -61,6 +61,23 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 
+    public function testTechnicalNameWithForbiddenCharactersAnswers422(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('POST', self::ADD_URL, server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
+            'technical_name' => 'pyramide raster/é',
+            'wmsv_offering_id' => self::WMSV_OFFERING_ID,
+            'wmsv_config_bbox' => 'POLYGON((0 0,1 0,1 1,0 0))',
+            'zoom_range' => [5, 12],
+        ], JSON_THROW_ON_ERROR));
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['technical_name'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
     public function testGenerationHarvestsTheWmsvServiceThenTagsAndLaunchesThePyramid(): void
     {
         $this->seedWmsvService();

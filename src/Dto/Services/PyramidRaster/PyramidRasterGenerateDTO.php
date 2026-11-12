@@ -11,6 +11,7 @@ final readonly class PyramidRasterGenerateDTO
 {
     public function __construct(
         #[Assert\NotBlank(message: 'Le nom technique de la pyramide est obligatoire')]
+        #[Assert\Regex(pattern: '/^[\w\-\.]+$/', message: 'Le nom technique ne doit contenir que des lettres sans accent, chiffres, tirets (-), underscores (_) ou points (.)')]
         public string $technical_name,
 
         #[Assert\Uuid(message: 'L’identifiant du flux WMS-Vecteur est invalide')]

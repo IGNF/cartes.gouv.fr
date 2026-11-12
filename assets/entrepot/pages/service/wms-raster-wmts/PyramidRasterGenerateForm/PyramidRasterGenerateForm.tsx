@@ -26,7 +26,7 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../../modules/apiError";
-import { bboxToWkt } from "../../../../../utils";
+import { bboxToWkt, regex } from "../../../../../utils";
 import api from "../../../../api";
 import { DatasheetViewActiveTabEnum } from "../../../datasheet/DatasheetView/DatasheetView/types";
 
@@ -60,7 +60,11 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
 
     const schemas: Record<number, yup.AnyObjectSchema> = {};
     schemas[STEPS.TECHNICAL_NAME] = yup.object({
-        technical_name: yup.string().typeError(t("technical_name.error.mandatory")).required(t("technical_name.error.mandatory")),
+        technical_name: yup
+            .string()
+            .typeError(t("technical_name.error.mandatory"))
+            .required(t("technical_name.error.mandatory"))
+            .matches(regex.technical_name, t("technical_name.error.regex")),
     });
 
     schemas[STEPS.ZOOM_RANGE] = yup.object({
