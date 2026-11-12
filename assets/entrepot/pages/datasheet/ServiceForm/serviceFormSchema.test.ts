@@ -1,7 +1,16 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
 
-import { buildServiceFormSchema, type ServiceAccess, serviceFormDefaultValues, type ServiceFormValues, type ServiceType } from "./serviceFormSchema";
+import { ConfigurationTypeEnum, type DatasheetDetailed } from "@/@types/app";
+import {
+    buildServiceFormSchema,
+    configurationTypeFor,
+    isRasterPyramid,
+    type ServiceAccess,
+    serviceFormDefaultValues,
+    type ServiceFormValues,
+    type ServiceType,
+} from "./serviceFormSchema";
 
 // la clé sert de message : les tests vérifient quel message est posé, pas sa traduction
 const t = ((key: string) => key) as Parameters<typeof buildServiceFormSchema>[0]["t"];
@@ -144,5 +153,24 @@ describe("buildServiceFormSchema", () => {
                 stored_data_id: "validation.stored_data.required_wms",
             });
         });
+    });
+});
+
+describe("isRasterPyramid", () => {
+    const datasheet = { pyramid_raster_list: [{ _id: "pyramid-1" }] } as DatasheetDetailed;
+
+    it("reconnaît une pyramide raster de la fiche, rien d’autre", () => {
+        expect(isRasterPyramid(datasheet, "pyramid-1")).toBe(true);
+        expect(isRasterPyramid(datasheet, "vectordb-1")).toBe(false);
+        expect(isRasterPyramid(datasheet, "")).toBe(false);
+        expect(isRasterPyramid(undefined, "pyramid-1")).toBe(false);
+    });
+});
+
+describe("configurationTypeFor", () => {
+    it("donne WMS-RASTER seulement pour un flux WMS sur une pyramide raster", () => {
+        expect(configurationTypeFor("wms", true)).toBe(ConfigurationTypeEnum.WMSRASTER);
+        expect(configurationTypeFor("wms", false)).toBe(ConfigurationTypeEnum.WMSVECTOR);
+        expect(configurationTypeFor("wfs", true)).toBe(ConfigurationTypeEnum.WFS);
     });
 });
