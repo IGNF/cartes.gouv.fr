@@ -15,6 +15,8 @@ abstract class ServiceFormDTO
     // un fichier de style par table en WMS vecteur : reste sous max_file_uploads de PHP (20)
     public const TABLES_MAX = 10;
 
+    public const DESCRIPTION_MAX_LENGTH = 300;
+
     /**
      * @param string[] $themes
      */

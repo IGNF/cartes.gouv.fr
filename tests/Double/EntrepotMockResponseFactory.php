@@ -18,6 +18,7 @@ final class EntrepotMockResponseFactory
     public const WFS_PUBLIC_ENDPOINT_ID = 'endpoint-wfs-public';
     public const WFS_PRIVATE_ENDPOINT_ID = 'endpoint-wfs-private';
     public const WMSV_PUBLIC_ENDPOINT_ID = 'endpoint-wmsv-public';
+    public const WMSR_PUBLIC_ENDPOINT_ID = 'endpoint-wmsr-public';
     private const ENTREPOT_HOST = 'entrepot.test';
     private const METADATA_FIXTURES_DIR = __DIR__.'/../Fixture/metadata';
 
@@ -188,6 +189,7 @@ final class EntrepotMockResponseFactory
                 ['endpoint' => ['_id' => self::WFS_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wfs-public', 'type' => 'WFS', 'open' => true, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/public']]]],
                 ['endpoint' => ['_id' => self::WFS_PRIVATE_ENDPOINT_ID, 'technical_name' => 'wfs-private', 'type' => 'WFS', 'open' => false, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/private']]]],
                 ['endpoint' => ['_id' => self::WMSV_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wmsv-public', 'type' => 'WMS-VECTOR', 'open' => true, 'urls' => [['type' => 'WMS', 'url' => 'https://wms.test/public']]]],
+                ['endpoint' => ['_id' => self::WMSR_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wmsr-public', 'type' => 'WMS-RASTER', 'open' => true, 'urls' => [['type' => 'WMS', 'url' => 'https://wms-r.test/public']]]],
             ]]);
         }
 

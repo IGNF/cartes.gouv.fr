@@ -58,6 +58,7 @@ const { i18n } = declareComponentKeys<
     | "styles.label"
     | "styles.hint"
     | "styles.no_table"
+    | "styles.raster"
     | "styles.no_file"
     | "styles.browse"
     | "styles.change"
@@ -78,6 +79,7 @@ const { i18n } = declareComponentKeys<
     | "attribution.logo.label"
     | "attribution.logo.modal_title"
     | "validation.stored_data.required"
+    | "validation.stored_data.required_wms"
     | "validation.title.required"
     | "validation.technical_name.required"
     | "validation.technical_name.chars"
@@ -172,6 +174,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "styles.label": "Ajouter un fichier de style",
     "styles.hint": "Format supporté : SLD.",
     "styles.no_table": "Cochez d’abord une ou plusieurs tables.",
+    "styles.raster": "Le style du flux dépend des données raster sources.",
     "styles.no_file": "Aucun fichier sélectionné.",
     "styles.browse": "Parcourir…",
     "styles.change": "Modifier",
@@ -194,6 +197,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "attribution.logo.label": "Logo (optionnel)",
     "attribution.logo.modal_title": "Ajouter un logo",
     "validation.stored_data.required": "Veuillez sélectionner un jeu de données vecteur",
+    "validation.stored_data.required_wms": "Veuillez sélectionner un jeu de données",
     "validation.title.required": "Le titre du flux est obligatoire",
     "validation.technical_name.required": "Le nom technique du flux est obligatoire",
     "validation.technical_name.chars": "Le nom technique ne doit contenir ni espace ni caractère spécial",
@@ -286,6 +290,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "styles.label": "Add a style file",
     "styles.hint": "Supported format: SLD.",
     "styles.no_table": "Select one or more tables first.",
+    "styles.raster": "The service style depends on the source raster data.",
     "styles.no_file": "No file selected.",
     "styles.browse": "Browse…",
     "styles.change": "Change",
@@ -307,6 +312,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "attribution.logo.label": "Logo (optional)",
     "attribution.logo.modal_title": "Add a logo",
     "validation.stored_data.required": "Please select a vector dataset",
+    "validation.stored_data.required_wms": "Please select a dataset",
     "validation.title.required": "The service title is required",
     "validation.technical_name.required": "The technical name is required",
     "validation.technical_name.chars": "The technical name must not contain spaces or special characters",

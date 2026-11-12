@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { queryOptions, skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum, type VectorDb } from "@/@types/app";
@@ -25,8 +25,9 @@ import StylesSection from "./sections/StylesSection";
 import TablesSection from "./sections/TablesSection";
 import {
     buildServiceFormSchema,
+    configurationTypeFor,
+    isRasterPyramid,
     SERVICE_ACCESSES,
-    SERVICE_CONFIGURATION_TYPES,
     type ServiceAccess,
     serviceFormDefaultValues,
     type ServiceFormOutput,
@@ -69,7 +70,10 @@ type ServiceFormProps = {
 export default function ServiceForm({ datastoreId, datasheetName, datasheet, type, onTypeChange, onSubmit }: ServiceFormProps) {
     const { t } = useTranslation("ServiceForm");
     const queryClient = useQueryClient();
-    const configurationType = SERVICE_CONFIGURATION_TYPES[type];
+    // tenu à part : le schéma en dépend et se construit avant le formulaire
+    const [rasterPyramidSelected, setRasterPyramidSelected] = useState(false);
+    const rasterPyramid = type === "wms" && rasterPyramidSelected;
+    const configurationType = configurationTypeFor(type, rasterPyramid);
 
     const { data: datastore } = useQuery(datastoreQueryOptions(datastoreId));
     const existingLayerNamesQuery = useQuery<string[], ApiError>({
@@ -97,11 +101,12 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
             buildServiceFormSchema({
                 t,
                 type,
+                rasterPyramid,
                 existingLayerNames: existingLayerNamesQuery.data ?? [],
                 layerNamePrefix: datastore?.configuration_layer_name_prefix,
                 availableAccesses,
             }),
-        [t, type, existingLayerNamesQuery.data, datastore?.configuration_layer_name_prefix, availableAccesses]
+        [t, type, rasterPyramid, existingLayerNamesQuery.data, datastore?.configuration_layer_name_prefix, availableAccesses]
     );
 
     const form = useForm<ServiceFormValues, unknown, ServiceFormOutput>({
@@ -113,12 +118,15 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
     const { handleSubmit, setError, setValue, getValues, control } = form;
 
     const storedDataId = useWatch({ control, name: "stored_data_id" });
-    const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, storedDataId));
+    // une pyramide raster n’a pas de tables à lire
+    const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, rasterPyramid ? "" : storedDataId));
 
     // les tables appartiennent au jeu précédent : vidées, puis remplies quand la base choisie est lue
     const loadTables = (id: string) => {
         setValue("tables", []);
-        if (id === "") return;
+        const raster = isRasterPyramid(datasheet, id);
+        setRasterPyramidSelected(raster);
+        if (id === "" || raster) return;
         queryClient
             .query(vectorDbQueryOptions(datastoreId, id))
             .then((vectorDb) => {
@@ -127,6 +135,15 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
             })
             // l’erreur reste dans la requête, affichée par la section Tables
             .catch(() => undefined);
+    };
+
+    // une pyramide raster n’est proposée qu’en WMS
+    const changeType = (next: ServiceType) => {
+        if (rasterPyramidSelected && next !== "wms") {
+            setValue("stored_data_id", "");
+            setRasterPyramidSelected(false);
+        }
+        onTypeChange(next);
     };
 
     const submit = handleSubmit(async (values) => {
@@ -142,25 +159,30 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
             <form onSubmit={(e) => void submit(e)} noValidate>
                 <MetadataSectionsContainer>
                     <MetadataSection title={t("section.type")}>
-                        <ServiceTypeSection value={type} onChange={onTypeChange} />
+                        <ServiceTypeSection value={type} onChange={changeType} />
                     </MetadataSection>
                     <MetadataSection title={t("section.description")}>
                         <ServiceDescriptionSection
-                            storedDataOptions={(datasheet.vector_db_list ?? []).filter((item) => item.status === StoredDataStatusEnum.GENERATED)}
+                            storedDataOptions={[...(datasheet.vector_db_list ?? []), ...(type === "wms" ? (datasheet.pyramid_raster_list ?? []) : [])].filter(
+                                (item) => item.status === StoredDataStatusEnum.GENERATED
+                            )}
                             onStoredDataChange={loadTables}
+                            withDataKind={type === "wms"}
                             withDescription={type !== "wfs"}
                         />
                     </MetadataSection>
-                    <MetadataSection title={t("section.tables")}>
-                        <TablesSection
-                            status={storedDataId === "" ? "idle" : vectorDbQuery.status}
-                            noGeometricTable={vectorDbQuery.data !== undefined && defaultTables(vectorDbQuery.data).length === 0}
-                            detailed={type === "wfs"}
-                        />
-                    </MetadataSection>
+                    {!rasterPyramid && (
+                        <MetadataSection title={t("section.tables")}>
+                            <TablesSection
+                                status={storedDataId === "" ? "idle" : vectorDbQuery.status}
+                                noGeometricTable={vectorDbQuery.data !== undefined && defaultTables(vectorDbQuery.data).length === 0}
+                                detailed={type === "wfs"}
+                            />
+                        </MetadataSection>
+                    )}
                     {type === "wms" && (
                         <MetadataSection title={t("section.styles")}>
-                            <StylesSection />
+                            {rasterPyramid ? <p className={fr.cx("fr-mb-0")}>{t("styles.raster")}</p> : <StylesSection />}
                         </MetadataSection>
                     )}
                     <MetadataSection title={t("section.access")}>

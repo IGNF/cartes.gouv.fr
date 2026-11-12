@@ -12,8 +12,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class WmsVectorFormDTO extends ServiceFormDTO
 {
-    public const DESCRIPTION_MAX_LENGTH = 300;
-
     /**
      * @param string[] $themes
      * @param string[] $selected_tables

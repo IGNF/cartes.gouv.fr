@@ -60,6 +60,15 @@ describe("buildServiceFormData", () => {
         expect(formData.get("style_files[brouillon]")).toBeNull();
     });
 
+    it("WMS raster : envoie la description, ni tables ni fichiers de style", () => {
+        const tables = values.tables.map((table) => ({ ...table, style: new File(["<sld/>"], "communes.sld") }));
+        const formData = buildServiceFormData("wms", { ...values, description: "Orthophotographie", tables }, true);
+        const payload = payloadOf(formData);
+        expect(payload.description).toBe("Orthophotographie");
+        expect(payload).not.toHaveProperty("selected_tables");
+        expect(formData.get("style_files[communes]")).toBeNull();
+    });
+
     it("WFS : n’envoie pas de description du flux", () => {
         expect(payloadOf(buildServiceFormData("wfs", { ...values, description: "ignorée" }))).not.toHaveProperty("description");
     });

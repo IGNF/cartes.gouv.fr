@@ -1,13 +1,22 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
 
-import { buildServiceFormSchema, type ServiceAccess, serviceFormDefaultValues, type ServiceFormValues, type ServiceType } from "./serviceFormSchema";
+import { ConfigurationTypeEnum, type DatasheetDetailed } from "@/@types/app";
+import {
+    buildServiceFormSchema,
+    configurationTypeFor,
+    isRasterPyramid,
+    type ServiceAccess,
+    serviceFormDefaultValues,
+    type ServiceFormValues,
+    type ServiceType,
+} from "./serviceFormSchema";
 
 // la clé sert de message : les tests vérifient quel message est posé, pas sa traduction
 const t = ((key: string) => key) as Parameters<typeof buildServiceFormSchema>[0]["t"];
 
-const schema = (availableAccesses: ServiceAccess[] = ["public", "restricted_visible", "restricted"], type: ServiceType = "wfs") =>
-    buildServiceFormSchema({ t, type, existingLayerNames: ["SANDBOX.pris"], layerNamePrefix: "SANDBOX", availableAccesses });
+const schema = (availableAccesses: ServiceAccess[] = ["public", "restricted_visible", "restricted"], type: ServiceType = "wfs", rasterPyramid = false) =>
+    buildServiceFormSchema({ t, type, rasterPyramid, existingLayerNames: ["SANDBOX.pris"], layerNamePrefix: "SANDBOX", availableAccesses });
 
 const table = (overrides: Partial<ServiceFormValues["tables"][number]> = {}) => ({
     native_name: "communes",
@@ -29,8 +38,8 @@ const valid = (): ServiceFormValues => ({
 });
 
 // validation SLD asynchrone : safeParseAsync, comme le résolveur du formulaire
-const issueMessages = async (values: ServiceFormValues, availableAccesses?: ServiceAccess[], type?: ServiceType) => {
-    const result = await schema(availableAccesses, type).safeParseAsync(values);
+const issueMessages = async (values: ServiceFormValues, availableAccesses?: ServiceAccess[], type?: ServiceType, rasterPyramid?: boolean) => {
+    const result = await schema(availableAccesses, type, rasterPyramid).safeParseAsync(values);
     // premier message par champ, comme le résolveur du formulaire
     const messages: Record<string, string> = {};
     for (const issue of result.error?.issues ?? []) {
@@ -126,5 +135,42 @@ describe("buildServiceFormSchema", () => {
             expect(await issueMessages(wms({ style }), undefined, "wms")).toEqual({ "tables.0.style": "validation.table.style.unreadable" });
             expect(await issueMessages(wms({ style }), undefined, "wms")).toEqual({});
         });
+    });
+
+    describe("WMS raster", () => {
+        const wmsr = (description = "Orthophotographie"): ServiceFormValues => ({ ...valid(), stored_data_id: "pyramid-1", description, tables: [] });
+
+        it("n’exige aucune table", async () => {
+            expect(await issueMessages(wmsr(), undefined, "wms", true)).toEqual({});
+        });
+
+        it("exige la description du flux", async () => {
+            expect(await issueMessages(wmsr(" "), undefined, "wms", true)).toEqual({ description: "validation.description.required" });
+        });
+
+        it("demande un jeu de données sans préciser vecteur", async () => {
+            expect(await issueMessages({ ...wmsr(), stored_data_id: "" }, undefined, "wms", true)).toEqual({
+                stored_data_id: "validation.stored_data.required_wms",
+            });
+        });
+    });
+});
+
+describe("isRasterPyramid", () => {
+    const datasheet = { pyramid_raster_list: [{ _id: "pyramid-1" }] } as DatasheetDetailed;
+
+    it("reconnaît une pyramide raster de la fiche, rien d’autre", () => {
+        expect(isRasterPyramid(datasheet, "pyramid-1")).toBe(true);
+        expect(isRasterPyramid(datasheet, "vectordb-1")).toBe(false);
+        expect(isRasterPyramid(datasheet, "")).toBe(false);
+        expect(isRasterPyramid(undefined, "pyramid-1")).toBe(false);
+    });
+});
+
+describe("configurationTypeFor", () => {
+    it("donne WMS-RASTER seulement pour un flux WMS sur une pyramide raster", () => {
+        expect(configurationTypeFor("wms", true)).toBe(ConfigurationTypeEnum.WMSRASTER);
+        expect(configurationTypeFor("wms", false)).toBe(ConfigurationTypeEnum.WMSVECTOR);
+        expect(configurationTypeFor("wfs", true)).toBe(ConfigurationTypeEnum.WFS);
     });
 });
