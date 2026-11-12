@@ -9,7 +9,6 @@ use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
-use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,7 +23,7 @@ use Symfony\Component\Routing\Requirement\Requirement;
     name: 'cartesgouvfr_api_service_',
     options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] services', description: 'Actions génériques sur les services')]
-class ServiceController extends AbstractController implements ApiControllerInterface
+final class ServiceController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
         private readonly DatastoreApiService $datastoreApiService,
@@ -32,7 +31,6 @@ class ServiceController extends AbstractController implements ApiControllerInter
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly CapabilitiesService $capabilitiesService,
         private readonly CartesMetadataApiService $cartesMetadataApiService,
-        protected SandboxService $sandboxService,
     ) {
     }
 

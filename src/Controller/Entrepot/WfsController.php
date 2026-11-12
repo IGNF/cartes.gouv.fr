@@ -8,16 +8,13 @@ use App\Dto\Services\Form\WfsFormDTO;
 use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Dto\Services\Wfs\WfsServiceDTO;
 use App\Dto\Services\Wfs\WfsTableDTO;
-use App\Services\CapabilitiesService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\ServiceImageAnnexeService;
 use App\Services\MultipartPayloadMapper;
-use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,19 +31,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
     name: 'cartesgouvfr_api_wfs_',
     options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] WFS', description: 'Création/modification des services WFS')]
-class WfsController extends ServiceController implements ApiControllerInterface
+final class WfsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
         private readonly ConfigurationApiService $configurationApiService,
         private readonly CartesServiceApiService $cartesServiceApiService,
-        CapabilitiesService $capabilitiesService,
-        CartesMetadataApiService $cartesMetadataApiService,
-        SandboxService $sandboxService,
         private readonly MultipartPayloadMapper $multipartPayloadMapper,
         private readonly ValidatorInterface $validator,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
 
     /**

@@ -9,16 +9,14 @@ use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
 use App\Security\User;
-use App\Services\CapabilitiesService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -29,20 +27,16 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
     name: 'cartesgouvfr_api_pyramid_vector_',
     options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] pyramid-vector', description: 'Génération de pyramides de tuiles vectorielles et création/modification des services associés')]
-class PyramidVectorController extends ServiceController implements ApiControllerInterface
+final class PyramidVectorController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
         private readonly ConfigurationApiService $configurationApiService,
         private readonly StoredDataApiService $storedDataApiService,
         private readonly ProcessingApiService $processingApiService,
-        SandboxService $sandboxService,
+        private readonly SandboxService $sandboxService,
         private readonly CartesServiceApiService $cartesServiceApiService,
-        CapabilitiesService $capabilitiesService,
-        CartesMetadataApiService $cartesMetadataApiService,
         private readonly UrlGeneratorInterface $urlGenerator,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]

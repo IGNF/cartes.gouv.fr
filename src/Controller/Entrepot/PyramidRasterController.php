@@ -10,9 +10,7 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
 use App\Exception\AppException;
 use App\Security\User;
-use App\Services\CapabilitiesService;
 use App\Services\EntrepotApi\AnnexeApiService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
@@ -23,6 +21,7 @@ use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
 use App\Utils;
 use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -40,7 +39,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
     name: 'cartesgouvfr_api_pyramid_raster_',
     options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] pyramid-raster', description: 'Génération de pyramides de tuiles raster et création/modification des services associés')]
-class PyramidRasterController extends ServiceController implements ApiControllerInterface
+final class PyramidRasterController extends AbstractController implements ApiControllerInterface
 {
     private readonly HttpClientInterface $httpClient;
 
@@ -49,10 +48,8 @@ class PyramidRasterController extends ServiceController implements ApiController
         private readonly ConfigurationApiService $configurationApiService,
         private readonly StoredDataApiService $storedDataApiService,
         private readonly ProcessingApiService $processingApiService,
-        SandboxService $sandboxService,
+        private readonly SandboxService $sandboxService,
         private readonly CartesServiceApiService $cartesServiceApiService,
-        CapabilitiesService $capabilitiesService,
-        CartesMetadataApiService $cartesMetadataApiService,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly AnnexeApiService $annexeApiService,
         private readonly StaticApiService $staticApiService,
@@ -60,8 +57,6 @@ class PyramidRasterController extends ServiceController implements ApiController
         ParameterBagInterface $params,
         HttpClientInterface $httpClient,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
-
         $this->httpClient = $httpClient->withOptions([
             'proxy' => $params->get('http_proxy'),
             'verify_peer' => false,

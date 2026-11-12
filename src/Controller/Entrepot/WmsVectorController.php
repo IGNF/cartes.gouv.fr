@@ -7,16 +7,12 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
 use App\Exception\AppException;
-use App\Services\CapabilitiesService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StaticApiService;
-use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,19 +26,13 @@ use Symfony\Component\Uid\Uuid;
     name: 'cartesgouvfr_api_wmsvector_',
     options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] WMS-VECTOR', description: 'Création/modification des services WMS-VECTOR')]
-class WmsVectorController extends ServiceController implements ApiControllerInterface
+final class WmsVectorController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
         private readonly ConfigurationApiService $configurationApiService,
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly StaticApiService $staticApiService,
-        CapabilitiesService $capabilitiesService,
-        protected Filesystem $filesystem,
-        CartesMetadataApiService $cartesMetadataApiService,
-        SandboxService $sandboxService,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
