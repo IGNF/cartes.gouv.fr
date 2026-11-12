@@ -10,6 +10,7 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,6 +32,7 @@ final class ServiceController extends AbstractController implements ApiControlle
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly CapabilitiesService $capabilitiesService,
         private readonly CartesMetadataApiService $cartesMetadataApiService,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -97,7 +99,14 @@ final class ServiceController extends AbstractController implements ApiControlle
             if (1 === count($endpoints)) {
                 $this->capabilitiesService->createOrUpdate($datastoreId, $endpoints[0]['endpoint'], $offering['urls'][0]['url']);
             }
-        } catch (\Exception) {
+        } catch (\Exception $e) {
+            // la dépublication a réussi : un échec des capabilities ne doit pas la faire paraître en erreur
+            $this->logger->warning('{class}: Failed to update capabilities after unpublishing offering {offeringId}: {error}', [
+                'class' => self::class,
+                'offeringId' => $offeringId,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         if (isset($configuration['tags'][CommonTags::DATASHEET_NAME])) {
