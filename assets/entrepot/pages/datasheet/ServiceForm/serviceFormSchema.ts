@@ -35,6 +35,9 @@ export const SERVICE_IMAGE_MAX_SIZE_MB = 5;
 /** même limite que WmsVectorFormDTO */
 export const SERVICE_DESCRIPTION_MAX_LENGTH = 300;
 
+/** même limite que ServiceFormDTO::TABLES_MAX */
+export const SERVICE_TABLES_MAX = 10;
+
 type SchemaDeps = {
     t: T;
     type: ServiceType;
@@ -158,7 +161,13 @@ export const buildServiceFormSchema = ({ t, type, existingLayerNames, layerNameP
                       .max(SERVICE_DESCRIPTION_MAX_LENGTH, t("validation.description.max", { max: SERVICE_DESCRIPTION_MAX_LENGTH })),
         tables:
             type === "wfs" || type === "wms"
-                ? z.array(tableSchema).refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))
+                ? z
+                      .array(tableSchema)
+                      .refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))
+                      .refine(
+                          (tables) => tables.filter((table) => table.selected).length <= SERVICE_TABLES_MAX,
+                          t("validation.tables.max", { max: SERVICE_TABLES_MAX })
+                      )
                 : z.array(tableSchema),
         access: z.enum(SERVICE_ACCESSES).refine((access) => availableAccesses.includes(access), t("validation.access.unavailable")),
         attribution: attributionSchema,

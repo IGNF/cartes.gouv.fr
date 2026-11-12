@@ -128,6 +128,11 @@ final class WfsPublishRouteTest extends WebTestCase
         $paths = array_column($this->jsonResponse($client)['violations'], 'propertyPath');
         sort($paths);
         self::assertSame(['attribution.title', 'attribution.url', 'tables', 'technical_name'], $paths);
+
+        $this->post($client, ['tables' => array_fill(0, 11, $this->payload()['tables'][0])] + $this->payload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['tables'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 

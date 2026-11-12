@@ -30,7 +30,7 @@ class WmsVectorFormDTO extends ServiceFormDTO
         #[Assert\Length(max: self::DESCRIPTION_MAX_LENGTH, maxMessage: 'La description du flux ne peut pas dépasser {{ limit }} caractères')]
         public readonly string $description = '',
 
-        #[Assert\Count(min: 1, minMessage: 'Veuillez choisir au moins une table')]
+        #[Assert\Count(min: 1, max: self::TABLES_MAX, minMessage: 'Veuillez choisir au moins une table', maxMessage: 'Choisissez au plus {{ limit }} tables')]
         #[Assert\Unique]
         #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()])]
         public readonly array $selected_tables = [],

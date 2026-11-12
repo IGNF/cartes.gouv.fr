@@ -12,6 +12,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /** Champs communs du formulaire de publication d’un flux. */
 abstract class ServiceFormDTO
 {
+    // un fichier de style par table en WMS vecteur : reste sous max_file_uploads de PHP (20)
+    public const TABLES_MAX = 10;
+
     /**
      * @param string[] $themes
      */

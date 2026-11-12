@@ -48,6 +48,13 @@ describe("buildServiceFormSchema", () => {
         expect(await issueMessages({ ...valid(), tables: [table({ selected: false })] })).toEqual({ tables: "validation.tables.required" });
     });
 
+    it("refuse plus de 10 tables cochées, sans compter les décochées", async () => {
+        const tables = (count: number, selected = true) =>
+            Array.from({ length: count }, (_, i) => table({ native_name: `t${i}`, public_name: `t${i}`, selected }));
+        expect(await issueMessages({ ...valid(), tables: [...tables(10), ...tables(5, false)] })).toEqual({});
+        expect(await issueMessages({ ...valid(), tables: tables(11) })).toEqual({ tables: "validation.tables.max" });
+    });
+
     it("ne valide pas les champs d’une table décochée", async () => {
         const tables = [table(), table({ native_name: "brouillon", selected: false, title: "", public_name: "Pas Valide", description: "" })];
         expect(await issueMessages({ ...valid(), tables })).toEqual({});

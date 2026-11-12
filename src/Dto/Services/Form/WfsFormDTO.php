@@ -24,7 +24,7 @@ class WfsFormDTO extends ServiceFormDTO
         ?ServiceAttributionFormDTO $attribution = null,
 
         #[Assert\Valid]
-        #[Assert\Count(min: 1, minMessage: 'Veuillez choisir au moins une table')]
+        #[Assert\Count(min: 1, max: self::TABLES_MAX, minMessage: 'Veuillez choisir au moins une table', maxMessage: 'Choisissez au plus {{ limit }} tables')]
         public readonly array $tables = [],
     ) {
         parent::__construct($title, $technical_name, $themes, $access, $attribution);

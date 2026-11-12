@@ -87,6 +87,7 @@ const { i18n } = declareComponentKeys<
     | "validation.themes.required"
     | { K: "validation.themes.max"; P: { max: number }; R: string }
     | "validation.tables.required"
+    | { K: "validation.tables.max"; P: { max: number }; R: string }
     | "validation.table.title.required"
     | "validation.table.public_name.required"
     | "validation.table.public_name.chars"
@@ -202,6 +203,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "validation.themes.required": "Sélectionnez au moins une thématique",
     "validation.themes.max": ({ max }) => `Retirez des thématiques : la sélection dépasse la limite de ${max} caractères`,
     "validation.tables.required": "Veuillez choisir au moins une table",
+    "validation.tables.max": ({ max }) => `Choisissez au plus ${max} tables`,
     "validation.table.title.required": "Le titre de la table est obligatoire",
     "validation.table.public_name.required": "Le nom technique de la table est obligatoire",
     "validation.table.public_name.chars": "Le nom technique de la table ne doit contenir que des minuscules, chiffres, tirets, points et tirets bas",
@@ -314,6 +316,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "validation.themes.required": "Select at least one theme",
     "validation.themes.max": ({ max }) => `Remove themes: the selection exceeds the ${max} character limit`,
     "validation.tables.required": "Please choose at least one table",
+    "validation.tables.max": ({ max }) => `Choose at most ${max} tables`,
     "validation.table.title.required": "The table title is required",
     "validation.table.public_name.required": "The table technical name is required",
     "validation.table.public_name.chars": "The table technical name may only contain lowercase letters, digits, hyphens, dots and underscores",
