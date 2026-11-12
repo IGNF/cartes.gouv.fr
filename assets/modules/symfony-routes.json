@@ -1519,6 +1519,43 @@
             ],
             "schemes": []
         },
+        "cartesgouvfr_api_pyramid_raster_wms_raster_wmts_publish": {
+            "tokens": [
+                [
+                    "text",
+                    "\/wms-raster-wmts\/publish"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "pyramidId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-raster"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
         "cartesgouvfr_api_pyramid_raster_wms_raster_wmts_add": {
             "tokens": [
                 [
