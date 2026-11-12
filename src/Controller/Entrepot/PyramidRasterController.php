@@ -385,7 +385,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         }
 
         // un WMS répond 200 avec une ServiceException XML quand il ne sait pas dessiner la légende
-        if (!str_starts_with($contentType, 'image/')) {
+        if (!str_starts_with(strtolower($contentType), 'image/')) {
             throw new AppException('La légende du flux WMS-Vecteur n’a pas pu être récupérée. Vérifiez le style du flux puis réessayez.', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
