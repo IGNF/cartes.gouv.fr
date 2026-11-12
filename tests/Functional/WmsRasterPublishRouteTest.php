@@ -65,6 +65,34 @@ final class WmsRasterPublishRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
     }
 
+    public function testConfigurationAndLegendStyleAreRemovedWhenTheRenamingFails(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PATCH statics/static-1');
+
+        $this->post($client, 'WMS-RASTER', $this->payload());
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame([], EntrepotMockResponseFactory::stored('configurations'));
+        self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
+    }
+
+    public function testNoTemporaryFileRemainsWhenTheLegendStyleUploadFails(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+        $tmpEntries = $this->styleFilesDirEntries();
+        EntrepotMockResponseFactory::failNext('POST statics');
+
+        $this->post($client, 'WMS-RASTER', $this->payload());
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
+        self::assertSame([], EntrepotMockResponseFactory::stored('configurations'));
+        self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
+    }
+
     public function testLegendStyleIsKeptWhenAStepAfterTheOfferingFails(): void
     {
         $this->seedMetadata();
