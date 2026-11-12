@@ -36,6 +36,7 @@ function StyleRow({ index, tableName }: { index: number; tableName: string }) {
     const { control } = useFormContext<ServiceFormValues>();
     const { classes } = useStyles();
     const inputRef = useRef<HTMLInputElement>(null);
+    const browseRef = useRef<HTMLButtonElement | null>(null);
     const id = useId();
     // le formulaire revalide au blur après un premier envoi : un choix de fichier vaut un blur
     const setFile = (onChange: (file: File | undefined) => void, onBlur: () => void, file: File | undefined) => {
@@ -50,14 +51,19 @@ function StyleRow({ index, tableName }: { index: number; tableName: string }) {
             render={({ field, fieldState: { error } }) => (
                 <li className={classes.row}>
                     <span id={`${id}-table`}>{tableName}</span>
-                    <span className={fr.cx(field.value && "fr-text--bold")}>{field.value?.name ?? t("styles.no_file")}</span>
+                    <span id={`${id}-file`} className={fr.cx(field.value && "fr-text--bold")}>
+                        {field.value?.name ?? t("styles.no_file")}
+                    </span>
                     <span className={classes.actions}>
                         <Button
-                            ref={field.ref}
+                            ref={(button: HTMLButtonElement | null) => {
+                                field.ref(button);
+                                browseRef.current = button;
+                            }}
                             type="button"
                             size="small"
                             priority={field.value ? "tertiary" : "secondary"}
-                            nativeButtonProps={{ "aria-describedby": error ? `${id}-table ${id}-error` : `${id}-table` }}
+                            nativeButtonProps={{ "aria-describedby": `${id}-table ${id}-file${error ? ` ${id}-error` : ""}` }}
                             onClick={() => inputRef.current?.click()}
                         >
                             {field.value ? t("styles.change") : t("styles.browse")}
@@ -69,7 +75,11 @@ function StyleRow({ index, tableName }: { index: number; tableName: string }) {
                                 priority="tertiary no outline"
                                 iconId="fr-icon-close-line"
                                 title={t("styles.remove", { table: tableName })}
-                                onClick={() => setFile(field.onChange, field.onBlur, undefined)}
+                                onClick={() => {
+                                    setFile(field.onChange, field.onBlur, undefined);
+                                    // le bouton cliqué disparaît : le focus revient sur « Parcourir… »
+                                    browseRef.current?.focus();
+                                }}
                             />
                         )}
                     </span>
