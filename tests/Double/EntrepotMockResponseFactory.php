@@ -19,6 +19,7 @@ final class EntrepotMockResponseFactory
     public const WFS_PRIVATE_ENDPOINT_ID = 'endpoint-wfs-private';
     public const WMSV_PUBLIC_ENDPOINT_ID = 'endpoint-wmsv-public';
     public const WMSR_PUBLIC_ENDPOINT_ID = 'endpoint-wmsr-public';
+    public const LAYER_WITHOUT_LEGEND = 'couche_sans_legende';
     public const LEGEND_PNG = "\x89PNG légende";
     private const ENTREPOT_HOST = 'entrepot.test';
     private const METADATA_FIXTURES_DIR = __DIR__.'/../Fixture/metadata';
@@ -119,6 +120,11 @@ final class EntrepotMockResponseFactory
 
         // légende GetLegendGraphic d’un flux WMS-V : requête publique, sans jeton
         if ('GET' === $method && str_contains((string) parse_url($url, PHP_URL_QUERY), 'GetLegendGraphic')) {
+            // couche que le WMS ne sait pas dessiner : ServiceException XML en 200, comme la Géoplateforme (mesuré le 12/11/2026)
+            if (str_contains((string) parse_url($url, PHP_URL_QUERY), self::LAYER_WITHOUT_LEGEND)) {
+                return new MockResponse('<ServiceExceptionReport/>', ['http_code' => 200, 'response_headers' => ['content-type' => 'text/xml;charset=UTF-8']]);
+            }
+
             return new MockResponse(self::LEGEND_PNG, ['http_code' => 200, 'response_headers' => ['content-type' => 'image/png']]);
         }
 

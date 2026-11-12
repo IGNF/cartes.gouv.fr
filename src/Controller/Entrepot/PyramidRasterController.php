@@ -374,8 +374,14 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         try {
             $response = $this->httpClient->request('GET', $wmsvOfferingLegendUrl);
             $responseContent = $response->getContent();
+            $contentType = $response->getHeaders()['content-type'][0] ?? '';
         } catch (\Throwable $th) {
             throw new AppException('Récupération de la légende GetLegendGraphic du service WMS-Vecteur échouée', Response::HTTP_INTERNAL_SERVER_ERROR, [], $th);
+        }
+
+        // un WMS répond 200 avec une ServiceException XML quand il ne sait pas dessiner la légende
+        if (!str_starts_with($contentType, 'image/')) {
+            throw new AppException('La légende du flux WMS-Vecteur n’a pas pu être récupérée. Vérifiez le style du flux puis réessayez.', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $styleFilesDir = $this->getParameter('style_files_path');

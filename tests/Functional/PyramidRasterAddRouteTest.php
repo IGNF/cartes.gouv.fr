@@ -162,6 +162,21 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
     }
 
+    public function testALegendThatIsNotAnImageAnswers422WithoutWriting(): void
+    {
+        $this->seedWmsvService(EntrepotMockResponseFactory::LAYER_WITHOUT_LEGEND);
+        $client = self::createClient();
+        $this->logIn($client);
+        $tmpEntries = $this->styleFilesDirEntries();
+
+        $this->post($client);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame('La légende du flux WMS-Vecteur n’a pas pu être récupérée. Vérifiez le style du flux puis réessayez.', $this->jsonResponse($client)['detail']);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+        self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
+    }
+
     public function testNoTemporaryFileRemainsAfterAGeneration(): void
     {
         $this->seedWmsvService();
