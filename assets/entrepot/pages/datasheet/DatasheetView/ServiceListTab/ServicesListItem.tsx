@@ -109,7 +109,8 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                             linkProps: getServiceEditLink(datastoreId, datasheetName, service),
                         },
                     service.type === OfferingTypeEnum.WMSVECTOR &&
-                        (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)) && {
+                        (isSupervisor ||
+                            (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX))) && {
                             text: "Créer un service raster WMS/WMTS",
                             iconId: "ri-add-box-line",
                             disabled: offeringUnavailable,

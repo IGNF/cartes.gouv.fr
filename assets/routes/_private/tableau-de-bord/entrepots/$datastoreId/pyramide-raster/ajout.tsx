@@ -1,5 +1,6 @@
 import { createFileRoute, SearchSchemaInput } from "@tanstack/react-router";
 
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import PyramidRasterGenerateForm from "@/entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm";
 import { requiredStringParam, stringParam } from "@/router/searchParams";
 
@@ -9,7 +10,11 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
         offeringId: stringParam(search.offeringId),
         datasheetName: requiredStringParam(search.datasheetName, "datasheetName"),
     }),
-    staticData: { matomoLabel: "Générer une pyramide de tuiles raster" },
+    // légende déposée en annexe (ANNEX)
+    staticData: {
+        matomoLabel: "Générer une pyramide de tuiles raster",
+        requiredRights: [CommunityMemberDtoRightsEnum.PROCESSING, CommunityMemberDtoRightsEnum.ANNEX],
+    },
     component: RouteComponent,
 });
 

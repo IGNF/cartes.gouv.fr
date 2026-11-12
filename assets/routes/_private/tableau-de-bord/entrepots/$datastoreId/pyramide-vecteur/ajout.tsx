@@ -1,5 +1,6 @@
 import { createFileRoute, SearchSchemaInput } from "@tanstack/react-router";
 
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import PyramidVectorGenerateForm from "@/entrepot/pages/service/tms/PyramidVectorGenerateForm/PyramidVectorGenerateForm";
 import { requiredStringParam, stringParam } from "@/router/searchParams";
 
@@ -9,7 +10,7 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
         vectorDbId: stringParam(search.vectorDbId),
         datasheetName: requiredStringParam(search.datasheetName, "datasheetName"),
     }),
-    staticData: { matomoLabel: "Générer une pyramide de tuiles vectorielles" },
+    staticData: { matomoLabel: "Générer une pyramide de tuiles vectorielles", requiredRights: [CommunityMemberDtoRightsEnum.PROCESSING] },
     component: RouteComponent,
 });
 

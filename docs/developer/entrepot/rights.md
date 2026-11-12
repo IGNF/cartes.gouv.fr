@@ -35,7 +35,7 @@
 | Modifier les informations de publication      | BROADCAST          | Ne pas afficher l'action |
 | Dépublier                                     | BROADCAST          | Ne pas afficher l'action |
 | Gérer les styles                              | ANNEX, BROADCAST   | Ne pas afficher l'action |
-| Menu WMS-V - Créer un service raster WMS/WMTS | PROCESSING         | Ne pas afficher l'action |
+| Menu WMS-V - Créer un service raster WMS/WMTS | PROCESSING, ANNEX  | Ne pas afficher l'action |
 
 ### Onglet "Flux" (fiche de données refondue)
 
@@ -46,6 +46,15 @@
 | Menu - Supprimer     | BROADCAST          | Ne pas afficher l'action  |
 
 La page « Créer un flux » exige les mêmes droits (vignette et logo déposés en annexes). La suppression d’un flux par un membre sans ANNEX laisse sa vignette et son logo en place (refus journalisé).
+
+### Pyramides de tuiles
+
+| Action                                                       | Droits nécessaires | En l'absence de droits   |
+| ------------------------------------------------------------ | ------------------ | ------------------------ |
+| Générer une pyramide raster (menu d’un flux WMS-V, page)     | PROCESSING, ANNEX  | Ne pas afficher l'action |
+| Générer une pyramide vecteur (menu d’une base vecteur, page) | PROCESSING         | Ne pas afficher l'action |
+
+La génération raster dépose la légende du flux WMS-V en annexe, d’où le droit ANNEX.
 
 ### Onglet "Document"
 
