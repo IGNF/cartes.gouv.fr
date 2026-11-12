@@ -26,6 +26,7 @@ const { i18n } = declareComponentKeys<
     | { K: "zoom_range.bounds_error"; P: { min: number; max: number }; R: string }
     | "generate"
     | "generate.in_progress"
+    | "generate.error"
 >()("PyramidRasterGenerateForm");
 export type I18n = typeof i18n;
 
@@ -65,6 +66,7 @@ export const PyramidRasterGenerateFormFrTranslations: Translations<"fr">["Pyrami
     "zoom_range.bounds_error": ({ min, max }) => `Les niveaux de zoom doivent être compris entre ${min} et ${max}.`,
     generate: "Générer",
     "generate.in_progress": "Génération de pyramide de tuiles raster en cours",
+    "generate.error": "La génération de la pyramide n’a pas pu être lancée",
 };
 
 export const PyramidRasterGenerateFormEnTranslations: Translations<"en">["PyramidRasterGenerateForm"] = {
@@ -91,4 +93,5 @@ export const PyramidRasterGenerateFormEnTranslations: Translations<"en">["Pyrami
     "zoom_range.bounds_error": undefined,
     generate: undefined,
     "generate.in_progress": undefined,
+    "generate.error": undefined,
 };

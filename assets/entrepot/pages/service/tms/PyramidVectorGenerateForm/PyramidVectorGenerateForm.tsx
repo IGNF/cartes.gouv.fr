@@ -249,7 +249,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, dat
                     title={t("step.title", { stepNumber: currentStep })}
                 />
                 {validationError && (
-                    <Alert className="fr-preline" closable description={getApiErrorMessage(validationError)} severity="error" title={tCommon("error")} />
+                    <Alert className="fr-preline" closable description={getApiErrorMessage(validationError)} severity="error" title={t("generate_error")} />
                 )}
                 <div className={fr.cx(currentStep !== STEPS.TABLES_SELECTION && "fr-hidden")}>
                     <Select

@@ -9,7 +9,6 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
-use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -19,13 +18,12 @@ use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
 use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
 
 #[Route(
     '/api/datastores/{datastoreId}/pyramid-vector',
@@ -41,6 +39,7 @@ final class PyramidVectorController extends AbstractController implements ApiCon
         private readonly SandboxService $sandboxService,
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -120,17 +119,19 @@ final class PyramidVectorController extends AbstractController implements ApiCon
 
             $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
             $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
-        } catch (\Throwable $e) {
-            // au mieux : supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
+        } catch (\Throwable $th) {
+            // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée ; supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
             try {
                 $this->processingApiService->removeExecution($datastoreId, $processingExecution['_id'])->await();
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
+                $this->logger->warning('{class}: Failed to remove processing execution {executionId} after a failed pyramid generation: {error}', [
+                    'class' => self::class,
+                    'executionId' => $processingExecution['_id'],
+                    'exception' => $e,
+                    'error' => $e->getMessage(),
+                ]);
             }
-            // jeton expiré : la reconnexion doit passer telle quelle
-            if ($e instanceof AuthenticationExpiredException) {
-                throw $e;
-            }
-            throw new AppException('La génération de la pyramide n’a pas pu être lancée. Réessayez.', Response::HTTP_INTERNAL_SERVER_ERROR, [], $e);
+            throw $th;
         }
 
         return new JsonResponse();

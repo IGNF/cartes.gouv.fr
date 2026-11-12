@@ -157,7 +157,6 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         $this->post($client);
 
         self::assertResponseStatusCodeSame(500);
-        self::assertSame('La génération de la pyramide n’a pas pu être lancée. Réessayez.', $this->jsonResponse($client)['detail']);
         self::assertSame([], EntrepotMockResponseFactory::stored('processings/executions'));
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
     }

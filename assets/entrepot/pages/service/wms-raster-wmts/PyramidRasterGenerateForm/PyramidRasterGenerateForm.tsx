@@ -221,7 +221,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                 />
 
                 {generatePyramidRasterMutation.error && (
-                    <Alert closable description={getApiErrorMessage(generatePyramidRasterMutation.error)} severity="error" title={tCommon("error")} />
+                    <Alert closable description={getApiErrorMessage(generatePyramidRasterMutation.error)} severity="error" title={t("generate.error")} />
                 )}
 
                 <div className={fr.cx(currentStep !== STEPS.TECHNICAL_NAME && "fr-hidden")}>

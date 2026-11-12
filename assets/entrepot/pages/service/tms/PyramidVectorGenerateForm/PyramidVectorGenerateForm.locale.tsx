@@ -16,6 +16,7 @@ const { i18n } = declareComponentKeys<
     | "step_generalisation.tippecanoe_option.label"
     | "step_generalisation.tippecanoe_option.error.required"
     | "generate_pyramid"
+    | "generate_error"
     | "pyramid_creation_launch_in_progress"
     | "vector_db.label"
     | "vector_db.placeholder"
@@ -59,6 +60,7 @@ export const PyramidVectorGenerateFormFrTranslations: Translations<"fr">["Pyrami
     "step_generalisation.tippecanoe_option.label": "Choisissez une option de généralisation",
     "step_generalisation.tippecanoe_option.error.required": "L'option de généralisation est obligatoire",
     generate_pyramid: "Générer la pyramide",
+    generate_error: "La génération de la pyramide n’a pas pu être lancée",
     pyramid_creation_launch_in_progress: "Demande de création de la pyramide de tuiles en cours ...",
     "vector_db.label": "Base de données vecteur",
     "vector_db.placeholder": "Sélectionnez une base de données",
@@ -88,6 +90,7 @@ export const PyramidVectorGenerateFormEnTranslations: Translations<"en">["Pyrami
     "step_generalisation.tippecanoe_option.label": undefined,
     "step_generalisation.tippecanoe_option.error.required": undefined,
     generate_pyramid: undefined,
+    generate_error: undefined,
     pyramid_creation_launch_in_progress: undefined,
     "vector_db.label": undefined,
     "vector_db.placeholder": undefined,
