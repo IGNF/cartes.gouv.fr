@@ -12,6 +12,7 @@ const { i18n } = declareComponentKeys<
     | "step_attributes.error.required"
     | "step_zoom_levels.label"
     | "step_zoom_levels.explanation"
+    | { K: "step_zoom_levels.error.bounds"; P: { min: number; max: number }; R: string }
     | "step_generalisation.tippecanoe_option.label"
     | "step_generalisation.tippecanoe_option.error.required"
     | "step_sample.label"
@@ -52,6 +53,7 @@ export const PyramidVectorGenerateFormFrTranslations: Translations<"fr">["Pyrami
     "step_zoom_levels.label": "Choisissez les niveaux de zoom minimum et maximum des tables sélectionnées",
     "step_zoom_levels.explanation":
         "Les niveaux de zoom de la pyramide de tuiles vectorielles sont prédéfinis. Choisissez les bornes minimum et maximum de votre pyramide de tuiles en vous aidant des deux cartes. Tous les niveaux intermédiaires seront générés.",
+    "step_zoom_levels.error.bounds": ({ min, max }) => `Les niveaux de zoom doivent être compris entre ${min} et ${max}.`,
     "step_generalisation.tippecanoe_option.label": "Choisissez une option de généralisation",
     "step_generalisation.tippecanoe_option.error.required": "L'option de généralisation est obligatoire",
     "step_sample.label": "Définition d’un échantillon (Optionnel)",
@@ -77,6 +79,7 @@ export const PyramidVectorGenerateFormEnTranslations: Translations<"en">["Pyrami
     "step_attributes.error.required": undefined,
     "step_zoom_levels.label": undefined,
     "step_zoom_levels.explanation": undefined,
+    "step_zoom_levels.error.bounds": undefined,
     "step_generalisation.tippecanoe_option.label": undefined,
     "step_generalisation.tippecanoe_option.error.required": undefined,
     "step_sample.label": undefined,

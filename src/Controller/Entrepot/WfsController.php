@@ -8,44 +8,32 @@ use App\Dto\Services\Form\WfsFormDTO;
 use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Dto\Services\Wfs\WfsServiceDTO;
 use App\Dto\Services\Wfs\WfsTableDTO;
-use App\Services\CapabilitiesService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
-use App\Services\EntrepotApi\ServiceImageAnnexeService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\MultipartPayloadMapper;
-use App\Services\SandboxService;
+use App\Services\ServiceFormFileValidator;
 use OpenApi\Attributes as OA;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Exception\ValidationFailedException;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/stored_data/{storedDataId}/wfs',
     name: 'cartesgouvfr_api_wfs_',
     options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] WFS', description: 'Création/modification des services WFS')]
-class WfsController extends ServiceController implements ApiControllerInterface
+final class WfsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
         private readonly ConfigurationApiService $configurationApiService,
         private readonly CartesServiceApiService $cartesServiceApiService,
-        CapabilitiesService $capabilitiesService,
-        CartesMetadataApiService $cartesMetadataApiService,
-        SandboxService $sandboxService,
         private readonly MultipartPayloadMapper $multipartPayloadMapper,
-        private readonly ValidatorInterface $validator,
+        private readonly ServiceFormFileValidator $serviceFormFileValidator,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
 
     /**
@@ -55,7 +43,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
     public function publish(string $datastoreId, string $storedDataId, Request $request): JsonResponse
     {
         $dto = $this->multipartPayloadMapper->map($request, WfsFormDTO::class);
-        [$thumbnail, $attributionLogo] = $this->imageFiles($request, 'thumbnail', 'attribution_logo');
+        [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
 
         $offering = $this->cartesServiceApiService->publishFromForm(
             $datastoreId,
@@ -68,40 +56,6 @@ class WfsController extends ServiceController implements ApiControllerInterface
         );
 
         return $this->json($offering, Response::HTTP_CREATED);
-    }
-
-    /**
-     * Fichiers image facultatifs de la requête, validés ensemble : 422 au chemin du champ, comme les erreurs du DTO.
-     *
-     * @return list<UploadedFile|null>
-     */
-    private function imageFiles(Request $request, string ...$fields): array
-    {
-        $files = [];
-        $validator = $this->validator->startContext();
-        foreach ($fields as $field) {
-            $file = $request->files->get($field);
-            $file = $file instanceof UploadedFile ? $file : null;
-            $files[] = $file;
-            if ($file instanceof UploadedFile) {
-                // minWidth oblige à lire les dimensions : un fichier au bon type mais illisible est refusé
-                $validator->atPath($field)->validate($file, new Assert\Image(
-                    maxSize: ServiceImageAnnexeService::MAX_SIZE,
-                    mimeTypes: ServiceImageAnnexeService::MIME_TYPES,
-                    minWidth: 1,
-                    maxSizeMessage: 'L’image ne peut pas dépasser {{ limit }} {{ suffix }}',
-                    mimeTypesMessage: 'L’image doit être au format jpg ou png',
-                    sizeNotDetectedMessage: 'L’image est illisible',
-                ));
-            }
-        }
-
-        $violations = $validator->getViolations();
-        if (count($violations) > 0) {
-            throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($files, $violations));
-        }
-
-        return $files;
     }
 
     /**
@@ -133,7 +87,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
     ): JsonResponse {
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WFS, $dto, $typeInfos);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody);
 
@@ -157,7 +111,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody, $oldOffering);
 

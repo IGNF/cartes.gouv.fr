@@ -7,15 +7,12 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
 use App\Exception\AppException;
-use App\Services\CapabilitiesService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StaticApiService;
-use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,19 +26,13 @@ use Symfony\Component\Uid\Uuid;
     name: 'cartesgouvfr_api_wmsvector_',
     options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] WMS-VECTOR', description: 'Création/modification des services WMS-VECTOR')]
-class WmsVectorController extends ServiceController implements ApiControllerInterface
+final class WmsVectorController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
         private readonly ConfigurationApiService $configurationApiService,
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly StaticApiService $staticApiService,
-        CapabilitiesService $capabilitiesService,
-        protected Filesystem $filesystem,
-        CartesMetadataApiService $cartesMetadataApiService,
-        SandboxService $sandboxService,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
@@ -60,7 +51,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody);
         $configuration = $offering['configuration'];
@@ -100,7 +91,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos, $oldConfiguration);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WMSVECTOR, $dto, $typeInfos, $oldConfiguration);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody, $oldOffering);
 
@@ -165,7 +156,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 /** @var UploadedFile|null */
                 $file = $files["style_{$tableName}"] ?? null;
                 if (null === $file) {
-                    throw new AppException("Fichier de style manquant pour la table $tableName", Response::HTTP_INTERNAL_SERVER_ERROR);
+                    throw new AppException("Fichier de style manquant pour la table $tableName", Response::HTTP_BAD_REQUEST);
                 }
                 $tmpFileDir = $directory.'/'.Uuid::v4();
 
@@ -202,8 +193,10 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                         $staticStyleFile = $this->staticApiService->add($datastoreId, $tmpFileDir.'/'.$file->getClientOriginalName(), $styleFileName, StaticFileTypes::GEOSERVER_STYLE);
                     }
                     $styleFilesByTable[$tableName] = $staticStyleFile['_id'];
-                } else {
+                } elseif (isset($oldStyleFilesByTable[$tableName])) {
                     $styleFilesByTable[$tableName] = $oldStyleFilesByTable[$tableName];
+                } else {
+                    throw new AppException("Fichier de style manquant pour la table $tableName", Response::HTTP_BAD_REQUEST);
                 }
             }
         }

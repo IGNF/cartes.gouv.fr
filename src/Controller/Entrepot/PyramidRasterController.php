@@ -8,24 +8,24 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
+use App\Dto\Services\PyramidRaster\PyramidRasterGenerateDTO;
 use App\Exception\AppException;
 use App\Security\User;
-use App\Services\CapabilitiesService;
 use App\Services\EntrepotApi\AnnexeApiService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StaticApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
 use App\Utils;
 use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -39,7 +39,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
     name: 'cartesgouvfr_api_pyramid_raster_',
     options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] pyramid-raster', description: 'Génération de pyramides de tuiles raster et création/modification des services associés')]
-class PyramidRasterController extends ServiceController implements ApiControllerInterface
+final class PyramidRasterController extends AbstractController implements ApiControllerInterface
 {
     private readonly HttpClientInterface $httpClient;
 
@@ -48,10 +48,8 @@ class PyramidRasterController extends ServiceController implements ApiController
         private readonly ConfigurationApiService $configurationApiService,
         private readonly StoredDataApiService $storedDataApiService,
         private readonly ProcessingApiService $processingApiService,
-        SandboxService $sandboxService,
+        private readonly SandboxService $sandboxService,
         private readonly CartesServiceApiService $cartesServiceApiService,
-        CapabilitiesService $capabilitiesService,
-        CartesMetadataApiService $cartesMetadataApiService,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly AnnexeApiService $annexeApiService,
         private readonly StaticApiService $staticApiService,
@@ -59,8 +57,6 @@ class PyramidRasterController extends ServiceController implements ApiController
         ParameterBagInterface $params,
         HttpClientInterface $httpClient,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
-
         $this->httpClient = $httpClient->withOptions([
             'proxy' => $params->get('http_proxy'),
             'verify_peer' => false,
@@ -69,14 +65,12 @@ class PyramidRasterController extends ServiceController implements ApiController
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
-    public function add(string $datastoreId, Request $request): JsonResponse
+    public function add(string $datastoreId, #[MapRequestPayload] PyramidRasterGenerateDTO $dto): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
         $datastore = $this->datastoreApiService->get($datastoreId);
         $processingId = $this->sandboxService->getProcGeneratePyramidRaster($datastoreId);
 
-        $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $data['wmsv_offering_id'])->array();
+        $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $dto->wmsv_offering_id)->array();
         $wmsvConfiguration = $this->configurationApiService->get($datastoreId, $wmsvOffering['configuration']['_id'])->array();
 
         $vectorDbId = $wmsvConfiguration['type_infos']['used_data'][0]['stored_data'] ?? null;
@@ -93,14 +87,15 @@ class PyramidRasterController extends ServiceController implements ApiController
             throw new AppException('URL du service WMS-Vecteur non trouvée', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $zoomRange = $data['zoom_range'];
+        $zoomRange = array_values($dto->zoom_range);
+        sort($zoomRange);
         $harvestLevels = array_map(strval(...), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
 
         $requestBody = [
             'processing' => $processingId,
             'output' => [
                 'stored_data' => [
-                    'name' => $data['technical_name'],
+                    'name' => $dto->technical_name,
                 ],
             ],
             'parameters' => [
@@ -113,11 +108,11 @@ class PyramidRasterController extends ServiceController implements ApiController
                 'harvest_format' => 'image/jpeg',
                 'harvest_url' => $endpointUrlBase,
                 'harvest_layers' => $wmsvOffering['layer_name'],
-                'harvest_area' => $data['wmsv_config_bbox'],
+                'harvest_area' => $dto->wmsv_config_bbox,
             ],
         ];
 
-        if (isset($data['email_notification']) && true === $data['email_notification']) {
+        if ($dto->email_notification) {
             /** @var User */
             $user = $this->getUser();
             $userEmail = $user->getEmail();
@@ -189,7 +184,7 @@ class PyramidRasterController extends ServiceController implements ApiController
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type);
-        $configRequestBody = $this->getConfigRequestBody($type, $dto, $typeInfos);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto($type, $dto, $typeInfos);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody);
 
@@ -224,7 +219,7 @@ class PyramidRasterController extends ServiceController implements ApiController
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type, $oldConfiguration['_id']);
-        $configRequestBody = $this->getConfigRequestBody($type, $dto, $typeInfos, $oldConfiguration);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto($type, $dto, $typeInfos, $oldConfiguration);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody, $oldOffering);
 
@@ -238,7 +233,7 @@ class PyramidRasterController extends ServiceController implements ApiController
      */
     private function getConfigTypeInfos(CommonDTO $dto, string $datastoreId, array $pyramid, string $serviceType, ?string $configurationId = null): array
     {
-        $levels = $this->getPyramidZoomLevels($pyramid);
+        $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
         $configType = ConfigurationTypes::WMSRASTER === $serviceType ? 'wmsr' : 'wmts';
 
         $legendStatic = $this->saveLegendInStatic($datastoreId, $pyramid, $configType, $levels, $configurationId);

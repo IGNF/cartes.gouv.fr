@@ -20,7 +20,12 @@ type TableZoomLevelsProps = {
 const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTables }) => {
     const { t } = useTranslation("PyramidVectorGenerateForm");
 
-    const { control, setValue: setFormValue, getValues: getFormValues } = form;
+    const {
+        control,
+        setValue: setFormValue,
+        getValues: getFormValues,
+        formState: { errors },
+    } = form;
     const tableZoomLevels = useWatch({ control, name: "table_zoom_levels" }) ?? {};
 
     const saveZoomLevels = useCallback(
@@ -66,6 +71,7 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
                         />
                     </Accordion>
                 ))}
+            {typeof errors.table_zoom_levels?.message === "string" && <p className={fr.cx("fr-error-text")}>{errors.table_zoom_levels.message}</p>}
         </div>
     );
 };

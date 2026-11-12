@@ -78,7 +78,15 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
             return yup.object().shape(tableAttributes);
         }),
     });
-    schema[STEPS.ZOOM_LEVELS] = yup.mixed().nullable().notRequired();
+    schema[STEPS.ZOOM_LEVELS] = yup.object({
+        table_zoom_levels: yup
+            .mixed<Record<string, number[]>>()
+            .test("bounds", t("step_zoom_levels.error.bounds", { min: olDefaults.zoom_levels.TOP, max: olDefaults.zoom_levels.BOTTOM }), (value) =>
+                Object.values(value ?? {}).every((levels) =>
+                    levels.every((level) => level >= olDefaults.zoom_levels.TOP && level <= olDefaults.zoom_levels.BOTTOM)
+                )
+            ),
+    });
     schema[STEPS.GENERALIZE_OPTIONS] = yup.object({
         tippecanoe: yup.string().required(t("step_generalisation.tippecanoe_option.error.required")),
     });

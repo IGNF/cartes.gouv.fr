@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
-use App\Controller\Entrepot\WfsController;
 use App\Dto\Services\Wfs\WfsServiceDTO;
 use App\Security\KeycloakTokenManager;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\ServiceImageAnnexeService;
 use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Double\FakeKeycloakClient;
@@ -55,8 +55,7 @@ final class ServiceImageAnnexeServiceTest extends KernelTestCase
             'attribution_text' => 'IGN', 'attribution_url' => 'https://www.ign.fr', 'table_infos' => [],
         ], JSON_THROW_ON_ERROR), WfsServiceDTO::class, 'json');
 
-        $body = (new \ReflectionMethod(WfsController::class, 'getConfigRequestBody'))->invoke(
-            self::getContainer()->get(WfsController::class),
+        $body = ServiceConfigurationRequestBuilder::buildFromCommonDto(
             'WFS',
             $dto,
             [],
