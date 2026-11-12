@@ -127,7 +127,12 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     const zoomRange = watch("zoom_range");
     const selectedOfferingId = watch("wmsv_offering_id");
 
-    const serviceQuery = useServiceQuery(datastoreId, selectedOfferingId, selectedOfferingId === "" ? { queryFn: skipToken } : undefined);
+    // flux absent de la liste (présélection indisponible ou d’une autre fiche) : rien à charger
+    const serviceQuery = useServiceQuery(
+        datastoreId,
+        selectedOfferingId,
+        !wmsvServices.some((service) => service._id === selectedOfferingId) ? { queryFn: skipToken } : undefined
+    );
     const bbox = (serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent | undefined)?.bbox;
 
     const generatePyramidRasterMutation = useMutation<unknown, ApiError>({
@@ -299,7 +304,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                             children: currentStep < Object.values(STEPS).length ? tCommon("continue") : t("generate"),
                             onClick: () => void nextStep(),
                             // l’emprise du flux choisi est encore en chargement
-                            disabled: selectedOfferingId !== "" && serviceQuery.isPending,
+                            disabled: serviceQuery.isLoading,
                         },
                     ]}
                     inlineLayoutWhen="always"
