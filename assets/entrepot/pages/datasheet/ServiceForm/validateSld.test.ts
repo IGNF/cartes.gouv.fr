@@ -8,6 +8,14 @@ const sld10 = (layers = "<NamedLayer><Name>communes</Name><UserStyle><FeatureTyp
 <StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld">${layers.replace("{rules}", rules)}</StyledLayerDescriptor>`;
 const rule10 = "<Rule><PolygonSymbolizer><Fill/></PolygonSymbolizer></Rule>";
 
+const sld10Prefixed = `<sld:StyledLayerDescriptor version="1.0.0" xmlns:sld="http://www.opengis.net/sld">
+  <sld:NamedLayer>
+    <sld:Name>communes</sld:Name>
+    <sld:UserStyle><sld:FeatureTypeStyle><sld:Rule><sld:PointSymbolizer/></sld:Rule></sld:FeatureTypeStyle></sld:UserStyle>
+  </sld:NamedLayer>
+</sld:StyledLayerDescriptor>`;
+
+// SLD 1.1.0 : refusé par l’Entrepôt
 const sld11 = `<?xml version="1.0" encoding="UTF-8"?>
 <StyledLayerDescriptor version="1.1.0" xmlns="http://www.opengis.net/sld" xmlns:se="http://www.opengis.net/se">
   <NamedLayer>
@@ -16,18 +24,10 @@ const sld11 = `<?xml version="1.0" encoding="UTF-8"?>
   </NamedLayer>
 </StyledLayerDescriptor>`;
 
-const sld11Prefixed = `<sld:StyledLayerDescriptor version="1.1.0" xmlns:sld="http://www.opengis.net/sld" xmlns:se="http://www.opengis.net/se">
-  <sld:NamedLayer>
-    <se:Name>communes</se:Name>
-    <sld:UserStyle><se:FeatureTypeStyle><se:Rule><se:PointSymbolizer/></se:Rule></se:FeatureTypeStyle></sld:UserStyle>
-  </sld:NamedLayer>
-</sld:StyledLayerDescriptor>`;
-
 describe("validateSld", () => {
-    it("accepte un SLD 1.0 et un SLD 1.1 préfixé", () => {
+    it("accepte un SLD 1.0.0, préfixé ou non", () => {
         expect(validateSld(sld10(), "communes")).toEqual([]);
-        expect(validateSld(sld11, "communes")).toEqual([]);
-        expect(validateSld(sld11Prefixed, "communes")).toEqual([]);
+        expect(validateSld(sld10Prefixed, "communes")).toEqual([]);
     });
 
     it("refuse un texte vide ou un XML mal formé", () => {
@@ -39,6 +39,7 @@ describe("validateSld", () => {
         expect(validateSld('<StyledLayer version="1.0.0" xmlns="http://www.opengis.net/sld"/>', "communes")).toEqual([{ code: "root" }]);
         expect(validateSld(sld10().replace("http://www.opengis.net/sld", "http://example.test/sld"), "communes")).toEqual([{ code: "root" }]);
         expect(validateSld(sld10().replace('version="1.0.0"', 'version="2.0"'), "communes")).toEqual([{ code: "version" }]);
+        expect(validateSld(sld11, "communes")).toEqual([{ code: "version" }]);
     });
 
     it("exige exactement un NamedLayer et aucun UserLayer", () => {

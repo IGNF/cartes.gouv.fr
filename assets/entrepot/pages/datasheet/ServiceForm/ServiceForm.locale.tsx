@@ -217,7 +217,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "validation.table.style.malformed": "Le fichier de style n’est pas un XML valide",
     "validation.table.style.root":
         "Le fichier n’est pas un style SLD : la racine doit être StyledLayerDescriptor dans l’espace de noms http://www.opengis.net/sld",
-    "validation.table.style.version": "La version du SLD doit être 1.0.0 ou 1.1.0",
+    "validation.table.style.version": "Le SLD doit être en version 1.0.0",
     "validation.table.style.named_layer_count": "Le SLD doit contenir exactement un NamedLayer et aucun UserLayer",
     "validation.table.style.layer_name": ({ expected }) => `Le nom du NamedLayer doit être celui de la table : ${expected}`,
     "validation.table.style.no_rule": "Le SLD doit contenir au moins une règle (Rule)",
@@ -329,7 +329,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "validation.table.style.unreadable": "The style file could not be read: select it again",
     "validation.table.style.malformed": "The style file is not valid XML",
     "validation.table.style.root": "The file is not an SLD style: the root must be StyledLayerDescriptor in the http://www.opengis.net/sld namespace",
-    "validation.table.style.version": "The SLD version must be 1.0.0 or 1.1.0",
+    "validation.table.style.version": "The SLD must be version 1.0.0",
     "validation.table.style.named_layer_count": "The SLD must contain exactly one NamedLayer and no UserLayer",
     "validation.table.style.layer_name": ({ expected }) => `The NamedLayer name must be the table name: ${expected}`,
     "validation.table.style.no_rule": "The SLD must contain at least one Rule",

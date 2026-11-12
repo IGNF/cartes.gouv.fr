@@ -1,5 +1,6 @@
 const SLD_NAMESPACE = "http://www.opengis.net/sld";
-const SLD_VERSIONS = new Set(["1.0.0", "1.1.0"]);
+// l’Entrepôt valide le fichier contre le schéma SLD 1.0.0 et refuse 1.1.0 (vérifié le 12/11/2026)
+const SLD_VERSION = "1.0.0";
 
 export type SldError =
     | { code: "empty" }
@@ -15,7 +16,7 @@ const childElements = (element: Element, localName: string) => Array.from(elemen
 
 /**
  * Contrôles imposés par l’Entrepôt à un style WMS vecteur : un seul NamedLayer nommé comme la table, au moins une règle avec un symboliseur.
- * SLD 1.1 place Name, Rule et les symboliseurs dans l’espace `se:` : comparaison par `localName`.
+ * Éléments comparés par `localName` : le préfixe d’espace de noms est libre.
  */
 export function validateSld(text: string, tableName: string): SldError[] {
     if (text.trim() === "") return [{ code: "empty" }];
@@ -26,7 +27,7 @@ export function validateSld(text: string, tableName: string): SldError[] {
 
     const root = doc.documentElement;
     if (root.localName !== "StyledLayerDescriptor" || root.namespaceURI !== SLD_NAMESPACE) return [{ code: "root" }];
-    if (!SLD_VERSIONS.has(root.getAttribute("version") ?? "")) return [{ code: "version" }];
+    if (root.getAttribute("version") !== SLD_VERSION) return [{ code: "version" }];
 
     const namedLayers = doc.getElementsByTagNameNS(SLD_NAMESPACE, "NamedLayer");
     if (namedLayers.length !== 1 || doc.getElementsByTagNameNS(SLD_NAMESPACE, "UserLayer").length > 0) return [{ code: "named_layer_count" }];
