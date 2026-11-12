@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { type DatasheetDetailed, type Service } from "@/@types/app";
+import { ConfigurationTypeEnum, type DatasheetDetailed, type Service } from "@/@types/app";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
@@ -16,7 +16,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
 import { buildServiceFormData } from "../ServiceForm/buildServiceFormData";
 import ServiceForm from "../ServiceForm/ServiceForm";
-import { SERVICE_CONFIGURATION_TYPES, type ServiceFormOutput, type ServiceType } from "../ServiceForm/serviceFormSchema";
+import { configurationTypeFor, isRasterPyramid, type ServiceFormOutput, type ServiceType } from "../ServiceForm/serviceFormSchema";
 
 // types livrés par le formulaire (IMPLEMENTED_SERVICE_TYPES)
 const publishers: Partial<Record<ServiceType, (datastoreId: string, storedDataId: string, formData: FormData) => Promise<Service>>> = {
@@ -51,16 +51,24 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
 
     const publishMutation = useMutation<Service, ApiError, ServiceFormOutput>({
         mutationFn: (values) => {
+            if (isRasterPyramid(datasheetQuery.data, values.stored_data_id)) {
+                return api.pyramidRaster.publish(datastoreId, values.stored_data_id, ConfigurationTypeEnum.WMSRASTER, buildServiceFormData(type, values, true));
+            }
             const publish = publishers[type];
             if (publish === undefined) throw new Error(`Type de flux non livré : ${type}`);
             return publish(datastoreId, values.stored_data_id, buildServiceFormData(type, values));
         },
         // aussi après un échec : le flux peut exister si l’erreur survient après la création de l’offre
-        onSettled: () => {
+        onSettled: (_data, _error, values) => {
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             // sinon un second flux au même nom passe le contrôle du formulaire
-            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_layernames_list(datastoreId, SERVICE_CONFIGURATION_TYPES[type]) });
+            void queryClient.invalidateQueries({
+                queryKey: RQKeys.datastore_layernames_list(
+                    datastoreId,
+                    configurationTypeFor(type, isRasterPyramid(datasheetQuery.data, values.stored_data_id))
+                ),
+            });
         },
         onSuccess: () => navigate({ ...servicesTab, search: { activeTab: "services" } }),
     });

@@ -1,7 +1,7 @@
 import { type TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { z } from "zod";
 
-import { ConfigurationTypeEnum } from "@/@types/app";
+import { ConfigurationTypeEnum, type DatasheetDetailed } from "@/@types/app";
 import { type ComponentKey } from "@/i18n/types";
 import { regex } from "@/utils";
 import { TAG_VALUE_MAX_LENGTH } from "../DatasetAdd/datasetAddSchema";
@@ -23,6 +23,13 @@ export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeE
     wmts: ConfigurationTypeEnum.WMTSTMS,
 };
 
+/** un flux WMS publié depuis une pyramide raster est un WMS raster */
+export const isRasterPyramid = (datasheet: DatasheetDetailed | undefined, storedDataId: string): boolean =>
+    (datasheet?.pyramid_raster_list ?? []).some((item) => item._id === storedDataId);
+
+export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean): ConfigurationTypeEnum =>
+    type === "wms" && rasterPyramid ? ConfigurationTypeEnum.WMSRASTER : SERVICE_CONFIGURATION_TYPES[type];
+
 export const SERVICE_ACCESSES = ["public", "restricted_visible", "restricted"] as const;
 export type ServiceAccess = (typeof SERVICE_ACCESSES)[number];
 
@@ -32,7 +39,7 @@ export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;
 export const SERVICE_IMAGE_ACCEPT = ["jpg", "jpeg", "png"];
 export const SERVICE_IMAGE_MAX_SIZE_MB = 5;
 
-/** même limite que WmsVectorFormDTO */
+/** même limite que ServiceFormDTO::DESCRIPTION_MAX_LENGTH */
 export const SERVICE_DESCRIPTION_MAX_LENGTH = 300;
 
 /** même limite que ServiceFormDTO::TABLES_MAX */
@@ -41,6 +48,8 @@ export const SERVICE_TABLES_MAX = 10;
 type SchemaDeps = {
     t: T;
     type: ServiceType;
+    /** donnée choisie = pyramide raster : un flux WMS sans tables ni styles */
+    rasterPyramid?: boolean;
     /** noms de couches déjà pris pour ce type de flux */
     existingLayerNames: readonly string[];
     /** préfixe imposé par l’entrepôt aux noms techniques, suivi d’un point */
@@ -78,7 +87,7 @@ const validateSldFile = (file: File, tableName: string): Promise<StyleFileError[
 const sldErrorMessage = (t: T, error: StyleFileError): string =>
     error.code === "layer_name" ? t("validation.table.style.layer_name", { expected: error.expected }) : t(`validation.table.style.${error.code}`);
 
-export const buildServiceFormSchema = ({ t, type, existingLayerNames, layerNamePrefix, availableAccesses }: SchemaDeps) => {
+export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existingLayerNames, layerNamePrefix, availableAccesses }: SchemaDeps) => {
     const tableSchema = z
         .object({
             native_name: z.string(),
@@ -131,7 +140,7 @@ export const buildServiceFormSchema = ({ t, type, existingLayerNames, layerNameP
         });
 
     return z.object({
-        stored_data_id: z.string().min(1, t("validation.stored_data.required")),
+        stored_data_id: z.string().min(1, type === "wms" ? t("validation.stored_data.required_wms") : t("validation.stored_data.required")),
         title: z.string().trim().min(1, t("validation.title.required")),
         technical_name: z
             .string()
@@ -160,7 +169,7 @@ export const buildServiceFormSchema = ({ t, type, existingLayerNames, layerNameP
                       .min(1, t("validation.description.required"))
                       .max(SERVICE_DESCRIPTION_MAX_LENGTH, t("validation.description.max", { max: SERVICE_DESCRIPTION_MAX_LENGTH })),
         tables:
-            type === "wfs" || type === "wms"
+            type === "wfs" || (type === "wms" && !rasterPyramid)
                 ? z
                       .array(tableSchema)
                       .refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))

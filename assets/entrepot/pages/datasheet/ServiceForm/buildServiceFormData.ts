@@ -5,7 +5,9 @@ import { type ServiceFormOutput, type ServiceType } from "./serviceFormSchema";
  * Requête multipart des routes `publish` : champ `data` (JSON lu par MultipartPayloadMapper côté Symfony)
  * et fichiers `thumbnail`, `attribution_logo`, `style_files[<table>]` (WMS vecteur). La donnée stockée voyage dans l’URL.
  */
-export function buildServiceFormData(type: ServiceType, values: ServiceFormOutput): FormData {
+export function buildServiceFormData(type: ServiceType, values: ServiceFormOutput, rasterPyramid = false): FormData {
+    // WMS raster : ni tables ni fichiers de style
+    const wmsVector = type === "wms" && !rasterPyramid;
     const { attribution } = values;
     const payload: Record<string, unknown> = {
         title: values.title,
@@ -27,13 +29,13 @@ export function buildServiceFormData(type: ServiceType, values: ServiceFormOutpu
     } else {
         payload.description = values.description;
     }
-    if (type === "wms") {
+    if (wmsVector) {
         payload.selected_tables = selectedTables.map((table) => table.native_name);
     }
 
     const formData = new FormData();
     formData.set("data", JSON.stringify(payload));
-    if (type === "wms") {
+    if (wmsVector) {
         for (const table of selectedTables) {
             if (table.style instanceof File) formData.set(`style_files[${table.native_name}]`, table.style);
         }
