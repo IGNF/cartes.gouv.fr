@@ -26,6 +26,7 @@ const { i18n } = declareComponentKeys<
     | "view"
     | "menu.open"
     | "menu.copy_url"
+    | "menu.generate_pyramid_raster"
     | "explore.link_title"
     | "menu.edit"
     | "menu.delete"
@@ -77,6 +78,7 @@ export const ServicesListTabNextFrTranslations: Translations<"fr">["ServicesList
     view: "Consulter",
     "menu.open": "Autres actions",
     "menu.copy_url": "Copier l’URL",
+    "menu.generate_pyramid_raster": "Créer une pyramide raster",
     "explore.link_title": "Voir dans Explorer les cartes",
     "menu.edit": "Mettre à jour",
     "menu.delete": "Supprimer",
@@ -126,6 +128,7 @@ export const ServicesListTabNextEnTranslations: Translations<"en">["ServicesList
     view: "View",
     "menu.open": "More actions",
     "menu.copy_url": "Copy URL",
+    "menu.generate_pyramid_raster": "Create a raster pyramid",
     "explore.link_title": "View in Explore maps",
     "menu.edit": "Update",
     "menu.delete": "Delete",

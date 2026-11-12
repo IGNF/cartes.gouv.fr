@@ -15,9 +15,6 @@ const { i18n } = declareComponentKeys<
     | "tms_hint_text"
     | "wfs_hint_text"
     | "wmsv_hint_text"
-    | "tile_technical_name"
-    | "tile_technical_name_hint_text"
-    | "technical_name_is_mandatory"
 >()("VectorDbList");
 export type I18n = typeof i18n;
 
@@ -36,10 +33,6 @@ export const VectorDbListFrTranslations: Translations<"fr">["VectorDbList"] = {
     wfs_hint_text:
         "Création puis publication d’un service permettant de manipuler des objets géographiques. Ce service s'appuie sur le protocole WFS en version 2.0.0",
     wmsv_hint_text: "Création puis publication d’images à partir de données vectorielles. Ce service s'appuie sur le protocole WMS en version 1.3.0",
-    tile_technical_name: "Nom technique de la pyramide de tuiles vectorielles",
-    tile_technical_name_hint_text:
-        "Il s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite.",
-    technical_name_is_mandatory: "Le nom technique est obligatoire",
 };
 
 export const VectorDbListEnTranslations: Translations<"en">["VectorDbList"] = {
@@ -55,8 +48,4 @@ export const VectorDbListEnTranslations: Translations<"en">["VectorDbList"] = {
     tms_hint_text: undefined,
     wfs_hint_text: undefined,
     wmsv_hint_text: undefined,
-    tile_technical_name: "Technical name of vector tile pyramid [TODO]",
-    tile_technical_name_hint_text:
-        "This is the technical name of the service which will appear in your workspace, it will not be published online. If you rename it, choose a meaningful name. [TODO]",
-    technical_name_is_mandatory: "Technical name is mandatory",
 };

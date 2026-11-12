@@ -4,6 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
@@ -15,7 +16,9 @@ use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
+use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -36,15 +39,13 @@ final class PyramidVectorController extends AbstractController implements ApiCon
         private readonly SandboxService $sandboxService,
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, #[MapRequestPayload] PyramidVectorGenerateDTO $dto): JsonResponse
     {
-        // TODO
-        // $samplePyramidId = $request->query->get('samplePyramidId', null);
-
         $vectordb = $this->storedDataApiService->get($datastoreId, $dto->vectordb_id)->array();
 
         // TODO Suppression de l'upload ?
@@ -68,10 +69,6 @@ final class PyramidVectorController extends AbstractController implements ApiCon
             'top_level' => strval($levels[0]),
             'tippecanoe_options' => $dto->tippecanoe,
         ];
-
-        if (!is_null($dto->area)) {
-            $parameters['area'] = $dto->area;
-        }
 
         $processing = $this->sandboxService->getProcGeneratePyramidVector($datastoreId);
 
@@ -110,23 +107,32 @@ final class PyramidVectorController extends AbstractController implements ApiCon
         $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
         $pyramidId = $processingExecution['output']['stored_data']['_id'];
 
-        $pyramidTags = [
-            CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
-            'upload_id' => $vectordb['tags']['upload_id'],
-            'proc_int_id' => $vectordb['tags']['proc_int_id'],
-            'vectordb_id' => $dto->vectordb_id,
-            'proc_pyr_creat_id' => $processingExecution['_id'],
-            'is_sample' => is_null($dto->area) ? 'false' : 'true',
-        ];
-        if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
-            $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
-        }
-        if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
-            $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
-        }
+        try {
+            // base vecteur créée hors du parcours de dépôt : tags de lignée absents
+            $pyramidTags = array_filter([
+                ...UploadIntegrationWorkflow::forwardedTags($vectordb['tags'] ?? []),
+                StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID] ?? null,
+                StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
+                StoredDataTags::VECTORDB_ID => $dto->vectordb_id,
+                StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
+            ], fn ($value) => null !== $value);
 
-        $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
-        $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
+            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+        } catch (\Throwable $th) {
+            // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée ; supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
+            try {
+                $this->processingApiService->removeExecution($datastoreId, $processingExecution['_id'])->await();
+            } catch (\Throwable $e) {
+                $this->logger->warning('{class}: Failed to remove processing execution {executionId} after a failed pyramid generation: {error}', [
+                    'class' => self::class,
+                    'executionId' => $processingExecution['_id'],
+                    'exception' => $e,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+            throw $th;
+        }
 
         return new JsonResponse();
     }

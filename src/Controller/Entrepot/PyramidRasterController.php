@@ -5,6 +5,7 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
@@ -24,6 +25,7 @@ use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
 use App\Services\ServiceFormFileValidator;
 use App\Utils;
+use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -67,8 +69,6 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     ) {
         $this->httpClient = $httpClient->withOptions([
             'proxy' => $params->get('http_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
         ]);
     }
 
@@ -141,37 +141,44 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             }
         }
 
-        $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
-        $pyramidId = $processingExecution['output']['stored_data']['_id'];
-
-        $pyramidTags = [
-            CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
-            'upload_id' => $vectordb['tags']['upload_id'],
-            'proc_int_id' => $vectordb['tags']['proc_int_id'],
-            'vectordb_id' => $vectorDbId,
-            'proc_pyr_creat_id' => $processingExecution['_id'],
-        ];
-        if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
-            $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
-        }
-        if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
-            $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
-        }
-
+        // avant l’exécution : une légende inaccessible ne laisse rien à défaire
         $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
-        $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
-        $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
+        $processingExecution = null;
 
-        $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
-        $this->storedDataApiService->modify($datastoreId, $pyramidId, [
-            'extra' => [
-                'legend' => [
-                    'url' => $legendAnnexeUrlAbs,
-                    'annexe_id' => $legendAnnexe['_id'],
+        try {
+            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
+            $pyramidId = $processingExecution['output']['stored_data']['_id'];
+
+            // base vecteur créée hors du parcours de dépôt : tags de lignée absents
+            $pyramidTags = array_filter([
+                ...UploadIntegrationWorkflow::forwardedTags($vectordb['tags'] ?? []),
+                StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID] ?? null,
+                StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
+                StoredDataTags::VECTORDB_ID => $vectorDbId,
+                StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
+            ], fn ($value) => null !== $value);
+
+            $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME] ?? null);
+            $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
+
+            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
+            $this->storedDataApiService->modify($datastoreId, $pyramidId, [
+                'extra' => [
+                    'legend' => [
+                        'url' => $legendAnnexeUrlAbs,
+                        'annexe_id' => $legendAnnexe['_id'],
+                    ],
                 ],
-            ],
-        ])->await();
-        $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+            ])->await();
+            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+        } catch (\Throwable $e) {
+            if (null !== $processingExecution) {
+                $this->cancelGeneration($datastoreId, $processingExecution['_id'], $processingExecution['output']['stored_data']['_id']);
+            }
+            throw $e;
+        } finally {
+            $this->fs->remove(dirname($legendFilePath));
+        }
 
         return new JsonResponse();
     }
@@ -184,7 +191,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     {
         $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
         if (!in_array($type, $acceptedTypes, true)) {
-            throw new AppException(sprintf("Le type %s n’est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
+            throw new AppException(sprintf('Le type %s n’est pas accepté. Les types acceptés sont %s.', $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
         }
 
         $dto = $this->multipartPayloadMapper->map($request, WmsRasterWmtsFormDTO::class);
@@ -324,6 +331,35 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         ];
     }
 
+    // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée ; supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
+    private function cancelGeneration(string $datastoreId, string $executionId, string $pyramidId): void
+    {
+        try {
+            $this->processingApiService->removeExecution($datastoreId, $executionId)->await();
+        } catch (\Throwable $e) {
+            $this->logger->warning('{class}: Failed to remove processing execution {executionId} after a failed pyramid generation: {error}', [
+                'class' => self::class,
+                'executionId' => $executionId,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // cherchée par son chemin : un échec entre le dépôt du fichier et la pose des libellés ne rend pas l’identifiant
+        try {
+            foreach ($this->annexeApiService->getAll($datastoreId, null, "/legend/{$pyramidId}.png")->resolve() as $annexe) {
+                $this->annexeApiService->remove($datastoreId, $annexe['_id'])->await();
+            }
+        } catch (\Throwable $e) {
+            $this->logger->warning('{class}: Failed to remove legend annexe of pyramid {pyramidId} after a failed pyramid generation: {error}', [
+                'class' => self::class,
+                'pyramidId' => $pyramidId,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
     /**
      * @param array<mixed> $wmsvOffering
      */
@@ -343,8 +379,14 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         try {
             $response = $this->httpClient->request('GET', $wmsvOfferingLegendUrl);
             $responseContent = $response->getContent();
+            $contentType = $response->getHeaders()['content-type'][0] ?? '';
         } catch (\Throwable $th) {
             throw new AppException('Récupération de la légende GetLegendGraphic du service WMS-Vecteur échouée', Response::HTTP_INTERNAL_SERVER_ERROR, [], $th);
+        }
+
+        // un WMS répond 200 avec une ServiceException XML quand il ne sait pas dessiner la légende
+        if (!str_starts_with(strtolower($contentType), 'image/')) {
+            throw new AppException('La légende du flux WMS-Vecteur n’a pas pu être récupérée. Vérifiez le style du flux puis réessayez.', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $styleFilesDir = $this->getParameter('style_files_path');
@@ -360,7 +402,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     /**
      * @return array<mixed>
      */
-    private function saveLegendInAnnexe(string $datastoreId, string $storedDataId, string $legendFilePath, string $datasheetName): array
+    private function saveLegendInAnnexe(string $datastoreId, string $storedDataId, string $legendFilePath, ?string $datasheetName): array
     {
         $path = "/legend/{$storedDataId}.png";
 
@@ -371,10 +413,10 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             return $this->annexeApiService->replaceFile($datastoreId, $existingAnnexe['_id'], $legendFilePath);
         }
 
-        $labels = [
-            CommonTags::DATASHEET_NAME.'='.$datasheetName,
-            'type=legend',
-        ];
+        $labels = ['type=legend'];
+        if (null !== $datasheetName) {
+            $labels[] = CommonTags::DATASHEET_NAME.'='.$datasheetName;
+        }
 
         return $this->annexeApiService->add($datastoreId, $legendFilePath, [$path], $labels, true);
     }

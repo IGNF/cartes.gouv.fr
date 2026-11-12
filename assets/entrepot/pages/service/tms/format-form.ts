@@ -28,11 +28,8 @@ const format = (technicalName: string, vectorDbId: string, values: PyramidVector
         composition: composition,
         tippecanoe: values.tippecanoe,
         vectordb_id: vectorDbId,
-        email_notification: values.sample!.email_notification === true,
+        email_notification: values.email_notification === true,
     };
-    if (values.sample!.is_sample === "true") {
-        result["area"] = values.sample!.area;
-    }
 
     return result;
 };

@@ -20,6 +20,8 @@ const { i18n } = declareComponentKeys<
     | "section.access"
     | "type.legend"
     | "type.help_link"
+    | "pyramid_raster.hint"
+    | "pyramid_raster.link"
     | "type.wfs"
     | "type.wms"
     | "type.tms"
@@ -134,6 +136,8 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "section.access": "Droits et accès",
     "type.legend": "Type de flux",
     "type.help_link": "Comment choisir le type de flux à publier ?",
+    "pyramid_raster.hint": "Pour publier un WMS raster, générez d’abord une pyramide de tuiles raster à partir d’un flux WMS-Vecteur.",
+    "pyramid_raster.link": "Créer une pyramide raster",
     "type.wfs": "Flux WFS",
     "type.wms": "Flux WMS",
     "type.tms": "Flux TMS",
@@ -251,6 +255,8 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "section.access": "Rights and access",
     "type.legend": "Service type",
     "type.help_link": "How to choose the type of service to publish?",
+    "pyramid_raster.hint": "To publish a raster WMS, first generate a raster tile pyramid from a vector WMS service.",
+    "pyramid_raster.link": "Create a raster pyramid",
     "type.wfs": "WFS service",
     "type.wms": "WMS service",
     "type.tms": "TMS service",
