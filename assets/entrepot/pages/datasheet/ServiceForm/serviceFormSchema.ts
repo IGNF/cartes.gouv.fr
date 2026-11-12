@@ -49,18 +49,30 @@ type SchemaDeps = {
 // undefined : inchangée, null : supprimée, File : nouvelle image
 const imageFile = z.instanceof(File).nullish();
 
+// fichier modifié ou déplacé sur le disque après son choix : le navigateur refuse de le lire
+type StyleFileError = SldError | { code: "unreadable" };
+
 // un même fichier n’est relu qu’une fois par table, même quand le formulaire revalide à chaque changement
-const sldValidations = new WeakMap<File, Map<string, Promise<SldError[]>>>();
+const sldValidations = new WeakMap<File, Map<string, Promise<StyleFileError[]>>>();
 // shortcut: lu en UTF-8 ; noms de table GeoPackage en ASCII (GpkgFormatHandler), autres formats non contrôlés, à revoir si un nom accentué est refusé à tort
-const validateSldFile = (file: File, tableName: string): Promise<SldError[]> => {
-    const byTable = sldValidations.get(file) ?? new Map<string, Promise<SldError[]>>();
+const validateSldFile = (file: File, tableName: string): Promise<StyleFileError[]> => {
+    const byTable = sldValidations.get(file) ?? new Map<string, Promise<StyleFileError[]>>();
     sldValidations.set(file, byTable);
-    const validation = byTable.get(tableName) ?? file.text().then((text) => validateSld(text, tableName));
+    const validation =
+        byTable.get(tableName) ??
+        file
+            .text()
+            .then((text) => validateSld(text, tableName))
+            .catch((): StyleFileError[] => {
+                // échec non gardé : le prochain envoi relit le fichier
+                byTable.delete(tableName);
+                return [{ code: "unreadable" }];
+            });
     byTable.set(tableName, validation);
     return validation;
 };
 
-const sldErrorMessage = (t: T, error: SldError): string =>
+const sldErrorMessage = (t: T, error: StyleFileError): string =>
     error.code === "layer_name" ? t("validation.table.style.layer_name", { expected: error.expected }) : t(`validation.table.style.${error.code}`);
 
 export const buildServiceFormSchema = ({ t, type, existingLayerNames, layerNamePrefix, availableAccesses }: SchemaDeps) => {

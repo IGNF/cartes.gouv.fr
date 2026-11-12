@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { buildServiceFormSchema, type ServiceAccess, serviceFormDefaultValues, type ServiceFormValues, type ServiceType } from "./serviceFormSchema";
 
@@ -111,6 +111,13 @@ describe("buildServiceFormSchema", () => {
                 "tables.0.style": "validation.table.style.layer_name",
             });
             expect(await issueMessages(wms({ selected: false, style: undefined }), undefined, "wms")).toEqual({ tables: "validation.tables.required" });
+        });
+
+        it("signale un fichier illisible sans garder l’échec", async () => {
+            const style = new File([sld()], "communes.sld");
+            vi.spyOn(style, "text").mockRejectedValueOnce(new DOMException("modifié sur le disque", "NotReadableError"));
+            expect(await issueMessages(wms({ style }), undefined, "wms")).toEqual({ "tables.0.style": "validation.table.style.unreadable" });
+            expect(await issueMessages(wms({ style }), undefined, "wms")).toEqual({});
         });
     });
 });

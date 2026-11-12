@@ -96,6 +96,7 @@ const { i18n } = declareComponentKeys<
     | "validation.table.style.required"
     | "validation.table.style.extension"
     | "validation.table.style.empty"
+    | "validation.table.style.unreadable"
     | "validation.table.style.malformed"
     | "validation.table.style.root"
     | "validation.table.style.version"
@@ -210,6 +211,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "validation.table.style.required": "Le fichier de style de la table est obligatoire",
     "validation.table.style.extension": "Le fichier de style doit être au format SLD",
     "validation.table.style.empty": "Le fichier de style est vide",
+    "validation.table.style.unreadable": "Le fichier de style n’a pas pu être lu : choisissez-le à nouveau",
     "validation.table.style.malformed": "Le fichier de style n’est pas un XML valide",
     "validation.table.style.root":
         "Le fichier n’est pas un style SLD : la racine doit être StyledLayerDescriptor dans l’espace de noms http://www.opengis.net/sld",
@@ -321,6 +323,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "validation.table.style.required": "The table style file is required",
     "validation.table.style.extension": "The style file must be an SLD file",
     "validation.table.style.empty": "The style file is empty",
+    "validation.table.style.unreadable": "The style file could not be read: select it again",
     "validation.table.style.malformed": "The style file is not valid XML",
     "validation.table.style.root": "The file is not an SLD style: the root must be StyledLayerDescriptor in the http://www.opengis.net/sld namespace",
     "validation.table.style.version": "The SLD version must be 1.0.0 or 1.1.0",
