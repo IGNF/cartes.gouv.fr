@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -102,9 +101,6 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
     // création d'un service
     const [serviceType, setServiceType] = useState<ServiceTypes>();
 
-    const [technicalName, setTechnicalName] = useState<string>(vectorDb.name);
-    const [technicalNameError, setTechnicalNameError] = useState<string>();
-
     // description de vectordb
     const [showDescription, toggleShowDescription] = useToggle();
 
@@ -189,13 +185,10 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                 break;
 
             case "tms":
-                if (!technicalName) {
-                    return;
-                }
                 void navigate({
                     to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout",
                     params: { datastoreId },
-                    search: { vectorDbId: vectorDb._id, technicalName, datasheetName },
+                    search: { vectorDbId: vectorDb._id, datasheetName },
                 });
                 break;
 
@@ -328,21 +321,6 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                             },
                         ]}
                     />
-                    {serviceType && serviceType === "tms" && (
-                        <Input
-                            label={t("tile_technical_name")}
-                            hintText={t("tile_technical_name_hint_text")}
-                            nativeInputProps={{
-                                defaultValue: technicalName,
-                                onChange: (e) => {
-                                    setTechnicalName(e.currentTarget.value ?? undefined);
-                                    setTechnicalNameError(e.currentTarget.value ? undefined : t("technical_name_is_mandatory"));
-                                },
-                            }}
-                            state={technicalNameError ? "error" : "default"}
-                            stateRelatedMessage={technicalNameError ?? undefined}
-                        />
-                    )}
                 </serviceTypeChoiceModal.Component>,
                 document.body
             )}

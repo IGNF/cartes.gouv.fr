@@ -23,7 +23,17 @@ const { i18n } = declareComponentKeys<
     | "generate_pyramid"
     | "generate_sample"
     | "pyramid_creation_launch_in_progress"
-    | "back_to_data_list"
+    | "vector_db.label"
+    | "vector_db.placeholder"
+    | "vector_db.error.mandatory"
+    | "vector_db.list_loading"
+    | "technical_name.label"
+    | "technical_name.explanation"
+    | "technical_name.error.mandatory"
+    | "technical_name.error.regex"
+    | "no_vector_db.title"
+    | "no_vector_db.description"
+    | "back_to_datasheet"
 >()("PyramidVectorGenerateForm");
 export type I18n = typeof i18n;
 
@@ -66,7 +76,18 @@ export const PyramidVectorGenerateFormFrTranslations: Translations<"fr">["Pyrami
     generate_pyramid: "Générer la pyramide complète",
     generate_sample: "Générer l’échantillon",
     pyramid_creation_launch_in_progress: "Demande de création de la pyramide de tuiles en cours ...",
-    back_to_data_list: "Retour à mes données",
+    "vector_db.label": "Base de données vecteur",
+    "vector_db.placeholder": "Sélectionnez une base de données",
+    "vector_db.error.mandatory": "La base de données vecteur est obligatoire",
+    "vector_db.list_loading": "Chargement des bases de données vecteur...",
+    "technical_name.label": "Nom technique de la pyramide de tuiles vectorielles",
+    "technical_name.explanation": "Nom de la pyramide dans votre espace de travail, il ne sera pas publié en ligne.",
+    "technical_name.error.mandatory": "Le nom technique de la pyramide de tuiles vectorielles est obligatoire",
+    "technical_name.error.regex":
+        "Le nom technique doit commencer par une lettre ou un underscore et ne contenir que des lettres, chiffres, tirets (-), underscores (_) ou points (.)",
+    "no_vector_db.title": "Aucune base de données vecteur disponible",
+    "no_vector_db.description": "La pyramide de tuiles vectorielles est générée à partir d’une base de données vecteur intégrée de cette fiche de données.",
+    back_to_datasheet: "Retour à la fiche de données",
 };
 
 export const PyramidVectorGenerateFormEnTranslations: Translations<"en">["PyramidVectorGenerateForm"] = {
@@ -90,5 +111,15 @@ export const PyramidVectorGenerateFormEnTranslations: Translations<"en">["Pyrami
     generate_pyramid: undefined,
     generate_sample: undefined,
     pyramid_creation_launch_in_progress: undefined,
-    back_to_data_list: undefined,
+    "vector_db.label": undefined,
+    "vector_db.placeholder": undefined,
+    "vector_db.error.mandatory": undefined,
+    "vector_db.list_loading": undefined,
+    "technical_name.label": undefined,
+    "technical_name.explanation": undefined,
+    "technical_name.error.mandatory": undefined,
+    "technical_name.error.regex": undefined,
+    "no_vector_db.title": undefined,
+    "no_vector_db.description": undefined,
+    back_to_datasheet: undefined,
 };

@@ -4,31 +4,31 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
+import Select from "@codegouvfr/react-dsfr/SelectNext";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FC, useCallback, useState } from "react";
+import { skipToken, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FC, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import type { PyramidRaster } from "../../../../../@types/app";
-import type { ConfigurationWmsVectorDetailsContent } from "../../../../../@types/entrepot";
-import Main from "../../../../../components/Layout/Main";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
-import LoadingText from "../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../components/Utils/Wait";
-import ZoomRange from "../../../../../components/Utils/ZoomRange";
-import olDefaults from "../../../../../data/ol-defaults.json";
-import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
-import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
-import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { ApiError } from "../../../../../modules/jsonFetch";
-import { getApiErrorMessage } from "../../../../../modules/apiError";
-import { bboxToWkt, regex } from "../../../../../utils";
+import { OfferingTypeEnum, type PyramidRaster, type Service } from "@/@types/app";
+import type { ConfigurationWmsVectorDetailsContent } from "@/@types/entrepot";
+import Main from "@/components/Layout/Main";
+import LoadingText from "@/components/Utils/LoadingText";
+import Wait from "@/components/Utils/Wait";
+import ZoomRange from "@/components/Utils/ZoomRange";
+import olDefaults from "@/data/ol-defaults.json";
+import useServiceQuery from "@/hooks/queries/useServiceQuery";
+import useScrollToTopEffect from "@/hooks/useScrollToTopEffect";
+import { useTranslation } from "@/i18n/i18n";
+import RQKeys from "@/modules/entrepot/RQKeys";
+import { ApiError } from "@/modules/jsonFetch";
+import { getApiErrorMessage } from "@/modules/apiError";
+import { bboxToWkt, regex } from "@/utils";
+import { isOfferingUnavailable } from "@/utils/offering";
 import api from "../../../../api";
-import { DatasheetViewActiveTabEnum } from "../../../datasheet/DatasheetView/DatasheetView/types";
 
 const STEPS = {
     TECHNICAL_NAME: 1,
@@ -36,6 +36,7 @@ const STEPS = {
 };
 
 type PyramidRasterGenerateFormType = {
+    wmsv_offering_id: string;
     technical_name: string;
     zoom_range: number[];
     email_notification: boolean;
@@ -43,23 +44,46 @@ type PyramidRasterGenerateFormType = {
 
 type PyramidRasterGenerateFormProps = {
     datastoreId: string;
-    offeringId: string;
     datasheetName: string;
+    /** flux WMS-V présélectionné */
+    offeringId?: string;
 };
-const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datastoreId, offeringId, datasheetName }) => {
+const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datastoreId, datasheetName, offeringId }) => {
     const navigate = useNavigate();
     const { t } = useTranslation("PyramidRasterGenerateForm");
     const { t: tCommon } = useTranslation("Common");
 
     const [currentStep, setCurrentStep] = useState(STEPS.TECHNICAL_NAME);
 
-    const serviceQuery = useServiceQuery(datastoreId, offeringId);
-    const bbox = (serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent | undefined)?.bbox;
+    const datasheetView = {
+        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
+        params: { datastoreId, datasheetName },
+    } as const;
+
+    // même requête que l’onglet Flux : servie par le cache
+    const serviceListQuery = useQuery<Service[], ApiError>({
+        queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
+        staleTime: 60000,
+        retry: false,
+    });
+    const wmsvServices = useMemo(
+        () => (serviceListQuery.data ?? []).filter((service) => service.type === OfferingTypeEnum.WMSVECTOR && !isOfferingUnavailable(service.status)),
+        [serviceListQuery.data]
+    );
 
     const queryClient = useQueryClient();
 
     const schemas: Record<number, yup.AnyObjectSchema> = {};
     schemas[STEPS.TECHNICAL_NAME] = yup.object({
+        // flux présélectionné par l’URL mais indisponible : refusé comme un choix vide
+        wmsv_offering_id: yup
+            .string()
+            .required(t("wmsv_service.error.mandatory"))
+            .oneOf(
+                wmsvServices.map((service) => service._id),
+                t("wmsv_service.error.mandatory")
+            ),
         technical_name: yup
             .string()
             .typeError(t("technical_name.error.mandatory"))
@@ -84,6 +108,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         resolver: yupResolver(schemas[currentStep]),
         mode: "onChange",
         defaultValues: {
+            wmsv_offering_id: offeringId ?? "",
             technical_name: "",
             zoom_range: [4, 16],
             email_notification: true,
@@ -100,12 +125,15 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     } = form;
 
     const zoomRange = watch("zoom_range");
+    const selectedOfferingId = watch("wmsv_offering_id");
+
+    const serviceQuery = useServiceQuery(datastoreId, selectedOfferingId, selectedOfferingId === "" ? { queryFn: skipToken } : undefined);
+    const bbox = (serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent | undefined)?.bbox;
 
     const generatePyramidRasterMutation = useMutation<PyramidRaster, ApiError>({
         mutationFn: () => {
             const formData = {
                 ...getFormValues(),
-                wmsv_offering_id: offeringId,
                 wmsv_config_bbox: bboxToWkt(bbox!),
             };
 
@@ -114,11 +142,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         onSuccess() {
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
-            void navigate({
-                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                params: { datastoreId, datasheetName },
-                search: { activeTab: "dataset" },
-            });
+            void navigate({ ...datasheetView, search: { activeTab: "dataset" } });
         },
     });
 
@@ -131,7 +155,8 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     const nextStep = useCallback(async () => {
         const isStepValid = await trigger(undefined, { shouldFocus: true }); // demande de valider le formulaire
         if (!isStepValid) return; // ne fait rien si formulaire invalide
-        // formulaire est valide
+        // l’emprise à moissonner vient du flux choisi
+        if (bbox === undefined) return;
         if (currentStep < Object.values(STEPS).length) {
             // on passe à la prochaine étape du formulaire
             setCurrentStep((currentStep) => currentStep + 1);
@@ -139,139 +164,156 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
             // on est à la dernière étape du formulaire donc on envoie la sauce
             generatePyramidRaster();
         }
-    }, [currentStep, generatePyramidRaster, trigger]);
+    }, [currentStep, generatePyramidRaster, trigger, bbox]);
 
-    return (
-        <Main title={t("title")}>
-            <h1>{t("title")}</h1>
+    const renderContent = () => {
+        if (serviceListQuery.isPending) {
+            return <LoadingText as="p" message={t("wmsv-service.loading")} withSpinnerIcon />;
+        }
 
-            {serviceQuery.isLoading ? (
-                <LoadingText as="h2" message={t("wmsv-service.loading")} />
-            ) : serviceQuery.error !== null ? (
+        if (serviceListQuery.isError) {
+            return (
                 <Alert
                     severity="error"
                     closable={false}
                     title={t("wmsv-service.fetch_failed")}
                     description={
                         <>
-                            <p>{getApiErrorMessage(serviceQuery.error)}</p>
+                            <p>{getApiErrorMessage(serviceListQuery.error)}</p>
+                            <Button linkProps={{ ...datasheetView, search: { activeTab: "services" } }}>{t("back_to_datasheet")}</Button>
+                        </>
+                    }
+                />
+            );
+        }
+
+        if (wmsvServices.length === 0) {
+            return (
+                <Alert
+                    severity="info"
+                    closable={false}
+                    title={t("no_wmsv_service.title")}
+                    description={
+                        <>
+                            <p>{t("no_wmsv_service.description")}</p>
                             <Button
                                 linkProps={{
-                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout",
                                     params: { datastoreId, datasheetName },
-                                    search: { activeTab: DatasheetViewActiveTabEnum.Services },
+                                    search: { type: "wms" },
                                 }}
                             >
-                                {t("back_to_datasheet")}
+                                {t("no_wmsv_service.create_service")}
                             </Button>
                         </>
                     }
                 />
-            ) : bbox === undefined ? (
-                <Alert
-                    severity="error"
-                    closable={false}
-                    title={t("wmsv-service.bbox_not_found")}
-                    description={
-                        <Button
-                            linkProps={{
-                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                                params: { datastoreId, datasheetName },
-                                search: { activeTab: DatasheetViewActiveTabEnum.Services },
-                            }}
-                        >
-                            {t("back_to_datasheet")}
-                        </Button>
-                    }
+            );
+        }
+
+        return (
+            <>
+                <Stepper
+                    currentStep={currentStep}
+                    stepCount={Object.values(STEPS).length}
+                    nextTitle={currentStep < STEPS.ZOOM_RANGE && t("step.title", { stepNumber: currentStep + 1 })}
+                    title={t("step.title", { stepNumber: currentStep })}
                 />
-            ) : (
-                <>
-                    <Stepper
-                        currentStep={currentStep}
-                        stepCount={Object.values(STEPS).length}
-                        nextTitle={currentStep < STEPS.ZOOM_RANGE && t("step.title", { stepNumber: currentStep + 1 })}
-                        title={t("step.title", { stepNumber: currentStep })}
+
+                {generatePyramidRasterMutation.error && (
+                    <Alert closable description={getApiErrorMessage(generatePyramidRasterMutation.error)} severity="error" title={tCommon("error")} />
+                )}
+
+                <div className={fr.cx(currentStep !== STEPS.TECHNICAL_NAME && "fr-hidden")}>
+                    <Select
+                        label={t("wmsv_service.label")}
+                        placeholder={t("wmsv_service.placeholder")}
+                        options={wmsvServices.map((service) => ({ value: service._id, label: `${service.configuration.name} - ${service.layer_name}` }))}
+                        state={errors.wmsv_offering_id?.message !== undefined ? "error" : "default"}
+                        stateRelatedMessage={errors.wmsv_offering_id?.message}
+                        nativeSelectProps={register("wmsv_offering_id")}
                     />
-
-                    <p>{tCommon("mandatory_fields")}</p>
-
-                    {generatePyramidRasterMutation.error && (
-                        <Alert closable description={getApiErrorMessage(generatePyramidRasterMutation.error)} severity="error" title={tCommon("error")} />
+                    {serviceQuery.isError ? (
+                        <Alert
+                            className={fr.cx("fr-mb-3w")}
+                            severity="error"
+                            small
+                            description={`${t("wmsv-service.fetch_failed")} : ${getApiErrorMessage(serviceQuery.error)}`}
+                        />
+                    ) : (
+                        serviceQuery.isSuccess &&
+                        bbox === undefined && <Alert className={fr.cx("fr-mb-3w")} severity="error" small description={t("wmsv-service.bbox_not_found")} />
                     )}
 
-                    <div className={fr.cx(currentStep !== STEPS.TECHNICAL_NAME && "fr-hidden")}>
-                        <h3>{t("technical_name.lead_text")}</h3>
-                        <Input
-                            label={t("technical_name.label")}
-                            hintText={t("technical_name.explanation")}
-                            nativeInputProps={{
-                                ...register("technical_name"),
-                            }}
-                            state={errors.technical_name?.message !== undefined ? "error" : "default"}
-                            stateRelatedMessage={errors.technical_name?.message}
-                        />
-                    </div>
+                    <h3>{t("technical_name.lead_text")}</h3>
+                    <Input
+                        label={t("technical_name.label")}
+                        hintText={t("technical_name.explanation")}
+                        nativeInputProps={{
+                            ...register("technical_name"),
+                        }}
+                        state={errors.technical_name?.message !== undefined ? "error" : "default"}
+                        stateRelatedMessage={errors.technical_name?.message}
+                    />
+                </div>
 
-                    <div className={fr.cx(currentStep !== STEPS.ZOOM_RANGE && "fr-hidden")}>
-                        <h3>{t("zoom_range.lead_text")}</h3>
-                        <p>{t("zoom_range.explanation")}</p>
-                        {currentStep === STEPS.ZOOM_RANGE && (
-                            <>
-                                <ZoomRange
-                                    min={olDefaults.zoom_levels.TOP}
-                                    max={olDefaults.zoom_levels.BOTTOM}
-                                    values={zoomRange}
-                                    onChange={(values) => setFormValue("zoom_range", values)}
-                                />
-                                {errors.zoom_range?.message !== undefined && <p className={fr.cx("fr-error-text")}>{errors.zoom_range?.message}</p>}
-                            </>
-                        )}
-                        <hr className={fr.cx("fr-mt-3w")} />
-                        <Checkbox
-                            options={[
-                                {
-                                    label: tCommon("email_notification"),
-                                    nativeInputProps: {
-                                        ...register("email_notification"),
-                                    },
+                <div className={fr.cx(currentStep !== STEPS.ZOOM_RANGE && "fr-hidden")}>
+                    <h3>{t("zoom_range.lead_text")}</h3>
+                    <p>{t("zoom_range.explanation")}</p>
+                    {currentStep === STEPS.ZOOM_RANGE && (
+                        <>
+                            <ZoomRange
+                                min={olDefaults.zoom_levels.TOP}
+                                max={olDefaults.zoom_levels.BOTTOM}
+                                values={zoomRange}
+                                onChange={(values) => setFormValue("zoom_range", values)}
+                            />
+                            {errors.zoom_range?.message !== undefined && <p className={fr.cx("fr-error-text")}>{errors.zoom_range?.message}</p>}
+                        </>
+                    )}
+                    <hr className={fr.cx("fr-mt-3w")} />
+                    <Checkbox
+                        options={[
+                            {
+                                label: tCommon("email_notification"),
+                                nativeInputProps: {
+                                    ...register("email_notification"),
                                 },
-                            ]}
-                        />
-                    </div>
-
-                    <ButtonsGroup
-                        className={fr.cx("fr-mt-2w")}
-                        alignment="between"
-                        buttons={[
-                            {
-                                children: tCommon("previous_step"),
-                                iconId: "fr-icon-arrow-left-fill",
-                                priority: "tertiary",
-                                onClick: previousStep,
-                                disabled: currentStep === STEPS.TECHNICAL_NAME,
-                            },
-                            {
-                                children: currentStep < Object.values(STEPS).length ? tCommon("continue") : tCommon("publish"),
-                                onClick: () => void nextStep(),
                             },
                         ]}
-                        inlineLayoutWhen="always"
                     />
-                </>
-            )}
+                </div>
 
+                <ButtonsGroup
+                    className={fr.cx("fr-mt-2w")}
+                    alignment="between"
+                    buttons={[
+                        {
+                            children: tCommon("previous_step"),
+                            iconId: "fr-icon-arrow-left-fill",
+                            priority: "tertiary",
+                            onClick: previousStep,
+                            disabled: currentStep === STEPS.TECHNICAL_NAME,
+                        },
+                        {
+                            children: currentStep < Object.values(STEPS).length ? tCommon("continue") : tCommon("publish"),
+                            onClick: () => void nextStep(),
+                        },
+                    ]}
+                    inlineLayoutWhen="always"
+                />
+            </>
+        );
+    };
+
+    return (
+        <Main title={`${t("title")} - ${datasheetName}`} breadcrumbSeparator>
+            <h1 className={fr.cx("fr-mb-1w")}>{t("title")}</h1>
+            <p className={fr.cx("fr-text--sm")}>{tCommon("mandatory_fields")}</p>
+            {renderContent()}
             {generatePyramidRasterMutation.isPending && (
                 <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon largeIcon={true} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("generate.in_progress")}</h6>
-                            </div>
-                        </div>
-                    </div>
+                    <LoadingText as="h6" message={t("generate.in_progress")} withSpinnerIcon />
                 </Wait>
             )}
         </Main>

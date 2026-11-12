@@ -2,15 +2,17 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Input from "@codegouvfr/react-dsfr/Input";
+import Select from "@codegouvfr/react-dsfr/SelectNext";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useEffect, useState } from "react";
+import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FC, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { type StoredDataRelation, type VectorDb } from "../../../../../@types/app";
+import { type DatasheetDetailed, type StoredDataRelation, StoredDataStatusEnum, type VectorDb } from "../../../../../@types/app";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
 import olDefaults from "../../../../../data/ol-defaults.json";
@@ -19,6 +21,7 @@ import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../../modules/apiError";
+import { regex } from "../../../../../utils";
 import api from "../../../../api";
 import TableSelection from "../../common/TableSelection/TableSelection";
 import formatForm from "../format-form";
@@ -29,6 +32,8 @@ import TippeCanoe from "../tippecanoes/Tippecanoe";
 import Main from "../../../../../components/Layout/Main";
 
 export type PyramidVectorGenerateFormValuesType = {
+    vectordb_id?: string;
+    technical_name?: string;
     selected_tables?: string[];
     table_attributes?: Record<string, string[]>;
     bottom_zoom_level?: number;
@@ -47,18 +52,45 @@ const STEPS = {
 
 type PyramidVectorNewProps = {
     datastoreId: string;
-    vectorDbId: string;
-    technicalName: string;
+    datasheetName: string;
+    /** base vecteur présélectionnée */
+    vectorDbId?: string;
 };
 
-const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, technicalName }) => {
+const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, datasheetName, vectorDbId }) => {
     const navigate = useNavigate();
     const { t } = useTranslation("PyramidVectorGenerateForm");
     const { t: tCommon } = useTranslation("Common");
 
     // Definition du schema
+    const datasheetView = {
+        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
+        params: { datastoreId, datasheetName },
+    } as const;
+
+    // même requête que la page de la fiche : servie par le cache
+    const datasheetQuery = useQuery<DatasheetDetailed, ApiError>({
+        queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
+        staleTime: 60000,
+        retry: false,
+    });
+    const vectorDbs = useMemo(
+        () => (datasheetQuery.data?.vector_db_list ?? []).filter((vectorDb) => vectorDb.status === StoredDataStatusEnum.GENERATED),
+        [datasheetQuery.data]
+    );
+
     const schema: Record<number, yup.AnySchema> = {};
     schema[STEPS.TABLES_SELECTION] = yup.object({
+        // base présélectionnée par l’URL mais pas générée : refusée comme un choix vide
+        vectordb_id: yup
+            .string()
+            .required(t("vector_db.error.mandatory"))
+            .oneOf(
+                vectorDbs.map((vectorDb) => vectorDb._id),
+                t("vector_db.error.mandatory")
+            ),
+        technical_name: yup.string().required(t("technical_name.error.mandatory")).matches(regex.technical_name, t("technical_name.error.regex")),
         selected_tables: yup.array(yup.string()).min(1, t("step_tables.error.required")).required(t("step_tables.error.required")),
     });
     schema[STEPS.ATTRIBUTES_SELECTION] = yup.object({
@@ -97,15 +129,17 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
 
     const queryClient = useQueryClient();
 
-    const vectorDbQuery = useQuery({
-        queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
-        queryFn: () => api.storedData.get<VectorDb>(datastoreId, vectorDbId),
-        staleTime: 600000,
-    });
-
     const form = useForm<PyramidVectorGenerateFormValuesType>({
         resolver: yupResolver(schema[currentStep] as yup.AnyObjectSchema),
         mode: "onChange",
+        defaultValues: { vectordb_id: vectorDbId ?? "", technical_name: "" },
+    });
+
+    const selectedVectorDbId = form.watch("vectordb_id") ?? "";
+    const vectorDbQuery = useQuery({
+        queryKey: RQKeys.datastore_stored_data(datastoreId, selectedVectorDbId),
+        queryFn: selectedVectorDbId === "" ? skipToken : ({ signal }) => api.storedData.get<VectorDb>(datastoreId, selectedVectorDbId, { signal }),
+        staleTime: 600000,
     });
     const {
         formState: { errors },
@@ -146,24 +180,16 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
         }
 
         const values = getFormValues();
-        const formatted = formatForm(technicalName, vectorDbId, values);
+        const formatted = formatForm(values.technical_name ?? "", values.vectordb_id ?? "", values);
 
         setIsSubmitting(true);
 
         api.pyramidVector
             .add(datastoreId, formatted)
             .then(() => {
-                if (vectorDbQuery.data?.tags?.datasheet_name) {
-                    void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name) });
-                    void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
-                    void navigate({
-                        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                        params: { datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name },
-                        search: { activeTab: "dataset" },
-                    });
-                } else {
-                    void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } });
-                }
+                void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+                void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
+                void navigate({ ...datasheetView, search: { activeTab: "dataset" } });
             })
             .catch((error) => {
                 setValidationError(error as ApiError);
@@ -173,79 +199,129 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
             });
     };
 
-    return (
-        <Main title={t("title")}>
-            <h1>{t("title")}</h1>
+    // changer de base vide les choix faits sur les tables de la précédente
+    const changeVectorDb = () => {
+        form.setValue("selected_tables", []);
+        form.setValue("table_attributes", undefined);
+        form.setValue("table_zoom_levels", undefined);
+    };
 
-            {vectorDbQuery.isLoading ? (
-                <LoadingText message={t("stored_data.loading")} />
-            ) : vectorDbQuery.data === undefined ? (
+    const renderContent = () => {
+        if (datasheetQuery.isPending) {
+            return <LoadingText as="p" message={t("vector_db.list_loading")} withSpinnerIcon />;
+        }
+
+        if (datasheetQuery.isError) {
+            return (
                 <Alert
                     severity="error"
                     closable={false}
                     title={t("stored_data.fetch_failed")}
                     description={
-                        <Button linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees", params: { datastoreId } }}>{t("back_to_data_list")}</Button>
+                        <>
+                            <p>{getApiErrorMessage(datasheetQuery.error)}</p>
+                            <Button linkProps={{ ...datasheetView, search: { activeTab: "dataset" } }}>{t("back_to_datasheet")}</Button>
+                        </>
                     }
                 />
-            ) : (
-                <>
-                    <Stepper
-                        currentStep={currentStep}
-                        stepCount={Object.values(STEPS).length}
-                        nextTitle={currentStep < STEPS.SAMPLE && t("step.title", { stepNumber: currentStep + 1 })}
-                        title={t("step.title", { stepNumber: currentStep })}
+            );
+        }
+
+        if (vectorDbs.length === 0) {
+            return (
+                <Alert
+                    severity="info"
+                    closable={false}
+                    title={t("no_vector_db.title")}
+                    description={
+                        <>
+                            <p>{t("no_vector_db.description")}</p>
+                            <Button linkProps={{ ...datasheetView, search: { activeTab: "dataset" } }}>{t("back_to_datasheet")}</Button>
+                        </>
+                    }
+                />
+            );
+        }
+
+        return (
+            <>
+                <Stepper
+                    currentStep={currentStep}
+                    stepCount={Object.values(STEPS).length}
+                    nextTitle={currentStep < STEPS.SAMPLE && t("step.title", { stepNumber: currentStep + 1 })}
+                    title={t("step.title", { stepNumber: currentStep })}
+                />
+                {validationError && (
+                    <Alert className="fr-preline" closable description={getApiErrorMessage(validationError)} severity="error" title={tCommon("error")} />
+                )}
+                <div className={fr.cx(currentStep !== STEPS.TABLES_SELECTION && "fr-hidden")}>
+                    <Select
+                        label={t("vector_db.label")}
+                        placeholder={t("vector_db.placeholder")}
+                        options={vectorDbs.map((vectorDb) => ({ value: vectorDb._id, label: vectorDb.name }))}
+                        state={errors.vectordb_id?.message !== undefined ? "error" : "default"}
+                        stateRelatedMessage={errors.vectordb_id?.message}
+                        nativeSelectProps={form.register("vectordb_id", { onChange: changeVectorDb })}
                     />
-                    {validationError && (
-                        <Alert className="fr-preline" closable description={getApiErrorMessage(validationError)} severity="error" title={tCommon("error")} />
-                    )}
+                    <Input
+                        label={t("technical_name.label")}
+                        hintText={t("technical_name.explanation")}
+                        nativeInputProps={form.register("technical_name")}
+                        state={errors.technical_name?.message !== undefined ? "error" : "default"}
+                        stateRelatedMessage={errors.technical_name?.message}
+                    />
+                </div>
+                {vectorDbQuery.isPending && selectedVectorDbId !== "" && <LoadingText as="p" message={t("stored_data.loading")} withSpinnerIcon />}
+                {vectorDbQuery.isError && (
+                    <Alert severity="error" small description={`${t("stored_data.fetch_failed")} : ${getApiErrorMessage(vectorDbQuery.error)}`} />
+                )}
+                {vectorDbQuery.data && (
                     <TableSelection filterGeometric={true} visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
-                    <TableAttributeSelection visible={currentStep === STEPS.ATTRIBUTES_SELECTION} form={form} selectedTables={selectedTables} />
-                    <TableZoomLevels visible={currentStep === STEPS.ZOOM_LEVELS} form={form} selectedTables={selectedTables} />
-                    <TippeCanoe
-                        visible={currentStep === STEPS.GENERALIZE_OPTIONS}
-                        state={errors.tippecanoe ? "error" : "default"}
-                        stateRelatedMessage={errors?.tippecanoe?.message as string}
-                        form={form}
-                    />
-                    <Sample visible={currentStep === STEPS.SAMPLE} bottomZoomLevel={bottomZoomLevel} form={form} />
-                    <ButtonsGroup
-                        className={fr.cx("fr-mt-2w")}
-                        alignment="between"
-                        buttons={[
-                            {
-                                children: tCommon("previous_step"),
-                                iconId: "fr-icon-arrow-left-fill",
-                                priority: "tertiary",
-                                onClick: previousStep,
-                                disabled: currentStep === STEPS.TABLES_SELECTION,
-                            },
-                            {
-                                children:
-                                    currentStep < Object.values(STEPS).length
-                                        ? tCommon("continue")
-                                        : sample?.is_sample === "true"
-                                          ? t("generate_sample")
-                                          : t("generate_pyramid"),
-                                onClick: () => void nextStep(),
-                            },
-                        ]}
-                        inlineLayoutWhen="always"
-                    />
-                </>
-            )}
+                )}
+                <TableAttributeSelection visible={currentStep === STEPS.ATTRIBUTES_SELECTION} form={form} selectedTables={selectedTables} />
+                <TableZoomLevels visible={currentStep === STEPS.ZOOM_LEVELS} form={form} selectedTables={selectedTables} />
+                <TippeCanoe
+                    visible={currentStep === STEPS.GENERALIZE_OPTIONS}
+                    state={errors.tippecanoe ? "error" : "default"}
+                    stateRelatedMessage={errors?.tippecanoe?.message as string}
+                    form={form}
+                />
+                <Sample visible={currentStep === STEPS.SAMPLE} bottomZoomLevel={bottomZoomLevel} form={form} />
+                <ButtonsGroup
+                    className={fr.cx("fr-mt-2w")}
+                    alignment="between"
+                    buttons={[
+                        {
+                            children: tCommon("previous_step"),
+                            iconId: "fr-icon-arrow-left-fill",
+                            priority: "tertiary",
+                            onClick: previousStep,
+                            disabled: currentStep === STEPS.TABLES_SELECTION,
+                        },
+                        {
+                            children:
+                                currentStep < Object.values(STEPS).length
+                                    ? tCommon("continue")
+                                    : sample?.is_sample === "true"
+                                      ? t("generate_sample")
+                                      : t("generate_pyramid"),
+                            onClick: () => void nextStep(),
+                        },
+                    ]}
+                    inlineLayoutWhen="always"
+                />
+            </>
+        );
+    };
+
+    return (
+        <Main title={`${t("title")} - ${datasheetName}`} breadcrumbSeparator>
+            <h1 className={fr.cx("fr-mb-1w")}>{t("title")}</h1>
+            <p className={fr.cx("fr-text--sm")}>{tCommon("mandatory_fields")}</p>
+            {renderContent()}
             {isSubmitting && (
                 <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("pyramid_creation_launch_in_progress")}</h6>
-                            </div>
-                        </div>
-                    </div>
+                    <LoadingText as="h6" message={t("pyramid_creation_launch_in_progress")} withSpinnerIcon />
                 </Wait>
             )}
         </Main>

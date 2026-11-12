@@ -9,6 +9,12 @@ const { i18n } = declareComponentKeys<
     | "wmsv-service.fetch_failed"
     | "wmsv-service.bbox_not_found"
     | "back_to_datasheet"
+    | "wmsv_service.label"
+    | "wmsv_service.placeholder"
+    | "wmsv_service.error.mandatory"
+    | "no_wmsv_service.title"
+    | "no_wmsv_service.description"
+    | "no_wmsv_service.create_service"
     | "technical_name.lead_text"
     | "technical_name.label"
     | "technical_name.explanation"
@@ -38,6 +44,12 @@ export const PyramidRasterGenerateFormFrTranslations: Translations<"fr">["Pyrami
     "wmsv-service.fetch_failed": "Récupération des informations sur le service WMS-Vecteur a échoué",
     "wmsv-service.bbox_not_found": "La bbox du service WMS-Vecteur n'a pas été trouvée, veuillez vérifier le service et la donnée stockée utilisée",
     back_to_datasheet: "Retour à la fiche de données",
+    "wmsv_service.label": "Flux WMS-Vecteur à moissonner",
+    "wmsv_service.placeholder": "Sélectionnez un flux",
+    "wmsv_service.error.mandatory": "Le flux WMS-Vecteur est obligatoire",
+    "no_wmsv_service.title": "Aucun flux WMS-Vecteur disponible",
+    "no_wmsv_service.description": "La pyramide de tuiles raster est générée à partir d’un flux WMS-Vecteur publié de cette fiche de données.",
+    "no_wmsv_service.create_service": "Créer un flux",
     "technical_name.lead_text": "Choisissez le nom technique de la pyramide de tuiles raster",
     "technical_name.label": "Nom technique de la pyramide de tuiles raster",
     "technical_name.explanation":
@@ -60,6 +72,12 @@ export const PyramidRasterGenerateFormEnTranslations: Translations<"en">["Pyrami
     "wmsv-service.fetch_failed": undefined,
     "wmsv-service.bbox_not_found": undefined,
     back_to_datasheet: undefined,
+    "wmsv_service.label": undefined,
+    "wmsv_service.placeholder": undefined,
+    "wmsv_service.error.mandatory": undefined,
+    "no_wmsv_service.title": undefined,
+    "no_wmsv_service.description": undefined,
+    "no_wmsv_service.create_service": undefined,
     "technical_name.error.mandatory": undefined,
     "technical_name.error.regex": undefined,
     "technical_name.lead_text": undefined,
