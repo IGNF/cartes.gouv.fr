@@ -1,4 +1,4 @@
-import type { PyramidRaster, Service } from "../../@types/app";
+import type { ConfigurationTypeEnum, PyramidRaster, Service } from "../../@types/app";
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 
@@ -47,7 +47,7 @@ const editWmsRasterWmts = (datastoreId: string, pyramidId: string, offeringId: s
     );
 };
 
-const publish = (datastoreId: string, pyramidId: string, type: string, formData: FormData) => {
+const publish = (datastoreId: string, pyramidId: string, type: ConfigurationTypeEnum.WMSRASTER | ConfigurationTypeEnum.WMTSTMS, formData: FormData) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_raster_wms_raster_wmts_publish", { datastoreId, pyramidId, type });
     return jsonFetch<Service>(url, { method: "POST" }, formData, true);
 };
