@@ -3157,6 +3157,43 @@
             ],
             "schemes": []
         },
+        "cartesgouvfr_api_wmsvector_publish": {
+            "tokens": [
+                [
+                    "text",
+                    "\/wmsvector\/publish"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
         "cartesgouvfr_api_wmsvector_add": {
             "tokens": [
                 [

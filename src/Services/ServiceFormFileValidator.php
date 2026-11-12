@@ -53,4 +53,42 @@ final readonly class ServiceFormFileValidator
 
         return $files;
     }
+
+    /**
+     * Un fichier SLD obligatoire par table, sous `style_files[<table>]`. Le contenu n’est pas contrôlé : le formulaire le valide, l’Entrepôt le refuse s’il est invalide.
+     *
+     * @param string[] $tableNames
+     *
+     * @return array<string, UploadedFile> par nom de table
+     */
+    public function styleFiles(Request $request, array $tableNames): array
+    {
+        // PHP garde tels quels les espaces et les points d’un nom de table placé entre crochets
+        $sent = $request->files->all('style_files');
+        $files = [];
+        $validator = $this->validator->startContext();
+        foreach ($tableNames as $tableName) {
+            $file = $sent[$tableName] ?? null;
+            $file = $file instanceof UploadedFile ? $file : null;
+            $validator->atPath(sprintf('style_files[%s]', $tableName))->validate($file, [
+                new Assert\NotNull(message: 'Le fichier de style de la table est obligatoire'),
+                // Symfony ne connaît pas l’extension sld ; finfo donne text/plain sans déclaration XML
+                new Assert\File(
+                    disallowEmptyMessage: 'Le fichier de style est vide',
+                    extensions: ['sld' => ['text/xml', 'application/xml', 'text/plain']],
+                    extensionsMessage: 'Le fichier de style doit être au format SLD',
+                ),
+            ]);
+            if ($file instanceof UploadedFile) {
+                $files[$tableName] = $file;
+            }
+        }
+
+        $violations = $validator->getViolations();
+        if (count($violations) > 0) {
+            throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($files, $violations));
+        }
+
+        return $files;
+    }
 }
