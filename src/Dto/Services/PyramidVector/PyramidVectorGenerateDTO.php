@@ -20,6 +20,7 @@ class PyramidVectorGenerateDTO
         /**
          * @var PyramidVectorCompositionDTO[]
          */
+        #[Assert\Count(min: 1, minMessage: 'pyramid_add.composition.required')]
         #[Assert\Valid]
         public readonly array $composition,
 

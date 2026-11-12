@@ -94,6 +94,22 @@ final class PyramidVectorAddRouteTest extends WebTestCase
         self::assertSame(['vectordb-1'], array_column(EntrepotMockResponseFactory::stored('stored_data'), '_id'));
     }
 
+    public function testEmptyCompositionAnswers422WithoutWriting(): void
+    {
+        $client = $this->client();
+
+        $client->xmlHttpRequest('POST', self::ADD_URL, server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
+            'technical_name' => 'pyramide_vecteur',
+            'tippecanoe' => '-zg',
+            'vectordb_id' => 'vectordb-1',
+            'composition' => [],
+        ], JSON_THROW_ON_ERROR));
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['composition'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
     private function client(): KernelBrowser
     {
         $client = self::createClient();

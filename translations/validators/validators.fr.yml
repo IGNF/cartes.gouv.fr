@@ -10,6 +10,7 @@ pyramid_add:
     technical_name_error: "Le nom technique est obligatoire"
     tippecanoe_error: "l’option de généralisation (tippecanoe) est obligatoire"
     composition:
+        required: "Veuillez choisir au moins une table"
         table_error: "Le nom de la table est obligatoire"
         attributes_error: "Il doit y avoir au moins un attribut"
         bottom_level_error: "Le niveau de zoom maximum doit être en {{min}} et {{max}}"
