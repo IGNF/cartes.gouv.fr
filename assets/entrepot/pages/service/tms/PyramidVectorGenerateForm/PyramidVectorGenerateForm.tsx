@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/SelectNext";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
@@ -25,7 +26,6 @@ import { regex } from "../../../../../utils";
 import api from "../../../../api";
 import TableSelection from "../../common/TableSelection/TableSelection";
 import formatForm from "../format-form";
-import Sample, { type SampleType } from "../sample/Sample";
 import TableAttributeSelection from "../tables/TableAttributeSelection";
 import TableZoomLevels from "../tables/TableZoomLevels";
 import TippeCanoe from "../tippecanoes/Tippecanoe";
@@ -36,8 +36,7 @@ export type PyramidVectorGenerateFormValuesType = {
     technical_name?: string;
     selected_tables?: string[];
     table_attributes?: Record<string, string[]>;
-    bottom_zoom_level?: number;
-    sample?: SampleType;
+    email_notification?: boolean;
     table_zoom_levels?: Record<string, number[]>;
     tippecanoe?: string;
 };
@@ -47,7 +46,6 @@ const STEPS = {
     ATTRIBUTES_SELECTION: 2,
     ZOOM_LEVELS: 3,
     GENERALIZE_OPTIONS: 4,
-    SAMPLE: 5,
 };
 
 type PyramidVectorNewProps = {
@@ -122,7 +120,6 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, dat
     schema[STEPS.GENERALIZE_OPTIONS] = yup.object({
         tippecanoe: yup.string().required(t("step_generalisation.tippecanoe_option.error.required")),
     });
-    schema[STEPS.SAMPLE] = yup.mixed().nullable().notRequired();
 
     /* l'etape courante */
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
@@ -132,7 +129,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, dat
     const form = useForm<PyramidVectorGenerateFormValuesType>({
         resolver: yupResolver(schema[currentStep] as yup.AnyObjectSchema),
         mode: "onChange",
-        defaultValues: { vectordb_id: vectorDbId ?? "", technical_name: "" },
+        defaultValues: { vectordb_id: vectorDbId ?? "", technical_name: "", email_notification: true },
     });
 
     const selectedVectorDbId = form.watch("vectordb_id") ?? "";
@@ -150,9 +147,6 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, dat
 
     const selectedTableNamesList: string[] | undefined = watch("selected_tables");
     const [selectedTables, setSelectedTables] = useState<StoredDataRelation[]>([]);
-
-    const bottomZoomLevel = watch("bottom_zoom_level", olDefaults.zoom_levels.BOTTOM);
-    const sample: SampleType | undefined = watch("sample");
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [validationError, setValidationError] = useState<ApiError>();
@@ -248,7 +242,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, dat
                 <Stepper
                     currentStep={currentStep}
                     stepCount={Object.values(STEPS).length}
-                    nextTitle={currentStep < STEPS.SAMPLE && t("step.title", { stepNumber: currentStep + 1 })}
+                    nextTitle={currentStep < STEPS.GENERALIZE_OPTIONS && t("step.title", { stepNumber: currentStep + 1 })}
                     title={t("step.title", { stepNumber: currentStep })}
                 />
                 {validationError && (
@@ -286,7 +280,10 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, dat
                     stateRelatedMessage={errors?.tippecanoe?.message as string}
                     form={form}
                 />
-                <Sample visible={currentStep === STEPS.SAMPLE} bottomZoomLevel={bottomZoomLevel} form={form} />
+                <div className={fr.cx(currentStep !== STEPS.GENERALIZE_OPTIONS && "fr-hidden")}>
+                    <hr className={fr.cx("fr-mt-3w")} />
+                    <Checkbox options={[{ label: tCommon("email_notification"), nativeInputProps: form.register("email_notification") }]} />
+                </div>
                 <ButtonsGroup
                     className={fr.cx("fr-mt-2w")}
                     alignment="between"
@@ -299,12 +296,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, dat
                             disabled: currentStep === STEPS.TABLES_SELECTION,
                         },
                         {
-                            children:
-                                currentStep < Object.values(STEPS).length
-                                    ? tCommon("continue")
-                                    : sample?.is_sample === "true"
-                                      ? t("generate_sample")
-                                      : t("generate_pyramid"),
+                            children: currentStep < Object.values(STEPS).length ? tCommon("continue") : t("generate_pyramid"),
                             onClick: () => void nextStep(),
                         },
                     ]}

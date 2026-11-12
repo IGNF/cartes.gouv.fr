@@ -8,10 +8,6 @@ wfs_add:
 pyramid_add:
     vector_id_error: "vectordbId est obligatoire"
     technical_name_error: "Le nom technique est obligatoire"
-    sample:
-        is_sample_error: "is_sample doit être ’true’ ou ’false’"
-        area_error: "area est obligatoire"
-        area_wkt: "area doit être une chaine au format WKT"
     tippecanoe_error: "l’option de généralisation (tippecanoe) est obligatoire"
     composition:
         table_error: "Le nom de la table est obligatoire"

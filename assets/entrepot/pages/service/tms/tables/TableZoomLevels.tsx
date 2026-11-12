@@ -30,13 +30,7 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
 
     const saveZoomLevels = useCallback(
         (zoomLevels: Record<string, number[]>) => {
-            let bottomLevel = -1;
-            Object.values(zoomLevels).forEach((levels) => {
-                if (levels[1] > bottomLevel) bottomLevel = levels[1];
-            });
-
             setFormValue("table_zoom_levels", zoomLevels);
-            setFormValue("bottom_zoom_level", bottomLevel === -1 ? olDefaults.zoom_levels.BOTTOM : bottomLevel);
         },
         [setFormValue]
     );

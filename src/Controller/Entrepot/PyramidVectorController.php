@@ -45,9 +45,6 @@ final class PyramidVectorController extends AbstractController implements ApiCon
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, #[MapRequestPayload] PyramidVectorGenerateDTO $dto): JsonResponse
     {
-        // TODO
-        // $samplePyramidId = $request->query->get('samplePyramidId', null);
-
         $vectordb = $this->storedDataApiService->get($datastoreId, $dto->vectordb_id)->array();
 
         // TODO Suppression de l'upload ?
@@ -71,10 +68,6 @@ final class PyramidVectorController extends AbstractController implements ApiCon
             'top_level' => strval($levels[0]),
             'tippecanoe_options' => $dto->tippecanoe,
         ];
-
-        if (!is_null($dto->area)) {
-            $parameters['area'] = $dto->area;
-        }
 
         $processing = $this->sandboxService->getProcGeneratePyramidVector($datastoreId);
 
@@ -121,7 +114,6 @@ final class PyramidVectorController extends AbstractController implements ApiCon
                 StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
                 StoredDataTags::VECTORDB_ID => $dto->vectordb_id,
                 StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
-                StoredDataTags::IS_SAMPLE => is_null($dto->area) ? 'false' : 'true',
             ], fn ($value) => null !== $value);
 
             $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();

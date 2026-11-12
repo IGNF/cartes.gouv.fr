@@ -11,9 +11,6 @@ class PyramidVectorGenerateDTO
         #[Assert\Regex(pattern: '/^[\w\-\.]+$/', message: 'pyramid_add.technical_name_regex')]
         public readonly string $technical_name,
 
-        #[Assert\Regex(pattern: '/^POLYGON/i', message: 'pyramid_add.sample.area_wkt')]
-        public readonly ?string $area,
-
         #[Assert\NotBlank(message: 'pyramid_add.tippecanoe_error')]
         public readonly string $tippecanoe,
 

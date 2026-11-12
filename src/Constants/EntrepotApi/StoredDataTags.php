@@ -11,5 +11,4 @@ final class StoredDataTags
     public const PROC_INT_ID = 'proc_int_id';
     public const VECTORDB_ID = 'vectordb_id';
     public const PROC_PYR_CREAT_ID = 'proc_pyr_creat_id';
-    public const IS_SAMPLE = 'is_sample';
 }

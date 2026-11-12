@@ -63,7 +63,6 @@ final class PyramidVectorAddRouteTest extends WebTestCase
             'proc_int_id' => 'proc-int-1',
             'vectordb_id' => 'vectordb-1',
             'proc_pyr_creat_id' => 'execution-2',
-            'is_sample' => 'false',
         ], EntrepotMockResponseFactory::stored('stored_data')[1]['tags']);
         self::assertSame('WAITING', EntrepotMockResponseFactory::stored('processings/executions')[0]['status']);
     }
@@ -78,7 +77,7 @@ final class PyramidVectorAddRouteTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSame(
-            ['vectordb_id' => 'vectordb-1', 'proc_pyr_creat_id' => 'execution-2', 'is_sample' => 'false'],
+            ['vectordb_id' => 'vectordb-1', 'proc_pyr_creat_id' => 'execution-2'],
             EntrepotMockResponseFactory::stored('stored_data')[1]['tags'],
         );
     }
@@ -107,7 +106,6 @@ final class PyramidVectorAddRouteTest extends WebTestCase
     {
         $client->xmlHttpRequest('POST', self::ADD_URL, server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
             'technical_name' => 'pyramide_vecteur',
-            'area' => null,
             'tippecanoe' => '-zg',
             'vectordb_id' => 'vectordb-1',
             'composition' => [['table' => 'troncon', 'attributes' => ['nom'], 'bottom_level' => 14, 'top_level' => 5]],

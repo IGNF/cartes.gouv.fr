@@ -95,7 +95,6 @@ final class SerializerContractTest extends KernelTestCase
         yield 'WmsVectorServiceDTO' => [WmsVectorServiceDTO::class, self::commonPayload() + ['selected_tables' => ['t1']]];
         yield 'PyramidVectorGenerateDTO' => [PyramidVectorGenerateDTO::class, [
             'technical_name' => 'pyr',
-            'area' => 'POLYGON((0 0,1 0,1 1,0 0))',
             'tippecanoe' => '-zg',
             'vectordb_id' => 'vdb-1',
             'composition' => [['table' => 't1', 'attributes' => ['a'], 'bottom_level' => 14, 'top_level' => 5]],
