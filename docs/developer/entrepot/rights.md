@@ -41,9 +41,11 @@
 
 | Action               | Droits nécessaires | En l'absence de droits    |
 | -------------------- | ------------------ | ------------------------- |
-| Créer un flux        | BROADCAST          | Ne pas afficher le bouton |
+| Créer un flux        | BROADCAST, ANNEX   | Ne pas afficher le bouton |
 | Menu - Mettre à jour | BROADCAST          | Ne pas afficher l'action  |
 | Menu - Supprimer     | BROADCAST          | Ne pas afficher l'action  |
+
+La page « Créer un flux » exige les mêmes droits (vignette et logo déposés en annexes). La suppression d’un flux par un membre sans ANNEX laisse sa vignette et son logo en place (refus journalisé).
 
 ### Onglet "Document"
 

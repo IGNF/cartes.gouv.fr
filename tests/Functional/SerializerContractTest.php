@@ -9,6 +9,9 @@ use App\Dto\Datastore\UpdatePermissionDTO;
 use App\Dto\Espaceco\Members\AddMembersDTO;
 use App\Dto\Metadata\CswLanguage;
 use App\Dto\Services\CommonDTO;
+use App\Dto\Services\Form\ServiceAttributionFormDTO;
+use App\Dto\Services\Form\WfsFormDTO;
+use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
@@ -81,6 +84,14 @@ final class SerializerContractTest extends KernelTestCase
         yield 'CommonDTO' => [CommonDTO::class, self::commonPayload(), ['language' => CswLanguage::class]];
         yield 'PyramidVectorTmsServiceDTO' => [PyramidVectorTmsServiceDTO::class, self::commonPayload()];
         yield 'WfsServiceDTO' => [WfsServiceDTO::class, self::commonPayload() + ['table_infos' => [self::wfsTablePayload()]], ['table_infos' => WfsTableDTO::class]];
+        yield 'WfsFormDTO' => [WfsFormDTO::class, [
+            'title' => 'Flux',
+            'technical_name' => 'tech',
+            'themes' => ['Hydrographie'],
+            'access' => 'restricted_visible',
+            'attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr'],
+            'tables' => [['native_name' => 't1', 'title' => 'Table', 'public_name' => 't1', 'description' => 'Résumé', 'keywords' => ['mot']]],
+        ], ['attribution' => ServiceAttributionFormDTO::class, 'tables' => WfsTableFormDTO::class]];
         yield 'WmsVectorServiceDTO' => [WmsVectorServiceDTO::class, self::commonPayload() + ['selected_tables' => ['t1']]];
         yield 'PyramidVectorGenerateDTO' => [PyramidVectorGenerateDTO::class, [
             'technical_name' => 'pyr',

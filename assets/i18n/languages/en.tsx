@@ -9,6 +9,7 @@ import { DatasheetViewNextEnTranslations } from "@/entrepot/pages/datasheet/Data
 import { DatasetTabNextEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetTabNext/DatasetTabNext.locale";
 import { ServicesListTabNextEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/ServiceListTab/ServicesListTabNext.locale";
 import { DatasetAddEnTranslations } from "@/entrepot/pages/datasheet/DatasetAdd/DatasetAdd.locale";
+import { ServiceFormEnTranslations } from "@/entrepot/pages/datasheet/ServiceForm/ServiceForm.locale";
 import { DatasheetCreateEnTranslations } from "@/entrepot/pages/datasheet/DatasheetCreate/DatasheetCreate.locale";
 import { CommunityInfoEnTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { StoredDataDeleteConfirmDialogEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
@@ -158,5 +159,6 @@ export const translations: Translations<"en"> = {
     DatasetTabNext: DatasetTabNextEnTranslations,
     ServicesListTabNext: ServicesListTabNextEnTranslations,
     DatasetAdd: DatasetAddEnTranslations,
+    ServiceForm: ServiceFormEnTranslations,
     Stats: StatsEnTranslations,
 };

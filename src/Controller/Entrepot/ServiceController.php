@@ -176,6 +176,10 @@ class ServiceController extends AbstractController implements ApiControllerInter
                 'title' => $dto->attribution_text,
                 'url' => $dto->attribution_url,
             ];
+            // le formulaire classique ne gère pas le logo posé par le nouveau formulaire : le PUT l’effacerait
+            if (isset($oldConfiguration['attribution']['logo'])) {
+                $body['attribution']['logo'] = $oldConfiguration['attribution']['logo'];
+            }
         }
 
         if (isset($oldConfiguration['metadata'])) {

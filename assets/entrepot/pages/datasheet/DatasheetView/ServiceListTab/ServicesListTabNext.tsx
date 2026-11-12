@@ -97,6 +97,8 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
 
     const { userRights, isSupervisor } = useCommunityRights();
     const canBroadcast = isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
+    // la page « Créer un flux » dépose vignette et logo en annexes
+    const canCreate = canBroadcast && (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
 
     // permissions de l’entrepôt, pour repérer les flux privés visibles sur cartes.gouv.fr ; en cas d’échec, ces flux s’affichent « Privé »
     const permissionsQuery = useQuery<DatastorePermission[], ApiError>({
@@ -242,9 +244,11 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         return <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceListQuery.error)} small />;
     }
 
-    // shortcut: bouton désactivé tant que la page « Ajouter un flux » n’existe pas, à brancher au ticket 04b
     const createButton = (
-        <Button iconId="fr-icon-add-line" disabled title={t("create_disabled")}>
+        <Button
+            iconId="fr-icon-add-line"
+            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout", params: { datastoreId, datasheetName } }}
+        >
             {t("create")}
         </Button>
     );
@@ -280,8 +284,12 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                     <div className={classes.empty}>
                         {canBroadcast ? (
                             <>
-                                {createButton}
-                                <span className={classes.separator}>{t("or")}</span>
+                                {canCreate && (
+                                    <>
+                                        {createButton}
+                                        <span className={classes.separator}>{t("or")}</span>
+                                    </>
+                                )}
                                 {referenceButton}
                             </>
                         ) : (
@@ -300,7 +308,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                             {canBroadcast && (
                                 <div className={classes.actions}>
                                     {referenceButton}
-                                    {createButton}
+                                    {canCreate && createButton}
                                 </div>
                             )}
                         </div>

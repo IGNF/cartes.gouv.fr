@@ -33,6 +33,7 @@ const breadcrumbNameByRouteId = {
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/": "datastore_datasheet_view",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue": "datastore_datasheet_view",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement": "datastore_datasheet_upload",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout": "datastore_datasheet_service_add",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details": "datastore_stored_data_details",
     "/_private/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport": "datastore_upload_details",
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/wfs/ajout": "datastore_wfs_service_new",
@@ -188,6 +189,12 @@ const getBreadcrumb = (
                 ...datastoreBaseProps,
                 segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: datasheetLink() }],
                 currentPageLabel: t("upload"),
+            };
+        case "datastore_datasheet_service_add":
+            return {
+                ...datastoreBaseProps,
+                segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: datasheetLink("services") }],
+                currentPageLabel: t("datastore_datasheet_service_add"),
             };
         case "datastore_datasheet_upload_integration": {
             const breadcrumbProps: BreadcrumbProps = {

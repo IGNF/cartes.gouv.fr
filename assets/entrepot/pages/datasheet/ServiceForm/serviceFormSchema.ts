@@ -1,0 +1,120 @@
+import { type TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
+import { z } from "zod";
+
+import { type ComponentKey } from "@/i18n/types";
+import { regex } from "@/utils";
+import { TAG_VALUE_MAX_LENGTH } from "../DatasetAdd/datasetAddSchema";
+
+type T = TranslationFunction<"ServiceForm", ComponentKey>;
+
+export const SERVICE_TYPES = ["wfs", "wms", "tms", "wmts"] as const;
+export type ServiceType = (typeof SERVICE_TYPES)[number];
+
+/** types dont le formulaire est livré ; les autres cartes restent visibles mais désactivées */
+export const IMPLEMENTED_SERVICE_TYPES: readonly ServiceType[] = ["wfs"];
+
+export const SERVICE_ACCESSES = ["public", "restricted_visible", "restricted"] as const;
+export type ServiceAccess = (typeof SERVICE_ACCESSES)[number];
+
+/** même regex que WfsTableFormDTO : nom technique d’une table WFS en minuscules */
+export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;
+
+export const SERVICE_IMAGE_ACCEPT = ["jpg", "jpeg", "png"];
+export const SERVICE_IMAGE_MAX_SIZE_MB = 5;
+
+type SchemaDeps = {
+    t: T;
+    type: ServiceType;
+    /** noms de couches déjà pris pour ce type de flux */
+    existingLayerNames: readonly string[];
+    /** préfixe imposé par l’entrepôt aux noms techniques, suivi d’un point */
+    layerNamePrefix?: string;
+    /** accès offerts par les endpoints de l’entrepôt pour ce type de flux */
+    availableAccesses: readonly ServiceAccess[];
+};
+
+// undefined : inchangée, null : supprimée, File : nouvelle image
+const imageFile = z.instanceof(File).nullish();
+
+export const buildServiceFormSchema = ({ t, type, existingLayerNames, layerNamePrefix, availableAccesses }: SchemaDeps) => {
+    const tableSchema = z
+        .object({
+            native_name: z.string(),
+            selected: z.boolean(),
+            title: z.string().trim(),
+            public_name: z.string().trim(),
+            description: z.string().trim(),
+            keywords: z.array(z.string()),
+        })
+        // champs obligatoires seulement sur les tables cochées
+        .superRefine((table, ctx) => {
+            if (!table.selected) return;
+            if (table.title === "") ctx.addIssue({ code: "custom", path: ["title"], message: t("validation.table.title.required") });
+            if (table.public_name === "") {
+                ctx.addIssue({ code: "custom", path: ["public_name"], message: t("validation.table.public_name.required") });
+            } else if (!WFS_TABLE_TECHNICAL_NAME_REGEX.test(table.public_name)) {
+                ctx.addIssue({ code: "custom", path: ["public_name"], message: t("validation.table.public_name.chars") });
+            }
+            if (table.description === "") ctx.addIssue({ code: "custom", path: ["description"], message: t("validation.table.description.required") });
+        });
+
+    const attributionSchema = z
+        .object({
+            enabled: z.boolean(),
+            title: z.string().trim(),
+            url: z.string().trim(),
+            logo: imageFile,
+        })
+        .superRefine((attribution, ctx) => {
+            if (!attribution.enabled) return;
+            if (attribution.title === "") ctx.addIssue({ code: "custom", path: ["title"], message: t("validation.attribution.text.required") });
+            if (attribution.url === "") {
+                ctx.addIssue({ code: "custom", path: ["url"], message: t("validation.attribution.url.required") });
+            } else if (!z.url({ protocol: /^https?$/ }).safeParse(attribution.url).success) {
+                ctx.addIssue({ code: "custom", path: ["url"], message: t("validation.attribution.url.invalid") });
+            }
+        });
+
+    return z.object({
+        stored_data_id: z.string().min(1, t("validation.stored_data.required")),
+        title: z.string().trim().min(1, t("validation.title.required")),
+        technical_name: z
+            .string()
+            .trim()
+            .min(1, t("validation.technical_name.required"))
+            .regex(regex.technical_name, t("validation.technical_name.chars"))
+            .refine((value) => !existingLayerNames.includes(value), t("validation.technical_name.taken"))
+            .refine(
+                (value) => !layerNamePrefix || value.startsWith(`${layerNamePrefix}.`),
+                t("validation.technical_name.prefix", { prefix: layerNamePrefix ?? "" })
+            )
+            .refine((value) => !layerNamePrefix || value !== `${layerNamePrefix}.`, t("validation.technical_name.prefix_only")),
+        thumbnail: imageFile,
+        themes: z
+            .array(z.string())
+            .min(1, t("validation.themes.required"))
+            .refine((themes) => themes.join(", ").length <= TAG_VALUE_MAX_LENGTH, t("validation.themes.max", { max: TAG_VALUE_MAX_LENGTH })),
+        // une entrée par table géométrique de la base choisie, cochée ou non
+        tables:
+            type === "wfs"
+                ? z.array(tableSchema).refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))
+                : z.array(tableSchema),
+        access: z.enum(SERVICE_ACCESSES).refine((access) => availableAccesses.includes(access), t("validation.access.unavailable")),
+        attribution: attributionSchema,
+    });
+};
+
+export type ServiceFormValues = z.input<ReturnType<typeof buildServiceFormSchema>>;
+export type ServiceFormOutput = z.output<ReturnType<typeof buildServiceFormSchema>>;
+export type ServiceTableFormValues = ServiceFormValues["tables"][number];
+
+export const serviceFormDefaultValues: ServiceFormValues = {
+    stored_data_id: "",
+    title: "",
+    technical_name: "",
+    thumbnail: undefined,
+    themes: [],
+    tables: [],
+    access: "public",
+    attribution: { enabled: false, title: "", url: "", logo: undefined },
+};

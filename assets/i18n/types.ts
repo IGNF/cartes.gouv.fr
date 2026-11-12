@@ -94,6 +94,7 @@ export type ComponentKey =
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetTabNext/DatasetTabNext.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/ServiceListTab/ServicesListTabNext.locale").I18n
     | import("../entrepot/pages/datasheet/DatasetAdd/DatasetAdd.locale").I18n
+    | import("../entrepot/pages/datasheet/ServiceForm/ServiceForm.locale").I18n
     | import("../entrepot/pages/stats/Stats.locale").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;

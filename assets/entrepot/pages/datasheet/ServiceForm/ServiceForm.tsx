@@ -1,0 +1,189 @@
+import { fr } from "@codegouvfr/react-dsfr";
+import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { queryOptions, skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
+
+import { ConfigurationTypeEnum, type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum, type VectorDb } from "@/@types/app";
+import api from "@/entrepot/api";
+import { filterGeometricRelations } from "@/helpers";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { useTranslation } from "@/i18n";
+import { isApiError } from "@/modules/apiError";
+import RQKeys from "@/modules/entrepot/RQKeys";
+import { type ApiError } from "@/modules/jsonFetch";
+import { setApiFormErrors } from "@/modules/setApiFormErrors";
+import { delta } from "@/utils/delta";
+import MetadataSection from "../forms/MetadataSection";
+import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
+import { mapServiceViolationPaths } from "./buildServiceFormData";
+import AccessSection from "./sections/AccessSection";
+import ServiceDescriptionSection from "./sections/ServiceDescriptionSection";
+import ServiceTypeSection from "./sections/ServiceTypeSection";
+import WfsTablesSection from "./sections/WfsTablesSection";
+import {
+    buildServiceFormSchema,
+    SERVICE_ACCESSES,
+    type ServiceAccess,
+    serviceFormDefaultValues,
+    type ServiceFormOutput,
+    type ServiceFormValues,
+    type ServiceTableFormValues,
+    type ServiceType,
+} from "./serviceFormSchema";
+
+// type de configuration Entrepôt (et d’endpoint) du type de flux
+const configurationTypes: Record<ServiceType, ConfigurationTypeEnum> = {
+    wfs: ConfigurationTypeEnum.WFS,
+    wms: ConfigurationTypeEnum.WMSVECTOR,
+    tms: ConfigurationTypeEnum.WMTSTMS,
+    wmts: ConfigurationTypeEnum.WMTSTMS,
+};
+
+// sans jeu choisi, la requête ne part pas et rien n’est mis en cache
+const vectorDbQueryOptions = (datastoreId: string, storedDataId: string) =>
+    queryOptions<VectorDb, ApiError>({
+        queryKey: RQKeys.datastore_stored_data(datastoreId, storedDataId),
+        queryFn: storedDataId === "" ? skipToken : ({ signal }) => api.storedData.get<VectorDb>(datastoreId, storedDataId, { signal }),
+        staleTime: delta.minutes(1),
+    });
+
+// une ligne par table géométrique, aucune cochée
+const defaultTables = (vectorDb: VectorDb): ServiceTableFormValues[] =>
+    filterGeometricRelations(vectorDb.type_infos?.relations ?? [], true).map((relation) => ({
+        native_name: relation.name,
+        selected: false,
+        title: relation.name,
+        public_name: relation.name.toLowerCase(),
+        description: "",
+        keywords: [],
+    }));
+
+type ServiceFormProps = {
+    datastoreId: string;
+    datasheetName: string;
+    datasheet: DatasheetDetailed;
+    /** type de flux tenu par la page : il décide des requêtes et du schéma */
+    type: ServiceType;
+    onTypeChange: (type: ServiceType) => void;
+    /** l’erreur levée reste dans la mutation de la page ; ses erreurs de validation retombent sur les champs */
+    onSubmit: (values: ServiceFormOutput) => Promise<unknown>;
+};
+
+export default function ServiceForm({ datastoreId, datasheetName, datasheet, type, onTypeChange, onSubmit }: ServiceFormProps) {
+    const { t } = useTranslation("ServiceForm");
+    const queryClient = useQueryClient();
+    const configurationType = configurationTypes[type];
+
+    const { data: datastore } = useQuery(datastoreQueryOptions(datastoreId));
+    const existingLayerNamesQuery = useQuery<string[], ApiError>({
+        queryKey: RQKeys.datastore_layernames_list(datastoreId, configurationType),
+        queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, configurationType, { signal }),
+        staleTime: delta.minutes(1),
+    });
+    const endpointsQuery = useQuery<DatastoreEndpoint[], ApiError>({
+        queryKey: RQKeys.datastore_endpoints(datastoreId),
+        queryFn: ({ signal }) => api.datastore.getEndpoints(datastoreId, {}, { signal }),
+        staleTime: delta.hours(1),
+    });
+
+    // tant que les endpoints ne sont pas lus, tout accès reste proposé ; le back refuse un accès sans endpoint
+    const availableAccesses = useMemo<readonly ServiceAccess[]>(() => {
+        if (!endpointsQuery.data) return SERVICE_ACCESSES;
+        const endpoints = endpointsQuery.data.filter((item) => item.endpoint.type.toUpperCase() === configurationType);
+        const hasOpen = endpoints.some((item) => item.endpoint.open);
+        const hasPrivate = endpoints.some((item) => !item.endpoint.open);
+        return SERVICE_ACCESSES.filter((access) => (access === "public" ? hasOpen : hasPrivate));
+    }, [endpointsQuery.data, configurationType]);
+
+    const schema = useMemo(
+        () =>
+            buildServiceFormSchema({
+                t,
+                type,
+                existingLayerNames: existingLayerNamesQuery.data ?? [],
+                layerNamePrefix: datastore?.configuration_layer_name_prefix,
+                availableAccesses,
+            }),
+        [t, type, existingLayerNamesQuery.data, datastore?.configuration_layer_name_prefix, availableAccesses]
+    );
+
+    const form = useForm<ServiceFormValues, unknown, ServiceFormOutput>({
+        resolver: zodResolver(schema),
+        mode: "onSubmit",
+        reValidateMode: "onBlur",
+        defaultValues: serviceFormDefaultValues,
+    });
+    const { handleSubmit, setError, setValue, getValues, control } = form;
+
+    const storedDataId = useWatch({ control, name: "stored_data_id" });
+    const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, storedDataId));
+
+    // les tables appartiennent au jeu précédent : vidées, puis remplies quand la base choisie est lue
+    const loadTables = (id: string) => {
+        setValue("tables", []);
+        if (id === "") return;
+        queryClient
+            .query(vectorDbQueryOptions(datastoreId, id))
+            .then((vectorDb) => {
+                // un choix plus récent l’emporte sur une lecture arrivée en retard
+                if (getValues("stored_data_id") === id) setValue("tables", defaultTables(vectorDb));
+            })
+            // l’erreur reste dans la requête, affichée par la section Tables
+            .catch(() => undefined);
+    };
+
+    const submit = handleSubmit(async (values) => {
+        try {
+            await onSubmit(values);
+        } catch (error) {
+            if (isApiError(error)) setApiFormErrors(mapServiceViolationPaths(error, values.tables), setError);
+        }
+    });
+
+    return (
+        <FormProvider {...form}>
+            <form onSubmit={(e) => void submit(e)} noValidate>
+                <MetadataSectionsContainer>
+                    <MetadataSection title={t("section.type")}>
+                        <ServiceTypeSection value={type} onChange={onTypeChange} />
+                    </MetadataSection>
+                    <MetadataSection title={t("section.description")}>
+                        <ServiceDescriptionSection
+                            storedDataOptions={(datasheet.vector_db_list ?? []).filter((item) => item.status === StoredDataStatusEnum.GENERATED)}
+                            onStoredDataChange={loadTables}
+                        />
+                    </MetadataSection>
+                    <MetadataSection title={t("section.tables")}>
+                        <WfsTablesSection
+                            status={storedDataId === "" ? "idle" : vectorDbQuery.status}
+                            noGeometricTable={vectorDbQuery.data !== undefined && defaultTables(vectorDbQuery.data).length === 0}
+                        />
+                    </MetadataSection>
+                    <MetadataSection title={t("section.access")}>
+                        <AccessSection availableAccesses={availableAccesses} />
+                    </MetadataSection>
+                </MetadataSectionsContainer>
+
+                <ButtonsGroup
+                    buttons={[
+                        {
+                            children: t("cancel"),
+                            priority: "secondary",
+                            linkProps: {
+                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
+                                params: { datastoreId, datasheetName },
+                                search: { activeTab: "services" },
+                            },
+                        },
+                        { children: t("submit"), type: "submit" },
+                    ]}
+                    inlineLayoutWhen="always"
+                    alignment="right"
+                    className={fr.cx("fr-mt-2w", "fr-mb-4w")}
+                />
+            </form>
+        </FormProvider>
+    );
+}
