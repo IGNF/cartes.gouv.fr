@@ -30,7 +30,7 @@ final class EntrepotMockResponseFactory
     /** @var array<string, string> contenu XML des métadonnées écrites, par identifiant */
     private static array $metadataFiles = [];
 
-    /** @var list<string> requêtes « MÉTHODE chemin » qui répondent 500 à leur prochain passage */
+    /** @var list<array{string, int}> requêtes « MÉTHODE chemin » qui répondent 500, après le nombre de passages réussis indiqué */
     private static array $failures = [];
 
     private static int $nextId = 1;
@@ -75,10 +75,10 @@ final class EntrepotMockResponseFactory
         return self::$metadataFiles[$metadataId] ?? null;
     }
 
-    // la prochaine requête « MÉTHODE chemin relatif au datastore » répond 500 (ex. « POST metadata »)
-    public static function failNext(string $request): void
+    // la prochaine requête « MÉTHODE chemin relatif au datastore » répond 500 (ex. « POST metadata »), après $passes passages réussis
+    public static function failNext(string $request, int $passes = 0): void
     {
-        self::$failures[] = $request;
+        self::$failures[] = [$request, $passes];
     }
 
     // GET users/me répond pour un autre utilisateur jusqu’au prochain reset()
@@ -169,9 +169,15 @@ final class EntrepotMockResponseFactory
     private function datastoreResponse(string $method, string $path, string $queryString, array $options): ?MockResponse
     {
         $relative = ltrim($path, '/');
-        $failure = array_search("$method $relative", self::$failures, true);
-        if (false !== $failure) {
-            array_splice(self::$failures, $failure, 1);
+        foreach (self::$failures as $index => [$request, $passes]) {
+            if ("$method $relative" !== $request) {
+                continue;
+            }
+            if ($passes > 0) {
+                self::$failures[$index][1] = $passes - 1;
+                break;
+            }
+            array_splice(self::$failures, $index, 1);
 
             return $this->json(['error' => 'Internal Server Error', 'error_description' => "Échec simulé de $method $relative"], 500);
         }

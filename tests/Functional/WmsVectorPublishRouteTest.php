@@ -66,6 +66,21 @@ final class WmsVectorPublishRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
     }
 
+    public function testUploadedStyleFilesAreRemovedWhenALaterOneIsRefused(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+        $tmpEntries = $this->styleFilesDirEntries();
+        EntrepotMockResponseFactory::failNext('POST statics', passes: 1);
+
+        $this->post($client, $this->payload(), ['communes' => $this->sld('communes.sld'), 'routes nationales' => $this->sld('routes.sld')]);
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
+        self::assertSame([], EntrepotMockResponseFactory::stored('configurations'));
+        self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
+    }
+
     public function testConfigurationAndStyleFilesAreRemovedWhenTheRenamingFails(): void
     {
         $this->seedMetadata();
