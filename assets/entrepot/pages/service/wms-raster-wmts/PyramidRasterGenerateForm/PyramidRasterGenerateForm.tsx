@@ -64,7 +64,16 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     });
 
     schemas[STEPS.ZOOM_RANGE] = yup.object({
-        zoom_range: yup.array().of(yup.number()).length(2, t("zoom_range.error")).required(t("zoom_range.error")),
+        zoom_range: yup
+            .array()
+            .of(
+                yup
+                    .number()
+                    .min(olDefaults.zoom_levels.TOP, t("zoom_range.bounds_error", { min: olDefaults.zoom_levels.TOP, max: olDefaults.zoom_levels.BOTTOM }))
+                    .max(olDefaults.zoom_levels.BOTTOM, t("zoom_range.bounds_error", { min: olDefaults.zoom_levels.TOP, max: olDefaults.zoom_levels.BOTTOM }))
+            )
+            .length(2, t("zoom_range.error"))
+            .required(t("zoom_range.error")),
     });
 
     const form = useForm<PyramidRasterGenerateFormType>({

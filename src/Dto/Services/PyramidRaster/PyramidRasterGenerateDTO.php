@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dto\Services\PyramidRaster;
 
+use App\Constants\EntrepotApi\ZoomLevels;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class PyramidRasterGenerateDTO
@@ -21,7 +22,10 @@ final readonly class PyramidRasterGenerateDTO
 
         /** @var int[] niveaux de zoom extrêmes, dans un ordre quelconque */
         #[Assert\Count(exactly: 2, exactMessage: 'Les bornes de la pyramide sont obligatoires')]
-        #[Assert\All([new Assert\Type('int')])]
+        #[Assert\All([
+            new Assert\Type('int'),
+            new Assert\Range(notInRangeMessage: 'Les niveaux de zoom doivent être compris entre {{ min }} et {{ max }}', min: ZoomLevels::MIN, max: ZoomLevels::MAX),
+        ])]
         public array $zoom_range,
 
         public bool $email_notification = false,

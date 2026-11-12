@@ -40,4 +40,21 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         self::assertSame(['technical_name', 'wmsv_config_bbox', 'wmsv_offering_id', 'zoom_range'], $paths);
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
+
+    public function testZoomLevelsOutsideTheSliderBoundsAnswer422(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('POST', self::ADD_URL, server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
+            'technical_name' => 'pyramide',
+            'wmsv_offering_id' => '0f8e3c2a-1b2c-4d5e-8f90-123456789abc',
+            'wmsv_config_bbox' => 'POLYGON((0 0,1 0,1 1,0 0))',
+            'zoom_range' => [0, 19],
+        ], JSON_THROW_ON_ERROR));
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['zoom_range[0]', 'zoom_range[1]'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
 }

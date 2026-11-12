@@ -16,6 +16,7 @@ const { i18n } = declareComponentKeys<
     | "zoom_range.lead_text"
     | "zoom_range.explanation"
     | "zoom_range.error"
+    | { K: "zoom_range.bounds_error"; P: { min: number; max: number }; R: string }
     | "generate.in_progress"
 >()("PyramidRasterGenerateForm");
 export type I18n = typeof i18n;
@@ -45,6 +46,7 @@ export const PyramidRasterGenerateFormFrTranslations: Translations<"fr">["Pyrami
     "zoom_range.explanation":
         "Les niveaux de zoom de la pyramide de tuiles raster sont prédéfinis. Choisissez la borne minimum de votre pyramide de tuiles en vous aidant de la carte de gauche et le zoom maximum en vous aidant de la carte de droite. Tous les niveaux intermédiaires seront générés.",
     "zoom_range.error": "Les bornes de la pyramide sont obligatoires.",
+    "zoom_range.bounds_error": ({ min, max }) => `Les niveaux de zoom doivent être compris entre ${min} et ${max}.`,
     "generate.in_progress": "Génération de pyramide de tuiles raster en cours",
 };
 
@@ -62,5 +64,6 @@ export const PyramidRasterGenerateFormEnTranslations: Translations<"en">["Pyrami
     "zoom_range.lead_text": undefined,
     "zoom_range.explanation": undefined,
     "zoom_range.error": undefined,
+    "zoom_range.bounds_error": undefined,
     "generate.in_progress": undefined,
 };

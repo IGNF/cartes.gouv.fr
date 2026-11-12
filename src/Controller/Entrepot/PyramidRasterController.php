@@ -87,7 +87,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             throw new AppException('URL du service WMS-Vecteur non trouvée', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $zoomRange = $dto->zoom_range;
+        $zoomRange = array_values($dto->zoom_range);
         $harvestLevels = array_map(strval(...), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
 
         $requestBody = [
