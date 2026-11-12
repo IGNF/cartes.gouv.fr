@@ -38,6 +38,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -144,7 +145,6 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         // avant l’exécution : une légende inaccessible ne laisse rien à défaire
         $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
         $processingExecution = null;
-        $legendAnnexe = null;
 
         try {
             $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
@@ -173,10 +173,16 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             ])->await();
             $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
         } catch (\Throwable $e) {
-            if (null !== $processingExecution) {
-                $this->cancelGeneration($datastoreId, $processingExecution['_id'], $legendAnnexe['_id'] ?? null);
+            // échec avant l’exécution : rien à défaire, l’erreur de l’Entrepôt reste lisible
+            if (null === $processingExecution) {
+                throw $e;
             }
-            throw $e;
+            $this->cancelGeneration($datastoreId, $processingExecution['_id'], $processingExecution['output']['stored_data']['_id']);
+            // jeton expiré : la reconnexion doit passer telle quelle
+            if ($e instanceof AuthenticationExpiredException) {
+                throw $e;
+            }
+            throw new AppException('La génération de la pyramide n’a pas pu être lancée. Réessayez.', Response::HTTP_INTERNAL_SERVER_ERROR, [], $e);
         } finally {
             $this->fs->remove(dirname($legendFilePath));
         }
@@ -333,18 +339,19 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     }
 
     // au mieux : l’erreur d’origine est celle qui remonte ; supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
-    private function cancelGeneration(string $datastoreId, string $executionId, ?string $legendAnnexeId): void
+    private function cancelGeneration(string $datastoreId, string $executionId, string $pyramidId): void
     {
         try {
             $this->processingApiService->removeExecution($datastoreId, $executionId)->await();
         } catch (\Throwable) {
         }
 
-        if (null !== $legendAnnexeId) {
-            try {
-                $this->annexeApiService->remove($datastoreId, $legendAnnexeId)->await();
-            } catch (\Throwable) {
+        // cherchée par son chemin : un échec entre le dépôt du fichier et la pose des libellés ne rend pas l’identifiant
+        try {
+            foreach ($this->annexeApiService->getAll($datastoreId, null, "/legend/{$pyramidId}.png")->resolve() as $annexe) {
+                $this->annexeApiService->remove($datastoreId, $annexe['_id'])->await();
             }
+        } catch (\Throwable) {
         }
     }
 

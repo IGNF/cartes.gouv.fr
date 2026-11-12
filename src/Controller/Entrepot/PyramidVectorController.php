@@ -9,6 +9,7 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
+use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -20,9 +21,11 @@ use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
 
 #[Route(
     '/api/datastores/{datastoreId}/pyramid-vector',
@@ -123,7 +126,11 @@ final class PyramidVectorController extends AbstractController implements ApiCon
                 $this->processingApiService->removeExecution($datastoreId, $processingExecution['_id'])->await();
             } catch (\Throwable) {
             }
-            throw $e;
+            // jeton expiré : la reconnexion doit passer telle quelle
+            if ($e instanceof AuthenticationExpiredException) {
+                throw $e;
+            }
+            throw new AppException('La génération de la pyramide n’a pas pu être lancée. Réessayez.', Response::HTTP_INTERNAL_SERVER_ERROR, [], $e);
         }
 
         return new JsonResponse();

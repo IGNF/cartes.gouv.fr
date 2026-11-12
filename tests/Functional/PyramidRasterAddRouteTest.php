@@ -147,6 +147,21 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
     }
 
+    public function testAFailureWhileLabellingTheLegendAnnexeStillRemovesIt(): void
+    {
+        $this->seedWmsvService();
+        $client = self::createClient();
+        $this->logIn($client);
+        EntrepotMockResponseFactory::failNext('PATCH annexes/annexe-3');
+
+        $this->post($client);
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame('La génération de la pyramide n’a pas pu être lancée. Réessayez.', $this->jsonResponse($client)['detail']);
+        self::assertSame([], EntrepotMockResponseFactory::stored('processings/executions'));
+        self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
+    }
+
     public function testNoTemporaryFileRemainsAfterAGeneration(): void
     {
         $this->seedWmsvService();
@@ -168,11 +183,11 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         return is_dir($dir) ? array_values(array_diff(scandir($dir) ?: [], ['.', '..'])) : [];
     }
 
-    private function seedWmsvService(): void
+    private function seedWmsvService(string $layerName = 'couche_wmsv'): void
     {
         EntrepotMockResponseFactory::seed('offerings', [
             '_id' => self::WMSV_OFFERING_ID,
-            'layer_name' => 'couche_wmsv',
+            'layer_name' => $layerName,
             'configuration' => ['_id' => 'configuration-wmsv'],
             'endpoint' => ['_id' => EntrepotMockResponseFactory::WMSV_PUBLIC_ENDPOINT_ID],
             'urls' => [['type' => 'WMS', 'url' => 'https://wms.test/public?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities']],
