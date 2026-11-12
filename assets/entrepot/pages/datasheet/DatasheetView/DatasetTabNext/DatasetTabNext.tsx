@@ -14,6 +14,7 @@ import { CommunityMemberDtoRightsEnum, StoredDataPrivateDetailResponseDtoTypeEnu
 import StoredDataStatusBadge from "@/components/Utils/Badges/StoredDataStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
 import LoadingText from "@/components/Utils/LoadingText";
+import MenuList from "@/components/Utils/MenuList";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import useDeleteUploadMutation from "@/hooks/queries/useDeleteUploadMutation";
@@ -68,6 +69,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
     const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
 
     const { userRights, isSupervisor } = useCommunityRights();
+    const canGeneratePyramidVector = isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING);
     const canAddData =
         isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) && userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING));
 
@@ -173,17 +175,36 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                 creation: storedData.creation,
                 status: <StoredDataStatusBadge status={storedData.status} />,
                 action: (
-                    <Button
-                        priority="tertiary"
-                        size="small"
-                        linkProps={{
-                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
-                            params: { datastoreId, storedDataId: storedData._id },
-                            search: { datasheetName },
-                        }}
-                    >
-                        {t("view")}
-                    </Button>
+                    <div className={classes.actions}>
+                        <Button
+                            priority="tertiary"
+                            size="small"
+                            linkProps={{
+                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
+                                params: { datastoreId, storedDataId: storedData._id },
+                                search: { datasheetName },
+                            }}
+                        >
+                            {t("view")}
+                        </Button>
+                        {storedData.type === StoredDataTypeEnum.VECTORDB && canGeneratePyramidVector && (
+                            <MenuList
+                                menuOpenButtonProps={{ iconId: "ri-more-2-line", priority: "tertiary no outline", title: t("menu.open"), size: "small" }}
+                                items={[
+                                    {
+                                        text: t("menu.generate_pyramid_vector"),
+                                        iconId: "ri-add-box-line",
+                                        disabled: storedData.status !== StoredDataStatusEnum.GENERATED,
+                                        linkProps: {
+                                            to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout",
+                                            params: { datastoreId },
+                                            search: { vectorDbId: storedData._id, datasheetName },
+                                        },
+                                    },
+                                ]}
+                            />
+                        )}
+                    </div>
                 ),
             })
         );
@@ -193,7 +214,19 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
             rows: [...uploadRows, ...storedDataRows].sort((a, b) => (b.creation ?? "").localeCompare(a.creation ?? "")),
             hasIntegrationInProgress: uploads.some(({ inProgress }) => inProgress),
         };
-    }, [datasheet, datasheetName, datastoreId, hasMetadata, canAddData, classes.actions, failedUploadIds, deleteUploadMutate, onDeleteDatasheet, t]);
+    }, [
+        datasheet,
+        datasheetName,
+        datastoreId,
+        hasMetadata,
+        canAddData,
+        canGeneratePyramidVector,
+        classes.actions,
+        failedUploadIds,
+        deleteUploadMutate,
+        onDeleteDatasheet,
+        t,
+    ]);
 
     const filteredRows = typeFilter === "all" ? rows : rows.filter((row) => (row.type === "ROK4-PYRAMID-RASTER" ? "raster" : "vector") === typeFilter);
     const segment = ({ value, label }: (typeof FILTERS)[number]) => ({

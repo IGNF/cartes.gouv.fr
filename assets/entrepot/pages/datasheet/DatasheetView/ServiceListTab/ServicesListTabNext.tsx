@@ -99,6 +99,9 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
     const canBroadcast = isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
     // la page « Créer un flux » dépose vignette et logo en annexes
     const canCreate = canBroadcast && (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
+    // la génération dépose la légende du flux en annexe
+    const canGeneratePyramidRaster =
+        isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
 
     // permissions de l’entrepôt, pour repérer les flux privés visibles sur cartes.gouv.fr ; en cas d’échec, ces flux s’affichent « Privé »
     const permissionsQuery = useQuery<DatastorePermission[], ApiError>({
@@ -214,6 +217,17 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                             disabled: offeringUnavailable || !service.share_url,
                             onClick: () => openCopyUrlDialog(service),
                         },
+                        service.type === OfferingTypeEnum.WMSVECTOR &&
+                            canGeneratePyramidRaster && {
+                                text: t("menu.generate_pyramid_raster"),
+                                iconId: "ri-add-box-line",
+                                disabled: offeringUnavailable,
+                                linkProps: {
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout",
+                                    params: { datastoreId },
+                                    search: { offeringId: service._id, datasheetName },
+                                },
+                            },
                         editable &&
                             canBroadcast && {
                                 text: t("menu.edit"),
@@ -234,7 +248,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                 />,
             ];
         });
-    }, [pageServices, sortedServices, permissionsQuery.data, now, canBroadcast, datastoreId, datasheetName, classes, t]);
+    }, [pageServices, sortedServices, permissionsQuery.data, now, canBroadcast, canGeneratePyramidRaster, datastoreId, datasheetName, classes, t]);
 
     if (serviceListQuery.isPending) {
         return <LoadingText withSpinnerIcon={true} as="p" />;
