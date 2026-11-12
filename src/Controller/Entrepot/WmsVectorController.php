@@ -156,7 +156,7 @@ final class WmsVectorController extends AbstractController implements ApiControl
                 /** @var UploadedFile|null */
                 $file = $files["style_{$tableName}"] ?? null;
                 if (null === $file) {
-                    throw new AppException("Fichier de style manquant pour la table $tableName", Response::HTTP_INTERNAL_SERVER_ERROR);
+                    throw new AppException("Fichier de style manquant pour la table $tableName", Response::HTTP_BAD_REQUEST);
                 }
                 $tmpFileDir = $directory.'/'.Uuid::v4();
 
