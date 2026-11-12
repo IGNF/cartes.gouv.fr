@@ -193,8 +193,10 @@ final class WmsVectorController extends AbstractController implements ApiControl
                         $staticStyleFile = $this->staticApiService->add($datastoreId, $tmpFileDir.'/'.$file->getClientOriginalName(), $styleFileName, StaticFileTypes::GEOSERVER_STYLE);
                     }
                     $styleFilesByTable[$tableName] = $staticStyleFile['_id'];
-                } else {
+                } elseif (isset($oldStyleFilesByTable[$tableName])) {
                     $styleFilesByTable[$tableName] = $oldStyleFilesByTable[$tableName];
+                } else {
+                    throw new AppException("Fichier de style manquant pour la table $tableName", Response::HTTP_BAD_REQUEST);
                 }
             }
         }
