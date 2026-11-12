@@ -8,6 +8,7 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
+use App\Dto\Services\PyramidRaster\PyramidRasterGenerateDTO;
 use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\AnnexeApiService;
@@ -25,7 +26,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -65,14 +65,12 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
-    public function add(string $datastoreId, Request $request): JsonResponse
+    public function add(string $datastoreId, #[MapRequestPayload] PyramidRasterGenerateDTO $dto): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
         $datastore = $this->datastoreApiService->get($datastoreId);
         $processingId = $this->sandboxService->getProcGeneratePyramidRaster($datastoreId);
 
-        $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $data['wmsv_offering_id'])->array();
+        $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $dto->wmsv_offering_id)->array();
         $wmsvConfiguration = $this->configurationApiService->get($datastoreId, $wmsvOffering['configuration']['_id'])->array();
 
         $vectorDbId = $wmsvConfiguration['type_infos']['used_data'][0]['stored_data'] ?? null;
@@ -89,14 +87,14 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             throw new AppException('URL du service WMS-Vecteur non trouvée', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $zoomRange = $data['zoom_range'];
+        $zoomRange = $dto->zoom_range;
         $harvestLevels = array_map(strval(...), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
 
         $requestBody = [
             'processing' => $processingId,
             'output' => [
                 'stored_data' => [
-                    'name' => $data['technical_name'],
+                    'name' => $dto->technical_name,
                 ],
             ],
             'parameters' => [
@@ -109,11 +107,11 @@ final class PyramidRasterController extends AbstractController implements ApiCon
                 'harvest_format' => 'image/jpeg',
                 'harvest_url' => $endpointUrlBase,
                 'harvest_layers' => $wmsvOffering['layer_name'],
-                'harvest_area' => $data['wmsv_config_bbox'],
+                'harvest_area' => $dto->wmsv_config_bbox,
             ],
         ];
 
-        if (isset($data['email_notification']) && true === $data['email_notification']) {
+        if ($dto->email_notification) {
             /** @var User */
             $user = $this->getUser();
             $userEmail = $user->getEmail();
