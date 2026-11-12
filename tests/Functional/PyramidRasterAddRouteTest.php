@@ -113,6 +113,44 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         self::assertSame('WAITING', EntrepotMockResponseFactory::stored('processings/executions')[0]['status']);
     }
 
+    public function testAFailureAfterTheExecutionRemovesTheExecutionAndTheLegendAnnexe(): void
+    {
+        $this->seedWmsvService();
+        $client = self::createClient();
+        $this->logIn($client);
+        $tmpEntries = $this->styleFilesDirEntries();
+        EntrepotMockResponseFactory::failNext('POST stored_data/stored-data-1/tags');
+
+        $this->post($client);
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame([], EntrepotMockResponseFactory::stored('processings/executions'));
+        self::assertSame(['vectordb-1'], array_column(EntrepotMockResponseFactory::stored('stored_data'), '_id'));
+        self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
+        self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
+    }
+
+    public function testNoTemporaryFileRemainsAfterAGeneration(): void
+    {
+        $this->seedWmsvService();
+        $client = self::createClient();
+        $this->logIn($client);
+        $tmpEntries = $this->styleFilesDirEntries();
+
+        $this->post($client);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
+    }
+
+    /** @return list<string> */
+    private function styleFilesDirEntries(): array
+    {
+        $dir = (string) self::getContainer()->getParameter('style_files_path');
+
+        return is_dir($dir) ? array_values(array_diff(scandir($dir) ?: [], ['.', '..'])) : [];
+    }
+
     private function seedWmsvService(): void
     {
         EntrepotMockResponseFactory::seed('offerings', [

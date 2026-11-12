@@ -83,6 +83,18 @@ final class PyramidVectorAddRouteTest extends WebTestCase
         );
     }
 
+    public function testAFailureAfterTheExecutionRemovesTheExecutionAndItsPyramid(): void
+    {
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('POST stored_data/stored-data-1/tags');
+
+        $this->post($client);
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame([], EntrepotMockResponseFactory::stored('processings/executions'));
+        self::assertSame(['vectordb-1'], array_column(EntrepotMockResponseFactory::stored('stored_data'), '_id'));
+    }
+
     private function client(): KernelBrowser
     {
         $client = self::createClient();

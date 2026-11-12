@@ -11,6 +11,7 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
 use App\Dto\Services\Form\WmsRasterWmtsFormDTO;
 use App\Dto\Services\PyramidRaster\PyramidRasterGenerateDTO;
+use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\AnnexeApiService;
@@ -143,32 +144,45 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             }
         }
 
-        $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
-        $pyramidId = $processingExecution['output']['stored_data']['_id'];
-
-        // base vecteur créée hors du parcours de dépôt : tags de lignée absents
-        $pyramidTags = array_filter([
-            ...UploadIntegrationWorkflow::forwardedTags($vectordb['tags'] ?? []),
-            StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID] ?? null,
-            StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
-            StoredDataTags::VECTORDB_ID => $vectorDbId,
-            StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
-        ], fn ($value) => null !== $value);
-
+        // avant l’exécution : une légende inaccessible ne laisse rien à défaire
         $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
-        $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME] ?? null);
-        $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
+        $processingExecution = null;
+        $legendAnnexe = null;
 
-        $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
-        $this->storedDataApiService->modify($datastoreId, $pyramidId, [
-            'extra' => [
-                'legend' => [
-                    'url' => $legendAnnexeUrlAbs,
-                    'annexe_id' => $legendAnnexe['_id'],
+        try {
+            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
+            $pyramidId = $processingExecution['output']['stored_data']['_id'];
+
+            // base vecteur créée hors du parcours de dépôt : tags de lignée absents
+            $pyramidTags = array_filter([
+                ...UploadIntegrationWorkflow::forwardedTags($vectordb['tags'] ?? []),
+                StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID] ?? null,
+                StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
+                StoredDataTags::VECTORDB_ID => $vectorDbId,
+                StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
+            ], fn ($value) => null !== $value);
+
+            $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME] ?? null);
+            $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
+
+            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
+            $this->storedDataApiService->modify($datastoreId, $pyramidId, [
+                'extra' => [
+                    'legend' => [
+                        'url' => $legendAnnexeUrlAbs,
+                        'annexe_id' => $legendAnnexe['_id'],
+                    ],
                 ],
-            ],
-        ])->await();
-        $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+            ])->await();
+            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+        } catch (\Throwable $e) {
+            if (null !== $processingExecution) {
+                $this->cancelGeneration($datastoreId, $processingExecution['_id'], $legendAnnexe['_id'] ?? null);
+            }
+            throw $e;
+        } finally {
+            $this->fs->remove(dirname($legendFilePath));
+        }
 
         return new JsonResponse();
     }
@@ -319,6 +333,22 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             ]],
             'styles' => [$legendStatic['_id']],
         ];
+    }
+
+    // au mieux : l’erreur d’origine est celle qui remonte ; supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
+    private function cancelGeneration(string $datastoreId, string $executionId, ?string $legendAnnexeId): void
+    {
+        try {
+            $this->processingApiService->removeExecution($datastoreId, $executionId)->await();
+        } catch (ApiException) {
+        }
+
+        if (null !== $legendAnnexeId) {
+            try {
+                $this->annexeApiService->remove($datastoreId, $legendAnnexeId)->await();
+            } catch (ApiException) {
+            }
+        }
     }
 
     /**

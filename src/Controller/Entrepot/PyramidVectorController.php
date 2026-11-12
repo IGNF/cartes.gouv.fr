@@ -9,6 +9,7 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
+use App\Exception\ApiException;
 use App\Security\User;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -112,18 +113,27 @@ final class PyramidVectorController extends AbstractController implements ApiCon
         $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
         $pyramidId = $processingExecution['output']['stored_data']['_id'];
 
-        // base vecteur créée hors du parcours de dépôt : tags de lignée absents
-        $pyramidTags = array_filter([
-            ...UploadIntegrationWorkflow::forwardedTags($vectordb['tags'] ?? []),
-            StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID] ?? null,
-            StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
-            StoredDataTags::VECTORDB_ID => $dto->vectordb_id,
-            StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
-            StoredDataTags::IS_SAMPLE => is_null($dto->area) ? 'false' : 'true',
-        ], fn ($value) => null !== $value);
+        try {
+            // base vecteur créée hors du parcours de dépôt : tags de lignée absents
+            $pyramidTags = array_filter([
+                ...UploadIntegrationWorkflow::forwardedTags($vectordb['tags'] ?? []),
+                StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID] ?? null,
+                StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
+                StoredDataTags::VECTORDB_ID => $dto->vectordb_id,
+                StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
+                StoredDataTags::IS_SAMPLE => is_null($dto->area) ? 'false' : 'true',
+            ], fn ($value) => null !== $value);
 
-        $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
-        $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
+            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+        } catch (\Throwable $e) {
+            // au mieux : supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
+            try {
+                $this->processingApiService->removeExecution($datastoreId, $processingExecution['_id'])->await();
+            } catch (ApiException) {
+            }
+            throw $e;
+        }
 
         return new JsonResponse();
     }
