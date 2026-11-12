@@ -2,13 +2,16 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { queryOptions, skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum, type VectorDb } from "@/@types/app";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import api from "@/entrepot/api";
 import { filterGeometricRelations } from "@/helpers";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import useCommunityRights from "@/hooks/useCommunityRights";
 import { useTranslation } from "@/i18n";
 import { isApiError } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -76,6 +79,9 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
     const configurationType = configurationTypeFor(type, rasterPyramid);
 
     const { data: datastore } = useQuery(datastoreQueryOptions(datastoreId));
+    const { userRights, isSupervisor } = useCommunityRights();
+    const canGeneratePyramidRaster =
+        isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
     const existingLayerNamesQuery = useQuery<string[], ApiError>({
         queryKey: RQKeys.datastore_layernames_list(datastoreId, configurationType),
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, configurationType, { signal }),
@@ -160,6 +166,14 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                 <MetadataSectionsContainer>
                     <MetadataSection title={t("section.type")}>
                         <ServiceTypeSection value={type} onChange={changeType} />
+                        {type === "wms" && canGeneratePyramidRaster && (
+                            <p className={fr.cx("fr-text--sm", "fr-mb-0")}>
+                                {t("pyramid_raster.hint")}{" "}
+                                <Link to="/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout" params={{ datastoreId }} search={{ datasheetName }}>
+                                    {t("pyramid_raster.link")}
+                                </Link>
+                            </p>
+                        )}
                     </MetadataSection>
                     <MetadataSection title={t("section.description")}>
                         <ServiceDescriptionSection
