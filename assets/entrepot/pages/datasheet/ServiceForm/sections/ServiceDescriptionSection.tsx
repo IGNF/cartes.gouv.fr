@@ -2,7 +2,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/SelectNext";
 import { Controller, useFormContext } from "react-hook-form";
 
-import { type DatasheetStoredDataItem } from "@/@types/app";
+import { type DatasheetStoredDataItem, StoredDataTypeEnum } from "@/@types/app";
 import AutocompleteSelect from "@/components/Input/AutocompleteSelect";
 import ImageFieldUpload from "@/components/Input/ImageFieldUpload";
 import { useTranslation } from "@/i18n";
@@ -16,11 +16,13 @@ type ServiceDescriptionSectionProps = {
     /** données stockées compatibles avec le type de flux choisi */
     storedDataOptions: DatasheetStoredDataItem[];
     onStoredDataChange: (storedDataId: string) => void;
+    /** type de donnée dans le libellé, quand la liste mêle vecteur et raster */
+    withDataKind: boolean;
     /** description du flux, sauf en WFS où chaque table a la sienne */
     withDescription: boolean;
 };
 
-export default function ServiceDescriptionSection({ storedDataOptions, onStoredDataChange, withDescription }: ServiceDescriptionSectionProps) {
+export default function ServiceDescriptionSection({ storedDataOptions, onStoredDataChange, withDataKind, withDescription }: ServiceDescriptionSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
         register,
@@ -49,7 +51,12 @@ export default function ServiceDescriptionSection({ storedDataOptions, onStoredD
                     <Select
                         label={t("stored_data.label")}
                         placeholder={t("stored_data.placeholder")}
-                        options={storedDataOptions.map((option) => ({ value: option._id, label: option.name }))}
+                        options={storedDataOptions.map((option) => ({
+                            value: option._id,
+                            label: withDataKind
+                                ? `${option.name} (${t(option.type === StoredDataTypeEnum.ROK4PYRAMIDRASTER ? "type.raster" : "type.vector")})`
+                                : option.name,
+                        }))}
                         state={error ? "error" : "default"}
                         stateRelatedMessage={error?.message}
                         nativeSelectProps={{

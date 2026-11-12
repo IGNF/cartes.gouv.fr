@@ -167,6 +167,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                                 (item) => item.status === StoredDataStatusEnum.GENERATED
                             )}
                             onStoredDataChange={loadTables}
+                            withDataKind={type === "wms"}
                             withDescription={type !== "wfs"}
                         />
                     </MetadataSection>
