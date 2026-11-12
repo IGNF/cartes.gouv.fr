@@ -52,9 +52,12 @@ const StoredDataPreviewTab: FC<StoredDataPreviewTabProps> = ({ datastoreId, repo
 
                     {storedData?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR && (
                         <>
-                            <li>
-                                <strong>Echantillon :</strong> {storedData?.tags?.is_sample === "true" ? "Oui" : "Non"}
-                            </li>
+                            {/* tag des anciens échantillons, plus écrit depuis le retrait de la fonctionnalité */}
+                            {storedData?.tags?.is_sample === "true" && (
+                                <li>
+                                    <strong>Echantillon :</strong> Oui
+                                </li>
+                            )}
 
                             {storedData.type_infos?.levels && (
                                 <li>
