@@ -5,6 +5,7 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
@@ -146,10 +147,10 @@ final class PyramidRasterController extends AbstractController implements ApiCon
 
         $pyramidTags = [
             CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
-            'upload_id' => $vectordb['tags']['upload_id'],
-            'proc_int_id' => $vectordb['tags']['proc_int_id'],
-            'vectordb_id' => $vectorDbId,
-            'proc_pyr_creat_id' => $processingExecution['_id'],
+            StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID],
+            StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID],
+            StoredDataTags::VECTORDB_ID => $vectorDbId,
+            StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
         ];
         if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
             $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
@@ -184,7 +185,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     {
         $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
         if (!in_array($type, $acceptedTypes, true)) {
-            throw new AppException(sprintf("Le type %s n’est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
+            throw new AppException(sprintf('Le type %s n’est pas accepté. Les types acceptés sont %s.', $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
         }
 
         $dto = $this->multipartPayloadMapper->map($request, WmsRasterWmtsFormDTO::class);

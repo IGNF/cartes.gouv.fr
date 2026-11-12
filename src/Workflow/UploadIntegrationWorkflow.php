@@ -5,6 +5,7 @@ namespace App\Workflow;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\UploadCheckTypes;
 use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
@@ -74,8 +75,8 @@ class UploadIntegrationWorkflow
         $storedDataStatus = null;
         if (JobStatuses::SUCCESSFUL === $steps[self::STEP_WAIT_CHECKS]) {
             // lue seulement si le lancement a posé ses deux tags ; une donnée stockée supprimée répond encore, avec le statut DELETED
-            if (isset($upload['tags']['vectordb_id'], $upload['tags']['proc_int_id'])) {
-                $storedDataStatus = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id'])->array()['status'];
+            if (isset($upload['tags'][StoredDataTags::VECTORDB_ID], $upload['tags'][StoredDataTags::PROC_INT_ID])) {
+                $storedDataStatus = $this->storedDataApiService->get($datastoreId, $upload['tags'][StoredDataTags::VECTORDB_ID])->array()['status'];
             }
             $steps[self::STEP_PROCESSING] = $this->computeProcessingStatus($datastoreId, $upload, $storedDataStatus);
         }
@@ -103,7 +104,7 @@ class UploadIntegrationWorkflow
             'steps' => $steps,
             'status' => $status,
             'next_action' => $nextAction,
-            'vectordb_id' => $upload['tags']['vectordb_id'] ?? null,
+            'vectordb_id' => $upload['tags'][StoredDataTags::VECTORDB_ID] ?? null,
             'datasheet_name' => $upload['tags'][CommonTags::DATASHEET_NAME] ?? null,
         ];
     }
@@ -235,8 +236,8 @@ class UploadIntegrationWorkflow
      */
     private function computeProcessingStatus(string $datastoreId, array $upload, ?string $storedDataStatus): string
     {
-        $hasProcExecId = isset($upload['tags']['proc_int_id']);
-        $hasVectorDbId = isset($upload['tags']['vectordb_id']);
+        $hasProcExecId = isset($upload['tags'][StoredDataTags::PROC_INT_ID]);
+        $hasVectorDbId = isset($upload['tags'][StoredDataTags::VECTORDB_ID]);
 
         // Ne devrait pas arriver normalement, mais si c'est le cas, on évite de bloquer l'intégration à l'infini.
         if ($hasProcExecId xor $hasVectorDbId) {
@@ -247,7 +248,7 @@ class UploadIntegrationWorkflow
             return JobStatuses::WAITING;
         }
 
-        $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags']['proc_int_id'])->array();
+        $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags'][StoredDataTags::PROC_INT_ID])->array();
 
         if (in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS], true)) {
             return JobStatuses::IN_PROGRESS;
@@ -317,13 +318,13 @@ class UploadIntegrationWorkflow
 
         try {
             $this->uploadApiService->addTags($datastoreId, $upload['_id'], [
-                'vectordb_id' => $vectorDbId,
-                'proc_int_id' => $processingExec['_id'],
+                StoredDataTags::VECTORDB_ID => $vectorDbId,
+                StoredDataTags::PROC_INT_ID => $processingExec['_id'],
             ])->await();
 
             $this->storedDataApiService->addTags($datastoreId, $vectorDbId, [
-                'upload_id' => $upload['_id'],
-                'proc_int_id' => $processingExec['_id'],
+                StoredDataTags::UPLOAD_ID => $upload['_id'],
+                StoredDataTags::PROC_INT_ID => $processingExec['_id'],
                 ...self::forwardedTags($upload['tags']),
             ])->await();
 
@@ -350,7 +351,7 @@ class UploadIntegrationWorkflow
         }
 
         try {
-            $this->uploadApiService->removeTags($datastoreId, $uploadId, ['vectordb_id', 'proc_int_id'])->await();
+            $this->uploadApiService->removeTags($datastoreId, $uploadId, [StoredDataTags::VECTORDB_ID, StoredDataTags::PROC_INT_ID])->await();
         } catch (ApiException) {
         }
     }

@@ -4,6 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
@@ -112,11 +113,11 @@ final class PyramidVectorController extends AbstractController implements ApiCon
 
         $pyramidTags = [
             CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
-            'upload_id' => $vectordb['tags']['upload_id'],
-            'proc_int_id' => $vectordb['tags']['proc_int_id'],
-            'vectordb_id' => $dto->vectordb_id,
-            'proc_pyr_creat_id' => $processingExecution['_id'],
-            'is_sample' => is_null($dto->area) ? 'false' : 'true',
+            StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID],
+            StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID],
+            StoredDataTags::VECTORDB_ID => $dto->vectordb_id,
+            StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
+            StoredDataTags::IS_SAMPLE => is_null($dto->area) ? 'false' : 'true',
         ];
         if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
             $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
