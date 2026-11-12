@@ -184,7 +184,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     {
         $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
         if (!in_array($type, $acceptedTypes, true)) {
-            throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
+            throw new AppException(sprintf("Le type %s n’est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
         }
 
         $dto = $this->multipartPayloadMapper->map($request, WmsRasterWmtsFormDTO::class);
