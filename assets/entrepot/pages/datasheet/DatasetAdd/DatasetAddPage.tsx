@@ -19,7 +19,7 @@ export default function DatasetAddPage({ datastoreId, datasheetName }: DatasetAd
     const metadataQuery = useQuery(datasheetMetadataQueryOptions(datastoreId, datasheetName));
 
     return (
-        <Main title={`${t("title")} - ${datasheetName}`}>
+        <Main title={`${t("title")} - ${datasheetName}`} breadcrumbSeparator>
             {/* sans fiche de métadonnées (404), pas de producteur proposé */}
             {metadataQuery.isPending ? (
                 <LoadingText as="p" withSpinnerIcon />

@@ -104,7 +104,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     };
 
     return (
-        <Main title={`${t("title")} - ${datasheetName}`}>
+        <Main title={`${t("title")} - ${datasheetName}`} breadcrumbSeparator>
             <h1 className={fr.cx("fr-mb-1w")}>{t("title")}</h1>
             <p className={fr.cx("fr-text--sm")}>{t("mandatory_fields")}</p>
             {renderContent()}
