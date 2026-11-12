@@ -11,7 +11,6 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
 use App\Dto\Services\Form\WmsRasterWmtsFormDTO;
 use App\Dto\Services\PyramidRaster\PyramidRasterGenerateDTO;
-use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\AnnexeApiService;
@@ -338,13 +337,13 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     {
         try {
             $this->processingApiService->removeExecution($datastoreId, $executionId)->await();
-        } catch (ApiException) {
+        } catch (\Throwable) {
         }
 
         if (null !== $legendAnnexeId) {
             try {
                 $this->annexeApiService->remove($datastoreId, $legendAnnexeId)->await();
-            } catch (ApiException) {
+            } catch (\Throwable) {
             }
         }
     }

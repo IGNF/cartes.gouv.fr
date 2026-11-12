@@ -9,7 +9,6 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
-use App\Exception\ApiException;
 use App\Security\User;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -122,7 +121,7 @@ final class PyramidVectorController extends AbstractController implements ApiCon
             // au mieux : supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
             try {
                 $this->processingApiService->removeExecution($datastoreId, $processingExecution['_id'])->await();
-            } catch (ApiException) {
+            } catch (\Throwable) {
             }
             throw $e;
         }
