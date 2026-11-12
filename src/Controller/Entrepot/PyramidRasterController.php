@@ -88,6 +88,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         }
 
         $zoomRange = array_values($dto->zoom_range);
+        sort($zoomRange);
         $harvestLevels = array_map(strval(...), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
 
         $requestBody = [
