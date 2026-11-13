@@ -78,7 +78,7 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
         },
         // rappel du hook, appelé même si la ligne a disparu du tableau entre-temps
         onSettled: (_data, error) => {
-            // préfixe de la liste des flux : un échec en cours de route peut avoir déjà dépublié des flux
+            // invalide aussi la liste des flux (clé préfixée) : un échec en cours de route peut avoir déjà dépublié des flux
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             if (error) {
                 void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_stored_data_uses(datastoreId, storedData._id) });
