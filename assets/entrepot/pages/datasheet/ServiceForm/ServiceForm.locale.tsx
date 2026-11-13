@@ -20,8 +20,10 @@ const { i18n } = declareComponentKeys<
     | "section.access"
     | "type.legend"
     | "type.help_link"
-    | "pyramid_raster.hint"
-    | "pyramid_raster.link"
+    | { K: "pyramid_raster.notice.title"; P: { service: string }; R: string }
+    | { K: "pyramid_raster.notice.description"; P: { service: string }; R: string }
+    | "pyramid_raster.notice.generate"
+    | "pyramid_raster.notice.help"
     | "type.wfs"
     | "type.wms"
     | "type.tms"
@@ -33,6 +35,7 @@ const { i18n } = declareComponentKeys<
     | "type.vector"
     | "type.raster"
     | "stored_data.label"
+    | "stored_data.label_pyramid"
     | "stored_data.placeholder"
     | "title.label"
     | "title.hint"
@@ -82,6 +85,7 @@ const { i18n } = declareComponentKeys<
     | "attribution.logo.modal_title"
     | "validation.stored_data.required"
     | "validation.stored_data.required_wms"
+    | "validation.stored_data.required_wmts"
     | "validation.title.required"
     | "validation.technical_name.required"
     | "validation.technical_name.chars"
@@ -136,8 +140,11 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "section.access": "Droits et accès",
     "type.legend": "Type de flux",
     "type.help_link": "Comment choisir le type de flux à publier ?",
-    "pyramid_raster.hint": "Pour publier un WMS raster, générez d’abord une pyramide de tuiles raster à partir d’un flux WMS-Vecteur.",
-    "pyramid_raster.link": "Créer une pyramide raster",
+    "pyramid_raster.notice.title": ({ service }) => `Créez un flux ${service} à partir d’une pyramide de données raster`,
+    "pyramid_raster.notice.description": ({ service }) =>
+        `Vous ne trouvez pas votre donnée ? Calculez des pyramides de données à partir de vos jeux de données depuis cartes.gouv.fr, puis revenez ici pour créer votre flux ${service}.`,
+    "pyramid_raster.notice.generate": "Générer une pyramide",
+    "pyramid_raster.notice.help": "Consulter l’aide",
     "type.wfs": "Flux WFS",
     "type.wms": "Flux WMS",
     "type.tms": "Flux TMS",
@@ -149,6 +156,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "type.vector": "Vecteur",
     "type.raster": "Raster",
     "stored_data.label": "Jeu de données",
+    "stored_data.label_pyramid": "Pyramide de données",
     "stored_data.placeholder": "Sélectionner une option",
     "title.label": "Titre du flux",
     "title.hint": "Titre concis et non-technique permettant aux utilisateurs de comprendre de quel flux il s’agit",
@@ -202,6 +210,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "attribution.logo.modal_title": "Ajouter un logo",
     "validation.stored_data.required": "Veuillez sélectionner un jeu de données vecteur",
     "validation.stored_data.required_wms": "Veuillez sélectionner un jeu de données",
+    "validation.stored_data.required_wmts": "Veuillez sélectionner une pyramide raster",
     "validation.title.required": "Le titre du flux est obligatoire",
     "validation.technical_name.required": "Le nom technique du flux est obligatoire",
     "validation.technical_name.chars": "Le nom technique ne doit contenir ni espace ni caractère spécial",
@@ -255,8 +264,11 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "section.access": "Rights and access",
     "type.legend": "Service type",
     "type.help_link": "How to choose the type of service to publish?",
-    "pyramid_raster.hint": "To publish a raster WMS, first generate a raster tile pyramid from a vector WMS service.",
-    "pyramid_raster.link": "Create a raster pyramid",
+    "pyramid_raster.notice.title": ({ service }) => `Create a ${service} service from a raster data pyramid`,
+    "pyramid_raster.notice.description": ({ service }) =>
+        `Can’t find your data? Compute data pyramids from your datasets on cartes.gouv.fr, then come back here to create your ${service} service.`,
+    "pyramid_raster.notice.generate": "Generate a pyramid",
+    "pyramid_raster.notice.help": "Read the help",
     "type.wfs": "WFS service",
     "type.wms": "WMS service",
     "type.tms": "TMS service",
@@ -268,6 +280,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "type.vector": "Vector",
     "type.raster": "Raster",
     "stored_data.label": "Dataset",
+    "stored_data.label_pyramid": "Data pyramid",
     "stored_data.placeholder": "Select an option",
     "title.label": "Service title",
     "title.hint": "Short, non-technical title that tells users what the service is about",
@@ -319,6 +332,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "attribution.logo.modal_title": "Add a logo",
     "validation.stored_data.required": "Please select a vector dataset",
     "validation.stored_data.required_wms": "Please select a dataset",
+    "validation.stored_data.required_wmts": "Please select a raster pyramid",
     "validation.title.required": "The service title is required",
     "validation.technical_name.required": "The technical name is required",
     "validation.technical_name.chars": "The technical name must not contain spaces or special characters",

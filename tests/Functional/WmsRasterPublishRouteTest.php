@@ -10,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
- * Publication d’un flux WMS raster depuis le nouveau formulaire : champ `data`, statique de légende ROK4 nommé d’après la configuration.
+ * Publication d’un flux WMS raster ou WMTS depuis le nouveau formulaire : champ `data`, statique de légende ROK4 nommé d’après la configuration.
  */
 final class WmsRasterPublishRouteTest extends WebTestCase
 {
@@ -50,6 +50,23 @@ final class WmsRasterPublishRouteTest extends WebTestCase
         self::assertSame([$statics[0]['_id']], $configuration['type_infos']['styles']);
         self::assertSame(EntrepotMockResponseFactory::WMSR_PUBLIC_ENDPOINT_ID, EntrepotMockResponseFactory::stored('offerings')[0]['endpoint']['_id']);
         self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
+    }
+
+    public function testWmtsLegendStyleIsNamedAfterTheConfigurationOnTheWmtsEndpoint(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+
+        $this->post($client, 'WMTS-TMS', $this->payload());
+
+        self::assertResponseStatusCodeSame(201);
+        $configuration = EntrepotMockResponseFactory::stored('configurations')[0];
+        self::assertSame('WMTS-TMS', $configuration['type']);
+        $statics = EntrepotMockResponseFactory::stored('statics');
+        self::assertSame([sprintf('config_%s_style_wmts', $configuration['_id'])], array_column($statics, 'name'));
+        self::assertSame([['bottom_level' => '12', 'top_level' => '5', 'stored_data' => 'pyramid-1']], $configuration['type_infos']['used_data']);
+        self::assertSame([$statics[0]['_id']], $configuration['type_infos']['styles']);
+        self::assertSame(EntrepotMockResponseFactory::WMTS_PUBLIC_ENDPOINT_ID, EntrepotMockResponseFactory::stored('offerings')[0]['endpoint']['_id']);
     }
 
     public function testLegendStyleIsRemovedWhenTheOfferingCannotBeCreated(): void

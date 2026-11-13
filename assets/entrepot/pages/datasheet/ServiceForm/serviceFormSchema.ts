@@ -13,7 +13,7 @@ export const SERVICE_TYPES = ["wfs", "wms", "tms", "wmts"] as const;
 export type ServiceType = (typeof SERVICE_TYPES)[number];
 
 /** types dont le formulaire est livré ; les autres cartes restent visibles mais désactivées */
-export const IMPLEMENTED_SERVICE_TYPES: readonly ServiceType[] = ["wfs", "wms"];
+export const IMPLEMENTED_SERVICE_TYPES: readonly ServiceType[] = ["wfs", "wms", "wmts"];
 
 /** type de configuration Entrepôt (et d’endpoint) du type de flux */
 export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeEnum> = {
@@ -29,6 +29,16 @@ export const isRasterPyramid = (datasheet: DatasheetDetailed | undefined, stored
 
 export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean): ConfigurationTypeEnum =>
     type === "wms" && rasterPyramid ? ConfigurationTypeEnum.WMSRASTER : SERVICE_CONFIGURATION_TYPES[type];
+
+/** type de flux publié depuis une pyramide raster (route pyramid-raster), undefined pour les autres routes, TMS compris */
+export const rasterPyramidPublishType = (
+    type: ServiceType,
+    rasterPyramid: boolean
+): ConfigurationTypeEnum.WMSRASTER | ConfigurationTypeEnum.WMTSTMS | undefined => {
+    if (type === "wmts") return ConfigurationTypeEnum.WMTSTMS;
+    if (type === "wms" && rasterPyramid) return ConfigurationTypeEnum.WMSRASTER;
+    return undefined;
+};
 
 export const SERVICE_ACCESSES = ["public", "restricted_visible", "restricted"] as const;
 export type ServiceAccess = (typeof SERVICE_ACCESSES)[number];
@@ -48,11 +58,11 @@ export const SERVICE_TABLES_MAX = 10;
 type SchemaDeps = {
     t: T;
     type: ServiceType;
-    /** donnée choisie = pyramide raster : un flux WMS sans tables ni styles */
+    /** donnée choisie = pyramide raster (toujours en WMTS) : un flux sans tables ni styles */
     rasterPyramid?: boolean;
     /** noms de couches déjà pris pour ce type de flux */
     existingLayerNames: readonly string[];
-    /** préfixe imposé par l’entrepôt aux noms techniques, suivi d’un point */
+    /** préfixe imposé par l’entrepôt aux noms techniques, suivi de « _ » */
     layerNamePrefix?: string;
     /** accès offerts par les endpoints de l’entrepôt pour ce type de flux */
     availableAccesses: readonly ServiceAccess[];
@@ -86,6 +96,12 @@ const validateSldFile = (file: File, tableName: string): Promise<StyleFileError[
 
 const sldErrorMessage = (t: T, error: StyleFileError): string =>
     error.code === "layer_name" ? t("validation.table.style.layer_name", { expected: error.expected }) : t(`validation.table.style.${error.code}`);
+
+const storedDataRequiredMessage = (t: T, type: ServiceType): string => {
+    if (type === "wms") return t("validation.stored_data.required_wms");
+    if (type === "wmts") return t("validation.stored_data.required_wmts");
+    return t("validation.stored_data.required");
+};
 
 export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existingLayerNames, layerNamePrefix, availableAccesses }: SchemaDeps) => {
     const tableSchema = z
@@ -140,7 +156,7 @@ export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existin
         });
 
     return z.object({
-        stored_data_id: z.string().min(1, type === "wms" ? t("validation.stored_data.required_wms") : t("validation.stored_data.required")),
+        stored_data_id: z.string().min(1, storedDataRequiredMessage(t, type)),
         title: z.string().trim().min(1, t("validation.title.required")),
         technical_name: z
             .string()

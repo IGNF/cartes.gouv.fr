@@ -6,6 +6,7 @@ import {
     buildServiceFormSchema,
     configurationTypeFor,
     isRasterPyramid,
+    rasterPyramidPublishType,
     type ServiceAccess,
     serviceFormDefaultValues,
     type ServiceFormValues,
@@ -156,6 +157,21 @@ describe("buildServiceFormSchema", () => {
             });
         });
     });
+
+    describe("WMTS", () => {
+        const wmts = (description = "Orthophotographie"): ServiceFormValues => ({ ...valid(), stored_data_id: "pyramid-1", description, tables: [] });
+
+        it("n’exige aucune table mais la description du flux", async () => {
+            expect(await issueMessages(wmts(), undefined, "wmts", true)).toEqual({});
+            expect(await issueMessages(wmts(" "), undefined, "wmts", true)).toEqual({ description: "validation.description.required" });
+        });
+
+        it("demande une pyramide raster", async () => {
+            expect(await issueMessages({ ...wmts(), stored_data_id: "" }, undefined, "wmts", true)).toEqual({
+                stored_data_id: "validation.stored_data.required_wmts",
+            });
+        });
+    });
 });
 
 describe("isRasterPyramid", () => {
@@ -174,5 +190,16 @@ describe("configurationTypeFor", () => {
         expect(configurationTypeFor("wms", true)).toBe(ConfigurationTypeEnum.WMSRASTER);
         expect(configurationTypeFor("wms", false)).toBe(ConfigurationTypeEnum.WMSVECTOR);
         expect(configurationTypeFor("wfs", true)).toBe(ConfigurationTypeEnum.WFS);
+        expect(configurationTypeFor("wmts", true)).toBe(ConfigurationTypeEnum.WMTSTMS);
+    });
+});
+
+describe("rasterPyramidPublishType", () => {
+    it("publie par la route des pyramides raster le WMTS et le WMS sur pyramide raster, rien d’autre", () => {
+        expect(rasterPyramidPublishType("wmts", true)).toBe(ConfigurationTypeEnum.WMTSTMS);
+        expect(rasterPyramidPublishType("wms", true)).toBe(ConfigurationTypeEnum.WMSRASTER);
+        expect(rasterPyramidPublishType("wms", false)).toBeUndefined();
+        expect(rasterPyramidPublishType("wfs", true)).toBeUndefined();
+        expect(rasterPyramidPublishType("tms", true)).toBeUndefined();
     });
 });
