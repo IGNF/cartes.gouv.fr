@@ -57,7 +57,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
                 return api.pyramidRaster.publish(datastoreId, values.stored_data_id, rasterType, buildServiceFormData(type, values, true));
             }
             const publish = publishers[type];
-            if (publish === undefined) throw new Error(`Type de flux non livré : ${type}`);
+            if (publish === undefined) throw new Error(`Type de flux sans route de publication : ${type}`);
             return publish(datastoreId, values.stored_data_id, buildServiceFormData(type, values));
         },
         // aussi après un échec : le flux peut exister si l’erreur survient après la création de l’offre
