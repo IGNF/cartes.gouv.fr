@@ -14,10 +14,10 @@ import api from "@/entrepot/api";
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
 import useStoredDataUseProcessings from "@/hooks/queries/useStoredDataUseProcessings";
 import { useTranslation } from "@/i18n";
+import { getApiErrorMessage } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
-import { offeringTypeDisplayName } from "@/utils";
-import { getApiErrorMessage } from "../../../../../modules/apiError";
 import { type ApiError } from "@/modules/jsonFetch";
+import { offeringTypeDisplayName } from "@/utils";
 
 type StoredDataDeleteConfirmDialogProps = {
     modal: ReturnType<typeof createModal>;
