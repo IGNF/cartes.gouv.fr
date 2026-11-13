@@ -33,7 +33,7 @@ final class EntrepotMockResponseFactory
     /** @var array<string, string> contenu XML des métadonnées écrites, par identifiant */
     private static array $metadataFiles = [];
 
-    /** @var list<array{string, int}> requêtes « MÉTHODE chemin » qui répondent 500, après le nombre de passages réussis indiqué */
+    /** @var list<array{string, int, int}> requêtes « MÉTHODE chemin » qui échouent avec le statut indiqué, après le nombre de passages réussis indiqué */
     private static array $failures = [];
 
     private static int $nextId = 1;
@@ -78,10 +78,10 @@ final class EntrepotMockResponseFactory
         return self::$metadataFiles[$metadataId] ?? null;
     }
 
-    // la prochaine requête « MÉTHODE chemin relatif au datastore » répond 500 (ex. « POST metadata »), après $passes passages réussis
-    public static function failNext(string $request, int $passes = 0): void
+    // la prochaine requête « MÉTHODE chemin relatif au datastore » échoue avec $status (ex. « POST metadata »), après $passes passages réussis
+    public static function failNext(string $request, int $passes = 0, int $status = 500): void
     {
-        self::$failures[] = [$request, $passes];
+        self::$failures[] = [$request, $passes, $status];
     }
 
     // GET users/me répond pour un autre utilisateur jusqu’au prochain reset()
@@ -182,7 +182,7 @@ final class EntrepotMockResponseFactory
     private function datastoreResponse(string $method, string $path, string $queryString, array $options): ?MockResponse
     {
         $relative = ltrim($path, '/');
-        foreach (self::$failures as $index => [$request, $passes]) {
+        foreach (self::$failures as $index => [$request, $passes, $status]) {
             if ("$method $relative" !== $request) {
                 continue;
             }
@@ -192,7 +192,7 @@ final class EntrepotMockResponseFactory
             }
             array_splice(self::$failures, $index, 1);
 
-            return $this->json(['error' => 'Internal Server Error', 'error_description' => "Échec simulé de $method $relative"], 500);
+            return $this->json(['error' => 'Internal Server Error', 'error_description' => "Échec simulé de $method $relative"], $status);
         }
 
         if ('GET' === $method && '' === $relative) {
@@ -354,6 +354,14 @@ final class EntrepotMockResponseFactory
             return $this->json($execution, 201);
         }
 
+        // annulation : ABORTED et 202 ; clé semée status_on_abort = exécution terminée entre-temps, 409 comme l’Entrepôt
+        if ('POST' === $method && 1 === preg_match('#^processings/executions/([\w-]+)/abort$#', $relative, $matches)) {
+            $status = $this->find('processings/executions', $matches[1])['status_on_abort'] ?? 'ABORTED';
+            $this->update('processings/executions', $matches[1], fn (array $item) => ['status' => $status] + $item);
+
+            return 'ABORTED' === $status ? new MockResponse('', ['http_code' => 202]) : $this->json(['error' => 'Conflict'], 409);
+        }
+
         if ('POST' === $method && 1 === preg_match('#^processings/executions/([\w-]+)/launch$#', $relative, $matches)) {
             $this->update('processings/executions', $matches[1], fn (array $item) => ['status' => 'WAITING'] + $item);
 
@@ -409,7 +417,7 @@ final class EntrepotMockResponseFactory
         return null;
     }
 
-    // filtres de liste de l’Entrepôt : tags[clé]=valeur, labels[]=clé=valeur, path
+    // filtres de liste de l’Entrepôt : tags[clé]=valeur, labels[]=clé=valeur, path, input_stored_data, output_stored_data
     /**
      * @param array<mixed> $item
      * @param array<mixed> $query
@@ -423,6 +431,14 @@ final class EntrepotMockResponseFactory
         }
 
         if (isset($query['path']) && !in_array($query['path'], $item['paths'] ?? [], true)) {
+            return false;
+        }
+
+        if (isset($query['input_stored_data']) && !in_array($query['input_stored_data'], array_column($item['inputs']['stored_data'] ?? [], '_id'), true)) {
+            return false;
+        }
+
+        if (isset($query['output_stored_data']) && $query['output_stored_data'] !== ($item['output']['stored_data']['_id'] ?? null)) {
             return false;
         }
 
