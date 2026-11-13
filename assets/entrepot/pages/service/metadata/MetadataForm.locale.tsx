@@ -139,7 +139,7 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
             {"Exemple : 25 000 si les données sont faites pour un affichage à l’échelle d’une carte topographique."}
         </>
     ),
-    "metadata.field.hint.prefix_mention": ({ prefix }) => `Il doit commencer par le préfixe « ${prefix}_ » défini dans la configuration de l'entrepôt.`,
+    "metadata.field.hint.prefix_mention": ({ prefix }) => `Il doit commencer par le préfixe « ${prefix}_ » défini dans la configuration de l’entrepôt.`,
 };
 
 export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = {
