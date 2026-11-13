@@ -637,11 +637,11 @@ class CartesServiceApiService
         ?\Closure $onConfigurationCreated = null,
         ?\Closure $onRollback = null,
     ): array {
-        $this->datastorePrefixValidator->assertLayerName($datastoreId, $dto->technical_name);
-
         $thumbnailUrl = null;
         $logo = null;
         try {
+            // dans le try : un refus annule aussi ce que l’appelant a déjà déposé
+            $this->datastorePrefixValidator->assertLayerName($datastoreId, $dto->technical_name);
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME] ?? null;
             if (!is_string($datasheetName)) {

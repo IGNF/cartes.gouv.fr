@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
+use App\Services\EntrepotApi\DatastoreApiService;
 use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Support\KeycloakLoginTrait;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -116,6 +117,27 @@ final class WmsVectorPublishRouteTest extends WebTestCase
         self::assertResponseStatusCodeSame(400);
         self::assertSame('Renseignez d’abord la description de la fiche de données', $this->jsonResponse($client)['detail']);
         self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
+    }
+
+    public function testStyleFilesAreRemovedWhenTheTechnicalNameLacksTheDatastorePrefix(): void
+    {
+        $this->seedMetadata();
+        EntrepotMockResponseFactory::setDatastorePrefixes(['configuration_layer_name_prefix' => 'SANDBOX']);
+        $client = $this->client();
+        // la réponse du datastore est mise en cache entre les tests
+        $datastoreApiService = self::getContainer()->get(DatastoreApiService::class);
+        $datastoreApiService->invalidate(EntrepotMockResponseFactory::DATASTORE_ID);
+
+        try {
+            $this->post($client, $this->payload(['communes']), ['communes' => $this->sld('communes.sld')]);
+
+            self::assertResponseStatusCodeSame(400);
+            self::assertSame('Le nom technique doit commencer par « SANDBOX_ »', $this->jsonResponse($client)['detail']);
+            self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
+            self::assertSame([], EntrepotMockResponseFactory::stored('configurations'));
+        } finally {
+            $datastoreApiService->invalidate(EntrepotMockResponseFactory::DATASTORE_ID);
+        }
     }
 
     public function testMissingOrInvalidStyleFilesAnswer422OnTheirTablePathWithoutWriting(): void
