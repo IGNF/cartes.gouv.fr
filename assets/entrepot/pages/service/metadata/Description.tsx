@@ -29,9 +29,10 @@ type DescriptionProps = {
     visible: boolean;
     form: UseFormReturn<ServiceFormValuesBaseType>;
     editMode?: boolean;
+    identifierLocked?: boolean;
 };
 
-const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
+const Description: FC<DescriptionProps> = ({ visible, form, editMode, identifierLocked = false }) => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = getTranslation("MetadatasForm");
 
@@ -62,14 +63,14 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
 
             // TODO Utiliser la nouvelle route https://github.com/Geoplateforme/geoplateforme.github.io/issues/1
 
-            if (regex.file_identifier.test(fileIdentifier)) {
+            if (!identifierLocked && regex.file_identifier.test(fileIdentifier)) {
                 setFormValue("identifier", fileIdentifier);
             }
             if (["dataset", "series"].includes(hierarchyLevel)) {
                 setFormValue("resource_genealogy", hierarchyLevel);
             }
         })();
-    }, [setFormValue, metadata]);
+    }, [setFormValue, metadata, identifierLocked]);
 
     useEffect(() => {
         const { unsubscribe } = watch(({ public_name }, { name }) => {
@@ -167,6 +168,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                 nativeInputProps={{
                     ...register("identifier"),
                 }}
+                disabled={identifierLocked}
             />
             <Controller
                 control={control}

@@ -262,7 +262,8 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         existingLayerNamesQuery.data,
         editMode,
         offeringQuery.data?.configuration.layer_name,
-        datastore
+        datastore,
+        metadataQuery.data !== undefined
     );
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
@@ -389,7 +390,12 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                         </StyleFormProvider>
                     )}
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
-                    <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} editMode={editMode} />
+                    <Description
+                        visible={currentStep === STEPS.METADATAS_DESCRIPTION}
+                        form={form}
+                        editMode={editMode}
+                        identifierLocked={metadataQuery.data !== undefined}
+                    />
                     <AdditionalInfo
                         datastoreId={datastoreId}
                         storedData={vectorDbQuery.data}

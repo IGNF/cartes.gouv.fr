@@ -20,7 +20,13 @@ export class CommonSchemasValidation {
         });
     }
 
-    getMDDescriptionSchema(existingLayerNames: string[] = [], editMode: boolean = false, oldTechnicalName?: string, datastore?: Datastore) {
+    getMDDescriptionSchema(
+        existingLayerNames: string[] = [],
+        editMode: boolean = false,
+        oldTechnicalName?: string,
+        datastore?: Datastore,
+        identifierLocked: boolean = false
+    ) {
         return yup
             .object({
                 technical_name: yup
@@ -53,7 +59,7 @@ export class CommonSchemasValidation {
                             if (!prefix) return true; // si pas de préfixe défini, on ne fait pas de validation
                             if (typeof technicalName !== "string") return false;
 
-                            const expectedPrefix = prefix + ".";
+                            const expectedPrefix = prefix + "_";
                             return technicalName.startsWith(expectedPrefix);
                         },
                     })
@@ -68,7 +74,7 @@ export class CommonSchemasValidation {
                             if (!prefix) return true;
                             if (typeof technicalName !== "string") return false;
 
-                            const expectedPrefix = prefix + ".";
+                            const expectedPrefix = prefix + "_";
                             if (!technicalName.startsWith(expectedPrefix)) return true;
                             return technicalName.length > expectedPrefix.length;
                         },
@@ -91,11 +97,12 @@ export class CommonSchemasValidation {
                         message: tValidMD("metadatas.identifier_prefix_error"),
                         test: (identifier) => {
                             if (!identifier) return true;
+                            if (identifierLocked) return true; // identifiant existant, éventuellement avec l’ancien séparateur « . »
                             const prefix = datastore?.metadata_file_identifier_prefix;
                             if (!prefix) return true; // si pas de préfixe défini, on ne fait pas de validation
                             if (typeof identifier !== "string") return false;
 
-                            const expectedPrefix = prefix + ".";
+                            const expectedPrefix = prefix + "_";
                             return identifier.startsWith(expectedPrefix);
                         },
                     })
@@ -104,11 +111,12 @@ export class CommonSchemasValidation {
                         message: tValidMD("metadatas.identifier_not_prefix_only_error"),
                         test: (identifier) => {
                             if (!identifier) return true;
+                            if (identifierLocked) return true;
                             const prefix = datastore?.metadata_file_identifier_prefix;
                             if (!prefix) return true;
                             if (typeof identifier !== "string") return false;
 
-                            const expectedPrefix = prefix + ".";
+                            const expectedPrefix = prefix + "_";
                             if (!identifier.startsWith(expectedPrefix)) return true;
                             return identifier.length > expectedPrefix.length;
                         },
