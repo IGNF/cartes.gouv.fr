@@ -75,10 +75,16 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
             dataUsesQuery.data?.offerings_list?.forEach((offering) => {
                 queryClient.removeQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offering._id) });
             });
-            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
         },
         // rappel du hook, appelé même si la ligne a disparu du tableau entre-temps
-        onSettled: (_data, error) => onSettled?.(error),
+        onSettled: (_data, error) => {
+            // préfixe de la liste des flux : un échec en cours de route peut avoir déjà dépublié des flux
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            if (error) {
+                void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_stored_data_uses(datastoreId, storedData._id) });
+            }
+            onSettled?.(error);
+        },
     });
 
     return (
