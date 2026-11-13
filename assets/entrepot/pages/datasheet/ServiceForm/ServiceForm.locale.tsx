@@ -87,6 +87,7 @@ const { i18n } = declareComponentKeys<
     | "validation.stored_data.required"
     | "validation.stored_data.required_wms"
     | "validation.stored_data.required_wmts"
+    | "validation.stored_data.required_tms"
     | "validation.title.required"
     | "validation.technical_name.required"
     | "validation.technical_name.chars"
@@ -213,6 +214,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "validation.stored_data.required": "Veuillez sélectionner un jeu de données vecteur",
     "validation.stored_data.required_wms": "Veuillez sélectionner un jeu de données",
     "validation.stored_data.required_wmts": "Veuillez sélectionner une pyramide raster",
+    "validation.stored_data.required_tms": "Veuillez sélectionner une pyramide vecteur",
     "validation.title.required": "Le titre du flux est obligatoire",
     "validation.technical_name.required": "Le nom technique du flux est obligatoire",
     "validation.technical_name.chars": "Le nom technique ne doit contenir ni espace ni caractère spécial",
@@ -336,6 +338,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "validation.stored_data.required": "Please select a vector dataset",
     "validation.stored_data.required_wms": "Please select a dataset",
     "validation.stored_data.required_wmts": "Please select a raster pyramid",
+    "validation.stored_data.required_tms": "Please select a vector pyramid",
     "validation.title.required": "The service title is required",
     "validation.technical_name.required": "The technical name is required",
     "validation.technical_name.chars": "The technical name must not contain spaces or special characters",

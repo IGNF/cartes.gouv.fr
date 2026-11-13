@@ -78,6 +78,8 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
     // WMTS toujours, WMS quand la donnée choisie est une pyramide raster : ni tables ni dépôt de style
     const raster = type === "wmts" || (type === "wms" && rasterPyramidSelected);
     const configurationType = configurationTypeFor(type, raster);
+    // TMS : une pyramide vecteur, sans tables à lire
+    const withTables = type === "wfs" || (type === "wms" && !rasterPyramidSelected);
 
     const { data: datastore } = useQuery(datastoreQueryOptions(datastoreId));
     const { userRights, isSupervisor } = useCommunityRights();
@@ -127,15 +129,14 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
     const { handleSubmit, setError, setValue, getValues, control } = form;
 
     const storedDataId = useWatch({ control, name: "stored_data_id" });
-    // une pyramide raster n’a pas de tables à lire
-    const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, raster ? "" : storedDataId));
+    const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, withTables ? storedDataId : ""));
 
     // les tables appartiennent au jeu précédent : vidées, puis remplies quand la base choisie est lue
     const loadTables = (id: string) => {
         setValue("tables", []);
         const raster = isRasterPyramid(datasheet, id);
         setRasterPyramidSelected(raster);
-        if (id === "" || raster) return;
+        if (id === "" || raster || type === "tms") return;
         queryClient
             .query(vectorDbQueryOptions(datastoreId, id))
             .then((vectorDb) => {
@@ -157,6 +158,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
     const storedDataOptions = [
         ...(type === "wfs" || type === "wms" ? (datasheet.vector_db_list ?? []) : []),
         ...(type === "wms" || type === "wmts" ? (datasheet.pyramid_raster_list ?? []) : []),
+        ...(type === "tms" ? (datasheet.pyramid_vector_list ?? []) : []),
     ].filter((item) => item.status === StoredDataStatusEnum.GENERATED);
 
     const submit = handleSubmit(async (values) => {
@@ -178,7 +180,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                         <ServiceDescriptionSection
                             storedDataOptions={storedDataOptions}
                             onStoredDataChange={loadTables}
-                            storedDataLabel={t(type === "wmts" ? "stored_data.label_pyramid" : "stored_data.label")}
+                            storedDataLabel={t(type === "wmts" || type === "tms" ? "stored_data.label_pyramid" : "stored_data.label")}
                             storedDataNotice={
                                 type !== "wfs" && (
                                     <PyramidNotice
@@ -194,7 +196,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                             withDescription={type !== "wfs"}
                         />
                     </MetadataSection>
-                    {!raster && (
+                    {withTables && (
                         <MetadataSection title={t("section.tables")}>
                             <TablesSection
                                 status={storedDataId === "" ? "idle" : vectorDbQuery.status}

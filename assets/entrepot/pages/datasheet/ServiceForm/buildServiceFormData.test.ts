@@ -79,6 +79,14 @@ describe("buildServiceFormData", () => {
         expect(formData.get("style_files[communes]")).toBeNull();
     });
 
+    it("TMS : envoie la description, ni tables ni fichiers de style", () => {
+        const formData = buildServiceFormData("tms", { ...values, description: "Hydrographie" });
+        const payload = payloadOf(formData);
+        expect(payload.description).toBe("Hydrographie");
+        expect(payload).not.toHaveProperty("tables");
+        expect(payload).not.toHaveProperty("selected_tables");
+    });
+
     it("WFS : n’envoie pas de description du flux", () => {
         expect(payloadOf(buildServiceFormData("wfs", { ...values, description: "ignorée" }))).not.toHaveProperty("description");
     });

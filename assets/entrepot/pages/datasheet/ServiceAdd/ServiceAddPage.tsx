@@ -18,10 +18,11 @@ import { buildServiceFormData } from "../ServiceForm/buildServiceFormData";
 import ServiceForm from "../ServiceForm/ServiceForm";
 import { configurationTypeFor, isRasterPyramid, rasterPyramidPublishType, type ServiceFormOutput, type ServiceType } from "../ServiceForm/serviceFormSchema";
 
-// types livrés par le formulaire (IMPLEMENTED_SERVICE_TYPES)
+// WMTS et WMS raster passent par api.pyramidRaster.publish
 const publishers: Partial<Record<ServiceType, (datastoreId: string, storedDataId: string, formData: FormData) => Promise<Service>>> = {
     wfs: api.wfs.publish,
     wms: api.wmsVector.publish,
+    tms: api.pyramidVector.publishTms,
 };
 
 type ServiceAddPageProps = {

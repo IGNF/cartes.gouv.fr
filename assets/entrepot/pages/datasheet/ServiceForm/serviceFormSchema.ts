@@ -12,9 +12,6 @@ type T = TranslationFunction<"ServiceForm", ComponentKey>;
 export const SERVICE_TYPES = ["wfs", "wms", "tms", "wmts"] as const;
 export type ServiceType = (typeof SERVICE_TYPES)[number];
 
-/** types dont le formulaire est livré ; les autres cartes restent visibles mais désactivées */
-export const IMPLEMENTED_SERVICE_TYPES: readonly ServiceType[] = ["wfs", "wms", "wmts"];
-
 /** type de configuration Entrepôt (et d’endpoint) du type de flux */
 export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeEnum> = {
     wfs: ConfigurationTypeEnum.WFS,
@@ -100,6 +97,7 @@ const sldErrorMessage = (t: T, error: StyleFileError): string =>
 const storedDataRequiredMessage = (t: T, type: ServiceType): string => {
     if (type === "wms") return t("validation.stored_data.required_wms");
     if (type === "wmts") return t("validation.stored_data.required_wmts");
+    if (type === "tms") return t("validation.stored_data.required_tms");
     return t("validation.stored_data.required");
 };
 

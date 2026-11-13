@@ -172,6 +172,21 @@ describe("buildServiceFormSchema", () => {
             });
         });
     });
+
+    describe("TMS", () => {
+        const tms = (description = "Hydrographie"): ServiceFormValues => ({ ...valid(), stored_data_id: "pyramid-1", description, tables: [] });
+
+        it("n’exige aucune table mais la description du flux", async () => {
+            expect(await issueMessages(tms(), undefined, "tms")).toEqual({});
+            expect(await issueMessages(tms(" "), undefined, "tms")).toEqual({ description: "validation.description.required" });
+        });
+
+        it("demande une pyramide vecteur", async () => {
+            expect(await issueMessages({ ...tms(), stored_data_id: "" }, undefined, "tms")).toEqual({
+                stored_data_id: "validation.stored_data.required_tms",
+            });
+        });
+    });
 });
 
 describe("isRasterPyramid", () => {
