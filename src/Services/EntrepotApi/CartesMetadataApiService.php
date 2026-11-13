@@ -213,15 +213,7 @@ class CartesMetadataApiService
 
         $newMetadataFilePath = $this->cswMetadataWriter->saveToFile($newCswMetadata);
 
-        // suppression et recréation de métadonnées si changement de file_identifier
-        if ($oldCswMetadata->file_identifier !== $newCswMetadata->file_identifier) {
-            $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->requireFileIdentifier(), $metadataEndpoint['_id'])->await();
-            $this->metadataApiService->delete($datastoreId, $oldApiMetadata['_id'])->await();
-
-            $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
-        } else {
-            $newApiMetadata = $this->metadataApiService->replaceFile($datastoreId, $oldApiMetadata['_id'], $newMetadataFilePath);
-        }
+        $newApiMetadata = $this->metadataApiService->replaceFile($datastoreId, $oldApiMetadata['_id'], $newMetadataFilePath);
         $newApiMetadata = $this->metadataApiService->addTags($datastoreId, $newApiMetadata['_id'], $oldApiMetadata['tags'])->array();
 
         if (0 === count($newApiMetadata['endpoints'])) { // la métadonnée n'est pas déjà publiée
@@ -253,7 +245,7 @@ class CartesMetadataApiService
                  new CswLanguage($formData['language']['code'], $formData['language']['language'])
                  : CswLanguage::default();
 
-            $newCswMetadata->file_identifier = $formData['identifier'];
+            $newCswMetadata->file_identifier ??= $formData['identifier']; // une métadonnée existante garde son identifiant
             $newCswMetadata->hierarchy_level = CswHierarchyLevel::tryFrom('' === $formData['hierarchy_level'] ? 'dataset' : $formData['hierarchy_level']);
 
             $newCswMetadata->language = $language;

@@ -55,19 +55,6 @@ const getMetadataFormDefaultValues = (metadata?: Metadata, datastore?: Datastore
         frequency_code: metadata?.csw_metadata?.frequency_code ?? "unknown",
     };
 
-    // NOTE : migration des anciennes valeurs de l'identifiant (préfixe en minuscule) vers la valeur telle qu'elle fournie par l'API sans transformation
-    if (datastore?.metadata_file_identifier_prefix && defaultValues.identifier) {
-        const prefix = datastore.metadata_file_identifier_prefix;
-        const identifier = defaultValues.identifier;
-        const prefixLength = prefix.length;
-        const startsWithPrefix = identifier.slice(0, prefixLength).toLowerCase() === prefix.toLowerCase();
-        const hasValidBoundary = identifier.length === prefixLength || identifier.charAt(prefixLength) === ".";
-
-        if (startsWithPrefix && hasValidBoundary) {
-            defaultValues.identifier = prefix + identifier.slice(prefixLength);
-        }
-    }
-
     return defaultValues;
 };
 

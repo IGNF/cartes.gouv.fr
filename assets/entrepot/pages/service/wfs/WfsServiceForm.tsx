@@ -239,12 +239,13 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
             existingLayerNamesQuery.data,
             editMode,
             offeringQuery.data?.configuration.layer_name,
-            datastore
+            datastore,
+            metadataQuery.data !== undefined
         );
         schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
         schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
         return schemas;
-    }, [editMode, existingLayerNamesQuery.data, offeringQuery.data?.configuration.layer_name, datastore, t]);
+    }, [editMode, existingLayerNamesQuery.data, offeringQuery.data?.configuration.layer_name, datastore, metadataQuery.data, t]);
 
     const defaultValues: WfsServiceFormValuesType = useMemo(
         () => getWfsServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data, datastore),
@@ -361,7 +362,12 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     />
 
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
-                    <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} editMode={editMode} />
+                    <Description
+                        visible={currentStep === STEPS.METADATAS_DESCRIPTION}
+                        form={form}
+                        editMode={editMode}
+                        identifierLocked={metadataQuery.data !== undefined}
+                    />
                     <AdditionalInfo
                         datastoreId={datastoreId}
                         storedData={vectorDbQuery.data}
