@@ -21,7 +21,7 @@ import MetadataSection from "../forms/MetadataSection";
 import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
 import { mapServiceViolationPaths } from "./buildServiceFormData";
 import AccessSection from "./sections/AccessSection";
-import PyramidRasterNotice from "./sections/PyramidRasterNotice";
+import PyramidNotice from "./sections/PyramidNotice";
 import ServiceDescriptionSection from "./sections/ServiceDescriptionSection";
 import ServiceTypeSection from "./sections/ServiceTypeSection";
 import StylesSection from "./sections/StylesSection";
@@ -81,8 +81,10 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
 
     const { data: datastore } = useQuery(datastoreQueryOptions(datastoreId));
     const { userRights, isSupervisor } = useCommunityRights();
-    const canGeneratePyramidRaster =
-        isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
+    const hasRight = (right: CommunityMemberDtoRightsEnum) => isSupervisor || !!userRights?.includes(right);
+    const pyramidKind = type === "tms" ? "vector" : "raster";
+    // mêmes droits que les routes de génération : la pyramide raster dépose aussi une légende en annexe
+    const canGeneratePyramid = hasRight(CommunityMemberDtoRightsEnum.PROCESSING) && (pyramidKind === "vector" || hasRight(CommunityMemberDtoRightsEnum.ANNEX));
     const existingLayerNamesQuery = useQuery<string[], ApiError>({
         queryKey: RQKeys.datastore_layernames_list(datastoreId, configurationType),
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, configurationType, { signal }),
@@ -178,12 +180,13 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                             onStoredDataChange={loadTables}
                             storedDataLabel={t(type === "wmts" ? "stored_data.label_pyramid" : "stored_data.label")}
                             storedDataNotice={
-                                (type === "wms" || type === "wmts") && (
-                                    <PyramidRasterNotice
+                                type !== "wfs" && (
+                                    <PyramidNotice
                                         datastoreId={datastoreId}
                                         datasheetName={datasheetName}
                                         service={type.toUpperCase()}
-                                        canGenerate={!!canGeneratePyramidRaster}
+                                        kind={pyramidKind}
+                                        canGenerate={canGeneratePyramid}
                                     />
                                 )
                             }
