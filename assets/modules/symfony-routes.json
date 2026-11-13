@@ -1667,6 +1667,43 @@
             ],
             "schemes": []
         },
+        "cartesgouvfr_api_pyramid_vector_tms_publish": {
+            "tokens": [
+                [
+                    "text",
+                    "\/tms\/publish"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "pyramidId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/pyramid-vector"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
         "cartesgouvfr_api_pyramid_vector_tms_add": {
             "tokens": [
                 [
