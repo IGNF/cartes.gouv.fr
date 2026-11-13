@@ -18,6 +18,7 @@ use App\Security\KeycloakTokenManager;
 use App\Services\CswMetadataXmlReader;
 use App\Services\CswMetadataXmlWriter;
 use App\Services\EntrepotApi\CartesMetadataApiService;
+use App\Services\EntrepotApi\DatastoreApiService;
 use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Double\FakeKeycloakClient;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -73,6 +74,21 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
 
         $this->assertHttpError(409, fn () => $this->service->create(self::DATASTORE_ID, $this->dto(), $this->thumbnail()));
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
+    }
+
+    public function testCreationWithoutTheDatastorePrefixAnswers400BeforeWriting(): void
+    {
+        EntrepotMockResponseFactory::setDatastorePrefixes(['metadata_file_identifier_prefix' => 'IGN']);
+        $datastoreApiService = self::getContainer()->get(DatastoreApiService::class);
+        $datastoreApiService->invalidate(self::DATASTORE_ID);
+
+        try {
+            $this->assertHttpError(400, fn () => $this->service->create(self::DATASTORE_ID, $this->dto(), $this->thumbnail()));
+            self::assertSame([], EntrepotMockResponseFactory::stored('metadata'));
+            self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
+        } finally {
+            $datastoreApiService->invalidate(self::DATASTORE_ID);
+        }
     }
 
     public function testThumbnailIsRemovedWhenTheMetadataWriteFails(): void

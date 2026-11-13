@@ -38,9 +38,20 @@ final class EntrepotMockResponseFactory
 
     private static int $nextId = 1;
 
+    /** @var array<string, string> préfixes ajoutés à la réponse du datastore */
+    private static array $datastorePrefixes = [];
+
     private static int $usersMeCalls = 0;
     private static bool $usersMeDown = false;
     private static string $usersMeId = self::USER_ID;
+
+    /**
+     * @param array<string, string> $prefixes metadata_file_identifier_prefix, configuration_layer_name_prefix
+     */
+    public static function setDatastorePrefixes(array $prefixes): void
+    {
+        self::$datastorePrefixes = $prefixes;
+    }
 
     public static function reset(): void
     {
@@ -49,6 +60,7 @@ final class EntrepotMockResponseFactory
         self::$metadataFiles = [];
         self::$failures = [];
         self::$nextId = 1;
+        self::$datastorePrefixes = [];
         self::$usersMeCalls = 0;
         self::$usersMeDown = false;
         self::$usersMeId = self::USER_ID;
@@ -196,7 +208,7 @@ final class EntrepotMockResponseFactory
         }
 
         if ('GET' === $method && '' === $relative) {
-            return $this->json(['_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => 'community-1'], 'endpoints' => [
+            return $this->json([...self::$datastorePrefixes, '_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => 'community-1'], 'endpoints' => [
                 ['endpoint' => ['_id' => self::METADATA_ENDPOINT_ID, 'type' => 'METADATA', 'open' => true, 'urls' => [['type' => 'CSW', 'url' => 'https://csw.test/csw']]]],
                 ['endpoint' => ['_id' => self::WFS_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wfs-public', 'type' => 'WFS', 'open' => true, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/public']]]],
                 ['endpoint' => ['_id' => self::WFS_PRIVATE_ENDPOINT_ID, 'technical_name' => 'wfs-private', 'type' => 'WFS', 'open' => false, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/private']]]],

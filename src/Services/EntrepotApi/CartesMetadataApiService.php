@@ -18,6 +18,7 @@ use App\Exception\AppException;
 use App\Services\CswMetadataXmlReader;
 use App\Services\CswMetadataXmlWriter;
 use App\Services\DatasheetMetadataMapper;
+use App\Services\DatastorePrefixValidator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -44,6 +45,7 @@ class CartesMetadataApiService
         private readonly StoredDataApiService $storedDataApiService,
         private readonly UploadApiService $uploadApiService,
         private readonly DatasheetMetadataMapper $mapper,
+        private readonly DatastorePrefixValidator $datastorePrefixValidator,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -253,6 +255,7 @@ class CartesMetadataApiService
     private function createMetadata(string $datastoreId, string $datasheetName, CswMetadata $metadata, ?UploadedFile $thumbnail): array
     {
         $fileIdentifier = $metadata->requireFileIdentifier();
+        $this->datastorePrefixValidator->assertFileIdentifier($datastoreId, $fileIdentifier);
         if (!$this->isFileIdentifierAvailable($datastoreId, $fileIdentifier)) {
             throw new AppException(sprintf('L’identifiant de fichier « %s » est déjà utilisé', $fileIdentifier), Response::HTTP_CONFLICT, ['field' => 'file_identifier']);
         }

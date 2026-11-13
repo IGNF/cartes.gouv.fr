@@ -20,6 +20,7 @@ use App\Dto\Services\Form\ServiceFormDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\CapabilitiesService;
+use App\Services\DatastorePrefixValidator;
 use App\Services\GeonetworkApiService;
 use App\Services\MembershipService;
 use App\Services\SandboxService;
@@ -61,6 +62,7 @@ class CartesServiceApiService
         private readonly LoggerInterface $logger,
         private readonly ServiceConfigurationRequestBuilder $configurationRequestBuilder,
         private readonly ServiceImageAnnexeService $serviceImageAnnexeService,
+        private readonly DatastorePrefixValidator $datastorePrefixValidator,
         HttpClientInterface $httpClient,
         #[Autowire(service: 'app.api_client.entrepot')]
         private readonly ApiClient $entrepotApi,
@@ -635,6 +637,8 @@ class CartesServiceApiService
         ?\Closure $onConfigurationCreated = null,
         ?\Closure $onRollback = null,
     ): array {
+        $this->datastorePrefixValidator->assertLayerName($datastoreId, $dto->technical_name);
+
         $thumbnailUrl = null;
         $logo = null;
         try {
