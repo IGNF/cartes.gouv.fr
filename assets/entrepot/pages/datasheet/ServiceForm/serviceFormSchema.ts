@@ -52,7 +52,7 @@ type SchemaDeps = {
     rasterPyramid?: boolean;
     /** noms de couches déjà pris pour ce type de flux */
     existingLayerNames: readonly string[];
-    /** préfixe imposé par l’entrepôt aux noms techniques, suivi d’un point */
+    /** préfixe imposé par l’entrepôt aux noms techniques, suivi de « _ » */
     layerNamePrefix?: string;
     /** accès offerts par les endpoints de l’entrepôt pour ce type de flux */
     availableAccesses: readonly ServiceAccess[];
