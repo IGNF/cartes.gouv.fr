@@ -27,6 +27,9 @@ export const isRasterPyramid = (datasheet: DatasheetDetailed | undefined, stored
 export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean): ConfigurationTypeEnum =>
     type === "wms" && rasterPyramid ? ConfigurationTypeEnum.WMSRASTER : SERVICE_CONFIGURATION_TYPES[type];
 
+/** tables à choisir : WFS, WMS sur une base vecteur ; ni WMS raster, ni WMTS, ni TMS */
+export const hasTables = (type: ServiceType, rasterPyramid: boolean): boolean => type === "wfs" || (type === "wms" && !rasterPyramid);
+
 /** type de flux publié depuis une pyramide raster (route pyramid-raster), undefined pour les autres routes, TMS compris */
 export const rasterPyramidPublishType = (
     type: ServiceType,
@@ -182,16 +185,15 @@ export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existin
                       .trim()
                       .min(1, t("validation.description.required"))
                       .max(SERVICE_DESCRIPTION_MAX_LENGTH, t("validation.description.max", { max: SERVICE_DESCRIPTION_MAX_LENGTH })),
-        tables:
-            type === "wfs" || (type === "wms" && !rasterPyramid)
-                ? z
-                      .array(tableSchema)
-                      .refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))
-                      .refine(
-                          (tables) => tables.filter((table) => table.selected).length <= SERVICE_TABLES_MAX,
-                          t("validation.tables.max", { max: SERVICE_TABLES_MAX })
-                      )
-                : z.array(tableSchema),
+        tables: hasTables(type, rasterPyramid)
+            ? z
+                  .array(tableSchema)
+                  .refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))
+                  .refine(
+                      (tables) => tables.filter((table) => table.selected).length <= SERVICE_TABLES_MAX,
+                      t("validation.tables.max", { max: SERVICE_TABLES_MAX })
+                  )
+            : z.array(tableSchema),
         access: z.enum(SERVICE_ACCESSES).refine((access) => availableAccesses.includes(access), t("validation.access.unavailable")),
         attribution: attributionSchema,
     });

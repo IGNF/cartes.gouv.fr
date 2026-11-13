@@ -5,6 +5,7 @@ import { ConfigurationTypeEnum, type DatasheetDetailed } from "@/@types/app";
 import {
     buildServiceFormSchema,
     configurationTypeFor,
+    hasTables,
     isRasterPyramid,
     rasterPyramidPublishType,
     type ServiceAccess,
@@ -186,6 +187,16 @@ describe("buildServiceFormSchema", () => {
                 stored_data_id: "validation.stored_data.required_tms",
             });
         });
+    });
+});
+
+describe("hasTables", () => {
+    it("propose des tables en WFS et en WMS sur une base vecteur seulement", () => {
+        expect(hasTables("wfs", false)).toBe(true);
+        expect(hasTables("wms", false)).toBe(true);
+        expect(hasTables("wms", true)).toBe(false);
+        expect(hasTables("wmts", true)).toBe(false);
+        expect(hasTables("tms", false)).toBe(false);
     });
 });
 

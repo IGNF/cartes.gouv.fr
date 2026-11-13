@@ -29,6 +29,7 @@ import TablesSection from "./sections/TablesSection";
 import {
     buildServiceFormSchema,
     configurationTypeFor,
+    hasTables,
     isRasterPyramid,
     SERVICE_ACCESSES,
     type ServiceAccess,
@@ -78,8 +79,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
     // WMTS toujours, WMS quand la donnée choisie est une pyramide raster : ni tables ni dépôt de style
     const raster = type === "wmts" || (type === "wms" && rasterPyramidSelected);
     const configurationType = configurationTypeFor(type, raster);
-    // TMS : une pyramide vecteur, sans tables à lire
-    const withTables = type === "wfs" || (type === "wms" && !rasterPyramidSelected);
+    const withTables = hasTables(type, rasterPyramidSelected);
 
     const { data: datastore } = useQuery(datastoreQueryOptions(datastoreId));
     const { userRights, isSupervisor } = useCommunityRights();
@@ -136,7 +136,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
         setValue("tables", []);
         const raster = isRasterPyramid(datasheet, id);
         setRasterPyramidSelected(raster);
-        if (id === "" || raster || type === "tms") return;
+        if (id === "" || !hasTables(type, raster)) return;
         queryClient
             .query(vectorDbQueryOptions(datastoreId, id))
             .then((vectorDb) => {
