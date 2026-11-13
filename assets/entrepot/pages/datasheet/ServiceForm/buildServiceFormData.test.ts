@@ -7,7 +7,7 @@ const values: ServiceFormOutput = {
     ...serviceFormDefaultValues,
     stored_data_id: "vectordb-1",
     title: "Mon flux",
-    technical_name: "SANDBOX.mon_flux",
+    technical_name: "SANDBOX_mon_flux",
     themes: ["Agriculture"],
     tables: [
         { native_name: "brouillon", selected: false, title: "", public_name: "brouillon", description: "", keywords: [] },
