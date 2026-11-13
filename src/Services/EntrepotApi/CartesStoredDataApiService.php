@@ -3,6 +3,8 @@
 namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\ProcessingStatuses;
+use App\Exception\ApiException;
+use Symfony\Component\HttpFoundation\Response;
 
 class CartesStoredDataApiService
 {
@@ -33,12 +35,16 @@ class CartesStoredDataApiService
         $processingExecutions = $this->processingApiService->getAllExecutions($datastoreId, [
             'input_stored_data' => $storedDataId,
         ])->resolve();
-        foreach ($processingExecutions as &$procExec) {
+        foreach ($processingExecutions as $procExec) {
             if (in_array($procExec['status'], $blockingProcessingStatuses)) {
-                $this->processingApiService->abortExecution($datastoreId, $procExec['_id'])->await();
+                $this->abortExecution($datastoreId, $procExec['_id']);
 
                 $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id'])->array();
-                $this->storedDataApiService->remove($datastoreId, $procExec['output']['stored_data']['_id'])->await(); // suppression de la donnée stockée créée par le traitement
+                // traitement réussi entre la liste et l’annulation : sa donnée de sortie est une vraie donnée, on la garde
+                // shortcut: une seule lecture juste après l’annulation (asynchrone, 202), un succès plus tardif perd sa sortie ; attendre le statut final si le cas se présente
+                if (ProcessingStatuses::SUCCESS !== $procExec['status']) {
+                    $this->storedDataApiService->remove($datastoreId, $procExec['output']['stored_data']['_id'])->await(); // suppression de la donnée stockée créée par le traitement
+                }
             }
         }
 
@@ -46,17 +52,36 @@ class CartesStoredDataApiService
         $processingExecutions = $this->processingApiService->getAllExecutions($datastoreId, [
             'output_stored_data' => $storedDataId,
         ])->resolve();
-        foreach ($processingExecutions as &$procExec) {
+        foreach ($processingExecutions as $procExec) {
             if (in_array($procExec['status'], $blockingProcessingStatuses)) {
-                $this->processingApiService->abortExecution($datastoreId, $procExec['_id'])->await();
+                $this->abortExecution($datastoreId, $procExec['_id']);
             }
         }
 
+        // annexe de légende déjà absente : rien à supprimer
         if (isset($storedData['extra']['legend']['annexe_id'])) {
-            $this->annexeApiService->remove($datastoreId, $storedData['extra']['legend']['annexe_id'])->await();
+            try {
+                $this->annexeApiService->remove($datastoreId, $storedData['extra']['legend']['annexe_id'])->await();
+            } catch (ApiException $e) {
+                if (Response::HTTP_NOT_FOUND !== $e->getStatusCode()) {
+                    throw $e;
+                }
+            }
         }
 
         // Suppression de la donnée stockée
         $this->storedDataApiService->remove($datastoreId, $storedDataId)->await();
+    }
+
+    // 409 : l’annulation n’a pas de sens (exécution terminée entre la liste et l’annulation)
+    private function abortExecution(string $datastoreId, string $executionId): void
+    {
+        try {
+            $this->processingApiService->abortExecution($datastoreId, $executionId)->await();
+        } catch (ApiException $e) {
+            if (Response::HTTP_CONFLICT !== $e->getStatusCode()) {
+                throw $e;
+            }
+        }
     }
 }

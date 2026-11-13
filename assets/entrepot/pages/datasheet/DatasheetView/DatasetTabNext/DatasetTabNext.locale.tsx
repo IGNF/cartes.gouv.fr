@@ -25,6 +25,7 @@ const { i18n } = declareComponentKeys<
     | "view"
     | "menu.open"
     | "menu.generate_pyramid_vector"
+    | "menu.delete"
     | "view_report"
     | "resume_integration"
     | "delete"
@@ -66,6 +67,7 @@ export const DatasetTabNextFrTranslations: Translations<"fr">["DatasetTabNext"] 
     view: "Consulter",
     "menu.open": "Autres actions",
     "menu.generate_pyramid_vector": "Créer une pyramide vecteur",
+    "menu.delete": "Supprimer",
     view_report: "Voir le rapport",
     resume_integration: "Reprendre l’intégration",
     delete: "Supprimer",
@@ -105,6 +107,7 @@ export const DatasetTabNextEnTranslations: Translations<"en">["DatasetTabNext"] 
     view: "View",
     "menu.open": "More actions",
     "menu.generate_pyramid_vector": "Create a vector pyramid",
+    "menu.delete": "Delete",
     view_report: "View report",
     resume_integration: "Resume integration",
     delete: "Delete",
