@@ -21,7 +21,7 @@ import MetadataSection from "../forms/MetadataSection";
 import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
 import { mapServiceViolationPaths } from "./buildServiceFormData";
 import AccessSection from "./sections/AccessSection";
-import PyramidRasterNotice from "./sections/PyramidRasterNotice";
+import PyramidNotice from "./sections/PyramidNotice";
 import ServiceDescriptionSection from "./sections/ServiceDescriptionSection";
 import ServiceTypeSection from "./sections/ServiceTypeSection";
 import StylesSection from "./sections/StylesSection";
@@ -29,6 +29,7 @@ import TablesSection from "./sections/TablesSection";
 import {
     buildServiceFormSchema,
     configurationTypeFor,
+    hasTables,
     isRasterPyramid,
     SERVICE_ACCESSES,
     type ServiceAccess,
@@ -78,11 +79,14 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
     // WMTS toujours, WMS quand la donnée choisie est une pyramide raster : ni tables ni dépôt de style
     const raster = type === "wmts" || (type === "wms" && rasterPyramidSelected);
     const configurationType = configurationTypeFor(type, raster);
+    const withTables = hasTables(type, rasterPyramidSelected);
 
     const { data: datastore } = useQuery(datastoreQueryOptions(datastoreId));
     const { userRights, isSupervisor } = useCommunityRights();
-    const canGeneratePyramidRaster =
-        isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
+    const hasRight = (right: CommunityMemberDtoRightsEnum) => isSupervisor || !!userRights?.includes(right);
+    const pyramidKind = type === "tms" ? "vector" : "raster";
+    // mêmes droits que les routes de génération : la pyramide raster dépose aussi une légende en annexe
+    const canGeneratePyramid = hasRight(CommunityMemberDtoRightsEnum.PROCESSING) && (pyramidKind === "vector" || hasRight(CommunityMemberDtoRightsEnum.ANNEX));
     const existingLayerNamesQuery = useQuery<string[], ApiError>({
         queryKey: RQKeys.datastore_layernames_list(datastoreId, configurationType),
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, configurationType, { signal }),
@@ -125,15 +129,14 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
     const { handleSubmit, setError, setValue, getValues, control } = form;
 
     const storedDataId = useWatch({ control, name: "stored_data_id" });
-    // une pyramide raster n’a pas de tables à lire
-    const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, raster ? "" : storedDataId));
+    const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, withTables ? storedDataId : ""));
 
     // les tables appartiennent au jeu précédent : vidées, puis remplies quand la base choisie est lue
     const loadTables = (id: string) => {
         setValue("tables", []);
         const raster = isRasterPyramid(datasheet, id);
         setRasterPyramidSelected(raster);
-        if (id === "" || raster) return;
+        if (id === "" || !hasTables(type, raster)) return;
         queryClient
             .query(vectorDbQueryOptions(datastoreId, id))
             .then((vectorDb) => {
@@ -155,6 +158,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
     const storedDataOptions = [
         ...(type === "wfs" || type === "wms" ? (datasheet.vector_db_list ?? []) : []),
         ...(type === "wms" || type === "wmts" ? (datasheet.pyramid_raster_list ?? []) : []),
+        ...(type === "tms" ? (datasheet.pyramid_vector_list ?? []) : []),
     ].filter((item) => item.status === StoredDataStatusEnum.GENERATED);
 
     const submit = handleSubmit(async (values) => {
@@ -176,14 +180,15 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                         <ServiceDescriptionSection
                             storedDataOptions={storedDataOptions}
                             onStoredDataChange={loadTables}
-                            storedDataLabel={t(type === "wmts" ? "stored_data.label_pyramid" : "stored_data.label")}
+                            storedDataLabel={t(type === "wmts" || type === "tms" ? "stored_data.label_pyramid" : "stored_data.label")}
                             storedDataNotice={
-                                (type === "wms" || type === "wmts") && (
-                                    <PyramidRasterNotice
+                                type !== "wfs" && (
+                                    <PyramidNotice
                                         datastoreId={datastoreId}
                                         datasheetName={datasheetName}
                                         service={type.toUpperCase()}
-                                        canGenerate={!!canGeneratePyramidRaster}
+                                        kind={pyramidKind}
+                                        canGenerate={canGeneratePyramid}
                                     />
                                 )
                             }
@@ -191,7 +196,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                             withDescription={type !== "wfs"}
                         />
                     </MetadataSection>
-                    {!raster && (
+                    {withTables && (
                         <MetadataSection title={t("section.tables")}>
                             <TablesSection
                                 status={storedDataId === "" ? "idle" : vectorDbQuery.status}

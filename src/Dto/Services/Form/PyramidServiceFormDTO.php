@@ -8,9 +8,9 @@ use App\Constants\ServiceAccess;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Formulaire de publication d’un flux WMS raster ou WMTS depuis une pyramide raster. La vignette et le logo d’attribution voyagent dans la même requête multipart, hors de ce DTO.
+ * Formulaire de publication d’un flux depuis une pyramide : WMS raster et WMTS (raster), TMS (vecteur). La vignette et le logo d’attribution voyagent dans la même requête multipart, hors de ce DTO.
  */
-class WmsRasterWmtsFormDTO extends ServiceFormDTO
+class PyramidServiceFormDTO extends ServiceFormDTO
 {
     /**
      * @param string[] $themes

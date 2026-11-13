@@ -4,7 +4,7 @@ import { tss } from "tss-react";
 
 import { useTranslation } from "@/i18n";
 import { externalLinkToUrl, externalUrls } from "@/router/externalUrls";
-import { IMPLEMENTED_SERVICE_TYPES, SERVICE_TYPES, type ServiceType } from "../serviceFormSchema";
+import { SERVICE_TYPES, type ServiceType } from "../serviceFormSchema";
 
 const dataKinds: Record<ServiceType, ("vector" | "raster")[]> = {
     wfs: ["vector"],
@@ -36,7 +36,6 @@ export default function ServiceTypeSection({ value, onChange }: ServiceTypeSecti
                             name="service-type"
                             value={type}
                             checked={value === type}
-                            disabled={!IMPLEMENTED_SERVICE_TYPES.includes(type)}
                             onChange={() => onChange(type)}
                         />
                         <span className={fr.cx("fr-text--lg", "fr-mb-0")}>{t(`type.${type}`)}</span>
@@ -90,11 +89,6 @@ const useStyles = tss.withName({ ServiceTypeSection }).create({
         "&:has(input:focus-visible)": {
             outline: `2px solid ${fr.colors.decisions.border.active.blueFrance.default}`,
             outlineOffset: "2px",
-        },
-        "&:has(input:disabled)": {
-            cursor: "not-allowed",
-            color: fr.colors.decisions.text.disabled.grey.default,
-            backgroundColor: fr.colors.decisions.background.default.grey.default,
         },
     },
     tags: {

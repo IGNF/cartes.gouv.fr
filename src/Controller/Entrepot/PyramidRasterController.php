@@ -9,7 +9,7 @@ use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
-use App\Dto\Services\Form\WmsRasterWmtsFormDTO;
+use App\Dto\Services\Form\PyramidServiceFormDTO;
 use App\Dto\Services\PyramidRaster\PyramidRasterGenerateDTO;
 use App\Exception\AppException;
 use App\Security\User;
@@ -184,7 +184,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     }
 
     /**
-     * Publication depuis le nouveau formulaire : multipart avec le champ JSON `data` (WmsRasterWmtsFormDTO) et les fichiers `thumbnail`, `attribution_logo`.
+     * Publication depuis le nouveau formulaire : multipart avec le champ JSON `data` (PyramidServiceFormDTO) et les fichiers `thumbnail`, `attribution_logo`.
      */
     #[Route('/{pyramidId}/wms-raster-wmts/publish', name: 'wms_raster_wmts_publish', methods: ['POST'])]
     public function publish(string $datastoreId, string $pyramidId, #[MapQueryParameter] string $type, Request $request): JsonResponse
@@ -194,7 +194,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             throw new AppException(sprintf('Le type %s n’est pas accepté. Les types acceptés sont %s.', $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
         }
 
-        $dto = $this->multipartPayloadMapper->map($request, WmsRasterWmtsFormDTO::class);
+        $dto = $this->multipartPayloadMapper->map($request, PyramidServiceFormDTO::class);
         [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
 
         $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();

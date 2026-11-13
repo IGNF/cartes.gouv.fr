@@ -5,22 +5,29 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StoredDataTags;
+use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\Form\PyramidServiceFormDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
+use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StoredDataApiService;
+use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
+use App\Services\ServiceFormFileValidator;
 use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -39,6 +46,8 @@ final class PyramidVectorController extends AbstractController implements ApiCon
         private readonly SandboxService $sandboxService,
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly MultipartPayloadMapper $multipartPayloadMapper,
+        private readonly ServiceFormFileValidator $serviceFormFileValidator,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -135,6 +144,43 @@ final class PyramidVectorController extends AbstractController implements ApiCon
         }
 
         return new JsonResponse();
+    }
+
+    /**
+     * Publication TMS depuis le nouveau formulaire : multipart avec le champ JSON `data` (PyramidServiceFormDTO) et les fichiers `thumbnail`, `attribution_logo`.
+     */
+    #[Route('/{pyramidId}/tms/publish', name: 'tms_publish', methods: ['POST'])]
+    public function publish(string $datastoreId, string $pyramidId, Request $request): JsonResponse
+    {
+        $dto = $this->multipartPayloadMapper->map($request, PyramidServiceFormDTO::class);
+        [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
+
+        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
+        if (StoredDataTypes::ROK4_PYRAMID_VECTOR !== ($pyramid['type'] ?? null)) {
+            throw new AppException('La donnée choisie n’est pas une pyramide vecteur', Response::HTTP_BAD_REQUEST);
+        }
+        $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
+
+        $offering = $this->cartesServiceApiService->publishFromForm(
+            $datastoreId,
+            $pyramidId,
+            $dto,
+            ConfigurationTypes::WMTSTMS,
+            [
+                'title' => $dto->title,
+                'abstract' => $dto->description,
+                'keywords' => $dto->themes,
+                'used_data' => [[
+                    'bottom_level' => $levels['bottom_level'],
+                    'top_level' => $levels['top_level'],
+                    'stored_data' => $pyramidId,
+                ]],
+            ],
+            $thumbnail,
+            $attributionLogo,
+        );
+
+        return $this->json($offering, Response::HTTP_CREATED);
     }
 
     #[Route('/{pyramidId}/tms', name: 'tms_add', methods: ['POST'])]

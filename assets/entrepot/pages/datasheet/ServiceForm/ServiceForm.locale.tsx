@@ -20,10 +20,11 @@ const { i18n } = declareComponentKeys<
     | "section.access"
     | "type.legend"
     | "type.help_link"
-    | { K: "pyramid_raster.notice.title"; P: { service: string }; R: string }
-    | { K: "pyramid_raster.notice.description"; P: { service: string }; R: string }
-    | "pyramid_raster.notice.generate"
-    | "pyramid_raster.notice.help"
+    | { K: "pyramid.notice.title.raster"; P: { service: string }; R: string }
+    | { K: "pyramid.notice.title.vector"; P: { service: string }; R: string }
+    | { K: "pyramid.notice.description"; P: { service: string }; R: string }
+    | "pyramid.notice.generate"
+    | "pyramid.notice.help"
     | "type.wfs"
     | "type.wms"
     | "type.tms"
@@ -86,6 +87,7 @@ const { i18n } = declareComponentKeys<
     | "validation.stored_data.required"
     | "validation.stored_data.required_wms"
     | "validation.stored_data.required_wmts"
+    | "validation.stored_data.required_tms"
     | "validation.title.required"
     | "validation.technical_name.required"
     | "validation.technical_name.chars"
@@ -140,11 +142,12 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "section.access": "Droits et accès",
     "type.legend": "Type de flux",
     "type.help_link": "Comment choisir le type de flux à publier ?",
-    "pyramid_raster.notice.title": ({ service }) => `Créez un flux ${service} à partir d’une pyramide de données raster`,
-    "pyramid_raster.notice.description": ({ service }) =>
+    "pyramid.notice.title.raster": ({ service }) => `Créez un flux ${service} à partir d’une pyramide de données raster`,
+    "pyramid.notice.title.vector": ({ service }) => `Créez un flux ${service} à partir d’une pyramide de données vecteur`,
+    "pyramid.notice.description": ({ service }) =>
         `Vous ne trouvez pas votre donnée ? Calculez des pyramides de données à partir de vos jeux de données depuis cartes.gouv.fr, puis revenez ici pour créer votre flux ${service}.`,
-    "pyramid_raster.notice.generate": "Générer une pyramide",
-    "pyramid_raster.notice.help": "Consulter l’aide",
+    "pyramid.notice.generate": "Générer une pyramide",
+    "pyramid.notice.help": "Consulter l’aide",
     "type.wfs": "Flux WFS",
     "type.wms": "Flux WMS",
     "type.tms": "Flux TMS",
@@ -211,6 +214,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "validation.stored_data.required": "Veuillez sélectionner un jeu de données vecteur",
     "validation.stored_data.required_wms": "Veuillez sélectionner un jeu de données",
     "validation.stored_data.required_wmts": "Veuillez sélectionner une pyramide raster",
+    "validation.stored_data.required_tms": "Veuillez sélectionner une pyramide vecteur",
     "validation.title.required": "Le titre du flux est obligatoire",
     "validation.technical_name.required": "Le nom technique du flux est obligatoire",
     "validation.technical_name.chars": "Le nom technique ne doit contenir ni espace ni caractère spécial",
@@ -264,11 +268,12 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "section.access": "Rights and access",
     "type.legend": "Service type",
     "type.help_link": "How to choose the type of service to publish?",
-    "pyramid_raster.notice.title": ({ service }) => `Create a ${service} service from a raster data pyramid`,
-    "pyramid_raster.notice.description": ({ service }) =>
+    "pyramid.notice.title.raster": ({ service }) => `Create a ${service} service from a raster data pyramid`,
+    "pyramid.notice.title.vector": ({ service }) => `Create a ${service} service from a vector data pyramid`,
+    "pyramid.notice.description": ({ service }) =>
         `Can’t find your data? Compute data pyramids from your datasets on cartes.gouv.fr, then come back here to create your ${service} service.`,
-    "pyramid_raster.notice.generate": "Generate a pyramid",
-    "pyramid_raster.notice.help": "Read the help",
+    "pyramid.notice.generate": "Generate a pyramid",
+    "pyramid.notice.help": "Read the help",
     "type.wfs": "WFS service",
     "type.wms": "WMS service",
     "type.tms": "TMS service",
@@ -333,6 +338,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "validation.stored_data.required": "Please select a vector dataset",
     "validation.stored_data.required_wms": "Please select a dataset",
     "validation.stored_data.required_wmts": "Please select a raster pyramid",
+    "validation.stored_data.required_tms": "Please select a vector pyramid",
     "validation.title.required": "The service title is required",
     "validation.technical_name.required": "The technical name is required",
     "validation.technical_name.chars": "The technical name must not contain spaces or special characters",

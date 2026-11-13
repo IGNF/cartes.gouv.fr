@@ -18,10 +18,11 @@ import { buildServiceFormData } from "../ServiceForm/buildServiceFormData";
 import ServiceForm from "../ServiceForm/ServiceForm";
 import { configurationTypeFor, isRasterPyramid, rasterPyramidPublishType, type ServiceFormOutput, type ServiceType } from "../ServiceForm/serviceFormSchema";
 
-// types livrés par le formulaire (IMPLEMENTED_SERVICE_TYPES)
+// WMTS et WMS raster passent par api.pyramidRaster.publish
 const publishers: Partial<Record<ServiceType, (datastoreId: string, storedDataId: string, formData: FormData) => Promise<Service>>> = {
     wfs: api.wfs.publish,
     wms: api.wmsVector.publish,
+    tms: api.pyramidVector.publishTms,
 };
 
 type ServiceAddPageProps = {
@@ -56,7 +57,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
                 return api.pyramidRaster.publish(datastoreId, values.stored_data_id, rasterType, buildServiceFormData(type, values, true));
             }
             const publish = publishers[type];
-            if (publish === undefined) throw new Error(`Type de flux non livré : ${type}`);
+            if (publish === undefined) throw new Error(`Type de flux sans route de publication : ${type}`);
             return publish(datastoreId, values.stored_data_id, buildServiceFormData(type, values));
         },
         // aussi après un échec : le flux peut exister si l’erreur survient après la création de l’offre

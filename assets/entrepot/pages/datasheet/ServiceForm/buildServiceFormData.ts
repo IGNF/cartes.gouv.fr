@@ -6,7 +6,7 @@ import { type ServiceFormOutput, type ServiceType } from "./serviceFormSchema";
  * et fichiers `thumbnail`, `attribution_logo`, `style_files[<table>]` (WMS vecteur). La donnée stockée voyage dans l’URL.
  */
 export function buildServiceFormData(type: ServiceType, values: ServiceFormOutput, rasterPyramid = false): FormData {
-    // WMS raster et WMTS : ni tables ni fichiers de style
+    // WMS raster, WMTS et TMS : ni tables ni fichiers de style
     const wmsVector = type === "wms" && !rasterPyramid;
     const { attribution } = values;
     const payload: Record<string, unknown> = {
