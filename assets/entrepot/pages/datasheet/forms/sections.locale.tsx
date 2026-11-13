@@ -30,6 +30,7 @@ const { i18n } = declareComponentKeys<
     | "field.additionalKeywords"
     | "field.fileIdentifier"
     | "field.fileIdentifier.hint"
+    | { K: "field.fileIdentifier.prefixHint"; P: { prefix: string }; R: string }
     // Champs producteur / contact (partagés)
     | "field.organizationName"
     | "field.organizationName.hint"
@@ -111,6 +112,8 @@ const { i18n } = declareComponentKeys<
     | "validation.fileIdentifier.required"
     | "validation.fileIdentifier.chars"
     | "validation.fileIdentifier.unique"
+    | { K: "validation.fileIdentifier.prefix"; P: { prefix: string }; R: string }
+    | "validation.fileIdentifier.prefixOnly"
     | "validation.organizationName"
     | "validation.organizationEmail"
     | "validation.producerRole"
@@ -156,6 +159,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "field.additionalKeywords": "Mots-clés additionnels (optionnel)",
     "field.fileIdentifier": "Identifiant unique",
     "field.fileIdentifier.hint": "Format attendu : sans caractères spéciaux et sans espaces. Exemple : IGN_BD-ORTHO",
+    "field.fileIdentifier.prefixHint": ({ prefix }) => `Il doit commencer par « ${prefix}_ ».`,
 
     "field.organizationName": "Nom de l’organisme",
     "field.organizationName.hint": "Utilisez l’auto-complétion ou saisissez directement un nom",
@@ -315,6 +319,8 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "validation.fileIdentifier.required": "L’identifiant de fichier est obligatoire",
     "validation.fileIdentifier.chars": "L’identifiant de fichier contient des caractères non autorisés",
     "validation.fileIdentifier.unique": "Cet identifiant de fichier est déjà utilisé",
+    "validation.fileIdentifier.prefix": ({ prefix }) => `L’identifiant de fichier doit commencer par « ${prefix}_ »`,
+    "validation.fileIdentifier.prefixOnly": "L’identifiant de fichier doit contenir au moins un caractère après le préfixe de l’entrepôt",
     "validation.organizationName": "Le nom de l’organisme est obligatoire",
     "validation.organizationEmail": "L’adresse électronique de l’organisme est obligatoire et doit être valide",
     "validation.producerRole": "Le rôle du producteur est obligatoire",
@@ -360,6 +366,7 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "field.additionalKeywords": "Additional keywords (optional)",
     "field.fileIdentifier": "Unique identifier",
     "field.fileIdentifier.hint": "Expected format: no special characters and no spaces. Example: IGN_BD-ORTHO",
+    "field.fileIdentifier.prefixHint": ({ prefix }) => `It must start with “${prefix}_”.`,
 
     "field.organizationName": "Organization name",
     "field.organizationName.hint": "Use auto-completion or type a name directly",
@@ -518,6 +525,8 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "validation.fileIdentifier.required": "The file identifier is required",
     "validation.fileIdentifier.chars": "The file identifier contains forbidden characters",
     "validation.fileIdentifier.unique": "This file identifier is already used",
+    "validation.fileIdentifier.prefix": ({ prefix }) => `The file identifier must start with “${prefix}_”`,
+    "validation.fileIdentifier.prefixOnly": "The file identifier must contain at least one character after the datastore prefix",
     "validation.organizationName": "The organization name is required",
     "validation.organizationEmail": "The organization email is required and must be valid",
     "validation.producerRole": "The producer role is required",

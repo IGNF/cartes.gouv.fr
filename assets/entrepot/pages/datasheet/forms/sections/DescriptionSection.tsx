@@ -18,11 +18,17 @@ type DescriptionSectionProps = {
     isEditMode?: boolean;
     /** identifiant déjà enregistré dans la fiche de métadonnées, non modifiable */
     fileIdentifierLocked?: boolean;
+    fileIdentifierPrefix?: string;
     /** URL de la vignette déjà enregistrée (mode édition) */
     existingThumbnailUrl?: string;
 };
 
-export default function DescriptionSection({ isEditMode = false, fileIdentifierLocked = false, existingThumbnailUrl }: DescriptionSectionProps) {
+export default function DescriptionSection({
+    isEditMode = false,
+    fileIdentifierLocked = false,
+    fileIdentifierPrefix,
+    existingThumbnailUrl,
+}: DescriptionSectionProps) {
     const { t } = useTranslation("DatasheetSections");
     const {
         register,
@@ -51,7 +57,17 @@ export default function DescriptionSection({ isEditMode = false, fileIdentifierL
 
             <Input
                 label={t("field.fileIdentifier")}
-                hintText={t("field.fileIdentifier.hint")}
+                hintText={
+                    <>
+                        {t("field.fileIdentifier.hint")}
+                        {fileIdentifierPrefix && !fileIdentifierLocked && (
+                            <>
+                                <br />
+                                {t("field.fileIdentifier.prefixHint", { prefix: fileIdentifierPrefix })}
+                            </>
+                        )}
+                    </>
+                }
                 state={errors.file_identifier ? "error" : "info"}
                 stateRelatedMessage={errors.file_identifier?.message ?? t("field.fileIdentifier.info")}
                 nativeInputProps={{ ...register("file_identifier"), readOnly: fileIdentifierLocked }}

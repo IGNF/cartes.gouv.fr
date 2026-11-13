@@ -1,12 +1,13 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { DevTool } from "@hookform/devtools";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { type ReactNode, useMemo } from "react";
 import { type FieldPath, FormProvider, useForm } from "react-hook-form";
 
 import api from "@/entrepot/api";
 import { datasheetListQueryOptions } from "@/hooks/queries/datasheetListQueryOptions";
+import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { useTranslation } from "@/i18n/i18n";
 import { isApiError } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -57,6 +58,8 @@ export default function MetadataForm({
 
     // aide à la saisie seulement : la création revérifie le nom (409)
     const datasheetListQuery = useQuery({ ...datasheetListQueryOptions(datastoreId), throwOnError: false, retry: false, enabled: !isEditMode });
+    const { data: datastore } = useSuspenseQuery(datastoreQueryOptions(datastoreId));
+    const fileIdentifierPrefix = datastore.metadata_file_identifier_prefix || undefined;
 
     const schema = useMemo(
         () =>
@@ -64,6 +67,7 @@ export default function MetadataForm({
                 t,
                 isEditMode,
                 fileIdentifierLocked,
+                fileIdentifierPrefix,
                 existingDatasheetNames: datasheetListQuery.data?.map((datasheet) => datasheet.name) ?? [],
                 // le résolveur valide tout le formulaire à chaque changement : une requête par identifiant, la création revérifie
                 isFileIdentifierAvailable: (fileIdentifier) =>
@@ -73,12 +77,15 @@ export default function MetadataForm({
                         staleTime: delta.minutes(1),
                     }),
             }),
-        [t, isEditMode, fileIdentifierLocked, datasheetListQuery.data, datastoreId, queryClient]
+        [t, isEditMode, fileIdentifierLocked, fileIdentifierPrefix, datasheetListQuery.data, datastoreId, queryClient]
     );
 
     const form = useForm<MetadataFormValues, unknown, MetadataValues>({
         resolver: zodResolver(schema),
-        defaultValues,
+        defaultValues: {
+            ...defaultValues,
+            file_identifier: defaultValues.file_identifier || (!fileIdentifierLocked && fileIdentifierPrefix ? `${fileIdentifierPrefix}_` : ""),
+        },
         disabled,
         mode: "onSubmit",
         reValidateMode: "onBlur",
@@ -122,7 +129,7 @@ export default function MetadataForm({
                     reset({
                         ...defaultMetadataValues,
                         name: "test-design-2026",
-                        file_identifier: "SANDBOX.test-design-2026",
+                        file_identifier: "SANDBOX_test-design-2026",
                         description: "test-design-2026-description",
                         themes: ["environment"],
                         keywords_inspire: ["Hydrographie"],
@@ -146,6 +153,7 @@ export default function MetadataForm({
                             <DescriptionSection
                                 isEditMode={isEditMode}
                                 fileIdentifierLocked={fileIdentifierLocked}
+                                fileIdentifierPrefix={fileIdentifierPrefix}
                                 existingThumbnailUrl={existingThumbnailUrl}
                             />
                         </MetadataSection>
