@@ -42,8 +42,16 @@ const remove = (datastoreId: string, metadataId: string) => {
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
+// shortcut: débogage (« Voir XML publié »), à retirer avant la fusion dans main
+const getFileContent = async (datastoreId: string, metadataId: string): Promise<string> => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_get_file_content", { datastoreId, metadataId });
+    const response = await apiFetch(url);
+    return response.text();
+};
+
 const metadata = {
     isFileIdentifierAvailable,
+    getFileContent,
     getById,
     getByDatasheetName,
     getList,

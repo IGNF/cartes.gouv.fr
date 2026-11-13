@@ -1,10 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { lazy, ReactNode, Suspense, useMemo } from "react";
+import { lazy, ReactNode, Suspense, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
@@ -42,6 +43,8 @@ export const DATASHEET_VIEW_NEXT_TABS = [
 const publishModal = createModal({ id: "datasheet-publish-modal", isOpenedByDefault: false });
 const unpublishModal = createModal({ id: "datasheet-unpublish-modal", isOpenedByDefault: false });
 const deleteModal = createModal({ id: "datasheet-delete-modal", isOpenedByDefault: false });
+// shortcut: débogage (« Voir XML publié »), à retirer avant la fusion dans main
+const publishedXmlModal = createModal({ id: "datasheet-published-xml-modal", isOpenedByDefault: false });
 
 type DatasheetViewNextProps = {
     datastoreId: string;
@@ -56,6 +59,16 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { classes } = useStyles();
+    // undefined pendant le chargement ; texte affiché tel quel dans un <pre>, jamais interprété
+    const [publishedXml, setPublishedXml] = useState<string>();
+    const openPublishedXml = (metadataId: string) => {
+        setPublishedXml(undefined);
+        publishedXmlModal.open();
+        api.metadata
+            .getFileContent(datastoreId, metadataId)
+            .then(setPublishedXml)
+            .catch((error: ApiError) => setPublishedXml(getApiErrorMessage(error)));
+    };
 
     const { userRights, isSupervisor } = useCommunityRights();
     const hasRights = (...rights: CommunityMemberDtoRightsEnum[]) => isSupervisor || rights.every((right) => userRights?.includes(right));
@@ -174,6 +187,11 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
     const tabContent: Record<(typeof DATASHEET_VIEW_NEXT_TABS)[number], ReactNode> = {
         [DatasheetViewActiveTabEnum.Description]: (
             <DatasheetViewTab>
+                {metadata && (
+                    <Button className={fr.cx("fr-mb-4w")} priority="tertiary" size="small" onClick={() => openPublishedXml(metadata._id)}>
+                        Voir XML publié
+                    </Button>
+                )}
                 <DescriptionTab datastoreId={datastoreId} datasheetName={datasheetName} metadataQuery={metadataQuery} />
             </DatasheetViewTab>
         ),
@@ -297,6 +315,12 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
                 </deleteModal.Component>,
                 document.body
             )}
+            {createPortal(
+                <publishedXmlModal.Component title="XML publié" size="large" className={classes.fullWidthModal}>
+                    {publishedXml === undefined ? <LoadingText withSpinnerIcon={true} as="p" /> : <pre className={classes.xml}>{publishedXml}</pre>}
+                </publishedXmlModal.Component>,
+                document.body
+            )}
         </Main>
     );
 }
@@ -304,5 +328,20 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
 const useStyles = tss.withName({ DatasheetViewNext }).create({
     tabBackground: {
         backgroundColor: fr.colors.decisions.background.alt.grey.default,
+    },
+    // modale sur toute la largeur : conteneur sans largeur maximale, colonne de la taille large (10/12 en md, 8/12 en lg) à 12/12
+    fullWidthModal: {
+        "& > .fr-container": {
+            maxWidth: "none",
+        },
+        "& .fr-col-md-10, & .fr-col-lg-8": {
+            flex: "0 0 100%",
+            maxWidth: "100%",
+            width: "100%",
+        },
+    },
+    xml: {
+        overflow: "auto",
+        fontSize: "0.75rem",
     },
 });
