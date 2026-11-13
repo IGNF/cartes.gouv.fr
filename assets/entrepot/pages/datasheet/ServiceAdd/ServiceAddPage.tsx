@@ -51,6 +51,9 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
 
     const publishMutation = useMutation<Service, ApiError, ServiceFormOutput>({
         mutationFn: (values) => {
+            if (type === "wmts") {
+                return api.pyramidRaster.publish(datastoreId, values.stored_data_id, ConfigurationTypeEnum.WMTSTMS, buildServiceFormData(type, values, true));
+            }
             if (isRasterPyramid(datasheetQuery.data, values.stored_data_id)) {
                 return api.pyramidRaster.publish(datastoreId, values.stored_data_id, ConfigurationTypeEnum.WMSRASTER, buildServiceFormData(type, values, true));
             }

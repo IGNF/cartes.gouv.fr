@@ -13,7 +13,7 @@ export const SERVICE_TYPES = ["wfs", "wms", "tms", "wmts"] as const;
 export type ServiceType = (typeof SERVICE_TYPES)[number];
 
 /** types dont le formulaire est livré ; les autres cartes restent visibles mais désactivées */
-export const IMPLEMENTED_SERVICE_TYPES: readonly ServiceType[] = ["wfs", "wms"];
+export const IMPLEMENTED_SERVICE_TYPES: readonly ServiceType[] = ["wfs", "wms", "wmts"];
 
 /** type de configuration Entrepôt (et d’endpoint) du type de flux */
 export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeEnum> = {
@@ -87,6 +87,12 @@ const validateSldFile = (file: File, tableName: string): Promise<StyleFileError[
 const sldErrorMessage = (t: T, error: StyleFileError): string =>
     error.code === "layer_name" ? t("validation.table.style.layer_name", { expected: error.expected }) : t(`validation.table.style.${error.code}`);
 
+const storedDataRequiredMessage = (t: T, type: ServiceType): string => {
+    if (type === "wms") return t("validation.stored_data.required_wms");
+    if (type === "wmts") return t("validation.stored_data.required_wmts");
+    return t("validation.stored_data.required");
+};
+
 export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existingLayerNames, layerNamePrefix, availableAccesses }: SchemaDeps) => {
     const tableSchema = z
         .object({
@@ -140,7 +146,7 @@ export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existin
         });
 
     return z.object({
-        stored_data_id: z.string().min(1, type === "wms" ? t("validation.stored_data.required_wms") : t("validation.stored_data.required")),
+        stored_data_id: z.string().min(1, storedDataRequiredMessage(t, type)),
         title: z.string().trim().min(1, t("validation.title.required")),
         technical_name: z
             .string()

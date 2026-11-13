@@ -1,5 +1,6 @@
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/SelectNext";
+import { type ReactNode } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 import { type DatasheetStoredDataItem, StoredDataTypeEnum } from "@/@types/app";
@@ -16,13 +17,23 @@ type ServiceDescriptionSectionProps = {
     /** données stockées compatibles avec le type de flux choisi */
     storedDataOptions: DatasheetStoredDataItem[];
     onStoredDataChange: (storedDataId: string) => void;
+    storedDataLabel: string;
+    /** affiché sous la liste des données */
+    storedDataNotice?: ReactNode;
     /** type de donnée dans le libellé, quand la liste mêle vecteur et raster */
     withDataKind: boolean;
     /** description du flux, sauf en WFS où chaque table a la sienne */
     withDescription: boolean;
 };
 
-export default function ServiceDescriptionSection({ storedDataOptions, onStoredDataChange, withDataKind, withDescription }: ServiceDescriptionSectionProps) {
+export default function ServiceDescriptionSection({
+    storedDataOptions,
+    onStoredDataChange,
+    storedDataLabel,
+    storedDataNotice,
+    withDataKind,
+    withDescription,
+}: ServiceDescriptionSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
         register,
@@ -49,7 +60,7 @@ export default function ServiceDescriptionSection({ storedDataOptions, onStoredD
                 name="stored_data_id"
                 render={({ field, fieldState: { error } }) => (
                     <Select
-                        label={t("stored_data.label")}
+                        label={storedDataLabel}
                         placeholder={t("stored_data.placeholder")}
                         options={storedDataOptions.map((option) => ({
                             value: option._id,
@@ -71,6 +82,7 @@ export default function ServiceDescriptionSection({ storedDataOptions, onStoredD
                     />
                 )}
             />
+            {storedDataNotice}
 
             <Input
                 label={t("title.label")}
