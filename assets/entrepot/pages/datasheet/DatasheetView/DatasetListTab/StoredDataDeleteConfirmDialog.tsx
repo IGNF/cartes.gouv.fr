@@ -17,16 +17,19 @@ import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { offeringTypeDisplayName } from "@/utils";
 import { getApiErrorMessage } from "../../../../../modules/apiError";
+import { type ApiError } from "@/modules/jsonFetch";
 
 type StoredDataDeleteConfirmDialogProps = {
     modal: ReturnType<typeof createModal>;
     datastoreId: string;
     storedData: DatasheetStoredDataItem;
     datasheetName: string;
+    /** fournie : l’appelant affiche l’erreur (null après un succès) à la place du dialogue */
+    onSettled?: (error: ApiError | Error | null) => void;
 };
 
 function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps) {
-    const { modal, datastoreId, storedData, datasheetName } = props;
+    const { modal, datastoreId, storedData, datasheetName, onSettled } = props;
 
     const { t } = useTranslation("StoredDataDeleteConfirmDialog");
     const { t: tCommon } = useTranslation("Common");
@@ -74,11 +77,13 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
             });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
         },
+        // rappel du hook, appelé même si la ligne a disparu du tableau entre-temps
+        onSettled: (_data, error) => onSettled?.(error),
     });
 
     return (
         <>
-            {deleteStoredDataMutation.error && (
+            {deleteStoredDataMutation.error && !onSettled && (
                 <Alert
                     title={t("error_deleting", { name: storedData.name, type: storedData.type })}
                     closable

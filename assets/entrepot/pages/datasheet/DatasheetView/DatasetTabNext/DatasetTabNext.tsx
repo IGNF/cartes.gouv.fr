@@ -6,15 +6,14 @@ import Notice from "@codegouvfr/react-dsfr/Notice";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery } from "@tanstack/react-query";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useCallback, useMemo, useState } from "react";
 import { tss } from "tss-react";
 
-import { DatasheetDetailed, StoredDataStatusEnum } from "@/@types/app";
+import { DatasheetDetailed, DatasheetStoredDataItem, StoredDataStatusEnum } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum, StoredDataPrivateDetailResponseDtoTypeEnum as StoredDataTypeEnum } from "@/@types/entrepot";
 import StoredDataStatusBadge from "@/components/Utils/Badges/StoredDataStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
 import LoadingText from "@/components/Utils/LoadingText";
-import MenuList from "@/components/Utils/MenuList";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import useDeleteUploadMutation from "@/hooks/queries/useDeleteUploadMutation";
@@ -27,6 +26,7 @@ import { type ApiError } from "@/modules/jsonFetch";
 import { formatDateFromISO } from "@/utils";
 import DatasheetViewTab from "../../DatasheetViewTab";
 import DatasetAddBanners from "./DatasetAddBanners";
+import StoredDataRowActions from "./StoredDataRowActions";
 
 type StoredDataType = `${StoredDataTypeEnum.VECTORDB | StoredDataTypeEnum.ROK4PYRAMIDVECTOR | StoredDataTypeEnum.ROK4PYRAMIDRASTER}`;
 type TypeFilter = "all" | "vector" | "raster";
@@ -65,11 +65,15 @@ type DatasetTabNextProps = {
 
 export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata, onDeleteDatasheet }: DatasetTabNextProps) {
     const { t } = useTranslation("DatasetTabNext");
+    const { t: tDeleteDialog } = useTranslation("StoredDataDeleteConfirmDialog");
     const { classes, cx } = useStyles();
     const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
 
     const { userRights, isSupervisor } = useCommunityRights();
-    const canGeneratePyramidVector = isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING);
+    const hasRights = (...rights: CommunityMemberDtoRightsEnum[]) => isSupervisor || rights.every((right) => userRights?.includes(right));
+    const canGeneratePyramidVector = hasRights(CommunityMemberDtoRightsEnum.PROCESSING);
+    // la suppression emporte les flux et l’annexe de légende
+    const canDeleteStoredData = hasRights(CommunityMemberDtoRightsEnum.ANNEX, CommunityMemberDtoRightsEnum.PROCESSING, CommunityMemberDtoRightsEnum.BROADCAST);
     const canAddData =
         isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) && userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING));
 
@@ -86,6 +90,12 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
 
     const deleteUpload = useDeleteUploadMutation(datastoreId, datasheetName);
     const { mutate: deleteUploadMutate } = deleteUpload;
+
+    const [deleteStoredDataError, setDeleteStoredDataError] = useState<{ storedData: DatasheetStoredDataItem; error: ApiError | Error }>();
+    const onStoredDataDeleteSettled = useCallback(
+        (storedData: DatasheetStoredDataItem, error: ApiError | Error | null) => setDeleteStoredDataError(error ? { storedData, error } : undefined),
+        []
+    );
 
     const { rows, hasIntegrationInProgress } = useMemo(() => {
         if (!datasheet) {
@@ -176,34 +186,16 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                 status: <StoredDataStatusBadge status={storedData.status} />,
                 action: (
                     <div className={classes.actions}>
-                        <Button
-                            priority="tertiary"
-                            size="small"
-                            linkProps={{
-                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
-                                params: { datastoreId, storedDataId: storedData._id },
-                                search: { datasheetName },
-                            }}
-                        >
-                            {t("view")}
-                        </Button>
-                        {storedData.type === StoredDataTypeEnum.VECTORDB && canGeneratePyramidVector && (
-                            <MenuList
-                                menuOpenButtonProps={{ iconId: "ri-more-2-line", priority: "tertiary no outline", title: t("menu.open"), size: "small" }}
-                                items={[
-                                    {
-                                        text: t("menu.generate_pyramid_vector"),
-                                        iconId: "ri-add-box-line",
-                                        disabled: storedData.status !== StoredDataStatusEnum.GENERATED,
-                                        linkProps: {
-                                            to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout",
-                                            params: { datastoreId },
-                                            search: { vectorDbId: storedData._id, datasheetName },
-                                        },
-                                    },
-                                ]}
-                            />
-                        )}
+                        {/* clé : les lignes du tableau sont indexées par position, l’état du dialogue suit la donnée */}
+                        <StoredDataRowActions
+                            key={storedData._id}
+                            datastoreId={datastoreId}
+                            datasheetName={datasheetName}
+                            storedData={storedData}
+                            canGeneratePyramidVector={canGeneratePyramidVector}
+                            canDelete={canDeleteStoredData}
+                            onDeleteSettled={onStoredDataDeleteSettled}
+                        />
                     </div>
                 ),
             })
@@ -221,6 +213,8 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
         hasMetadata,
         canAddData,
         canGeneratePyramidVector,
+        canDeleteStoredData,
+        onStoredDataDeleteSettled,
         classes.actions,
         failedUploadIds,
         deleteUploadMutate,
@@ -260,6 +254,19 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                         severity="error"
                         title={t("delete_error")}
                         description={getApiErrorMessage(deleteUpload.error)}
+                        small
+                    />
+                )}
+
+                {deleteStoredDataError && (
+                    <Alert
+                        className={fr.cx("fr-mt-2w")}
+                        severity="error"
+                        title={tDeleteDialog("error_deleting", {
+                            name: deleteStoredDataError.storedData.name || deleteStoredDataError.storedData._id,
+                            type: deleteStoredDataError.storedData.type,
+                        })}
+                        description={getApiErrorMessage(deleteStoredDataError.error)}
                         small
                     />
                 )}
