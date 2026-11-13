@@ -19,6 +19,7 @@ import metadata from "./metadata";
 import processing from "./processing";
 import statics from "./statics";
 import geonetwork from "./geonetwork";
+import geocoding from "./geocoding";
 import alerts from "./alerts";
 
 const api = {
@@ -46,5 +47,7 @@ const api = {
     // epsg.io
     epsg,
     geonetwork,
+    // Géoplateforme (géocodage)
+    geocoding,
 };
 export default api;

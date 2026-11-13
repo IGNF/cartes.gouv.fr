@@ -5,23 +5,30 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
+use App\Dto\Services\Form\PyramidServiceFormDTO;
+use App\Dto\Services\PyramidRaster\PyramidRasterGenerateDTO;
 use App\Exception\AppException;
 use App\Security\User;
-use App\Services\CapabilitiesService;
 use App\Services\EntrepotApi\AnnexeApiService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StaticApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
+use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
+use App\Services\ServiceFormFileValidator;
 use App\Utils;
+use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -39,7 +46,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
     name: 'cartesgouvfr_api_pyramid_raster_',
     options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] pyramid-raster', description: 'Génération de pyramides de tuiles raster et création/modification des services associés')]
-class PyramidRasterController extends ServiceController implements ApiControllerInterface
+final class PyramidRasterController extends AbstractController implements ApiControllerInterface
 {
     private readonly HttpClientInterface $httpClient;
 
@@ -48,35 +55,30 @@ class PyramidRasterController extends ServiceController implements ApiController
         private readonly ConfigurationApiService $configurationApiService,
         private readonly StoredDataApiService $storedDataApiService,
         private readonly ProcessingApiService $processingApiService,
-        SandboxService $sandboxService,
+        private readonly SandboxService $sandboxService,
         private readonly CartesServiceApiService $cartesServiceApiService,
-        CapabilitiesService $capabilitiesService,
-        CartesMetadataApiService $cartesMetadataApiService,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly AnnexeApiService $annexeApiService,
         private readonly StaticApiService $staticApiService,
         private readonly Filesystem $fs,
+        private readonly MultipartPayloadMapper $multipartPayloadMapper,
+        private readonly ServiceFormFileValidator $serviceFormFileValidator,
+        private readonly LoggerInterface $logger,
         ParameterBagInterface $params,
         HttpClientInterface $httpClient,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
-
         $this->httpClient = $httpClient->withOptions([
             'proxy' => $params->get('http_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
         ]);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
-    public function add(string $datastoreId, Request $request): JsonResponse
+    public function add(string $datastoreId, #[MapRequestPayload] PyramidRasterGenerateDTO $dto): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
         $datastore = $this->datastoreApiService->get($datastoreId);
         $processingId = $this->sandboxService->getProcGeneratePyramidRaster($datastoreId);
 
-        $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $data['wmsv_offering_id'])->array();
+        $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $dto->wmsv_offering_id)->array();
         $wmsvConfiguration = $this->configurationApiService->get($datastoreId, $wmsvOffering['configuration']['_id'])->array();
 
         $vectorDbId = $wmsvConfiguration['type_infos']['used_data'][0]['stored_data'] ?? null;
@@ -93,14 +95,15 @@ class PyramidRasterController extends ServiceController implements ApiController
             throw new AppException('URL du service WMS-Vecteur non trouvée', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $zoomRange = $data['zoom_range'];
+        $zoomRange = array_values($dto->zoom_range);
+        sort($zoomRange);
         $harvestLevels = array_map(strval(...), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
 
         $requestBody = [
             'processing' => $processingId,
             'output' => [
                 'stored_data' => [
-                    'name' => $data['technical_name'],
+                    'name' => $dto->technical_name,
                 ],
             ],
             'parameters' => [
@@ -113,11 +116,11 @@ class PyramidRasterController extends ServiceController implements ApiController
                 'harvest_format' => 'image/jpeg',
                 'harvest_url' => $endpointUrlBase,
                 'harvest_layers' => $wmsvOffering['layer_name'],
-                'harvest_area' => $data['wmsv_config_bbox'],
+                'harvest_area' => $dto->wmsv_config_bbox,
             ],
         ];
 
-        if (isset($data['email_notification']) && true === $data['email_notification']) {
+        if ($dto->email_notification) {
             /** @var User */
             $user = $this->getUser();
             $userEmail = $user->getEmail();
@@ -138,39 +141,111 @@ class PyramidRasterController extends ServiceController implements ApiController
             }
         }
 
-        $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
-        $pyramidId = $processingExecution['output']['stored_data']['_id'];
-
-        $pyramidTags = [
-            CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
-            'upload_id' => $vectordb['tags']['upload_id'],
-            'proc_int_id' => $vectordb['tags']['proc_int_id'],
-            'vectordb_id' => $vectorDbId,
-            'proc_pyr_creat_id' => $processingExecution['_id'],
-        ];
-        if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
-            $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
-        }
-        if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
-            $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
-        }
-
+        // avant l’exécution : une légende inaccessible ne laisse rien à défaire
         $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
-        $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
-        $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
+        $processingExecution = null;
 
-        $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
-        $this->storedDataApiService->modify($datastoreId, $pyramidId, [
-            'extra' => [
-                'legend' => [
-                    'url' => $legendAnnexeUrlAbs,
-                    'annexe_id' => $legendAnnexe['_id'],
+        try {
+            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
+            $pyramidId = $processingExecution['output']['stored_data']['_id'];
+
+            // base vecteur créée hors du parcours de dépôt : tags de lignée absents
+            $pyramidTags = array_filter([
+                ...UploadIntegrationWorkflow::forwardedTags($vectordb['tags'] ?? []),
+                StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID] ?? null,
+                StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
+                StoredDataTags::VECTORDB_ID => $vectorDbId,
+                StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
+            ], fn ($value) => null !== $value);
+
+            $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME] ?? null);
+            $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
+
+            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
+            $this->storedDataApiService->modify($datastoreId, $pyramidId, [
+                'extra' => [
+                    'legend' => [
+                        'url' => $legendAnnexeUrlAbs,
+                        'annexe_id' => $legendAnnexe['_id'],
+                    ],
                 ],
-            ],
-        ])->await();
-        $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+            ])->await();
+            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+        } catch (\Throwable $e) {
+            if (null !== $processingExecution) {
+                $this->cancelGeneration($datastoreId, $processingExecution['_id'], $processingExecution['output']['stored_data']['_id']);
+            }
+            throw $e;
+        } finally {
+            $this->fs->remove(dirname($legendFilePath));
+        }
 
         return new JsonResponse();
+    }
+
+    /**
+     * Publication depuis le nouveau formulaire : multipart avec le champ JSON `data` (PyramidServiceFormDTO) et les fichiers `thumbnail`, `attribution_logo`.
+     */
+    #[Route('/{pyramidId}/wms-raster-wmts/publish', name: 'wms_raster_wmts_publish', methods: ['POST'])]
+    public function publish(string $datastoreId, string $pyramidId, #[MapQueryParameter] string $type, Request $request): JsonResponse
+    {
+        $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
+        if (!in_array($type, $acceptedTypes, true)) {
+            throw new AppException(sprintf('Le type %s n’est pas accepté. Les types acceptés sont %s.', $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
+        }
+
+        $dto = $this->multipartPayloadMapper->map($request, PyramidServiceFormDTO::class);
+        [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
+
+        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
+        if (StoredDataTypes::ROK4_PYRAMID_RASTER !== ($pyramid['type'] ?? null)) {
+            throw new AppException('La donnée choisie n’est pas une pyramide raster', Response::HTTP_BAD_REQUEST);
+        }
+        $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
+        $configType = ConfigurationTypes::WMSRASTER === $type ? 'wmsr' : 'wmts';
+        // nom temporaire : l’identifiant de la configuration n’existe pas encore
+        $legendStaticId = $this->saveLegendInStatic($datastoreId, $pyramid, $configType, $levels)['_id'];
+
+        $offering = $this->cartesServiceApiService->publishFromForm(
+            $datastoreId,
+            $pyramidId,
+            $dto,
+            $type,
+            [
+                'title' => $dto->title,
+                'abstract' => $dto->description,
+                'keywords' => $dto->themes,
+                'used_data' => [[
+                    'bottom_level' => $levels['bottom_level'],
+                    'top_level' => $levels['top_level'],
+                    'stored_data' => $pyramidId,
+                ]],
+                'styles' => [$legendStaticId],
+            ],
+            $thumbnail,
+            $attributionLogo,
+            // renommage avant l’offre : un échec annule encore la configuration
+            function (string $configurationId) use ($datastoreId, $legendStaticId, $configType): void {
+                $this->staticApiService->modifyInfo($datastoreId, $legendStaticId, [
+                    'name' => sprintf('config_%s_style_%s', $configurationId, $configType),
+                ])->await();
+            },
+            // après l’offre, le fichier reste : le flux l’utilise
+            function () use ($datastoreId, $legendStaticId): void {
+                try {
+                    $this->staticApiService->delete($datastoreId, $legendStaticId)->await();
+                } catch (\Throwable $e) {
+                    $this->logger->warning('{class}: Failed to remove legend style file {staticId} after a failed publication: {error}', [
+                        'class' => self::class,
+                        'staticId' => $legendStaticId,
+                        'exception' => $e,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            },
+        );
+
+        return $this->json($offering, Response::HTTP_CREATED);
     }
 
     #[Route('/{pyramidId}/wms-raster-wmts', name: 'wms_raster_wmts_add', methods: ['POST'])]
@@ -189,7 +264,7 @@ class PyramidRasterController extends ServiceController implements ApiController
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type);
-        $configRequestBody = $this->getConfigRequestBody($type, $dto, $typeInfos);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto($type, $dto, $typeInfos);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody);
 
@@ -224,7 +299,7 @@ class PyramidRasterController extends ServiceController implements ApiController
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type, $oldConfiguration['_id']);
-        $configRequestBody = $this->getConfigRequestBody($type, $dto, $typeInfos, $oldConfiguration);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto($type, $dto, $typeInfos, $oldConfiguration);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody, $oldOffering);
 
@@ -238,7 +313,7 @@ class PyramidRasterController extends ServiceController implements ApiController
      */
     private function getConfigTypeInfos(CommonDTO $dto, string $datastoreId, array $pyramid, string $serviceType, ?string $configurationId = null): array
     {
-        $levels = $this->getPyramidZoomLevels($pyramid);
+        $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
         $configType = ConfigurationTypes::WMSRASTER === $serviceType ? 'wmsr' : 'wmts';
 
         $legendStatic = $this->saveLegendInStatic($datastoreId, $pyramid, $configType, $levels, $configurationId);
@@ -254,6 +329,35 @@ class PyramidRasterController extends ServiceController implements ApiController
             ]],
             'styles' => [$legendStatic['_id']],
         ];
+    }
+
+    // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée ; supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
+    private function cancelGeneration(string $datastoreId, string $executionId, string $pyramidId): void
+    {
+        try {
+            $this->processingApiService->removeExecution($datastoreId, $executionId)->await();
+        } catch (\Throwable $e) {
+            $this->logger->warning('{class}: Failed to remove processing execution {executionId} after a failed pyramid generation: {error}', [
+                'class' => self::class,
+                'executionId' => $executionId,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // cherchée par son chemin : un échec entre le dépôt du fichier et la pose des libellés ne rend pas l’identifiant
+        try {
+            foreach ($this->annexeApiService->getAll($datastoreId, null, "/legend/{$pyramidId}.png")->resolve() as $annexe) {
+                $this->annexeApiService->remove($datastoreId, $annexe['_id'])->await();
+            }
+        } catch (\Throwable $e) {
+            $this->logger->warning('{class}: Failed to remove legend annexe of pyramid {pyramidId} after a failed pyramid generation: {error}', [
+                'class' => self::class,
+                'pyramidId' => $pyramidId,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -275,8 +379,14 @@ class PyramidRasterController extends ServiceController implements ApiController
         try {
             $response = $this->httpClient->request('GET', $wmsvOfferingLegendUrl);
             $responseContent = $response->getContent();
+            $contentType = $response->getHeaders()['content-type'][0] ?? '';
         } catch (\Throwable $th) {
             throw new AppException('Récupération de la légende GetLegendGraphic du service WMS-Vecteur échouée', Response::HTTP_INTERNAL_SERVER_ERROR, [], $th);
+        }
+
+        // un WMS répond 200 avec une ServiceException XML quand il ne sait pas dessiner la légende
+        if (!str_starts_with(strtolower($contentType), 'image/')) {
+            throw new AppException('La légende du flux WMS-Vecteur n’a pas pu être récupérée. Vérifiez le style du flux puis réessayez.', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $styleFilesDir = $this->getParameter('style_files_path');
@@ -292,7 +402,7 @@ class PyramidRasterController extends ServiceController implements ApiController
     /**
      * @return array<mixed>
      */
-    private function saveLegendInAnnexe(string $datastoreId, string $storedDataId, string $legendFilePath, string $datasheetName): array
+    private function saveLegendInAnnexe(string $datastoreId, string $storedDataId, string $legendFilePath, ?string $datasheetName): array
     {
         $path = "/legend/{$storedDataId}.png";
 
@@ -303,10 +413,10 @@ class PyramidRasterController extends ServiceController implements ApiController
             return $this->annexeApiService->replaceFile($datastoreId, $existingAnnexe['_id'], $legendFilePath);
         }
 
-        $labels = [
-            CommonTags::DATASHEET_NAME.'='.$datasheetName,
-            'type=legend',
-        ];
+        $labels = ['type=legend'];
+        if (null !== $datasheetName) {
+            $labels[] = CommonTags::DATASHEET_NAME.'='.$datasheetName;
+        }
 
         return $this->annexeApiService->add($datastoreId, $legendFilePath, [$path], $labels, true);
     }
@@ -351,21 +461,25 @@ class PyramidRasterController extends ServiceController implements ApiController
         $styleFilePath = $styleFileDir.DIRECTORY_SEPARATOR.'rok4style_'.Uuid::v4().'.json';
 
         $this->fs->mkdir($styleFileDir);
-        $this->fs->dumpFile($styleFilePath, json_encode($rok4Style, JSON_THROW_ON_ERROR));
+        try {
+            $this->fs->dumpFile($styleFilePath, json_encode($rok4Style, JSON_THROW_ON_ERROR));
 
-        if (null !== $configurationId) {
-            $finalStyleFileName = sprintf('config_%s_style_%s', $configurationId, $configType);
-            $existingStatics = $this->staticApiService->getAll($datastoreId, [
-                'type' => StaticFileTypes::ROK4_STYLE,
-                'name' => $finalStyleFileName,
-            ])->resolve();
-            if (count($existingStatics) > 0) {
-                $existingStatic = $existingStatics[0];
+            if (null !== $configurationId) {
+                $finalStyleFileName = sprintf('config_%s_style_%s', $configurationId, $configType);
+                $existingStatics = $this->staticApiService->getAll($datastoreId, [
+                    'type' => StaticFileTypes::ROK4_STYLE,
+                    'name' => $finalStyleFileName,
+                ])->resolve();
+                if (count($existingStatics) > 0) {
+                    $existingStatic = $existingStatics[0];
 
-                return $this->staticApiService->replaceFile($datastoreId, $existingStatic['_id'], $styleFilePath);
+                    return $this->staticApiService->replaceFile($datastoreId, $existingStatic['_id'], $styleFilePath);
+                }
             }
-        }
 
-        return $this->staticApiService->add($datastoreId, $styleFilePath, $tmpStyleFileName, StaticFileTypes::ROK4_STYLE);
+            return $this->staticApiService->add($datastoreId, $styleFilePath, $tmpStyleFileName, StaticFileTypes::ROK4_STYLE);
+        } finally {
+            $this->fs->remove($styleFileDir);
+        }
     }
 }

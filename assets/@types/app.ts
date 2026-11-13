@@ -126,6 +126,8 @@ export interface StoredData extends StoredDataPrivateDetailResponseDto {
         datasheet_name?: string;
         producer?: string;
         production_year?: string;
+        /** thématiques choisies au dépôt, jointes par « , » */
+        theme?: string;
     };
 }
 export {
@@ -169,6 +171,16 @@ export interface PyramidRaster extends StoredData {
     type_infos?: StoredDataRok4PyramidRasterDetailsDto;
 }
 
+/** état de l’intégration d’une livraison, calculé par le backend à chaque lecture */
+export type UploadIntegration = {
+    steps: Record<string, string>;
+    status: "waiting" | "in_progress" | "failed" | "successful";
+    /** action que le POST d’avancement exécuterait, null s’il n’y a rien à faire */
+    next_action: "send_files" | "launch_processing" | "delete_upload" | null;
+    vectordb_id: string | null;
+    datasheet_name: string | null;
+};
+
 /** upload (livraison) */
 export type Upload = UploadPrivateDetailResponseDto & {
     tags: {
@@ -176,8 +188,6 @@ export type Upload = UploadPrivateDetailResponseDto & {
         proc_int_id?: string;
         vectordb_id?: string;
         data_upload_path?: string;
-        integration_progress?: string;
-        integration_current_step?: string;
         producer?: string;
         production_year?: string;
     };
@@ -247,7 +257,16 @@ export type TmsMetadata = {
 };
 
 /** configuration & offerings */
+/** données libres de la configuration, voir docs/developer/entrepot/extra.md */
+export type ConfigurationExtra = {
+    _search?: {
+        /** vignette du flux, affichée dans la liste des flux et dans Explorer les cartes */
+        url_vignette?: string;
+    };
+};
+
 export type Configuration = ConfigurationStandardDetailResponseDto & {
+    extra?: ConfigurationExtra;
     styles?: CartesStyle[];
     tags: {
         datasheet_name?: string;
@@ -395,25 +414,56 @@ export type CswOnlineResource = {
     open: boolean;
 };
 
+export type CswMetadataTerritory = {
+    id: string;
+    title: string;
+    bbox: number[];
+};
+
+export type CswMetadataProducer = {
+    organization_name: string;
+    organization_email: string;
+    role: string;
+    address_number_and_streetname?: string | null;
+    address_postal_code?: string | null;
+    address_city?: string | null;
+};
+
+export type CswMetadataSubConstraint = {
+    type: string;
+    restriction_code?: string | null;
+    limitation_code?: string | null;
+    classification_code?: string | null;
+    url?: string | null;
+    description?: string | null;
+};
+
+export type CswMetadataResourceConstraint = {
+    type: string;
+    constraints: CswMetadataSubConstraint[];
+};
+
 export type CswMetadata = {
     file_identifier?: string;
     hierarchy_level?: MetadataHierarchyLevel;
     resource_genealogy?: string;
     language?: LanguageType;
     charset?: string;
-    title?: string;
-    abstract?: string;
-    creation_date?: string;
-    topic_categories?: string[];
-    inspire_keywords?: string[];
-    free_keywords?: string[];
-    frequency_code?: string;
-    contact_email?: string;
-    organisation_name?: string;
-    organisation_email?: string;
-    resolution?: string;
+    name?: string;
+    description?: string;
+    date_creation?: string;
+    date_publication?: string;
+    date_revision?: string;
+    themes?: string[];
+    keywords_inspire?: string[];
+    keywords_additional?: string[];
+    update_frequency?: string;
+    producers?: CswMetadataProducer[];
+    resource_constraints?: CswMetadataResourceConstraint[];
+    scale?: number;
+    resolution?: number;
     online_resources?: CswOnlineResource[];
-    bbox?: BoundingBox | null;
+    territories?: CswMetadataTerritory[];
     thumbnail_url?: string;
 };
 

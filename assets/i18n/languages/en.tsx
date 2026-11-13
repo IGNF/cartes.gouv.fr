@@ -1,4 +1,16 @@
+import { AddressFieldsEnTranslations } from "@/components/Input/AddressFields.locale";
+import { AutocompleteSelectEnTranslations } from "@/components/Input/AutocompleteSelect.locale";
 import { KeyValueListEnTranslations } from "@/components/Input/KeyValueList.locale";
+import { ImageCropModalEnTranslations } from "@/components/Input/ImageCropModal/ImageCropModal.locale";
+import { ImageFieldUploadEnTranslations } from "@/components/Input/ImageFieldUpload.locale";
+import { DatasheetSectionsEnTranslations } from "@/entrepot/pages/datasheet/forms/sections.locale";
+import { DescriptionTabEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DescriptionTab/DescriptionTab.locale";
+import { DatasheetViewNextEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetViewNext.locale";
+import { DatasetTabNextEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetTabNext/DatasetTabNext.locale";
+import { ServicesListTabNextEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/ServiceListTab/ServicesListTabNext.locale";
+import { DatasetAddEnTranslations } from "@/entrepot/pages/datasheet/DatasetAdd/DatasetAdd.locale";
+import { ServiceFormEnTranslations } from "@/entrepot/pages/datasheet/ServiceForm/ServiceForm.locale";
+import { DatasheetCreateEnTranslations } from "@/entrepot/pages/datasheet/DatasheetCreate/DatasheetCreate.locale";
 import { CommunityInfoEnTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { StoredDataDeleteConfirmDialogEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { DatastoreAddEnTranslations } from "@/entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale";
@@ -16,7 +28,6 @@ import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities
 import { RightsEnTranslations } from "../../entrepot/pages/communities/Rights.locale";
 import { AlertsEnTranslations } from "../../entrepot/pages/config/Alerts.locale";
 import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale";
-import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale";
 import { DatasheetUploadIntegrationEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegration.locale";
 import { PyramidRasterListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale";
 import { PyramidVectorListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale";
@@ -117,7 +128,6 @@ export const translations: Translations<"en"> = {
     ManageCommunityValidations: ManageCommunityValidationsEnTranslations,
     AutofillKeywords: AutofillKeywordsEnTranslations,
     AutofillDialog: AutofillDialogEnTranslations,
-    DatasheetUploadForm: DatasheetUploadFormEnTranslations,
     DatasheetList: DatasheetListEnTranslations,
     AccessRestrictions: AccessRestrictionsEnTranslations,
     LoginDisabled: LoginDisabledEnTranslations,
@@ -138,5 +148,17 @@ export const translations: Translations<"en"> = {
     ManageGridsDialog: ManageGridsDialogEnTranslations,
     alerts: AlertsEnTranslations,
     KeyValueList: KeyValueListEnTranslations,
+    AddressFields: AddressFieldsEnTranslations,
+    AutocompleteSelect: AutocompleteSelectEnTranslations,
+    ImageCropModal: ImageCropModalEnTranslations,
+    ImageFieldUpload: ImageFieldUploadEnTranslations,
+    DatasheetSections: DatasheetSectionsEnTranslations,
+    DatasheetCreate: DatasheetCreateEnTranslations,
+    DescriptionTab: DescriptionTabEnTranslations,
+    DatasheetViewNext: DatasheetViewNextEnTranslations,
+    DatasetTabNext: DatasetTabNextEnTranslations,
+    ServicesListTabNext: ServicesListTabNextEnTranslations,
+    DatasetAdd: DatasetAddEnTranslations,
+    ServiceForm: ServiceFormEnTranslations,
     Stats: StatsEnTranslations,
 };

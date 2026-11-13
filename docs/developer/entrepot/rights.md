@@ -35,7 +35,38 @@
 | Modifier les informations de publication      | BROADCAST          | Ne pas afficher l'action |
 | Dépublier                                     | BROADCAST          | Ne pas afficher l'action |
 | Gérer les styles                              | ANNEX, BROADCAST   | Ne pas afficher l'action |
-| Menu WMS-V - Créer un service raster WMS/WMTS | PROCESSING         | Ne pas afficher l'action |
+| Menu WMS-V - Créer un service raster WMS/WMTS | PROCESSING, ANNEX  | Ne pas afficher l'action |
+
+### Onglet "Données" (fiche de données refondue)
+
+| Action                                      | Droits nécessaires           | En l'absence de droits    |
+| ------------------------------------------- | ---------------------------- | ------------------------- |
+| Ajouter une donnée                          | UPLOAD, PROCESSING           | Ne pas afficher le bouton |
+| Livraison - Reprendre l'intégration         | UPLOAD, PROCESSING           | Ne pas afficher le bouton |
+| Livraison - Supprimer                       | UPLOAD, PROCESSING           | Ne pas afficher le bouton |
+| Base vecteur - Créer une pyramide vecteur   | PROCESSING                   | Ne pas afficher l'action  |
+| Donnée stockée - Supprimer (tous les types) | ANNEX, PROCESSING, BROADCAST | Ne pas afficher l'action  |
+
+La suppression d’une donnée stockée supprime aussi ses flux et l’annexe de légende d’une pyramide raster, d’où les droits BROADCAST et ANNEX.
+
+### Onglet "Flux" (fiche de données refondue)
+
+| Action               | Droits nécessaires | En l'absence de droits    |
+| -------------------- | ------------------ | ------------------------- |
+| Créer un flux        | BROADCAST, ANNEX   | Ne pas afficher le bouton |
+| Menu - Mettre à jour | BROADCAST          | Ne pas afficher l'action  |
+| Menu - Supprimer     | BROADCAST          | Ne pas afficher l'action  |
+
+La page « Créer un flux » exige les mêmes droits (vignette et logo déposés en annexes). La suppression d’un flux par un membre sans ANNEX laisse sa vignette et son logo en place (refus journalisé).
+
+### Pyramides de tuiles
+
+| Action                                                       | Droits nécessaires | En l'absence de droits   |
+| ------------------------------------------------------------ | ------------------ | ------------------------ |
+| Générer une pyramide raster (menu d’un flux WMS-V, page)     | PROCESSING, ANNEX  | Ne pas afficher l'action |
+| Générer une pyramide vecteur (menu d’une base vecteur, page) | PROCESSING         | Ne pas afficher l'action |
+
+La génération raster dépose la légende du flux WMS-V en annexe, d’où le droit ANNEX.
 
 ### Onglet "Document"
 

@@ -4,6 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
@@ -121,8 +122,8 @@ class StoredDataController extends AbstractController implements ApiControllerIn
         $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
 
         // récupération de détails sur l'upload s'il y en a un qui a servi à créer la stored_data
-        if (isset($storedData['tags']['upload_id'])) {
-            $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id'])->array();
+        if (isset($storedData['tags'][StoredDataTags::UPLOAD_ID])) {
+            $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags'][StoredDataTags::UPLOAD_ID])->array();
             $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id'], $inputUpload);
             $inputUpload['checks'] = [];
             $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
@@ -139,8 +140,8 @@ class StoredDataController extends AbstractController implements ApiControllerIn
             }
         }
 
-        $procIntegrationId = $storedData['tags']['proc_int_id'] ?? null;
-        $procPyramidCreationId = $storedData['tags']['proc_pyr_creat_id'] ?? null;
+        $procIntegrationId = $storedData['tags'][StoredDataTags::PROC_INT_ID] ?? null;
+        $procPyramidCreationId = $storedData['tags'][StoredDataTags::PROC_PYR_CREAT_ID] ?? null;
         $procExections = [];
 
         // récupération de l'exécution de traitement d'intégration en base de données

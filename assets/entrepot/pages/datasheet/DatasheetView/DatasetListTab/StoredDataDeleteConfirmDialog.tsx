@@ -14,19 +14,22 @@ import api from "@/entrepot/api";
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
 import useStoredDataUseProcessings from "@/hooks/queries/useStoredDataUseProcessings";
 import { useTranslation } from "@/i18n";
+import { getApiErrorMessage } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
+import { type ApiError } from "@/modules/jsonFetch";
 import { offeringTypeDisplayName } from "@/utils";
-import { getApiErrorMessage } from "../../../../../modules/apiError";
 
 type StoredDataDeleteConfirmDialogProps = {
     modal: ReturnType<typeof createModal>;
     datastoreId: string;
     storedData: DatasheetStoredDataItem;
     datasheetName: string;
+    /** fournie : l’appelant affiche l’erreur (null après un succès) à la place du dialogue */
+    onSettled?: (error: ApiError | Error | null) => void;
 };
 
 function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps) {
-    const { modal, datastoreId, storedData, datasheetName } = props;
+    const { modal, datastoreId, storedData, datasheetName, onSettled } = props;
 
     const { t } = useTranslation("StoredDataDeleteConfirmDialog");
     const { t: tCommon } = useTranslation("Common");
@@ -72,13 +75,21 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
             dataUsesQuery.data?.offerings_list?.forEach((offering) => {
                 queryClient.removeQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offering._id) });
             });
+        },
+        // rappel du hook, appelé même si la ligne a disparu du tableau entre-temps
+        onSettled: (_data, error) => {
+            // invalide aussi la liste des flux (clé préfixée) : un échec en cours de route peut avoir déjà dépublié des flux
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            if (error) {
+                void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_stored_data_uses(datastoreId, storedData._id) });
+            }
+            onSettled?.(error);
         },
     });
 
     return (
         <>
-            {deleteStoredDataMutation.error && (
+            {deleteStoredDataMutation.error && !onSettled && (
                 <Alert
                     title={t("error_deleting", { name: storedData.name, type: storedData.type })}
                     closable

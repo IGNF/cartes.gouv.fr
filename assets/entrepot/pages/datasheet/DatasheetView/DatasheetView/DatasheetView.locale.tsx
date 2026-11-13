@@ -1,26 +1,17 @@
 import { declareComponentKeys } from "i18nifty";
-import { ThumbnailAction } from "../DatasheetThumbnail";
 import { DatasheetDocument, DatasheetDocumentTypeEnum } from "../../../../../@types/app";
 import { Translations } from "../../../../../i18n/types";
 import { getFileExtension } from "../../../../../utils";
 
 const { i18n } = declareComponentKeys<
     | "tab_label.metadata"
+    | "tab_label.description"
     | { K: "tab_label.datasets"; P: { num: number }; R: string }
     | { K: "tab_label.services"; P: { num: number }; R: string }
     | { K: "tab_label.documents"; P: { num: number }; R: string }
     | "datasheet.back_to_list"
     | "datasheet.remove"
     | { K: "datasheet.being_removed"; P: { datasheetName: string }; R: string }
-    | "file_validation.required_error"
-    | "file_validation.size_error"
-    | "file_validation.format_error"
-    | "button.title"
-    | "thumbnail_modal.title"
-    | "thumbnail_modal.file_hint"
-    | { K: "thumbnail_modal.action_being"; P: { action: ThumbnailAction }; R: string }
-    | { K: "thumbnail_action"; P: { action: ThumbnailAction }; R: string }
-    | "thumbnail_confirm_delete_modal.title"
     | { K: "datasheet_confirm_delete_modal.title"; P: { datasheetName: string }; R: string }
     | "datasheet_confirm_delete_modal.text"
     | "processing_in_progress_deletion_warning"
@@ -56,39 +47,13 @@ export type I18n = typeof i18n;
 
 export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = {
     "tab_label.metadata": "Métadonnées",
+    "tab_label.description": "Description",
     "tab_label.datasets": ({ num }) => `Jeux de données (${num})`,
     "tab_label.services": ({ num }) => `Services (${num})`,
     "tab_label.documents": ({ num }) => `Documents (${num})`,
     "datasheet.back_to_list": "Retour à ma liste de données",
     "datasheet.remove": "Supprimer la fiche de données",
     "datasheet.being_removed": ({ datasheetName }) => `Suppression de la fiche de données ${datasheetName} en cours ...`,
-    "file_validation.required_error": "Aucun fichier n'a été choisi",
-    "file_validation.size_error": "La taille du fichier ne peut excéder 2 Mo",
-    "file_validation.format_error": "Le fichier doit être au format jpeg ou png",
-    "button.title": "Ajouter, modifier ou supprimer la vignette",
-    "thumbnail_modal.title": "Vignette pour la fiche de données",
-    "thumbnail_modal.file_hint": "Taille maximale : 2 Mo. Formats acceptés : jpg, png",
-    "thumbnail_modal.action_being": ({ action }) => {
-        switch (action) {
-            case "add":
-                return "Ajout de la vignette en cours ...";
-            case "modify":
-                return "Remplacement de la vignette en cours ...";
-            case "delete":
-                return "Suppression de la vignette en cours ...";
-        }
-    },
-    thumbnail_action: ({ action }) => {
-        switch (action) {
-            case "add":
-                return "Ajouter une vignette";
-            case "modify":
-                return "Remplacer la vignette";
-            case "delete":
-                return "Supprimer la vignette";
-        }
-    },
-    "thumbnail_confirm_delete_modal.title": "Êtes-vous sûr de vouloir supprimer la vignette de cette fiche de données ?",
     "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`,
     "datasheet_confirm_delete_modal.text": "Les éléments suivants seront supprimés :",
     processing_in_progress_deletion_warning: "Un ou plusieurs traitements avec au moins un de ces jeux de données en entrée sont en cours et seront annulés.",
@@ -169,39 +134,13 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
 
 export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = {
     "tab_label.metadata": "Metadata",
+    "tab_label.description": "Description",
     "tab_label.datasets": ({ num }) => `Datasets (${num})`,
     "tab_label.services": ({ num }) => `Services (${num})`,
     "tab_label.documents": ({ num }) => `Documents (${num})`,
     "datasheet.back_to_list": "Back to my data list",
     "datasheet.remove": "Delete datasheet",
     "datasheet.being_removed": ({ datasheetName }) => `Datasheet ${datasheetName} being removed ...`,
-    "file_validation.required_error": "No files have been chosen",
-    "file_validation.size_error": "File size cannot exceed 2 MB",
-    "file_validation.format_error": "Format required for file is jpeg or png",
-    "button.title": "Add, modify or remove thumbnail",
-    "thumbnail_modal.title": "Datasheet thumbnail",
-    "thumbnail_modal.file_hint": "Max size : 2 Mo. Accepted formats : jpg, png",
-    "thumbnail_modal.action_being": ({ action }) => {
-        switch (action) {
-            case "add":
-                return "Thumbnail being added ...";
-            case "modify":
-                return "Thumbnail being replaced ...";
-            case "delete":
-                return "Thumbnail being deleted ...";
-        }
-    },
-    thumbnail_action: ({ action }) => {
-        switch (action) {
-            case "add":
-                return "Add thumbnail";
-            case "modify":
-                return "Replace thumbnail";
-            case "delete":
-                return "Delete thumbnail";
-        }
-    },
-    "thumbnail_confirm_delete_modal.title": "Are you sure you want to remove the thumbnail from this data sheet",
     "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Are you sure you want to delete datasheet ${datasheetName} ?`,
     "datasheet_confirm_delete_modal.text": "The following items will be deleted :",
     processing_in_progress_deletion_warning: undefined,

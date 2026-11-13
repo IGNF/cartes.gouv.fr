@@ -32,6 +32,12 @@ const publish = (datastoreId: string, pyramidId: string, formData: FormData | ob
     );
 };
 
+/** publication depuis le nouveau formulaire : multipart, voir buildServiceFormData */
+const publishTms = (datastoreId: string, pyramidId: string, formData: FormData) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_vector_tms_publish", { datastoreId, pyramidId });
+    return jsonFetch<Service>(url, { method: "POST" }, formData, true);
+};
+
 const publishEdit = (datastoreId: string, pyramidId: string, offeringId: string, formData: FormData | object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_vector_tms_edit", { datastoreId, pyramidId, offeringId });
     return jsonFetch<Service>(
@@ -50,5 +56,6 @@ const publishEdit = (datastoreId: string, pyramidId: string, offeringId: string,
 export default {
     add,
     publish,
+    publishTms,
     publishEdit,
 };

@@ -12,11 +12,15 @@ use App\Constants\EntrepotApi\OfferingStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\PermissionTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
+use App\Constants\ServiceAccess;
 use App\Dto\Datasheet\DatasheetServices;
 use App\Dto\Services\CommonDTO;
+use App\Dto\Services\Form\ServiceAttributionFormDTO;
+use App\Dto\Services\Form\ServiceFormDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\CapabilitiesService;
+use App\Services\DatastorePrefixValidator;
 use App\Services\GeonetworkApiService;
 use App\Services\MembershipService;
 use App\Services\SandboxService;
@@ -24,6 +28,7 @@ use App\Utils;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -55,6 +60,9 @@ class CartesServiceApiService
         private readonly MembershipService $membershipService,
         private readonly CacheInterface $cache,
         private readonly LoggerInterface $logger,
+        private readonly ServiceConfigurationRequestBuilder $configurationRequestBuilder,
+        private readonly ServiceImageAnnexeService $serviceImageAnnexeService,
+        private readonly DatastorePrefixValidator $datastorePrefixValidator,
         HttpClientInterface $httpClient,
         #[Autowire(service: 'app.api_client.entrepot')]
         private readonly ApiClient $entrepotApi,
@@ -255,6 +263,18 @@ class CartesServiceApiService
 
         $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
 
+        // vignette et logo d’attribution, après la configuration qui les référence ; un échec n’empêche pas la suppression du flux
+        try {
+            $this->serviceImageAnnexeService->removeServiceImages($datastoreId, $configuration);
+        } catch (ApiException $e) {
+            $this->logger->warning('{class}: Failed to remove image annexes of configuration {configurationId}: {error}', [
+                'class' => self::class,
+                'configurationId' => $configuration['_id'],
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         if ($removeStyleFiles) {
             $this->removeStyleFiles($datastoreId, $configuration);
         }
@@ -445,7 +465,7 @@ class CartesServiceApiService
         // Mise à jour des métadonnées de la configuration
         $configRequestBody['metadata'] = $this->getNewConfigMetadata($dto->identifier, $configRequestBody['metadata'] ?? []);
         $configTags = [
-            CommonTags::CONFIG_THEME => implode(', ', $dto->category),
+            CommonTags::THEME_CATEGORIES => implode(', ', $dto->category),
         ];
 
         if ($oldOffering) {
@@ -493,31 +513,16 @@ class CartesServiceApiService
         // Création ou modification des permissions de la communauté actuelle ou de config
         $this->handlePermissions($datastoreId, $offering, $dto);
 
-        // Création ou mise à jour du capabilities dans le cas ou l'on est pas dans l'espace découverte (sandbox)
-        try {
-            if (!$this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
-            }
-        } catch (\Exception $e) {
-            $this->logger->warning('{class}: Failed to create or update capabilities for endpoint {endpointName} ({endpoint}) after the creation/modification of offering {offeringId}: {error}', [
-                'class' => self::class,
-                'endpoint' => $endpoint['_id'],
-                'endpointName' => $endpoint['technical_name'],
-                'offeringId' => $offering['_id'],
-                'exception' => $e,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
 
         // Services de la fiche (dont celui qui vient d'être écrit), chargés une fois pour la métadonnée et la synchronisation
         $services = $this->getDatasheetServices($datastoreId, $datasheetName);
 
-        // Création ou mise à jour de metadata
-        $formData = json_decode(json_encode($dto, JSON_THROW_ON_ERROR), true);
-        $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $services, $formData);
+        // la publication d’un flux ne touche qu’aux ressources en ligne de la fiche de métadonnées
+        $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $services);
 
         // Synchronisation des autres services de la même fiche de données
-        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::CONFIG_THEME], $dto, $services);
+        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::THEME_CATEGORIES], $dto, $services);
 
         return $offering;
     }
@@ -542,9 +547,9 @@ class CartesServiceApiService
                 }
 
                 // Mise à jour des tags seulement si nécessaire
-                if ($configTheme !== ($configuration['tags'][CommonTags::CONFIG_THEME] ?? '')) {
+                if ($configTheme !== ($configuration['tags'][CommonTags::THEME_CATEGORIES] ?? '')) {
                     $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
-                        CommonTags::CONFIG_THEME => $configTheme,
+                        CommonTags::THEME_CATEGORIES => $configTheme,
                     ])->array();
                 }
 
@@ -567,11 +572,9 @@ class CartesServiceApiService
                         $configRequestBody['type_infos']['keywords'] = $keywords;
                     }
 
+                    // attribution entière, logo compris : le PUT efface tout champ absent du corps
                     if (isset($configuration['attribution']['title']) && isset($configuration['attribution']['url'])) {
-                        $configRequestBody['attribution'] = [
-                            'title' => $configuration['attribution']['title'],
-                            'url' => $configuration['attribution']['url'],
-                        ];
+                        $configRequestBody['attribution'] = $configuration['attribution'];
                     }
 
                     $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody)->array();
@@ -614,6 +617,179 @@ class CartesServiceApiService
     }
 
     /**
+     * Publie un flux depuis le nouveau formulaire : annexes images, configuration, offre, permissions, capabilities,
+     * puis ressources en ligne de la fiche de métadonnées. La métadonnée doit exister : elle fournit les liens `metadata` de la configuration.
+     *
+     * @param array<mixed>            $typeInfos
+     * @param ?\Closure(string): void $onConfigurationCreated appelé avec l’identifiant de la configuration juste après sa création ; un échec annule la configuration
+     * @param ?\Closure(): void       $onRollback             appelé quand la publication échoue avant la création de l’offre ; ne doit pas lever d’exception
+     *
+     * @return array<mixed> offre créée, avec sa configuration
+     */
+    public function publishFromForm(
+        string $datastoreId,
+        string $storedDataId,
+        ServiceFormDTO $dto,
+        string $type,
+        array $typeInfos,
+        ?UploadedFile $thumbnail = null,
+        ?UploadedFile $attributionLogo = null,
+        ?\Closure $onConfigurationCreated = null,
+        ?\Closure $onRollback = null,
+    ): array {
+        $thumbnailUrl = null;
+        $logo = null;
+        try {
+            // dans le try : un refus annule aussi ce que l’appelant a déjà déposé
+            $this->datastorePrefixValidator->assertLayerName($datastoreId, $dto->technical_name);
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
+            $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME] ?? null;
+            if (!is_string($datasheetName)) {
+                throw new AppException('La donnée n’est rattachée à aucune fiche de données', Response::HTTP_BAD_REQUEST);
+            }
+
+            $apiMetadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
+            if (null === $apiMetadata) {
+                throw new AppException('Renseignez d’abord la description de la fiche de données', Response::HTTP_BAD_REQUEST);
+            }
+
+            $endpoint = $this->getEndpointByAccess($datastoreId, $type, $dto->access);
+
+            $configTags = [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+                CommonTags::THEME_CATEGORIES => implode(', ', $dto->themes),
+            ];
+
+            // dépôts dans le try : un échec du second ne doit pas laisser le premier orphelin
+            $thumbnailUrl = $thumbnail instanceof UploadedFile ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
+            $logo = $attributionLogo instanceof UploadedFile && $dto->attribution instanceof ServiceAttributionFormDTO
+                ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
+                : null;
+
+            $configRequestBody = $this->configurationRequestBuilder->build($dto, $type, $typeInfos, $this->getNewConfigMetadata($apiMetadata['file_identifier']), $logo);
+
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody)->array();
+            try {
+                if ($onConfigurationCreated instanceof \Closure) {
+                    $onConfigurationCreated($configuration['_id']);
+                }
+                $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->array();
+                if (null !== $thumbnailUrl) {
+                    $configuration = $this->configurationApiService->modify($datastoreId, $configuration['_id'], ServiceConfigurationRequestBuilder::buildThumbnailExtra($thumbnailUrl), $configuration)->array();
+                }
+                $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open'])->array();
+            } catch (\Throwable $th) {
+                // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée
+                try {
+                    $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
+                } catch (\Throwable $e) {
+                    $this->logger->warning('{class}: Failed to remove configuration {configurationId} after a failed publication: {error}', [
+                        'class' => self::class,
+                        'configurationId' => $configuration['_id'],
+                        'exception' => $e,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+                throw $th;
+            }
+        } catch (\Throwable $th) {
+            if ($onRollback instanceof \Closure) {
+                $onRollback();
+            }
+            $this->removeImageAnnexesQuietly($datastoreId, [$thumbnailUrl, $logo['url'] ?? null]);
+            throw $th;
+        }
+
+        $offering['configuration'] = $configuration;
+
+        // shortcut: aucune annulation si les permissions ou la métadonnée échouent après la création de l’offre (comme saveService), à reprendre au ticket de nettoyage
+        $this->handleAccessPermissions($datastoreId, $offering, $dto->access);
+        $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
+
+        $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $this->getDatasheetServices($datastoreId, $datasheetName));
+
+        return $offering;
+    }
+
+    /**
+     * Nettoyage après un échec de publication : une erreur ici ne doit pas masquer celle d’origine.
+     *
+     * @param array<string|null> $urls
+     */
+    private function removeImageAnnexesQuietly(string $datastoreId, array $urls): void
+    {
+        foreach (array_filter($urls, is_string(...)) as $url) {
+            try {
+                $this->serviceImageAnnexeService->removeByUrl($datastoreId, $url);
+            } catch (\Throwable $e) {
+                $this->logger->warning('{class}: Failed to remove orphan annex {url}: {error}', [
+                    'class' => self::class,
+                    'url' => $url,
+                    'exception' => $e,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Capabilities filtrées, sauf dans l’espace découverte (sandbox) ; un échec ne remet pas en cause la publication.
+     *
+     * @param array<mixed> $endpoint
+     * @param array<mixed> $offering
+     */
+    private function createOrUpdateCapabilities(string $datastoreId, array $endpoint, array $offering): void
+    {
+        try {
+            if (!$this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            }
+        } catch (\Exception $e) {
+            $this->logger->warning('{class}: Failed to create or update capabilities for endpoint {endpointName} ({endpoint}) after the creation/modification of offering {offeringId}: {error}', [
+                'class' => self::class,
+                'endpoint' => $endpoint['_id'],
+                'endpointName' => $endpoint['technical_name'],
+                'offeringId' => $offering['_id'],
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Permissions selon l’accès choisi : la communauté propre de l’entrepôt sur tout flux restreint,
+     * la communauté cartes.gouv.fr seulement quand le flux reste visualisable sur Explorer les cartes.
+     *
+     * @param array<mixed> $offering
+     */
+    private function handleAccessPermissions(string $datastoreId, array $offering, ServiceAccess $access): void
+    {
+        if ($access->isOpen()) {
+            return;
+        }
+
+        $permissions = $this->datastoreApiService->getPermissions($datastoreId)->resolve();
+
+        $communityId = $this->membershipService->getDatastoreIdentity($datastoreId)->communityId;
+        // POST /permissions renvoie la liste des permissions créées
+        $permissions = [...$permissions, ...$this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions)];
+
+        if ($access->allowsCartesGouvView()) {
+            $this->addPermissionForCommunity($datastoreId, $this->params->get('config')['community_id'], $offering, $permissions);
+        } else {
+            $this->removeExistingConfigPermission($datastoreId, $offering, $permissions);
+        }
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getEndpointByAccess(string $datastoreId, string $configType, ServiceAccess $access): array
+    {
+        return $this->getEndpointByShareType($datastoreId, $configType, $access->isOpen() ? 'all_public' : 'your_community');
+    }
+
+    /**
      * @param array<mixed> $configMetadata
      *
      * @return array<mixed>
@@ -636,7 +812,7 @@ class CartesServiceApiService
         ];
         $configMetadata[] = [
             'format' => 'text/html',
-            'url' => implode('/', [$catalogueBaseUrl, 'dataset', $fileIdentifier]),
+            'url' => implode('/', [$catalogueBaseUrl, 'dataset', rawurlencode($fileIdentifier)]),
             'type' => ConfigurationMetadataTypes::OTHER,
         ];
 

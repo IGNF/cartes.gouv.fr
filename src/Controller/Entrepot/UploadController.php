@@ -7,8 +7,8 @@ use App\Constants\EntrepotApi\UploadTags;
 use App\Constants\EntrepotApi\UploadTypes;
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
+use App\Dto\Upload\UploadAddDTO;
 use App\Exception\ApiException;
-use App\Exception\AppException;
 use App\Services\EntrepotApi\UploadApiService;
 use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -63,43 +64,44 @@ class UploadController extends AbstractController implements ApiControllerInterf
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
-    public function add(string $datastoreId, Request $request): JsonResponse
+    public function add(string $datastoreId, #[MapRequestPayload] UploadAddDTO $dto): JsonResponse
     {
-        $content = json_decode($request->getContent(), true);
-
-        if (!is_array($content)) {
-            throw new AppException('Corps de requête invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Corps de requête invalide']);
-        }
-
-        $dataUploadPath = $content['data_upload_path'] ?? null;
-        if (!is_string($dataUploadPath) || '' === trim($dataUploadPath)) {
-            throw new AppException('Chemin de fichier invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Chemin de fichier invalide']);
-        }
-
         // déclaration de livraison
-        $uploadData = [
-            'name' => $content['data_technical_name'],
-            'description' => $content['data_technical_name'],
+        $upload = $this->uploadApiService->add($datastoreId, [
+            'name' => $dto->name,
+            'description' => $dto->description,
             'type' => UploadTypes::VECTOR,
-            'srs' => $content['data_srid'],
-        ];
-        $upload = $this->uploadApiService->add($datastoreId, $uploadData)->array();
+            'srs' => $dto->srid,
+        ])->array();
 
-        // ajout tags sur la livraison
         $tags = [
-            UploadTags::DATA_UPLOAD_PATH => $dataUploadPath,
-            CommonTags::DATASHEET_NAME => $content['data_name'],
-            CommonTags::PRODUCER => $content['producer'],
-            CommonTags::PRODUCTION_YEAR => $content['production_year'],
+            UploadTags::DATA_UPLOAD_PATH => $dto->data_upload_path,
+            CommonTags::DATASHEET_NAME => $dto->datasheet_name,
+            CommonTags::PRODUCER => $dto->producer,
+            CommonTags::PRODUCTION_YEAR => $dto->getProductionYear(),
+            CommonTags::PRODUCTION_DATE => $dto->production_date,
+            CommonTags::THEME_CATEGORIES => implode(', ', $dto->themes),
+            CommonTags::ZONE => trim($dto->zone),
+            CommonTags::EMAIL_NOTIFICATION => $dto->email_notification,
         ];
-
-        if (isset($content['email_notification'])) {
-            $tags['email_notification'] = (bool) $content['email_notification'];
+        if (null !== $dto->producer_short && '' !== trim($dto->producer_short)) {
+            $tags[CommonTags::PRODUCER_SHORT] = trim($dto->producer_short);
         }
 
-        $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags)->array();
+        try {
+            $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags)->array();
+        } catch (ApiException $e) {
+            // sans datasheet_name, aucune fiche ne liste la livraison : on la retire plutôt que de la laisser compter dans le quota
+            try {
+                $this->uploadApiService->remove($datastoreId, $upload['_id'], $upload)->await();
+            } catch (ApiException) {
+                // l’erreur d’origine prime sur celle de la suppression
+            }
 
-        // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB
+            throw $e;
+        }
+
+        // le front fait ensuite avancer l’intégration (routes integration)
         return $this->json($upload);
     }
 
@@ -117,51 +119,21 @@ class UploadController extends AbstractController implements ApiControllerInterf
         return $this->json($fileTree);
     }
 
-    #[Route('/{uploadId}/integration_progress', name: 'integration_progress', methods: ['GET'])]
-    public function integrationProgress(
-        string $datastoreId,
-        string $uploadId,
-        UploadIntegrationWorkflow $uploadIntegrationWorkflow,
-        #[MapQueryParameter] bool $getOnlyProgress = false,
-    ): JsonResponse {
+    #[Route('/{uploadId}/integration', name: 'integration', methods: ['GET'])]
+    public function integration(string $datastoreId, string $uploadId, UploadIntegrationWorkflow $uploadIntegrationWorkflow): JsonResponse
+    {
         $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
-        $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
 
-        // relecture seulement si une étape a été déclenchée
-        if (false === $getOnlyProgress && $uploadIntegrationWorkflow->advanceIfPossible($datastoreId, $upload, $progress)) {
-            $upload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
-            $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
-        }
+        return $this->json($uploadIntegrationWorkflow->getState($datastoreId, $upload));
+    }
 
-        $currentStepIndex = $uploadIntegrationWorkflow->getCurrentStepIndex($progress);
+    #[Route('/{uploadId}/integration', name: 'integration_advance', methods: ['POST'])]
+    public function advanceIntegration(string $datastoreId, string $uploadId, UploadIntegrationWorkflow $uploadIntegrationWorkflow): JsonResponse
+    {
+        // l'envoi d'un gros fichier vers l'Entrepôt dépasse max_execution_time
+        set_time_limit(0);
 
-        $progressJson = json_encode($progress);
-        $stepString = (string) $currentStepIndex;
-        $existingProgressJson = $upload['tags'][UploadTags::INTEGRATION_PROGRESS] ?? null;
-        $existingStepString = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? (string) $upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP] : null;
-
-        $uploadTags = [
-            UploadTags::INTEGRATION_PROGRESS => $progressJson,
-            UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
-        ];
-
-        // mise à jour état des étapes de l'intégration uniquement si changement
-        if ($existingProgressJson !== $progressJson || $existingStepString !== $stepString) {
-            $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags)->await();
-        }
-
-        // supprime livraison si intégration terminée
-        if (false === $getOnlyProgress && $uploadIntegrationWorkflow->isIntegrationCompleted($progress)) {
-            $this->uploadApiService->remove($datastoreId, $uploadId, $upload)->await();
-        }
-
-        // retourne l'upload complet + tags de progression pour que le frontend ait les données
-        // même après suppression de l'upload (pour avoir accès à datasheet_name, vectordb_id, etc.)
-        return $this->json([
-            'upload' => $upload,
-            UploadTags::INTEGRATION_PROGRESS => $progressJson,
-            UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
-        ]);
+        return $this->json($uploadIntegrationWorkflow->advance($datastoreId, $uploadId));
     }
 
     #[Route('/{uploadId}', name: 'delete', methods: ['DELETE'])]

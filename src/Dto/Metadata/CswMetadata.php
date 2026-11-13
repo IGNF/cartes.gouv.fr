@@ -1,7 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Dto\Metadata;
 
+use App\Dto\Datasheet\ProducerDTO;
+use App\Dto\Datasheet\ResourceConditionDTO;
+use App\Dto\Datasheet\TerritoryDTO;
 use App\Exception\AppException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -18,34 +23,41 @@ class CswMetadata
     public ?CswHierarchyLevel $hierarchy_level = CswHierarchyLevel::Series;
     public ?CswLanguage $language;
     public ?string $charset = 'utf8';
-    public ?string $title = null;
-    public ?string $abstract = null;
-    public ?string $creation_date = null;
+    public ?string $name = null;
+    public ?string $description = null;
+    public ?string $date_creation = null;
+    public ?string $date_publication = null;
+    public ?string $date_revision = null;
     public ?string $resource_genealogy = null;
 
     /** @var list<string> */
-    public array $inspire_keywords = [];
+    public array $keywords_inspire = [];
 
     /** @var list<string> */
-    public array $free_keywords = [];
+    public array $keywords_additional = [];
 
     /** @var list<string> */
-    public array $topic_categories = [];
+    public array $themes = [];
 
-    public ?string $contact_email = null;
-    public ?string $organisation_name = null;
-    public ?string $organisation_email = null;
+    /** @var list<ProducerDTO> le premier est le point de contact ; le rôle contact est le contact des métadonnées (gmd:contact) */
+    public array $producers = [];
 
-    public ?string $resolution = null;
+    /** @var list<ResourceConditionDTO> chaque restriction d’usage ou d’accès est suivie de sa sous-contrainte compagne */
+    public array $resource_constraints = [];
+
+    // dénominateur de l’échelle équivalente (md_resolutions.json)
+    public ?int $scale = null;
+    // distance au sol en mètres
+    public ?float $resolution = null;
 
     /** @var list<CswOnlineResource> couches, styles, GetCapabilities et documents, dans cet ordre */
     public array $online_resources = [];
 
-    /** @var array{west: float, east: float, south: float, north: float}|null */
-    public ?array $bbox = null;
+    /** @var list<TerritoryDTO> une emprise par territoire, avec son identifiant géographique */
+    public array $territories = [];
 
     public ?string $thumbnail_url = null;
-    public ?string $frequency_code = 'unknown';
+    public ?string $update_frequency = 'unknown';
 
     public function __construct()
     {

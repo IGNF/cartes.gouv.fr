@@ -2,14 +2,9 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
-use App\Services\CswMetadataXmlReader;
-use App\Services\CswMetadataXmlWriter;
 use App\Services\EntrepotApi\AnnexeApiService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
-use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\RSSFeed\RSSFeed;
 use App\Utils;
 use OpenApi\Attributes as OA;
@@ -20,7 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
-use Symfony\Component\Uid\Uuid;
 
 #[Route(
     '/api/datastores/{datastoreId}/annexe',
@@ -33,10 +27,6 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
 
     public function __construct(
         private AnnexeApiService $annexeApiService,
-        private MetadataApiService $metadataApiService,
-        private CartesMetadataApiService $cartesMetadataApiService,
-        private CswMetadataXmlReader $cswMetadataReader,
-        private CswMetadataXmlWriter $cswMetadataWriter,
         private RSSFeed $rssFeed,
     ) {
     }
@@ -112,7 +102,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     }
 
     /**
-     * Ajout de Requirement::UUID_V4 sinon cette route est appelée pour thumbnail_add.
+     * Requirement::UUID_V4 : sinon cette route intercepte `POST /add`.
      */
     #[Route('/{annexeId}', name: 'replace_file', methods: ['POST'], requirements: ['annexeId' => Requirement::UUID_V4])]
     public function replaceFile(string $datastoreId, string $annexeId, Request $request): JsonResponse
@@ -128,70 +118,6 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         return $this->json(
             $this->annexeApiService->replaceFile($datastoreId, $annexeId, $file->getRealPath())
         );
-    }
-
-    #[Route('/thumbnail_add', name: 'thumbnail_add', methods: ['POST'])]
-    public function addThumbnail(string $datastoreId, Request $request): JsonResponse
-    {
-        $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
-        $datasheetName = $request->request->getString('datasheetName');
-
-        $uuid = Uuid::v4();
-
-        $file = $request->files->get('file');
-        $extension = $file->getClientOriginalExtension();
-        $path = implode('/', ['thumbnail', "$uuid.$extension"]);
-
-        $labels = [
-            CommonTags::DATASHEET_NAME."=$datasheetName",
-            'type=thumbnail',
-        ];
-
-        // On regarde s'il existe deja une vignette
-        $annexes = $this->annexeApiService->getAll($datastoreId, null, null, $labels)->resolve();
-
-        if (count($annexes)) {  // Elle existe, on la supprime sinon le path ne change pas
-            $this->annexeApiService->remove($datastoreId, $annexes[0]['_id'])->await();
-        }
-
-        $annexe = $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
-        $annexe['url'] = $annexesBaseUrl.$annexe['paths'][0];
-
-        // Creation ou mise a jour des métadonnées
-        $metadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
-        if (is_null($metadata)) {
-            return new JsonResponse($annexe);
-        }
-
-        $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
-        $cswMetadata = $this->cswMetadataReader->read($xmlFileContent);
-        $cswMetadata->thumbnail_url = $annexe['url'];
-
-        $xmlFilePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
-        $this->metadataApiService->replaceFile($datastoreId, $metadata['_id'], $xmlFilePath);
-
-        return new JsonResponse($annexe);
-    }
-
-    #[Route('/thumbnail_delete/{datasheetName}/{annexeId}', name: 'thumbnail_delete', methods: ['DELETE'])]
-    public function deleteThumbnail(string $datastoreId, string $datasheetName, string $annexeId): JsonResponse
-    {
-        $response = $this->deleteAnnexe($datastoreId, $annexeId);
-
-        // Mise a jour des métadonnées
-        $metadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
-        if (is_null($metadata)) {
-            return $response;
-        }
-
-        $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
-        $cswMetadata = $this->cswMetadataReader->read($xmlFileContent);
-        $cswMetadata->thumbnail_url = null;
-
-        $xmlFilePath = $this->cswMetadataWriter->saveToFile($cswMetadata);
-        $this->metadataApiService->replaceFile($datastoreId, $metadata['_id'], $xmlFilePath);
-
-        return $response;
     }
 
     #[Route('/{annexeId}', name: 'delete', methods: ['DELETE'])]

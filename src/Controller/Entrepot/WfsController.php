@@ -4,16 +4,20 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\Form\WfsFormDTO;
+use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Dto\Services\Wfs\WfsServiceDTO;
 use App\Dto\Services\Wfs\WfsTableDTO;
-use App\Services\CapabilitiesService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
-use App\Services\SandboxService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
+use App\Services\MultipartPayloadMapper;
+use App\Services\ServiceFormFileValidator;
 use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -22,17 +26,57 @@ use Symfony\Component\Routing\Attribute\Route;
     name: 'cartesgouvfr_api_wfs_',
     options: ['expose' => true])]
 #[OA\Tag(name: '[cartes.gouv.fr] WFS', description: 'Création/modification des services WFS')]
-class WfsController extends ServiceController implements ApiControllerInterface
+final class WfsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
         private readonly ConfigurationApiService $configurationApiService,
         private readonly CartesServiceApiService $cartesServiceApiService,
-        CapabilitiesService $capabilitiesService,
-        CartesMetadataApiService $cartesMetadataApiService,
-        SandboxService $sandboxService,
+        private readonly MultipartPayloadMapper $multipartPayloadMapper,
+        private readonly ServiceFormFileValidator $serviceFormFileValidator,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
+    }
+
+    /**
+     * Publication depuis le nouveau formulaire : multipart avec le champ JSON `data` (WfsFormDTO) et les fichiers `thumbnail`, `attribution_logo`.
+     */
+    #[Route('/publish', name: 'publish', methods: ['POST'])]
+    public function publish(string $datastoreId, string $storedDataId, Request $request): JsonResponse
+    {
+        $dto = $this->multipartPayloadMapper->map($request, WfsFormDTO::class);
+        [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
+
+        $offering = $this->cartesServiceApiService->publishFromForm(
+            $datastoreId,
+            $storedDataId,
+            $dto,
+            ConfigurationTypes::WFS,
+            $this->getFormConfigTypeInfos($dto, $storedDataId),
+            $thumbnail,
+            $attributionLogo,
+        );
+
+        return $this->json($offering, Response::HTTP_CREATED);
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getFormConfigTypeInfos(WfsFormDTO $dto, string $storedDataId): array
+    {
+        $relations = array_map(fn (WfsTableFormDTO $table) => array_filter([
+            'native_name' => $table->native_name,
+            'public_name' => $table->public_name,
+            'title' => $table->title,
+            'abstract' => $table->description,
+            'keywords' => $table->keywords,
+        ], fn ($value) => [] !== $value), $dto->tables);
+
+        return [
+            'used_data' => [[
+                'relations' => $relations,
+                'stored_data' => $storedDataId,
+            ]],
+        ];
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
@@ -43,7 +87,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
     ): JsonResponse {
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WFS, $dto, $typeInfos);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody);
 
@@ -67,7 +111,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
         // création de requête pour la config
         $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
+        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
 
         $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody, $oldOffering);
 

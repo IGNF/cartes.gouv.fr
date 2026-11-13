@@ -5,9 +5,11 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { FC } from "react";
 
 import { OfferingStatusEnum, OfferingTypeEnum } from "../../../../@types/app";
+import { CommunityMemberDtoRightsEnum } from "../../../../@types/entrepot";
 import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
+import useCommunityRights from "../../../../hooks/useCommunityRights";
 import { isOfferingUnavailable } from "../../../../utils";
 import PrivateServiceExplanation from "./PrivateServiceExplanation";
 import ServiceViewContent from "./ServiceViewContent";
@@ -21,6 +23,9 @@ type ServiceViewProps = {
 
 const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetName }) => {
     const serviceQuery = useServiceQuery(datastoreId, offeringId);
+    const { userRights, isSupervisor } = useCommunityRights();
+    const canGeneratePyramidRaster =
+        isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
 
     return (
         <Main title={`Visualisation données ${datasheetName ?? serviceQuery.data?.layer_name}`}>
@@ -79,19 +84,21 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                         </div>
                     )}
 
-                    {serviceQuery.data?.type === OfferingTypeEnum.WMSVECTOR && serviceQuery.data?.status === OfferingStatusEnum.PUBLISHED && (
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
-                            <Button
-                                linkProps={{
-                                    to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout",
-                                    params: { datastoreId },
-                                    search: { offeringId, datasheetName },
-                                }}
-                            >
-                                Créer un service raster WMS/WMTS
-                            </Button>
-                        </div>
-                    )}
+                    {canGeneratePyramidRaster &&
+                        serviceQuery.data?.type === OfferingTypeEnum.WMSVECTOR &&
+                        serviceQuery.data?.status === OfferingStatusEnum.PUBLISHED && (
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+                                <Button
+                                    linkProps={{
+                                        to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout",
+                                        params: { datastoreId },
+                                        search: { offeringId, datasheetName },
+                                    }}
+                                >
+                                    Créer un service raster WMS/WMTS
+                                </Button>
+                            </div>
+                        )}
 
                     {isOfferingUnavailable(serviceQuery.data.status) ? null : serviceQuery.data?.open === true ? (
                         <ServiceViewContent datastoreId={datastoreId} offeringId={offeringId} datasheetName={datasheetName} />

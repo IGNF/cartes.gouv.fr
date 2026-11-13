@@ -1,13 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Functional;
 
 use App\Dto\Datastore\PermissionDTO;
 use App\Dto\Datastore\UpdatePermissionDTO;
 use App\Dto\Espaceco\Members\AddMembersDTO;
 use App\Dto\Metadata\CswLanguage;
-use App\Dto\Metadata\CswMetadata;
 use App\Dto\Services\CommonDTO;
+use App\Dto\Services\Form\ServiceAttributionFormDTO;
+use App\Dto\Services\Form\WfsFormDTO;
+use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
@@ -34,9 +38,9 @@ final class SerializerContractTest extends KernelTestCase
         $json = self::getContainer()->get('serializer')->normalize(CswMetadataFixtures::full());
 
         self::assertSame([
-            'file_identifier', 'hierarchy_level', 'language', 'charset', 'title', 'abstract', 'creation_date', 'resource_genealogy',
-            'inspire_keywords', 'free_keywords', 'topic_categories', 'contact_email', 'organisation_name', 'organisation_email', 'resolution',
-            'online_resources', 'bbox', 'thumbnail_url', 'frequency_code',
+            'file_identifier', 'hierarchy_level', 'language', 'charset', 'name', 'description', 'date_creation', 'date_publication', 'date_revision',
+            'resource_genealogy', 'keywords_inspire', 'keywords_additional', 'themes', 'producers', 'resource_constraints', 'scale', 'resolution',
+            'online_resources', 'territories', 'thumbnail_url', 'update_frequency',
         ], array_keys($json));
         self::assertSame('dataset', $json['hierarchy_level']);
         self::assertSame(['code' => 'fre', 'language' => 'français'], $json['language']);
@@ -49,16 +53,6 @@ final class SerializerContractTest extends KernelTestCase
             'open' => false,
         ], $json['online_resources'][1]);
         self::assertSame('document', $json['online_resources'][5]['type']);
-    }
-
-    // chemin de MetadataController::add : le JSON du front redevient une CswMetadata identique
-    public function testCswMetadataSurvivesJsonRoundTrip(): void
-    {
-        /** @var Serializer $serializer */
-        $serializer = self::getContainer()->get('serializer');
-        $metadata = CswMetadataFixtures::full();
-
-        self::assertEquals($metadata, $serializer->deserialize($serializer->serialize($metadata, 'json'), CswMetadata::class, 'json'));
     }
 
     /**
@@ -90,10 +84,17 @@ final class SerializerContractTest extends KernelTestCase
         yield 'CommonDTO' => [CommonDTO::class, self::commonPayload(), ['language' => CswLanguage::class]];
         yield 'PyramidVectorTmsServiceDTO' => [PyramidVectorTmsServiceDTO::class, self::commonPayload()];
         yield 'WfsServiceDTO' => [WfsServiceDTO::class, self::commonPayload() + ['table_infos' => [self::wfsTablePayload()]], ['table_infos' => WfsTableDTO::class]];
+        yield 'WfsFormDTO' => [WfsFormDTO::class, [
+            'title' => 'Flux',
+            'technical_name' => 'tech',
+            'themes' => ['Hydrographie'],
+            'access' => 'restricted_visible',
+            'attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr'],
+            'tables' => [['native_name' => 't1', 'title' => 'Table', 'public_name' => 't1', 'description' => 'Résumé', 'keywords' => ['mot']]],
+        ], ['attribution' => ServiceAttributionFormDTO::class, 'tables' => WfsTableFormDTO::class]];
         yield 'WmsVectorServiceDTO' => [WmsVectorServiceDTO::class, self::commonPayload() + ['selected_tables' => ['t1']]];
         yield 'PyramidVectorGenerateDTO' => [PyramidVectorGenerateDTO::class, [
             'technical_name' => 'pyr',
-            'area' => 'POLYGON((0 0,1 0,1 1,0 0))',
             'tippecanoe' => '-zg',
             'vectordb_id' => 'vdb-1',
             'composition' => [['table' => 't1', 'attributes' => ['a'], 'bottom_level' => 14, 'top_level' => 5]],

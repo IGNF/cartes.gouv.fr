@@ -1,4 +1,16 @@
+import { AddressFieldsFrTranslations } from "@/components/Input/AddressFields.locale";
+import { AutocompleteSelectFrTranslations } from "@/components/Input/AutocompleteSelect.locale";
 import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
+import { ImageCropModalFrTranslations } from "@/components/Input/ImageCropModal/ImageCropModal.locale";
+import { ImageFieldUploadFrTranslations } from "@/components/Input/ImageFieldUpload.locale";
+import { DatasheetSectionsFrTranslations } from "@/entrepot/pages/datasheet/forms/sections.locale";
+import { DescriptionTabFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DescriptionTab/DescriptionTab.locale";
+import { DatasheetViewNextFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetViewNext.locale";
+import { DatasetTabNextFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetTabNext/DatasetTabNext.locale";
+import { ServicesListTabNextFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/ServiceListTab/ServicesListTabNext.locale";
+import { DatasetAddFrTranslations } from "@/entrepot/pages/datasheet/DatasetAdd/DatasetAdd.locale";
+import { ServiceFormFrTranslations } from "@/entrepot/pages/datasheet/ServiceForm/ServiceForm.locale";
+import { DatasheetCreateFrTranslations } from "@/entrepot/pages/datasheet/DatasheetCreate/DatasheetCreate.locale";
 import { CommunityInfoFrTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { StoredDataDeleteConfirmDialogFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { DatastoreAddFrTranslations } from "@/entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale";
@@ -15,7 +27,6 @@ import { CommunityMembersFrTranslations } from "../../entrepot/pages/communities
 import { RightsFrTranslations } from "../../entrepot/pages/communities/Rights.locale";
 import { AlertsFrTranslations } from "../../entrepot/pages/config/Alerts.locale";
 import { DatasheetListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale";
-import { DatasheetUploadFormFrTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale";
 import { DatasheetUploadIntegrationFrTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegration.locale";
 import { PyramidRasterListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale";
 import { PyramidVectorListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale";
@@ -108,7 +119,6 @@ export const translations: Translations<"fr"> = {
     PyramidRasterGenerateForm: PyramidRasterGenerateFormFrTranslations,
     PyramidRasterWmsRasterServiceForm: PyramidRasterWmsRasterServiceFormFrTranslations,
     PyramidRasterWmtsServiceForm: PyramidRasterWmtsServiceFormFrTranslations,
-    DatasheetUploadForm: DatasheetUploadFormFrTranslations,
     DatasheetList: DatasheetListFrTranslations,
     AccessRestrictions: AccessRestrictionsFrTranslations,
     EspaceCoCommunityList: EspaceCoCommunityListFrTranslations,
@@ -138,5 +148,17 @@ export const translations: Translations<"fr"> = {
     ManageGridsDialog: ManageGridsDialogFrTranslations,
     alerts: AlertsFrTranslations,
     KeyValueList: KeyValueListFrTranslations,
+    AddressFields: AddressFieldsFrTranslations,
+    AutocompleteSelect: AutocompleteSelectFrTranslations,
+    ImageCropModal: ImageCropModalFrTranslations,
+    ImageFieldUpload: ImageFieldUploadFrTranslations,
+    DatasheetSections: DatasheetSectionsFrTranslations,
+    DatasheetCreate: DatasheetCreateFrTranslations,
+    DescriptionTab: DescriptionTabFrTranslations,
+    DatasheetViewNext: DatasheetViewNextFrTranslations,
+    DatasetTabNext: DatasetTabNextFrTranslations,
+    ServicesListTabNext: ServicesListTabNextFrTranslations,
+    DatasetAdd: DatasetAddFrTranslations,
+    ServiceForm: ServiceFormFrTranslations,
     Stats: StatsFrTranslations,
 };

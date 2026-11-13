@@ -28,9 +28,12 @@ const breadcrumbNameByRouteId = {
     "/_private/tableau-de-bord/entrepots/$datastoreId/permissions/ajout": "datastore_add_permission",
     "/_private/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification": "datastore_edit_permission",
     "/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/donnees/": "datasheet_list",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/televersement": "datastore_datasheet_upload",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/creer": "datastore_datasheet_create",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/integration": "datastore_datasheet_upload_integration",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName": "datastore_datasheet_view",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/": "datastore_datasheet_view",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue": "datastore_datasheet_view",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement": "datastore_datasheet_upload",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout": "datastore_datasheet_service_add",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details": "datastore_stored_data_details",
     "/_private/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport": "datastore_upload_details",
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/wfs/ajout": "datastore_wfs_service_new",
@@ -178,19 +181,21 @@ const getBreadcrumb = (
                 currentPageLabel: tCommon("datastore_name", { name: community?.name, isSandbox }),
             };
 
-        case "datastore_datasheet_upload": {
-            const breadcrumbProps: BreadcrumbProps = {
-                ...datastoreBaseProps,
-            };
+        case "datastore_datasheet_create":
+            return { ...datastoreBaseProps, currentPageLabel: t("datastore_create_datasheet") };
 
-            if (datasheetName) {
-                breadcrumbProps.segments.push({ label: datasheetName, linkProps: datasheetLink() });
-                breadcrumbProps["currentPageLabel"] = t("upload");
-            } else {
-                breadcrumbProps["currentPageLabel"] = t("datastore_create_datasheet");
-            }
-            return breadcrumbProps;
-        }
+        case "datastore_datasheet_upload":
+            return {
+                ...datastoreBaseProps,
+                segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: datasheetLink() }],
+                currentPageLabel: t("upload"),
+            };
+        case "datastore_datasheet_service_add":
+            return {
+                ...datastoreBaseProps,
+                segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: datasheetLink("services") }],
+                currentPageLabel: t("datastore_datasheet_service_add"),
+            };
         case "datastore_datasheet_upload_integration": {
             const breadcrumbProps: BreadcrumbProps = {
                 ...datastoreBaseProps,

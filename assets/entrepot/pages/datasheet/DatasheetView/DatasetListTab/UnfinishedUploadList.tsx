@@ -18,11 +18,13 @@ import useCommunityRights from "@/hooks/useCommunityRights";
 type UnfinishedUploadListProps = {
     datastoreId: string;
     uploadList: DatasheetUploadItem[];
+    /** livraisons dont une vérification a échoué */
+    failedUploadIds: Set<string>;
     nbPublications: number;
     datasheetName: string;
 };
 
-const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList, nbPublications, datasheetName }) => {
+const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList, failedUploadIds, nbPublications, datasheetName }) => {
     const { t } = useTranslation("DatastoreManageStorage");
 
     const queryClient = useQueryClient();
@@ -56,15 +58,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
             </div>
 
             {uploadList.map((upload) => {
-                let failureCase = false;
-                if (upload.tags.integration_progress) {
-                    try {
-                        const progress = JSON.parse(upload.tags.integration_progress) as Record<string, string>;
-                        failureCase = Object.values(progress).includes("failed");
-                    } catch {
-                        // ignore
-                    }
-                }
+                const failureCase = failedUploadIds.has(upload._id);
 
                 return (
                     <div key={upload._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>

@@ -33,6 +33,7 @@ const { i18n } = declareComponentKeys<
     | "datastore_edit_permission"
     | "datastore_create_datasheet"
     | "upload"
+    | "datastore_datasheet_service_add"
     | "datastore_datasheet_upload_integration"
     | "datastore_stored_data_details"
     | "datastore_upload_details"
@@ -89,7 +90,8 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     datastore_add_permission: "Ajout d'une permission",
     datastore_edit_permission: "Modification d'une permission",
     datastore_create_datasheet: "Création d'une fiche de données",
-    upload: "Téléversement",
+    upload: "Ajouter une donnée",
+    datastore_datasheet_service_add: "Créer un flux",
     datastore_datasheet_upload_integration: "Intégration de données",
     datastore_stored_data_details: "Détails d'une donnée stockée",
     datastore_upload_details: "Détails d'une livraison",
@@ -145,7 +147,8 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     datastore_add_permission: "Add permission",
     datastore_edit_permission: "Modify permission",
     datastore_create_datasheet: "Create datasheet",
-    upload: "Upload",
+    upload: "Add data",
+    datastore_datasheet_service_add: "Create a service",
     datastore_datasheet_upload_integration: "Data integration",
     datastore_stored_data_details: "Details of stored data",
     datastore_upload_details: "Details of upload",

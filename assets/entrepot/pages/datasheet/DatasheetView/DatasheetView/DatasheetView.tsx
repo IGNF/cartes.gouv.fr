@@ -12,10 +12,11 @@ import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
 import LoadingText from "@/components/Utils/LoadingText";
+import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
 import { blockingProcessingStatuses } from "@/hooks/queries/useStoredDataUseProcessings";
 import { delta } from "@/utils";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
-import type { Datasheet, DatasheetDetailed, Metadata, Service } from "../../../../../@types/app";
+import type { Datasheet, DatasheetDetailed, Service } from "../../../../../@types/app";
 import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../../components/Utils/Wait";
@@ -24,15 +25,17 @@ import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { type ApiError } from "../../../../../modules/jsonFetch";
 import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../../../modules/apiError";
 import api from "../../../../api";
-import DatasheetThumbnail from "../DatasheetThumbnail";
 
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { DatasheetViewActiveTabEnum } from "./types";
 
+import placeholder1x1 from "@/img/placeholder.1x1.png";
+
 const DatasetListTab = lazy(() => import("../DatasetListTab/DatasetListTab"));
 const DocumentsTab = lazy(() => import("../DocumentsTab/DocumentsTab"));
 const MetadataTab = lazy(() => import("../MetadataTab/MetadataTab"));
+const DescriptionTab = lazy(() => import("../DescriptionTab/DescriptionTab"));
 const ServicesListTab = lazy(() => import("../ServiceListTab/ServicesListTab"));
 
 const deleteDataConfirmModal = createModal({
@@ -45,7 +48,7 @@ export const deleteUploadConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
-const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName");
+const routeApi = getRouteApi("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/");
 
 type DatasheetViewProps = {
     datastoreId: string;
@@ -98,13 +101,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         }
     }, [serviceListQuery.data, datastoreId, queryClient]);
 
-    const metadataQuery = useQuery<Metadata, ApiError>({
-        queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
-        enabled: !datasheetDeleteMutation.isPending,
-        staleTime: 60000,
-        retry: false,
-    });
+    const metadataQuery = useQuery({ ...datasheetMetadataQueryOptions(datastoreId, datasheetName), enabled: !datasheetDeleteMutation.isPending });
 
     const documentsListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_documents_list(datastoreId, datasheetName),
@@ -142,7 +139,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     return (
         <Main title={`Données ${datasheetName}`}>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-5w", "fr-mb-4w")}>
                 <Button
                     iconId="fr-icon-arrow-left-s-line"
                     priority="tertiary no outline"
@@ -194,11 +191,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-2")}>
-                            <DatasheetThumbnail
-                                datastoreId={datastoreId}
-                                datasheetName={datasheetName}
-                                datasheet={datasheetQuery.data}
-                                canEditThumbnail={isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)}
+                            {/* lecture seule : la vignette se modifie dans l’onglet Description */}
+                            <img
+                                className={fr.cx("fr-responsive-img")}
+                                loading="lazy"
+                                src={datasheetQuery.data.thumbnail?.url ?? placeholder1x1}
+                                alt={`Vignette de la fiche de données ${datasheetName}`}
                             />
                         </div>
                         <div className={fr.cx("fr-col")}>
@@ -235,6 +233,10 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         tabId: DatasheetViewActiveTabEnum.Metadata,
                                     },
                                     {
+                                        label: t("tab_label.description"),
+                                        tabId: DatasheetViewActiveTabEnum.Description,
+                                    },
+                                    {
                                         label: t("tab_label.datasets", {
                                             num:
                                                 (datasheetQuery.data?.vector_db_list?.length || 0) +
@@ -262,6 +264,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         switch (activeTab) {
                                             case DatasheetViewActiveTabEnum.Metadata:
                                                 return <MetadataTab datastoreId={datastoreId} metadataQuery={metadataQuery} />;
+                                            case DatasheetViewActiveTabEnum.Description:
+                                                return <DescriptionTab datastoreId={datastoreId} datasheetName={datasheetName} metadataQuery={metadataQuery} />;
 
                                             case DatasheetViewActiveTabEnum.Dataset:
                                                 return <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;

@@ -18,15 +18,15 @@ class PyramidVectorCompositionDTO
         public readonly array $attributes,
 
         #[Assert\Range(
-            min: ZoomLevels::TOP_LEVEL_DEFAULT,
-            max: ZoomLevels::BOTTOM_LEVEL_DEFAULT,
+            min: ZoomLevels::MIN,
+            max: ZoomLevels::MAX,
             notInRangeMessage: 'pyramid_add.composition.bottom_level_error'
         )]
         public readonly int $bottom_level,
 
         #[Assert\Range(
-            min: ZoomLevels::TOP_LEVEL_DEFAULT,
-            max: ZoomLevels::BOTTOM_LEVEL_DEFAULT,
+            min: ZoomLevels::MIN,
+            max: ZoomLevels::MAX,
             notInRangeMessage: 'pyramid_add.composition.top_level_error'
         )]
         #[Assert\Expression(

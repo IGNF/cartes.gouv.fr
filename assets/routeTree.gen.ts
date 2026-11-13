@@ -43,14 +43,16 @@ import { Route as PrivateTableauDeBordCommunauteCommunityIdOngletsMembresRouteIm
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdOngletsConsommationRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdOngletsInfoRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/info'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdOngletsMembresRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/membres'
-import { Route as PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName'
+import { Route as PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/donnees/creer'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/donnees/integration'
-import { Route as PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/donnees/televersement'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdPermissionsAjoutRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/permissions/ajout'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdPyramideRasterAjoutRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdPyramideVecteurAjoutRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdOngletsDonneesIndexRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/donnees/index'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdOngletsPermissionsIndexRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/permissions/index'
+import { Route as PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/index'
+import { Route as PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue'
+import { Route as PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdDonneesStoredDataIdDetailsRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId.details'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdLivraisonsUploadIdRapportRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId.rapport'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdPermissionsPermissionIdModificationRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId.modification'
@@ -60,6 +62,7 @@ import { Route as PrivateTableauDeBordEntrepotsDatastoreIdServiceWfsAjoutRouteIm
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdServiceWmsRasterAjoutRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/service/wms-raster/ajout'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdServiceWmsVecteurAjoutRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/service/wms-vecteur/ajout'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdServiceWmtsAjoutRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/service/wmts/ajout'
+import { Route as PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux.ajout'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleAjoutRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdServiceTmsOfferingIdModificationRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/service/tms/$offeringId.modification'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdServiceWfsOfferingIdModificationRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/service/wfs/$offeringId.modification'
@@ -264,28 +267,18 @@ const PrivateTableauDeBordEntrepotsDatastoreIdOngletsMembresRoute =
     getParentRoute: () =>
       PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRoute,
   } as any)
-const PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRoute =
-  PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRouteImport.update(
-    {
-      id: '/donnees/$datasheetName',
-      path: '/donnees/$datasheetName',
-      getParentRoute: () => PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute,
-    } as any,
-  )
+const PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRoute =
+  PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRouteImport.update({
+    id: '/donnees/creer',
+    path: '/donnees/creer',
+    getParentRoute: () => PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute,
+  } as any)
 const PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRoute =
   PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRouteImport.update({
     id: '/donnees/integration',
     path: '/donnees/integration',
     getParentRoute: () => PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute,
   } as any)
-const PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRoute =
-  PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRouteImport.update(
-    {
-      id: '/donnees/televersement',
-      path: '/donnees/televersement',
-      getParentRoute: () => PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute,
-    } as any,
-  )
 const PrivateTableauDeBordEntrepotsDatastoreIdPermissionsAjoutRoute =
   PrivateTableauDeBordEntrepotsDatastoreIdPermissionsAjoutRouteImport.update({
     id: '/permissions/ajout',
@@ -324,6 +317,30 @@ const PrivateTableauDeBordEntrepotsDatastoreIdOngletsPermissionsIndexRoute =
       path: '/permissions/',
       getParentRoute: () =>
         PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRoute,
+    } as any,
+  )
+const PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRoute =
+  PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRouteImport.update(
+    {
+      id: '/donnees/$datasheetName/',
+      path: '/donnees/$datasheetName/',
+      getParentRoute: () => PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute,
+    } as any,
+  )
+const PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRoute =
+  PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRouteImport.update(
+    {
+      id: '/donnees/$datasheetName/nouvelle-vue',
+      path: '/donnees/$datasheetName/nouvelle-vue',
+      getParentRoute: () => PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute,
+    } as any,
+  )
+const PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRoute =
+  PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRouteImport.update(
+    {
+      id: '/donnees/$datasheetName/televersement',
+      path: '/donnees/$datasheetName/televersement',
+      getParentRoute: () => PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute,
     } as any,
   )
 const PrivateTableauDeBordEntrepotsDatastoreIdDonneesStoredDataIdDetailsRoute =
@@ -392,6 +409,14 @@ const PrivateTableauDeBordEntrepotsDatastoreIdServiceWmtsAjoutRoute =
     path: '/service/wmts/ajout',
     getParentRoute: () => PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute,
   } as any)
+const PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRoute =
+  PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRouteImport.update(
+    {
+      id: '/donnees/$datasheetName/flux/ajout',
+      path: '/donnees/$datasheetName/flux/ajout',
+      getParentRoute: () => PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute,
+    } as any,
+  )
 const PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleAjoutRoute =
   PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleAjoutRouteImport.update(
     {
@@ -479,13 +504,14 @@ export interface FileRoutesByFullPath {
   '/tableau-de-bord/entrepots/$datastoreId/consommation': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsConsommationRoute
   '/tableau-de-bord/entrepots/$datastoreId/info': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsInfoRoute
   '/tableau-de-bord/entrepots/$datastoreId/membres': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsMembresRoute
-  '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRoute
+  '/tableau-de-bord/entrepots/$datastoreId/donnees/creer': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRoute
   '/tableau-de-bord/entrepots/$datastoreId/donnees/integration': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRoute
-  '/tableau-de-bord/entrepots/$datastoreId/donnees/televersement': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRoute
   '/tableau-de-bord/entrepots/$datastoreId/permissions/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdPermissionsAjoutRoute
   '/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdPyramideRasterAjoutRoute
   '/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdPyramideVecteurAjoutRoute
   '/tableau-de-bord/communaute/$communityId/': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsIndexRoute
+  '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRoute
+  '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRoute
   '/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesStoredDataIdDetailsRoute
   '/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport': typeof PrivateTableauDeBordEntrepotsDatastoreIdLivraisonsUploadIdRapportRoute
   '/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification': typeof PrivateTableauDeBordEntrepotsDatastoreIdPermissionsPermissionIdModificationRoute
@@ -497,6 +523,8 @@ export interface FileRoutesByFullPath {
   '/tableau-de-bord/entrepots/$datastoreId/service/wmts/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWmtsAjoutRoute
   '/tableau-de-bord/entrepots/$datastoreId/donnees/': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsDonneesIndexRoute
   '/tableau-de-bord/entrepots/$datastoreId/permissions/': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsPermissionsIndexRoute
+  '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRoute
+  '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRoute
   '/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleAjoutRoute
   '/tableau-de-bord/entrepots/$datastoreId/service/tms/$offeringId/modification': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceTmsOfferingIdModificationRoute
   '/tableau-de-bord/entrepots/$datastoreId/service/wfs/$offeringId/modification': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWfsOfferingIdModificationRoute
@@ -534,12 +562,13 @@ export interface FileRoutesByTo {
   '/tableau-de-bord/entrepots/$datastoreId/consommation': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsConsommationRoute
   '/tableau-de-bord/entrepots/$datastoreId/info': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsInfoRoute
   '/tableau-de-bord/entrepots/$datastoreId/membres': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsMembresRoute
-  '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRoute
+  '/tableau-de-bord/entrepots/$datastoreId/donnees/creer': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRoute
   '/tableau-de-bord/entrepots/$datastoreId/donnees/integration': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRoute
-  '/tableau-de-bord/entrepots/$datastoreId/donnees/televersement': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRoute
   '/tableau-de-bord/entrepots/$datastoreId/permissions/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdPermissionsAjoutRoute
   '/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdPyramideRasterAjoutRoute
   '/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdPyramideVecteurAjoutRoute
+  '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRoute
+  '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRoute
   '/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesStoredDataIdDetailsRoute
   '/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport': typeof PrivateTableauDeBordEntrepotsDatastoreIdLivraisonsUploadIdRapportRoute
   '/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification': typeof PrivateTableauDeBordEntrepotsDatastoreIdPermissionsPermissionIdModificationRoute
@@ -551,6 +580,8 @@ export interface FileRoutesByTo {
   '/tableau-de-bord/entrepots/$datastoreId/service/wmts/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWmtsAjoutRoute
   '/tableau-de-bord/entrepots/$datastoreId/donnees': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsDonneesIndexRoute
   '/tableau-de-bord/entrepots/$datastoreId/permissions': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsPermissionsIndexRoute
+  '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRoute
+  '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRoute
   '/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleAjoutRoute
   '/tableau-de-bord/entrepots/$datastoreId/service/tms/$offeringId/modification': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceTmsOfferingIdModificationRoute
   '/tableau-de-bord/entrepots/$datastoreId/service/wfs/$offeringId/modification': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWfsOfferingIdModificationRoute
@@ -594,13 +625,14 @@ export interface FileRoutesById {
   '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsConsommationRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/info': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsInfoRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/membres': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsMembresRoute
-  '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRoute
+  '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/creer': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/integration': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRoute
-  '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/televersement': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/permissions/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdPermissionsAjoutRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdPyramideRasterAjoutRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdPyramideVecteurAjoutRoute
   '/_private/tableau-de-bord/communaute/$communityId/_onglets/': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsIndexRoute
+  '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRoute
+  '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesStoredDataIdDetailsRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport': typeof PrivateTableauDeBordEntrepotsDatastoreIdLivraisonsUploadIdRapportRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification': typeof PrivateTableauDeBordEntrepotsDatastoreIdPermissionsPermissionIdModificationRoute
@@ -612,6 +644,8 @@ export interface FileRoutesById {
   '/_private/tableau-de-bord/entrepots/$datastoreId/service/wmts/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWmtsAjoutRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/donnees/': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsDonneesIndexRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/permissions/': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsPermissionsIndexRoute
+  '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRoute
+  '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleAjoutRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/service/tms/$offeringId/modification': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceTmsOfferingIdModificationRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/service/wfs/$offeringId/modification': typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWfsOfferingIdModificationRoute
@@ -652,13 +686,14 @@ export interface FileRouteTypes {
     | '/tableau-de-bord/entrepots/$datastoreId/consommation'
     | '/tableau-de-bord/entrepots/$datastoreId/info'
     | '/tableau-de-bord/entrepots/$datastoreId/membres'
-    | '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName'
+    | '/tableau-de-bord/entrepots/$datastoreId/donnees/creer'
     | '/tableau-de-bord/entrepots/$datastoreId/donnees/integration'
-    | '/tableau-de-bord/entrepots/$datastoreId/donnees/televersement'
     | '/tableau-de-bord/entrepots/$datastoreId/permissions/ajout'
     | '/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout'
     | '/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout'
     | '/tableau-de-bord/communaute/$communityId/'
+    | '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue'
+    | '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement'
     | '/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details'
     | '/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport'
     | '/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification'
@@ -670,6 +705,8 @@ export interface FileRouteTypes {
     | '/tableau-de-bord/entrepots/$datastoreId/service/wmts/ajout'
     | '/tableau-de-bord/entrepots/$datastoreId/donnees/'
     | '/tableau-de-bord/entrepots/$datastoreId/permissions/'
+    | '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/'
+    | '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout'
     | '/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout'
     | '/tableau-de-bord/entrepots/$datastoreId/service/tms/$offeringId/modification'
     | '/tableau-de-bord/entrepots/$datastoreId/service/wfs/$offeringId/modification'
@@ -707,12 +744,13 @@ export interface FileRouteTypes {
     | '/tableau-de-bord/entrepots/$datastoreId/consommation'
     | '/tableau-de-bord/entrepots/$datastoreId/info'
     | '/tableau-de-bord/entrepots/$datastoreId/membres'
-    | '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName'
+    | '/tableau-de-bord/entrepots/$datastoreId/donnees/creer'
     | '/tableau-de-bord/entrepots/$datastoreId/donnees/integration'
-    | '/tableau-de-bord/entrepots/$datastoreId/donnees/televersement'
     | '/tableau-de-bord/entrepots/$datastoreId/permissions/ajout'
     | '/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout'
     | '/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout'
+    | '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue'
+    | '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement'
     | '/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details'
     | '/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport'
     | '/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification'
@@ -724,6 +762,8 @@ export interface FileRouteTypes {
     | '/tableau-de-bord/entrepots/$datastoreId/service/wmts/ajout'
     | '/tableau-de-bord/entrepots/$datastoreId/donnees'
     | '/tableau-de-bord/entrepots/$datastoreId/permissions'
+    | '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName'
+    | '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout'
     | '/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout'
     | '/tableau-de-bord/entrepots/$datastoreId/service/tms/$offeringId/modification'
     | '/tableau-de-bord/entrepots/$datastoreId/service/wfs/$offeringId/modification'
@@ -766,13 +806,14 @@ export interface FileRouteTypes {
     | '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/info'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/membres'
-    | '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName'
+    | '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/creer'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/integration'
-    | '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/televersement'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/permissions/ajout'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout'
     | '/_private/tableau-de-bord/communaute/$communityId/_onglets/'
+    | '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue'
+    | '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification'
@@ -784,6 +825,8 @@ export interface FileRouteTypes {
     | '/_private/tableau-de-bord/entrepots/$datastoreId/service/wmts/ajout'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/donnees/'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/permissions/'
+    | '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/'
+    | '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/service/tms/$offeringId/modification'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/service/wfs/$offeringId/modification'
@@ -1038,11 +1081,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsMembresRouteImport
       parentRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRoute
     }
-    '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName': {
-      id: '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName'
-      path: '/donnees/$datasheetName'
-      fullPath: '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName'
-      preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRouteImport
+    '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/creer': {
+      id: '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/creer'
+      path: '/donnees/creer'
+      fullPath: '/tableau-de-bord/entrepots/$datastoreId/donnees/creer'
+      preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRouteImport
       parentRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute
     }
     '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/integration': {
@@ -1050,13 +1093,6 @@ declare module '@tanstack/react-router' {
       path: '/donnees/integration'
       fullPath: '/tableau-de-bord/entrepots/$datastoreId/donnees/integration'
       preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRouteImport
-      parentRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute
-    }
-    '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/televersement': {
-      id: '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/televersement'
-      path: '/donnees/televersement'
-      fullPath: '/tableau-de-bord/entrepots/$datastoreId/donnees/televersement'
-      preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRouteImport
       parentRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute
     }
     '/_private/tableau-de-bord/entrepots/$datastoreId/permissions/ajout': {
@@ -1093,6 +1129,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/tableau-de-bord/entrepots/$datastoreId/permissions/'
       preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsPermissionsIndexRouteImport
       parentRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRoute
+    }
+    '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/': {
+      id: '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/'
+      path: '/donnees/$datasheetName'
+      fullPath: '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/'
+      preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRouteImport
+      parentRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute
+    }
+    '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue': {
+      id: '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue'
+      path: '/donnees/$datasheetName/nouvelle-vue'
+      fullPath: '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue'
+      preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRouteImport
+      parentRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute
+    }
+    '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement': {
+      id: '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement'
+      path: '/donnees/$datasheetName/televersement'
+      fullPath: '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement'
+      preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRouteImport
+      parentRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute
     }
     '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details': {
       id: '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details'
@@ -1155,6 +1212,13 @@ declare module '@tanstack/react-router' {
       path: '/service/wmts/ajout'
       fullPath: '/tableau-de-bord/entrepots/$datastoreId/service/wmts/ajout'
       preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWmtsAjoutRouteImport
+      parentRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute
+    }
+    '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout': {
+      id: '/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout'
+      path: '/donnees/$datasheetName/flux/ajout'
+      fullPath: '/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout'
+      preLoaderRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRouteImport
       parentRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRoute
     }
     '/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout': {
@@ -1315,12 +1379,13 @@ const PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRouteWithChildren =
 
 interface PrivateTableauDeBordEntrepotsDatastoreIdRouteRouteChildren {
   PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRouteWithChildren
-  PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRoute
+  PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRoute
   PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRoute
-  PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRoute
   PrivateTableauDeBordEntrepotsDatastoreIdPermissionsAjoutRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdPermissionsAjoutRoute
   PrivateTableauDeBordEntrepotsDatastoreIdPyramideRasterAjoutRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdPyramideRasterAjoutRoute
   PrivateTableauDeBordEntrepotsDatastoreIdPyramideVecteurAjoutRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdPyramideVecteurAjoutRoute
+  PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRoute
+  PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRoute
   PrivateTableauDeBordEntrepotsDatastoreIdDonneesStoredDataIdDetailsRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesStoredDataIdDetailsRoute
   PrivateTableauDeBordEntrepotsDatastoreIdLivraisonsUploadIdRapportRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdLivraisonsUploadIdRapportRoute
   PrivateTableauDeBordEntrepotsDatastoreIdPermissionsPermissionIdModificationRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdPermissionsPermissionIdModificationRoute
@@ -1330,6 +1395,8 @@ interface PrivateTableauDeBordEntrepotsDatastoreIdRouteRouteChildren {
   PrivateTableauDeBordEntrepotsDatastoreIdServiceWmsRasterAjoutRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWmsRasterAjoutRoute
   PrivateTableauDeBordEntrepotsDatastoreIdServiceWmsVecteurAjoutRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWmsVecteurAjoutRoute
   PrivateTableauDeBordEntrepotsDatastoreIdServiceWmtsAjoutRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWmtsAjoutRoute
+  PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRoute
+  PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRoute
   PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleAjoutRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleAjoutRoute
   PrivateTableauDeBordEntrepotsDatastoreIdServiceTmsOfferingIdModificationRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceTmsOfferingIdModificationRoute
   PrivateTableauDeBordEntrepotsDatastoreIdServiceWfsOfferingIdModificationRoute: typeof PrivateTableauDeBordEntrepotsDatastoreIdServiceWfsOfferingIdModificationRoute
@@ -1343,18 +1410,20 @@ const PrivateTableauDeBordEntrepotsDatastoreIdRouteRouteChildren: PrivateTableau
   {
     PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRoute:
       PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRouteWithChildren,
-    PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRoute:
-      PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameRoute,
+    PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRoute:
+      PrivateTableauDeBordEntrepotsDatastoreIdDonneesCreerRoute,
     PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRoute:
       PrivateTableauDeBordEntrepotsDatastoreIdDonneesIntegrationRoute,
-    PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRoute:
-      PrivateTableauDeBordEntrepotsDatastoreIdDonneesTeleversementRoute,
     PrivateTableauDeBordEntrepotsDatastoreIdPermissionsAjoutRoute:
       PrivateTableauDeBordEntrepotsDatastoreIdPermissionsAjoutRoute,
     PrivateTableauDeBordEntrepotsDatastoreIdPyramideRasterAjoutRoute:
       PrivateTableauDeBordEntrepotsDatastoreIdPyramideRasterAjoutRoute,
     PrivateTableauDeBordEntrepotsDatastoreIdPyramideVecteurAjoutRoute:
       PrivateTableauDeBordEntrepotsDatastoreIdPyramideVecteurAjoutRoute,
+    PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRoute:
+      PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameNouvelleVueRoute,
+    PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRoute:
+      PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameTeleversementRoute,
     PrivateTableauDeBordEntrepotsDatastoreIdDonneesStoredDataIdDetailsRoute:
       PrivateTableauDeBordEntrepotsDatastoreIdDonneesStoredDataIdDetailsRoute,
     PrivateTableauDeBordEntrepotsDatastoreIdLivraisonsUploadIdRapportRoute:
@@ -1373,6 +1442,10 @@ const PrivateTableauDeBordEntrepotsDatastoreIdRouteRouteChildren: PrivateTableau
       PrivateTableauDeBordEntrepotsDatastoreIdServiceWmsVecteurAjoutRoute,
     PrivateTableauDeBordEntrepotsDatastoreIdServiceWmtsAjoutRoute:
       PrivateTableauDeBordEntrepotsDatastoreIdServiceWmtsAjoutRoute,
+    PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRoute:
+      PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameIndexRoute,
+    PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRoute:
+      PrivateTableauDeBordEntrepotsDatastoreIdDonneesDatasheetNameFluxAjoutRoute,
     PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleAjoutRoute:
       PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleAjoutRoute,
     PrivateTableauDeBordEntrepotsDatastoreIdServiceTmsOfferingIdModificationRoute:
