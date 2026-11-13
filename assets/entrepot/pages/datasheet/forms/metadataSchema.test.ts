@@ -97,6 +97,18 @@ describe("buildMetadataSchema", () => {
         expect(await issuePaths(valid(), { isFileIdentifierAvailable, isEditMode: true })).toEqual(["file_identifier validation.fileIdentifier.unique"]);
     });
 
+    it("exige le préfixe de l’entrepôt suivi de « _ » sur un nouvel identifiant", async () => {
+        const deps = { fileIdentifierPrefix: "SANDBOX" };
+
+        expect(await issuePaths({ ...valid(), file_identifier: "SANDBOX_fiche" }, deps)).toEqual([]);
+        expect(await issuePaths({ ...valid(), file_identifier: "SANDBOX.fiche" }, deps)).toEqual(["file_identifier validation.fileIdentifier.prefix"]);
+        expect(await issuePaths({ ...valid(), file_identifier: "sandbox_fiche" }, deps)).toEqual(["file_identifier validation.fileIdentifier.prefix"]);
+        expect(await issuePaths({ ...valid(), file_identifier: "SANDBOX_" }, deps)).toEqual(["file_identifier validation.fileIdentifier.prefixOnly"]);
+        // identifiant déjà enregistré avec l’ancien séparateur
+        expect(await issuePaths({ ...valid(), file_identifier: "SANDBOX.fiche" }, { ...deps, isEditMode: true, fileIdentifierLocked: true })).toEqual([]);
+        expect(await issuePaths({ ...valid(), file_identifier: "fiche" })).toEqual([]);
+    });
+
     it("n’applique le motif du nom qu’à la création", async () => {
         const values = { ...valid(), name: "Plan d’urbanisme / 2024" };
 

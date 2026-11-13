@@ -126,12 +126,21 @@ type SchemaDeps = {
     isEditMode: boolean;
     /** identifiant déjà enregistré : pas de contrôle de disponibilité */
     fileIdentifierLocked?: boolean;
+    /** préfixe du datastore, suivi de « _ » dans les nouveaux identifiants */
+    fileIdentifierPrefix?: string;
     existingDatasheetNames: string[];
     /** true si l’identifiant est libre ; une erreur autre qu’un identifiant pris ne bloque pas */
     isFileIdentifierAvailable: (fileIdentifier: string) => Promise<boolean>;
 };
 
-export const buildMetadataSchema = ({ t, isEditMode, fileIdentifierLocked = false, existingDatasheetNames, isFileIdentifierAvailable }: SchemaDeps) =>
+export const buildMetadataSchema = ({
+    t,
+    isEditMode,
+    fileIdentifierLocked = false,
+    fileIdentifierPrefix,
+    existingDatasheetNames,
+    isFileIdentifierAvailable,
+}: SchemaDeps) =>
     z.object({
         // section description
         name: z
@@ -154,6 +163,15 @@ export const buildMetadataSchema = ({ t, isEditMode, fileIdentifierLocked = fals
             .trim()
             .min(1, t("validation.fileIdentifier.required"))
             .regex(FILE_IDENTIFIER_REGEX, t("validation.fileIdentifier.chars"))
+            // un identifiant déjà enregistré garde son préfixe, éventuellement suivi de « . »
+            .refine(
+                (fileIdentifier) => fileIdentifierLocked || !fileIdentifierPrefix || fileIdentifier.startsWith(`${fileIdentifierPrefix}_`),
+                t("validation.fileIdentifier.prefix", { prefix: fileIdentifierPrefix ?? "" })
+            )
+            .refine(
+                (fileIdentifier) => fileIdentifierLocked || !fileIdentifierPrefix || fileIdentifier !== `${fileIdentifierPrefix}_`,
+                t("validation.fileIdentifier.prefixOnly")
+            )
             .refine(async (fileIdentifier) => fileIdentifierLocked || (await isFileIdentifierAvailable(fileIdentifier)), t("validation.fileIdentifier.unique")),
 
         // section producteurs ; la première carte est le point de contact

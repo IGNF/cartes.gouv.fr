@@ -16,7 +16,7 @@ import {
 const t = ((key: string) => key) as Parameters<typeof buildServiceFormSchema>[0]["t"];
 
 const schema = (availableAccesses: ServiceAccess[] = ["public", "restricted_visible", "restricted"], type: ServiceType = "wfs", rasterPyramid = false) =>
-    buildServiceFormSchema({ t, type, rasterPyramid, existingLayerNames: ["SANDBOX.pris"], layerNamePrefix: "SANDBOX", availableAccesses });
+    buildServiceFormSchema({ t, type, rasterPyramid, existingLayerNames: ["SANDBOX_pris"], layerNamePrefix: "SANDBOX", availableAccesses });
 
 const table = (overrides: Partial<ServiceFormValues["tables"][number]> = {}) => ({
     native_name: "communes",
@@ -32,7 +32,7 @@ const valid = (): ServiceFormValues => ({
     ...serviceFormDefaultValues,
     stored_data_id: "vectordb-1",
     title: "Mon flux",
-    technical_name: "SANDBOX.mon_flux",
+    technical_name: "SANDBOX_mon_flux",
     themes: ["Hydrographie"],
     tables: [table()],
 });
@@ -86,9 +86,11 @@ describe("buildServiceFormSchema", () => {
     });
 
     it("refuse un nom technique déjà pris ou sans le préfixe de l’entrepôt", async () => {
-        expect(await issueMessages({ ...valid(), technical_name: "SANDBOX.pris" })).toEqual({ technical_name: "validation.technical_name.taken" });
+        expect(await issueMessages({ ...valid(), technical_name: "SANDBOX_pris" })).toEqual({ technical_name: "validation.technical_name.taken" });
         expect(await issueMessages({ ...valid(), technical_name: "mon_flux" })).toEqual({ technical_name: "validation.technical_name.prefix" });
-        expect(await issueMessages({ ...valid(), technical_name: "SANDBOX." })).toEqual({ technical_name: "validation.technical_name.prefix_only" });
+        expect(await issueMessages({ ...valid(), technical_name: "SANDBOX.mon_flux" })).toEqual({ technical_name: "validation.technical_name.prefix" });
+        expect(await issueMessages({ ...valid(), technical_name: "sandbox_mon_flux" })).toEqual({ technical_name: "validation.technical_name.prefix" });
+        expect(await issueMessages({ ...valid(), technical_name: "SANDBOX_" })).toEqual({ technical_name: "validation.technical_name.prefix_only" });
     });
 
     it("refuse un accès que l’entrepôt n’offre pas", async () => {

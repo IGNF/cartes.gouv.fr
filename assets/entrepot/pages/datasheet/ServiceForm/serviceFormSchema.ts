@@ -149,10 +149,10 @@ export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existin
             .regex(regex.technical_name, t("validation.technical_name.chars"))
             .refine((value) => !existingLayerNames.includes(value), t("validation.technical_name.taken"))
             .refine(
-                (value) => !layerNamePrefix || value.startsWith(`${layerNamePrefix}.`),
+                (value) => !layerNamePrefix || value.startsWith(`${layerNamePrefix}_`),
                 t("validation.technical_name.prefix", { prefix: layerNamePrefix ?? "" })
             )
-            .refine((value) => !layerNamePrefix || value !== `${layerNamePrefix}.`, t("validation.technical_name.prefix_only")),
+            .refine((value) => !layerNamePrefix || value !== `${layerNamePrefix}_`, t("validation.technical_name.prefix_only")),
         thumbnail: imageFile,
         themes: z
             .array(z.string())
