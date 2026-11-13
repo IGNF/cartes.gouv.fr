@@ -133,7 +133,8 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
         existingLayerNamesQuery.data,
         editMode,
         offeringQuery.data?.configuration.layer_name,
-        datastore
+        datastore,
+        metadataQuery.data !== undefined
     );
     schemas[STEPS.METADATA_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
@@ -234,7 +235,12 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
                     )}
 
                     <UploadMDFile visible={currentStep === STEPS.METADATA_UPLOAD} form={form} />
-                    <Description visible={currentStep === STEPS.METADATA_DESCRIPTION} form={form} editMode={editMode} />
+                    <Description
+                        visible={currentStep === STEPS.METADATA_DESCRIPTION}
+                        form={form}
+                        editMode={editMode}
+                        identifierLocked={metadataQuery.data !== undefined}
+                    />
                     <AdditionalInfo
                         datastoreId={datastoreId}
                         storedData={pyramidQuery.data}

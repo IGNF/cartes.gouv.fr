@@ -49,24 +49,11 @@ const getMetadataFormDefaultValues = (metadata?: Metadata, datastore?: Datastore
         identifier:
             metadata?.csw_metadata?.file_identifier ??
             metadata?.file_identifier ??
-            (datastore?.metadata_file_identifier_prefix ? datastore.metadata_file_identifier_prefix + "." : undefined),
+            (datastore?.metadata_file_identifier_prefix ? datastore.metadata_file_identifier_prefix + "_" : undefined),
         charset: metadata?.csw_metadata?.charset ?? DEFAULT_CHARSET,
         resolution: metadata?.csw_metadata?.resolution ?? "",
         frequency_code: metadata?.csw_metadata?.frequency_code ?? "unknown",
     };
-
-    // NOTE : migration des anciennes valeurs de l'identifiant (préfixe en minuscule) vers la valeur telle qu'elle fournie par l'API sans transformation
-    if (datastore?.metadata_file_identifier_prefix && defaultValues.identifier) {
-        const prefix = datastore.metadata_file_identifier_prefix;
-        const identifier = defaultValues.identifier;
-        const prefixLength = prefix.length;
-        const startsWithPrefix = identifier.slice(0, prefixLength).toLowerCase() === prefix.toLowerCase();
-        const hasValidBoundary = identifier.length === prefixLength || identifier.charAt(prefixLength) === ".";
-
-        if (startsWithPrefix && hasValidBoundary) {
-            defaultValues.identifier = prefix + identifier.slice(prefixLength);
-        }
-    }
 
     return defaultValues;
 };
@@ -87,7 +74,7 @@ function suggestServiceTechnicalName(storedDataName: string, endpointType: Endpo
 
     let technicalName = `${nice}_${suffix}`;
     if (configLayerNamePrefix) {
-        technicalName = `${configLayerNamePrefix}.${technicalName}`;
+        technicalName = `${configLayerNamePrefix}_${technicalName}`;
     }
 
     return technicalName;
