@@ -20,10 +20,8 @@ const { i18n } = declareComponentKeys<
     | "section.access"
     | "type.legend"
     | "type.help_link"
-    | "pyramid_raster.hint"
-    | "pyramid_raster.link"
-    | "pyramid_raster.notice.title"
-    | "pyramid_raster.notice.description"
+    | { K: "pyramid_raster.notice.title"; P: { service: string }; R: string }
+    | { K: "pyramid_raster.notice.description"; P: { service: string }; R: string }
     | "pyramid_raster.notice.generate"
     | "pyramid_raster.notice.help"
     | "type.wfs"
@@ -142,11 +140,9 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "section.access": "Droits et accès",
     "type.legend": "Type de flux",
     "type.help_link": "Comment choisir le type de flux à publier ?",
-    "pyramid_raster.hint": "Pour publier un WMS raster, générez d’abord une pyramide de tuiles raster à partir d’un flux WMS-Vecteur.",
-    "pyramid_raster.link": "Créer une pyramide raster",
-    "pyramid_raster.notice.title": "Créez un flux WMTS à partir d’une pyramide de données raster",
-    "pyramid_raster.notice.description":
-        "Vous ne trouvez pas votre donnée ? Calculez des pyramides de données à partir de vos jeux de données depuis cartes.gouv.fr, puis revenez ici pour créer votre flux WMTS.",
+    "pyramid_raster.notice.title": ({ service }) => `Créez un flux ${service} à partir d’une pyramide de données raster`,
+    "pyramid_raster.notice.description": ({ service }) =>
+        `Vous ne trouvez pas votre donnée ? Calculez des pyramides de données à partir de vos jeux de données depuis cartes.gouv.fr, puis revenez ici pour créer votre flux ${service}.`,
     "pyramid_raster.notice.generate": "Générer une pyramide",
     "pyramid_raster.notice.help": "Consulter l’aide",
     "type.wfs": "Flux WFS",
@@ -268,11 +264,9 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "section.access": "Rights and access",
     "type.legend": "Service type",
     "type.help_link": "How to choose the type of service to publish?",
-    "pyramid_raster.hint": "To publish a raster WMS, first generate a raster tile pyramid from a vector WMS service.",
-    "pyramid_raster.link": "Create a raster pyramid",
-    "pyramid_raster.notice.title": "Create a WMTS service from a raster data pyramid",
-    "pyramid_raster.notice.description":
-        "Can’t find your data? Compute data pyramids from your datasets on cartes.gouv.fr, then come back here to create your WMTS service.",
+    "pyramid_raster.notice.title": ({ service }) => `Create a ${service} service from a raster data pyramid`,
+    "pyramid_raster.notice.description": ({ service }) =>
+        `Can’t find your data? Compute data pyramids from your datasets on cartes.gouv.fr, then come back here to create your ${service} service.`,
     "pyramid_raster.notice.generate": "Generate a pyramid",
     "pyramid_raster.notice.help": "Read the help",
     "type.wfs": "WFS service",

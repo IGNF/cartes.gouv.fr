@@ -2,7 +2,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { queryOptions, skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
@@ -172,14 +171,6 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                 <MetadataSectionsContainer>
                     <MetadataSection title={t("section.type")}>
                         <ServiceTypeSection value={type} onChange={changeType} />
-                        {type === "wms" && canGeneratePyramidRaster && (
-                            <p className={fr.cx("fr-text--sm", "fr-mb-0")}>
-                                {t("pyramid_raster.hint")}{" "}
-                                <Link to="/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout" params={{ datastoreId }} search={{ datasheetName }}>
-                                    {t("pyramid_raster.link")}
-                                </Link>
-                            </p>
-                        )}
                     </MetadataSection>
                     <MetadataSection title={t("section.description")}>
                         <ServiceDescriptionSection
@@ -187,8 +178,13 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                             onStoredDataChange={loadTables}
                             storedDataLabel={t(type === "wmts" ? "stored_data.label_pyramid" : "stored_data.label")}
                             storedDataNotice={
-                                type === "wmts" && (
-                                    <PyramidRasterNotice datastoreId={datastoreId} datasheetName={datasheetName} canGenerate={!!canGeneratePyramidRaster} />
+                                (type === "wms" || type === "wmts") && (
+                                    <PyramidRasterNotice
+                                        datastoreId={datastoreId}
+                                        datasheetName={datasheetName}
+                                        service={type.toUpperCase()}
+                                        canGenerate={!!canGeneratePyramidRaster}
+                                    />
                                 )
                             }
                             withDataKind={type === "wms"}
