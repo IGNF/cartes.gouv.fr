@@ -41,6 +41,7 @@ class CartesStoredDataApiService
 
                 $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id'])->array();
                 // traitement réussi entre la liste et l’annulation : sa donnée de sortie est une vraie donnée, on la garde
+                // shortcut: une seule lecture juste après l’annulation (asynchrone, 202), un succès plus tardif perd sa sortie ; attendre le statut final si le cas se présente
                 if (ProcessingStatuses::SUCCESS !== $procExec['status']) {
                     $this->storedDataApiService->remove($datastoreId, $procExec['output']['stored_data']['_id'])->await(); // suppression de la donnée stockée créée par le traitement
                 }
