@@ -53,7 +53,7 @@ export class CommonSchemasValidation {
                             if (!prefix) return true; // si pas de préfixe défini, on ne fait pas de validation
                             if (typeof technicalName !== "string") return false;
 
-                            const expectedPrefix = prefix + ".";
+                            const expectedPrefix = prefix + "_";
                             return technicalName.startsWith(expectedPrefix);
                         },
                     })
@@ -68,7 +68,7 @@ export class CommonSchemasValidation {
                             if (!prefix) return true;
                             if (typeof technicalName !== "string") return false;
 
-                            const expectedPrefix = prefix + ".";
+                            const expectedPrefix = prefix + "_";
                             if (!technicalName.startsWith(expectedPrefix)) return true;
                             return technicalName.length > expectedPrefix.length;
                         },
@@ -95,7 +95,7 @@ export class CommonSchemasValidation {
                             if (!prefix) return true; // si pas de préfixe défini, on ne fait pas de validation
                             if (typeof identifier !== "string") return false;
 
-                            const expectedPrefix = prefix + ".";
+                            const expectedPrefix = prefix + "_";
                             return identifier.startsWith(expectedPrefix);
                         },
                     })
@@ -108,7 +108,7 @@ export class CommonSchemasValidation {
                             if (!prefix) return true;
                             if (typeof identifier !== "string") return false;
 
-                            const expectedPrefix = prefix + ".";
+                            const expectedPrefix = prefix + "_";
                             if (!identifier.startsWith(expectedPrefix)) return true;
                             return identifier.length > expectedPrefix.length;
                         },
