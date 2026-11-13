@@ -268,6 +268,8 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                         })}
                         description={getApiErrorMessage(deleteStoredDataError.error)}
                         small
+                        closable
+                        onClose={() => setDeleteStoredDataError(undefined)}
                     />
                 )}
 
