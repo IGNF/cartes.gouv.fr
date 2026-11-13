@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { ConfigurationTypeEnum, type DatasheetDetailed, type Service } from "@/@types/app";
+import { type DatasheetDetailed, type Service } from "@/@types/app";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
@@ -16,7 +16,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
 import { buildServiceFormData } from "../ServiceForm/buildServiceFormData";
 import ServiceForm from "../ServiceForm/ServiceForm";
-import { configurationTypeFor, isRasterPyramid, type ServiceFormOutput, type ServiceType } from "../ServiceForm/serviceFormSchema";
+import { configurationTypeFor, isRasterPyramid, rasterPyramidPublishType, type ServiceFormOutput, type ServiceType } from "../ServiceForm/serviceFormSchema";
 
 // types livrés par le formulaire (IMPLEMENTED_SERVICE_TYPES)
 const publishers: Partial<Record<ServiceType, (datastoreId: string, storedDataId: string, formData: FormData) => Promise<Service>>> = {
@@ -51,11 +51,9 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
 
     const publishMutation = useMutation<Service, ApiError, ServiceFormOutput>({
         mutationFn: (values) => {
-            if (type === "wmts") {
-                return api.pyramidRaster.publish(datastoreId, values.stored_data_id, ConfigurationTypeEnum.WMTSTMS, buildServiceFormData(type, values, true));
-            }
-            if (isRasterPyramid(datasheetQuery.data, values.stored_data_id)) {
-                return api.pyramidRaster.publish(datastoreId, values.stored_data_id, ConfigurationTypeEnum.WMSRASTER, buildServiceFormData(type, values, true));
+            const rasterType = rasterPyramidPublishType(type, isRasterPyramid(datasheetQuery.data, values.stored_data_id));
+            if (rasterType !== undefined) {
+                return api.pyramidRaster.publish(datastoreId, values.stored_data_id, rasterType, buildServiceFormData(type, values, true));
             }
             const publish = publishers[type];
             if (publish === undefined) throw new Error(`Type de flux non livré : ${type}`);

@@ -30,6 +30,16 @@ export const isRasterPyramid = (datasheet: DatasheetDetailed | undefined, stored
 export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean): ConfigurationTypeEnum =>
     type === "wms" && rasterPyramid ? ConfigurationTypeEnum.WMSRASTER : SERVICE_CONFIGURATION_TYPES[type];
 
+/** type de flux publié depuis une pyramide raster (route pyramid-raster), undefined pour les autres routes, TMS compris */
+export const rasterPyramidPublishType = (
+    type: ServiceType,
+    rasterPyramid: boolean
+): ConfigurationTypeEnum.WMSRASTER | ConfigurationTypeEnum.WMTSTMS | undefined => {
+    if (type === "wmts") return ConfigurationTypeEnum.WMTSTMS;
+    if (type === "wms" && rasterPyramid) return ConfigurationTypeEnum.WMSRASTER;
+    return undefined;
+};
+
 export const SERVICE_ACCESSES = ["public", "restricted_visible", "restricted"] as const;
 export type ServiceAccess = (typeof SERVICE_ACCESSES)[number];
 
@@ -48,7 +58,7 @@ export const SERVICE_TABLES_MAX = 10;
 type SchemaDeps = {
     t: T;
     type: ServiceType;
-    /** donnée choisie = pyramide raster : un flux WMS sans tables ni styles */
+    /** donnée choisie = pyramide raster (toujours en WMTS) : un flux sans tables ni styles */
     rasterPyramid?: boolean;
     /** noms de couches déjà pris pour ce type de flux */
     existingLayerNames: readonly string[];

@@ -6,6 +6,7 @@ import {
     buildServiceFormSchema,
     configurationTypeFor,
     isRasterPyramid,
+    rasterPyramidPublishType,
     type ServiceAccess,
     serviceFormDefaultValues,
     type ServiceFormValues,
@@ -190,5 +191,15 @@ describe("configurationTypeFor", () => {
         expect(configurationTypeFor("wms", false)).toBe(ConfigurationTypeEnum.WMSVECTOR);
         expect(configurationTypeFor("wfs", true)).toBe(ConfigurationTypeEnum.WFS);
         expect(configurationTypeFor("wmts", true)).toBe(ConfigurationTypeEnum.WMTSTMS);
+    });
+});
+
+describe("rasterPyramidPublishType", () => {
+    it("publie par la route des pyramides raster le WMTS et le WMS sur pyramide raster, rien d’autre", () => {
+        expect(rasterPyramidPublishType("wmts", true)).toBe(ConfigurationTypeEnum.WMTSTMS);
+        expect(rasterPyramidPublishType("wms", true)).toBe(ConfigurationTypeEnum.WMSRASTER);
+        expect(rasterPyramidPublishType("wms", false)).toBeUndefined();
+        expect(rasterPyramidPublishType("wfs", true)).toBeUndefined();
+        expect(rasterPyramidPublishType("tms", true)).toBeUndefined();
     });
 });
