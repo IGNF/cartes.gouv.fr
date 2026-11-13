@@ -37,6 +37,18 @@
 | Gérer les styles                              | ANNEX, BROADCAST   | Ne pas afficher l'action |
 | Menu WMS-V - Créer un service raster WMS/WMTS | PROCESSING, ANNEX  | Ne pas afficher l'action |
 
+### Onglet "Données" (fiche de données refondue)
+
+| Action                                      | Droits nécessaires           | En l'absence de droits    |
+| ------------------------------------------- | ---------------------------- | ------------------------- |
+| Ajouter une donnée                          | UPLOAD, PROCESSING           | Ne pas afficher le bouton |
+| Livraison - Reprendre l'intégration         | UPLOAD, PROCESSING           | Ne pas afficher le bouton |
+| Livraison - Supprimer                       | UPLOAD, PROCESSING           | Ne pas afficher le bouton |
+| Base vecteur - Créer une pyramide vecteur   | PROCESSING                   | Ne pas afficher l'action  |
+| Donnée stockée - Supprimer (tous les types) | ANNEX, PROCESSING, BROADCAST | Ne pas afficher l'action  |
+
+La suppression d’une donnée stockée supprime aussi ses flux et l’annexe de légende d’une pyramide raster, d’où les droits BROADCAST et ANNEX.
+
 ### Onglet "Flux" (fiche de données refondue)
 
 | Action               | Droits nécessaires | En l'absence de droits    |
