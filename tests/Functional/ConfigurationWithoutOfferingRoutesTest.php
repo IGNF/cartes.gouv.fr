@@ -33,12 +33,15 @@ final class ConfigurationWithoutOfferingRoutesTest extends WebTestCase
             'name' => 'Orpheline',
             'status' => 'UNPUBLISHED',
             'tags' => ['datasheet_name' => 'Fiche'],
-            'extra' => ['_search' => ['url_vignette' => self::ANNEXES_URL.'/thumbnail/'.self::THUMBNAIL_UUID.'.png']],
-            'type_infos' => ['styles' => ['legend-static-1']],
+            'extra' => ['_search' => ['url_vignette' => self::ANNEXES_URL.'/thumbnail/'.self::THUMBNAIL_UUID.'.png'], 'styles' => []],
+            'type_infos' => ['styles' => ['legend-static-1', 'legend-static-2']],
         ]);
         EntrepotMockResponseFactory::seed('configurations', ['_id' => self::OTHER_DATASHEET_ID, 'name' => 'Autre fiche', 'status' => 'UNPUBLISHED', 'tags' => ['datasheet_name' => 'Autre']]);
         EntrepotMockResponseFactory::seed('annexes', ['_id' => 'thumbnail-1', 'paths' => ['/thumbnail/'.self::THUMBNAIL_UUID.'.png'], 'labels' => ['type=service-thumbnail']]);
+        // annexe de styles laissée par les anciens formulaires
+        EntrepotMockResponseFactory::seed('annexes', ['_id' => 'legacy-styles-1', 'paths' => ['/configuration/'.self::ORPHAN_ID.'/styles.json']]);
         EntrepotMockResponseFactory::seed('statics', ['_id' => 'legend-static-1']);
+        EntrepotMockResponseFactory::seed('statics', ['_id' => 'legend-static-2']);
     }
 
     public function testListsOnlyTheConfigurationsOfTheDatasheetWithoutOffering(): void
@@ -58,12 +61,19 @@ final class ConfigurationWithoutOfferingRoutesTest extends WebTestCase
         $client->xmlHttpRequest('DELETE', self::BASE.self::DATASTORE_PATH.'/configurations/'.self::ORPHAN_ID);
 
         self::assertResponseStatusCodeSame(204);
+        self::assertSame([
+            'DELETE '.self::DATASTORE_PATH.'/configurations/'.self::ORPHAN_ID,
+            'DELETE '.self::DATASTORE_PATH.'/annexes/thumbnail-1',
+            'DELETE '.self::DATASTORE_PATH.'/annexes/legacy-styles-1',
+            'DELETE '.self::DATASTORE_PATH.'/statics/legend-static-1',
+            'DELETE '.self::DATASTORE_PATH.'/statics/legend-static-2',
+        ], array_map(fn (array $request) => $request['method'].' '.$request['path'], EntrepotMockResponseFactory::writeRequests()));
         self::assertSame([self::PUBLISHED_ID, self::OTHER_DATASHEET_ID], array_column(EntrepotMockResponseFactory::stored('configurations'), '_id'));
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
         self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
     }
 
-    public function testConfigurationIsRemovedEvenWhenAFileRemovalFails(): void
+    public function testAFailedFileRemovalDoesNotStopTheOthers(): void
     {
         EntrepotMockResponseFactory::failNext('DELETE statics/legend-static-1', status: 409);
         $client = $this->client();
@@ -72,6 +82,7 @@ final class ConfigurationWithoutOfferingRoutesTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(204);
         self::assertNotContains(self::ORPHAN_ID, array_column(EntrepotMockResponseFactory::stored('configurations'), '_id'));
+        self::assertSame(['legend-static-1'], array_column(EntrepotMockResponseFactory::stored('statics'), '_id'));
     }
 
     public function testRefusesAConfigurationThatStillHasAnOffering(): void
@@ -81,7 +92,7 @@ final class ConfigurationWithoutOfferingRoutesTest extends WebTestCase
         $client->xmlHttpRequest('DELETE', self::BASE.self::DATASTORE_PATH.'/configurations/'.self::PUBLISHED_ID);
 
         self::assertResponseStatusCodeSame(409);
-        self::assertStringContainsString('encore publiée', json_decode((string) $client->getResponse()->getContent(), true)['detail']);
+        self::assertStringContainsString('encore une offre', json_decode((string) $client->getResponse()->getContent(), true)['detail']);
         self::assertContains(self::PUBLISHED_ID, array_column(EntrepotMockResponseFactory::stored('configurations'), '_id'));
     }
 

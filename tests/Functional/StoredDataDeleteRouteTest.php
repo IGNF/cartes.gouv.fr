@@ -74,7 +74,9 @@ final class StoredDataDeleteRouteTest extends WebTestCase
         self::assertResponseStatusCodeSame(204);
         self::assertSame(['other-1'], array_column(EntrepotMockResponseFactory::stored('configurations'), '_id'));
         $writes = array_map(fn (array $request) => $request['method'].' '.$request['path'], EntrepotMockResponseFactory::writeRequests());
-        self::assertLessThan(array_search('DELETE '.self::DATASTORE_PATH.'/stored_data/pyramid-1', $writes, true), array_search('DELETE '.self::DATASTORE_PATH.'/configurations/orphan-1', $writes, true));
+        $configurationDelete = array_search('DELETE '.self::DATASTORE_PATH.'/configurations/orphan-1', $writes, true);
+        self::assertNotFalse($configurationDelete);
+        self::assertLessThan(array_search('DELETE '.self::DATASTORE_PATH.'/stored_data/pyramid-1', $writes, true), $configurationDelete);
     }
 
     public function testOutputOfAProcessingThatSucceededBeforeTheAbortIsKept(): void

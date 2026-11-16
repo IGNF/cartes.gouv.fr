@@ -73,7 +73,7 @@ export default function ConfigurationsWithoutOfferingList({ datastoreId, datashe
             )}
 
             <CardRowsTable
-                caption={t("without_offering.title")}
+                caption={t("without_offering.caption")}
                 noCaption
                 columnWidths={COLUMN_WIDTHS}
                 headers={[t("column.name"), t("column.update"), t("column.status"), t("column.action")]}
@@ -94,6 +94,7 @@ export default function ConfigurationsWithoutOfferingList({ datastoreId, datashe
                             key={`delete-${configuration._id}`}
                             priority="tertiary"
                             size="small"
+                            nativeButtonProps={{ "aria-label": t("without_offering.delete_label", { name: configuration.name }) }}
                             onClick={() => {
                                 setTarget(configuration);
                                 deleteConfigurationModal.open();

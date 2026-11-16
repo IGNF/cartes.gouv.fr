@@ -37,7 +37,7 @@ final class ConfigurationController extends AbstractController implements ApiCon
             $this->cartesServiceApiService->removeConfiguration($datastoreId, $configuration);
         } catch (ApiException $e) {
             if (Response::HTTP_CONFLICT === $e->getStatusCode()) {
-                throw new AppException('La configuration est encore publiée : supprimez le flux depuis sa ligne', Response::HTTP_CONFLICT, $e->getDetails(), $e);
+                throw new AppException('La configuration a encore une offre : supprimez le flux depuis sa ligne dans la liste des flux', Response::HTTP_CONFLICT, $e->getDetails(), $e);
             }
             throw $e;
         }

@@ -107,7 +107,11 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
     const metadataQuery = useQuery({ ...datasheetMetadataQueryOptions(datastoreId, datasheetName), enabled });
 
     const serviceListQuery = useQuery({ ...datasheetServiceListQueryOptions(datastoreId, datasheetName), enabled });
-    const configurationsWithoutOfferingQuery = useQuery({ ...datasheetConfigurationsWithoutOfferingQueryOptions(datastoreId, datasheetName), enabled });
+    // lourde (une lecture par configuration) : seulement sur l’onglet Flux
+    const configurationsWithoutOfferingQuery = useQuery({
+        ...datasheetConfigurationsWithoutOfferingQueryOptions(datastoreId, datasheetName),
+        enabled: enabled && activeTab === DatasheetViewActiveTabEnum.Services,
+    });
 
     const isDeleteModalOpen = useIsModalOpen(deleteModal);
 

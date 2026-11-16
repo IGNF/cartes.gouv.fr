@@ -50,6 +50,8 @@ const { i18n } = declareComponentKeys<
     | "deleting"
     | "delete_error"
     | "without_offering.title"
+    | "without_offering.caption"
+    | { K: "without_offering.delete_label"; P: { name: string }; R: string }
     | "without_offering.explanation"
     | "without_offering.status"
     | "without_offering.load_error"
@@ -109,6 +111,8 @@ export const ServicesListTabNextFrTranslations: Translations<"fr">["ServicesList
     deleting: "Suppression du flux en cours",
     delete_error: "Le flux n’a pas été supprimé",
     "without_offering.title": "Flux non publiés",
+    "without_offering.caption": "Liste des flux non publiés",
+    "without_offering.delete_label": ({ name }) => `Supprimer le flux non publié ${name}`,
     "without_offering.explanation":
         "Ces flux n’ont plus d’offre de publication, souvent après une publication ou une suppression interrompue. Ils gardent leur nom technique tant qu’ils ne sont pas supprimés.",
     "without_offering.status": "Non publié",
@@ -167,6 +171,8 @@ export const ServicesListTabNextEnTranslations: Translations<"en">["ServicesList
     deleting: "Deleting the service",
     delete_error: "The service was not deleted",
     "without_offering.title": "Unpublished services",
+    "without_offering.caption": "List of unpublished services",
+    "without_offering.delete_label": ({ name }) => `Delete the unpublished service ${name}`,
     "without_offering.explanation":
         "These services no longer have a publication offering, often after an interrupted publication or deletion. They keep their technical name until they are deleted.",
     "without_offering.status": "Unpublished",

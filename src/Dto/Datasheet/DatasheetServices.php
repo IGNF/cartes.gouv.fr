@@ -44,9 +44,7 @@ final readonly class DatasheetServices
      */
     public function configurationsWithoutOffering(): array
     {
-        $configurationIds = array_flip(array_map(fn (array $offering) => $offering['configuration']['_id'] ?? null, $this->offeringsById));
-
-        return array_values(array_filter($this->configurationsById, fn (array $configuration) => !isset($configurationIds[$configuration['_id']])));
+        return array_values(array_filter($this->configurationsById, fn (array $configuration) => null === $this->offeringOfConfiguration($configuration['_id'])));
     }
 
     /**
