@@ -113,7 +113,8 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
     const form = useForm<ServiceFormValues>({ values: values as ServiceFormValues, disabled: true });
 
     const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId, now);
-    const exploreMapsAvailability = getExploreMapsAvailability({ service, services: services ?? [service], visibleOnCartesGouv, now });
+    // sans la liste des flux de la fiche, le WMTS jumeau d’un WMS reste inconnu
+    const exploreMapsAvailability = services === undefined ? "unavailable" : getExploreMapsAvailability({ service, services, visibleOnCartesGouv, now });
 
     const reportColumns: { title: string; rows: [string, ReactNode][] }[] = [
         {
