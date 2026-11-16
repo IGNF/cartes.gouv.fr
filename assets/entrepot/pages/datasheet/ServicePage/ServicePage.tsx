@@ -8,24 +8,22 @@ import { Fragment, type ReactNode, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { tss } from "tss-react";
 
-import { type DatasheetDetailed, OfferingStatusEnum, OfferingTypeEnum, type Service } from "@/@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import LoadingText from "@/components/Utils/LoadingText";
 import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
 import api from "@/entrepot/api";
+import { datasheetQueryOptions } from "@/hooks/queries/datasheetQueryOptions";
 import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
 import { datastorePermissionsQueryOptions } from "@/hooks/queries/datastorePermissionsQueryOptions";
 import { serviceQueryOptions } from "@/hooks/queries/serviceQueryOptions";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
-import RQKeys from "@/modules/entrepot/RQKeys";
-import { type ApiError } from "@/modules/jsonFetch";
 import AppLink from "@/router/AppLink";
 import {
-    delta,
     editableOfferingTypes,
     formatDateFromISO,
     getExploreMapsAvailability,
@@ -93,12 +91,7 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
     // permissions illisibles ou en chargement : aucun accès coché, flux privé absent d’Explorer les cartes
     const { data: permissions } = useQuery(datastorePermissionsQueryOptions(datastoreId));
     const { data: services } = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName));
-    const { data: datasheet } = useQuery<DatasheetDetailed, ApiError>({
-        queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
-        staleTime: delta.minutes(1),
-        retry: false,
-    });
+    const { data: datasheet } = useQuery(datasheetQueryOptions(datastoreId, datasheetName));
 
     const { userRights, isSupervisor } = useCommunityRights();
     const canBroadcast = isSupervisor || !!userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
