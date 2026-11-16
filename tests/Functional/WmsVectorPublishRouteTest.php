@@ -54,6 +54,20 @@ final class WmsVectorPublishRouteTest extends WebTestCase
         self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
     }
 
+    public function testTableNamedWithDigitsOnlyIsPublished(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+
+        // PHP range une clé « 2024 » en entier
+        $this->post($client, $this->payload(['2024']), ['2024' => $this->sld('2024.sld')]);
+
+        self::assertResponseStatusCodeSame(201);
+        $configuration = EntrepotMockResponseFactory::stored('configurations')[0];
+        self::assertSame([sprintf('config_%s_style_wmsv_2024', $configuration['_id'])], array_column(EntrepotMockResponseFactory::stored('statics'), 'name'));
+        self::assertSame('2024', $configuration['type_infos']['used_data'][0]['relations'][0]['name']);
+    }
+
     public function testStyleFilesAreRemovedWhenTheOfferingCannotBeCreated(): void
     {
         $this->seedMetadata();
@@ -209,8 +223,8 @@ final class WmsVectorPublishRouteTest extends WebTestCase
     }
 
     /**
-     * @param array<string, mixed>        $payload
-     * @param array<string, UploadedFile> $styleFiles par nom de table
+     * @param array<string, mixed>           $payload
+     * @param array<array-key, UploadedFile> $styleFiles par nom de table
      */
     private function post(KernelBrowser $client, array $payload, array $styleFiles = []): void
     {

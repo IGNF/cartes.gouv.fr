@@ -47,7 +47,8 @@ final readonly class WmsVectorStyleFileService
                 $staticIds[$tableName] = $this->staticApiService->add(
                     $datastoreId,
                     $file->getPathname(),
-                    self::name($configurationId, $tableName),
+                    // une clé « 2024 » devient un entier en PHP
+                    self::name($configurationId, (string) $tableName),
                     StaticFileTypes::GEOSERVER_STYLE,
                 )['_id'];
             }

@@ -113,7 +113,8 @@ final class ServiceController extends AbstractController implements ApiControlle
 
         /** @var array<string, string> $savedStyleIds fichier de style enregistré par table */
         $savedStyleIds = array_column($configuration['type_infos']['used_data'][0]['relations'] ?? [], 'style', 'name');
-        $styleFiles = $this->serviceFormFileValidator->styleFiles($request, $dto->selected_tables, array_keys($savedStyleIds));
+        // une clé « 2024 » devient un entier en PHP
+        $styleFiles = $this->serviceFormFileValidator->styleFiles($request, $dto->selected_tables, array_map(strval(...), array_keys($savedStyleIds)));
 
         // nouveau fichier puis suppression de l’ancien après l’enregistrement : un échec laisse le flux intact
         $newStyleIds = $this->wmsVectorStyleFileService->upload($datastoreId, $styleFiles, $configuration['_id']);

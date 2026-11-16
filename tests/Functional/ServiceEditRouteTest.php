@@ -345,6 +345,18 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertSame([['name' => 'communes', 'style' => $newStatic['_id']], ['name' => 'routes', 'style' => 'static-routes']], $this->configurationPut()['type_infos']['used_data'][0]['relations']);
     }
 
+    public function testWmsVectorTableNamedWithDigitsOnlyKeepsItsSavedStyle(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [['name' => '2024', 'style' => 'static-2024']]);
+        $client = $this->client();
+
+        // PHP range une clé « 2024 » en entier
+        $this->post($client, ['selected_tables' => ['2024']] + $this->wmsVectorPayload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame([['name' => '2024', 'style' => 'static-2024']], $this->configurationPut()['type_infos']['used_data'][0]['relations']);
+    }
+
     public function testWmsVectorAddedTableWithoutStyleFileAnswers422WithoutWriting(): void
     {
         $this->seedService('WMS-VECTOR');
@@ -487,9 +499,16 @@ final class ServiceEditRouteTest extends WebTestCase
         return self::getContainer()->getParameter('config')['community_id'];
     }
 
-    private function seedService(string $type, bool $open = true, string $offeringStatus = 'PUBLISHED', string $configurationStatus = 'PUBLISHED'): void
+    /**
+     * @param ?list<array{name: string, style: string}> $wmsVectorRelations relations enregistrées d’un WMS vecteur, communes et routes par défaut
+     */
+    private function seedService(string $type, bool $open = true, string $offeringStatus = 'PUBLISHED', string $configurationStatus = 'PUBLISHED', ?array $wmsVectorRelations = null): void
     {
-        EntrepotMockResponseFactory::seed('configurations', ['status' => $configurationStatus] + $this->seededConfiguration($type));
+        $configuration = $this->seededConfiguration($type);
+        if (null !== $wmsVectorRelations) {
+            $configuration['type_infos']['used_data'][0]['relations'] = $wmsVectorRelations;
+        }
+        EntrepotMockResponseFactory::seed('configurations', ['status' => $configurationStatus] + $configuration);
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'pyramid-1', 'type' => 'ROK4-PYRAMID-RASTER', 'tags' => ['datasheet_name' => 'Fiche']]);
         if ('WMS-VECTOR' === $type) {
             EntrepotMockResponseFactory::seed('statics', ['_id' => 'static-communes', 'name' => 'config_'.self::CONFIGURATION_ID.'_style_wmsv_communes']);
