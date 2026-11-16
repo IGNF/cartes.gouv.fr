@@ -27,8 +27,6 @@ class GeonetworkApiService
             (new HttpOptions())
                 ->setBaseUri($this->baseUrl)
                 ->setProxy($parameterBag->get('http_proxy'))
-                ->verifyHost(false)
-                ->verifyPeer(false)
                 ->toArray()
         );
     }
