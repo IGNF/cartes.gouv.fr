@@ -4,21 +4,45 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery } from "@tanstack/react-query";
 import { notFound } from "@tanstack/react-router";
-import { Fragment, type ReactNode } from "react";
+import { Fragment, type ReactNode, useMemo } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { tss } from "tss-react";
 
-import { OfferingStatusEnum, type Service } from "@/@types/app";
+import { type DatasheetDetailed, OfferingStatusEnum, OfferingTypeEnum, type Service } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import LoadingText from "@/components/Utils/LoadingText";
+import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
+import api from "@/entrepot/api";
+import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
+import { datastorePermissionsQueryOptions } from "@/hooks/queries/datastorePermissionsQueryOptions";
 import { serviceQueryOptions } from "@/hooks/queries/serviceQueryOptions";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
-import { editableOfferingTypes, formatDateFromISO, getServiceEditLink, getServiceTypeLabel, isOfferingUnavailable } from "@/utils";
+import RQKeys from "@/modules/entrepot/RQKeys";
+import { type ApiError } from "@/modules/jsonFetch";
+import AppLink from "@/router/AppLink";
+import {
+    delta,
+    editableOfferingTypes,
+    formatDateFromISO,
+    getExploreMapsAvailability,
+    getExploreMapsLayerParam,
+    getServiceEditLink,
+    getServiceThumbnailUrl,
+    getServiceTypeLabel,
+    isOfferingUnavailable,
+    isPrivateServiceVisibleOnCartesGouv,
+} from "@/utils";
+import ServiceExploreMapsCell from "../DatasheetView/ServiceListTab/ServiceExploreMapsCell";
 import MetadataSection from "../forms/MetadataSection";
 import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
+import AccessSection from "../ServiceForm/sections/AccessSection";
+import ServiceDescriptionSection from "../ServiceForm/sections/ServiceDescriptionSection";
+import { SERVICE_ACCESSES, type ServiceFormValues } from "../ServiceForm/serviceFormSchema";
+import { serviceToFormValues } from "../ServiceForm/serviceToFormValues";
 
 type ServicePageProps = {
     datastoreId: string;
@@ -42,7 +66,7 @@ export default function ServicePage({ datastoreId, datasheetName, offeringId }: 
         }
         // flux d’une autre fiche : introuvable sous cette fiche
         if (serviceQuery.data.configuration.tags.datasheet_name !== datasheetName) throw notFound();
-        return <ServicePageContent datastoreId={datastoreId} datasheetName={datasheetName} service={serviceQuery.data} />;
+        return <ServicePageContent datastoreId={datastoreId} datasheetName={datasheetName} service={serviceQuery.data} now={serviceQuery.dataUpdatedAt} />;
     };
 
     return (
@@ -56,11 +80,24 @@ type ServicePageContentProps = {
     datastoreId: string;
     datasheetName: string;
     service: Service;
+    /** instant de lecture du flux : référence des expirations de permission et du délai d’Explorer les cartes */
+    now: number;
 };
 
-function ServicePageContent({ datastoreId, datasheetName, service }: ServicePageContentProps) {
+function ServicePageContent({ datastoreId, datasheetName, service, now }: ServicePageContentProps) {
     const { t } = useTranslation("ServicePage");
+    const { t: tForm } = useTranslation("ServiceForm");
     const { classes } = useStyles();
+
+    // permissions illisibles ou en chargement : aucun accès coché, flux privé absent d’Explorer les cartes
+    const { data: permissions } = useQuery(datastorePermissionsQueryOptions(datastoreId));
+    const { data: services } = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName));
+    const { data: datasheet } = useQuery<DatasheetDetailed, ApiError>({
+        queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
+        staleTime: delta.minutes(1),
+        retry: false,
+    });
 
     const { userRights, isSupervisor } = useCommunityRights();
     const canBroadcast = isSupervisor || !!userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
@@ -71,6 +108,19 @@ function ServicePageContent({ datastoreId, datasheetName, service }: ServicePage
     const showEdit = editableOfferingTypes.includes(service.type) && canBroadcast && !("to" in editLink && editLink.to === "/404");
 
     const { configuration } = service;
+    const pyramid = service.type === OfferingTypeEnum.WMTSTMS;
+    const storedDataId = configuration.type_infos.used_data[0]?.stored_data;
+    const storedDataName = [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_vector_list ?? []), ...(datasheet?.pyramid_raster_list ?? [])].find(
+        (storedData) => storedData._id === storedDataId
+    )?.name;
+
+    const values = useMemo(() => serviceToFormValues(service, permissions, api.alerts.communityId, now), [service, permissions, now]);
+    // sans résolveur ni envoi : un accès absent laisse simplement les boutons radio décochés
+    const form = useForm<ServiceFormValues>({ values: values as ServiceFormValues });
+
+    const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId, now);
+    const exploreMapsAvailability = getExploreMapsAvailability({ service, services: services ?? [service], visibleOnCartesGouv, now });
+
     const reportColumns: { title: string; rows: [string, ReactNode][] }[] = [
         {
             title: t("report.configuration"),
@@ -138,25 +188,58 @@ function ServicePageContent({ datastoreId, datasheetName, service }: ServicePage
                 <Alert className={fr.cx("fr-mt-2w")} severity="info" title={t("unstable.title")} description={t("unstable.description")} />
             )}
 
-            <MetadataSectionsContainer>
-                <MetadataSection title={t("section.report")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        {reportColumns.map(({ title, rows }) => (
-                            <div key={title} className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                                <h3 className={fr.cx("fr-text--md", "fr-text--bold", "fr-mb-2w")}>{title}</h3>
-                                <dl className={fr.cx("fr-m-0")}>
-                                    {rows.map(([label, value]) => (
-                                        <Fragment key={label}>
-                                            <dt className={fr.cx("fr-text--sm", "fr-mb-0")}>{label}</dt>
-                                            <dd className={classes.value}>{value}</dd>
-                                        </Fragment>
-                                    ))}
-                                </dl>
-                            </div>
-                        ))}
-                    </div>
-                </MetadataSection>
-            </MetadataSectionsContainer>
+            <FormProvider {...form}>
+                <MetadataSectionsContainer>
+                    <MetadataSection title={tForm("section.description")}>
+                        <fieldset disabled className={classes.fieldset}>
+                            <ServiceDescriptionSection
+                                storedDataLabel={tForm(pyramid ? "stored_data.label_pyramid" : "stored_data.label")}
+                                storedDataName={storedDataName}
+                                withDataKind={false}
+                                withDescription={service.type !== OfferingTypeEnum.WFS}
+                                thumbnailUrl={getServiceThumbnailUrl(service)}
+                            />
+                        </fieldset>
+                        {/* hors du fieldset : son bouton « Copier » resterait désactivé */}
+                        {!unavailable && service.share_url && <TextCopyToClipboard label={t("share_url")} text={service.share_url} />}
+                        <p className={fr.cx("fr-label", "fr-mb-1v")}>{t("explore_maps")}</p>
+                        <ServiceExploreMapsCell availability={exploreMapsAvailability} layerParam={getExploreMapsLayerParam(service)} />
+                    </MetadataSection>
+
+                    <MetadataSection title={tForm("section.access")}>
+                        {values.access === undefined && <p className={fr.cx("fr-text--sm")}>{t("access.unknown")}</p>}
+                        <fieldset disabled className={classes.fieldset}>
+                            <AccessSection availableAccesses={SERVICE_ACCESSES} logoUrl={configuration.attribution?.logo?.url} />
+                        </fieldset>
+                        {!service.open && !unavailable && (
+                            <>
+                                <h3 className={fr.cx("fr-h6", "fr-mt-4w")}>{t("permissions.title")}</h3>
+                                <AppLink to="/tableau-de-bord/entrepots/$datastoreId/permissions" params={{ datastoreId }}>
+                                    {t("permissions.manage")}
+                                </AppLink>
+                            </>
+                        )}
+                    </MetadataSection>
+
+                    <MetadataSection title={t("section.report")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                            {reportColumns.map(({ title, rows }) => (
+                                <div key={title} className={fr.cx("fr-col-12", "fr-col-md-6")}>
+                                    <h3 className={fr.cx("fr-text--md", "fr-text--bold", "fr-mb-2w")}>{title}</h3>
+                                    <dl className={fr.cx("fr-m-0")}>
+                                        {rows.map(([label, value]) => (
+                                            <Fragment key={label}>
+                                                <dt className={fr.cx("fr-text--sm", "fr-mb-0")}>{label}</dt>
+                                                <dd className={classes.value}>{value}</dd>
+                                            </Fragment>
+                                        ))}
+                                    </dl>
+                                </div>
+                            ))}
+                        </div>
+                    </MetadataSection>
+                </MetadataSectionsContainer>
+            </FormProvider>
         </>
     );
 }
@@ -168,6 +251,12 @@ const useStyles = tss.withName({ ServicePageContent }).create({
         alignItems: "flex-start",
         justifyContent: "space-between",
         gap: fr.spacing("2w"),
+    },
+    fieldset: {
+        border: 0,
+        margin: 0,
+        padding: 0,
+        minWidth: 0,
     },
     tags: {
         display: "flex",

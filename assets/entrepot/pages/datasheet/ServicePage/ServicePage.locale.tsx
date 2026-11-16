@@ -13,6 +13,11 @@ const { i18n } = declareComponentKeys<
     | "unavailable.description"
     | "unstable.title"
     | "unstable.description"
+    | "share_url"
+    | "explore_maps"
+    | "access.unknown"
+    | "permissions.title"
+    | "permissions.manage"
     | "section.report"
     | "report.configuration"
     | "report.offering"
@@ -48,6 +53,11 @@ export const ServicePageFrTranslations: Translations<"fr">["ServicePage"] = {
     "unavailable.description": "Ce flux n’est plus diffusé. Vous pouvez uniquement terminer sa dépublication depuis l’onglet Flux de la fiche.",
     "unstable.title": "Flux instable",
     "unstable.description": "L’Entrepôt considère ce flux comme instable. Il peut ne pas s’afficher correctement.",
+    share_url: "URL de diffusion",
+    explore_maps: "Lien de visualisation dans Explorer les cartes",
+    "access.unknown": "Aucun accès n’est coché : les permissions du flux sont en cours de chargement ou n’ont pas pu être lues, ou le flux n’est plus diffusé.",
+    "permissions.title": "Permissions",
+    "permissions.manage": "Gérer les permissions",
     "section.report": "Rapport de génération",
     "report.configuration": "Configuration",
     "report.offering": "Offre",
@@ -70,6 +80,11 @@ export const ServicePageEnTranslations: Translations<"en">["ServicePage"] = {
     "unavailable.description": "This service is no longer broadcast. You can only finish unpublishing it from the Services tab of the datasheet.",
     "unstable.title": "Unstable service",
     "unstable.description": "The Entrepôt considers this service unstable. It may not display correctly.",
+    share_url: "Broadcast URL",
+    explore_maps: "Link to view in Explorer les cartes",
+    "access.unknown": "No access is selected: the service permissions are loading or could not be read, or the service is no longer broadcast.",
+    "permissions.title": "Permissions",
+    "permissions.manage": "Manage permissions",
     "section.report": "Generation report",
     "report.configuration": "Configuration",
     "report.offering": "Offering",
