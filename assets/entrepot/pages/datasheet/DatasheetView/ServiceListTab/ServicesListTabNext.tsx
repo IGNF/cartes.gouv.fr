@@ -224,12 +224,19 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                                     search: { offeringId: service._id, datasheetName },
                                 },
                             },
+                        // WMS vecteur : ancien formulaire ; autres types : page du flux, mêmes droits que la création
                         editable &&
-                            canBroadcast && {
+                            (service.type === OfferingTypeEnum.WMSVECTOR ? canBroadcast : canCreate) && {
                                 text: t("menu.edit"),
                                 iconId: "ri-edit-box-line",
                                 disabled: offeringUnavailable,
-                                linkProps: getServiceEditLink(datastoreId, datasheetName, service),
+                                linkProps:
+                                    service.type === OfferingTypeEnum.WMSVECTOR
+                                        ? getServiceEditLink(datastoreId, datasheetName, service)
+                                        : {
+                                              to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
+                                              params: { datastoreId, datasheetName, offeringId: service._id },
+                                          },
                             },
                         editable &&
                             canBroadcast && {
@@ -244,7 +251,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                 />,
             ];
         });
-    }, [pageServices, sortedServices, permissionsQuery.data, now, canBroadcast, canGeneratePyramidRaster, datastoreId, datasheetName, classes, t]);
+    }, [pageServices, sortedServices, permissionsQuery.data, now, canBroadcast, canCreate, canGeneratePyramidRaster, datastoreId, datasheetName, classes, t]);
 
     if (serviceListQuery.isPending) {
         return <LoadingText withSpinnerIcon={true} as="p" />;
