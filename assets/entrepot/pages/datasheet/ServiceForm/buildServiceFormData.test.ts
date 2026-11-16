@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildServiceFormData, mapServiceViolationPaths } from "./buildServiceFormData";
+import { buildServiceEditFormData, buildServiceFormData, mapServiceViolationPaths } from "./buildServiceFormData";
 import { serviceFormDefaultValues, type ServiceFormOutput } from "./serviceFormSchema";
 
 const values: ServiceFormOutput = {
@@ -122,5 +122,33 @@ describe("mapServiceViolationPaths", () => {
             values.tables
         );
         expect(error.violations?.map((violation) => violation.propertyPath)).toEqual(["tables[1].style", "tables"]);
+    });
+});
+
+describe("buildServiceEditFormData", () => {
+    const { stored_data_id: _storedDataId, technical_name: _technicalName, ...editValues } = values;
+
+    it("envoie le même contenu que la publication, sans nom technique, avec les retraits d’images", () => {
+        const payload = payloadOf(buildServiceEditFormData("wfs", editValues));
+        expect(payload).not.toHaveProperty("technical_name");
+        expect(payload.tables).toEqual([
+            { native_name: "communes", title: "Communes", public_name: "communes", description: "Les communes", keywords: ["Unités administratives"] },
+        ]);
+        expect(payload.remove_thumbnail).toBe(false);
+        expect(payload.remove_attribution_logo).toBe(false);
+    });
+
+    it("demande le retrait de la vignette et du logo passés à null", () => {
+        const payload = payloadOf(
+            buildServiceEditFormData(
+                "wms",
+                { ...editValues, description: "Ortho", thumbnail: null, attribution: { enabled: true, title: "IGN", url: "https://www.ign.fr", logo: null } },
+                true
+            )
+        );
+        expect(payload.remove_thumbnail).toBe(true);
+        expect(payload.remove_attribution_logo).toBe(true);
+        expect(payload.description).toBe("Ortho");
+        expect(payload).not.toHaveProperty("tables");
     });
 });

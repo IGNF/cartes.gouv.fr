@@ -1,7 +1,7 @@
 import { type TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { z } from "zod";
 
-import { ConfigurationTypeEnum, type DatasheetDetailed } from "@/@types/app";
+import { ConfigurationTypeEnum, type DatasheetDetailed, type DatastoreEndpoint } from "@/@types/app";
 import { type ComponentKey } from "@/i18n/types";
 import { regex } from "@/utils";
 import { TAG_VALUE_MAX_LENGTH } from "../DatasetAdd/datasetAddSchema";
@@ -43,6 +43,15 @@ export const rasterPyramidPublishType = (
 export const SERVICE_ACCESSES = ["public", "restricted_visible", "restricted"] as const;
 export type ServiceAccess = (typeof SERVICE_ACCESSES)[number];
 
+/** accès offerts par les endpoints de l’entrepôt pour ce type de configuration ; tous tant que les endpoints ne sont pas lus (le back refuse un accès sans endpoint) */
+export const availableServiceAccesses = (endpoints: DatastoreEndpoint[] | undefined, configurationType: ConfigurationTypeEnum): readonly ServiceAccess[] => {
+    if (!endpoints) return SERVICE_ACCESSES;
+    const ofType = endpoints.filter((item) => item.endpoint.type.toUpperCase() === configurationType);
+    const hasOpen = ofType.some((item) => item.endpoint.open);
+    const hasPrivate = ofType.some((item) => !item.endpoint.open);
+    return SERVICE_ACCESSES.filter((access) => (access === "public" ? hasOpen : hasPrivate));
+};
+
 /** même regex que WfsTableFormDTO : nom technique d’une table WFS en minuscules */
 export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;
 
@@ -63,6 +72,8 @@ type SchemaDeps = {
     layerNamePrefix?: string;
     /** accès offerts par les endpoints de l’entrepôt pour ce type de flux */
     availableAccesses: readonly ServiceAccess[];
+    /** modification : noms techniques enregistrés par table (`native_name` → `public_name`) ; nom facultatif, ancien nom accepté hors de la règle des minuscules, pas de plafond de tables */
+    savedTablePublicNames?: Readonly<Record<string, string>>;
 };
 
 // undefined : inchangée, null : supprimée, File : nouvelle image
@@ -101,7 +112,16 @@ const storedDataRequiredMessage = (t: T, type: ServiceType): string => {
     return t("validation.stored_data.required");
 };
 
-export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existingLayerNames, layerNamePrefix, availableAccesses }: SchemaDeps) => {
+export const buildServiceFormSchema = ({
+    t,
+    type,
+    rasterPyramid = false,
+    existingLayerNames,
+    layerNamePrefix,
+    availableAccesses,
+    savedTablePublicNames,
+}: SchemaDeps) => {
+    const edit = savedTablePublicNames !== undefined;
     const tableSchema = z
         .object({
             native_name: z.string(),
@@ -112,6 +132,8 @@ export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existin
             keywords: z.array(z.string()),
             // fichier SLD (WMS vecteur)
             style: z.instanceof(File).optional(),
+            // modification : table enregistrée absente de la base, affichée mais non cochable
+            missing: z.boolean().optional(),
         })
         // champs obligatoires seulement sur les tables cochées
         .superRefine(async (table, ctx) => {
@@ -129,8 +151,9 @@ export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existin
             if (type !== "wfs") return;
             if (table.title === "") ctx.addIssue({ code: "custom", path: ["title"], message: t("validation.table.title.required") });
             if (table.public_name === "") {
-                ctx.addIssue({ code: "custom", path: ["public_name"], message: t("validation.table.public_name.required") });
-            } else if (!WFS_TABLE_TECHNICAL_NAME_REGEX.test(table.public_name)) {
+                // modification : vide = l’Entrepôt sert `native_name`
+                if (!edit) ctx.addIssue({ code: "custom", path: ["public_name"], message: t("validation.table.public_name.required") });
+            } else if (!WFS_TABLE_TECHNICAL_NAME_REGEX.test(table.public_name) && savedTablePublicNames?.[table.native_name] !== table.public_name) {
                 ctx.addIssue({ code: "custom", path: ["public_name"], message: t("validation.table.public_name.chars") });
             }
             if (table.description === "") ctx.addIssue({ code: "custom", path: ["description"], message: t("validation.table.description.required") });
@@ -180,7 +203,8 @@ export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existin
                   .array(tableSchema)
                   .refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))
                   .refine(
-                      (tables) => tables.filter((table) => table.selected).length <= SERVICE_TABLES_MAX,
+                      // plafond des fichiers de style du WMS vecteur : sans objet en modification
+                      (tables) => edit || tables.filter((table) => table.selected).length <= SERVICE_TABLES_MAX,
                       t("validation.tables.max", { max: SERVICE_TABLES_MAX })
                   )
             : z.array(tableSchema),
@@ -188,6 +212,14 @@ export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existin
         attribution: attributionSchema,
     });
 };
+
+// type, donnée stockée et nom technique figés en modification
+export const buildServiceEditFormSchema = (
+    deps: Omit<SchemaDeps, "existingLayerNames" | "layerNamePrefix"> & { savedTablePublicNames: Readonly<Record<string, string>> }
+) => buildServiceFormSchema({ ...deps, existingLayerNames: [] }).omit({ stored_data_id: true, technical_name: true });
+
+export type ServiceEditFormValues = z.input<ReturnType<typeof buildServiceEditFormSchema>>;
+export type ServiceEditFormOutput = z.output<ReturnType<typeof buildServiceEditFormSchema>>;
 
 export type ServiceFormValues = z.input<ReturnType<typeof buildServiceFormSchema>>;
 export type ServiceFormOutput = z.output<ReturnType<typeof buildServiceFormSchema>>;

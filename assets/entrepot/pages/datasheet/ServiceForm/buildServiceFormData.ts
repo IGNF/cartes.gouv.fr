@@ -1,17 +1,32 @@
 import { type ApiError } from "@/modules/jsonFetch";
-import { type ServiceFormOutput, type ServiceType } from "./serviceFormSchema";
+import { type ServiceEditFormOutput, type ServiceFormOutput, type ServiceType } from "./serviceFormSchema";
 
 /**
  * Requête multipart des routes `publish` : champ `data` (JSON lu par MultipartPayloadMapper côté Symfony)
  * et fichiers `thumbnail`, `attribution_logo`, `style_files[<table>]` (WMS vecteur). La donnée stockée voyage dans l’URL.
  */
 export function buildServiceFormData(type: ServiceType, values: ServiceFormOutput, rasterPyramid = false): FormData {
+    return buildFormData(type, values, rasterPyramid, { technical_name: values.technical_name });
+}
+
+/**
+ * Requête multipart de la route `edit` : même `data` que la publication sans nom technique (figé),
+ * avec les retraits de la vignette et du logo (image passée à null dans le formulaire).
+ */
+export function buildServiceEditFormData(type: ServiceType, values: ServiceEditFormOutput, rasterPyramid = false): FormData {
+    return buildFormData(type, values, rasterPyramid, {
+        remove_thumbnail: values.thumbnail === null,
+        remove_attribution_logo: values.attribution.logo === null,
+    });
+}
+
+function buildFormData(type: ServiceType, values: ServiceEditFormOutput, rasterPyramid: boolean, fields: Record<string, unknown>): FormData {
     // WMS raster, WMTS et TMS : ni tables ni fichiers de style
     const wmsVector = type === "wms" && !rasterPyramid;
     const { attribution } = values;
     const payload: Record<string, unknown> = {
+        ...fields,
         title: values.title,
-        technical_name: values.technical_name,
         themes: values.themes,
         access: values.access,
         attribution: attribution.enabled ? { title: attribution.title, url: attribution.url } : null,
