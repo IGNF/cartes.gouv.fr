@@ -311,6 +311,31 @@ final class EntrepotMockResponseFactory
             return $this->json($this->update('configurations', $matches[1], fn (array $item) => json_decode($body, true, flags: JSON_THROW_ON_ERROR) + $item));
         }
 
+        // comme l’Entrepôt (vérifié le 16/11/2026) : le PUT remplace la configuration mais garde `layer_name`, `extra` et les tags
+        if ('PUT' === $method && 1 === preg_match('#^configurations/([\w-]+)$#', $relative, $matches)) {
+            $request = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+            unset($request['extra'], $request['layer_name']);
+
+            return $this->json($this->update('configurations', $matches[1], fn (array $item) => array_intersect_key($item, array_flip(['_id', 'status', 'tags', 'layer_name', 'extra'])) + $request));
+        }
+
+        // synchronisation d’une offre
+        if ('PUT' === $method && 1 === preg_match('#^offerings/([\w-]+)$#', $relative, $matches)) {
+            return $this->json($this->find('offerings', $matches[1]) ?? []);
+        }
+
+        // 1er DELETE : dépublication, immédiate ici ; 2e DELETE sur l’offre UNPUBLISHED : suppression, avec ses permissions
+        if ('DELETE' === $method && 1 === preg_match('#^offerings/([\w-]+)$#', $relative, $matches)) {
+            if ('UNPUBLISHED' !== ($this->find('offerings', $matches[1])['status'] ?? null)) {
+                $this->update('offerings', $matches[1], fn (array $item) => ['status' => 'UNPUBLISHED'] + $item);
+            } else {
+                self::$store['offerings'] = array_values(array_filter(self::$store['offerings'], fn (array $item) => $item['_id'] !== $matches[1]));
+                self::$store['permissions'] = array_values(array_filter(self::$store['permissions'] ?? [], fn (array $item) => !in_array($matches[1], array_column($item['offerings'] ?? [], '_id'), true)));
+            }
+
+            return new MockResponse('', ['http_code' => 204]);
+        }
+
         if ('POST' === $method && 1 === preg_match('#^configurations/([\w-]+)/offerings$#', $relative, $matches)) {
             $request = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
             $configuration = $this->find('configurations', $matches[1]) ?? [];
