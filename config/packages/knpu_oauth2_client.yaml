@@ -7,8 +7,6 @@ knpu_oauth2_client:
         # timeout: 0
         # if you want to disable the proxy (e.g. local GitLab OAuth) - set it to "false"
         proxy: "%env(resolve:HTTP_PROXY)%"
-        #proxy: false
-        verify: false # ssl verification disabled
 
     clients:
         # configure your clients as described here: https://github.com/knpuniversity/oauth2-client-bundle#configuration
