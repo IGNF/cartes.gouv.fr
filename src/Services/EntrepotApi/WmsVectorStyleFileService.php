@@ -1,0 +1,83 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\EntrepotApi;
+
+use App\Constants\EntrepotApi\StaticFileTypes;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Uid\Uuid;
+
+/** Fichiers de style SLD d’un flux WMS vecteur : un fichier statique par table. */
+final readonly class WmsVectorStyleFileService
+{
+    public function __construct(
+        private StaticApiService $staticApiService,
+        private Filesystem $filesystem,
+        private LoggerInterface $logger,
+        #[Autowire(param: 'style_files_path')]
+        private string $styleFilesPath,
+    ) {
+    }
+
+    public static function name(string $configurationId, string $tableName): string
+    {
+        return sprintf('config_%s_style_wmsv_%s', $configurationId, $tableName);
+    }
+
+    /**
+     * Dépose les fichiers ; en cas d’échec, ceux déjà déposés sont supprimés.
+     *
+     * @param array<string, UploadedFile> $files fichier par nom de table
+     *
+     * @return array<string, string> identifiant du fichier statique par nom de table
+     */
+    public function upload(string $datastoreId, array $files, string $configurationId): array
+    {
+        $staticIds = [];
+        $tmpDirs = [];
+        try {
+            foreach ($files as $tableName => $file) {
+                $tmpDirs[] = $tmpDir = $this->styleFilesPath.'/'.Uuid::v4();
+                $file = $file->move($tmpDir, $file->getClientOriginalName());
+                $staticIds[$tableName] = $this->staticApiService->add(
+                    $datastoreId,
+                    $file->getPathname(),
+                    self::name($configurationId, $tableName),
+                    StaticFileTypes::GEOSERVER_STYLE,
+                )['_id'];
+            }
+        } catch (\Throwable $th) {
+            $this->removeQuietly($datastoreId, $staticIds);
+            throw $th;
+        } finally {
+            $this->filesystem->remove($tmpDirs);
+        }
+
+        return $staticIds;
+    }
+
+    /**
+     * Suppression sans lever d’erreur (échec journalisé) : un fichier restant n’est qu’un orphelin.
+     *
+     * @param array<string> $staticIds
+     */
+    public function removeQuietly(string $datastoreId, array $staticIds): void
+    {
+        foreach ($staticIds as $staticId) {
+            try {
+                $this->staticApiService->delete($datastoreId, $staticId)->await();
+            } catch (\Throwable $e) {
+                $this->logger->warning('{class}: Failed to remove style file {staticId}: {error}', [
+                    'class' => self::class,
+                    'staticId' => $staticId,
+                    'exception' => $e,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+}
