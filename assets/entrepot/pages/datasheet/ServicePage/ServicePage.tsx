@@ -83,7 +83,7 @@ type ServicePageContentProps = {
 function ServicePageContent({ datastoreId, datasheetName, service, now }: ServicePageContentProps) {
     const { t } = useTranslation("ServicePage");
     const { t: tForm } = useTranslation("ServiceForm");
-    const { classes } = useStyles();
+    const { classes, cx } = useStyles();
 
     const { data: permissions } = useQuery(datastorePermissionsQueryOptions(datastoreId));
     const { data: services } = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName));
@@ -137,36 +137,6 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
 
     return (
         <>
-            <Button
-                iconId="fr-icon-arrow-left-line"
-                priority="tertiary no outline"
-                size="small"
-                className={fr.cx("fr-mb-2w")}
-                linkProps={{
-                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
-                    params: { datastoreId, datasheetName },
-                    search: { activeTab: "services" },
-                }}
-            >
-                {t("back")}
-            </Button>
-
-            <div className={classes.header}>
-                <div>
-                    <h1 className={fr.cx("fr-mb-1w")}>{configuration.name}</h1>
-                    <div className={classes.tags}>
-                        <Tag small>{getServiceTypeLabel(service)}</Tag>
-                        <OfferingStatusBadge status={service.status} />
-                    </div>
-                </div>
-                {showEdit && (
-                    <Button iconId="fr-icon-edit-line" {...(unavailable || !editLink ? { disabled: true } : { linkProps: editLink })}>
-                        {t("edit")}
-                    </Button>
-                )}
-            </div>
-            {showEdit && <p className={fr.cx("fr-text--sm", "fr-mt-2w")}>{t("edit_notice")}</p>}
-
             {unavailable && (
                 <Alert
                     className={fr.cx("fr-mt-2w")}
@@ -181,6 +151,16 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
 
             <FormProvider {...form}>
                 <MetadataSectionsContainer>
+                    <div className={cx(fr.cx("fr-col-12"), classes.header)}>
+                        <div className={classes.title}>
+                            <h1 className={fr.cx("fr-h6", "fr-mb-0")}>{configuration.name}</h1>
+                            <div className={classes.tags}>
+                                <Tag small>{t("type_tag", { type: getServiceTypeLabel(service) })}</Tag>
+                                <OfferingStatusBadge status={service.status} />
+                            </div>
+                        </div>
+                        {showEdit && <Button {...(unavailable || !editLink ? { disabled: true } : { linkProps: editLink })}>{t("edit")}</Button>}
+                    </div>
                     <MetadataSection title={tForm("section.description")}>
                         <fieldset disabled className={classes.fieldset}>
                             <ServiceDescriptionSection
@@ -244,9 +224,19 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
 const useStyles = tss.withName({ ServicePageContent }).create({
     header: {
         display: "flex",
-        flexWrap: "wrap",
         alignItems: "flex-start",
-        justifyContent: "space-between",
+        gap: fr.spacing("2w"),
+        padding: `${fr.spacing("3w")} ${fr.spacing("6v")} !important`,
+        borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+        [fr.breakpoints.up("md")]: {
+            padding: `${fr.spacing("3w")} ${fr.spacing("10v")} !important`,
+        },
+    },
+    title: {
+        flex: 1,
+        minWidth: 0,
+        display: "flex",
+        flexDirection: "column",
         gap: fr.spacing("2w"),
     },
     fieldset: {
@@ -257,8 +247,9 @@ const useStyles = tss.withName({ ServicePageContent }).create({
     },
     tags: {
         display: "flex",
+        flexWrap: "wrap",
         alignItems: "center",
-        gap: fr.spacing("1w"),
+        gap: fr.spacing("3v"),
     },
     value: {
         marginLeft: 0,

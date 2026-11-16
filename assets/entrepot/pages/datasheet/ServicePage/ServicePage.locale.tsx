@@ -5,9 +5,8 @@ import { type Translations } from "@/i18n/types";
 const { i18n } = declareComponentKeys<
     | "loading"
     | "load_error"
-    | "back"
+    | { K: "type_tag"; P: { type: string }; R: string }
     | "edit"
-    | "edit_notice"
     | "unpublishing.title"
     | "unpublished.title"
     | "unavailable.description"
@@ -48,9 +47,8 @@ const configurationStatusEn: Record<ConfigurationStatus, string> = {
 export const ServicePageFrTranslations: Translations<"fr">["ServicePage"] = {
     loading: "Chargement du flux",
     load_error: "Le flux n’a pas pu être chargé",
-    back: "Retour aux flux de la fiche",
+    type_tag: ({ type }) => `FLUX ${type}`,
     edit: "Modifier",
-    edit_notice: "La modification du flux se fera bientôt sur cette page. En attendant, « Modifier » ouvre le formulaire de modification actuel.",
     "unpublishing.title": "Flux en cours de dépublication",
     "unpublished.title": "Flux dépublié",
     "unavailable.description": "Ce flux n’est plus diffusé. Vous pouvez uniquement terminer sa dépublication depuis l’onglet Flux de la fiche.",
@@ -78,9 +76,8 @@ export const ServicePageFrTranslations: Translations<"fr">["ServicePage"] = {
 export const ServicePageEnTranslations: Translations<"en">["ServicePage"] = {
     loading: "Loading the service",
     load_error: "The service could not be loaded",
-    back: "Back to the datasheet services",
+    type_tag: ({ type }) => `${type} SERVICE`,
     edit: "Edit",
-    edit_notice: "Editing the service will soon happen on this page. Meanwhile, “Edit” opens the current edit form.",
     "unpublishing.title": "Service being unpublished",
     "unpublished.title": "Unpublished service",
     "unavailable.description": "This service is no longer broadcast. You can only finish unpublishing it from the Services tab of the datasheet.",
