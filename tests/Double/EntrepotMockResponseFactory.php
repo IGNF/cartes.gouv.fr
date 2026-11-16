@@ -44,6 +44,11 @@ final class EntrepotMockResponseFactory
         self::$usersMeMember = true;
     }
 
+    public static function removeUserFromDatastore(): void
+    {
+        self::$usersMeMember = false;
+    }
+
     public static function datastoreCalls(): int
     {
         return self::$datastoreCalls;

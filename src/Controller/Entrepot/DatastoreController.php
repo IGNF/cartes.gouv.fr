@@ -7,6 +7,7 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\Datastore\PermissionDTO;
 use App\Dto\Datastore\UpdatePermissionDTO;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\MembershipService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,14 +25,14 @@ class DatastoreController extends AbstractController implements ApiControllerInt
 {
     public function __construct(
         private readonly DatastoreApiService $datastoreApiService,
+        private readonly MembershipService $membershipService,
     ) {
     }
 
     #[Route('/{datastoreId}', name: 'get', methods: ['GET'])]
     public function getDatastore(string $datastoreId): JsonResponse
     {
-        // sans le cache commun à tous les utilisateurs : l'Entrepôt répond ou refuse avec le jeton de l'utilisateur
-        return $this->json($this->datastoreApiService->fetch($datastoreId));
+        return $this->json($this->readDatastore($datastoreId));
     }
 
     #[Route('/{datastoreId}/endpoints', name: 'get_endpoints', methods: ['GET'])]
@@ -40,7 +41,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
         #[MapQueryParameter] ?string $type = null,
         #[MapQueryParameter] ?bool $open = null,
     ): JsonResponse {
-        $endpoints = $this->datastoreApiService->filterEndpoints($this->datastoreApiService->fetch($datastoreId), [
+        $endpoints = $this->datastoreApiService->filterEndpoints($this->readDatastore($datastoreId), [
             'type' => $type,
             'open' => $open,
         ]);
@@ -119,5 +120,17 @@ class DatastoreController extends AbstractController implements ApiControllerInt
         $stats = $this->datastoreApiService->getEndpointStats($datastoreId, $endpointId, $query)->resolve();
 
         return $this->json($stats);
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function readDatastore(string $datastoreId): array
+    {
+        // le cache est commun à tous les utilisateurs et la lecture de l'entrepôt est lente (7 à 8 s) : appartenance relue à chaque requête,
+        // un non-membre interroge l'Entrepôt avec son propre jeton
+        return $this->membershipService->isMemberOfDatastoreNow($datastoreId)
+            ? $this->datastoreApiService->get($datastoreId)
+            : $this->datastoreApiService->fetch($datastoreId);
     }
 }

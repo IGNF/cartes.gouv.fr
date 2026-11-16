@@ -7,6 +7,7 @@ use App\Exception\ApiException;
 use App\Security\KeycloakTokenManager;
 use App\Security\User;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotUserCache;
 use App\Services\MembershipService;
 use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Double\FakeKeycloakClient;
@@ -16,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
- * Le cache de l’entrepôt est commun à tous les utilisateurs : les routes qui renvoient l’entrepôt ne le lisent pas.
+ * Le cache de l’entrepôt est commun à tous les utilisateurs : seul un membre le lit, appartenance relue à chaque requête.
  * Le pool de cache de test est vidé entre deux requêtes HTTP : le cache se teste dans un seul noyau.
  */
 final class DatastoreCacheMembershipTest extends KernelTestCase
@@ -32,7 +33,7 @@ final class DatastoreCacheMembershipTest extends KernelTestCase
         self::getContainer()->get('security.token_storage')->setToken(new UsernamePasswordToken($user, 'main', $user->getRoles()));
     }
 
-    public function testTheRoutesDoNotReadTheCacheEvenForAMember(): void
+    public function testAMemberReadsTheCache(): void
     {
         EntrepotMockResponseFactory::makeUserMemberOfDatastore();
         $this->warmCache();
@@ -41,7 +42,22 @@ final class DatastoreCacheMembershipTest extends KernelTestCase
         self::assertSame(Response::HTTP_OK, $controller->getDatastore(self::ID)->getStatusCode());
         self::assertSame(Response::HTTP_OK, $controller->getEndpoints(self::ID)->getStatusCode());
 
-        self::assertSame(3, EntrepotMockResponseFactory::datastoreCalls());
+        self::assertSame(1, EntrepotMockResponseFactory::datastoreCalls());
+    }
+
+    public function testAMemberRemovedSinceTheProfileWasCachedDoesNotReadTheCache(): void
+    {
+        EntrepotMockResponseFactory::makeUserMemberOfDatastore();
+        $userCache = self::getContainer()->get(EntrepotUserCache::class);
+        $userCache->get(EntrepotMockResponseFactory::USER_ID);
+        // requête suivante : le profil en cache dit encore « membre »
+        $userCache->reset();
+        $this->warmCache();
+        EntrepotMockResponseFactory::removeUserFromDatastore();
+        EntrepotMockResponseFactory::forbidDatastore();
+
+        $this->assertForbidden(fn () => self::getContainer()->get(DatastoreController::class)->getDatastore(self::ID));
+        self::assertSame(2, EntrepotMockResponseFactory::datastoreCalls());
     }
 
     public function testANonMemberGetsTheAnswerOfTheEntrepotForTheDatastore(): void

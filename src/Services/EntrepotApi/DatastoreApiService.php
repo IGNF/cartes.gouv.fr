@@ -22,7 +22,7 @@ final readonly class DatastoreApiService
 
     /**
      * Cache commun à tous les utilisateurs : réservé aux appelants internes qui interrogent aussi l'Entrepôt avec le jeton de l'utilisateur dans la même requête.
-     * Une route qui renvoie l'entrepôt ou ses points d'accès passe par fetch().
+     * Une route qui renvoie l'entrepôt ou ses points d'accès vérifie d'abord l'appartenance (MembershipService::isMemberOfDatastoreNow), sinon fetch().
      *
      * @return array<mixed>
      */

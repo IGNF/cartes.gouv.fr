@@ -35,6 +35,18 @@ class MembershipService
     }
 
     /**
+     * Appartenance lue dans un profil frais (un appel users/me) : un retrait fait par un autre membre compte tout de suite.
+     */
+    public function isMemberOfDatastoreNow(string $datastoreId): bool
+    {
+        if (!$this->security->getUser() instanceof User) {
+            return false;
+        }
+
+        return null !== Utils::array_find($this->currentProfile(true)['communities_member'] ?? [], fn (array $member) => ($member['community']['datastore'] ?? null) === $datastoreId);
+    }
+
+    /**
      * @return array<mixed>|null
      */
     public function findByCommunity(string $communityId): ?array
