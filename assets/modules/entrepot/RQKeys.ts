@@ -54,12 +54,21 @@ const RQKeys = {
     ],
     datastore_datasheet_metadata: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName, "metadata"],
     datastore_datasheet_service_list: (datastoreId: string, datasheetName: string) => ["datastore", datastoreId, "datasheet", datasheetName, "services"],
+    datastore_datasheet_configurations_without_offering: (datastoreId: string, datasheetName: string) => [
+        "datastore",
+        datastoreId,
+        "datasheet",
+        datasheetName,
+        "configurations_without_offering",
+    ],
 
     datastore_offering_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "offering"];
         if (queryParams) keys.push(JSON.stringify(queryParams));
         return keys;
     },
+    // préfixe des listes de noms de couches pris, tous types de flux
+    datastore_layernames: (datastoreId: string): string[] => ["datastore", datastoreId, "layernames"],
     datastore_layernames_list: (datastoreId: string, configurationType: ConfigurationTypeEnum): string[] => [
         "datastore",
         datastoreId,

@@ -30,6 +30,11 @@ class CartesStoredDataApiService
             $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id']);
         }
 
+        // configurations restées sans offre : l’Entrepôt refuserait la suppression d’une donnée encore utilisée
+        foreach ($this->configurationApiService->getAll($datastoreId, ['stored_data' => $storedDataId])->resolve() as $configuration) {
+            $this->cartesServiceApiService->removeConfiguration($datastoreId, $this->configurationApiService->get($datastoreId, $configuration['_id'])->array());
+        }
+
         // Annulation des exécutions de traitements en cours utilisant la donnée stockée en entrée
         $blockingProcessingStatuses = [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS];
         $processingExecutions = $this->processingApiService->getAllExecutions($datastoreId, [

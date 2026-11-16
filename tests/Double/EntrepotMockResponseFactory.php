@@ -422,6 +422,12 @@ final class EntrepotMockResponseFactory
             return new MockResponse('', ['http_code' => 204]);
         }
 
+        // comme l’Entrepôt (vérifié le 16/11/2026) : une configuration qui a encore une offre n’est pas supprimée
+        if ('DELETE' === $method && 1 === preg_match('#^configurations/([\w-]+)$#', $relative, $matches)
+            && [] !== array_filter(self::$store['offerings'] ?? [], fn (array $item) => ($item['configuration']['_id'] ?? null) === $matches[1])) {
+            return $this->json(['error' => 'Conflict', 'error_description' => ['Configuration utilisée']], 409);
+        }
+
         if ('DELETE' === $method && 1 === preg_match('#^(annexes|statics|metadata|uploads|stored_data|configurations|permissions)/([\w-]+)$#', $relative, $matches)) {
             self::$store[$matches[1]] = array_values(array_filter(self::$store[$matches[1]] ?? [], fn (array $item) => $item['_id'] !== $matches[2]));
 
@@ -431,7 +437,7 @@ final class EntrepotMockResponseFactory
         return null;
     }
 
-    // filtres de liste de l’Entrepôt : tags[clé]=valeur, labels[]=clé=valeur, path, input_stored_data, output_stored_data
+    // filtres de liste de l’Entrepôt : tags[clé]=valeur, labels[]=clé=valeur, path, input_stored_data, output_stored_data, stored_data
     /**
      * @param array<mixed> $item
      * @param array<mixed> $query
@@ -454,6 +460,14 @@ final class EntrepotMockResponseFactory
 
         if (isset($query['output_stored_data']) && $query['output_stored_data'] !== ($item['output']['stored_data']['_id'] ?? null)) {
             return false;
+        }
+
+        // configuration, ou offre par sa configuration
+        if (isset($query['stored_data'])) {
+            $typeInfos = $item['type_infos'] ?? $this->find('configurations', (string) ($item['configuration']['_id'] ?? ''))['type_infos'] ?? [];
+            if (!in_array($query['stored_data'], array_column($typeInfos['used_data'] ?? [], 'stored_data'), true)) {
+                return false;
+            }
         }
 
         return [] === array_diff((array) ($query['labels'] ?? []), $item['labels'] ?? []);

@@ -255,31 +255,47 @@ class CartesServiceApiService
      *
      * @return array<mixed> la configuration supprimée
      */
-    private function unpublishOfferingAndConfiguration(string $datastoreId, array $offering, bool $removeStyleFiles = true): array
+    private function unpublishOfferingAndConfiguration(string $datastoreId, array $offering): array
     {
         $this->removeOfferingFully($datastoreId, $offering);
 
         $configuration = $this->waitForConfigurationUnpublished($datastoreId, $offering['configuration']['_id']);
 
+        $this->removeConfiguration($datastoreId, $configuration);
+
+        return $configuration;
+    }
+
+    /**
+     * Supprime une configuration sans offre, puis ses images et fichiers de style. L’Entrepôt refuse (409) une configuration qui a encore une offre.
+     *
+     * @param array<mixed> $configuration
+     */
+    public function removeConfiguration(string $datastoreId, array $configuration): void
+    {
         $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
 
-        // vignette et logo d’attribution, après la configuration qui les référence ; un échec n’empêche pas la suppression du flux
+        // fichiers lus dans la configuration supprimée : un échec n’empêche pas la suppression du flux
+        $this->removeQuietly($configuration['_id'], 'image annexes', fn () => $this->serviceImageAnnexeService->removeServiceImages($datastoreId, $configuration));
+        $this->removeStyleFiles($datastoreId, $configuration);
+    }
+
+    /**
+     * Suppression d’un fichier d’une configuration déjà supprimée : l’échec est journalisé, les suppressions suivantes ont lieu.
+     */
+    private function removeQuietly(string $configurationId, string $files, \Closure $remove): void
+    {
         try {
-            $this->serviceImageAnnexeService->removeServiceImages($datastoreId, $configuration);
+            $remove();
         } catch (ApiException $e) {
-            $this->logger->warning('{class}: Failed to remove image annexes of configuration {configurationId}: {error}', [
+            $this->logger->warning('{class}: Failed to remove {files} of configuration {configurationId}: {error}', [
                 'class' => self::class,
-                'configurationId' => $configuration['_id'],
+                'files' => $files,
+                'configurationId' => $configurationId,
                 'exception' => $e,
                 'error' => $e->getMessage(),
             ]);
         }
-
-        if ($removeStyleFiles) {
-            $this->removeStyleFiles($datastoreId, $configuration);
-        }
-
-        return $configuration;
     }
 
     /**
@@ -416,29 +432,39 @@ class CartesServiceApiService
      */
     private function removeStyleFiles(string $datastoreId, array $configuration): void
     {
-        // WFS et TMS
-        $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration);
+        $configurationId = $configuration['_id'];
+        $remove = fn (string $files, ResponsePromise $promise) => $this->removeQuietly($configurationId, $files, fn () => $promise->await());
 
+        // WFS et TMS ; sans migration : elle écrirait dans la configuration déjà supprimée
+        $styles = [];
+        $this->removeQuietly($configurationId, 'style list', function () use ($datastoreId, $configuration, &$styles): void {
+            $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration, false);
+        });
         foreach ($styles as $style) {
-            if (array_key_exists('layers', $style)) {
-                foreach ($style['layers'] as $layer) {
-                    $this->annexeApiService->remove($datastoreId, $layer['annexe_id'])->await();
-                }
+            foreach ($style['layers'] ?? [] as $layer) {
+                $remove('style annexe '.$layer['annexe_id'], $this->annexeApiService->remove($datastoreId, $layer['annexe_id']));
             }
         }
 
+        // ancienne annexe de styles, que la migration supprimait
+        $legacyAnnexes = [];
+        $this->removeQuietly($configurationId, 'legacy styles annexe', function () use ($datastoreId, $configurationId, &$legacyAnnexes): void {
+            $legacyAnnexes = $this->annexeApiService->getAll($datastoreId, null, "/configuration/$configurationId/styles.json")->resolve();
+        });
+        foreach ($legacyAnnexes as $annexe) {
+            $remove('legacy styles annexe '.$annexe['_id'], $this->annexeApiService->remove($datastoreId, $annexe['_id']));
+        }
+
         // WMS-VECTOR
-        $relations = $configuration['type_infos']['used_data'][0]['relations'] ?? [];
-        foreach ($relations as $relation) {
+        foreach ($configuration['type_infos']['used_data'][0]['relations'] ?? [] as $relation) {
             if (isset($relation['style'])) {
-                $this->staticApiService->delete($datastoreId, $relation['style'])->await();
+                $remove('style static '.$relation['style'], $this->staticApiService->delete($datastoreId, $relation['style']));
             }
         }
 
         // WMS-RASTER & WMTS
-        $typeInfoStyles = $configuration['type_infos']['styles'] ?? [];
-        foreach ($typeInfoStyles as $styleStaticId) {
-            $this->staticApiService->delete($datastoreId, $styleStaticId)->await();
+        foreach ($configuration['type_infos']['styles'] ?? [] as $styleStaticId) {
+            $remove('style static '.$styleStaticId, $this->staticApiService->delete($datastoreId, $styleStaticId));
         }
     }
 

@@ -17,6 +17,7 @@ import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
+import { datasheetConfigurationsWithoutOfferingQueryOptions } from "@/hooks/queries/datasheetConfigurationsWithoutOfferingQueryOptions";
 import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
 import { blockingProcessingStatuses } from "@/hooks/queries/useStoredDataUseProcessings";
 import useCatalogueDatasheetUrl from "@/hooks/useCatalogueDatasheetUrl";
@@ -106,6 +107,11 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
     const metadataQuery = useQuery({ ...datasheetMetadataQueryOptions(datastoreId, datasheetName), enabled });
 
     const serviceListQuery = useQuery({ ...datasheetServiceListQueryOptions(datastoreId, datasheetName), enabled });
+    // lourde (une lecture par configuration) : seulement sur l’onglet Flux
+    const configurationsWithoutOfferingQuery = useQuery({
+        ...datasheetConfigurationsWithoutOfferingQueryOptions(datastoreId, datasheetName),
+        enabled: enabled && activeTab === DatasheetViewActiveTabEnum.Services,
+    });
 
     const isDeleteModalOpen = useIsModalOpen(deleteModal);
 
@@ -199,7 +205,12 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
             />
         ),
         [DatasheetViewActiveTabEnum.Services]: (
-            <ServicesListTabNext datastoreId={datastoreId} datasheetName={datasheetName} serviceListQuery={serviceListQuery} />
+            <ServicesListTabNext
+                datastoreId={datastoreId}
+                datasheetName={datasheetName}
+                serviceListQuery={serviceListQuery}
+                configurationsWithoutOfferingQuery={configurationsWithoutOfferingQuery}
+            />
         ),
     };
 
