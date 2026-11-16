@@ -968,11 +968,17 @@ class CartesServiceApiService
         $permissions = $this->datastoreApiService->getPermissions($datastoreId)->resolve();
 
         $communityId = $this->membershipService->getDatastoreIdentity($datastoreId)->communityId;
+        $configCommunityId = $this->params->get('config')['community_id'];
+        if ($renewExpired) {
+            // une seule fois pour les deux communautés : elles peuvent être la même (entrepôt de cartes.gouv.fr)
+            $permissions = $this->removeExpiredPermissions($datastoreId, $offering, $permissions, [$communityId, $configCommunityId]);
+        }
+
         // POST /permissions renvoie la liste des permissions créées
-        $permissions = [...$permissions, ...$this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions, $renewExpired)];
+        $permissions = [...$permissions, ...$this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions)];
 
         if ($access->allowsCartesGouvView()) {
-            $this->addPermissionForCommunity($datastoreId, $this->params->get('config')['community_id'], $offering, $permissions, $renewExpired);
+            $this->addPermissionForCommunity($datastoreId, $configCommunityId, $offering, $permissions);
         } else {
             $this->removeExistingConfigPermission($datastoreId, $offering, $permissions);
         }
@@ -1101,15 +1107,37 @@ class CartesServiceApiService
     }
 
     /**
+     * Supprime les permissions expirées de l’offre accordées à ces communautés.
+     *
+     * @param array<mixed>  $offering
+     * @param array<mixed>  $permissions  permissions du datastore
+     * @param array<string> $communityIds
+     *
+     * @return array<mixed> permissions restantes
+     */
+    private function removeExpiredPermissions(string $datastoreId, array $offering, array $permissions, array $communityIds): array
+    {
+        return array_values(array_filter($permissions, function (array $permission) use ($datastoreId, $offering, $communityIds): bool {
+            $expired = $this->isPermissionExpired($permission)
+                && in_array($permission['beneficiary']['_id'] ?? null, $communityIds, true)
+                && in_array($offering['_id'], array_column($permission['offerings'] ?? [], '_id'), true);
+            if ($expired) {
+                $this->datastoreApiService->removePermission($datastoreId, $permission['_id'])->await();
+            }
+
+            return !$expired;
+        }));
+    }
+
+    /**
      * Retourne les permissions créées (aucune si elle existait déjà).
      *
      * @param array<mixed> $offering
-     * @param array<mixed> $permissions  permissions existantes du datastore
-     * @param bool         $renewExpired voir handleAccessPermissions()
+     * @param array<mixed> $permissions permissions existantes du datastore
      *
      * @return array<mixed>
      */
-    private function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering, array $permissions, bool $renewExpired = false): array
+    private function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering, array $permissions): array
     {
         $offeringId = $offering['_id'];
 
@@ -1117,15 +1145,6 @@ class CartesServiceApiService
             return isset($permission['offerings']) && in_array($offeringId, array_column($permission['offerings'], '_id'))
                 && isset($permission['beneficiary']['_id']) && $permission['beneficiary']['_id'] === $consumerCommunityId;
         });
-
-        if ($renewExpired) {
-            foreach ($communityPermissions as $index => $permission) {
-                if ($this->isPermissionExpired($permission)) {
-                    $this->datastoreApiService->removePermission($producerDatastoreId, $permission['_id'])->await();
-                    unset($communityPermissions[$index]);
-                }
-            }
-        }
 
         if ([] !== $communityPermissions) {
             return [];

@@ -224,6 +224,19 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertSame(['community-1', $this->cartesGouvCommunityId()], array_map(fn (array $permission) => $permission['beneficiary']['_id'], $permissions));
     }
 
+    public function testExpiredPermissionIsRenewedOnceWhenTheDatastoreCommunityIsTheCartesGouvCommunity(): void
+    {
+        $client = $this->client();
+        EntrepotMockResponseFactory::setDatastoreCommunity($this->cartesGouvCommunityId());
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('expired-cartes', $this->cartesGouvCommunityId(), '2020-01-01T00:00:00+00:00');
+
+        $this->post($client, ['access' => 'restricted_visible'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame([$this->cartesGouvCommunityId()], array_map(fn (array $permission) => $permission['beneficiary']['_id'], EntrepotMockResponseFactory::stored('permissions')));
+    }
+
     public function testPermissionsAreLeftIntactWhenTheAccessIsUnchanged(): void
     {
         $this->seedService('WFS', open: false);

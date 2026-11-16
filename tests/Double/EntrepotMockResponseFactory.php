@@ -42,6 +42,8 @@ final class EntrepotMockResponseFactory
     /** @var array<string, string> préfixes ajoutés à la réponse du datastore */
     private static array $datastorePrefixes = [];
 
+    private static string $datastoreCommunityId = 'community-1';
+
     private static int $usersMeCalls = 0;
     private static bool $usersMeDown = false;
     private static string $usersMeId = self::USER_ID;
@@ -54,8 +56,15 @@ final class EntrepotMockResponseFactory
         self::$datastorePrefixes = $prefixes;
     }
 
+    // communauté propre du datastore jusqu’au prochain reset()
+    public static function setDatastoreCommunity(string $communityId): void
+    {
+        self::$datastoreCommunityId = $communityId;
+    }
+
     public static function reset(): void
     {
+        self::$datastoreCommunityId = 'community-1';
         self::$writeRequests = [];
         self::$store = [];
         self::$metadataFiles = [];
@@ -209,7 +218,7 @@ final class EntrepotMockResponseFactory
         }
 
         if ('GET' === $method && '' === $relative) {
-            return $this->json([...self::$datastorePrefixes, '_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => 'community-1'], 'endpoints' => [
+            return $this->json([...self::$datastorePrefixes, '_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => self::$datastoreCommunityId], 'endpoints' => [
                 ['endpoint' => ['_id' => self::METADATA_ENDPOINT_ID, 'type' => 'METADATA', 'open' => true, 'urls' => [['type' => 'CSW', 'url' => 'https://csw.test/csw']]]],
                 ['endpoint' => ['_id' => self::WFS_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wfs-public', 'type' => 'WFS', 'open' => true, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/public']]]],
                 ['endpoint' => ['_id' => self::WFS_PRIVATE_ENDPOINT_ID, 'technical_name' => 'wfs-private', 'type' => 'WFS', 'open' => false, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/private']]]],
@@ -451,6 +460,10 @@ final class EntrepotMockResponseFactory
         if ('DELETE' === $method && 1 === preg_match('#^configurations/([\w-]+)$#', $relative, $matches)
             && [] !== array_filter(self::$store['offerings'] ?? [], fn (array $item) => ($item['configuration']['_id'] ?? null) === $matches[1])) {
             return $this->json(['error' => 'Conflict', 'error_description' => ['Configuration utilisée']], 409);
+        }
+
+        if ('DELETE' === $method && 1 === preg_match('#^permissions/([\w-]+)$#', $relative, $matches) && null === $this->find('permissions', $matches[1])) {
+            return $this->json(['error' => 'NotFound'], 404);
         }
 
         if ('DELETE' === $method && 1 === preg_match('#^(annexes|statics|metadata|uploads|stored_data|configurations|permissions)/([\w-]+)$#', $relative, $matches)) {
