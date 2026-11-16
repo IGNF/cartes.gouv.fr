@@ -218,6 +218,13 @@ final class ServiceEditRouteTest extends WebTestCase
     {
         $this->seedService('WFS', open: false);
         $this->seedPermission('own', 'community-1', '2099-01-01T00:00:00+00:00');
+        // permission partagée avec un autre flux : elle garde l’autre flux
+        EntrepotMockResponseFactory::seed('permissions', [
+            '_id' => 'shared',
+            'end_date' => '2099-01-01T00:00:00+00:00',
+            'offerings' => [['_id' => self::OFFERING_ID], ['_id' => 'other-offering']],
+            'beneficiary' => ['_id' => 'community-1'],
+        ]);
         $client = $this->client();
 
         $this->post($client, ['access' => 'public'] + $this->payload());
@@ -227,7 +234,9 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertCount(1, $offerings);
         self::assertNotSame(self::OFFERING_ID, $offerings[0]['_id']);
         self::assertSame(EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, $offerings[0]['endpoint']['_id']);
-        self::assertSame([], EntrepotMockResponseFactory::stored('permissions'));
+        $permissions = EntrepotMockResponseFactory::stored('permissions');
+        self::assertSame(['shared'], array_column($permissions, '_id'));
+        self::assertSame([['_id' => 'other-offering']], $permissions[0]['offerings']);
     }
 
     public function testFailedOfferingCreationLeavesTheFluxWithoutOffering(): void

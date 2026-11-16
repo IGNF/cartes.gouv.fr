@@ -333,13 +333,14 @@ final class EntrepotMockResponseFactory
             return $this->json($this->find('offerings', $matches[1]) ?? []);
         }
 
-        // 1er DELETE : dépublication, immédiate ici ; 2e DELETE sur l’offre UNPUBLISHED : suppression, avec ses permissions
+        // 1er DELETE : dépublication, immédiate ici ; 2e DELETE : suppression, l’offre est retirée de ses permissions et une permission vide est supprimée (mesuré le 16/11/2026)
         if ('DELETE' === $method && 1 === preg_match('#^offerings/([\w-]+)$#', $relative, $matches)) {
             if ('UNPUBLISHED' !== ($this->find('offerings', $matches[1])['status'] ?? null)) {
                 $this->update('offerings', $matches[1], fn (array $item) => ['status' => 'UNPUBLISHED'] + $item);
             } else {
                 self::$store['offerings'] = array_values(array_filter(self::$store['offerings'], fn (array $item) => $item['_id'] !== $matches[1]));
-                self::$store['permissions'] = array_values(array_filter(self::$store['permissions'] ?? [], fn (array $item) => !in_array($matches[1], array_column($item['offerings'] ?? [], '_id'), true)));
+                $permissions = array_map(fn (array $item) => ['offerings' => array_values(array_filter($item['offerings'] ?? [], fn (array $offering) => $offering['_id'] !== $matches[1]))] + $item, self::$store['permissions'] ?? []);
+                self::$store['permissions'] = array_values(array_filter($permissions, fn (array $item) => [] !== $item['offerings']));
             }
 
             return new MockResponse('', ['http_code' => 204]);

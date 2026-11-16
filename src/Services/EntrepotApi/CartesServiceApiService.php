@@ -300,7 +300,7 @@ class CartesServiceApiService
     }
 
     /**
-     * Supprime complètement une offering : dépublication (1er DELETE) puis suppression définitive (2e DELETE sur l'offering UNPUBLISHED, qui supprime aussi ses accès et permissions).
+     * Supprime complètement une offering : dépublication (1er DELETE) puis suppression (2e DELETE, qui la retire de ses permissions et supprime celles restées vides).
      *
      * @param array<mixed> $offering
      */
