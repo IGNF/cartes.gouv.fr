@@ -92,9 +92,11 @@ final class ServiceEditRouteTest extends WebTestCase
             'abstract' => 'Nouvelle description',
             'keywords' => ['Hydrographie', 'Transports'],
         ], $this->configurationPut()['type_infos']);
+        // même endpoint public : l’offre est synchronisée, pas recréée
+        self::assertSame([self::OFFERING_ID], array_column(EntrepotMockResponseFactory::stored('offerings'), '_id'));
     }
 
-    public function testNewLogoReplacesTheOldOneWhichIsRemovedAfterwards(): void
+    public function testNewLogoReplacesTheOldOneWhichIsRemoved(): void
     {
         $this->seedService('WFS');
         $client = $this->client();
@@ -171,10 +173,26 @@ final class ServiceEditRouteTest extends WebTestCase
         $client = $this->client();
         EntrepotMockResponseFactory::failNext('PUT configurations/'.self::CONFIGURATION_ID);
 
+        $this->post($client, ['attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr']] + $this->payload(), [
+            'thumbnail' => $this->png(),
+            'attribution_logo' => $this->png(),
+        ]);
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame(['annexe-service-thumbnail', 'annexe-attribution-logo'], array_column(EntrepotMockResponseFactory::stored('annexes'), '_id'));
+    }
+
+    public function testNewThumbnailIsRemovedWhenExtraCannotBeWritten(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PATCH configurations/'.self::CONFIGURATION_ID);
+
         $this->post($client, $this->payload(), ['thumbnail' => $this->png()]);
 
         self::assertResponseStatusCodeSame(500);
         self::assertSame(['annexe-service-thumbnail', 'annexe-attribution-logo'], array_column(EntrepotMockResponseFactory::stored('annexes'), '_id'));
+        self::assertSame(self::ANNEXES_URL.self::OLD_THUMBNAIL_PATH, EntrepotMockResponseFactory::stored('configurations')[0]['extra']['_search']['url_vignette']);
     }
 
     public function testPublicToRestrictedVisibleRecreatesTheOfferingOnThePrivateEndpoint(): void
@@ -194,6 +212,22 @@ final class ServiceEditRouteTest extends WebTestCase
             ['community-1', $this->cartesGouvCommunityId()],
             array_map(fn (array $permission) => $permission['beneficiary']['_id'], EntrepotMockResponseFactory::stored('permissions')),
         );
+    }
+
+    public function testRestrictedToPublicRecreatesTheOfferingOnThePublicEndpointWithoutPermission(): void
+    {
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('own', 'community-1', '2099-01-01T00:00:00+00:00');
+        $client = $this->client();
+
+        $this->post($client, ['access' => 'public'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        $offerings = EntrepotMockResponseFactory::stored('offerings');
+        self::assertCount(1, $offerings);
+        self::assertNotSame(self::OFFERING_ID, $offerings[0]['_id']);
+        self::assertSame(EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, $offerings[0]['endpoint']['_id']);
+        self::assertSame([], EntrepotMockResponseFactory::stored('permissions'));
     }
 
     public function testFailedOfferingCreationLeavesTheFluxWithoutOffering(): void
@@ -271,6 +305,17 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 
+    public function testConfigurationBeingSynchronizedAnswers409WithoutWriting(): void
+    {
+        $this->seedService('WFS', configurationStatus: 'SYNCHRONIZING');
+        $client = $this->client();
+
+        $this->post($client, $this->payload());
+
+        self::assertResponseStatusCodeSame(409);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
     public function testInvalidFieldsAnswer422ByType(): void
     {
         $this->seedService('WFS');
@@ -319,9 +364,9 @@ final class ServiceEditRouteTest extends WebTestCase
         return self::getContainer()->getParameter('config')['community_id'];
     }
 
-    private function seedService(string $type, bool $open = true, string $offeringStatus = 'PUBLISHED'): void
+    private function seedService(string $type, bool $open = true, string $offeringStatus = 'PUBLISHED', string $configurationStatus = 'PUBLISHED'): void
     {
-        EntrepotMockResponseFactory::seed('configurations', $this->seededConfiguration($type));
+        EntrepotMockResponseFactory::seed('configurations', ['status' => $configurationStatus] + $this->seededConfiguration($type));
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'pyramid-1', 'type' => 'ROK4-PYRAMID-RASTER', 'tags' => ['datasheet_name' => 'Fiche']]);
         EntrepotMockResponseFactory::seed('offerings', [
             '_id' => self::OFFERING_ID,
@@ -329,7 +374,12 @@ final class ServiceEditRouteTest extends WebTestCase
             'layer_name' => 'SANDBOX.mon_flux',
             'open' => $open,
             'status' => $offeringStatus,
-            'endpoint' => ['_id' => $open ? EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID : EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID],
+            'endpoint' => ['_id' => match ($type) {
+                'WMS-RASTER' => EntrepotMockResponseFactory::WMSR_PUBLIC_ENDPOINT_ID,
+                'WMTS-TMS' => EntrepotMockResponseFactory::WMTS_PUBLIC_ENDPOINT_ID,
+                'WMS-VECTOR' => EntrepotMockResponseFactory::WMSV_PUBLIC_ENDPOINT_ID,
+                default => $open ? EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID : EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID,
+            }],
             'configuration' => ['_id' => self::CONFIGURATION_ID],
             'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/public']],
         ]);
