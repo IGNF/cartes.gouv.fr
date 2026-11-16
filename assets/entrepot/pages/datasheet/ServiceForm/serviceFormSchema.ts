@@ -72,7 +72,7 @@ type SchemaDeps = {
     layerNamePrefix?: string;
     /** accès offerts par les endpoints de l’entrepôt pour ce type de flux */
     availableAccesses: readonly ServiceAccess[];
-    /** modification : noms techniques enregistrés par table (`native_name` → `public_name`) ; nom facultatif, ancien nom accepté hors de la règle des minuscules, pas de plafond de tables */
+    /** modification : noms techniques enregistrés par table (`native_name` → `public_name`) ; nom facultatif, ancien nom accepté hors de la règle des minuscules, pas de plafond de tables en WFS */
     savedTablePublicNames?: Readonly<Record<string, string>>;
 };
 
@@ -132,6 +132,8 @@ export const buildServiceFormSchema = ({
             keywords: z.array(z.string()),
             // fichier SLD (WMS vecteur)
             style: z.instanceof(File).optional(),
+            // modification WMS vecteur : fichier de style enregistré, gardé sans nouveau fichier
+            saved_style_id: z.string().optional(),
             // modification : table enregistrée absente de la base, affichée mais non cochable
             missing: z.boolean().optional(),
         })
@@ -140,7 +142,7 @@ export const buildServiceFormSchema = ({
             if (!table.selected) return;
             if (type === "wms") {
                 if (table.style === undefined) {
-                    ctx.addIssue({ code: "custom", path: ["style"], message: t("validation.table.style.required") });
+                    if (table.saved_style_id === undefined) ctx.addIssue({ code: "custom", path: ["style"], message: t("validation.table.style.required") });
                 } else if (!table.style.name.toLowerCase().endsWith(".sld")) {
                     ctx.addIssue({ code: "custom", path: ["style"], message: t("validation.table.style.extension") });
                 } else {
@@ -203,8 +205,8 @@ export const buildServiceFormSchema = ({
                   .array(tableSchema)
                   .refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))
                   .refine(
-                      // plafond des fichiers de style du WMS vecteur : sans objet en modification
-                      (tables) => edit || tables.filter((table) => table.selected).length <= SERVICE_TABLES_MAX,
+                      // plafond des fichiers de style du WMS vecteur, publication WFS comprise ; pas en modification WFS
+                      (tables) => (edit && type === "wfs") || tables.filter((table) => table.selected).length <= SERVICE_TABLES_MAX,
                       t("validation.tables.max", { max: SERVICE_TABLES_MAX })
                   )
             : z.array(tableSchema),

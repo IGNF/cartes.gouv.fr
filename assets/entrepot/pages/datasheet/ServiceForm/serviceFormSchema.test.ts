@@ -233,14 +233,14 @@ describe("rasterPyramidPublishType", () => {
 });
 
 describe("buildServiceEditFormSchema", () => {
-    const editIssues = async (tables: ServiceFormValues["tables"]) => {
+    const editIssues = async (tables: ServiceFormValues["tables"], type: ServiceType = "wfs") => {
         const { stored_data_id: _storedDataId, technical_name: _technicalName, ...values } = valid();
         const result = await buildServiceEditFormSchema({
             t,
-            type: "wfs",
+            type,
             availableAccesses: ["public"],
             savedTablePublicNames: { communes: "Communes_2020" },
-        }).safeParseAsync({ ...values, tables });
+        }).safeParseAsync({ ...values, description: "Les communes", tables });
         return (result.error?.issues ?? []).map((issue) => `${issue.path.join(".")}: ${issue.message}`);
     };
 
@@ -254,8 +254,26 @@ describe("buildServiceEditFormSchema", () => {
         expect(await editIssues([table({ public_name: "Communes_2021" })])).toEqual(["tables.0.public_name: validation.table.public_name.chars"]);
     });
 
-    it("n’applique pas le plafond de tables", async () => {
+    it("n’applique pas le plafond de tables en WFS", async () => {
         expect(await editIssues(Array.from({ length: 11 }, (_, index) => table({ native_name: `table_${index}`, public_name: `table_${index}` })))).toEqual([]);
+    });
+
+    describe("WMS vecteur", () => {
+        it("garde le style enregistré sans nouveau fichier, en exige un pour une table sans style", async () => {
+            expect(await editIssues([table({ saved_style_id: "static-communes" })], "wms")).toEqual([]);
+            expect(await editIssues([table({ native_name: "routes" })], "wms")).toEqual(["tables.0.style: validation.table.style.required"]);
+        });
+
+        it("contrôle un nouveau fichier même quand un style est enregistré", async () => {
+            expect(await editIssues([table({ saved_style_id: "static-communes", style: new File(["x"], "communes.qml") })], "wms")).toEqual([
+                "tables.0.style: validation.table.style.extension",
+            ]);
+        });
+
+        it("applique le plafond de tables", async () => {
+            const tables = Array.from({ length: 11 }, (_, index) => table({ native_name: `table_${index}`, saved_style_id: `static-${index}` }));
+            expect(await editIssues(tables, "wms")).toEqual(["tables: validation.tables.max"]);
+        });
     });
 });
 

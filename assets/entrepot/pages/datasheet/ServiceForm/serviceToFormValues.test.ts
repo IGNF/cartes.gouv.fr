@@ -192,3 +192,30 @@ describe("serviceToFormValues, tables WFS", () => {
         expect(serviceToFormValues(wfs, [], CARTES_GOUV, NOW).tables).toEqual([]);
     });
 });
+
+describe("serviceToFormValues, tables WMS vecteur", () => {
+    const geometric = (name: string) => ({ name, attributes: { geom: "geometry(Point)" }, type: "TABLE", primary_key: [] });
+    const vectorDb = { type_infos: { relations: [geometric("communes"), geometric("routes")] } } as unknown as VectorDb;
+    const wmsv = service({
+        typeInfos: {
+            used_data: [
+                {
+                    stored_data: "vectordb-1",
+                    relations: [
+                        { name: "communes", style: "static-communes" },
+                        { name: "disparue", style: "static-disparue" },
+                    ],
+                },
+            ],
+        },
+    });
+    const row = (native_name: string) => ({ native_name, title: native_name, public_name: native_name, description: "", keywords: [], style: undefined });
+
+    it("lit les tables par leur nom avec leur style enregistré, garde une table disparue non cochable", () => {
+        expect(serviceToFormValues(wmsv, [], CARTES_GOUV, NOW, vectorDb).tables).toEqual([
+            { ...row("communes"), selected: true, saved_style_id: "static-communes" },
+            { ...row("routes"), selected: false },
+            { ...row("disparue"), selected: false, missing: true, saved_style_id: "static-disparue" },
+        ]);
+    });
+});
