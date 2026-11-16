@@ -88,6 +88,11 @@ const getBreadcrumb = (
         params: { datastoreId: datastoreId ?? "", datasheetName: datasheetName ?? "" },
         search: activeTab ? { activeTab } : {},
     });
+    const servicesTabNextLink = {
+        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue" as const,
+        params: { datastoreId: datastoreId ?? "", datasheetName: datasheetName ?? "" },
+        search: { activeTab: "services" as const },
+    };
 
     const dashboardProps: BreadcrumbProps = {
         homeLinkProps: { to: "/tableau-de-bord" },
@@ -197,7 +202,7 @@ const getBreadcrumb = (
         case "datastore_datasheet_service_view":
             return {
                 ...datastoreBaseProps,
-                segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: datasheetLink("services") }],
+                segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: servicesTabNextLink }],
                 currentPageLabel: t(name),
             };
         case "datastore_datasheet_upload_integration": {
@@ -254,7 +259,7 @@ const getBreadcrumb = (
         case "datastore_service_style_edit":
             datastoreBaseProps.segments = [
                 ...datastoreBaseProps.segments,
-                { label: datasheetName, linkProps: datasheetLink("services") },
+                { label: datasheetName, linkProps: returnTo === "service_page" ? servicesTabNextLink : datasheetLink("services") },
                 returnTo === "service_page"
                     ? {
                           label: t("datastore_datasheet_service_view"),
