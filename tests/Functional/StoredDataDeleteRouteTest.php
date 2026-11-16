@@ -63,6 +63,20 @@ final class StoredDataDeleteRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
     }
 
+    public function testConfigurationsWithoutOfferingAreRemovedBeforeTheStoredData(): void
+    {
+        EntrepotMockResponseFactory::seed('configurations', ['_id' => 'orphan-1', 'tags' => [], 'type_infos' => ['used_data' => [['stored_data' => 'pyramid-1']]]]);
+        EntrepotMockResponseFactory::seed('configurations', ['_id' => 'other-1', 'tags' => [], 'type_infos' => ['used_data' => [['stored_data' => 'pyramid-2']]]]);
+        $client = $this->client();
+
+        $client->xmlHttpRequest('DELETE', self::DELETE_URL);
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame(['other-1'], array_column(EntrepotMockResponseFactory::stored('configurations'), '_id'));
+        $writes = array_map(fn (array $request) => $request['method'].' '.$request['path'], EntrepotMockResponseFactory::writeRequests());
+        self::assertLessThan(array_search('DELETE '.self::DATASTORE_PATH.'/stored_data/pyramid-1', $writes, true), array_search('DELETE '.self::DATASTORE_PATH.'/configurations/orphan-1', $writes, true));
+    }
+
     public function testOutputOfAProcessingThatSucceededBeforeTheAbortIsKept(): void
     {
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'output-1', 'type' => 'ROK4-PYRAMID-VECTOR', 'tags' => []]);

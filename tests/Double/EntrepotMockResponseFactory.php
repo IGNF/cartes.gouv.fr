@@ -437,7 +437,7 @@ final class EntrepotMockResponseFactory
         return null;
     }
 
-    // filtres de liste de l’Entrepôt : tags[clé]=valeur, labels[]=clé=valeur, path, input_stored_data, output_stored_data
+    // filtres de liste de l’Entrepôt : tags[clé]=valeur, labels[]=clé=valeur, path, input_stored_data, output_stored_data, stored_data
     /**
      * @param array<mixed> $item
      * @param array<mixed> $query
@@ -460,6 +460,14 @@ final class EntrepotMockResponseFactory
 
         if (isset($query['output_stored_data']) && $query['output_stored_data'] !== ($item['output']['stored_data']['_id'] ?? null)) {
             return false;
+        }
+
+        // configuration, ou offre par sa configuration
+        if (isset($query['stored_data'])) {
+            $typeInfos = $item['type_infos'] ?? $this->find('configurations', (string) ($item['configuration']['_id'] ?? ''))['type_infos'] ?? [];
+            if (!in_array($query['stored_data'], array_column($typeInfos['used_data'] ?? [], 'stored_data'), true)) {
+                return false;
+            }
         }
 
         return [] === array_diff((array) ($query['labels'] ?? []), $item['labels'] ?? []);
