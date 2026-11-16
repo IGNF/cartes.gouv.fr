@@ -270,6 +270,8 @@ export type Configuration = ConfigurationStandardDetailResponseDto & {
     styles?: CartesStyle[];
     tags: {
         datasheet_name?: string;
+        /** thématiques séparées par « , » */
+        theme?: string;
     };
     pyramid?: PyramidVector | PyramidRaster;
 };
