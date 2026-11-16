@@ -14,7 +14,6 @@ const { i18n } = declareComponentKeys<
     | "unstable.description"
     | "share_url"
     | "explore_maps"
-    | "access.unknown"
     | "permissions.title"
     | "permissions.manage"
     | "section.preview"
@@ -56,7 +55,6 @@ export const ServicePageFrTranslations: Translations<"fr">["ServicePage"] = {
     "unstable.description": "L’Entrepôt considère ce flux comme instable. Il peut ne pas s’afficher correctement.",
     share_url: "URL de diffusion",
     explore_maps: "Lien de visualisation dans Explorer les cartes",
-    "access.unknown": "Aucun accès n’est coché : les permissions du flux sont en cours de chargement ou n’ont pas pu être lues, ou le flux n’est plus diffusé.",
     "permissions.title": "Permissions",
     "permissions.manage": "Gérer les permissions",
     "section.preview": "Aperçu",
@@ -85,7 +83,6 @@ export const ServicePageEnTranslations: Translations<"en">["ServicePage"] = {
     "unstable.description": "The Entrepôt considers this service unstable. It may not display correctly.",
     share_url: "Broadcast URL",
     explore_maps: "Link to view in Explorer les cartes",
-    "access.unknown": "No access is selected: the service permissions are loading or could not be read, or the service is no longer broadcast.",
     "permissions.title": "Permissions",
     "permissions.manage": "Manage permissions",
     "section.preview": "Preview",

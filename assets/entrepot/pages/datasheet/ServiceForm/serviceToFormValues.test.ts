@@ -124,12 +124,12 @@ describe("serviceToFormValues", () => {
             expect(serviceToFormValues(service({ open: false }), [permission("autre")], CARTES_GOUV, NOW).access).toBe("restricted");
         });
 
-        it("aucun accès quand les permissions ne sont pas lues", () => {
-            expect(serviceToFormValues(service({ open: false }), undefined, CARTES_GOUV, NOW).access).toBeUndefined();
+        it("restreint tant que les permissions ne sont pas lues, comme l’onglet Flux", () => {
+            expect(serviceToFormValues(service({ open: false }), undefined, CARTES_GOUV, NOW).access).toBe("restricted");
         });
 
-        it.each([OfferingStatusEnum.UNPUBLISHED, OfferingStatusEnum.UNPUBLISHING])("aucun accès pour un flux privé au statut %s", (status) => {
-            expect(serviceToFormValues(service({ open: false, status }), [permission(CARTES_GOUV)], CARTES_GOUV, NOW).access).toBeUndefined();
+        it("public pour un flux ouvert dépublié", () => {
+            expect(serviceToFormValues(service({ status: OfferingStatusEnum.UNPUBLISHED }), undefined, CARTES_GOUV, NOW).access).toBe("public");
         });
     });
 });

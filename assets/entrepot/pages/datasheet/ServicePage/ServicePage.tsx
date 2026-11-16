@@ -105,8 +105,7 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
     )?.name;
 
     const values = useMemo(() => serviceToFormValues(service, permissions, api.alerts.communityId, now), [service, permissions, now]);
-    // sans résolveur ni envoi : un accès absent laisse simplement les boutons radio décochés
-    const form = useForm<ServiceFormValues>({ values: values as ServiceFormValues, disabled: true });
+    const form = useForm<ServiceFormValues>({ values, disabled: true });
 
     const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId, now);
     // sans la liste des flux de la fiche, le WMTS jumeau d’un WMS reste inconnu
@@ -184,7 +183,6 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
                     )}
 
                     <MetadataSection title={tForm("section.access")}>
-                        {values.access === undefined && <p className={fr.cx("fr-text--sm")}>{t("access.unknown")}</p>}
                         <fieldset disabled className={classes.fieldset}>
                             <AccessSection availableAccesses={SERVICE_ACCESSES} logoUrl={configuration.attribution?.logo?.url} />
                         </fieldset>

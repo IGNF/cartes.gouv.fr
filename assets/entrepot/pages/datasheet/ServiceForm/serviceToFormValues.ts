@@ -1,8 +1,6 @@
 import { type DatastorePermission, type Service } from "@/@types/app";
-import { isOfferingUnavailable, isPrivateServiceVisibleOnCartesGouv } from "@/utils";
+import { isPrivateServiceVisibleOnCartesGouv } from "@/utils";
 import { type ServiceAccess, type ServiceFormValues } from "./serviceFormSchema";
-
-export type PublishedServiceFormValues = Omit<ServiceFormValues, "access"> & { access?: ServiceAccess };
 
 // les anciens formulaires TMS et raster enregistraient la description encodée en JSON
 const decodeDescription = (abstract: string): string => {
@@ -17,15 +15,9 @@ const decodeDescription = (abstract: string): string => {
     return abstract;
 };
 
-// la dépublication supprime les permissions du flux : elles ne disent plus rien de son accès
-const readAccess = (
-    service: Service,
-    permissions: DatastorePermission[] | undefined,
-    cartesGouvCommunityId: string | null,
-    now: number
-): ServiceAccess | undefined => {
+// même lecture que l’accès affiché dans l’onglet Flux
+const readAccess = (service: Service, permissions: DatastorePermission[] | undefined, cartesGouvCommunityId: string | null, now: number): ServiceAccess => {
     if (service.open) return "public";
-    if (isOfferingUnavailable(service.status) || permissions === undefined) return undefined;
     return isPrivateServiceVisibleOnCartesGouv(service, permissions, cartesGouvCommunityId, now) ? "restricted_visible" : "restricted";
 };
 
@@ -34,7 +26,7 @@ export function serviceToFormValues(
     permissions: DatastorePermission[] | undefined,
     cartesGouvCommunityId: string | null,
     now: number
-): PublishedServiceFormValues {
+): ServiceFormValues {
     const { configuration } = service;
     const typeInfos = configuration.type_infos;
     const abstract = "abstract" in typeInfos && typeof typeInfos.abstract === "string" ? typeInfos.abstract : "";
