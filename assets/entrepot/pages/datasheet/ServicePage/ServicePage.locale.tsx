@@ -18,6 +18,9 @@ const { i18n } = declareComponentKeys<
     | "access.unknown"
     | "permissions.title"
     | "permissions.manage"
+    | "section.preview"
+    | "preview.restricted"
+    | "preview.no_bbox"
     | "section.report"
     | "report.configuration"
     | "report.offering"
@@ -58,6 +61,9 @@ export const ServicePageFrTranslations: Translations<"fr">["ServicePage"] = {
     "access.unknown": "Aucun accès n’est coché : les permissions du flux sont en cours de chargement ou n’ont pas pu être lues, ou le flux n’est plus diffusé.",
     "permissions.title": "Permissions",
     "permissions.manage": "Gérer les permissions",
+    "section.preview": "Aperçu",
+    "preview.restricted": "Aperçu indisponible : ce flux est restreint, il ne s’affiche qu’avec une clé d’accès.",
+    "preview.no_bbox": "Aperçu indisponible : l’emprise du flux est inconnue.",
     "section.report": "Rapport de génération",
     "report.configuration": "Configuration",
     "report.offering": "Offre",
@@ -85,6 +91,9 @@ export const ServicePageEnTranslations: Translations<"en">["ServicePage"] = {
     "access.unknown": "No access is selected: the service permissions are loading or could not be read, or the service is no longer broadcast.",
     "permissions.title": "Permissions",
     "permissions.manage": "Manage permissions",
+    "section.preview": "Preview",
+    "preview.restricted": "Preview unavailable: this service is restricted, it only displays with an access key.",
+    "preview.no_bbox": "Preview unavailable: the service extent is unknown.",
     "section.report": "Generation report",
     "report.configuration": "Configuration",
     "report.offering": "Offering",

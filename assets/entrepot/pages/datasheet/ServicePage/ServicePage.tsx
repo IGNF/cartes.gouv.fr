@@ -43,6 +43,7 @@ import AccessSection from "../ServiceForm/sections/AccessSection";
 import ServiceDescriptionSection from "../ServiceForm/sections/ServiceDescriptionSection";
 import { SERVICE_ACCESSES, type ServiceFormValues } from "../ServiceForm/serviceFormSchema";
 import { serviceToFormValues } from "../ServiceForm/serviceToFormValues";
+import ServicePreviewSection from "./ServicePreviewSection";
 
 type ServicePageProps = {
     datastoreId: string;
@@ -205,6 +206,12 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
                         <p className={fr.cx("fr-label", "fr-mb-1v")}>{t("explore_maps")}</p>
                         <ServiceExploreMapsCell availability={exploreMapsAvailability} layerParam={getExploreMapsLayerParam(service)} />
                     </MetadataSection>
+
+                    {!unavailable && (
+                        <MetadataSection title={t("section.preview")}>
+                            <ServicePreviewSection datastoreId={datastoreId} datasheetName={datasheetName} service={service} />
+                        </MetadataSection>
+                    )}
 
                     <MetadataSection title={tForm("section.access")}>
                         {values.access === undefined && <p className={fr.cx("fr-text--sm")}>{t("access.unknown")}</p>}
