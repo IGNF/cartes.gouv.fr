@@ -9,10 +9,7 @@ export function buildServiceFormData(type: ServiceType, values: ServiceFormOutpu
     return buildFormData(type, values, rasterPyramid, { technical_name: values.technical_name });
 }
 
-/**
- * Requête multipart de la route `edit` : même `data` que la publication sans nom technique (figé),
- * avec les retraits de la vignette et du logo (image passée à null dans le formulaire).
- */
+/** Requête multipart de la route `edit` : `data` de la publication sans nom technique, avec les retraits d’images (valeur null). */
 export function buildServiceEditFormData(type: ServiceType, values: ServiceEditFormOutput, rasterPyramid = false): FormData {
     return buildFormData(type, values, rasterPyramid, {
         remove_thumbnail: values.thumbnail === null,

@@ -11,7 +11,7 @@ use App\Dto\Services\Form\ServiceFormDTO;
 use App\Dto\Services\Form\WfsTableEditFormDTO;
 use App\Dto\Services\Form\WfsTableFormDTO;
 
-/** Corps de la requête de création d’une configuration Entrepôt depuis le formulaire de publication. */
+/** Corps des requêtes de configuration Entrepôt des formulaires de flux (publication, et tables WFS de la modification). */
 class ServiceConfigurationRequestBuilder
 {
     /**

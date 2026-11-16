@@ -739,9 +739,7 @@ class CartesServiceApiService
     }
 
     /**
-     * Modifie un flux WFS, WMS raster, WMTS ou TMS depuis sa page : configuration (PUT puis tag et vignette), offre, permissions,
-     * capabilities, ressources en ligne de la fiche. Passer de public à restreint (ou l’inverse) supprime l’offre puis en crée une
-     * sur l’autre endpoint : le flux est coupé entre les deux, et reste sans offre si le retrait dépasse l’attente (503) ou si l’ajout échoue.
+     * Modifie un flux WFS, WMS raster, WMTS ou TMS ; public ↔ restreint supprime l’offre puis la recrée (flux sans offre si l’ajout échoue).
      *
      * @param array<mixed> $offering      offre brute
      * @param array<mixed> $configuration configuration brute de l’offre
@@ -908,7 +906,7 @@ class CartesServiceApiService
     }
 
     /**
-     * Nettoyage après un échec de publication : une erreur ici ne doit pas masquer celle d’origine.
+     * Suppression d’annexes sans lever d’erreur (échec journalisé) : nettoyage après un échec, ou images remplacées après une modification.
      *
      * @param array<string|null> $urls
      */

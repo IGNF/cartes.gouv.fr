@@ -6,10 +6,7 @@ namespace App\Dto\Services\Form;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * Table d’un flux WFS modifié : `public_name` facultatif (vide = l’Entrepôt sert `native_name`) ;
- * sa forme est contrôlée par ServiceController, qui accepte le nom déjà enregistré des anciens flux.
- */
+/** Table d’un flux WFS modifié : `public_name` facultatif, sa forme contrôlée par ServiceController (ancien nom accepté). */
 class WfsTableEditFormDTO
 {
     /**

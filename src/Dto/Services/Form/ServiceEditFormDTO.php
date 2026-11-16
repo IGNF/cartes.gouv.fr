@@ -10,10 +10,7 @@ use App\Dto\Upload\UploadAddDTO;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-/**
- * Modification d’un flux WFS, WMS raster, WMTS ou TMS depuis sa page. Type, donnée stockée et nom technique sont figés.
- * Validé avec les groupes Default et le type de la configuration (ConfigurationTypes).
- */
+/** Modification d’un flux depuis sa page, validée avec les groupes Default et le type de la configuration. */
 class ServiceEditFormDTO
 {
     /**

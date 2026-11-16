@@ -86,10 +86,7 @@ final class ServiceController extends AbstractController implements ApiControlle
         return $this->json($offering);
     }
 
-    /**
-     * Modification depuis la page du flux (WFS, WMS raster, WMTS, TMS) : multipart avec le champ JSON `data` (ServiceEditFormDTO)
-     * et les fichiers `thumbnail`, `attribution_logo`. Type et donnée stockée sont lus dans la configuration.
-     */
+    /** Modification depuis la page du flux : multipart `data` (ServiceEditFormDTO), `thumbnail`, `attribution_logo`. */
     #[Route('/{offeringId}/edit', name: 'edit_service', methods: ['POST'], requirements: ['offeringId' => Requirement::UUID_V4])]
     public function editService(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
