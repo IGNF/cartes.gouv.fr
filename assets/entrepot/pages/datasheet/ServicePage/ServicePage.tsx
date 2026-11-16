@@ -32,6 +32,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
 import { setApiFormErrors } from "@/modules/setApiFormErrors";
 import AppLink from "@/router/AppLink";
+import { useSnackbarStore } from "@/stores/SnackbarStore";
 import {
     editableOfferingTypes,
     formatDateFromISO,
@@ -76,8 +77,6 @@ export default function ServicePage({ datastoreId, datasheetName, offeringId }: 
     const { t } = useTranslation("ServicePage");
     const serviceQuery = useQuery(serviceQueryOptions(datastoreId, offeringId));
     const service = serviceQuery.data;
-    // tenue ici : le contenu est démonté pendant le chargement de la nouvelle offre quand l’enregistrement en crée une
-    const [saved, setSaved] = useState(false);
 
     const renderContent = () => {
         if (serviceQuery.isPending) {
@@ -88,20 +87,11 @@ export default function ServicePage({ datastoreId, datasheetName, offeringId }: 
             return <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceQuery.error)} small />;
         }
         if (serviceQuery.data.configuration.tags.datasheet_name !== datasheetName) throw notFound();
-        return (
-            <ServicePageContent
-                datastoreId={datastoreId}
-                datasheetName={datasheetName}
-                service={serviceQuery.data}
-                readAt={serviceQuery.dataUpdatedAt}
-                onSavedChange={setSaved}
-            />
-        );
+        return <ServicePageContent datastoreId={datastoreId} datasheetName={datasheetName} service={serviceQuery.data} readAt={serviceQuery.dataUpdatedAt} />;
     };
 
     return (
         <Main title={service ? `${service.configuration.name} - ${datasheetName}` : datasheetName} breadcrumbSeparator>
-            {saved && <Alert className={fr.cx("fr-mt-2w")} severity="success" description={t("edit.success")} small />}
             {renderContent()}
         </Main>
     );
@@ -112,7 +102,6 @@ type ServicePageContentProps = {
     datasheetName: string;
     service: Service;
     readAt: number;
-    onSavedChange: (saved: boolean) => void;
 };
 
 /** décide si la page est modifiable et monte le formulaire une fois ses valeurs initiales sûres */
@@ -169,13 +158,15 @@ type ServiceSheetProps = ServicePageContentProps & {
     canSave: boolean;
 };
 
-function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChange, values, editable, canSave }: ServiceSheetProps) {
+function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, editable, canSave }: ServiceSheetProps) {
     const { t } = useTranslation("ServicePage");
     const { t: tForm } = useTranslation("ServiceForm");
     const { classes, cx } = useStyles();
     const formId = useId();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+    // message global : il reste affiché quand l’enregistrement mène à la nouvelle offre
+    const setSnackbarMessage = useSnackbarStore((state) => state.setMessage);
 
     const { data: permissions } = useQuery(datastorePermissionsQueryOptions(datastoreId));
     const { data: services } = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName));
@@ -266,7 +257,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
                 // après la navigation, seulement si plus rien ne l’observe : une requête encore observée serait relue en 404
                 queryClient.removeQueries({ queryKey: serviceKey, type: "inactive" });
                 void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_permissions(datastoreId) });
-                onSavedChange(true);
+                setSnackbarMessage(t("edit.success"));
                 return;
             }
 
@@ -287,7 +278,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
                     )
                 );
             }
-            onSavedChange(true);
+            setSnackbarMessage(t("edit.success"));
         },
     });
 
@@ -305,12 +296,6 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
     }, [blocker.status, leaveModal]);
     // fermeture de la modale sans quitter : la navigation bloquée est abandonnée
     useIsModalOpen(leaveModal, { onConceal: () => blocker.reset?.() });
-
-    // une nouvelle modification rend caduque l’alerte du précédent enregistrement
-    const { isDirty } = form.formState;
-    useEffect(() => {
-        if (isDirty) onSavedChange(false);
-    }, [isDirty, onSavedChange]);
 
     const submit = form.handleSubmit(async (formValues) => {
         try {
@@ -365,15 +350,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
             )}
 
             {/* champs hors du formulaire HTML : seul le bouton « Enregistrer » le soumet, pas la touche Entrée ni les boutons des autres sections */}
-            <form
-                id={formId}
-                onSubmit={(e) => {
-                    // aussi quand la validation échoue : l’alerte du précédent enregistrement n’a plus lieu d’être
-                    onSavedChange(false);
-                    void submit(e);
-                }}
-                noValidate
-            />
+            <form id={formId} onSubmit={(e) => void submit(e)} noValidate />
             <FormProvider {...form}>
                 <MetadataSectionsContainer>
                     <div className={cx(fr.cx("fr-col-12"), classes.header)}>
