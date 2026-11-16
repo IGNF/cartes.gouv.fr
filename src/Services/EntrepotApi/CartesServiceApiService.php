@@ -70,8 +70,6 @@ class CartesServiceApiService
     ) {
         $this->httpClient = $httpClient->withOptions([
             'proxy' => $params->get('http_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
         ]);
     }
 
