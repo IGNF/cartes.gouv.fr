@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -12,9 +13,11 @@ type AccessSectionProps = {
     /** accès offerts par les endpoints de l’entrepôt pour ce type de flux */
     availableAccesses: readonly ServiceAccess[];
     logoUrl?: string;
+    /** accès enregistré d’un flux publié : avertissement quand il passe de libre à restreint, ou l’inverse */
+    savedAccess?: ServiceAccess;
 };
 
-export default function AccessSection({ availableAccesses, logoUrl }: AccessSectionProps) {
+export default function AccessSection({ availableAccesses, logoUrl, savedAccess }: AccessSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
         register,
@@ -22,6 +25,8 @@ export default function AccessSection({ availableAccesses, logoUrl }: AccessSect
         formState: { errors },
     } = useFormContext<ServiceFormValues>();
     const attributionEnabled = useWatch({ control, name: "attribution.enabled" });
+    const access = useWatch({ control, name: "access" });
+    const endpointChange = savedAccess !== undefined && (savedAccess === "public") !== (access === "public");
 
     return (
         <div>
@@ -35,6 +40,14 @@ export default function AccessSection({ availableAccesses, logoUrl }: AccessSect
                     nativeInputProps: { ...register("access"), value: access, disabled: !availableAccesses.includes(access) },
                 }))}
             />
+            {endpointChange && (
+                <Alert
+                    className={fr.cx("fr-mb-3w")}
+                    severity="warning"
+                    small
+                    description={t(access === "public" ? "access.change_warning.to_public" : "access.change_warning.to_restricted")}
+                />
+            )}
 
             <h3 className={fr.cx("fr-h6", "fr-mt-4w")}>{t("attribution.title")}</h3>
             <p>{t("attribution.explanation")}</p>

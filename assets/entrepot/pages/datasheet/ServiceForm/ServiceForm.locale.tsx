@@ -61,6 +61,8 @@ const { i18n } = declareComponentKeys<
     | "table.description.label"
     | "table.keywords.label"
     | "table.keywords.hint"
+    | "table.missing"
+    | "table.styled"
     | "styles.label"
     | "styles.hint"
     | "styles.no_table"
@@ -76,6 +78,8 @@ const { i18n } = declareComponentKeys<
     | "access.restricted_visible.hint"
     | "access.restricted"
     | "access.restricted.hint"
+    | "access.change_warning.to_public"
+    | "access.change_warning.to_restricted"
     | "attribution.title"
     | "attribution.explanation"
     | "attribution.enabled"
@@ -185,6 +189,8 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "table.description.label": "Résumé de la table",
     "table.keywords.label": "Mot-clés (optionnels)",
     "table.keywords.hint": "Utilisez l’auto-complétion ou saisissez librement des mots-clés en appuyant sur Entrée après chaque mot.",
+    "table.missing": "Cette table n’existe plus dans le jeu de données : elle ne sera plus publiée à l’enregistrement.",
+    "table.styled": "Cette table a un style : modifier son nom technique ou la décocher détache ce style du flux.",
     "styles.label": "Ajouter un fichier de style",
     "styles.hint": "Format supporté : SLD.",
     "styles.no_table": "Cochez d’abord une ou plusieurs tables.",
@@ -201,6 +207,9 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
         "Le service sera visible sur cartes.gouv.fr mais une clé d’accès sera nécessaire pour accéder au flux dans les outils tiers.",
     "access.restricted": "Flux restreint pour tous",
     "access.restricted.hint": "Le service ne sera visible qu’aux utilisateurs disposant d’une clé d’accès, dans cartes.gouv.fr ou tout autre outil tiers.",
+    "access.change_warning.to_public":
+        "Vous passez le flux d’un accès restreint à un accès libre. Le flux changera d’adresse et ses permissions seront supprimées définitivement.",
+    "access.change_warning.to_restricted": "Vous passez le flux d’un accès libre à un accès restreint. Le flux changera d’adresse.",
     "attribution.title": "Droits et attributions",
     "attribution.explanation":
         "Ajouter une attribution pour que les utilisateurs de vos services affichent une mention sur leurs cartes. Elle indique la source de données et permet un renvoi vers un site internet ou une licence.",
@@ -309,6 +318,8 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "table.description.label": "Table summary",
     "table.keywords.label": "Keywords (optional)",
     "table.keywords.hint": "Use autocompletion or type free keywords, pressing Enter after each one.",
+    "table.missing": "This table no longer exists in the dataset: it will no longer be published when you save.",
+    "table.styled": "This table has a style: changing its technical name or unchecking it detaches this style from the service.",
     "styles.label": "Add a style file",
     "styles.hint": "Supported format: SLD.",
     "styles.no_table": "Select one or more tables first.",
@@ -324,6 +335,9 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "access.restricted_visible.hint": "The service will be visible on cartes.gouv.fr but an access key will be needed in third-party tools.",
     "access.restricted": "Restricted service for everyone",
     "access.restricted.hint": "The service will only be visible to users with an access key, in cartes.gouv.fr or any third-party tool.",
+    "access.change_warning.to_public":
+        "You are moving the service from restricted to open access. The service will change address and its permissions will be permanently deleted.",
+    "access.change_warning.to_restricted": "You are moving the service from open to restricted access. The service will change address.",
     "attribution.title": "Rights and attributions",
     "attribution.explanation":
         "Add an attribution so that users of your services display a notice on their maps. It gives the data source and links to a website or a licence.",

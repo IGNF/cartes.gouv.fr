@@ -27,6 +27,8 @@ type ServiceDescriptionSectionProps = {
     /** description du flux, sauf en WFS où chaque table a la sienne */
     withDescription: boolean;
     thumbnailUrl?: string;
+    /** nom technique d’un flux publié : affiché en lecture seule, hors du formulaire (figé) */
+    technicalName?: string;
 };
 
 export default function ServiceDescriptionSection({
@@ -38,6 +40,7 @@ export default function ServiceDescriptionSection({
     withDataKind,
     withDescription,
     thumbnailUrl,
+    technicalName,
 }: ServiceDescriptionSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
@@ -114,13 +117,17 @@ export default function ServiceDescriptionSection({
                 />
             )}
 
-            <Input
-                label={t("technical_name.label")}
-                hintText={t("technical_name.hint")}
-                state={errors.technical_name ? "error" : "default"}
-                stateRelatedMessage={errors.technical_name?.message}
-                nativeInputProps={register("technical_name")}
-            />
+            {technicalName === undefined ? (
+                <Input
+                    label={t("technical_name.label")}
+                    hintText={t("technical_name.hint")}
+                    state={errors.technical_name ? "error" : "default"}
+                    stateRelatedMessage={errors.technical_name?.message}
+                    nativeInputProps={register("technical_name")}
+                />
+            ) : (
+                <Input label={t("technical_name.label")} nativeInputProps={{ value: technicalName, readOnly: true }} />
+            )}
 
             <ImageFieldUpload
                 name="thumbnail"
