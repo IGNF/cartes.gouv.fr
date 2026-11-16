@@ -71,6 +71,9 @@ const { i18n } = declareComponentKeys<
     | "styles.browse"
     | "styles.change"
     | { K: "styles.remove"; P: { table: string }; R: string }
+    | "styles.current"
+    | { K: "styles.download"; P: { table: string }; R: string }
+    | "styles.download_error"
     | "access.legend"
     | "access.public"
     | "access.public.hint"
@@ -199,6 +202,9 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "styles.browse": "Parcourir…",
     "styles.change": "Modifier",
     "styles.remove": ({ table }) => `Retirer le fichier de style de la table ${table}`,
+    "styles.current": "Style actuel conservé.",
+    "styles.download": ({ table }) => `Télécharger le style actuel de la table ${table}`,
+    "styles.download_error": "Le style actuel n’a pas pu être téléchargé.",
     "access.legend": "Accès",
     "access.public": "Accès libre pour tous",
     "access.public.hint": "En acceptant, le service sera accessible à tout utilisateur, dans cartes.gouv.fr ou tout autre outil tiers.",
@@ -328,6 +334,9 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "styles.browse": "Browse…",
     "styles.change": "Change",
     "styles.remove": ({ table }) => `Remove the style file of table ${table}`,
+    "styles.current": "Current style kept.",
+    "styles.download": ({ table }) => `Download the current style of table ${table}`,
+    "styles.download_error": "The current style could not be downloaded.",
     "access.legend": "Access",
     "access.public": "Open access for everyone",
     "access.public.hint": "The service will be available to any user, in cartes.gouv.fr or any third-party tool.",

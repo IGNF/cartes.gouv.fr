@@ -1,14 +1,22 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { useMutation } from "@tanstack/react-query";
 import { useId, useRef } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { tss } from "tss-react";
 
+import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n";
+import { saveBlob } from "@/utils/browser";
 import { type ServiceFormValues } from "../serviceFormSchema";
 
+type StylesSectionProps = {
+    /** modification : entrepôt du flux, pour télécharger le style enregistré d’une table */
+    datastoreId?: string;
+};
+
 /** un fichier SLD par table cochée (WMS vecteur) ; l’éditeur de styles viendra avec #1139 */
-export default function StylesSection() {
+export default function StylesSection({ datastoreId }: StylesSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const { control } = useFormContext<ServiceFormValues>();
     const tables = useWatch({ control, name: "tables" });
@@ -25,19 +33,41 @@ export default function StylesSection() {
                 <span className={fr.cx("fr-hint-text")}>{t("styles.hint")}</span>
             </p>
             <ul className={classes.rows}>
-                {tables.map((table, index) => (table.selected ? <StyleRow key={table.native_name} index={index} tableName={table.native_name} /> : null))}
+                {tables.map((table, index) =>
+                    table.selected ? (
+                        <StyleRow
+                            key={table.native_name}
+                            index={index}
+                            tableName={table.native_name}
+                            savedStyle={datastoreId && table.saved_style_id ? { datastoreId, staticId: table.saved_style_id } : undefined}
+                        />
+                    ) : null
+                )}
             </ul>
         </div>
     );
 }
 
-function StyleRow({ index, tableName }: { index: number; tableName: string }) {
+type StyleRowProps = {
+    index: number;
+    tableName: string;
+    /** style enregistré, gardé tant qu’aucun nouveau fichier n’est choisi */
+    savedStyle?: { datastoreId: string; staticId: string };
+};
+
+function StyleRow({ index, tableName, savedStyle }: StyleRowProps) {
     const { t } = useTranslation("ServiceForm");
     const { control } = useFormContext<ServiceFormValues>();
     const { classes } = useStyles();
     const inputRef = useRef<HTMLInputElement>(null);
     const browseRef = useRef<HTMLButtonElement | null>(null);
     const id = useId();
+    const download = useMutation({
+        mutationFn: async ({ datastoreId, staticId }: { datastoreId: string; staticId: string }) => {
+            const sld = await api.statics.download(datastoreId, staticId);
+            await saveBlob(new Blob([sld], { type: "application/xml" }), { fileName: `${tableName}.sld`, mimeType: "application/xml", extension: ".sld" });
+        },
+    });
     // le formulaire revalide au blur après un premier envoi : un choix de fichier vaut un blur
     const setFile = (onChange: (file: File | undefined) => void, onBlur: () => void, file: File | undefined) => {
         onChange(file);
@@ -52,7 +82,19 @@ function StyleRow({ index, tableName }: { index: number; tableName: string }) {
                 <li className={classes.row}>
                     <span id={`${id}-table`}>{tableName}</span>
                     <span id={`${id}-file`} className={fr.cx(field.value && "fr-text--bold")}>
-                        {field.value?.name ?? t("styles.no_file")}
+                        {field.value?.name ?? (savedStyle ? t("styles.current") : t("styles.no_file"))}
+                        {!field.value && savedStyle && (
+                            <Button
+                                type="button"
+                                size="small"
+                                priority="tertiary no outline"
+                                iconId="fr-icon-download-line"
+                                className={fr.cx("fr-ml-1w")}
+                                title={t("styles.download", { table: tableName })}
+                                disabled={download.isPending}
+                                onClick={() => download.mutate(savedStyle)}
+                            />
+                        )}
                     </span>
                     <span className={classes.actions}>
                         <Button
@@ -100,6 +142,7 @@ function StyleRow({ index, tableName }: { index: number; tableName: string }) {
                             {error.message}
                         </p>
                     )}
+                    {download.isError && <p className={fr.cx("fr-error-text", "fr-mt-0")}>{t("styles.download_error")}</p>}
                 </li>
             )}
         />

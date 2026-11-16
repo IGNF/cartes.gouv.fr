@@ -34,12 +34,10 @@ import { setApiFormErrors } from "@/modules/setApiFormErrors";
 import AppLink from "@/router/AppLink";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import {
-    editableOfferingTypes,
     formatDateFromISO,
     getExploreMapsAvailability,
     getExploreMapsLayerParam,
     getNextExploreMapsPendingEnd,
-    getServiceEditLink,
     getServiceThumbnailUrl,
     getServiceTypeLabel,
     isOfferingUnavailable,
@@ -52,6 +50,7 @@ import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
 import { buildServiceEditFormData, mapServiceViolationPaths } from "../ServiceForm/buildServiceFormData";
 import AccessSection from "../ServiceForm/sections/AccessSection";
 import ServiceDescriptionSection from "../ServiceForm/sections/ServiceDescriptionSection";
+import StylesSection from "../ServiceForm/sections/StylesSection";
 import TablesSection from "../ServiceForm/sections/TablesSection";
 import {
     availableServiceAccesses,
@@ -64,8 +63,9 @@ import {
 import { serviceToFormValues } from "../ServiceForm/serviceToFormValues";
 import ServicePreviewSection from "./ServicePreviewSection";
 
-/** types modifiés depuis la page du flux ; le WMS vecteur garde l’ancien formulaire */
-const PAGE_EDITABLE_TYPES = new Set<OfferingTypeEnum>([OfferingTypeEnum.WFS, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WMTSTMS]);
+const PAGE_EDITABLE_TYPES = new Set<OfferingTypeEnum>([OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WMTSTMS]);
+// flux sur une base vecteur : tables à choisir
+const TABLE_TYPES = new Set<OfferingTypeEnum>([OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR]);
 
 type ServicePageProps = {
     datastoreId: string;
@@ -111,7 +111,7 @@ function ServicePageContent(props: ServicePageContentProps) {
     const { datastoreId, service, readAt } = props;
     const { configuration } = service;
     const storedDataId = configuration.type_infos.used_data[0]?.stored_data ?? "";
-    const isWfs = service.type === OfferingTypeEnum.WFS;
+    const withTables = TABLE_TYPES.has(service.type);
 
     const { userRights, isSupervisor } = useCommunityRights();
     const hasRight = (right: CommunityMemberDtoRightsEnum) => isSupervisor || !!userRights?.includes(right);
@@ -121,11 +121,11 @@ function ServicePageContent(props: ServicePageContentProps) {
     const published = service.status === OfferingStatusEnum.PUBLISHED && configuration.status === ConfigurationStatus.PUBLISHED;
 
     const permissionsQuery = useQuery(datastorePermissionsQueryOptions(datastoreId));
-    const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, canSave && isWfs ? storedDataId : ""));
+    const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, canSave && withTables ? storedDataId : ""));
 
     // permissions lues (sinon l’accès initial vaudrait « restreint ») ; l’échec d’une relecture ne démonte pas le formulaire
     const permissionsReady = service.open || permissionsQuery.data !== undefined;
-    const tablesReady = !isWfs || vectorDbQuery.data !== undefined;
+    const tablesReady = !withTables || vectorDbQuery.data !== undefined;
     const editable = canSave && published && permissionsReady && tablesReady;
 
     let lockReason: string | undefined;
@@ -178,19 +178,13 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
         enabled: editable,
     });
 
-    const { userRights, isSupervisor } = useCommunityRights();
-    const canBroadcast = isSupervisor || !!userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
-
     const unavailable = isOfferingUnavailable(service.status);
-    // WMS vecteur : ancien formulaire, mêmes conditions que le menu « Modifier » de l’onglet Flux
-    const editLink =
-        !PAGE_EDITABLE_TYPES.has(service.type) && editableOfferingTypes.includes(service.type) && canBroadcast
-            ? getServiceEditLink(datastoreId, datasheetName, service)
-            : undefined;
-    const showEdit = editLink !== undefined && !("to" in editLink && editLink.to === "/404");
 
     const { configuration } = service;
     const isWfs = service.type === OfferingTypeEnum.WFS;
+    const isWmsVector = service.type === OfferingTypeEnum.WMSVECTOR;
+    // type du formulaire : WFS et WMS vecteur ont des tables, les pyramides une description du flux
+    const formType = isWfs ? "wfs" : isWmsVector ? "wms" : "wmts";
     const pyramid = service.type === OfferingTypeEnum.WMTSTMS;
     const storedDataId = configuration.type_infos.used_data[0]?.stored_data;
     const storedDataName = [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_vector_list ?? []), ...(datasheet?.pyramid_raster_list ?? [])].find(
@@ -224,12 +218,11 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
         () =>
             buildServiceEditFormSchema({
                 t: tForm,
-                // le schéma ne distingue que WFS (tables) et les pyramides (description du flux)
-                type: isWfs ? "wfs" : "wmts",
+                type: formType,
                 availableAccesses: availableServiceAccesses(endpointsQuery.data, configuration.type),
                 savedTablePublicNames,
             }),
-        [tForm, isWfs, endpointsQuery.data, configuration.type, savedTablePublicNames]
+        [tForm, formType, endpointsQuery.data, configuration.type, savedTablePublicNames]
     );
     const form = useForm<ServiceEditFormValues, unknown, ServiceEditFormOutput>(
         editable ? { resolver: zodResolver(schema), mode: "onSubmit", reValidateMode: "onBlur", defaultValues: values } : { values, disabled: true }
@@ -238,11 +231,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
     const serviceKey = RQKeys.datastore_offering(datastoreId, service._id);
     const editMutation = useMutation<Service, ApiError, ServiceEditFormOutput>({
         mutationFn: (formValues) =>
-            api.service.edit(
-                datastoreId,
-                service._id,
-                buildServiceEditFormData(isWfs ? "wfs" : "wmts", formValues, service.type === OfferingTypeEnum.WMSRASTER)
-            ),
+            api.service.edit(datastoreId, service._id, buildServiceEditFormData(formType, formValues, service.type === OfferingTypeEnum.WMSRASTER)),
         onSuccess: async (offering) => {
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
@@ -370,7 +359,6 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
                                 {t("save")}
                             </Button>
                         )}
-                        {showEdit && <Button {...(unavailable || !editLink ? { disabled: true } : { linkProps: editLink })}>{t("edit")}</Button>}
                     </div>
                     <MetadataSection title={tForm("section.description")}>
                         <fieldset disabled={!editable} className={classes.fieldset}>
@@ -389,9 +377,20 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
                         <ServiceExploreMapsCell availability={exploreMapsAvailability} layerParam={getExploreMapsLayerParam(service)} />
                     </MetadataSection>
 
-                    {editable && isWfs && (
+                    {editable && (isWfs || isWmsVector) && (
                         <MetadataSection title={tForm("section.tables")}>
-                            <TablesSection status="success" noGeometricTable={values.tables.length === 0} detailed styledTables={styledTables} />
+                            <TablesSection
+                                status="success"
+                                noGeometricTable={values.tables.length === 0}
+                                detailed={isWfs}
+                                styledTables={isWfs ? styledTables : undefined}
+                            />
+                        </MetadataSection>
+                    )}
+
+                    {editable && isWmsVector && (
+                        <MetadataSection title={tForm("section.styles")}>
+                            <StylesSection datastoreId={datastoreId} />
                         </MetadataSection>
                     )}
 
