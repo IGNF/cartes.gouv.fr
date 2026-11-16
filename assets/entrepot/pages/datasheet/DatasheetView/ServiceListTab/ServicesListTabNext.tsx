@@ -189,9 +189,8 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                         ? { disabled: true }
                         : {
                               linkProps: {
-                                  to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
-                                  params: { datastoreId, offeringId: service._id },
-                                  search: { datasheetName },
+                                  to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
+                                  params: { datastoreId, datasheetName, offeringId: service._id },
                               },
                           })}
                 >
