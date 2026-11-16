@@ -49,9 +49,6 @@ export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;
 export const SERVICE_IMAGE_ACCEPT = ["jpg", "jpeg", "png"];
 export const SERVICE_IMAGE_MAX_SIZE_MB = 5;
 
-/** même limite que ServiceFormDTO::DESCRIPTION_MAX_LENGTH */
-export const SERVICE_DESCRIPTION_MAX_LENGTH = 300;
-
 /** même limite que ServiceFormDTO::TABLES_MAX */
 export const SERVICE_TABLES_MAX = 10;
 
@@ -177,14 +174,7 @@ export const buildServiceFormSchema = ({ t, type, rasterPyramid = false, existin
             .refine((themes) => themes.join(", ").length <= TAG_VALUE_MAX_LENGTH, t("validation.themes.max", { max: TAG_VALUE_MAX_LENGTH })),
         // une entrée par table géométrique de la base choisie, cochée ou non
         // WFS : pas de description du flux, chaque table a la sienne
-        description:
-            type === "wfs"
-                ? z.string()
-                : z
-                      .string()
-                      .trim()
-                      .min(1, t("validation.description.required"))
-                      .max(SERVICE_DESCRIPTION_MAX_LENGTH, t("validation.description.max", { max: SERVICE_DESCRIPTION_MAX_LENGTH })),
+        description: type === "wfs" ? z.string() : z.string().trim().min(1, t("validation.description.required")),
         tables: hasTables(type, rasterPyramid)
             ? z
                   .array(tableSchema)

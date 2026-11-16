@@ -155,16 +155,14 @@ final class WmsRasterPublishRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 
-    public function testInvalidDescriptionAnswers422WithoutWriting(): void
+    public function testEmptyDescriptionAnswers422WithoutWriting(): void
     {
         $client = $this->client();
 
-        foreach (['', str_repeat('a', 301)] as $description) {
-            $this->post($client, 'WMS-RASTER', ['description' => $description] + $this->payload());
+        $this->post($client, 'WMS-RASTER', ['description' => ''] + $this->payload());
 
-            self::assertResponseStatusCodeSame(422);
-            self::assertSame(['description'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
-        }
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['description'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 

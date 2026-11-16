@@ -159,12 +159,10 @@ final class WmsVectorPublishRouteTest extends WebTestCase
     {
         $client = $this->client();
 
-        $this->post($client, ['description' => str_repeat('a', 301), 'selected_tables' => []] + $this->payload());
+        $this->post($client, ['selected_tables' => []] + $this->payload());
 
         self::assertResponseStatusCodeSame(422);
-        $paths = array_column($this->jsonResponse($client)['violations'], 'propertyPath');
-        sort($paths);
-        self::assertSame(['description', 'selected_tables'], $paths);
+        self::assertSame(['selected_tables'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
 
         $this->post($client, ['selected_tables' => array_map(fn (int $i) => "table_$i", range(1, 11))] + $this->payload());
 

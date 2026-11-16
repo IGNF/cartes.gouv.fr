@@ -117,9 +117,9 @@ describe("buildServiceFormSchema", () => {
             expect(await issueMessages(wms(), undefined, "wms")).toEqual({});
         });
 
-        it("exige la description du flux, 300 caractères au plus", async () => {
+        it("exige la description du flux, sans limite de longueur", async () => {
             expect(await issueMessages(wms({}, " "), undefined, "wms")).toEqual({ description: "validation.description.required" });
-            expect(await issueMessages(wms({}, "a".repeat(301)), undefined, "wms")).toEqual({ description: "validation.description.max" });
+            expect(await issueMessages(wms({}, "a".repeat(1000)), undefined, "wms")).toEqual({});
         });
 
         it("exige un fichier .sld conforme par table cochée", async () => {

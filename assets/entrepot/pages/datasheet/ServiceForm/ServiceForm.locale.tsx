@@ -103,7 +103,6 @@ const { i18n } = declareComponentKeys<
     | "validation.table.public_name.chars"
     | "validation.table.description.required"
     | "validation.description.required"
-    | { K: "validation.description.max"; P: { max: number }; R: string }
     | "validation.table.style.required"
     | "validation.table.style.extension"
     | "validation.table.style.empty"
@@ -230,7 +229,6 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "validation.table.public_name.chars": "Le nom technique de la table ne doit contenir que des minuscules, chiffres, tirets, points et tirets bas",
     "validation.table.description.required": "Le résumé de la table est obligatoire",
     "validation.description.required": "La description du flux est obligatoire",
-    "validation.description.max": ({ max }) => `La description du flux ne peut pas dépasser ${max} caractères`,
     "validation.table.style.required": "Le fichier de style de la table est obligatoire",
     "validation.table.style.extension": "Le fichier de style doit être au format SLD",
     "validation.table.style.empty": "Le fichier de style est vide",
@@ -354,7 +352,6 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "validation.table.public_name.chars": "The table technical name may only contain lowercase letters, digits, hyphens, dots and underscores",
     "validation.table.description.required": "The table summary is required",
     "validation.description.required": "The service description is required",
-    "validation.description.max": ({ max }) => `The service description cannot exceed ${max} characters`,
     "validation.table.style.required": "The table style file is required",
     "validation.table.style.extension": "The style file must be an SLD file",
     "validation.table.style.empty": "The style file is empty",

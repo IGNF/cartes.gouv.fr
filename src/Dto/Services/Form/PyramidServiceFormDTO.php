@@ -24,7 +24,6 @@ class PyramidServiceFormDTO extends ServiceFormDTO
 
         // l’Entrepôt exige `type_infos.abstract`
         #[Assert\NotBlank(message: 'La description du flux est obligatoire')]
-        #[Assert\Length(max: self::DESCRIPTION_MAX_LENGTH, maxMessage: 'La description du flux ne peut pas dépasser {{ limit }} caractères')]
         public readonly string $description = '',
     ) {
         parent::__construct($title, $technical_name, $themes, $access, $attribution);
