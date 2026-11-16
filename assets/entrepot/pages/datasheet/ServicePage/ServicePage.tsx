@@ -104,9 +104,9 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
     const canBroadcast = isSupervisor || !!userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
 
     const unavailable = isOfferingUnavailable(service.status);
-    const editLink = getServiceEditLink(datastoreId, datasheetName, service);
     // mêmes conditions que le menu « Modifier » de l’onglet Flux
-    const showEdit = editableOfferingTypes.includes(service.type) && canBroadcast && !("to" in editLink && editLink.to === "/404");
+    const editLink = editableOfferingTypes.includes(service.type) && canBroadcast ? getServiceEditLink(datastoreId, datasheetName, service) : undefined;
+    const showEdit = editLink !== undefined && !("to" in editLink && editLink.to === "/404");
 
     const { configuration } = service;
     const pyramid = service.type === OfferingTypeEnum.WMTSTMS;
@@ -170,7 +170,7 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
                     </div>
                 </div>
                 {showEdit && (
-                    <Button iconId="fr-icon-edit-line" {...(unavailable ? { disabled: true } : { linkProps: editLink })}>
+                    <Button iconId="fr-icon-edit-line" {...(unavailable || !editLink ? { disabled: true } : { linkProps: editLink })}>
                         {t("edit")}
                     </Button>
                 )}
