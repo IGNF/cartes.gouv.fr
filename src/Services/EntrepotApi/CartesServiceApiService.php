@@ -255,31 +255,40 @@ class CartesServiceApiService
      *
      * @return array<mixed> la configuration supprimée
      */
-    private function unpublishOfferingAndConfiguration(string $datastoreId, array $offering, bool $removeStyleFiles = true): array
+    private function unpublishOfferingAndConfiguration(string $datastoreId, array $offering): array
     {
         $this->removeOfferingFully($datastoreId, $offering);
 
         $configuration = $this->waitForConfigurationUnpublished($datastoreId, $offering['configuration']['_id']);
 
-        $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
-
-        // vignette et logo d’attribution, après la configuration qui les référence ; un échec n’empêche pas la suppression du flux
-        try {
-            $this->serviceImageAnnexeService->removeServiceImages($datastoreId, $configuration);
-        } catch (ApiException $e) {
-            $this->logger->warning('{class}: Failed to remove image annexes of configuration {configurationId}: {error}', [
-                'class' => self::class,
-                'configurationId' => $configuration['_id'],
-                'exception' => $e,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        if ($removeStyleFiles) {
-            $this->removeStyleFiles($datastoreId, $configuration);
-        }
+        $this->removeConfiguration($datastoreId, $configuration);
 
         return $configuration;
+    }
+
+    /**
+     * Supprime une configuration sans offre, puis ses images et fichiers de style. L’Entrepôt refuse (409) une configuration qui a encore une offre.
+     *
+     * @param array<mixed> $configuration
+     */
+    public function removeConfiguration(string $datastoreId, array $configuration): void
+    {
+        $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
+
+        // fichiers lus dans la configuration supprimée : un échec n’empêche pas la suppression du flux
+        foreach (['image annexes' => $this->serviceImageAnnexeService->removeServiceImages(...), 'style files' => $this->removeStyleFiles(...)] as $files => $remove) {
+            try {
+                $remove($datastoreId, $configuration);
+            } catch (ApiException $e) {
+                $this->logger->warning('{class}: Failed to remove {files} of configuration {configurationId}: {error}', [
+                    'class' => self::class,
+                    'files' => $files,
+                    'configurationId' => $configuration['_id'],
+                    'exception' => $e,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     /**
@@ -416,8 +425,8 @@ class CartesServiceApiService
      */
     private function removeStyleFiles(string $datastoreId, array $configuration): void
     {
-        // WFS et TMS
-        $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration);
+        // WFS et TMS ; sans migration : elle écrirait dans la configuration déjà supprimée
+        $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration, false);
 
         foreach ($styles as $style) {
             if (array_key_exists('layers', $style)) {
