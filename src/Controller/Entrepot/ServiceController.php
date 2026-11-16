@@ -14,6 +14,7 @@ use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\WmsVectorStyleFileService;
 use App\Services\MultipartPayloadMapper;
 use App\Services\ServiceFormFileValidator;
 use OpenApi\Attributes as OA;
@@ -46,6 +47,7 @@ final class ServiceController extends AbstractController implements ApiControlle
         private readonly LoggerInterface $logger,
         private readonly MultipartPayloadMapper $multipartPayloadMapper,
         private readonly ServiceFormFileValidator $serviceFormFileValidator,
+        private readonly WmsVectorStyleFileService $wmsVectorStyleFileService,
     ) {
     }
 
@@ -94,7 +96,7 @@ final class ServiceController extends AbstractController implements ApiControlle
         $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
 
         $type = $configuration['type'];
-        $editableTypes = [ConfigurationTypes::WFS, ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
+        $editableTypes = [ConfigurationTypes::WFS, ConfigurationTypes::WMSVECTOR, ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
         if (!in_array($type, $editableTypes, true)) {
             throw new AppException('Ce type de flux ne se modifie pas depuis cette page', Response::HTTP_BAD_REQUEST, ['configuration_type' => $type]);
         }
@@ -105,7 +107,29 @@ final class ServiceController extends AbstractController implements ApiControlle
         }
         [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
 
-        return $this->json($this->cartesServiceApiService->editFromForm($datastoreId, $offering, $configuration, $dto, $thumbnail, $attributionLogo));
+        if (ConfigurationTypes::WMSVECTOR !== $type) {
+            return $this->json($this->cartesServiceApiService->editFromForm($datastoreId, $offering, $configuration, $dto, $thumbnail, $attributionLogo));
+        }
+
+        /** @var array<string, string> $savedStyleIds fichier de style enregistré par table */
+        $savedStyleIds = array_column($configuration['type_infos']['used_data'][0]['relations'] ?? [], 'style', 'name');
+        $styleFiles = $this->serviceFormFileValidator->styleFiles($request, $dto->selected_tables, array_keys($savedStyleIds));
+
+        // nouveau fichier puis suppression de l’ancien après l’enregistrement : un échec laisse le flux intact
+        $newStyleIds = $this->wmsVectorStyleFileService->upload($datastoreId, $styleFiles, $configuration['_id']);
+        $styleIds = $newStyleIds + array_intersect_key($savedStyleIds, array_flip($dto->selected_tables));
+        try {
+            $offering = $this->cartesServiceApiService->editFromForm($datastoreId, $offering, $configuration, $dto, $thumbnail, $attributionLogo, $styleIds);
+        } catch (\Throwable $th) {
+            // fichiers déjà référencés après un PUT réussi : l’Entrepôt refuse leur suppression (409, journalisé)
+            $this->wmsVectorStyleFileService->removeQuietly($datastoreId, $newStyleIds);
+            throw $th;
+        }
+
+        // fichiers remplacés et tables décochées
+        $this->wmsVectorStyleFileService->removeQuietly($datastoreId, array_diff($savedStyleIds, $styleIds));
+
+        return $this->json($offering);
     }
 
     /**

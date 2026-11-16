@@ -746,10 +746,11 @@ class CartesServiceApiService
     }
 
     /**
-     * Modifie un flux WFS, WMS raster, WMTS ou TMS ; public ↔ restreint supprime l’offre puis la recrée (flux sans offre si l’ajout échoue).
+     * Modifie un flux WFS, WMS vecteur, WMS raster, WMTS ou TMS ; public ↔ restreint supprime l’offre puis la recrée (flux sans offre si l’ajout échoue).
      *
-     * @param array<mixed> $offering      offre brute
-     * @param array<mixed> $configuration configuration brute de l’offre
+     * @param array<mixed>          $offering      offre brute
+     * @param array<mixed>          $configuration configuration brute de l’offre
+     * @param array<string, string> $styleIds      WMS vecteur : fichier de style (gardé ou déposé) par table cochée
      *
      * @return array<mixed> offre (nouvelle si l’endpoint change), avec sa configuration
      *
@@ -762,6 +763,7 @@ class CartesServiceApiService
         ServiceEditFormDTO $dto,
         ?UploadedFile $thumbnail = null,
         ?UploadedFile $attributionLogo = null,
+        array $styleIds = [],
     ): array {
         if (ConfigurationStatuses::PUBLISHED !== ($configuration['status'] ?? null) || OfferingStatuses::PUBLISHED !== ($offering['status'] ?? null)) {
             throw new AppException('Le flux est en cours de publication ou de modification, réessayez plus tard', Response::HTTP_CONFLICT, ['configuration_status' => $configuration['status'] ?? null, 'offering_status' => $offering['status'] ?? null]);
@@ -790,7 +792,7 @@ class CartesServiceApiService
             $body = [
                 'name' => $dto->title,
                 'type' => $type,
-                'type_infos' => $this->getEditTypeInfos($configuration, $dto),
+                'type_infos' => $this->getEditTypeInfos($configuration, $dto, $styleIds),
                 'metadata' => $configuration['metadata'] ?? [],
             ];
             if ($dto->attribution instanceof ServiceAttributionFormDTO) {
@@ -860,11 +862,12 @@ class CartesServiceApiService
     }
 
     /**
-     * @param array<mixed> $configuration
+     * @param array<mixed>          $configuration
+     * @param array<string, string> $styleIds
      *
      * @return array<mixed>
      */
-    private function getEditTypeInfos(array $configuration, ServiceEditFormDTO $dto): array
+    private function getEditTypeInfos(array $configuration, ServiceEditFormDTO $dto, array $styleIds): array
     {
         $typeInfos = $configuration['type_infos'];
 
@@ -877,6 +880,9 @@ class CartesServiceApiService
         $typeInfos['title'] = $dto->title;
         $typeInfos['abstract'] = $dto->description;
         $typeInfos['keywords'] = $dto->themes;
+        if (ConfigurationTypes::WMSVECTOR === $configuration['type']) {
+            $typeInfos['used_data'][0]['relations'] = array_map(fn (string $tableName) => ['name' => $tableName, 'style' => $styleIds[$tableName]], $dto->selected_tables);
+        }
 
         return $typeInfos;
     }

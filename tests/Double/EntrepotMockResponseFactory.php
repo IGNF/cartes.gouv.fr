@@ -463,6 +463,12 @@ final class EntrepotMockResponseFactory
             return $this->json(['error' => 'Conflict', 'error_description' => ['Configuration utilisée']], 409);
         }
 
+        // comme l’Entrepôt (vérifié le 16/11/2026) : un fichier statique référencé par une configuration n’est pas supprimé
+        if ('DELETE' === $method && 1 === preg_match('#^statics/([\w-]+)$#', $relative, $matches)
+            && str_contains(json_encode(array_column(self::$store['configurations'] ?? [], 'type_infos'), JSON_THROW_ON_ERROR), '"'.$matches[1].'"')) {
+            return $this->json(['error' => 'Conflict', 'error_description' => ['Le fichier statique est utilisé dans au moins une configuration']], 409);
+        }
+
         if ('DELETE' === $method && 1 === preg_match('#^permissions/([\w-]+)$#', $relative, $matches) && null === $this->find('permissions', $matches[1])) {
             return $this->json(['error' => 'NotFound'], 404);
         }
