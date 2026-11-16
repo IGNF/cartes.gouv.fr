@@ -1,11 +1,14 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { notFound, useNavigate } from "@tanstack/react-router";
+import { notFound, useBlocker, useNavigate } from "@tanstack/react-router";
 import { Fragment, type ReactNode, useEffect, useId, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import { tss } from "tss-react";
 
@@ -257,6 +260,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
                     to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
                     params: { datastoreId, datasheetName, offeringId: offering._id },
                     replace: true,
+                    ignoreBlocker: true,
                 });
                 // après la navigation : une invalidation relirait l’ancienne offre en 404
                 queryClient.removeQueries({ queryKey: serviceKey });
@@ -285,6 +289,21 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
             onSavedChange(true);
         },
     });
+
+    // modifications non enregistrées : confirmation avant de quitter la page (navigation dans l’application ou fermeture de l’onglet)
+    const reactId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
+    const leaveModal = useMemo(() => createModal({ id: `service-leave-${reactId}`, isOpenedByDefault: false }), [reactId]);
+    const blocker = useBlocker({
+        shouldBlockFn: () => true,
+        enableBeforeUnload: true,
+        disabled: !editable || !form.formState.isDirty || editMutation.isPending,
+        withResolver: true,
+    });
+    useEffect(() => {
+        if (blocker.status === "blocked") leaveModal.open();
+    }, [blocker.status, leaveModal]);
+    // fermeture de la modale sans quitter : la navigation bloquée est abandonnée
+    useIsModalOpen(leaveModal, { onConceal: () => blocker.reset?.() });
 
     const submit = form.handleSubmit(async (formValues) => {
         onSavedChange(false);
@@ -424,6 +443,26 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
                     </MetadataSection>
                 </MetadataSectionsContainer>
             </FormProvider>
+
+            {createPortal(
+                <leaveModal.Component
+                    title={t("leave.title")}
+                    buttons={[
+                        { children: t("leave.stay"), priority: "secondary", doClosesModal: true },
+                        {
+                            children: t("leave.confirm"),
+                            onClick: () => {
+                                blocker.proceed?.();
+                                leaveModal.close();
+                            },
+                            doClosesModal: false,
+                        },
+                    ]}
+                >
+                    {t("leave.description")}
+                </leaveModal.Component>,
+                document.body
+            )}
 
             {editMutation.isPending && (
                 <Wait>
