@@ -495,6 +495,14 @@ class CartesServiceApiService
             CommonTags::THEME_CATEGORIES => implode(', ', $dto->category),
         ];
 
+        $access = match (true) {
+            'your_community' !== $dto->share_with => ServiceAccess::Public,
+            true === $dto->allow_view_data => ServiceAccess::RestrictedVisible,
+            default => ServiceAccess::Restricted,
+        };
+        // même règle que la page du flux : permission expirée renouvelée seulement si l’accès change
+        $renewExpired = null !== $oldOffering && $this->getServiceAccess($datastoreId, $oldOffering) !== $access;
+
         if ($oldOffering) {
             // Modification d'un service existant
             $oldConfiguration = $oldOffering['configuration'];
@@ -537,8 +545,7 @@ class CartesServiceApiService
 
         $offering['configuration'] = $configuration;
 
-        // Création ou modification des permissions de la communauté actuelle ou de config
-        $this->handlePermissions($datastoreId, $offering, $dto);
+        $this->handleAccessPermissions($datastoreId, $offering, $access, $renewExpired);
 
         $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
 
@@ -1019,40 +1026,6 @@ class CartesServiceApiService
         ];
 
         return $configMetadata;
-    }
-
-    /**
-     * Crée, modifie ou supprime des permissions de la communauté actuelle ou de config.
-     *
-     * @param array<mixed> $offering
-     */
-    private function handlePermissions(string $datastoreId, array $offering, CommonDTO $dto): void
-    {
-        $shareWithCommunity = 'your_community' === $dto->share_with;
-        $isPrivate = false === $offering['open'];
-        if (!$shareWithCommunity && !$isPrivate) {
-            return;
-        }
-
-        // une seule lecture paginée des permissions pour les deux étapes, complétée par les créations
-        $permissions = $this->datastoreApiService->getPermissions($datastoreId)->resolve();
-
-        // création d'une permission pour la communauté actuelle
-        if ($shareWithCommunity) {
-            $communityId = $this->membershipService->getDatastoreIdentity($datastoreId)->communityId;
-            $permissions = [...$permissions, ...$this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions)];
-        }
-
-        if ($isPrivate) {
-            // création d'une permission pour la communauté config si demandée
-            $configCommunityId = $this->params->get('config')['community_id'];
-            if ($dto->allow_view_data) {
-                $this->addPermissionForCommunity($datastoreId, $configCommunityId, $offering, $permissions);
-            } else {
-                // sinon suppression de la permission pour la communauté config si elle existe déjà (elle a été créée lors de la création ou d'une modification précédente de l'offering)
-                $this->removeExistingConfigPermission($datastoreId, $offering, $permissions);
-            }
-        }
     }
 
     /**
