@@ -27,14 +27,30 @@ export default function ServicePreviewSection({ datastoreId, datasheetName, serv
         (service.type === OfferingTypeEnum.WFS ||
             (service.type === OfferingTypeEnum.WMTSTMS && service.configuration.pyramid?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR));
 
-    const [olLayers, setOlLayers] = useState<Layer[]>([]);
-    useEffect(() => {
-        if (!service.open) return;
-        void getWebService(service).getLayers().then(setOlLayers);
-    }, [service]);
-
     const typeInfos = service.configuration.type_infos;
     const bbox = "bbox" in typeInfos ? typeInfos.bbox : undefined;
+    const showMap = service.open && bbox !== undefined;
+
+    const [olLayers, setOlLayers] = useState<Layer[]>([]);
+    useEffect(() => {
+        if (!showMap) return;
+        let cancelled = false;
+        // shortcut: flux non affichable (type ou pyramide inconnus, capacités illisibles) = carte sans couche, à revoir avec les classes WebServices
+        const loadLayers = async (): Promise<Layer[]> => {
+            try {
+                return await getWebService(service).getLayers();
+            } catch {
+                return [];
+            }
+        };
+        void loadLayers().then((layers) => {
+            if (!cancelled) setOlLayers(layers);
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [service, showMap]);
+
     const currentStyle = service.configuration.styles?.find((style) => style.current);
 
     const preview = !service.open ? (
