@@ -977,7 +977,8 @@ class CartesServiceApiService
 
         if ($access->allowsCartesGouvView()) {
             $this->addPermissionForCommunity($datastoreId, $configCommunityId, $offering, $permissions);
-        } else {
+        } elseif ($communityId !== $configCommunityId) {
+            // entrepôt de cartes.gouv.fr : cette permission est celle de sa propre communauté, elle reste
             $this->removeExistingConfigPermission($datastoreId, $offering, $permissions);
         }
     }

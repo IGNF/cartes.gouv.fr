@@ -271,6 +271,21 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertSame([$this->cartesGouvCommunityId()], array_map(fn (array $permission) => $permission['beneficiary']['_id'], EntrepotMockResponseFactory::stored('permissions')));
     }
 
+    public function testRestrictedAccessKeepsTheOwnPermissionWhenTheDatastoreCommunityIsTheCartesGouvCommunity(): void
+    {
+        $client = $this->client();
+        EntrepotMockResponseFactory::setDatastoreCommunity($this->cartesGouvCommunityId());
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('own', $this->cartesGouvCommunityId(), '2099-01-01T00:00:00+00:00');
+        $this->seedPermission('other', 'community-other', '2099-01-01T00:00:00+00:00');
+
+        // accès enregistré « restreint visible » (permission cartes.gouv.fr en cours), demandé « restreint »
+        $this->post($client, ['access' => 'restricted'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(['own', 'other'], array_column(EntrepotMockResponseFactory::stored('permissions'), '_id'));
+    }
+
     public function testPermissionsAreLeftIntactWhenTheAccessIsUnchanged(): void
     {
         $this->seedService('WFS', open: false);
