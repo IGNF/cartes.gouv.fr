@@ -262,8 +262,8 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
                     replace: true,
                     ignoreBlocker: true,
                 });
-                // après la navigation : une invalidation relirait l’ancienne offre en 404
-                queryClient.removeQueries({ queryKey: serviceKey });
+                // après la navigation, seulement si plus rien ne l’observe : une requête encore observée serait relue en 404
+                queryClient.removeQueries({ queryKey: serviceKey, type: "inactive" });
                 void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_permissions(datastoreId) });
                 onSavedChange(true);
                 return;
@@ -306,7 +306,6 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
     useIsModalOpen(leaveModal, { onConceal: () => blocker.reset?.() });
 
     const submit = form.handleSubmit(async (formValues) => {
-        onSavedChange(false);
         try {
             await editMutation.mutateAsync(formValues);
         } catch (error) {
@@ -359,7 +358,15 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
             )}
 
             {/* champs hors du formulaire HTML : seul le bouton « Enregistrer » le soumet, pas la touche Entrée ni les boutons des autres sections */}
-            <form id={formId} onSubmit={(e) => void submit(e)} noValidate />
+            <form
+                id={formId}
+                onSubmit={(e) => {
+                    // aussi quand la validation échoue : l’alerte du précédent enregistrement n’a plus lieu d’être
+                    onSavedChange(false);
+                    void submit(e);
+                }}
+                noValidate
+            />
             <FormProvider {...form}>
                 <MetadataSectionsContainer>
                     <div className={cx(fr.cx("fr-col-12"), classes.header)}>
