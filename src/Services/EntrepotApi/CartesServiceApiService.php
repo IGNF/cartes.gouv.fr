@@ -495,6 +495,14 @@ class CartesServiceApiService
             CommonTags::THEME_CATEGORIES => implode(', ', $dto->category),
         ];
 
+        $access = match (true) {
+            'your_community' !== $dto->share_with => ServiceAccess::Public,
+            true === $dto->allow_view_data => ServiceAccess::RestrictedVisible,
+            default => ServiceAccess::Restricted,
+        };
+        // même règle que la page du flux : permission expirée renouvelée seulement si l’accès change
+        $renewExpired = null !== $oldOffering && $this->getServiceAccess($datastoreId, $oldOffering) !== $access;
+
         if ($oldOffering) {
             // Modification d'un service existant
             $oldConfiguration = $oldOffering['configuration'];
@@ -537,8 +545,7 @@ class CartesServiceApiService
 
         $offering['configuration'] = $configuration;
 
-        // Création ou modification des permissions de la communauté actuelle ou de config
-        $this->handlePermissions($datastoreId, $offering, $dto);
+        $this->handleAccessPermissions($datastoreId, $offering, $access, $renewExpired);
 
         $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
 
@@ -739,14 +746,38 @@ class CartesServiceApiService
     }
 
     /**
-     * Modifie un flux WFS, WMS raster, WMTS ou TMS ; public ↔ restreint supprime l’offre puis la recrée (flux sans offre si l’ajout échoue).
+     * Flux modifiable : configuration et offre publiées, rattachées à une fiche de données.
      *
-     * @param array<mixed> $offering      offre brute
-     * @param array<mixed> $configuration configuration brute de l’offre
+     * @param array<mixed> $offering
+     * @param array<mixed> $configuration
+     *
+     * @return string nom de la fiche de données
+     *
+     * @throws AppException 409 si la configuration ou l’offre n’est pas publiée, 400 sans fiche de données
+     */
+    public function assertEditable(array $offering, array $configuration): string
+    {
+        if (ConfigurationStatuses::PUBLISHED !== ($configuration['status'] ?? null) || OfferingStatuses::PUBLISHED !== ($offering['status'] ?? null)) {
+            throw new AppException('Le flux est en cours de publication ou de modification, réessayez plus tard', Response::HTTP_CONFLICT, ['configuration_status' => $configuration['status'] ?? null, 'offering_status' => $offering['status'] ?? null]);
+        }
+        $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME] ?? null;
+        if (!is_string($datasheetName)) {
+            throw new AppException('Le flux n’est rattaché à aucune fiche de données', Response::HTTP_BAD_REQUEST);
+        }
+
+        return $datasheetName;
+    }
+
+    /**
+     * Modifie un flux WFS, WMS vecteur, WMS raster, WMTS ou TMS ; public ↔ restreint supprime l’offre puis la recrée (flux sans offre si l’ajout échoue).
+     *
+     * @param array<mixed>          $offering      offre brute
+     * @param array<mixed>          $configuration configuration brute de l’offre
+     * @param array<string, string> $styleIds      WMS vecteur : fichier de style (gardé ou déposé) par table cochée
      *
      * @return array<mixed> offre (nouvelle si l’endpoint change), avec sa configuration
      *
-     * @throws AppException 409 si la configuration ou l’offre n’est pas publiée, avant toute écriture
+     * @throws AppException 409 si la configuration ou l’offre n’est pas publiée, avant toute écriture (voir assertEditable)
      */
     public function editFromForm(
         string $datastoreId,
@@ -755,14 +786,9 @@ class CartesServiceApiService
         ServiceEditFormDTO $dto,
         ?UploadedFile $thumbnail = null,
         ?UploadedFile $attributionLogo = null,
+        array $styleIds = [],
     ): array {
-        if (ConfigurationStatuses::PUBLISHED !== ($configuration['status'] ?? null) || OfferingStatuses::PUBLISHED !== ($offering['status'] ?? null)) {
-            throw new AppException('Le flux est en cours de publication ou de modification, réessayez plus tard', Response::HTTP_CONFLICT, ['configuration_status' => $configuration['status'] ?? null, 'offering_status' => $offering['status'] ?? null]);
-        }
-        $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME] ?? null;
-        if (!is_string($datasheetName)) {
-            throw new AppException('Le flux n’est rattaché à aucune fiche de données', Response::HTTP_BAD_REQUEST);
-        }
+        $datasheetName = $this->assertEditable($offering, $configuration);
 
         $type = $configuration['type'];
         $previousAccess = $this->getServiceAccess($datastoreId, $offering);
@@ -783,7 +809,7 @@ class CartesServiceApiService
             $body = [
                 'name' => $dto->title,
                 'type' => $type,
-                'type_infos' => $this->getEditTypeInfos($configuration, $dto),
+                'type_infos' => $this->getEditTypeInfos($configuration, $dto, $styleIds),
                 'metadata' => $configuration['metadata'] ?? [],
             ];
             if ($dto->attribution instanceof ServiceAttributionFormDTO) {
@@ -853,11 +879,12 @@ class CartesServiceApiService
     }
 
     /**
-     * @param array<mixed> $configuration
+     * @param array<mixed>          $configuration
+     * @param array<string, string> $styleIds
      *
      * @return array<mixed>
      */
-    private function getEditTypeInfos(array $configuration, ServiceEditFormDTO $dto): array
+    private function getEditTypeInfos(array $configuration, ServiceEditFormDTO $dto, array $styleIds): array
     {
         $typeInfos = $configuration['type_infos'];
 
@@ -870,6 +897,9 @@ class CartesServiceApiService
         $typeInfos['title'] = $dto->title;
         $typeInfos['abstract'] = $dto->description;
         $typeInfos['keywords'] = $dto->themes;
+        if (ConfigurationTypes::WMSVECTOR === $configuration['type']) {
+            $typeInfos['used_data'][0]['relations'] = array_map(fn (string $tableName) => ['name' => $tableName, 'style' => $styleIds[$tableName]], $dto->selected_tables);
+        }
 
         return $typeInfos;
     }
@@ -1019,40 +1049,6 @@ class CartesServiceApiService
         ];
 
         return $configMetadata;
-    }
-
-    /**
-     * Crée, modifie ou supprime des permissions de la communauté actuelle ou de config.
-     *
-     * @param array<mixed> $offering
-     */
-    private function handlePermissions(string $datastoreId, array $offering, CommonDTO $dto): void
-    {
-        $shareWithCommunity = 'your_community' === $dto->share_with;
-        $isPrivate = false === $offering['open'];
-        if (!$shareWithCommunity && !$isPrivate) {
-            return;
-        }
-
-        // une seule lecture paginée des permissions pour les deux étapes, complétée par les créations
-        $permissions = $this->datastoreApiService->getPermissions($datastoreId)->resolve();
-
-        // création d'une permission pour la communauté actuelle
-        if ($shareWithCommunity) {
-            $communityId = $this->membershipService->getDatastoreIdentity($datastoreId)->communityId;
-            $permissions = [...$permissions, ...$this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions)];
-        }
-
-        if ($isPrivate) {
-            // création d'une permission pour la communauté config si demandée
-            $configCommunityId = $this->params->get('config')['community_id'];
-            if ($dto->allow_view_data) {
-                $this->addPermissionForCommunity($datastoreId, $configCommunityId, $offering, $permissions);
-            } else {
-                // sinon suppression de la permission pour la communauté config si elle existe déjà (elle a été créée lors de la création ou d'une modification précédente de l'offering)
-                $this->removeExistingConfigPermission($datastoreId, $offering, $permissions);
-            }
-        }
     }
 
     /**

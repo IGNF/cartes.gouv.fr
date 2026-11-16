@@ -1,7 +1,7 @@
 import markdownit from "markdown-it";
 
-import { type DatastorePermission, type Service, type VectorDb } from "@/@types/app";
-import { type ConfigurationUsedDataRelationWfsDetailsContent } from "@/@types/entrepot";
+import { type DatastorePermission, OfferingTypeEnum, type Service, type VectorDb } from "@/@types/app";
+import { type ConfigurationUsedDataRelationWfsDetailsContent, type ConfigurationUsedDataRelationWmsVectorDetailsContent } from "@/@types/entrepot";
 import { filterGeometricRelations } from "@/helpers";
 import { getThematicCategories, isPrivateServiceVisibleOnCartesGouv } from "@/utils";
 import { type ServiceAccess, type ServiceFormValues, type ServiceTableFormValues } from "./serviceFormSchema";
@@ -56,15 +56,27 @@ const readAccess = (service: Service, permissions: DatastorePermission[] | undef
 
 /** une ligne par table géométrique de la base, aucune cochée */
 export const defaultTables = (vectorDb: VectorDb): ServiceTableFormValues[] =>
-    filterGeometricRelations(vectorDb.type_infos?.relations ?? [], true).map((relation) => ({
-        native_name: relation.name,
-        selected: false,
-        title: relation.name,
-        public_name: relation.name.toLowerCase(),
-        description: "",
-        keywords: [],
-        style: undefined,
-    }));
+    filterGeometricRelations(vectorDb.type_infos?.relations ?? [], true).map((relation) => defaultTable(relation.name));
+
+const defaultTable = (name: string): ServiceTableFormValues => ({
+    native_name: name,
+    selected: false,
+    title: name,
+    public_name: name.toLowerCase(),
+    description: "",
+    keywords: [],
+    style: undefined,
+});
+
+// WMS vecteur : tables enregistrées par `name`, avec leur fichier de style ; même règle qu’en WFS pour une table disparue
+const wmsVectorTables = (relations: ConfigurationUsedDataRelationWmsVectorDetailsContent[], vectorDb: VectorDb): ServiceTableFormValues[] => {
+    const savedStyles = new Map(relations.map((relation) => [relation.name, relation.style]));
+    const tables = defaultTables(vectorDb).map((table) =>
+        savedStyles.has(table.native_name) ? { ...table, selected: true, saved_style_id: savedStyles.get(table.native_name) } : table
+    );
+    const missing = relations.filter((relation) => !tables.some((table) => table.native_name === relation.name));
+    return [...tables, ...missing.map((relation) => ({ ...defaultTable(relation.name), missing: true, saved_style_id: relation.style }))];
+};
 
 // tables de la base, cochées et remplies depuis les relations enregistrées ; une relation dont la table a disparu reste affichée, non cochable
 const wfsTables = (relations: ConfigurationUsedDataRelationWfsDetailsContent[], vectorDb: VectorDb): ServiceTableFormValues[] => {
@@ -91,7 +103,7 @@ const toTable = (
 });
 
 /**
- * Valeurs du formulaire d’un flux publié. `vectorDb` : base du flux WFS, pour proposer toutes ses tables ; sans elle, aucune table.
+ * Valeurs du formulaire d’un flux publié. `vectorDb` : base du flux WFS ou WMS vecteur, pour proposer toutes ses tables ; sans elle, aucune table.
  */
 export function serviceToFormValues(
     service: Service,
@@ -105,7 +117,11 @@ export function serviceToFormValues(
     const abstract = "abstract" in typeInfos && typeof typeInfos.abstract === "string" ? typeInfos.abstract : "";
     const decoded = decodeDescription(abstract);
     const usedData = typeInfos.used_data[0];
-    const relations = usedData && "relations" in usedData ? (usedData.relations as ConfigurationUsedDataRelationWfsDetailsContent[]) : [];
+    const relations = usedData && "relations" in usedData ? usedData.relations : [];
+    const readTables = (db: VectorDb) =>
+        service.type === OfferingTypeEnum.WMSVECTOR
+            ? wmsVectorTables(relations as ConfigurationUsedDataRelationWmsVectorDetailsContent[], db)
+            : wfsTables(relations as ConfigurationUsedDataRelationWfsDetailsContent[], db);
 
     return {
         stored_data_id: usedData?.stored_data ?? "",
@@ -115,7 +131,7 @@ export function serviceToFormValues(
         description: decoded === undefined ? abstract : markdownToText(decoded),
         thumbnail: undefined,
         themes: readThemes(configuration.tags.theme ?? ""),
-        tables: vectorDb ? wfsTables(relations, vectorDb) : [],
+        tables: vectorDb ? readTables(vectorDb) : [],
         access: readAccess(service, permissions, cartesGouvCommunityId, now),
         attribution: {
             enabled: Boolean(configuration.attribution),

@@ -25,6 +25,7 @@ final class ServiceEditRouteTest extends WebTestCase
     private const OLD_LOGO_PATH = '/attribution-logo/1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d.png';
     // style déjà migré : getStyles ne le réécrit pas
     private const STYLE = ['name' => 'Mon style', 'technical_name' => 'mon_style', 'layers' => []];
+    private const SLD = '<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld"><NamedLayer><Name>communes</Name></NamedLayer></StyledLayerDescriptor>';
     private const PNG_1X1 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
     protected function setUp(): void
@@ -307,14 +308,135 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertSame(['expired-own'], array_column(EntrepotMockResponseFactory::stored('permissions'), '_id'));
     }
 
-    public function testWmsVectorFluxIsRefused(): void
+    public function testWmsVectorKeepsAddsAndRemovesTablesWithTheirStyleFiles(): void
     {
         $this->seedService('WMS-VECTOR');
         $client = $this->client();
 
-        $this->post($client, $this->payload());
+        // communes gardée sans nouveau fichier, routes décochée, rivieres ajoutée
+        $this->post($client, ['selected_tables' => ['communes', 'rivieres']] + $this->wmsVectorPayload(), ['style_files' => ['rivieres' => $this->sld()]]);
 
-        self::assertResponseStatusCodeSame(400);
+        self::assertResponseIsSuccessful();
+        $statics = EntrepotMockResponseFactory::stored('statics');
+        self::assertCount(2, $statics);
+        self::assertSame('static-communes', $statics[0]['_id']);
+        self::assertSame(sprintf('config_%s_style_wmsv_rivieres', self::CONFIGURATION_ID), $statics[1]['name']);
+        $put = $this->configurationPut();
+        self::assertArrayNotHasKey('layer_name', $put);
+        self::assertSame([
+            'stored_data' => 'vectordb-1',
+            'relations' => [['name' => 'communes', 'style' => 'static-communes'], ['name' => 'rivieres', 'style' => $statics[1]['_id']]],
+        ], $put['type_infos']['used_data'][0]);
+        self::assertSame(['Flux modifié', 'Nouvelle description', ['Hydrographie', 'Transports']], [$put['type_infos']['title'], $put['type_infos']['abstract'], $put['type_infos']['keywords']]);
+    }
+
+    public function testWmsVectorNewStyleFileReplacesTheOldOneAfterTheSave(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+
+        $this->post($client, $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseIsSuccessful();
+        $statics = EntrepotMockResponseFactory::stored('statics');
+        self::assertSame(['static-routes'], array_values(array_intersect(array_column($statics, '_id'), ['static-communes', 'static-routes'])));
+        $newStatic = array_values(array_filter($statics, fn (array $static) => 'static-routes' !== $static['_id']))[0];
+        self::assertSame(sprintf('config_%s_style_wmsv_communes', self::CONFIGURATION_ID), $newStatic['name']);
+        self::assertSame([['name' => 'communes', 'style' => $newStatic['_id']], ['name' => 'routes', 'style' => 'static-routes']], $this->configurationPut()['type_infos']['used_data'][0]['relations']);
+    }
+
+    public function testWmsVectorTableNamedWithDigitsOnlyKeepsItsSavedStyle(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [['name' => '2024', 'style' => 'static-2024']]);
+        $client = $this->client();
+
+        // PHP range une clé « 2024 » en entier
+        $this->post($client, ['selected_tables' => ['2024']] + $this->wmsVectorPayload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame([['name' => '2024', 'style' => 'static-2024']], $this->configurationPut()['type_infos']['used_data'][0]['relations']);
+    }
+
+    public function testWmsVectorAddedTableWithoutStyleFileAnswers422WithoutWriting(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+
+        $this->post($client, ['selected_tables' => ['communes', 'rivieres']] + $this->wmsVectorPayload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['style_files[rivieres]'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    public function testWmsVectorFailedSaveRemovesTheNewStyleFilesAndKeepsTheOldOnes(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PUT configurations/'.self::CONFIGURATION_ID);
+
+        $this->post($client, $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame(['static-communes', 'static-routes'], array_column(EntrepotMockResponseFactory::stored('statics'), '_id'));
+    }
+
+    public function testWmsVectorFailureAfterTheSaveRemovesTheStyleFilesTheConfigurationNoLongerUses(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PUT offerings/'.self::OFFERING_ID);
+
+        $this->post($client, $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseStatusCodeSame(500);
+        $statics = array_column(EntrepotMockResponseFactory::stored('statics'), '_id');
+        $relations = EntrepotMockResponseFactory::stored('configurations')[0]['type_infos']['used_data'][0]['relations'];
+        // configuration enregistrée : le nouveau fichier reste, l’ancien part
+        self::assertEqualsCanonicalizing(array_column($relations, 'style'), $statics);
+        self::assertNotContains('static-communes', $statics);
+    }
+
+    public function testWmsVectorAccessChangeKeepsTheNewStyleFileAndRemovesTheOldOne(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+
+        $this->post($client, ['access' => 'restricted'] + $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseIsSuccessful();
+        $offerings = EntrepotMockResponseFactory::stored('offerings');
+        self::assertSame([EntrepotMockResponseFactory::WMSV_PRIVATE_ENDPOINT_ID], array_column(array_column($offerings, 'endpoint'), '_id'));
+        $relations = EntrepotMockResponseFactory::stored('configurations')[0]['type_infos']['used_data'][0]['relations'];
+        self::assertEqualsCanonicalizing(array_column($relations, 'style'), array_column(EntrepotMockResponseFactory::stored('statics'), '_id'));
+        self::assertNotContains('static-communes', array_column($relations, 'style'));
+    }
+
+    public function testWmsVectorFluxBeingPublishedAnswers409WithoutUploadingStyleFiles(): void
+    {
+        $this->seedService('WMS-VECTOR', offeringStatus: 'PUBLISHING');
+        $client = $this->client();
+
+        $this->post($client, $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseStatusCodeSame(409);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    public function testWmsVectorEmptyDescriptionOrTooManyTablesAnswer422(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+
+        $this->post($client, ['description' => '', 'selected_tables' => []] + $this->wmsVectorPayload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['description', 'selected_tables'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+
+        $this->post($client, ['selected_tables' => array_map(fn (int $i) => "table_$i", range(1, 11))] + $this->wmsVectorPayload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['selected_tables'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 
@@ -388,10 +510,21 @@ final class ServiceEditRouteTest extends WebTestCase
         return self::getContainer()->getParameter('config')['community_id'];
     }
 
-    private function seedService(string $type, bool $open = true, string $offeringStatus = 'PUBLISHED', string $configurationStatus = 'PUBLISHED'): void
+    /**
+     * @param ?list<array{name: string, style: string}> $wmsVectorRelations relations enregistrées d’un WMS vecteur, communes et routes par défaut
+     */
+    private function seedService(string $type, bool $open = true, string $offeringStatus = 'PUBLISHED', string $configurationStatus = 'PUBLISHED', ?array $wmsVectorRelations = null): void
     {
-        EntrepotMockResponseFactory::seed('configurations', ['status' => $configurationStatus] + $this->seededConfiguration($type));
+        $configuration = $this->seededConfiguration($type);
+        if (null !== $wmsVectorRelations) {
+            $configuration['type_infos']['used_data'][0]['relations'] = $wmsVectorRelations;
+        }
+        EntrepotMockResponseFactory::seed('configurations', ['status' => $configurationStatus] + $configuration);
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'pyramid-1', 'type' => 'ROK4-PYRAMID-RASTER', 'tags' => ['datasheet_name' => 'Fiche']]);
+        if ('WMS-VECTOR' === $type) {
+            EntrepotMockResponseFactory::seed('statics', ['_id' => 'static-communes', 'name' => 'config_'.self::CONFIGURATION_ID.'_style_wmsv_communes']);
+            EntrepotMockResponseFactory::seed('statics', ['_id' => 'static-routes', 'name' => 'config_'.self::CONFIGURATION_ID.'_style_wmsv_routes']);
+        }
         EntrepotMockResponseFactory::seed('offerings', [
             '_id' => self::OFFERING_ID,
             'type' => $type,
@@ -412,18 +545,25 @@ final class ServiceEditRouteTest extends WebTestCase
     /** @return array<string, mixed> */
     private function seededConfiguration(string $type): array
     {
-        $typeInfos = 'WFS' === $type
-            ? ['used_data' => [[
+        $typeInfos = match ($type) {
+            'WFS' => ['used_data' => [[
                 'stored_data' => 'vectordb-1',
                 'relations' => [['native_name' => 'communes', 'public_name' => 'Communes_2020', 'title' => 'Communes', 'abstract' => 'Les communes']],
-            ]], 'expose_primary_key' => true]
-            : [
+            ]], 'expose_primary_key' => true],
+            'WMS-VECTOR' => [
+                'used_data' => [['stored_data' => 'vectordb-1', 'relations' => [['name' => 'communes', 'style' => 'static-communes'], ['name' => 'routes', 'style' => 'static-routes']]]],
+                'title' => 'Ancien titre',
+                'abstract' => 'Ancienne description',
+                'keywords' => ['Ancien mot-clé'],
+            ],
+            default => [
                 'used_data' => [['stored_data' => 'pyramid-1', 'bottom_level' => '18', 'top_level' => '5']],
                 'styles' => ['static-legend'],
                 'title' => 'Ancien titre',
                 'abstract' => '"Ancienne description"',
                 'keywords' => ['Ancien mot-clé'],
-            ];
+            ],
+        };
 
         return [
             '_id' => self::CONFIGURATION_ID,
@@ -467,6 +607,14 @@ final class ServiceEditRouteTest extends WebTestCase
         return array_values(array_intersect(array_column(EntrepotMockResponseFactory::stored('annexes'), '_id'), ['annexe-service-thumbnail', 'annexe-attribution-logo']));
     }
 
+    private function sld(): UploadedFile
+    {
+        $path = (string) tempnam(sys_get_temp_dir(), 'style');
+        file_put_contents($path, self::SLD);
+
+        return new UploadedFile($path, 'style.sld', 'application/octet-stream', null, true);
+    }
+
     private function png(): UploadedFile
     {
         $path = (string) tempnam(sys_get_temp_dir(), 'image');
@@ -476,12 +624,18 @@ final class ServiceEditRouteTest extends WebTestCase
     }
 
     /**
-     * @param array<string, mixed>        $payload
-     * @param array<string, UploadedFile> $files
+     * @param array<string, mixed>                                    $payload
+     * @param array<string, UploadedFile|array<string, UploadedFile>> $files
      */
     private function post(KernelBrowser $client, array $payload, array $files = []): void
     {
         $client->xmlHttpRequest('POST', self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/offerings/'.self::OFFERING_ID.'/edit', ['data' => json_encode($payload, JSON_THROW_ON_ERROR)], $files);
+    }
+
+    /** @return array<string, mixed> */
+    private function wmsVectorPayload(): array
+    {
+        return ['description' => 'Nouvelle description', 'tables' => [], 'selected_tables' => ['communes', 'routes']] + $this->payload();
     }
 
     /** @return array<string, mixed> */

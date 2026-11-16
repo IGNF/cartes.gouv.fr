@@ -16,6 +16,7 @@ class ServiceEditFormDTO
     /**
      * @param string[]              $themes
      * @param WfsTableEditFormDTO[] $tables
+     * @param string[]              $selected_tables
      */
     public function __construct(
         #[Assert\NotBlank(message: 'Le titre du flux est obligatoire')]
@@ -31,12 +32,18 @@ class ServiceEditFormDTO
         public readonly ?ServiceAttributionFormDTO $attribution = null,
 
         // l’Entrepôt exige `type_infos.abstract` hors WFS
-        #[Assert\NotBlank(message: 'La description du flux est obligatoire', groups: [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS])]
+        #[Assert\NotBlank(message: 'La description du flux est obligatoire', groups: [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS, ConfigurationTypes::WMSVECTOR])]
         public readonly string $description = '',
 
         #[Assert\Valid]
         #[Assert\Count(min: 1, minMessage: 'Veuillez choisir au moins une table', groups: [ConfigurationTypes::WFS])]
         public readonly array $tables = [],
+
+        // tables WMS vecteur cochées, un fichier de style chacune
+        #[Assert\Count(min: 1, max: ServiceFormDTO::TABLES_MAX, minMessage: 'Veuillez choisir au moins une table', maxMessage: 'Choisissez au plus {{ limit }} tables', groups: [ConfigurationTypes::WMSVECTOR])]
+        #[Assert\Unique(groups: [ConfigurationTypes::WMSVECTOR])]
+        #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()], groups: [ConfigurationTypes::WMSVECTOR])]
+        public readonly array $selected_tables = [],
 
         public readonly bool $remove_thumbnail = false,
 

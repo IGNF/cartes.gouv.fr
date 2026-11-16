@@ -6,7 +6,6 @@ const { i18n } = declareComponentKeys<
     | "loading"
     | "load_error"
     | { K: "type_tag"; P: { type: string }; R: string }
-    | "edit"
     | "save"
     | "edit.saving"
     | "edit.success"
@@ -59,7 +58,6 @@ export const ServicePageFrTranslations: Translations<"fr">["ServicePage"] = {
     loading: "Chargement du flux",
     load_error: "Le flux n’a pas pu être chargé",
     type_tag: ({ type }) => `FLUX ${type}`,
-    edit: "Modifier",
     save: "Enregistrer",
     "edit.saving": "Enregistrement du flux",
     "edit.success": "Les modifications du flux sont enregistrées",
@@ -99,7 +97,6 @@ export const ServicePageEnTranslations: Translations<"en">["ServicePage"] = {
     loading: "Loading the service",
     load_error: "The service could not be loaded",
     type_tag: ({ type }) => `${type} SERVICE`,
-    edit: "Edit",
     save: "Save",
     "edit.saving": "Saving the service",
     "edit.success": "The service changes are saved",

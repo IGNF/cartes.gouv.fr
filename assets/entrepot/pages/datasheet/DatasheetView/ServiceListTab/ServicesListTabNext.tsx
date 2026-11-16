@@ -33,7 +33,6 @@ import {
     getExploreMapsAvailability,
     getExploreMapsLayerParam,
     getNextExploreMapsPendingEnd,
-    getServiceEditLink,
     getServiceThumbnailUrl,
     getServiceTypeLabel,
     isOfferingUnavailable,
@@ -224,19 +223,16 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                                     search: { offeringId: service._id, datasheetName },
                                 },
                             },
-                        // WMS vecteur : ancien formulaire ; autres types : page du flux, mêmes droits que la création
+                        // page du flux, mêmes droits que la création
                         editable &&
-                            (service.type === OfferingTypeEnum.WMSVECTOR ? canBroadcast : canCreate) && {
+                            canCreate && {
                                 text: t("menu.edit"),
                                 iconId: "ri-edit-box-line",
                                 disabled: offeringUnavailable,
-                                linkProps:
-                                    service.type === OfferingTypeEnum.WMSVECTOR
-                                        ? getServiceEditLink(datastoreId, datasheetName, service)
-                                        : {
-                                              to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
-                                              params: { datastoreId, datasheetName, offeringId: service._id },
-                                          },
+                                linkProps: {
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
+                                    params: { datastoreId, datasheetName, offeringId: service._id },
+                                },
                             },
                         editable &&
                             canBroadcast && {

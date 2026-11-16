@@ -151,4 +151,16 @@ describe("buildServiceEditFormData", () => {
         expect(payload.description).toBe("Ortho");
         expect(payload).not.toHaveProperty("tables");
     });
+
+    it("WMS vecteur : noms des tables cochées, fichiers de style des seules tables qui en ont un nouveau", () => {
+        const style = new File(["<sld/>"], "routes.sld");
+        const tables = [
+            { ...editValues.tables[1], saved_style_id: "static-communes" },
+            { ...editValues.tables[1], native_name: "routes", style },
+        ];
+        const formData = buildServiceEditFormData("wms", { ...editValues, description: "Réseau", tables });
+        expect(payloadOf(formData).selected_tables).toEqual(["communes", "routes"]);
+        expect(formData.get("style_files[communes]")).toBeNull();
+        expect(formData.get("style_files[routes]")).toBe(style);
+    });
 });
