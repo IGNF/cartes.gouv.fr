@@ -9,7 +9,7 @@ import { lazy, ReactNode, Suspense, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
-import type { Datasheet, DatasheetDetailed, Metadata, Service } from "@/@types/app";
+import type { Datasheet, DatasheetDetailed, Metadata } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import TertiaryNavigation from "@/components/Layout/TertiaryNavigation";
@@ -21,6 +21,7 @@ import useCatalogueDatasheetUrl from "@/hooks/useCatalogueDatasheetUrl";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
+import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
 import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
@@ -104,13 +105,7 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
 
     const metadataQuery = useQuery({ ...datasheetMetadataQueryOptions(datastoreId, datasheetName), enabled });
 
-    const serviceListQuery = useQuery<Service[], ApiError>({
-        queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
-        staleTime: 60000,
-        retry: false,
-        enabled,
-    });
+    const serviceListQuery = useQuery({ ...datasheetServiceListQueryOptions(datastoreId, datasheetName), enabled });
 
     const isDeleteModalOpen = useIsModalOpen(deleteModal);
 

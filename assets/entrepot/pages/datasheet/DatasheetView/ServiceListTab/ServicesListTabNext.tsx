@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
-import { type DatastorePermission, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
+import { OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
@@ -19,12 +19,12 @@ import MenuList from "@/components/Utils/MenuList";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
+import { datastorePermissionsQueryOptions } from "@/hooks/queries/datastorePermissionsQueryOptions";
 import useUnpublishServiceMutation from "@/hooks/queries/useUnpublishServiceMutation";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { usePagination } from "@/hooks/usePagination";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
-import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
 import { externalLinkToUrl, externalUrls } from "@/router/externalUrls";
 import {
@@ -104,12 +104,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
 
     // permissions de l’entrepôt, pour repérer les flux privés visibles sur cartes.gouv.fr ; en cas d’échec, ces flux s’affichent « Privé »
-    const permissionsQuery = useQuery<DatastorePermission[], ApiError>({
-        queryKey: RQKeys.datastore_permissions(datastoreId),
-        queryFn: ({ signal }) => api.datastore.getPermissions(datastoreId, {}, { signal }),
-        staleTime: 60000,
-        retry: false,
-    });
+    const permissionsQuery = useQuery(datastorePermissionsQueryOptions(datastoreId));
 
     const deleteServiceMutation = useUnpublishServiceMutation(datastoreId, datasheetName);
 
