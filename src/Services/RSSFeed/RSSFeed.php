@@ -24,8 +24,6 @@ class RSSFeed
     ) {
         $this->httpClient = $httpClient->withOptions([
             'proxy' => $parameters->get('http_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
         ]);
         $this->alertsJsonUrl = $parameters->get('annexes_url').'/'.$parameters->get('config')['technical_name'].'/public/alerts.json';
     }
