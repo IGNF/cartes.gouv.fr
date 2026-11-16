@@ -63,16 +63,33 @@ type StyleAddModifyPostDataType = {
     >;
 };
 
+/** pages d’où l’on ouvre un formulaire de style, hors vue classique du flux */
+export const STYLE_FORM_RETURN_PAGES = ["service_page"] as const;
+export type StyleFormReturnPage = (typeof STYLE_FORM_RETURN_PAGES)[number];
+
 type StyleAddModifyFormProps = {
     datastoreId: string;
     datasheetName: string;
     offeringId: string;
     styleTechnicalName?: string;
+    /** absent : retour vers la vue classique du flux */
+    returnTo?: StyleFormReturnPage;
 };
 
 const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     const navigate = useNavigate();
-    const { datastoreId, datasheetName, offeringId, styleTechnicalName } = props;
+    const { datastoreId, datasheetName, offeringId, styleTechnicalName, returnTo } = props;
+    const backLink =
+        returnTo === "service_page"
+            ? ({
+                  to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
+                  params: { datastoreId, datasheetName, offeringId },
+              } as const)
+            : ({
+                  to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
+                  params: { datastoreId, offeringId },
+                  search: { datasheetName },
+              } as const);
 
     // const { t } = useTranslation("Style");
     const { t: tCommon } = useTranslation("Common");
@@ -320,11 +337,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
             });
 
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offeringId) });
-            void navigate({
-                to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
-                params: { datastoreId, offeringId },
-                search: { datasheetName },
-            });
+            void navigate(backLink);
         },
     });
 
@@ -363,11 +376,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                             {...(isDirty
                                 ? { onClick: confirmReturnModal.open }
                                 : {
-                                      linkProps: {
-                                          to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
-                                          params: { datastoreId, offeringId },
-                                          search: { datasheetName },
-                                      },
+                                      linkProps: backLink,
                                   })}
                         />
                         <h1 className={fr.cx("fr-m-0")}>{editMode ? `Modifier le style "${style.name}"` : "Ajouter un style"}</h1>
@@ -446,12 +455,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         {
                             children: "Annuler",
                             priority: "secondary",
-                            onClick: () =>
-                                void navigate({
-                                    to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
-                                    params: { datastoreId, offeringId },
-                                    search: { datasheetName },
-                                }),
+                            onClick: () => void navigate(backLink),
                         },
                         {
                             children: "Enregistrer les modifications",

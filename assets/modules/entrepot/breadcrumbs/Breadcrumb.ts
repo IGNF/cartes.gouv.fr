@@ -64,6 +64,8 @@ export type BreadcrumbRouteParams = {
     communityId?: string;
     datasheetName?: string;
     offeringId?: string;
+    /** page d’origine d’un formulaire de style */
+    returnTo?: string;
 };
 
 const getBreadcrumb = (
@@ -80,7 +82,7 @@ const getBreadcrumb = (
 
     const name = breadcrumbNameByRouteId[routeId as keyof typeof breadcrumbNameByRouteId] as
         (typeof breadcrumbNameByRouteId)[keyof typeof breadcrumbNameByRouteId] | undefined;
-    const { datastoreId, datasheetName, offeringId } = params;
+    const { datastoreId, datasheetName, offeringId, returnTo } = params;
     const datasheetLink = (activeTab?: "dataset" | "services") => ({
         to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName" as const,
         params: { datastoreId: datastoreId ?? "", datasheetName: datasheetName ?? "" },
@@ -253,14 +255,22 @@ const getBreadcrumb = (
             datastoreBaseProps.segments = [
                 ...datastoreBaseProps.segments,
                 { label: datasheetName, linkProps: datasheetLink("services") },
-                {
-                    label: t("datastore_service_view"),
-                    linkProps: {
-                        to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
-                        params: { datastoreId: datastoreId ?? "", offeringId: offeringId ?? "" },
-                        search: { datasheetName: datasheetName ?? "" },
-                    },
-                },
+                returnTo === "service_page"
+                    ? {
+                          label: t("datastore_datasheet_service_view"),
+                          linkProps: {
+                              to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
+                              params: { datastoreId: datastoreId ?? "", datasheetName: datasheetName ?? "", offeringId: offeringId ?? "" },
+                          },
+                      }
+                    : {
+                          label: t("datastore_service_view"),
+                          linkProps: {
+                              to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
+                              params: { datastoreId: datastoreId ?? "", offeringId: offeringId ?? "" },
+                              search: { datasheetName: datasheetName ?? "" },
+                          },
+                      },
             ];
             return { ...datastoreBaseProps, currentPageLabel: t(name) };
 
