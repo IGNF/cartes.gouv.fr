@@ -15,6 +15,8 @@ export default function useUnpublishServiceMutation(datastoreId: string, datashe
         onSettled() {
             void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
+            // le nom technique redevient libre
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_layernames(datastoreId) });
             // attendue : la mutation reste en cours (et l’attente affichée) jusqu’à la relecture de la liste
             return queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
         },

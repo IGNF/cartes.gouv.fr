@@ -49,6 +49,13 @@ const { i18n } = declareComponentKeys<
     | { K: "delete_modal.configuration"; P: { id: string }; R: string }
     | "deleting"
     | "delete_error"
+    | "without_offering.title"
+    | "without_offering.explanation"
+    | "without_offering.status"
+    | "without_offering.load_error"
+    | { K: "without_offering.delete_modal.title"; P: { name: string }; R: string }
+    | "without_offering.deleting"
+    | "without_offering.delete_error"
 >()("ServicesListTabNext");
 
 export type I18n = typeof i18n;
@@ -101,6 +108,14 @@ export const ServicesListTabNextFrTranslations: Translations<"fr">["ServicesList
     "delete_modal.configuration": ({ id }) => `1 configuration (${id})`,
     deleting: "Suppression du flux en cours",
     delete_error: "Le flux n’a pas été supprimé",
+    "without_offering.title": "Flux non publiés",
+    "without_offering.explanation":
+        "Ces flux n’ont plus d’offre de publication, souvent après une publication ou une suppression interrompue. Ils gardent leur nom technique tant qu’ils ne sont pas supprimés.",
+    "without_offering.status": "Non publié",
+    "without_offering.load_error": "La liste des flux non publiés n’a pas pu être chargée",
+    "without_offering.delete_modal.title": ({ name }) => `Êtes-vous sûr de vouloir supprimer le flux non publié ${name} ?`,
+    "without_offering.deleting": "Suppression du flux non publié en cours",
+    "without_offering.delete_error": "Le flux non publié n’a pas été supprimé",
 };
 
 export const ServicesListTabNextEnTranslations: Translations<"en">["ServicesListTabNext"] = {
@@ -151,4 +166,12 @@ export const ServicesListTabNextEnTranslations: Translations<"en">["ServicesList
     "delete_modal.configuration": ({ id }) => `1 configuration (${id})`,
     deleting: "Deleting the service",
     delete_error: "The service was not deleted",
+    "without_offering.title": "Unpublished services",
+    "without_offering.explanation":
+        "These services no longer have a publication offering, often after an interrupted publication or deletion. They keep their technical name until they are deleted.",
+    "without_offering.status": "Unpublished",
+    "without_offering.load_error": "The list of unpublished services could not be loaded",
+    "without_offering.delete_modal.title": ({ name }) => `Are you sure you want to delete the unpublished service ${name}?`,
+    "without_offering.deleting": "Deleting the unpublished service",
+    "without_offering.delete_error": "The unpublished service was not deleted",
 };

@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
-import { OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
+import { type Configuration, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
@@ -40,6 +40,7 @@ import {
     isPrivateServiceVisibleOnCartesGouv,
 } from "@/utils";
 import DatasheetViewTab from "../../DatasheetViewTab";
+import ConfigurationsWithoutOfferingList from "./ConfigurationsWithoutOfferingList";
 import ServiceAccessBadge from "./ServiceAccessBadge";
 import ServiceExploreMapsCell from "./ServiceExploreMapsCell";
 import ServiceShareUrlCell from "./ServiceShareUrlCell";
@@ -86,9 +87,10 @@ type ServicesListTabNextProps = {
     datastoreId: string;
     datasheetName: string;
     serviceListQuery: UseQueryResult<Service[], ApiError>;
+    configurationsWithoutOfferingQuery: UseQueryResult<Configuration[], ApiError>;
 };
 
-export default function ServicesListTabNext({ datastoreId, datasheetName, serviceListQuery }: ServicesListTabNextProps) {
+export default function ServicesListTabNext({ datastoreId, datasheetName, serviceListQuery, configurationsWithoutOfferingQuery }: ServicesListTabNextProps) {
     const { t } = useTranslation("ServicesListTabNext");
     const { classes, cx } = useStyles();
     const [typeFilter, setTypeFilter] = useState<ServiceTypeFilter>("all");
@@ -248,8 +250,23 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         return <LoadingText withSpinnerIcon={true} as="p" />;
     }
 
+    const configurationsWithoutOffering = (
+        <ConfigurationsWithoutOfferingList
+            datastoreId={datastoreId}
+            datasheetName={datasheetName}
+            query={configurationsWithoutOfferingQuery}
+            canDelete={!!canBroadcast}
+        />
+    );
+
+    // les flux non publiés restent accessibles quand la liste des flux est en erreur
     if (serviceListQuery.isError) {
-        return <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceListQuery.error)} small />;
+        return (
+            <>
+                <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceListQuery.error)} small />
+                {configurationsWithoutOffering}
+            </>
+        );
     }
 
     const createButton = (
@@ -363,6 +380,8 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                         )}
                     </>
                 )}
+
+                {configurationsWithoutOffering}
             </DatasheetViewTab>
 
             {createPortal(

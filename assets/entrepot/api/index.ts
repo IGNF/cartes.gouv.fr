@@ -12,6 +12,7 @@ import wmsVector from "./wms-vector";
 import pyramidVector from "./pyramidVector";
 import pyramidRaster from "./pyramidRaster";
 import service from "./service";
+import configuration from "./configuration";
 import epsg from "./epsg";
 import annexe from "./annexe";
 import style from "./style";
@@ -38,6 +39,7 @@ const api = {
     pyramidVector,
     pyramidRaster,
     service,
+    configuration,
     annexe,
     style,
     metadata,
