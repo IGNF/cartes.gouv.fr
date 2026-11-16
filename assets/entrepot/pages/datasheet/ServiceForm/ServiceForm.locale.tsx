@@ -208,7 +208,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "access.restricted": "Flux restreint pour tous",
     "access.restricted.hint": "Le service ne sera visible qu’aux utilisateurs disposant d’une clé d’accès, dans cartes.gouv.fr ou tout autre outil tiers.",
     "access.change_warning.to_public":
-        "Vous passez le flux d’un accès restreint à un accès libre. Le flux changera d’adresse et ses permissions seront supprimées définitivement.",
+        "Vous passez le flux d’un accès restreint à un accès libre. Le flux changera d’adresse et sera retiré de ses permissions.",
     "access.change_warning.to_restricted": "Vous passez le flux d’un accès libre à un accès restreint. Le flux changera d’adresse.",
     "attribution.title": "Droits et attributions",
     "attribution.explanation":
@@ -336,7 +336,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "access.restricted": "Restricted service for everyone",
     "access.restricted.hint": "The service will only be visible to users with an access key, in cartes.gouv.fr or any third-party tool.",
     "access.change_warning.to_public":
-        "You are moving the service from restricted to open access. The service will change address and its permissions will be permanently deleted.",
+        "You are moving the service from restricted to open access. The service will change address and will be removed from its permissions.",
     "access.change_warning.to_restricted": "You are moving the service from open to restricted access. The service will change address.",
     "attribution.title": "Rights and attributions",
     "attribution.explanation":
