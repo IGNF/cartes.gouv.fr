@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/SelectNext";
 import { type ReactNode } from "react";
@@ -14,25 +15,31 @@ const thematicCategories = getThematicCategories();
 const thematicCategoryLabels = new Map(thematicCategories.map((category) => [category.code, category.text]));
 
 type ServiceDescriptionSectionProps = {
-    /** données stockées compatibles avec le type de flux choisi */
-    storedDataOptions: DatasheetStoredDataItem[];
-    onStoredDataChange: (storedDataId: string) => void;
+    /** données stockées compatibles avec le type de flux choisi ; absentes, la donnée est affichée en texte (flux publié) */
+    storedDataOptions?: DatasheetStoredDataItem[];
+    onStoredDataChange?: (storedDataId: string) => void;
     storedDataLabel: string;
+    /** nom de la donnée d’un flux publié */
+    storedDataName?: string;
     /** affiché sous la liste des données */
     storedDataNotice?: ReactNode;
     /** type de donnée dans le libellé, quand la liste mêle vecteur et raster */
     withDataKind: boolean;
     /** description du flux, sauf en WFS où chaque table a la sienne */
     withDescription: boolean;
+    /** vignette déjà enregistrée */
+    thumbnailUrl?: string;
 };
 
 export default function ServiceDescriptionSection({
     storedDataOptions,
     onStoredDataChange,
     storedDataLabel,
+    storedDataName,
     storedDataNotice,
     withDataKind,
     withDescription,
+    thumbnailUrl,
 }: ServiceDescriptionSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
@@ -46,7 +53,7 @@ export default function ServiceDescriptionSection({
     // thématiques choisies au dépôt, portées par la donnée stockée : préremplissage, modifiable ensuite
     const prefillThemes = (storedDataId: string) => {
         if (getValues("themes").length > 0) return;
-        const themes = (storedDataOptions.find((option) => option._id === storedDataId)?.tags.theme ?? "")
+        const themes = (storedDataOptions?.find((option) => option._id === storedDataId)?.tags.theme ?? "")
             .split(",")
             .map((theme) => theme.trim())
             .filter((theme) => thematicCategoryLabels.has(theme));
@@ -55,33 +62,40 @@ export default function ServiceDescriptionSection({
 
     return (
         <div>
-            <Controller
-                control={control}
-                name="stored_data_id"
-                render={({ field, fieldState: { error } }) => (
-                    <Select
-                        label={storedDataLabel}
-                        placeholder={t("stored_data.placeholder")}
-                        options={storedDataOptions.map((option) => ({
-                            value: option._id,
-                            label: withDataKind
-                                ? `${option.name} (${t(option.type === StoredDataTypeEnum.ROK4PYRAMIDRASTER ? "type.raster" : "type.vector")})`
-                                : option.name,
-                        }))}
-                        state={error ? "error" : "default"}
-                        stateRelatedMessage={error?.message}
-                        nativeSelectProps={{
-                            value: field.value,
-                            onBlur: field.onBlur,
-                            onChange: (e) => {
-                                field.onChange(e.target.value);
-                                prefillThemes(e.target.value);
-                                onStoredDataChange(e.target.value);
-                            },
-                        }}
-                    />
-                )}
-            />
+            {storedDataOptions === undefined ? (
+                <div className={fr.cx("fr-mb-3w")}>
+                    <p className={fr.cx("fr-label", "fr-mb-1v")}>{storedDataLabel}</p>
+                    <p className={fr.cx("fr-mb-0")}>{storedDataName ?? "-"}</p>
+                </div>
+            ) : (
+                <Controller
+                    control={control}
+                    name="stored_data_id"
+                    render={({ field, fieldState: { error } }) => (
+                        <Select
+                            label={storedDataLabel}
+                            placeholder={t("stored_data.placeholder")}
+                            options={storedDataOptions.map((option) => ({
+                                value: option._id,
+                                label: withDataKind
+                                    ? `${option.name} (${t(option.type === StoredDataTypeEnum.ROK4PYRAMIDRASTER ? "type.raster" : "type.vector")})`
+                                    : option.name,
+                            }))}
+                            state={error ? "error" : "default"}
+                            stateRelatedMessage={error?.message}
+                            nativeSelectProps={{
+                                value: field.value,
+                                onBlur: field.onBlur,
+                                onChange: (e) => {
+                                    field.onChange(e.target.value);
+                                    prefillThemes(e.target.value);
+                                    onStoredDataChange?.(e.target.value);
+                                },
+                            }}
+                        />
+                    )}
+                />
+            )}
             {storedDataNotice}
 
             <Input
@@ -117,6 +131,7 @@ export default function ServiceDescriptionSection({
                 modalTitle={t("thumbnail.modal_title")}
                 accept={SERVICE_IMAGE_ACCEPT}
                 maxFileSizeMb={SERVICE_IMAGE_MAX_SIZE_MB}
+                existingUrl={thumbnailUrl}
             />
 
             <Controller

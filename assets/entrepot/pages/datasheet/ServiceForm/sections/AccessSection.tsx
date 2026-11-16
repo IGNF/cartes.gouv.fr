@@ -11,9 +11,11 @@ import { SERVICE_ACCESSES, SERVICE_IMAGE_ACCEPT, SERVICE_IMAGE_MAX_SIZE_MB, type
 type AccessSectionProps = {
     /** accès offerts par les endpoints de l’entrepôt pour ce type de flux */
     availableAccesses: readonly ServiceAccess[];
+    /** logo d’attribution déjà enregistré */
+    logoUrl?: string;
 };
 
-export default function AccessSection({ availableAccesses }: AccessSectionProps) {
+export default function AccessSection({ availableAccesses, logoUrl }: AccessSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
         register,
@@ -63,6 +65,7 @@ export default function AccessSection({ availableAccesses }: AccessSectionProps)
                         accept={SERVICE_IMAGE_ACCEPT}
                         maxFileSizeMb={SERVICE_IMAGE_MAX_SIZE_MB}
                         crop={false}
+                        existingUrl={logoUrl}
                     />
                 </div>
             )}
