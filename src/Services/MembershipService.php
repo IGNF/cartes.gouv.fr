@@ -35,6 +35,18 @@ class MembershipService
     }
 
     /**
+     * Appartenance lue dans un profil frais (un appel users/me) : un retrait fait par un autre membre compte tout de suite.
+     */
+    public function isMemberOfDatastoreNow(string $datastoreId): bool
+    {
+        if (!$this->security->getUser() instanceof User) {
+            return false;
+        }
+
+        return null !== Utils::array_find($this->currentProfile(true)['communities_member'] ?? [], fn (array $member) => ($member['community']['datastore'] ?? null) === $datastoreId);
+    }
+
+    /**
      * @return array<mixed>|null
      */
     public function findByCommunity(string $communityId): ?array
@@ -56,8 +68,8 @@ class MembershipService
             );
         }
 
-        // non-membre : on laisse l'API Entrepôt répondre elle-même (succès ou erreur)
-        $datastore = $this->datastoreApiService->get($datastoreId);
+        // non-membre : sans cache, l'API Entrepôt répond elle-même (succès ou erreur)
+        $datastore = $this->datastoreApiService->fetch($datastoreId);
 
         return new DatastoreIdentity($datastore['name'], $datastore['technical_name'], $datastore['community']['_id']);
     }

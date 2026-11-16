@@ -23,8 +23,6 @@ class CapabilitiesService
     ) {
         $this->httpClient = $httpClient->withOptions([
             'proxy' => $parameterBag->get('http_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
         ]);
 
         $this->fs = new Filesystem();
