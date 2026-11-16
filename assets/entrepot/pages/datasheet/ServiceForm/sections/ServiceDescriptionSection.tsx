@@ -149,6 +149,8 @@ export default function ServiceDescriptionSection({
                         value={field.value}
                         onChange={(_, value) => field.onChange(value)}
                         onBlur={field.onBlur}
+                        // un fieldset désactivé n’empêche pas MUI d’ouvrir la liste
+                        disabled={field.disabled}
                         multiple
                     />
                 )}

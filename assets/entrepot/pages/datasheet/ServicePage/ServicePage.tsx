@@ -117,7 +117,7 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
 
     const values = useMemo(() => serviceToFormValues(service, permissions, api.alerts.communityId, now), [service, permissions, now]);
     // sans résolveur ni envoi : un accès absent laisse simplement les boutons radio décochés
-    const form = useForm<ServiceFormValues>({ values: values as ServiceFormValues });
+    const form = useForm<ServiceFormValues>({ values: values as ServiceFormValues, disabled: true });
 
     const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId, now);
     const exploreMapsAvailability = getExploreMapsAvailability({ service, services: services ?? [service], visibleOnCartesGouv, now });
