@@ -134,16 +134,17 @@ function ServicePageContent(props: ServicePageContentProps) {
     const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, canSave && isWfs ? storedDataId : ""));
 
     // sans les permissions, l’accès initial vaudrait « restreint » et l’enregistrement retirerait la permission cartes.gouv.fr
-    const permissionsReady = service.open || permissionsQuery.isSuccess;
-    const tablesReady = !isWfs || vectorDbQuery.isSuccess;
+    // données lues une fois suffisent : l’échec d’une relecture en arrière-plan ne doit pas démonter le formulaire
+    const permissionsReady = service.open || permissionsQuery.data !== undefined;
+    const tablesReady = !isWfs || vectorDbQuery.data !== undefined;
     const editable = canSave && published && permissionsReady && tablesReady;
 
     let lockReason: string | undefined;
     if (canSave && !published && !isOfferingUnavailable(service.status) && service.status !== OfferingStatusEnum.UNSTABLE) {
         lockReason = t("edit.busy");
-    } else if (canSave && published && !service.open && permissionsQuery.isError) {
+    } else if (canSave && published && !permissionsReady && permissionsQuery.isError) {
         lockReason = t("edit.permissions_error");
-    } else if (canSave && published && isWfs && vectorDbQuery.isError) {
+    } else if (canSave && published && !tablesReady && vectorDbQuery.isError) {
         lockReason = t("edit.tables_error");
     }
 
@@ -304,6 +305,12 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, onSavedChan
     }, [blocker.status, leaveModal]);
     // fermeture de la modale sans quitter : la navigation bloquée est abandonnée
     useIsModalOpen(leaveModal, { onConceal: () => blocker.reset?.() });
+
+    // une nouvelle modification rend caduque l’alerte du précédent enregistrement
+    const { isDirty } = form.formState;
+    useEffect(() => {
+        if (isDirty) onSavedChange(false);
+    }, [isDirty, onSavedChange]);
 
     const submit = form.handleSubmit(async (formValues) => {
         try {
