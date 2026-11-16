@@ -8,6 +8,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class WfsTableFormDTO
 {
+    public const PUBLIC_NAME_PATTERN = '/^[a-z_][a-z0-9_.-]*$/';
+    public const PUBLIC_NAME_MESSAGE = 'Le nom technique de la table ne doit contenir que des minuscules, chiffres, tirets, points et tirets bas';
+
     /**
      * @param string[] $keywords
      */
@@ -19,7 +22,7 @@ class WfsTableFormDTO
         public readonly string $title = '',
 
         #[Assert\NotBlank(message: 'Le nom technique de la table est obligatoire')]
-        #[Assert\Regex(pattern: '/^[a-z_][a-z0-9_.-]*$/', message: 'Le nom technique de la table ne doit contenir que des minuscules, chiffres, tirets, points et tirets bas')]
+        #[Assert\Regex(pattern: self::PUBLIC_NAME_PATTERN, message: self::PUBLIC_NAME_MESSAGE)]
         public readonly string $public_name = '',
 
         #[Assert\NotBlank(message: 'Le résumé de la table est obligatoire')]

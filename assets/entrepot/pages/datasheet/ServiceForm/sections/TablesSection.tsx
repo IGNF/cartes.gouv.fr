@@ -18,9 +18,11 @@ type TablesSectionProps = {
     noGeometricTable: boolean;
     /** titre, nom technique, résumé et mots-clés par table cochée (WFS) */
     detailed: boolean;
+    /** flux publié : tables (`native_name`) qui ont un style WFS, rattaché à leur nom technique enregistré */
+    styledTables?: ReadonlySet<string>;
 };
 
-export default function TablesSection({ status, noGeometricTable, detailed }: TablesSectionProps) {
+export default function TablesSection({ status, noGeometricTable, detailed, styledTables }: TablesSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
         register,
@@ -53,7 +55,8 @@ export default function TablesSection({ status, noGeometricTable, detailed }: Ta
                 stateRelatedMessage={tablesError}
                 options={tables.map((table, index) => ({
                     label: table.native_name,
-                    nativeInputProps: register(`tables.${index}.selected`),
+                    hintText: table.missing ? t("table.missing") : undefined,
+                    nativeInputProps: { ...register(`tables.${index}.selected`), disabled: table.missing },
                 }))}
             />
 
@@ -72,8 +75,10 @@ export default function TablesSection({ status, noGeometricTable, detailed }: Ta
                             <Input
                                 label={t("table.public_name.label")}
                                 hintText={t("table.public_name.hint")}
-                                state={errors.tables?.[index]?.public_name ? "error" : "default"}
-                                stateRelatedMessage={errors.tables?.[index]?.public_name?.message}
+                                state={errors.tables?.[index]?.public_name ? "error" : styledTables?.has(table.native_name) ? "info" : "default"}
+                                stateRelatedMessage={
+                                    errors.tables?.[index]?.public_name?.message ?? (styledTables?.has(table.native_name) ? t("table.styled") : undefined)
+                                }
                                 nativeInputProps={register(`tables.${index}.public_name`)}
                             />
                             <Input

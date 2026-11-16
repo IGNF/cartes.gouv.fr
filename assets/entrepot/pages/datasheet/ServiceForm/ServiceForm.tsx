@@ -1,15 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { queryOptions, skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum, type VectorDb } from "@/@types/app";
+import { type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import api from "@/entrepot/api";
-import { filterGeometricRelations } from "@/helpers";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { useTranslation } from "@/i18n";
 import { isApiError } from "@/modules/apiError";
@@ -27,38 +27,17 @@ import ServiceTypeSection from "./sections/ServiceTypeSection";
 import StylesSection from "./sections/StylesSection";
 import TablesSection from "./sections/TablesSection";
 import {
+    availableServiceAccesses,
     buildServiceFormSchema,
     configurationTypeFor,
     hasTables,
     isRasterPyramid,
-    SERVICE_ACCESSES,
-    type ServiceAccess,
     serviceFormDefaultValues,
     type ServiceFormOutput,
     type ServiceFormValues,
-    type ServiceTableFormValues,
     type ServiceType,
 } from "./serviceFormSchema";
-
-// sans jeu choisi, la requête ne part pas et rien n’est mis en cache
-const vectorDbQueryOptions = (datastoreId: string, storedDataId: string) =>
-    queryOptions<VectorDb, ApiError>({
-        queryKey: RQKeys.datastore_stored_data(datastoreId, storedDataId),
-        queryFn: storedDataId === "" ? skipToken : ({ signal }) => api.storedData.get<VectorDb>(datastoreId, storedDataId, { signal }),
-        staleTime: delta.minutes(1),
-    });
-
-// une ligne par table géométrique, aucune cochée
-const defaultTables = (vectorDb: VectorDb): ServiceTableFormValues[] =>
-    filterGeometricRelations(vectorDb.type_infos?.relations ?? [], true).map((relation) => ({
-        native_name: relation.name,
-        selected: false,
-        title: relation.name,
-        public_name: relation.name.toLowerCase(),
-        description: "",
-        keywords: [],
-        style: undefined,
-    }));
+import { defaultTables } from "./serviceToFormValues";
 
 type ServiceFormProps = {
     datastoreId: string;
@@ -98,14 +77,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
         staleTime: delta.hours(1),
     });
 
-    // tant que les endpoints ne sont pas lus, tout accès reste proposé ; le back refuse un accès sans endpoint
-    const availableAccesses = useMemo<readonly ServiceAccess[]>(() => {
-        if (!endpointsQuery.data) return SERVICE_ACCESSES;
-        const endpoints = endpointsQuery.data.filter((item) => item.endpoint.type.toUpperCase() === configurationType);
-        const hasOpen = endpoints.some((item) => item.endpoint.open);
-        const hasPrivate = endpoints.some((item) => !item.endpoint.open);
-        return SERVICE_ACCESSES.filter((access) => (access === "public" ? hasOpen : hasPrivate));
-    }, [endpointsQuery.data, configurationType]);
+    const availableAccesses = useMemo(() => availableServiceAccesses(endpointsQuery.data, configurationType), [endpointsQuery.data, configurationType]);
 
     const schema = useMemo(
         () =>

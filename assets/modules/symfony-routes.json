@@ -1922,6 +1922,45 @@
             ],
             "schemes": []
         },
+        "cartesgouvfr_api_service_edit_service": {
+            "tokens": [
+                [
+                    "text",
+                    "\/edit"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "offeringId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/offerings"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "offeringId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "POST"
+            ],
+            "schemes": []
+        },
         "cartesgouvfr_api_service_get_service_stats": {
             "tokens": [
                 [

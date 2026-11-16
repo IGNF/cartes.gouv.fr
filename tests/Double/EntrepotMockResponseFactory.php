@@ -42,6 +42,8 @@ final class EntrepotMockResponseFactory
     /** @var array<string, string> préfixes ajoutés à la réponse du datastore */
     private static array $datastorePrefixes = [];
 
+    private static string $datastoreCommunityId = 'community-1';
+
     private static int $usersMeCalls = 0;
     private static bool $usersMeDown = false;
     private static string $usersMeId = self::USER_ID;
@@ -54,8 +56,15 @@ final class EntrepotMockResponseFactory
         self::$datastorePrefixes = $prefixes;
     }
 
+    // communauté propre du datastore jusqu’au prochain reset()
+    public static function setDatastoreCommunity(string $communityId): void
+    {
+        self::$datastoreCommunityId = $communityId;
+    }
+
     public static function reset(): void
     {
+        self::$datastoreCommunityId = 'community-1';
         self::$writeRequests = [];
         self::$store = [];
         self::$metadataFiles = [];
@@ -209,7 +218,7 @@ final class EntrepotMockResponseFactory
         }
 
         if ('GET' === $method && '' === $relative) {
-            return $this->json([...self::$datastorePrefixes, '_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => 'community-1'], 'endpoints' => [
+            return $this->json([...self::$datastorePrefixes, '_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => self::$datastoreCommunityId], 'endpoints' => [
                 ['endpoint' => ['_id' => self::METADATA_ENDPOINT_ID, 'type' => 'METADATA', 'open' => true, 'urls' => [['type' => 'CSW', 'url' => 'https://csw.test/csw']]]],
                 ['endpoint' => ['_id' => self::WFS_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wfs-public', 'type' => 'WFS', 'open' => true, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/public']]]],
                 ['endpoint' => ['_id' => self::WFS_PRIVATE_ENDPOINT_ID, 'technical_name' => 'wfs-private', 'type' => 'WFS', 'open' => false, 'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/private']]]],
@@ -309,6 +318,32 @@ final class EntrepotMockResponseFactory
 
         if ('PATCH' === $method && 1 === preg_match('#^configurations/([\w-]+)$#', $relative, $matches)) {
             return $this->json($this->update('configurations', $matches[1], fn (array $item) => json_decode($body, true, flags: JSON_THROW_ON_ERROR) + $item));
+        }
+
+        // comme l’Entrepôt (vérifié le 16/11/2026) : le PUT remplace la configuration mais garde `layer_name`, `extra` et les tags
+        if ('PUT' === $method && 1 === preg_match('#^configurations/([\w-]+)$#', $relative, $matches)) {
+            $request = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+            unset($request['extra'], $request['layer_name']);
+
+            return $this->json($this->update('configurations', $matches[1], fn (array $item) => array_intersect_key($item, array_flip(['_id', 'status', 'tags', 'layer_name', 'extra'])) + $request));
+        }
+
+        // synchronisation d’une offre
+        if ('PUT' === $method && 1 === preg_match('#^offerings/([\w-]+)$#', $relative, $matches)) {
+            return $this->json($this->find('offerings', $matches[1]) ?? []);
+        }
+
+        // 1er DELETE : dépublication, immédiate ici ; 2e DELETE : suppression, l’offre est retirée de ses permissions et une permission vide est supprimée (mesuré le 16/11/2026)
+        if ('DELETE' === $method && 1 === preg_match('#^offerings/([\w-]+)$#', $relative, $matches)) {
+            if ('UNPUBLISHED' !== ($this->find('offerings', $matches[1])['status'] ?? null)) {
+                $this->update('offerings', $matches[1], fn (array $item) => ['status' => 'UNPUBLISHED'] + $item);
+            } else {
+                self::$store['offerings'] = array_values(array_filter(self::$store['offerings'], fn (array $item) => $item['_id'] !== $matches[1]));
+                $permissions = array_map(fn (array $item) => ['offerings' => array_values(array_filter($item['offerings'] ?? [], fn (array $offering) => $offering['_id'] !== $matches[1]))] + $item, self::$store['permissions'] ?? []);
+                self::$store['permissions'] = array_values(array_filter($permissions, fn (array $item) => [] !== $item['offerings']));
+            }
+
+            return new MockResponse('', ['http_code' => 204]);
         }
 
         if ('POST' === $method && 1 === preg_match('#^configurations/([\w-]+)/offerings$#', $relative, $matches)) {
@@ -426,6 +461,10 @@ final class EntrepotMockResponseFactory
         if ('DELETE' === $method && 1 === preg_match('#^configurations/([\w-]+)$#', $relative, $matches)
             && [] !== array_filter(self::$store['offerings'] ?? [], fn (array $item) => ($item['configuration']['_id'] ?? null) === $matches[1])) {
             return $this->json(['error' => 'Conflict', 'error_description' => ['Configuration utilisée']], 409);
+        }
+
+        if ('DELETE' === $method && 1 === preg_match('#^permissions/([\w-]+)$#', $relative, $matches) && null === $this->find('permissions', $matches[1])) {
+            return $this->json(['error' => 'NotFound'], 404);
         }
 
         if ('DELETE' === $method && 1 === preg_match('#^(annexes|statics|metadata|uploads|stored_data|configurations|permissions)/([\w-]+)$#', $relative, $matches)) {

@@ -25,7 +25,6 @@ class WmsVectorFormDTO extends ServiceFormDTO
 
         // l’Entrepôt exige `type_infos.abstract`
         #[Assert\NotBlank(message: 'La description du flux est obligatoire')]
-        #[Assert\Length(max: self::DESCRIPTION_MAX_LENGTH, maxMessage: 'La description du flux ne peut pas dépasser {{ limit }} caractères')]
         public readonly string $description = '',
 
         #[Assert\Count(min: 1, max: self::TABLES_MAX, minMessage: 'Veuillez choisir au moins une table', maxMessage: 'Choisissez au plus {{ limit }} tables')]

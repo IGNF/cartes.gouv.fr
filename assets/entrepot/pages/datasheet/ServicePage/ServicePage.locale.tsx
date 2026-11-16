@@ -7,6 +7,18 @@ const { i18n } = declareComponentKeys<
     | "load_error"
     | { K: "type_tag"; P: { type: string }; R: string }
     | "edit"
+    | "save"
+    | "edit.saving"
+    | "edit.success"
+    | "edit.error"
+    | "edit.locked"
+    | "edit.busy"
+    | "edit.permissions_error"
+    | "edit.tables_error"
+    | "leave.title"
+    | "leave.description"
+    | "leave.stay"
+    | "leave.confirm"
     | "unpublishing.title"
     | "unpublished.title"
     | "unavailable.description"
@@ -48,6 +60,18 @@ export const ServicePageFrTranslations: Translations<"fr">["ServicePage"] = {
     load_error: "Le flux n’a pas pu être chargé",
     type_tag: ({ type }) => `FLUX ${type}`,
     edit: "Modifier",
+    save: "Enregistrer",
+    "edit.saving": "Enregistrement du flux",
+    "edit.success": "Les modifications du flux sont enregistrées",
+    "edit.error": "Les modifications du flux n’ont pas pu être enregistrées",
+    "edit.locked": "Modification impossible pour le moment",
+    "edit.busy": "Le flux est en cours de publication ou de modification. Rechargez la page dans quelques minutes.",
+    "edit.permissions_error": "Les permissions de l’entrepôt n’ont pas pu être lues : l’accès actuel du flux est inconnu.",
+    "edit.tables_error": "Les tables du jeu de données n’ont pas pu être lues.",
+    "leave.title": "Quitter sans enregistrer ?",
+    "leave.description": "Les modifications du flux ne sont pas enregistrées. Elles seront perdues si vous quittez la page.",
+    "leave.stay": "Rester sur la page",
+    "leave.confirm": "Quitter sans enregistrer",
     "unpublishing.title": "Flux en cours de dépublication",
     "unpublished.title": "Flux dépublié",
     "unavailable.description": "Ce flux n’est plus diffusé. Vous pouvez uniquement terminer sa dépublication depuis l’onglet Flux de la fiche.",
@@ -76,6 +100,18 @@ export const ServicePageEnTranslations: Translations<"en">["ServicePage"] = {
     load_error: "The service could not be loaded",
     type_tag: ({ type }) => `${type} SERVICE`,
     edit: "Edit",
+    save: "Save",
+    "edit.saving": "Saving the service",
+    "edit.success": "The service changes are saved",
+    "edit.error": "The service changes could not be saved",
+    "edit.locked": "Editing unavailable for now",
+    "edit.busy": "The service is being published or modified. Reload the page in a few minutes.",
+    "edit.permissions_error": "The datastore permissions could not be read: the current access of the service is unknown.",
+    "edit.tables_error": "The dataset tables could not be read.",
+    "leave.title": "Leave without saving?",
+    "leave.description": "The service changes are not saved. They will be lost if you leave the page.",
+    "leave.stay": "Stay on the page",
+    "leave.confirm": "Leave without saving",
     "unpublishing.title": "Service being unpublished",
     "unpublished.title": "Unpublished service",
     "unavailable.description": "This service is no longer broadcast. You can only finish unpublishing it from the Services tab of the datasheet.",

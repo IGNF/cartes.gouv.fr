@@ -5,7 +5,6 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\Form\WfsFormDTO;
-use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Dto\Services\Wfs\WfsServiceDTO;
 use App\Dto\Services\Wfs\WfsTableDTO;
 use App\Services\EntrepotApi\CartesServiceApiService;
@@ -63,17 +62,9 @@ final class WfsController extends AbstractController implements ApiControllerInt
      */
     private function getFormConfigTypeInfos(WfsFormDTO $dto, string $storedDataId): array
     {
-        $relations = array_map(fn (WfsTableFormDTO $table) => array_filter([
-            'native_name' => $table->native_name,
-            'public_name' => $table->public_name,
-            'title' => $table->title,
-            'abstract' => $table->description,
-            'keywords' => $table->keywords,
-        ], fn ($value) => [] !== $value), $dto->tables);
-
         return [
             'used_data' => [[
-                'relations' => $relations,
+                'relations' => ServiceConfigurationRequestBuilder::buildWfsRelations($dto->tables),
                 'stored_data' => $storedDataId,
             ]],
         ];

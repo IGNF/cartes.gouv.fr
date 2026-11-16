@@ -8,8 +8,10 @@ use App\Constants\EntrepotApi\ZoomLevels;
 use App\Dto\Services\CommonDTO;
 use App\Dto\Services\Form\ServiceAttributionFormDTO;
 use App\Dto\Services\Form\ServiceFormDTO;
+use App\Dto\Services\Form\WfsTableEditFormDTO;
+use App\Dto\Services\Form\WfsTableFormDTO;
 
-/** Corps de la requête de création d’une configuration Entrepôt depuis le formulaire de publication. */
+/** Corps des requêtes de configuration Entrepôt des formulaires de flux (publication, et tables WFS de la modification). */
 class ServiceConfigurationRequestBuilder
 {
     /**
@@ -42,6 +44,24 @@ class ServiceConfigurationRequestBuilder
         }
 
         return $body;
+    }
+
+    /**
+     * `used_data[0].relations` d’un flux WFS, à la publication comme à la modification ; un champ vide est omis.
+     *
+     * @param array<WfsTableFormDTO|WfsTableEditFormDTO> $tables
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function buildWfsRelations(array $tables): array
+    {
+        return array_values(array_map(fn (WfsTableFormDTO|WfsTableEditFormDTO $table) => array_filter([
+            'native_name' => $table->native_name,
+            'public_name' => $table->public_name,
+            'title' => $table->title,
+            'abstract' => $table->description,
+            'keywords' => $table->keywords,
+        ], fn ($value) => [] !== $value && '' !== $value), $tables));
     }
 
     /**

@@ -16,6 +16,7 @@ use App\Constants\ServiceAccess;
 use App\Dto\Datasheet\DatasheetServices;
 use App\Dto\Services\CommonDTO;
 use App\Dto\Services\Form\ServiceAttributionFormDTO;
+use App\Dto\Services\Form\ServiceEditFormDTO;
 use App\Dto\Services\Form\ServiceFormDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
@@ -299,7 +300,7 @@ class CartesServiceApiService
     }
 
     /**
-     * Supprime complètement une offering : dépublication (1er DELETE) puis suppression définitive (2e DELETE sur l'offering UNPUBLISHED, qui supprime aussi ses accès et permissions).
+     * Supprime complètement une offering : dépublication (1er DELETE) puis suppression (2e DELETE, qui la retire de ses permissions et supprime celles restées vides).
      *
      * @param array<mixed> $offering
      */
@@ -738,7 +739,174 @@ class CartesServiceApiService
     }
 
     /**
-     * Nettoyage après un échec de publication : une erreur ici ne doit pas masquer celle d’origine.
+     * Modifie un flux WFS, WMS raster, WMTS ou TMS ; public ↔ restreint supprime l’offre puis la recrée (flux sans offre si l’ajout échoue).
+     *
+     * @param array<mixed> $offering      offre brute
+     * @param array<mixed> $configuration configuration brute de l’offre
+     *
+     * @return array<mixed> offre (nouvelle si l’endpoint change), avec sa configuration
+     *
+     * @throws AppException 409 si la configuration ou l’offre n’est pas publiée, avant toute écriture
+     */
+    public function editFromForm(
+        string $datastoreId,
+        array $offering,
+        array $configuration,
+        ServiceEditFormDTO $dto,
+        ?UploadedFile $thumbnail = null,
+        ?UploadedFile $attributionLogo = null,
+    ): array {
+        if (ConfigurationStatuses::PUBLISHED !== ($configuration['status'] ?? null) || OfferingStatuses::PUBLISHED !== ($offering['status'] ?? null)) {
+            throw new AppException('Le flux est en cours de publication ou de modification, réessayez plus tard', Response::HTTP_CONFLICT, ['configuration_status' => $configuration['status'] ?? null, 'offering_status' => $offering['status'] ?? null]);
+        }
+        $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME] ?? null;
+        if (!is_string($datasheetName)) {
+            throw new AppException('Le flux n’est rattaché à aucune fiche de données', Response::HTTP_BAD_REQUEST);
+        }
+
+        $type = $configuration['type'];
+        $previousAccess = $this->getServiceAccess($datastoreId, $offering);
+        $previousEndpoint = $this->getEndpointByAccess($datastoreId, $type, $previousAccess);
+        $endpoint = $this->getEndpointByAccess($datastoreId, $type, $dto->access);
+
+        $oldThumbnailUrl = $configuration['extra']['_search']['url_vignette'] ?? null;
+        $oldLogo = $configuration['attribution']['logo'] ?? null;
+        $thumbnailUrl = null;
+        $newLogo = null;
+        try {
+            $thumbnailUrl = $thumbnail instanceof UploadedFile ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
+            $newLogo = $attributionLogo instanceof UploadedFile && $dto->attribution instanceof ServiceAttributionFormDTO
+                ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
+                : null;
+
+            // sans `layer_name` : figé, et l’Entrepôt l’a déjà refusé dans un PUT
+            $body = [
+                'name' => $dto->title,
+                'type' => $type,
+                'type_infos' => $this->getEditTypeInfos($configuration, $dto),
+                'metadata' => $configuration['metadata'] ?? [],
+            ];
+            if ($dto->attribution instanceof ServiceAttributionFormDTO) {
+                $body['attribution'] = ['title' => $dto->attribution->title, 'url' => $dto->attribution->url];
+                $logo = $newLogo ?? ($dto->remove_attribution_logo ? null : $oldLogo);
+                if (null !== $logo) {
+                    $body['attribution']['logo'] = $logo;
+                }
+            }
+
+            $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $body)->array();
+        } catch (\Throwable $th) {
+            $this->removeImageAnnexesQuietly($datastoreId, [$thumbnailUrl, $newLogo['url'] ?? null]);
+            throw $th;
+        }
+
+        try {
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [CommonTags::THEME_CATEGORIES => implode(', ', $dto->themes)])->array();
+
+            // `extra` relu après le PUT et renvoyé entier : les autres clés (styles) sont gardées
+            if (null !== $thumbnailUrl || $dto->remove_thumbnail) {
+                $extra = $configuration['extra'] ?? [];
+                if (null !== $thumbnailUrl) {
+                    $extra['_search']['url_vignette'] = $thumbnailUrl;
+                } else {
+                    unset($extra['_search']['url_vignette']);
+                    if ([] === ($extra['_search'] ?? null)) {
+                        unset($extra['_search']);
+                    }
+                }
+                $configuration = $this->configurationApiService->replaceExtra($datastoreId, $configuration['_id'], $extra)->array();
+            }
+        } catch (\Throwable $th) {
+            $this->removeImageAnnexesQuietly($datastoreId, [$thumbnailUrl]);
+            throw $th;
+        }
+
+        $oldOffering = $offering;
+        $endpointChanged = $previousAccess->isOpen() !== $dto->access->isOpen();
+        if ($endpointChanged) {
+            $this->removeOfferingFully($datastoreId, $oldOffering);
+            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open'])->array();
+        } else {
+            $offering = $this->configurationApiService->syncOffering($datastoreId, $offering['_id'])->array();
+        }
+        $offering['configuration'] = $configuration;
+
+        // accès inchangé : permissions intactes, même expirées
+        if ($endpointChanged || $previousAccess !== $dto->access) {
+            $this->handleAccessPermissions($datastoreId, $offering, $dto->access, renewExpired: true);
+        }
+
+        // l’ancien endpoint public perd la couche ; createOrUpdate ignore un endpoint privé
+        if ($endpointChanged) {
+            $this->createOrUpdateCapabilities($datastoreId, $previousEndpoint, $oldOffering);
+        }
+        $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
+
+        $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $this->getDatasheetServices($datastoreId, $datasheetName));
+
+        $this->removeImageAnnexesQuietly($datastoreId, [
+            null !== $thumbnailUrl || $dto->remove_thumbnail ? $oldThumbnailUrl : null,
+            ($oldLogo['url'] ?? null) !== ($configuration['attribution']['logo']['url'] ?? null) ? $oldLogo['url'] ?? null : null,
+        ]);
+
+        return $offering;
+    }
+
+    /**
+     * @param array<mixed> $configuration
+     *
+     * @return array<mixed>
+     */
+    private function getEditTypeInfos(array $configuration, ServiceEditFormDTO $dto): array
+    {
+        $typeInfos = $configuration['type_infos'];
+
+        if (ConfigurationTypes::WFS === $configuration['type']) {
+            $typeInfos['used_data'][0]['relations'] = ServiceConfigurationRequestBuilder::buildWfsRelations($dto->tables);
+
+            return $typeInfos;
+        }
+
+        $typeInfos['title'] = $dto->title;
+        $typeInfos['abstract'] = $dto->description;
+        $typeInfos['keywords'] = $dto->themes;
+
+        return $typeInfos;
+    }
+
+    /**
+     * Accès actuel d’un flux, même règle que `offering.ts` : endpoint ouvert, sinon permission en cours pour la communauté cartes.gouv.fr.
+     *
+     * @param array<mixed> $offering
+     */
+    private function getServiceAccess(string $datastoreId, array $offering): ServiceAccess
+    {
+        if (true === $offering['open']) {
+            return ServiceAccess::Public;
+        }
+
+        $configCommunityId = $this->params->get('config')['community_id'];
+        foreach ($this->datastoreApiService->getPermissions($datastoreId)->resolve() as $permission) {
+            if (($permission['beneficiary']['_id'] ?? null) === $configCommunityId
+                && !$this->isPermissionExpired($permission)
+                && in_array($offering['_id'], array_column($permission['offerings'] ?? [], '_id'), true)) {
+                return ServiceAccess::RestrictedVisible;
+            }
+        }
+
+        return ServiceAccess::Restricted;
+    }
+
+    /**
+     * @param array<mixed> $permission
+     */
+    private function isPermissionExpired(array $permission): bool
+    {
+        return isset($permission['end_date']) && strtotime($permission['end_date']) <= time();
+    }
+
+    /**
+     * Suppression d’annexes sans lever d’erreur (échec journalisé) : nettoyage après un échec, ou images remplacées après une modification.
      *
      * @param array<string|null> $urls
      */
@@ -787,8 +955,9 @@ class CartesServiceApiService
      * la communauté cartes.gouv.fr seulement quand le flux reste visualisable sur Explorer les cartes.
      *
      * @param array<mixed> $offering
+     * @param bool         $renewExpired une permission expirée compte comme absente : supprimée puis recréée (modification seulement)
      */
-    private function handleAccessPermissions(string $datastoreId, array $offering, ServiceAccess $access): void
+    private function handleAccessPermissions(string $datastoreId, array $offering, ServiceAccess $access, bool $renewExpired = false): void
     {
         if ($access->isOpen()) {
             return;
@@ -797,12 +966,19 @@ class CartesServiceApiService
         $permissions = $this->datastoreApiService->getPermissions($datastoreId)->resolve();
 
         $communityId = $this->membershipService->getDatastoreIdentity($datastoreId)->communityId;
+        $configCommunityId = $this->params->get('config')['community_id'];
+        if ($renewExpired) {
+            // une seule fois pour les deux communautés : elles peuvent être la même (entrepôt de cartes.gouv.fr)
+            $permissions = $this->removeExpiredPermissions($datastoreId, $offering, $permissions, [$communityId, $configCommunityId]);
+        }
+
         // POST /permissions renvoie la liste des permissions créées
         $permissions = [...$permissions, ...$this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions)];
 
         if ($access->allowsCartesGouvView()) {
-            $this->addPermissionForCommunity($datastoreId, $this->params->get('config')['community_id'], $offering, $permissions);
-        } else {
+            $this->addPermissionForCommunity($datastoreId, $configCommunityId, $offering, $permissions);
+        } elseif ($communityId !== $configCommunityId) {
+            // entrepôt de cartes.gouv.fr : cette permission est celle de sa propre communauté, elle reste
             $this->removeExistingConfigPermission($datastoreId, $offering, $permissions);
         }
     }
@@ -930,6 +1106,29 @@ class CartesServiceApiService
     }
 
     /**
+     * Supprime les permissions expirées de l’offre accordées à ces communautés.
+     *
+     * @param array<mixed>  $offering
+     * @param array<mixed>  $permissions  permissions du datastore
+     * @param array<string> $communityIds
+     *
+     * @return array<mixed> permissions restantes
+     */
+    private function removeExpiredPermissions(string $datastoreId, array $offering, array $permissions, array $communityIds): array
+    {
+        return array_values(array_filter($permissions, function (array $permission) use ($datastoreId, $offering, $communityIds): bool {
+            $expired = $this->isPermissionExpired($permission)
+                && in_array($permission['beneficiary']['_id'] ?? null, $communityIds, true)
+                && in_array($offering['_id'], array_column($permission['offerings'] ?? [], '_id'), true);
+            if ($expired) {
+                $this->datastoreApiService->removePermission($datastoreId, $permission['_id'])->await();
+            }
+
+            return !$expired;
+        }));
+    }
+
+    /**
      * Retourne les permissions créées (aucune si elle existait déjà).
      *
      * @param array<mixed> $offering
@@ -941,15 +1140,12 @@ class CartesServiceApiService
     {
         $offeringId = $offering['_id'];
 
-        $offeringPermissions = array_filter($permissions, function ($permission) use ($offeringId) {
-            return isset($permission['offerings']) && in_array($offeringId, array_column($permission['offerings'], '_id'));
+        $communityPermissions = array_filter($permissions, function ($permission) use ($offeringId, $consumerCommunityId) {
+            return isset($permission['offerings']) && in_array($offeringId, array_column($permission['offerings'], '_id'))
+                && isset($permission['beneficiary']['_id']) && $permission['beneficiary']['_id'] === $consumerCommunityId;
         });
 
-        $permissionExists = array_reduce($offeringPermissions, function ($carry, $permission) use ($consumerCommunityId) {
-            return $carry || (isset($permission['beneficiary']['_id']) && $permission['beneficiary']['_id'] === $consumerCommunityId);
-        }, false);
-
-        if ($permissionExists) {
+        if ([] !== $communityPermissions) {
             return [];
         }
 

@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
 
-import { ConfigurationTypeEnum, type DatasheetDetailed } from "@/@types/app";
+import { ConfigurationTypeEnum, type DatasheetDetailed, type DatastoreEndpoint } from "@/@types/app";
 import {
+    availableServiceAccesses,
+    buildServiceEditFormSchema,
     buildServiceFormSchema,
     configurationTypeFor,
     hasTables,
@@ -117,9 +119,9 @@ describe("buildServiceFormSchema", () => {
             expect(await issueMessages(wms(), undefined, "wms")).toEqual({});
         });
 
-        it("exige la description du flux, 300 caractères au plus", async () => {
+        it("exige la description du flux, sans limite de longueur", async () => {
             expect(await issueMessages(wms({}, " "), undefined, "wms")).toEqual({ description: "validation.description.required" });
-            expect(await issueMessages(wms({}, "a".repeat(301)), undefined, "wms")).toEqual({ description: "validation.description.max" });
+            expect(await issueMessages(wms({}, "a".repeat(1000)), undefined, "wms")).toEqual({});
         });
 
         it("exige un fichier .sld conforme par table cochée", async () => {
@@ -227,5 +229,42 @@ describe("rasterPyramidPublishType", () => {
         expect(rasterPyramidPublishType("wms", false)).toBeUndefined();
         expect(rasterPyramidPublishType("wfs", true)).toBeUndefined();
         expect(rasterPyramidPublishType("tms", true)).toBeUndefined();
+    });
+});
+
+describe("buildServiceEditFormSchema", () => {
+    const editIssues = async (tables: ServiceFormValues["tables"]) => {
+        const { stored_data_id: _storedDataId, technical_name: _technicalName, ...values } = valid();
+        const result = await buildServiceEditFormSchema({
+            t,
+            type: "wfs",
+            availableAccesses: ["public"],
+            savedTablePublicNames: { communes: "Communes_2020" },
+        }).safeParseAsync({ ...values, tables });
+        return (result.error?.issues ?? []).map((issue) => `${issue.path.join(".")}: ${issue.message}`);
+    };
+
+    it("ne contrôle ni la donnée stockée ni le nom technique du flux", async () => {
+        expect(await editIssues([table()])).toEqual([]);
+    });
+
+    it("accepte un nom technique de table vide ou déjà enregistré hors de la règle des minuscules", async () => {
+        expect(await editIssues([table({ public_name: "" })])).toEqual([]);
+        expect(await editIssues([table({ public_name: "Communes_2020" })])).toEqual([]);
+        expect(await editIssues([table({ public_name: "Communes_2021" })])).toEqual(["tables.0.public_name: validation.table.public_name.chars"]);
+    });
+
+    it("n’applique pas le plafond de tables", async () => {
+        expect(await editIssues(Array.from({ length: 11 }, (_, index) => table({ native_name: `table_${index}`, public_name: `table_${index}` })))).toEqual([]);
+    });
+});
+
+describe("availableServiceAccesses", () => {
+    const endpoint = (type: string, open: boolean) => ({ endpoint: { type, open } }) as unknown as DatastoreEndpoint;
+
+    it("propose les accès des endpoints du type, tous tant qu’ils ne sont pas lus", () => {
+        expect(availableServiceAccesses(undefined, ConfigurationTypeEnum.WFS)).toEqual(["public", "restricted_visible", "restricted"]);
+        expect(availableServiceAccesses([endpoint("WFS", true), endpoint("WMTS-TMS", false)], ConfigurationTypeEnum.WFS)).toEqual(["public"]);
+        expect(availableServiceAccesses([endpoint("wfs", false)], ConfigurationTypeEnum.WFS)).toEqual(["restricted_visible", "restricted"]);
     });
 });
