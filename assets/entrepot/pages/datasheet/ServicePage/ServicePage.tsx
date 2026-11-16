@@ -82,8 +82,9 @@ export default function ServicePage({ datastoreId, datasheetName, offeringId }: 
         if (serviceQuery.isPending) {
             return <LoadingText as="p" message={t("loading")} withSpinnerIcon />;
         }
-        if (serviceQuery.isError) {
-            if (serviceQuery.error.status === 404) throw notFound();
+        if (serviceQuery.isError && serviceQuery.error.status === 404) throw notFound();
+        // échec d’une relecture en arrière-plan : le flux déjà lu reste affiché, avec le formulaire en cours
+        if (serviceQuery.data === undefined) {
             return <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceQuery.error)} small />;
         }
         if (serviceQuery.data.configuration.tags.datasheet_name !== datasheetName) throw notFound();
@@ -122,8 +123,7 @@ function ServicePageContent(props: ServicePageContentProps) {
     const permissionsQuery = useQuery(datastorePermissionsQueryOptions(datastoreId));
     const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, canSave && isWfs ? storedDataId : ""));
 
-    // sans les permissions, l’accès initial vaudrait « restreint » et l’enregistrement retirerait la permission cartes.gouv.fr
-    // données lues une fois suffisent : l’échec d’une relecture en arrière-plan ne doit pas démonter le formulaire
+    // permissions lues (sinon l’accès initial vaudrait « restreint ») ; l’échec d’une relecture ne démonte pas le formulaire
     const permissionsReady = service.open || permissionsQuery.data !== undefined;
     const tablesReady = !isWfs || vectorDbQuery.data !== undefined;
     const editable = canSave && published && permissionsReady && tablesReady;
@@ -248,6 +248,8 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
 
             if (offering._id !== service._id) {
+                // permissions de la nouvelle offre lues avant son formulaire, qui en tire l’accès initial
+                await queryClient.invalidateQueries({ queryKey: RQKeys.datastore_permissions(datastoreId) });
                 await navigate({
                     to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
                     params: { datastoreId, datasheetName, offeringId: offering._id },
@@ -256,7 +258,6 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
                 });
                 // après la navigation, seulement si plus rien ne l’observe : une requête encore observée serait relue en 404
                 queryClient.removeQueries({ queryKey: serviceKey, type: "inactive" });
-                void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_permissions(datastoreId) });
                 setSnackbarMessage(t("edit.success"));
                 return;
             }
@@ -267,7 +268,10 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
                 queryClient.invalidateQueries({ queryKey: RQKeys.datastore_permissions(datastoreId) }),
             ]);
             const fresh = queryClient.getQueryData<Service>(serviceKey);
-            if (fresh) {
+            // relecture en échec : le cache est celui d’avant l’enregistrement, les valeurs envoyées deviennent la référence
+            if (queryClient.getQueryState(serviceKey)?.status === "error" || !fresh) {
+                form.reset(form.getValues());
+            } else {
                 form.reset(
                     serviceToFormValues(
                         fresh,
