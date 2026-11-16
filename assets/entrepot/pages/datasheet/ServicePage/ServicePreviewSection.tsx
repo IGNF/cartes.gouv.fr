@@ -17,7 +17,6 @@ type ServicePreviewSectionProps = {
     service: Service;
 };
 
-/** aperçu d’un flux diffusé : carte et, pour un WFS ou un TMS, ses styles */
 export default function ServicePreviewSection({ datastoreId, datasheetName, service }: ServicePreviewSectionProps) {
     const { t } = useTranslation("ServicePage");
     const { userRights, isSupervisor } = useCommunityRights();

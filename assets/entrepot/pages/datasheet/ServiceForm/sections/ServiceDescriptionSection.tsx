@@ -19,7 +19,6 @@ type ServiceDescriptionSectionProps = {
     storedDataOptions?: DatasheetStoredDataItem[];
     onStoredDataChange?: (storedDataId: string) => void;
     storedDataLabel: string;
-    /** nom de la donnée d’un flux publié */
     storedDataName?: string;
     /** affiché sous la liste des données */
     storedDataNotice?: ReactNode;
@@ -27,7 +26,6 @@ type ServiceDescriptionSectionProps = {
     withDataKind: boolean;
     /** description du flux, sauf en WFS où chaque table a la sienne */
     withDescription: boolean;
-    /** vignette déjà enregistrée */
     thumbnailUrl?: string;
 };
 

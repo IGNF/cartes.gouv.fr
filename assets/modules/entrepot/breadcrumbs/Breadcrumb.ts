@@ -64,7 +64,6 @@ export type BreadcrumbRouteParams = {
     communityId?: string;
     datasheetName?: string;
     offeringId?: string;
-    /** page d’origine d’un formulaire de style */
     returnTo?: string;
 };
 

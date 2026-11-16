@@ -49,7 +49,6 @@ type ServicePageProps = {
     offeringId: string;
 };
 
-/** page d’un flux publié : formulaire du flux en lecture seule et rapport de génération */
 export default function ServicePage({ datastoreId, datasheetName, offeringId }: ServicePageProps) {
     const { t } = useTranslation("ServicePage");
     const serviceQuery = useQuery(serviceQueryOptions(datastoreId, offeringId));
@@ -63,7 +62,6 @@ export default function ServicePage({ datastoreId, datasheetName, offeringId }: 
             if (serviceQuery.error.status === 404) throw notFound();
             return <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceQuery.error)} small />;
         }
-        // flux d’une autre fiche : introuvable sous cette fiche
         if (serviceQuery.data.configuration.tags.datasheet_name !== datasheetName) throw notFound();
         return <ServicePageContent datastoreId={datastoreId} datasheetName={datasheetName} service={serviceQuery.data} now={serviceQuery.dataUpdatedAt} />;
     };
@@ -79,7 +77,6 @@ type ServicePageContentProps = {
     datastoreId: string;
     datasheetName: string;
     service: Service;
-    /** instant de lecture du flux : référence des expirations de permission et du délai d’Explorer les cartes */
     now: number;
 };
 
@@ -88,7 +85,6 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
     const { t: tForm } = useTranslation("ServiceForm");
     const { classes } = useStyles();
 
-    // permissions illisibles ou en chargement : aucun accès coché, flux privé absent d’Explorer les cartes
     const { data: permissions } = useQuery(datastorePermissionsQueryOptions(datastoreId));
     const { data: services } = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName));
     const { data: datasheet } = useQuery(datasheetQueryOptions(datastoreId, datasheetName));

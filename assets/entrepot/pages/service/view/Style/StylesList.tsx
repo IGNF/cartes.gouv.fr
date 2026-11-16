@@ -23,7 +23,6 @@ interface StylesListProps {
     service: Service;
     datasheetName: string;
     offeringId: string;
-    /** page où ramènent les formulaires de style ; absente : vue classique du flux */
     returnTo?: StyleFormReturnPage;
 }
 

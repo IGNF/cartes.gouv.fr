@@ -2,7 +2,6 @@ import { type DatastorePermission, type Service } from "@/@types/app";
 import { isOfferingUnavailable, isPrivateServiceVisibleOnCartesGouv } from "@/utils";
 import { type ServiceAccess, type ServiceFormValues } from "./serviceFormSchema";
 
-/** valeurs du formulaire de flux lues depuis un flux publié ; accès absent quand il ne peut pas être lu */
 export type PublishedServiceFormValues = Omit<ServiceFormValues, "access"> & { access?: ServiceAccess };
 
 // les anciens formulaires TMS et raster enregistraient la description encodée en JSON
@@ -46,7 +45,6 @@ export function serviceToFormValues(
         technical_name: configuration.layer_name,
         description: decodeDescription(abstract),
         thumbnail: undefined,
-        // anciens formulaires : libellés et non codes, affichés tels quels
         themes: (configuration.tags.theme ?? "").split(", ").filter((theme) => theme !== ""),
         tables: [],
         access: readAccess(service, permissions, cartesGouvCommunityId, now),

@@ -63,7 +63,6 @@ type StyleAddModifyPostDataType = {
     >;
 };
 
-/** pages d’où l’on ouvre un formulaire de style, hors vue classique du flux */
 export const STYLE_FORM_RETURN_PAGES = ["service_page"] as const;
 export type StyleFormReturnPage = (typeof STYLE_FORM_RETURN_PAGES)[number];
 
