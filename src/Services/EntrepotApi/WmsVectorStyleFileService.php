@@ -16,6 +16,7 @@ final readonly class WmsVectorStyleFileService
 {
     public function __construct(
         private StaticApiService $staticApiService,
+        private ConfigurationApiService $configurationApiService,
         private Filesystem $filesystem,
         private LoggerInterface $logger,
         #[Autowire(param: 'style_files_path')]
@@ -58,6 +59,31 @@ final readonly class WmsVectorStyleFileService
         }
 
         return $staticIds;
+    }
+
+    /**
+     * Après un échec de modification : supprime ceux de ces fichiers que la configuration relue n’utilise plus, qu’elle ait été enregistrée ou non.
+     *
+     * @param array<string> $staticIds fichiers enregistrés et déposés
+     */
+    public function removeUnused(string $datastoreId, string $configurationId, array $staticIds): void
+    {
+        try {
+            $relations = $this->configurationApiService->get($datastoreId, $configurationId)->array()['type_infos']['used_data'][0]['relations'] ?? [];
+            $used = array_column($relations, 'style');
+        } catch (\Throwable $e) {
+            // configuration illisible : rien n’est supprimé, un fichier peut être encore utilisé
+            $this->logger->warning('{class}: Failed to read configuration {configurationId} after a failed edit: {error}', [
+                'class' => self::class,
+                'configurationId' => $configurationId,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+
+            return;
+        }
+
+        $this->removeQuietly($datastoreId, array_diff($staticIds, $used));
     }
 
     /**

@@ -121,8 +121,7 @@ final class ServiceController extends AbstractController implements ApiControlle
         try {
             $offering = $this->cartesServiceApiService->editFromForm($datastoreId, $offering, $configuration, $dto, $thumbnail, $attributionLogo, $styleIds);
         } catch (\Throwable $th) {
-            // fichiers déjà référencés après un PUT réussi : l’Entrepôt refuse leur suppression (409, journalisé)
-            $this->wmsVectorStyleFileService->removeQuietly($datastoreId, $newStyleIds);
+            $this->wmsVectorStyleFileService->removeUnused($datastoreId, $configuration['_id'], [...array_values($savedStyleIds), ...array_values($newStyleIds)]);
             throw $th;
         }
 

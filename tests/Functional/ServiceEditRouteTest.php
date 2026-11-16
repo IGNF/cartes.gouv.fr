@@ -369,6 +369,37 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertSame(['static-communes', 'static-routes'], array_column(EntrepotMockResponseFactory::stored('statics'), '_id'));
     }
 
+    public function testWmsVectorFailureAfterTheSaveRemovesTheStyleFilesTheConfigurationNoLongerUses(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PUT offerings/'.self::OFFERING_ID);
+
+        $this->post($client, $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseStatusCodeSame(500);
+        $statics = array_column(EntrepotMockResponseFactory::stored('statics'), '_id');
+        $relations = EntrepotMockResponseFactory::stored('configurations')[0]['type_infos']['used_data'][0]['relations'];
+        // configuration enregistrée : le nouveau fichier reste, l’ancien part
+        self::assertEqualsCanonicalizing(array_column($relations, 'style'), $statics);
+        self::assertNotContains('static-communes', $statics);
+    }
+
+    public function testWmsVectorAccessChangeKeepsTheNewStyleFileAndRemovesTheOldOne(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+
+        $this->post($client, ['access' => 'restricted'] + $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseIsSuccessful();
+        $offerings = EntrepotMockResponseFactory::stored('offerings');
+        self::assertSame([EntrepotMockResponseFactory::WMSV_PRIVATE_ENDPOINT_ID], array_column(array_column($offerings, 'endpoint'), '_id'));
+        $relations = EntrepotMockResponseFactory::stored('configurations')[0]['type_infos']['used_data'][0]['relations'];
+        self::assertEqualsCanonicalizing(array_column($relations, 'style'), array_column(EntrepotMockResponseFactory::stored('statics'), '_id'));
+        self::assertNotContains('static-communes', array_column($relations, 'style'));
+    }
+
     public function testWmsVectorEmptyDescriptionOrTooManyTablesAnswer422(): void
     {
         $this->seedService('WMS-VECTOR');
