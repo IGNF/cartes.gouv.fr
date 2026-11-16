@@ -422,6 +422,12 @@ final class EntrepotMockResponseFactory
             return new MockResponse('', ['http_code' => 204]);
         }
 
+        // comme l’Entrepôt (vérifié le 16/11/2026) : une configuration qui a encore une offre n’est pas supprimée
+        if ('DELETE' === $method && 1 === preg_match('#^configurations/([\w-]+)$#', $relative, $matches)
+            && [] !== array_filter(self::$store['offerings'] ?? [], fn (array $item) => ($item['configuration']['_id'] ?? null) === $matches[1])) {
+            return $this->json(['error' => 'Conflict', 'error_description' => ['Configuration utilisée']], 409);
+        }
+
         if ('DELETE' === $method && 1 === preg_match('#^(annexes|statics|metadata|uploads|stored_data|configurations|permissions)/([\w-]+)$#', $relative, $matches)) {
             self::$store[$matches[1]] = array_values(array_filter(self::$store[$matches[1]] ?? [], fn (array $item) => $item['_id'] !== $matches[2]));
 

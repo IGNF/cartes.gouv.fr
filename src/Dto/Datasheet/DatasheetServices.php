@@ -38,6 +38,18 @@ final readonly class DatasheetServices
     }
 
     /**
+     * Configurations de la fiche qui n’ont aucune offre, quel que soit leur statut.
+     *
+     * @return list<array<mixed>>
+     */
+    public function configurationsWithoutOffering(): array
+    {
+        $configurationIds = array_flip(array_map(fn (array $offering) => $offering['configuration']['_id'] ?? null, $this->offeringsById));
+
+        return array_values(array_filter($this->configurationsById, fn (array $configuration) => !isset($configurationIds[$configuration['_id']])));
+    }
+
+    /**
      * @return array<mixed>|null
      */
     public function configurationOfOffering(string $offeringId): ?array

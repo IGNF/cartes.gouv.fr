@@ -480,6 +480,41 @@
             ],
             "schemes": []
         },
+        "cartesgouvfr_api_configuration_delete": {
+            "tokens": [
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "configurationId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/configurations"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "configurationId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "DELETE"
+            ],
+            "schemes": []
+        },
         "cartesgouvfr_api_datasheet_add": {
             "tokens": [
                 [
@@ -677,6 +712,43 @@
                 [
                     "text",
                     "\/services"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datasheetName",
+                    true
+                ],
+                [
+                    "text",
+                    "\/datasheet"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_datasheet_get_configurations_without_offering": {
+            "tokens": [
+                [
+                    "text",
+                    "\/configurations_without_offering"
                 ],
                 [
                     "variable",
