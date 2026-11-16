@@ -21,6 +21,8 @@ final readonly class DatastoreApiService
     }
 
     /**
+     * Cache commun à tous les utilisateurs : réservé aux appelants dont l'utilisateur est membre de l'entrepôt, sinon fetch().
+     *
      * @return array<mixed>
      */
     public function get(string $datastoreId): array
@@ -28,8 +30,18 @@ final readonly class DatastoreApiService
         return $this->cache->get("datastore-$datastoreId", function (ItemInterface $item) use ($datastoreId) {
             $item->expiresAfter(120);
 
-            return $this->api->get("datastores/$datastoreId")->array();
+            return $this->fetch($datastoreId);
         });
+    }
+
+    /**
+     * Sans cache : l'Entrepôt répond ou refuse avec le jeton de l'utilisateur.
+     *
+     * @return array<mixed>
+     */
+    public function fetch(string $datastoreId): array
+    {
+        return $this->api->get("datastores/$datastoreId")->array();
     }
 
     public function invalidate(string $datastoreId): void
@@ -44,7 +56,17 @@ final readonly class DatastoreApiService
      */
     public function getEndpointsList(string $datastoreId, array $query = []): array
     {
-        $datastore = $this->get($datastoreId);
+        return $this->filterEndpoints($this->get($datastoreId), $query);
+    }
+
+    /**
+     * @param array<mixed>        $datastore
+     * @param array<string,mixed> $query
+     *
+     * @return array<mixed>
+     */
+    public function filterEndpoints(array $datastore, array $query = []): array
+    {
         $endpoints = $datastore['endpoints'];
 
         if (isset($query['type'])) {

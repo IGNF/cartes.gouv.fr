@@ -23,6 +23,9 @@ final class EntrepotMockResponseFactory
     private static int $usersMeCalls = 0;
     private static bool $usersMeDown = false;
     private static string $usersMeId = self::USER_ID;
+    private static bool $usersMeMember = false;
+    private static int $datastoreCalls = 0;
+    private static bool $datastoreForbidden = false;
 
     public static function reset(): void
     {
@@ -30,6 +33,26 @@ final class EntrepotMockResponseFactory
         self::$usersMeCalls = 0;
         self::$usersMeDown = false;
         self::$usersMeId = self::USER_ID;
+        self::$usersMeMember = false;
+        self::$datastoreCalls = 0;
+        self::$datastoreForbidden = false;
+    }
+
+    // GET users/me répond avec une appartenance à l’entrepôt de test jusqu’au prochain reset()
+    public static function makeUserMemberOfDatastore(): void
+    {
+        self::$usersMeMember = true;
+    }
+
+    public static function datastoreCalls(): int
+    {
+        return self::$datastoreCalls;
+    }
+
+    // GET datastores/{id} répond 403 jusqu’au prochain reset()
+    public static function forbidDatastore(): void
+    {
+        self::$datastoreForbidden = true;
     }
 
     // GET users/me répond pour un autre utilisateur jusqu’au prochain reset()
@@ -78,7 +101,7 @@ final class EntrepotMockResponseFactory
                 'email' => FakeKeycloakClient::DEFAULT_RESOURCE_OWNER['email'],
                 'creation' => '2026-01-01T00:00:00Z',
                 'last_login' => '2026-10-29T08:00:00Z',
-                'communities_member' => [],
+                'communities_member' => self::$usersMeMember ? [['rights' => [], 'community' => ['_id' => 'community-1', 'name' => 'Communauté de test', 'technical_name' => 'test', 'datastore' => self::DATASTORE_ID]]] : [],
                 'documents_quota' => 10,
                 'documents_use' => 0,
                 'keys_quota' => 10,
@@ -87,6 +110,21 @@ final class EntrepotMockResponseFactory
         }
 
         $datastorePath = '/api/datastores/'.self::DATASTORE_ID;
+
+        if (self::ENTREPOT_HOST === $host && 'GET' === $method && $datastorePath === $path) {
+            ++self::$datastoreCalls;
+            if (self::$datastoreForbidden) {
+                return $this->json(['error' => 'Forbidden', 'error_description' => 'Accès refusé'], 403);
+            }
+
+            return $this->json([
+                '_id' => self::DATASTORE_ID,
+                'name' => 'Entrepôt de test',
+                'technical_name' => 'test',
+                'community' => ['_id' => 'community-1'],
+                'endpoints' => [['endpoint' => ['_id' => 'endpoint-1', 'type' => 'WFS', 'open' => true]]],
+            ]);
+        }
 
         // listes vides : entrepôt sans contenu
         if (self::ENTREPOT_HOST === $host && 'GET' === $method && 1 === preg_match('#^'.$datastorePath.'/(processings/executions|offerings|configurations|metadata|statics|annexes|stored_data|uploads)$#', $path)) {

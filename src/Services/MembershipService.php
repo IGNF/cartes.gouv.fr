@@ -56,8 +56,8 @@ class MembershipService
             );
         }
 
-        // non-membre : on laisse l'API Entrepôt répondre elle-même (succès ou erreur)
-        $datastore = $this->datastoreApiService->get($datastoreId);
+        // non-membre : sans cache, l'API Entrepôt répond elle-même (succès ou erreur)
+        $datastore = $this->datastoreApiService->fetch($datastoreId);
 
         return new DatastoreIdentity($datastore['name'], $datastore['technical_name'], $datastore['community']['_id']);
     }
