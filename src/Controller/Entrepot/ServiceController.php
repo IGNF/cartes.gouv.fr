@@ -116,6 +116,8 @@ final class ServiceController extends AbstractController implements ApiControlle
         // une clé « 2024 » devient un entier en PHP
         $styleFiles = $this->serviceFormFileValidator->styleFiles($request, $dto->selected_tables, array_map(strval(...), array_keys($savedStyleIds)));
 
+        // flux occupé refusé avant tout dépôt de fichier
+        $this->cartesServiceApiService->assertEditable($offering, $configuration);
         // nouveau fichier puis suppression de l’ancien après l’enregistrement : un échec laisse le flux intact
         $newStyleIds = $this->wmsVectorStyleFileService->upload($datastoreId, $styleFiles, $configuration['_id']);
         $styleIds = $newStyleIds + array_intersect_key($savedStyleIds, array_flip($dto->selected_tables));

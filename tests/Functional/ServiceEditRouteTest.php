@@ -412,6 +412,17 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertNotContains('static-communes', array_column($relations, 'style'));
     }
 
+    public function testWmsVectorFluxBeingPublishedAnswers409WithoutUploadingStyleFiles(): void
+    {
+        $this->seedService('WMS-VECTOR', offeringStatus: 'PUBLISHING');
+        $client = $this->client();
+
+        $this->post($client, $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseStatusCodeSame(409);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
     public function testWmsVectorEmptyDescriptionOrTooManyTablesAnswer422(): void
     {
         $this->seedService('WMS-VECTOR');

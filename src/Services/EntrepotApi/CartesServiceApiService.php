@@ -746,6 +746,29 @@ class CartesServiceApiService
     }
 
     /**
+     * Flux modifiable : configuration et offre publiées, rattachées à une fiche de données.
+     *
+     * @param array<mixed> $offering
+     * @param array<mixed> $configuration
+     *
+     * @return string nom de la fiche de données
+     *
+     * @throws AppException 409 si la configuration ou l’offre n’est pas publiée, 400 sans fiche de données
+     */
+    public function assertEditable(array $offering, array $configuration): string
+    {
+        if (ConfigurationStatuses::PUBLISHED !== ($configuration['status'] ?? null) || OfferingStatuses::PUBLISHED !== ($offering['status'] ?? null)) {
+            throw new AppException('Le flux est en cours de publication ou de modification, réessayez plus tard', Response::HTTP_CONFLICT, ['configuration_status' => $configuration['status'] ?? null, 'offering_status' => $offering['status'] ?? null]);
+        }
+        $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME] ?? null;
+        if (!is_string($datasheetName)) {
+            throw new AppException('Le flux n’est rattaché à aucune fiche de données', Response::HTTP_BAD_REQUEST);
+        }
+
+        return $datasheetName;
+    }
+
+    /**
      * Modifie un flux WFS, WMS vecteur, WMS raster, WMTS ou TMS ; public ↔ restreint supprime l’offre puis la recrée (flux sans offre si l’ajout échoue).
      *
      * @param array<mixed>          $offering      offre brute
@@ -754,7 +777,7 @@ class CartesServiceApiService
      *
      * @return array<mixed> offre (nouvelle si l’endpoint change), avec sa configuration
      *
-     * @throws AppException 409 si la configuration ou l’offre n’est pas publiée, avant toute écriture
+     * @throws AppException 409 si la configuration ou l’offre n’est pas publiée, avant toute écriture (voir assertEditable)
      */
     public function editFromForm(
         string $datastoreId,
@@ -765,13 +788,7 @@ class CartesServiceApiService
         ?UploadedFile $attributionLogo = null,
         array $styleIds = [],
     ): array {
-        if (ConfigurationStatuses::PUBLISHED !== ($configuration['status'] ?? null) || OfferingStatuses::PUBLISHED !== ($offering['status'] ?? null)) {
-            throw new AppException('Le flux est en cours de publication ou de modification, réessayez plus tard', Response::HTTP_CONFLICT, ['configuration_status' => $configuration['status'] ?? null, 'offering_status' => $offering['status'] ?? null]);
-        }
-        $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME] ?? null;
-        if (!is_string($datasheetName)) {
-            throw new AppException('Le flux n’est rattaché à aucune fiche de données', Response::HTTP_BAD_REQUEST);
-        }
+        $datasheetName = $this->assertEditable($offering, $configuration);
 
         $type = $configuration['type'];
         $previousAccess = $this->getServiceAccess($datastoreId, $offering);
