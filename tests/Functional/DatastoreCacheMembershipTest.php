@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
- * Le cache de l’entrepôt est commun à tous les utilisateurs : seul un membre le lit.
+ * Le cache de l’entrepôt est commun à tous les utilisateurs : les routes qui renvoient l’entrepôt ne le lisent pas.
  * Le pool de cache de test est vidé entre deux requêtes HTTP : le cache se teste dans un seul noyau.
  */
 final class DatastoreCacheMembershipTest extends KernelTestCase
@@ -32,7 +32,7 @@ final class DatastoreCacheMembershipTest extends KernelTestCase
         self::getContainer()->get('security.token_storage')->setToken(new UsernamePasswordToken($user, 'main', $user->getRoles()));
     }
 
-    public function testAMemberReadsTheCache(): void
+    public function testTheRoutesDoNotReadTheCacheEvenForAMember(): void
     {
         EntrepotMockResponseFactory::makeUserMemberOfDatastore();
         $this->warmCache();
@@ -41,7 +41,7 @@ final class DatastoreCacheMembershipTest extends KernelTestCase
         self::assertSame(Response::HTTP_OK, $controller->getDatastore(self::ID)->getStatusCode());
         self::assertSame(Response::HTTP_OK, $controller->getEndpoints(self::ID)->getStatusCode());
 
-        self::assertSame(1, EntrepotMockResponseFactory::datastoreCalls());
+        self::assertSame(3, EntrepotMockResponseFactory::datastoreCalls());
     }
 
     public function testANonMemberGetsTheAnswerOfTheEntrepotForTheDatastore(): void

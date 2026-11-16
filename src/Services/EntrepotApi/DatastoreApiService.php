@@ -21,7 +21,8 @@ final readonly class DatastoreApiService
     }
 
     /**
-     * Cache commun à tous les utilisateurs : réservé aux appelants dont l'utilisateur est membre de l'entrepôt, sinon fetch().
+     * Cache commun à tous les utilisateurs : réservé aux appelants internes qui interrogent aussi l'Entrepôt avec le jeton de l'utilisateur dans la même requête.
+     * Une route qui renvoie l'entrepôt ou ses points d'accès passe par fetch().
      *
      * @return array<mixed>
      */
