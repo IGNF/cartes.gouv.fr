@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery } from "@tanstack/react-query";
 import { notFound } from "@tanstack/react-router";
-import { Fragment, type ReactNode, useMemo } from "react";
+import { Fragment, type ReactNode, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { tss } from "tss-react";
 
@@ -28,6 +28,7 @@ import {
     formatDateFromISO,
     getExploreMapsAvailability,
     getExploreMapsLayerParam,
+    getNextExploreMapsPendingEnd,
     getServiceEditLink,
     getServiceThumbnailUrl,
     getServiceTypeLabel,
@@ -63,7 +64,7 @@ export default function ServicePage({ datastoreId, datasheetName, offeringId }: 
             return <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceQuery.error)} small />;
         }
         if (serviceQuery.data.configuration.tags.datasheet_name !== datasheetName) throw notFound();
-        return <ServicePageContent datastoreId={datastoreId} datasheetName={datasheetName} service={serviceQuery.data} now={serviceQuery.dataUpdatedAt} />;
+        return <ServicePageContent datastoreId={datastoreId} datasheetName={datasheetName} service={serviceQuery.data} readAt={serviceQuery.dataUpdatedAt} />;
     };
 
     return (
@@ -77,10 +78,10 @@ type ServicePageContentProps = {
     datastoreId: string;
     datasheetName: string;
     service: Service;
-    now: number;
+    readAt: number;
 };
 
-function ServicePageContent({ datastoreId, datasheetName, service, now }: ServicePageContentProps) {
+function ServicePageContent({ datastoreId, datasheetName, service, readAt }: ServicePageContentProps) {
     const { t } = useTranslation("ServicePage");
     const { t: tForm } = useTranslation("ServiceForm");
     const { classes, cx } = useStyles();
@@ -103,6 +104,16 @@ function ServicePageContent({ datastoreId, datasheetName, service, now }: Servic
     const storedDataName = [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_vector_list ?? []), ...(datasheet?.pyramid_raster_list ?? [])].find(
         (storedData) => storedData._id === storedDataId
     )?.name;
+
+    // comme l’onglet Flux : réveil à la sortie du délai « En cours » d’Explorer les cartes
+    const [clockTick, setClockTick] = useState(0);
+    const now = Math.max(readAt, clockTick);
+    useEffect(() => {
+        const pendingEnd = getNextExploreMapsPendingEnd([service], now);
+        if (pendingEnd === undefined) return;
+        const timer = window.setTimeout(() => setClockTick(Date.now()), pendingEnd - now + 1000);
+        return () => window.clearTimeout(timer);
+    }, [service, now]);
 
     const values = useMemo(() => serviceToFormValues(service, permissions, api.alerts.communityId, now), [service, permissions, now]);
     const form = useForm<ServiceFormValues>({ values, disabled: true });
