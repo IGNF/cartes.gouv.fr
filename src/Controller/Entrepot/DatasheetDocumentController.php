@@ -24,6 +24,7 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -82,7 +83,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
         // le type décide : un fichier joint à un lien est ignoré
         if (DatasheetDocumentDTO::TYPE_FILE === $dto->type) {
-            ['id' => $fileAnnexeId, 'url' => $newDocument['url']] = $this->uploadFile($datastoreId, $datasheetName, $file);
+            ['id' => $fileAnnexeId, 'url' => $newDocument['url'], 'file_name' => $newDocument['file_name']] = $this->uploadFile($datastoreId, $datasheetName, $file);
             $newDocument['id'] = $fileAnnexeId;
         } else {
             $newDocument['id'] = (string) Uuid::v4();
@@ -94,9 +95,9 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         try {
             $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
         } catch (\Throwable $e) {
-            // fichier déposé mais absent de la liste : on le retire
+            // fichier déposé mais absent de la liste : on le retire, sans masquer l’erreur d’origine
             if (null !== $fileAnnexeId) {
-                $this->annexeApiService->remove($datastoreId, $fileAnnexeId)->await();
+                $this->removeFileAnnexe($datastoreId, $fileAnnexeId);
             }
             throw $e;
         }
@@ -139,7 +140,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         // nouvelle annexe : l’Entrepôt garde le chemin, donc le nom de fichier, d’une annexe remplacée
         $newFileAnnexeId = null;
         if ($file instanceof UploadedFile) {
-            ['id' => $newFileAnnexeId, 'url' => $document['url']] = $this->uploadFile($datastoreId, $datasheetName, $file);
+            ['id' => $newFileAnnexeId, 'url' => $document['url'], 'file_name' => $document['file_name']] = $this->uploadFile($datastoreId, $datasheetName, $file);
             $document['id'] = $newFileAnnexeId;
         }
         $documentsList[$index] = $document;
@@ -148,13 +149,13 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
         } catch (\Throwable $e) {
             if (null !== $newFileAnnexeId) {
-                $this->annexeApiService->remove($datastoreId, $newFileAnnexeId)->await();
+                $this->removeFileAnnexe($datastoreId, $newFileAnnexeId);
             }
             throw $e;
         }
 
         if (null !== $newFileAnnexeId) {
-            $this->removeReplacedFile($datastoreId, $documentId);
+            $this->removeFileAnnexe($datastoreId, $documentId);
         }
 
         $this->updateMetadataDocuments($datastoreId, $datasheetName, $documentsList);
@@ -180,12 +181,13 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
         $newDocumentsList = array_values(array_filter($initialDocumentsList, fn ($doc) => $doc['id'] !== $documentId));
 
+        // la liste d’abord : un échec laisse le document entier, une nouvelle tentative reste possible
         if (null !== $document) {
-            if ('file' === $document['type']) {
-                $this->annexeApiService->remove($datastoreId, $document['id'])->await();
-            }
-
             $this->updateListAnnexe($datastoreId, $listAnnexe, $newDocumentsList);
+
+            if ('file' === $document['type']) {
+                $this->removeFileAnnexe($datastoreId, $document['id']);
+            }
         }
 
         $this->updateMetadataDocuments($datastoreId, $datasheetName, $newDocumentsList);
@@ -201,7 +203,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     }
 
     /**
-     * @return array{id: string, url: string}
+     * @return array{id: string, url: string, file_name: string}
      */
     private function uploadFile(string $datastoreId, string $datasheetName, UploadedFile $file): array
     {
@@ -210,23 +212,31 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
         $file->move($tempFileDir, $fileName);
 
+        // chemin normalisé : ni virgule (séparateur du champ `paths`), ni caractère à encoder dans l’URL publique
+        $slugger = new AsciiSlugger();
+        $extension = strtolower($file->getClientOriginalExtension());
+        $datasheetSlug = $slugger->slug($datasheetName)->lower()->toString() ?: 'fiche';
+        $fileSlug = $slugger->slug(pathinfo($fileName, PATHINFO_FILENAME))->lower()->toString() ?: 'document';
+        $annexePath = implode('/', ['documents', $datasheetSlug, $uuid, "$fileSlug.$extension"]);
+
         try {
             $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
-            $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFileDir.DIRECTORY_SEPARATOR.$fileName, [implode('/', ['documents', $datasheetName, $uuid, $fileName])], ["datasheet_name=$datasheetName", 'type=document'], true);
+            $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFileDir.DIRECTORY_SEPARATOR.$fileName, [$annexePath], ["datasheet_name=$datasheetName", 'type=document'], true);
         } finally {
             $this->fs->remove($tempFileDir);
         }
 
-        return ['id' => $fileAnnexe['_id'], 'url' => $annexesBaseUrl.$fileAnnexe['paths'][0]];
+        // nom d’origine gardé pour le téléchargement : le chemin n’en garde qu’une forme normalisée
+        return ['id' => $fileAnnexe['_id'], 'url' => $annexesBaseUrl.$fileAnnexe['paths'][0], 'file_name' => $fileName];
     }
 
-    // la liste pointe déjà vers le nouveau fichier : un échec ici laisse seulement l’ancien fichier orphelin
-    private function removeReplacedFile(string $datastoreId, string $annexeId): void
+    // appelée quand la liste ne référence pas ou plus l’annexe : un échec laisse seulement une annexe orpheline
+    private function removeFileAnnexe(string $datastoreId, string $annexeId): void
     {
         try {
             $this->annexeApiService->remove($datastoreId, $annexeId)->await();
         } catch (\Throwable $e) {
-            $this->logger->warning('Ancien fichier de document {annexeId} non supprimé : {error}', ['annexeId' => $annexeId, 'error' => $e->getMessage(), 'exception' => $e]);
+            $this->logger->warning('Annexe {annexeId} non supprimée : {error}', ['annexeId' => $annexeId, 'error' => $e->getMessage(), 'exception' => $e]);
         }
     }
 
@@ -261,7 +271,16 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         $tempFilePath = $this->varDataPath.DIRECTORY_SEPARATOR.Uuid::v4().'.json';
         $this->fs->dumpFile($tempFilePath, json_encode([], JSON_THROW_ON_ERROR));
 
-        return $this->annexeApiService->add($datastoreId, $tempFilePath, ["documents/$datasheetName.json"], $this->listAnnexeLabels($datasheetName), true);
+        // shortcut: chemin non normalisé, pour rester celui des listes existantes ; une virgule dans le nom de la fiche le coupe en deux dans `paths`, à reprendre si une telle fiche apparaît
+        $created = $this->annexeApiService->add($datastoreId, $tempFilePath, ["documents/$datasheetName.json"], $this->listAnnexeLabels($datasheetName), true);
+
+        // deux premiers ajouts simultanés : la plus ancienne liste gagne, l’autre requête retire la sienne
+        $oldest = $this->findListAnnexe($datastoreId, $datasheetName) ?? $created;
+        if ($oldest['_id'] !== $created['_id']) {
+            $this->removeFileAnnexe($datastoreId, $created['_id']);
+        }
+
+        return $oldest;
     }
 
     /**

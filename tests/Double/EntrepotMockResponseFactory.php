@@ -38,6 +38,9 @@ final class EntrepotMockResponseFactory
     /** @var array<string, string> contenu des fichiers d’annexe, par identifiant */
     private static array $annexeFiles = [];
 
+    /** @var list<array{array<mixed>, string}> annexes créées par une autre requête pendant le prochain dépôt d’annexe */
+    private static array $concurrentAnnexes = [];
+
     /** @var list<array{string, int, int}> requêtes « MÉTHODE chemin » qui échouent avec le statut indiqué, après le nombre de passages réussis indiqué */
     private static array $failures = [];
 
@@ -76,6 +79,7 @@ final class EntrepotMockResponseFactory
         self::$store = [];
         self::$metadataFiles = [];
         self::$annexeFiles = [];
+        self::$concurrentAnnexes = [];
         self::$failures = [];
         self::$nextId = 1;
         self::$datastorePrefixes = [];
@@ -131,6 +135,14 @@ final class EntrepotMockResponseFactory
     public static function seedAnnexeFile(string $annexeId, string $content): void
     {
         self::$annexeFiles[$annexeId] = $content;
+    }
+
+    /**
+     * @param array<mixed> $annexe
+     */
+    public static function createConcurrentlyWithNextAnnexe(array $annexe, string $content): void
+    {
+        self::$concurrentAnnexes[] = [$annexe, $content];
     }
 
     public static function annexeFile(string $annexeId): ?string
@@ -489,6 +501,11 @@ final class EntrepotMockResponseFactory
             $annexe = ['_id' => 'annexe-'.self::$nextId++, 'paths' => explode(',', $matches[1] ?? ''), 'labels' => $labels[1], 'creation' => sprintf('2026-11-17T10:00:%02dZ', self::$nextId)];
             self::$store['annexes'][] = $annexe;
             self::$annexeFiles[$annexe['_id']] = $this->filePart($body);
+            foreach (self::$concurrentAnnexes as [$concurrent, $content]) {
+                self::$store['annexes'][] = $concurrent;
+                self::$annexeFiles[$concurrent['_id']] = $content;
+            }
+            self::$concurrentAnnexes = [];
 
             return $this->json($annexe, 201);
         }

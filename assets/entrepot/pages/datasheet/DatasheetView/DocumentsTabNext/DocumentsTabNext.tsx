@@ -46,8 +46,8 @@ const FILTERS = [
     { value: DatasheetDocumentTypeEnum.Link, label: "filter.links" },
 ] as const satisfies { value: TypeFilter; label: string }[];
 
-// nom d’origine du fichier, dernier segment de son URL publique
-const fileNameOf = (document: DatasheetDocument) => decodeURIComponent(document.url.split("/").pop() ?? document.name);
+// nom d’origine du fichier ; pour les anciens documents, dernier segment de son URL publique (non encodée par le serveur)
+const fileNameOf = (document: DatasheetDocument) => document.file_name ?? document.url.split("/").pop() ?? document.name;
 
 const formatOf = (document: DatasheetDocument) => {
     const extension = getFileExtension(fileNameOf(document))?.toUpperCase();

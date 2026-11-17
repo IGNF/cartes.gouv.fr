@@ -27,9 +27,11 @@ final readonly class DatasheetDocumentDTO
 
         #[Assert\When(
             expression: 'this.type === "link"',
-            constraints: [new Assert\NotBlank(message: 'L’URL du lien est obligatoire')],
+            constraints: [new Assert\NotNull(message: 'L’URL du lien est obligatoire')],
             groups: [self::CREATION],
         )]
+        // envoyée vide à la modification : refusée, comme à l’ajout
+        #[Assert\NotBlank(message: 'L’URL du lien est obligatoire', allowNull: true)]
         #[Assert\Url(message: 'L’URL du lien doit commencer par http:// ou https://', protocols: ['http', 'https'], requireTld: true)]
         public ?string $url = null,
     ) {

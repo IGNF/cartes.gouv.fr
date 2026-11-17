@@ -87,11 +87,11 @@ final readonly class AnnexeApiService
             $formFields[] = ['labels' => $label];
         }
 
-        $response = $this->api->sendFile('POST', "datastores/$datastoreId/annexes", $annexeFilePath, $formFields)->array();
-
-        $this->filesystem->remove($annexeFilePath);
-
-        return $response;
+        try {
+            return $this->api->sendFile('POST', "datastores/$datastoreId/annexes", $annexeFilePath, $formFields)->array();
+        } finally {
+            $this->filesystem->remove($annexeFilePath);
+        }
     }
 
     /**
@@ -122,11 +122,11 @@ final readonly class AnnexeApiService
      */
     public function replaceFile(string $datastoreId, string $annexeId, string $annexeFilePath): array
     {
-        $response = $this->api->sendFile('PUT', "datastores/$datastoreId/annexes/$annexeId", $annexeFilePath)->array();
-
-        $this->filesystem->remove($annexeFilePath);
-
-        return $response;
+        try {
+            return $this->api->sendFile('PUT', "datastores/$datastoreId/annexes/$annexeId", $annexeFilePath)->array();
+        } finally {
+            $this->filesystem->remove($annexeFilePath);
+        }
     }
 
     public function publish(string $datastoreId, string $annexeId): ResponsePromise
