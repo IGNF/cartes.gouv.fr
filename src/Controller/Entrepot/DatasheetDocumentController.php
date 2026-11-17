@@ -72,16 +72,19 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         if (DatasheetDocumentDTO::TYPE_FILE === $dto->type && !$file instanceof UploadedFile) {
             $this->throwViolation($dto, 'file', 'Le fichier est obligatoire');
         }
+        if (DatasheetDocumentDTO::TYPE_LINK === $dto->type && $file instanceof UploadedFile) {
+            $this->throwViolation($dto, 'file', 'Un lien ne prend pas de fichier');
+        }
 
         /** @var array<mixed> $listAnnexe entité annexe de l'API entrepôt */
         $listAnnexe = $this->findListAnnexe($datastoreId, $datasheetName) ?? $this->createListAnnexe($datastoreId, $datasheetName);
+        // shortcut: lecture-modification-écriture sans verrou (l’Entrepôt n’a pas d’écriture conditionnelle) ; deux ajouts dans la même seconde peuvent perdre un document, à reprendre si des éditions concurrentes apparaissent
         $documentsList = $this->readList($datastoreId, $listAnnexe);
 
         // date d’ajout écrite par cartes.gouv.fr ; un remplacement de fichier la garde
         $newDocument = ['type' => $dto->type, 'name' => trim($dto->name), 'creation' => $this->clock->now()->format(\DATE_ATOM)];
         $fileAnnexeId = null;
 
-        // le type décide : un fichier joint à un lien est ignoré
         if (DatasheetDocumentDTO::TYPE_FILE === $dto->type) {
             ['id' => $fileAnnexeId, 'url' => $newDocument['url'], 'file_name' => $newDocument['file_name']] = $this->uploadFile($datastoreId, $datasheetName, $file);
             $newDocument['id'] = $fileAnnexeId;

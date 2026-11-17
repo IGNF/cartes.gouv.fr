@@ -152,16 +152,16 @@ final class DatasheetDocumentRoutesTest extends WebTestCase
         self::assertSame(['name'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
     }
 
-    public function testALinkWithAnAttachedFileStaysALink(): void
+    public function testALinkWithAnAttachedFileAnswers422(): void
     {
         $client = self::createClient();
         $this->logIn($client);
 
         $client->xmlHttpRequest('POST', self::DOCUMENTS_URL, ['type' => 'link', 'name' => 'Site', 'url' => 'https://example.test/'], ['file' => $this->upload('rapport.pdf', "%PDF-1.4\n%%EOF")]);
 
-        self::assertResponseIsSuccessful();
-        self::assertSame([['type' => 'link', 'url' => 'https://example.test/']], array_map(fn (array $document) => ['type' => $document['type'], 'url' => $document['url']], $this->jsonResponse($client)));
-        self::assertCount(1, EntrepotMockResponseFactory::stored('annexes'));
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['file'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 
     // nouvelle annexe pour le nouveau fichier, puis suppression de l’ancienne ; la description disparaît
