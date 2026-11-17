@@ -60,18 +60,6 @@ final readonly class StaticApiService
         return $response;
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function replaceFile(string $datastoreId, string $staticId, string $filepath): array
-    {
-        $response = $this->api->sendFile('PUT', "datastores/$datastoreId/statics/$staticId", $filepath)->array();
-
-        $this->filesystem->remove($filepath);
-
-        return $response;
-    }
-
     public function delete(string $datastoreId, string $staticId): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/statics/$staticId");

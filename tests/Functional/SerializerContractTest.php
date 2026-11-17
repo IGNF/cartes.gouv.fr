@@ -7,17 +7,11 @@ namespace App\Tests\Functional;
 use App\Dto\Datastore\PermissionDTO;
 use App\Dto\Datastore\UpdatePermissionDTO;
 use App\Dto\Espaceco\Members\AddMembersDTO;
-use App\Dto\Metadata\CswLanguage;
-use App\Dto\Services\CommonDTO;
 use App\Dto\Services\Form\ServiceAttributionFormDTO;
 use App\Dto\Services\Form\WfsFormDTO;
 use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
-use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
-use App\Dto\Services\Wfs\WfsServiceDTO;
-use App\Dto\Services\Wfs\WfsTableDTO;
-use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
 use App\Dto\User\AccessDTO;
 use App\Dto\User\UserKeyDTO;
 use App\Tests\Support\CswMetadataFixtures;
@@ -81,9 +75,6 @@ final class SerializerContractTest extends KernelTestCase
      */
     public static function inputPayloads(): iterable
     {
-        yield 'CommonDTO' => [CommonDTO::class, self::commonPayload(), ['language' => CswLanguage::class]];
-        yield 'PyramidVectorTmsServiceDTO' => [PyramidVectorTmsServiceDTO::class, self::commonPayload()];
-        yield 'WfsServiceDTO' => [WfsServiceDTO::class, self::commonPayload() + ['table_infos' => [self::wfsTablePayload()]], ['table_infos' => WfsTableDTO::class]];
         yield 'WfsFormDTO' => [WfsFormDTO::class, [
             'title' => 'Flux',
             'technical_name' => 'tech',
@@ -92,7 +83,6 @@ final class SerializerContractTest extends KernelTestCase
             'attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr'],
             'tables' => [['native_name' => 't1', 'title' => 'Table', 'public_name' => 't1', 'description' => 'Résumé', 'keywords' => ['mot']]],
         ], ['attribution' => ServiceAttributionFormDTO::class, 'tables' => WfsTableFormDTO::class]];
-        yield 'WmsVectorServiceDTO' => [WmsVectorServiceDTO::class, self::commonPayload() + ['selected_tables' => ['t1']]];
         yield 'PyramidVectorGenerateDTO' => [PyramidVectorGenerateDTO::class, [
             'technical_name' => 'pyr',
             'tippecanoe' => '-zg',
@@ -125,52 +115,17 @@ final class SerializerContractTest extends KernelTestCase
     public function testViolationPathsUseSnakeCaseKeys(): void
     {
         $container = self::getContainer();
-        $payload = ['email_contact' => 'pas-un-email', 'table_infos' => [['native_name' => ''] + self::wfsTablePayload()]] + self::commonPayload();
-        $dto = $container->get('serializer')->deserialize(json_encode($payload, JSON_THROW_ON_ERROR), WfsServiceDTO::class, 'json');
+        $payload = [
+            'title' => 'Flux',
+            'technical_name' => 'nom technique',
+            'themes' => ['Hydrographie'],
+            'tables' => [['native_name' => '', 'title' => 'Table', 'public_name' => 't1', 'description' => 'Résumé']],
+        ];
+        $dto = $container->get('serializer')->deserialize(json_encode($payload, JSON_THROW_ON_ERROR), WfsFormDTO::class, 'json');
 
         /** @var array{violations: list<array{propertyPath: string}>} $violations */
         $violations = $container->get('serializer')->normalize($container->get(ValidatorInterface::class)->validate($dto));
 
-        self::assertSame(['table_infos[0].native_name', 'email_contact'], array_column($violations['violations'], 'propertyPath'));
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private static function commonPayload(): array
-    {
-        return [
-            'technical_name' => 'tech',
-            'public_name' => 'Public',
-            'service_name' => 'service',
-            'description' => 'Description',
-            'identifier' => 'id-1',
-            'category' => ['cat'],
-            'keywords' => ['mot'],
-            'free_keywords' => ['libre'],
-            'email_contact' => 'contact@example.test',
-            'creation_date' => '2024-01-15',
-            'organization' => 'Organisation',
-            'organization_email' => 'orga@example.test',
-            'projection' => 'EPSG:2154',
-            'attribution_text' => 'Attribution',
-            'attribution_url' => 'https://example.test',
-            'language' => ['code' => 'fre', 'language' => 'français'],
-            'charset' => 'utf8',
-            'resolution' => '100',
-            'hierarchy_level' => 'dataset',
-            'resource_genealogy' => 'Généalogie',
-            'frequency_code' => 'monthly',
-            'share_with' => 'all_public',
-            'allow_view_data' => true,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private static function wfsTablePayload(): array
-    {
-        return ['native_name' => 'table', 'title' => 'Titre', 'description' => 'Description', 'public_name' => 'publique', 'keywords' => ['mot']];
+        self::assertSame(['tables[0].native_name', 'technical_name'], array_column($violations['violations'], 'propertyPath'));
     }
 }

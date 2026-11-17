@@ -8,7 +8,6 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
-use App\Dto\Services\CommonDTO;
 use App\Dto\Services\Form\PyramidServiceFormDTO;
 use App\Dto\Services\PyramidRaster\PyramidRasterGenerateDTO;
 use App\Exception\AppException;
@@ -248,89 +247,6 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         return $this->json($offering, Response::HTTP_CREATED);
     }
 
-    #[Route('/{pyramidId}/wms-raster-wmts', name: 'wms_raster_wmts_add', methods: ['POST'])]
-    public function addWmsRasterWmts(
-        string $datastoreId,
-        string $pyramidId,
-        #[MapQueryParameter] string $type,
-        #[MapRequestPayload] CommonDTO $dto,
-    ): JsonResponse {
-        $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
-        if (!in_array($type, $acceptedTypes)) {
-            throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
-        }
-
-        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
-
-        // création de requête pour la config
-        $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type);
-        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto($type, $dto, $typeInfos);
-
-        $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody);
-
-        $configType = ConfigurationTypes::WMSRASTER === $type ? 'wmsr' : 'wmts';
-        $finalStyleFileName = sprintf('config_%s_style_%s', $offering['configuration']['_id'], $configType);
-        $this->staticApiService->modifyInfo($datastoreId, $typeInfos['styles'][0], [
-            'name' => $finalStyleFileName,
-        ])->await();
-
-        return $this->json($offering);
-    }
-
-    #[Route('/{pyramidId}/wms-raster-wmts/{offeringId}/edit', name: 'wms_raster_wmts_edit', methods: ['POST'])]
-    public function editWmsRasterWmts(
-        string $datastoreId,
-        string $pyramidId,
-        string $offeringId,
-        #[MapQueryParameter] string $type,
-        #[MapRequestPayload] CommonDTO $dto,
-    ): JsonResponse {
-        $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
-        if (!in_array($type, $acceptedTypes)) {
-            throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
-        }
-
-        // récup config et offering existants
-        $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
-        $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
-        $oldOffering['configuration'] = $oldConfiguration;
-
-        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
-
-        // création de requête pour la config
-        $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type, $oldConfiguration['_id']);
-        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto($type, $dto, $typeInfos, $oldConfiguration);
-
-        $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody, $oldOffering);
-
-        return $this->json($offering);
-    }
-
-    /**
-     * @param array<mixed> $pyramid
-     *
-     * @return array<mixed>
-     */
-    private function getConfigTypeInfos(CommonDTO $dto, string $datastoreId, array $pyramid, string $serviceType, ?string $configurationId = null): array
-    {
-        $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
-        $configType = ConfigurationTypes::WMSRASTER === $serviceType ? 'wmsr' : 'wmts';
-
-        $legendStatic = $this->saveLegendInStatic($datastoreId, $pyramid, $configType, $levels, $configurationId);
-
-        return [
-            'title' => $dto->service_name,
-            'abstract' => json_encode($dto->description),
-            'keywords' => [...$dto->category, ...$dto->keywords, ...$dto->free_keywords],
-            'used_data' => [[
-                'bottom_level' => $levels['bottom_level'],
-                'top_level' => $levels['top_level'],
-                'stored_data' => $pyramid['_id'],
-            ]],
-            'styles' => [$legendStatic['_id']],
-        ];
-    }
-
     // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée ; supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
     private function cancelGeneration(string $datastoreId, string $executionId, string $pyramidId): void
     {
@@ -427,7 +343,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
      *
      * @return array<mixed>
      */
-    private function saveLegendInStatic(string $datastoreId, array $pyramid, string $configType, array $zoomLevels, ?string $configurationId = null): array
+    private function saveLegendInStatic(string $datastoreId, array $pyramid, string $configType, array $zoomLevels): array
     {
         // config_[configuration_id]_style_[type_config]
         $tmpConfigUuid = Uuid::v4();
@@ -463,19 +379,6 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         $this->fs->mkdir($styleFileDir);
         try {
             $this->fs->dumpFile($styleFilePath, json_encode($rok4Style, JSON_THROW_ON_ERROR));
-
-            if (null !== $configurationId) {
-                $finalStyleFileName = sprintf('config_%s_style_%s', $configurationId, $configType);
-                $existingStatics = $this->staticApiService->getAll($datastoreId, [
-                    'type' => StaticFileTypes::ROK4_STYLE,
-                    'name' => $finalStyleFileName,
-                ])->resolve();
-                if (count($existingStatics) > 0) {
-                    $existingStatic = $existingStatics[0];
-
-                    return $this->staticApiService->replaceFile($datastoreId, $existingStatic['_id'], $styleFilePath);
-                }
-            }
 
             return $this->staticApiService->add($datastoreId, $styleFilePath, $tmpStyleFileName, StaticFileTypes::ROK4_STYLE);
         } finally {
