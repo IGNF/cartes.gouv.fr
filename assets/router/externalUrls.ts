@@ -14,6 +14,8 @@ export const externalUrls = {
     helpUserGuideCreateKeys: appRoot + "/aide/fr/guides-utilisateur/creation-des-cles-et-integration-sig/",
     catalogue: catalogueUrl ?? appRoot + "/rechercher-une-donnee",
     maps: appRoot + "/explorer-les-cartes",
+    myMaps: appRoot + "/creer-une-carte/mes-cartes",
+    myExtractions: appRoot + "/extraire-une-donnee/mes-extractions",
     contact_us: appRoot + "/aide/fr/nous-ecrire",
     discover_cartesgouvfr: appRoot + "/decouvrir",
     present_service_maps: appRoot + "/decouvrir/explorer-les-cartes",
