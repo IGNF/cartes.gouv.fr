@@ -51,6 +51,7 @@ final class DatasheetDocumentRoutesTest extends WebTestCase
         self::assertSame(self::LIST_LABELS, $annexes[0]['labels']);
         self::assertSame([], array_filter(EntrepotMockResponseFactory::writeRequests(), fn (array $request) => 'PATCH' === $request['method']));
         self::assertSame(['Site'], array_column(json_decode((string) EntrepotMockResponseFactory::annexeFile($annexes[0]['_id']), true, flags: JSON_THROW_ON_ERROR), 'name'));
+        self::assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/', $this->jsonResponse($client)[0]['creation']);
     }
 
     public function testDuplicatedListsReadTheOldest(): void
@@ -165,7 +166,7 @@ final class DatasheetDocumentRoutesTest extends WebTestCase
     // nouvelle annexe pour le nouveau fichier, puis suppression de l’ancienne ; la description disparaît
     public function testReplacingAFileMovesTheDocumentToANewAnnexe(): void
     {
-        $this->seedList([['id' => 'fichier-1', 'type' => 'file', 'name' => 'Ancien', 'description' => 'à retirer', 'url' => 'https://entrepot.test/ancien.pdf']]);
+        $this->seedList([['id' => 'fichier-1', 'type' => 'file', 'name' => 'Ancien', 'description' => 'à retirer', 'url' => 'https://entrepot.test/ancien.pdf', 'creation' => '2026-09-28T11:04:00+00:00']]);
         EntrepotMockResponseFactory::seed('annexes', ['_id' => 'fichier-1', 'paths' => ['documents/Fiche/x/ancien.pdf'], 'labels' => ['datasheet_name=Fiche', 'type=document']]);
         $client = self::createClient();
         $this->logIn($client);
@@ -178,6 +179,7 @@ final class DatasheetDocumentRoutesTest extends WebTestCase
         self::assertSame('Carte', $document['name']);
         self::assertStringEndsWith('/carte.png', $document['url']);
         self::assertArrayNotHasKey('description', $document);
+        self::assertSame('2026-09-28T11:04:00+00:00', $document['creation']);
         self::assertSame(['liste', $document['id']], array_column(EntrepotMockResponseFactory::stored('annexes'), '_id'));
     }
 

@@ -12,6 +12,7 @@ use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Validator\Constraint\DatasheetDocumentFile;
 use OpenApi\Attributes as OA;
+use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -42,6 +43,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         private readonly CartesMetadataApiService $cartesMetadataApiService,
         private readonly LoggerInterface $logger,
         private readonly Filesystem $fs,
+        private readonly ClockInterface $clock,
         ParameterBagInterface $parameters,
     ) {
         $this->varDataPath = $parameters->get('datasheet_documents_path');
@@ -74,7 +76,8 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         $listAnnexe = $this->findListAnnexe($datastoreId, $datasheetName) ?? $this->createListAnnexe($datastoreId, $datasheetName);
         $documentsList = $this->readList($datastoreId, $listAnnexe);
 
-        $newDocument = ['type' => $dto->type, 'name' => trim($dto->name)];
+        // date d’ajout écrite par cartes.gouv.fr ; un remplacement de fichier la garde
+        $newDocument = ['type' => $dto->type, 'name' => trim($dto->name), 'creation' => $this->clock->now()->format(\DATE_ATOM)];
         $fileAnnexeId = null;
 
         // le type décide : un fichier joint à un lien est ignoré

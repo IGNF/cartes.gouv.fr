@@ -79,6 +79,8 @@ export type DatasheetDocument = {
     name: string;
     description?: string;
     id: string;
+    /** date d’ajout (ISO 8601), absente des documents ajoutés avant le 17/11/2026 */
+    creation?: string;
 };
 
 export enum DatasheetDocumentTypeEnum {
