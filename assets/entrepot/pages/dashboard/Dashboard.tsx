@@ -47,50 +47,32 @@ export default function Dashboard() {
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                     <Tile
-                        linkProps={{ to: "/mon-compte" }}
-                        imageUrl={accountSvgUrl}
-                        title="Mon compte"
-                        desc="Consulter et modifier mes informations personnelles"
-                        orientation="vertical"
-                        classes={{
-                            img: fr.cx("fr-mb-0"),
-                        }}
-                    />
-                </div>
-                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                    <Tile
-                        linkProps={{ to: "/mes-cles" }}
-                        imageUrl={keyManagerSvgUrl}
-                        title="Mes clés d’accès"
-                        desc="Créer et consulter mes accès aux services restreints"
-                        orientation="vertical"
-                        classes={{
-                            img: fr.cx("fr-mb-0"),
-                        }}
-                    />
-                </div>
-                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                    <Tile
-                        linkProps={{ to: "/tableau-de-bord/statistiques-de-consommation" }}
-                        title={"Mes statistiques de consommation"}
-                        imageUrl={statsSvgUrl}
-                        orientation="vertical"
-                        desc="Consulter les consommations de mes entrepôts et de mon activité personnelle"
-                        classes={{
-                            img: fr.cx("fr-mb-0"),
-                        }}
-                    />
-                </div>
-                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                    <Tile
-                        linkProps={{ to: "/tableau-de-bord/entrepots" }}
-                        imageUrl={uploaderSvgUrl}
-                        title="Mes entrepôts"
-                        desc="Gérer mes entrepôts et mes fiches de données"
+                        linkProps={{ href: externalUrls.myMaps }}
+                        imageUrl={editorSvgUrl}
+                        title="Mes cartes"
+                        desc="Constuler, gérer et modifier des cartes interactives"
                         start={
-                            <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
-                                <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} aria-hidden="true" />
-                                Publier
+                            <Badge className={fr.cx("fr-badge--yellow-tournesol")} noIcon={true} as="span" small={true}>
+                                <span className={fr.cx("fr-icon--sm", "fr-icon-brush-fill", "fr-mr-1v")} aria-hidden="true" />
+                                Créer
+                            </Badge>
+                        }
+                        orientation="vertical"
+                        classes={{
+                            img: fr.cx("fr-mb-0"),
+                        }}
+                    />
+                </div>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Tile
+                        linkProps={{ href: externalUrls.myExtractions }}
+                        imageUrl={extractionSvgUrl}
+                        title="Mes extractions"
+                        desc="Télécharger les données extraites, relancer des extractions"
+                        start={
+                            <Badge className={fr.cx("fr-badge--pink-macaron")} noIcon={true} as="span" small={true}>
+                                <span className={fr.cx("fr-icon--sm", "ri-contacts-book-upload-line", "fr-mr-1v")} aria-hidden="true" />
+                                Extraire
                             </Badge>
                         }
                         orientation="vertical"
@@ -121,14 +103,14 @@ export default function Dashboard() {
                 )}
                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                     <Tile
-                        linkProps={{ href: externalUrls.myMaps }}
-                        imageUrl={editorSvgUrl}
-                        title="Mes cartes"
-                        desc="Constuler, gérer et modifier des cartes interactives"
+                        linkProps={{ to: "/tableau-de-bord/entrepots" }}
+                        imageUrl={uploaderSvgUrl}
+                        title="Mes entrepôts"
+                        desc="Gérer mes entrepôts et mes fiches de données"
                         start={
-                            <Badge className={fr.cx("fr-badge--yellow-tournesol")} noIcon={true} as="span" small={true}>
-                                <span className={fr.cx("fr-icon--sm", "fr-icon-brush-fill", "fr-mr-1v")} aria-hidden="true" />
-                                Créer
+                            <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
+                                <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} aria-hidden="true" />
+                                Publier
                             </Badge>
                         }
                         orientation="vertical"
@@ -139,17 +121,35 @@ export default function Dashboard() {
                 </div>
                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                     <Tile
-                        linkProps={{ href: externalUrls.myExtractions }}
-                        imageUrl={extractionSvgUrl}
-                        title="Mes extractions"
-                        desc="Télécharger les données extraites, relancer des extractions"
-                        start={
-                            <Badge className={fr.cx("fr-badge--pink-macaron")} noIcon={true} as="span" small={true}>
-                                <span className={fr.cx("fr-icon--sm", "fr-icon-road-map-fill", "fr-mr-1v")} aria-hidden="true" />
-                                Extraire
-                            </Badge>
-                        }
+                        linkProps={{ to: "/mon-compte" }}
+                        imageUrl={accountSvgUrl}
+                        title="Mon compte"
+                        desc="Consulter et modifier mes informations personnelles"
                         orientation="vertical"
+                        classes={{
+                            img: fr.cx("fr-mb-0"),
+                        }}
+                    />
+                </div>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Tile
+                        linkProps={{ to: "/mes-cles" }}
+                        imageUrl={keyManagerSvgUrl}
+                        title="Mes clés d’accès"
+                        desc="Créer et consulter mes accès aux services restreints"
+                        orientation="vertical"
+                        classes={{
+                            img: fr.cx("fr-mb-0"),
+                        }}
+                    />
+                </div>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Tile
+                        linkProps={{ to: "/tableau-de-bord/statistiques-de-consommation" }}
+                        title={"Mes statistiques de consommation"}
+                        imageUrl={statsSvgUrl}
+                        orientation="vertical"
+                        desc="Consulter les consommations de mes entrepôts et de mon activité personnelle"
                         classes={{
                             img: fr.cx("fr-mb-0"),
                         }}
