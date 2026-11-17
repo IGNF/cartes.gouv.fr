@@ -21,6 +21,8 @@ final readonly class ContactUsDTO
         public string $last_name,
         public string $category,
         public string $organization,
+
+        public ?string $geocaptchaToken = null,
     ) {
     }
 }

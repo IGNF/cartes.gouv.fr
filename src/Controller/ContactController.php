@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Dto\Contact\ContactUsDTO;
 use App\Exception\AppException;
 use App\Security\User;
+use App\Services\GeocaptchaService;
 use App\Services\MailerService;
 use App\Services\MembershipService;
 use Psr\Log\LoggerInterface;
@@ -38,7 +39,7 @@ class ContactController extends AbstractController
         name: 'contact_us',
         options: ['expose' => true],
         methods: ['POST'])]
-    public function contact(Request $request, RateLimiterFactory $contactUsLimiter, LockFactory $lockFactory, DenormalizerInterface $serializer, ValidatorInterface $validator): JsonResponse
+    public function contact(Request $request, RateLimiterFactory $contactUsLimiter, LockFactory $lockFactory, DenormalizerInterface $serializer, ValidatorInterface $validator, GeocaptchaService $geocaptchaService): JsonResponse
     {
         // avant tout contrôle : les appels de robots comptent aussi ; verrou commun, le compteur reste par adresse IP
         $lock = $lockFactory->createLock('contact_us_limiter');
@@ -75,6 +76,8 @@ class ContactController extends AbstractController
         if (count($violations) > 0) {
             throw new BadRequestHttpException((string) $violations->get(0)->getMessage());
         }
+
+        $geocaptchaService->check($contact->geocaptchaToken);
 
         if ($this->mailerService->containsBannedWords($contact->message)) {
             throw new BadRequestHttpException('Votre message contient des mots interdits');

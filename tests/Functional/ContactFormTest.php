@@ -3,8 +3,11 @@
 namespace App\Tests\Functional;
 
 use App\Security\ApiAuthenticationEntryPoint;
+use App\Services\GeocaptchaService;
+use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Double\FakeKeycloakClient;
 use App\Tests\Support\KeycloakLoginTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Mime\RawMessage;
 
@@ -121,6 +124,73 @@ final class ContactFormTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
+    protected function tearDown(): void
+    {
+        $this->setGeocaptchaEnabled(false);
+        parent::tearDown();
+    }
+
+    public function testContactUsMailsSupportWhenTheGeocaptchaIsResolved(): void
+    {
+        $this->setGeocaptchaEnabled(true);
+        $client = self::createClient();
+
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json($this->contactForm(['geocaptchaToken' => EntrepotMockResponseFactory::GEOCAPTCHA_RESOLVED_TOKEN])));
+
+        self::assertResponseIsSuccessful();
+        self::assertEmailCount(2);
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>}>
+     */
+    public static function rejectedGeocaptchaProvider(): iterable
+    {
+        yield 'sans jeton' => [[]];
+        yield 'jeton vide' => [['geocaptchaToken' => '']];
+        yield 'challenge non résolu' => [['geocaptchaToken' => EntrepotMockResponseFactory::GEOCAPTCHA_UNRESOLVED_TOKEN]];
+        yield 'challenge inconnu' => [['geocaptchaToken' => 'inconnu']];
+        yield 'segment de point' => [['geocaptchaToken' => '..']];
+    }
+
+    /**
+     * @param array<string, mixed> $token
+     */
+    #[DataProvider('rejectedGeocaptchaProvider')]
+    public function testContactUsRejectsAnUnresolvedGeocaptcha(array $token): void
+    {
+        $this->setGeocaptchaEnabled(true);
+        $client = self::createClient();
+
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json($this->contactForm($token)));
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertSame(GeocaptchaService::INVALID_MESSAGE, $this->jsonResponse($client)['detail']);
+        self::assertEmailCount(0);
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function unavailableGeocaptchaProvider(): iterable
+    {
+        yield 'erreur interne' => [EntrepotMockResponseFactory::GEOCAPTCHA_DOWN_TOKEN];
+        yield 'clé refusée' => [EntrepotMockResponseFactory::GEOCAPTCHA_FORBIDDEN_TOKEN];
+    }
+
+    #[DataProvider('unavailableGeocaptchaProvider')]
+    public function testContactUsAnswers503WhenTheGeocaptchaApiFails(string $token): void
+    {
+        $this->setGeocaptchaEnabled(true);
+        $client = self::createClient();
+
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json($this->contactForm(['geocaptchaToken' => $token])));
+
+        self::assertResponseStatusCodeSame(503);
+        self::assertSame(GeocaptchaService::UNAVAILABLE_MESSAGE, $this->jsonResponse($client)['detail']);
+        self::assertEmailCount(0);
+    }
+
     public function testDatastoreCreateRequestMailsSupportAndTheUser(): void
     {
         $client = self::createClient();
@@ -209,6 +279,12 @@ final class ContactFormTest extends WebTestCase
     private function json(array $payload): string
     {
         return json_encode($payload, JSON_THROW_ON_ERROR);
+    }
+
+    // lu à l’exécution par %env()% : chaque nouveau noyau prend la valeur courante
+    private function setGeocaptchaEnabled(bool $enabled): void
+    {
+        $_ENV['GEOCAPTCHA_ENABLED'] = $_SERVER['GEOCAPTCHA_ENABLED'] = $enabled ? 'true' : 'false';
     }
 
     /**
