@@ -67,6 +67,13 @@ final readonly class GeocaptchaService
         }
 
         if (true !== ($result['result'] ?? null)) {
+            // msg porte la session du visiteur (IP, referer) : seuls success et attempts sont gardés
+            $msg = $result['msg'] ?? null;
+            $this->logger->warning('geocaptcha.validation.rejected', [
+                'result' => $result['result'] ?? null,
+                'msg' => is_array($msg) ? array_intersect_key($msg, array_flip(['success', 'attempts'])) : $msg,
+            ]);
+
             throw new BadRequestHttpException(self::INVALID_MESSAGE);
         }
     }
