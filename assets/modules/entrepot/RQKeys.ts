@@ -4,16 +4,9 @@ import { withQueryKeyNamespace } from "../withQueryKeyNamespace";
 
 /** Factory des query keys react-query du domaine Entrepôt, toutes préfixées par "entrepot" */
 const RQKeys = {
-    datastore_list: (): string[] => ["datastore"],
     datastore: (datastoreId: string): string[] => ["datastore", datastoreId],
     datastore_endpoints: (datastoreId: string): string[] => ["datastore", datastoreId, "endpoints"],
-    datastore_endpoint_stats: (datastoreId: string, endpointId: string, queryParams?: object): string[] => {
-        const keys = ["datastore", datastoreId, "endpoints", endpointId, "stats"];
-        if (queryParams) keys.push(JSON.stringify(queryParams));
-        return keys;
-    },
     datastore_permissions: (datastoreId: string): string[] => ["datastore", datastoreId, "permissions"],
-    datastore_permission_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "permissions", "offering", offeringId],
     datastore_permission: (datastoreId: string, permissionId: string): string[] => ["datastore", datastoreId, "permission", permissionId],
 
     datastore_upload_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
@@ -21,9 +14,7 @@ const RQKeys = {
         if (queryParams) keys.push(JSON.stringify(queryParams));
         return keys;
     },
-    datastore_upload: (datastoreId: string, uploadId: string): string[] => ["datastore", datastoreId, "upload", uploadId],
     datastore_upload_integration: (datastoreId: string, uploadId: string): string[] => ["datastore", datastoreId, "upload", uploadId, "integration"],
-    datastore_upload_file_tree: (datastoreId: string, uploadId: string = "undefined"): string[] => ["datastore", datastoreId, "upload", uploadId, "file_tree"],
     datastore_upload_report: (datastoreId: string, uploadId: string): string[] => ["datastore", datastoreId, "upload", uploadId, "report"],
 
     datastore_stored_data_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
@@ -88,14 +79,12 @@ const RQKeys = {
     datastore_annexe: (datastoreId: string, annexeId: string): string[] => ["datastore", datastoreId, "annexe", annexeId],
 
     datastore_metadata_list: (datastoreId: string): string[] => ["datastore", datastoreId, "metadata"],
-    datastore_metadata_by_id: (datastoreId: string, metadataId: string): string[] => ["datastore", datastoreId, "metadata", metadataId],
 
     datastore_statics_list: (datastoreId: string, query?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "statics"];
         if (query) keys.push(JSON.stringify(query));
         return keys;
     },
-    datastore_statics_download: (datastoreId: string, fileId: string): string[] => ["datastore", datastoreId, "statics", fileId, "download"],
 
     datastore_cleanup_content: (datastoreId: string): string[] => ["datastore", datastoreId, "cleanup", "content"],
 
@@ -117,7 +106,6 @@ const RQKeys = {
     },
     get_permission: (permissionId: string): string[] => ["user", "me", "permissions", permissionId],
     my_documents: (query?: unknown): string[] => ["user", "me", "documents", JSON.stringify(query)],
-    my_document: (documentId: string): string[] => ["user", "me", "documents", documentId],
 
     accesses_request: (fileIdentifier: string): string[] => ["accesses_request", fileIdentifier],
 

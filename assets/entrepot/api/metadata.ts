@@ -21,14 +21,6 @@ const getList = (datastoreId: string, queryParams: QueryParams = {}, otherOption
     });
 };
 
-const getById = (datastoreId: string, metadataId: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_get", { datastoreId, metadataId });
-    return jsonFetch<Metadata>(url, {
-        method: "GET",
-        ...otherOptions,
-    });
-};
-
 const getByDatasheetName = (datastoreId: string, datasheetName: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_get_by_datasheet_name", { datastoreId, datasheetName });
     return jsonFetch<Metadata>(url, {
@@ -52,7 +44,6 @@ const getFileContent = async (datastoreId: string, metadataId: string): Promise<
 const metadata = {
     isFileIdentifierAvailable,
     getFileContent,
-    getById,
     getByDatasheetName,
     getList,
     remove,

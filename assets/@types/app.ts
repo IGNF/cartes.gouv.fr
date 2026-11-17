@@ -1,5 +1,4 @@
 import { LanguageType } from "@/utils";
-import { SummaryProps } from "@codegouvfr/react-dsfr/Summary";
 import {
     AccessCreateDto,
     AccessDetailResponseDto,
@@ -11,13 +10,7 @@ import {
     CommunityDetailResponseDto,
     CommunityMemberDto,
     CommunityUserResponseDtoRightsEnum,
-    ConfigurationAltimetryDetailsContent,
-    ConfigurationItineraryIsocurveDetailsContent,
     ConfigurationStandardDetailResponseDto,
-    ConfigurationWfsDetailsContent,
-    ConfigurationWmsRasterDetailsContent,
-    ConfigurationWmsVectorDetailsContent,
-    ConfigurationWmtsTmsDetailsContent,
     DatastoreDetailResponseDto,
     DatastoreEndpointStandardResponseDto,
     EndpointDetailResponseDtoTypeEnum,
@@ -37,7 +30,6 @@ import {
     StoredDataVectorDbDetailsDto,
     UploadPrivateDetailResponseDto,
     UploadTreeElementResponseDto,
-    UserDetailsResponseDto,
     UserKeyDetailsResponseDtoUserKeyInfoDto,
     UserKeyResponseDto,
 } from "./entrepot";
@@ -208,9 +200,6 @@ export {
 export { EndpointDetailResponseDtoTypeEnum as EndpointTypeEnum };
 export type UploadTree = UploadTreeElementResponseDto[];
 
-/** user, objet représentant l'utilisateur de l'API Entrepot */
-export type EntrepotUser = UserDetailsResponseDto;
-
 /** les styles */
 export type StyleLayer = {
     name?: string;
@@ -223,11 +212,6 @@ export type CartesStyle = {
     technical_name: string;
     current?: boolean;
     layers: StyleLayer[];
-};
-
-export type StyleForm = {
-    style_name: string;
-    style_files: Record<string, string>;
 };
 
 export enum StyleFormatEnum {
@@ -289,55 +273,10 @@ export interface Service extends Offering {
     share_url?: string;
 }
 
-export type TypeInfosWithBbox =
-    | ConfigurationAltimetryDetailsContent
-    | ConfigurationItineraryIsocurveDetailsContent
-    | ConfigurationWfsDetailsContent
-    | ConfigurationWmsRasterDetailsContent
-    | ConfigurationWmsVectorDetailsContent
-    | ConfigurationWmtsTmsDetailsContent;
-
 export enum MetadataHierarchyLevel {
     Dataset = "dataset",
     Series = "series",
 }
-
-export type MetadataFormValuesType = {
-    metadata_file_content?: FileList;
-    identifier?: string;
-    public_name?: string;
-    description?: string;
-    email_contact?: string;
-    creation_date?: string;
-    resource_genealogy?: string;
-    hierarchy_level?: MetadataHierarchyLevel;
-    organization?: string;
-    organization_email?: string;
-    category?: string[];
-    keywords?: string[];
-    free_keywords?: string[];
-    charset?: string;
-    projection?: string;
-    // encoding?: string;
-    resolution?: string;
-    language?: LanguageType;
-    frequency_code?: string;
-};
-
-export type AttributionFormValuesType = {
-    attribution_text?: string;
-    attribution_url?: string;
-};
-
-export type ServiceFormValuesBaseType = {
-    technical_name?: string;
-    public_name?: string;
-    service_name?: string;
-    description?: string;
-    share_with?: string;
-    allow_view_data?: boolean;
-} & MetadataFormValuesType &
-    AttributionFormValuesType;
 
 /** endpoints */
 export type DatastoreEndpoint = DatastoreEndpointStandardResponseDto;
@@ -479,12 +418,6 @@ export type Metadata = MetadataStandardResponseDto & {
         datasheet_name?: string;
     };
 };
-
-/* Liens dans les composants de type Summary */
-export type SummaryLink = SummaryProps["links"][number];
-
-export const arrUserCategories = ["Individual", "Professional"] as const;
-export type UserCategory = (typeof arrUserCategories)[number];
 
 export type DatastoreCleanupContentResponse = {
     entities: DatastoreCleanupEntitiesCount;

@@ -17,36 +17,6 @@ const add = (datastoreId: string, formData: FormData | object) => {
     );
 };
 
-const publishWmsRasterWmts = (datastoreId: string, pyramidId: string, type: string, formData: FormData | object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_raster_wms_raster_wmts_add", { datastoreId, pyramidId, type });
-    return jsonFetch<Service>(
-        url,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-        },
-        formData
-    );
-};
-
-const editWmsRasterWmts = (datastoreId: string, pyramidId: string, offeringId: string, type: string, formData: FormData | object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_raster_wms_raster_wmts_edit", { datastoreId, pyramidId, offeringId, type });
-    return jsonFetch<Service>(
-        url,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-        },
-        formData
-    );
-};
-
 const publish = (datastoreId: string, pyramidId: string, type: ConfigurationTypeEnum.WMSRASTER | ConfigurationTypeEnum.WMTSTMS, formData: FormData) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_raster_wms_raster_wmts_publish", { datastoreId, pyramidId, type });
     return jsonFetch<Service>(url, { method: "POST" }, formData, true);
@@ -55,6 +25,4 @@ const publish = (datastoreId: string, pyramidId: string, type: ConfigurationType
 export default {
     add,
     publish,
-    publishWmsRasterWmts,
-    editWmsRasterWmts: editWmsRasterWmts,
 };
