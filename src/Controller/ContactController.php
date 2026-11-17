@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Dto\Contact\ContactUsDTO;
 use App\Exception\AppException;
 use App\Security\User;
 use App\Services\MailerService;
@@ -16,6 +17,9 @@ use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(
     name: 'cartesgouvfr_api_contact_',
@@ -34,7 +38,7 @@ class ContactController extends AbstractController
         name: 'contact_us',
         options: ['expose' => true],
         methods: ['POST'])]
-    public function contact(Request $request, RateLimiterFactory $contactUsLimiter, LockFactory $lockFactory): JsonResponse
+    public function contact(Request $request, RateLimiterFactory $contactUsLimiter, LockFactory $lockFactory, DenormalizerInterface $serializer, ValidatorInterface $validator): JsonResponse
     {
         // avant tout contrôle : les appels de robots comptent aussi ; verrou commun, le compteur reste par adresse IP
         $lock = $lockFactory->createLock('contact_us_limiter');
@@ -61,19 +65,18 @@ class ContactController extends AbstractController
             return new JsonResponse();
         }
 
-        $requiredKeys = ['email_contact', 'message', 'first_name', 'last_name', 'category', 'organization'];
-        if ([] !== array_diff($requiredKeys, array_keys($data))) {
+        try {
+            $contact = $serializer->denormalize($data, ContactUsDTO::class);
+        } catch (SerializerExceptionInterface) {
             throw new BadRequestHttpException('Le formulaire de contact est incomplet');
         }
 
-        // Validite de l'email
-        $userEmail = $data['email_contact'];
-        if (!filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
-            throw new BadRequestHttpException("L’adresse électronique n'est pas valide");
+        $violations = $validator->validate($contact);
+        if (count($violations) > 0) {
+            throw new BadRequestHttpException((string) $violations->get(0)->getMessage());
         }
 
-        $message = $data['message'];
-        if ($this->mailerService->containsBannedWords($message)) {
+        if ($this->mailerService->containsBannedWords($contact->message)) {
             throw new BadRequestHttpException('Votre message contient des mots interdits');
         }
 
@@ -81,13 +84,13 @@ class ContactController extends AbstractController
         $now = new \DateTime();
 
         $supportMailParams = [
-            'userEmail' => $userEmail,
-            'firstName' => $data['first_name'],
-            'lastName' => $data['last_name'],
-            'category' => $data['category'],
-            'organization' => $data['organization'],
+            'userEmail' => $contact->email_contact,
+            'firstName' => $contact->first_name,
+            'lastName' => $contact->last_name,
+            'category' => $contact->category,
+            'organization' => $contact->organization,
             'sendDate' => $now,
-            'message' => $message,
+            'message' => $contact->message,
         ];
 
         if ($user instanceof User) {
@@ -103,8 +106,8 @@ class ContactController extends AbstractController
         $this->mailerService->sendMail($supportAddress, '[cartes.gouv.fr] Nouvelle demande', 'Mailer/contact.html.twig', $supportMailParams);
 
         // // envoi du mail d'accusé de réception à l'utilisateur
-        $this->mailerService->sendMail($userEmail, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
-            'message' => $message,
+        $this->mailerService->sendMail($contact->email_contact, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
+            'message' => $contact->message,
             'sendDate' => $now,
         ]);
 

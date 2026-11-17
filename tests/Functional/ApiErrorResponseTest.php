@@ -61,16 +61,11 @@ final class ApiErrorResponseTest extends WebTestCase
     public function testUnexpectedErrorHidesItsMessageAndTraceOutsideDebug(): void
     {
         $client = self::createClient(['debug' => false]);
+        $this->logIn($client);
 
-        // message en tableau : TypeError dans le filtre de mots interdits
-        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: (string) json_encode([
-            'email_contact' => 'visiteur@example.test',
-            'importance' => '0',
-            'message' => ['pas une chaîne'],
-            'first_name' => 'Prénom',
-            'last_name' => 'Nom',
-            'category' => 'Autre',
-            'organization' => 'Organisation test',
+        // adresse en tableau : TypeError à l’envoi du courriel
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/join-community', content: (string) json_encode([
+            'community' => ['_id' => 'community-1', 'name' => 'Communauté test', 'contact' => ['pas une chaîne']],
         ]));
 
         self::assertResponseStatusCodeSame(500);

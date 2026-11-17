@@ -95,6 +95,29 @@ final class ContactFormTest extends WebTestCase
         ]));
 
         self::assertResponseStatusCodeSame(400);
+        self::assertSame('L’adresse électronique n’est pas valide', $this->jsonResponse($client)['detail']);
+        self::assertEmailCount(0);
+    }
+
+    public function testContactUsRejectsAMessageThatIsNotAString(): void
+    {
+        $client = self::createClient();
+
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json($this->contactForm(['message' => ['pas une chaîne']])));
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertSame('Le formulaire de contact est incomplet', $this->jsonResponse($client)['detail']);
+        self::assertEmailCount(0);
+    }
+
+    public function testContactUsRejectsAnEmptyMessage(): void
+    {
+        $client = self::createClient();
+
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json($this->contactForm(['message' => ''])));
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertSame('Le message est obligatoire', $this->jsonResponse($client)['detail']);
         self::assertEmailCount(0);
     }
 
@@ -186,5 +209,23 @@ final class ContactFormTest extends WebTestCase
     private function json(array $payload): string
     {
         return json_encode($payload, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * @param array<string, mixed> $overrides
+     *
+     * @return array<string, mixed>
+     */
+    private function contactForm(array $overrides = []): array
+    {
+        return $overrides + [
+            'email_contact' => 'visiteur@example.test',
+            'importance' => '0',
+            'message' => 'Bonjour, une question.',
+            'first_name' => 'Prénom',
+            'last_name' => 'Nom',
+            'category' => 'Autre',
+            'organization' => 'Organisation test',
+        ];
     }
 }
