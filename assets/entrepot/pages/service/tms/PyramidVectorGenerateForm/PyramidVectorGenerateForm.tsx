@@ -62,7 +62,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, dat
 
     // Definition du schema
     const datasheetView = {
-        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
+        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
         params: { datastoreId, datasheetName },
     } as const;
 

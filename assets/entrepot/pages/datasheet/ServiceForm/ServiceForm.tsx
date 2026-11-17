@@ -193,7 +193,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                             children: t("cancel"),
                             priority: "secondary",
                             linkProps: {
-                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
+                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
                                 params: { datastoreId, datasheetName },
                                 search: { activeTab: "services" },
                             },

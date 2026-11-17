@@ -48,7 +48,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     // la fiche de métadonnées fournit les liens `metadata` de la configuration : sans elle, pas de publication
     const metadataQuery = useQuery(datasheetMetadataQueryOptions(datastoreId, datasheetName));
 
-    const servicesTab = { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue", params: { datastoreId, datasheetName } } as const;
+    const servicesTab = { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName", params: { datastoreId, datasheetName } } as const;
 
     const publishMutation = useMutation<Service, ApiError, ServiceFormOutput>({
         mutationFn: (values) => {

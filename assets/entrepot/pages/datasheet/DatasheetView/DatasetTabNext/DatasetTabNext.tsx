@@ -154,7 +154,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                                     linkProps={{
                                         to: "/tableau-de-bord/entrepots/$datastoreId/donnees/integration",
                                         params: { datastoreId },
-                                        search: { uploadId: upload._id, datasheetName, vue: "nouvelle" },
+                                        search: { uploadId: upload._id, datasheetName },
                                     }}
                                 >
                                     {t("resume_integration")}

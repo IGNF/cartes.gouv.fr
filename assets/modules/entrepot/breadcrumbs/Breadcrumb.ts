@@ -31,7 +31,6 @@ const breadcrumbNameByRouteId = {
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/creer": "datastore_datasheet_create",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/integration": "datastore_datasheet_upload_integration",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/": "datastore_datasheet_view",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue": "datastore_datasheet_view",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement": "datastore_datasheet_upload",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout": "datastore_datasheet_service_add",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId": "datastore_datasheet_service_view",
@@ -87,11 +86,6 @@ const getBreadcrumb = (
         params: { datastoreId: datastoreId ?? "", datasheetName: datasheetName ?? "" },
         search: activeTab ? { activeTab } : {},
     });
-    const servicesTabNextLink = {
-        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue" as const,
-        params: { datastoreId: datastoreId ?? "", datasheetName: datasheetName ?? "" },
-        search: { activeTab: "services" as const },
-    };
 
     const dashboardProps: BreadcrumbProps = {
         homeLinkProps: { to: "/tableau-de-bord" },
@@ -201,7 +195,7 @@ const getBreadcrumb = (
         case "datastore_datasheet_service_view":
             return {
                 ...datastoreBaseProps,
-                segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: servicesTabNextLink }],
+                segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: datasheetLink("services") }],
                 currentPageLabel: t(name),
             };
         case "datastore_datasheet_upload_integration": {
@@ -258,7 +252,7 @@ const getBreadcrumb = (
         case "datastore_service_style_edit":
             datastoreBaseProps.segments = [
                 ...datastoreBaseProps.segments,
-                { label: datasheetName, linkProps: returnTo === "service_page" ? servicesTabNextLink : datasheetLink("services") },
+                { label: datasheetName, linkProps: datasheetLink("services") },
                 returnTo === "service_page"
                     ? {
                           label: t("datastore_datasheet_service_view"),
