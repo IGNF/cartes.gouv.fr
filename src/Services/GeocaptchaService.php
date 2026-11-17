@@ -55,6 +55,9 @@ final readonly class GeocaptchaService
             $status = $e->getStatusCode();
             // 401/403 : clé ou accès refusés, une panne de configuration et non un captcha raté
             if ($status < 500 && !in_array($status, [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN], true)) {
+                // msg de l’API (ex. « Application unknown » : referer non déclaré), sans le jeton
+                $this->logger->warning('geocaptcha.validation.rejected', ['status' => $status, 'msg' => $e->getMessage()]);
+
                 throw new BadRequestHttpException(self::INVALID_MESSAGE);
             }
             // pas le message : il contient l’URL, donc le jeton
