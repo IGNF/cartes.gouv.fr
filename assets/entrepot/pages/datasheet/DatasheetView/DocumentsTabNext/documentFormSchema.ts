@@ -23,6 +23,8 @@ export const buildDocumentFormSchema = (t: T, { type, editing }: DocumentFormMod
                       .trim()
                       .min(1, t("validation.url.required"))
                       .pipe(z.url({ protocol: /^https?$/, error: t("validation.url.invalid") }))
+                      // même règle que le serveur (requireTld) : nom de domaine, ni localhost ni adresse IP
+                      .refine((url) => !URL.canParse(url) || z.regexes.domain.test(new URL(url).hostname), t("validation.url.domain"))
                 : z.string().optional(),
         file: z.custom<FileList | undefined>().superRefine((files, ctx) => {
             const file = files?.[0];

@@ -37,6 +37,13 @@ describe("buildDocumentFormSchema", () => {
         expect(issueMessages({ name: "Site", url: "javascript:alert(1)" }, addLink)).toEqual({ url: "validation.url.invalid" });
         expect(issueMessages({ name: "Site", url: "" }, addLink)).toEqual({ url: "validation.url.required" });
         expect(issueMessages({ name: "Site", url: "https://example.test/" }, addLink)).toEqual({});
+        expect(issueMessages({ name: "Site", url: "example.test" }, addLink)).toEqual({ url: "validation.url.invalid" });
+    });
+
+    it("exige un nom de domaine, comme le serveur", () => {
+        expect(issueMessages({ name: "Site", url: "http://localhost/" }, addLink)).toEqual({ url: "validation.url.domain" });
+        expect(issueMessages({ name: "Site", url: "http://192.168.1.1/" }, addLink)).toEqual({ url: "validation.url.domain" });
+        expect(issueMessages({ name: "Site", url: "https://été.fr/" }, addLink)).toEqual({});
     });
 
     it("exige un fichier à l’ajout seulement", () => {

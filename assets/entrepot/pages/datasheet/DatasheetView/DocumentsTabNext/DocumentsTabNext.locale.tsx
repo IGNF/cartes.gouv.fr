@@ -56,6 +56,7 @@ const { i18n } = declareComponentKeys<
     | "validation.name.required"
     | "validation.url.required"
     | "validation.url.invalid"
+    | "validation.url.domain"
     | "validation.file.required"
     | "validation.file.extension"
     | { K: "validation.file.size"; P: { max: number }; R: string }
@@ -118,6 +119,7 @@ export const DocumentsTabNextFrTranslations: Translations<"fr">["DocumentsTabNex
     "validation.name.required": "Le nom est obligatoire",
     "validation.url.required": "L’URL du lien est obligatoire",
     "validation.url.invalid": "L’URL du lien doit commencer par http:// ou https://",
+    "validation.url.domain": "L’URL du lien doit contenir un nom de domaine",
     "validation.file.required": "Le fichier est obligatoire",
     "validation.file.extension": "Le fichier doit être au format qgz, pdf, jpg, png, svg ou csv",
     "validation.file.size": ({ max }) => `Le fichier ne peut pas dépasser ${max} Mo`,
@@ -178,6 +180,7 @@ export const DocumentsTabNextEnTranslations: Translations<"en">["DocumentsTabNex
     "validation.name.required": "The name is required",
     "validation.url.required": "The link URL is required",
     "validation.url.invalid": "The link URL must start with http:// or https://",
+    "validation.url.domain": "The link URL must contain a domain name",
     "validation.file.required": "The file is required",
     "validation.file.extension": "The file must be a qgz, pdf, jpg, png, svg or csv file",
     "validation.file.size": ({ max }) => `The file cannot exceed ${max} MB`,

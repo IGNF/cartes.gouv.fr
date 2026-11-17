@@ -32,7 +32,12 @@ final readonly class DatasheetDocumentDTO
         )]
         // envoyée vide à la modification : refusée, comme à l’ajout
         #[Assert\NotBlank(message: 'L’URL du lien est obligatoire', allowNull: true)]
-        #[Assert\Url(message: 'L’URL du lien doit commencer par http:// ou https://', protocols: ['http', 'https'], requireTld: true)]
+        #[Assert\Url(
+            message: 'L’URL du lien doit commencer par http:// ou https://',
+            protocols: ['http', 'https'],
+            requireTld: true,
+            tldMessage: 'L’URL du lien doit contenir un nom de domaine',
+        )]
         public ?string $url = null,
     ) {
     }

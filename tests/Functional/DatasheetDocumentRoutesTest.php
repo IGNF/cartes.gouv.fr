@@ -118,6 +118,7 @@ final class DatasheetDocumentRoutesTest extends WebTestCase
         yield 'lien javascript' => [['type' => 'link', 'name' => 'Nom', 'url' => 'javascript:alert(1)'], [], 'url'];
         yield 'lien absent' => [['type' => 'link', 'name' => 'Nom'], [], 'url'];
         yield 'lien vide' => [['type' => 'link', 'name' => 'Nom', 'url' => ''], [], 'url'];
+        yield 'lien sans nom de domaine' => [['type' => 'link', 'name' => 'Nom', 'url' => 'http://localhost/'], [], 'url'];
         yield 'fichier absent' => [['type' => 'file', 'name' => 'Nom'], [], 'file'];
         yield 'extension refusée' => [['type' => 'file', 'name' => 'Nom'], ['file' => ['page.html', '<html></html>']], 'file'];
         yield 'contenu qui ne correspond pas' => [['type' => 'file', 'name' => 'Nom'], ['file' => ['faux.pdf', '<html></html>']], 'file'];
@@ -271,6 +272,17 @@ final class DatasheetDocumentRoutesTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertMatchesRegularExpression('#/[0-9a-f-]{36}/document\.pdf$#', $this->jsonResponse($client)[0]['url']);
+    }
+
+    public function testUrlWithoutDomainHasAFrenchMessage(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('POST', self::DOCUMENTS_URL, ['type' => 'link', 'name' => 'Nom', 'url' => 'http://192.168.1.1/']);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['L’URL du lien doit contenir un nom de domaine'], array_column($this->jsonResponse($client)['violations'], 'title'));
     }
 
     public function testEditingALinkWithAnEmptyUrlAnswers422(): void
