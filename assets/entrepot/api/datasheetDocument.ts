@@ -9,7 +9,7 @@ const getList = (datastoreId: string, datasheetName: string, otherOptions: Reque
     });
 };
 
-const add = (datastoreId: string, datasheetName: string, formData: FormData | object) => {
+const add = (datastoreId: string, datasheetName: string, formData: FormData) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_document_add", { datastoreId, datasheetName });
     return jsonFetch<DatasheetDocument[]>(
         url,
@@ -22,14 +22,16 @@ const add = (datastoreId: string, datasheetName: string, formData: FormData | ob
     );
 };
 
-const edit = (datastoreId: string, datasheetName: string, documentId: string, formData: FormData | object) => {
+const edit = (datastoreId: string, datasheetName: string, documentId: string, formData: FormData) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_document_edit", { datastoreId, datasheetName, documentId });
     return jsonFetch<DatasheetDocument[]>(
         url,
         {
-            method: "PATCH",
+            method: "POST",
         },
-        formData
+        formData,
+        true,
+        true
     );
 };
 

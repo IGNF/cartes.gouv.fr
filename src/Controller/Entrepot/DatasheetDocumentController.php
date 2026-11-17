@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller\Entrepot;
 
 use App\Controller\ApiControllerInterface;
+use App\Dto\Datasheet\DatasheetDocumentDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
+use App\Validator\Constraint\DatasheetDocumentFile;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,10 +18,15 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 #[Route(
     '/api/datastores/{datastoreId}/datasheet/{datasheetName}/documents',
@@ -46,67 +55,45 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             return $this->json([]);
         }
 
-        $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
-        $documentsList = json_decode($docsListJson, true);
-
-        return $this->json($documentsList);
+        return $this->json($this->readList($datastoreId, $listAnnexe));
     }
 
+    // multipart : champs du DTO et, pour un fichier, le fichier `file`
     #[Route('', name: 'add', methods: ['POST'])]
-    public function add(string $datastoreId, string $datasheetName, Request $request): JsonResponse
-    {
-        $documentType = $request->request->get('type');
-        $documentName = $request->request->get('name');
-        $documentDescription = $request->request->get('description');
-
-        $files = $request->files;
-        $fileAnnexeId = null;
+    public function add(
+        string $datastoreId,
+        string $datasheetName,
+        #[MapRequestPayload(validationGroups: ['Default', DatasheetDocumentDTO::CREATION])] DatasheetDocumentDTO $dto,
+        #[MapUploadedFile(constraints: new DatasheetDocumentFile())] ?UploadedFile $file = null,
+    ): JsonResponse {
+        if (DatasheetDocumentDTO::TYPE_FILE === $dto->type && !$file instanceof UploadedFile) {
+            $violations = new ConstraintViolationList([new ConstraintViolation('Le fichier est obligatoire', null, [], $dto, 'file', null)]);
+            throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($dto, $violations));
+        }
 
         /** @var array<mixed> $listAnnexe entité annexe de l'API entrepôt */
         $listAnnexe = $this->findListAnnexe($datastoreId, $datasheetName) ?? $this->createListAnnexe($datastoreId, $datasheetName);
+        $documentsList = $this->readList($datastoreId, $listAnnexe);
 
-        $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
-        $documentsList = json_decode($docsListJson, true);
+        $newDocument = ['type' => $dto->type, 'name' => trim($dto->name)];
+        $fileAnnexeId = null;
 
-        $newDocument = [
-            'type' => $documentType,
-            'name' => $documentName,
-        ];
+        if (!$file instanceof UploadedFile) {
+            $newDocument['id'] = (string) Uuid::v4();
+            $newDocument['url'] = $dto->url;
+        } else {
+            $uuid = (string) Uuid::v4();
+            $fileName = $file->getClientOriginalName();
+            $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
+            $file->move($tempFileDir, $fileName);
 
-        if (null !== $documentDescription) {
-            $newDocument['description'] = $documentDescription;
-        }
+            $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
+            $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFileDir.DIRECTORY_SEPARATOR.$fileName, [implode('/', ['documents', $datasheetName, $uuid, $fileName])], ["datasheet_name=$datasheetName", 'type=document'], true);
+            $this->fs->remove($tempFileDir);
 
-        switch ($documentType) {
-            case 'link':
-                $newDocument['id'] = Uuid::v4();
-                $newDocument['url'] = $request->request->get('document');
-                break;
-
-            case 'file':
-                /** @var UploadedFile|null */
-                $file = $files->get('document');
-                $uuid = Uuid::v4();
-
-                if (null !== $file) {
-                    $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
-                    $tempFilePath = implode(DIRECTORY_SEPARATOR, [$tempFileDir, $file->getClientOriginalName()]);
-
-                    $file->move($tempFileDir, $file->getClientOriginalName());
-                } else {
-                    throw new AppException('Fichier non fourni', Response::HTTP_BAD_REQUEST);
-                }
-
-                $annexePath = implode('/', ['documents', $datasheetName, $uuid, $file->getClientOriginalName()]);
-
-                $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
-                $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], ["datasheet_name=$datasheetName", 'type=document'], true);
-
-                $fileAnnexeId = $fileAnnexe['_id'];
-                $newDocument['id'] = $fileAnnexeId;
-                $newDocument['url'] = $annexesBaseUrl.$fileAnnexe['paths'][0];
-
-                break;
+            $fileAnnexeId = $fileAnnexe['_id'];
+            $newDocument['id'] = $fileAnnexeId;
+            $newDocument['url'] = $annexesBaseUrl.$fileAnnexe['paths'][0];
         }
 
         $documentsList[] = $newDocument;
@@ -126,30 +113,20 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         return $this->json($documentsList);
     }
 
-    #[Route('/{documentId}', name: 'edit', methods: ['PATCH'])]
-    public function edit(string $datastoreId, string $datasheetName, string $documentId, Request $request): JsonResponse
+    // multipart, comme l’ajout ; la description des anciens documents disparaît à la modification
+    #[Route('/{documentId}', name: 'edit', methods: ['POST'])]
+    public function edit(string $datastoreId, string $datasheetName, string $documentId, #[MapRequestPayload] DatasheetDocumentDTO $dto): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
         $listAnnexe = $this->findListAnnexe($datastoreId, $datasheetName) ?? throw new AppException('Document introuvable', Response::HTTP_NOT_FOUND);
 
-        $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
-        $documentsList = json_decode($docsListJson, true);
-
-        $documentsList = array_map(function ($document) use ($documentId, $data) {
+        $documentsList = array_map(function (array $document) use ($documentId, $dto) {
             if ($document['id'] === $documentId) {
-                $document['name'] = $data['name'];
-
-                if (null !== $data['description'] && !empty($data['description'])) {
-                    $document['description'] = $data['description'];
-                } elseif (!empty($document['description'])) {
-                    unset($document['description']);
-                }
+                $document['name'] = trim($dto->name);
+                unset($document['description']);
             }
 
             return $document;
-        }, $documentsList);
-        $documentsList = array_values($documentsList);
+        }, $this->readList($datastoreId, $listAnnexe));
 
         $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
 
@@ -163,8 +140,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     {
         $listAnnexe = $this->findListAnnexe($datastoreId, $datasheetName) ?? throw new AppException('Document introuvable', Response::HTTP_NOT_FOUND);
 
-        $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
-        $initialDocumentsList = json_decode($docsListJson, true);
+        $initialDocumentsList = $this->readList($datastoreId, $listAnnexe);
 
         // document à supprimer
         $document = null;
@@ -230,6 +206,18 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     private function listAnnexeLabels(string $datasheetName): array
     {
         return ["datasheet_name=$datasheetName", 'type=document-list'];
+    }
+
+    /**
+     * @param array<mixed> $listAnnexe entité annexe de l'API entrepôt
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function readList(string $datastoreId, array $listAnnexe): array
+    {
+        $list = json_decode($this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text(), true, flags: JSON_THROW_ON_ERROR);
+
+        return is_array($list) ? array_values($list) : [];
     }
 
     /**

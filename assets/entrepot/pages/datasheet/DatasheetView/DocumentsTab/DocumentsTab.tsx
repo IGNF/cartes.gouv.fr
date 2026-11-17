@@ -119,16 +119,12 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
         formData.set("type", formValues.type);
         formData.set("name", formValues.name);
 
-        if (formValues.description !== undefined) {
-            formData.set("description", formValues.description);
-        }
-
         if (typeof formValues.document === "string") {
-            formData.set("document", formValues.document);
+            formData.set("url", formValues.document);
         }
 
         if (formValues.document instanceof FileList) {
-            formData.set("document", formValues.document[0]);
+            formData.set("file", formValues.document[0]);
         }
 
         addDocumentMutation.mutate(formData);
