@@ -92,7 +92,7 @@ Labels :
 
 ## la vignette d’un flux
 
-Déposée par le formulaire de publication refondu, référencée par son URL dans `extra._search.url_vignette` de la configuration (voir [extra.md](../extra.md)). Supprimée avec le flux.
+Déposée par le formulaire de publication, référencée par son URL dans `extra._search.url_vignette` de la configuration (voir [extra.md](../extra.md)). Supprimée avec le flux.
 
 Chemin : `/thumbnail/{uuid}.{jpg|png}` (même dossier que la vignette d’une fiche, distinguée par le label `type`)
 
@@ -105,7 +105,7 @@ Labels :
 
 ## le logo d’attribution d’un flux
 
-Déposé par le formulaire de publication refondu quand une attribution avec logo est renseignée, référencé par `attribution.logo.url` de la configuration (l’Entrepôt exige aussi `width`, `height` et `format`, calculés au dépôt). Supprimé avec le flux.
+Déposé par le formulaire de publication quand une attribution avec logo est renseignée, référencé par `attribution.logo.url` de la configuration (l’Entrepôt exige aussi `width`, `height` et `format`, calculés au dépôt). Supprimé avec le flux.
 
 Chemin : `/attribution-logo/{uuid}.{jpg|png}`
 
