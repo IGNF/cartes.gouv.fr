@@ -23,6 +23,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(
+    '/api/contact',
     name: 'cartesgouvfr_api_contact_',
     options: ['expose' => true],
 )]
@@ -35,9 +36,8 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/contact-us',
+        '/contact-us',
         name: 'contact_us',
-        options: ['expose' => true],
         methods: ['POST'])]
     public function contact(Request $request, RateLimiterFactory $contactUsLimiter, LockFactory $lockFactory, DenormalizerInterface $serializer, ValidatorInterface $validator, GeocaptchaService $geocaptchaService): JsonResponse
     {
@@ -123,9 +123,8 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/datastore-create-request',
+        '/datastore-create-request',
         name: 'datastore_create_request',
-        options: ['expose' => true],
         methods: ['POST'])]
     public function datastoreCreateRequest(Request $request, MembershipService $membershipService): JsonResponse
     {
@@ -175,9 +174,8 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/join-community',
+        '/join-community',
         name: 'join_community',
-        options: ['expose' => true],
         methods: ['POST'])]
     public function joinCommunity(Request $request): JsonResponse
     {
@@ -223,7 +221,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/accesses-request',
+        '/accesses-request',
         name: 'accesses_request',
         methods: ['POST'],
     )]
@@ -280,7 +278,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/datastore-deletion-request',
+        '/datastore-deletion-request',
         name: 'datastore_deletion_request',
         methods: ['POST'],
     )]
