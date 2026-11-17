@@ -105,7 +105,7 @@ Labels :
 
 ## le logo d’attribution d’un flux
 
-Déposé par le formulaire de publication refondu quand une attribution avec logo est renseignée, référencé par `attribution.logo.url` de la configuration (l’Entrepôt exige aussi `width`, `height` et `format`, calculés au dépôt). Supprimé avec le flux. Les formulaires classiques recopient le logo existant : un `PUT` sans `logo` l’efface.
+Déposé par le formulaire de publication refondu quand une attribution avec logo est renseignée, référencé par `attribution.logo.url` de la configuration (l’Entrepôt exige aussi `width`, `height` et `format`, calculés au dépôt). Supprimé avec le flux.
 
 Chemin : `/attribution-logo/{uuid}.{jpg|png}`
 
