@@ -928,7 +928,7 @@
             "requirements": [],
             "hosttokens": [],
             "methods": [
-                "PATCH"
+                "POST"
             ],
             "schemes": []
         },

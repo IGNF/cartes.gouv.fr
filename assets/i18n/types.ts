@@ -93,6 +93,7 @@ export type ComponentKey =
     | import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetViewNext.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetTabNext/DatasetTabNext.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/ServiceListTab/ServicesListTabNext.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DocumentsTabNext/DocumentsTabNext.locale").I18n
     | import("../entrepot/pages/datasheet/DatasetAdd/DatasetAdd.locale").I18n
     | import("../entrepot/pages/datasheet/ServiceForm/ServiceForm.locale").I18n
     | import("../entrepot/pages/datasheet/ServicePage/ServicePage.locale").I18n

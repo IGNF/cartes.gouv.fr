@@ -3,6 +3,7 @@ import { type Translations } from "@/i18n/types";
 
 const { i18n } = declareComponentKeys<
     | "tab.description"
+    | "tab.documents"
     | "tab.dataset"
     | "tab.services"
     | "published"
@@ -38,6 +39,7 @@ export type I18n = typeof i18n;
 
 export const DatasheetViewNextFrTranslations: Translations<"fr">["DatasheetViewNext"] = {
     "tab.description": "Description",
+    "tab.documents": "Annexes",
     "tab.dataset": "Données",
     "tab.services": "Flux",
     published: "Publié",
@@ -73,6 +75,7 @@ export const DatasheetViewNextFrTranslations: Translations<"fr">["DatasheetViewN
 
 export const DatasheetViewNextEnTranslations: Translations<"en">["DatasheetViewNext"] = {
     "tab.description": "Description",
+    "tab.documents": "Appendices",
     "tab.dataset": "Data",
     "tab.services": "Services",
     published: "Published",

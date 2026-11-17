@@ -18,6 +18,7 @@ import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
 import { datasheetConfigurationsWithoutOfferingQueryOptions } from "@/hooks/queries/datasheetConfigurationsWithoutOfferingQueryOptions";
+import { datasheetDocumentsQueryOptions } from "@/hooks/queries/datasheetDocumentsQueryOptions";
 import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
 import { blockingProcessingStatuses } from "@/hooks/queries/useStoredDataUseProcessings";
 import useCatalogueDatasheetUrl from "@/hooks/useCatalogueDatasheetUrl";
@@ -33,11 +34,13 @@ import DatasheetHeader from "./DatasheetHeader";
 import { DatasheetViewActiveTabEnum } from "./types";
 
 const DescriptionTab = lazy(() => import("../DescriptionTab/DescriptionTab"));
+const DocumentsTabNext = lazy(() => import("../DocumentsTabNext/DocumentsTabNext"));
 const DatasetTabNext = lazy(() => import("../DatasetTabNext/DatasetTabNext"));
 const ServicesListTabNext = lazy(() => import("../ServiceListTab/ServicesListTabNext"));
 
 export const DATASHEET_VIEW_NEXT_TABS = [
     DatasheetViewActiveTabEnum.Description,
+    DatasheetViewActiveTabEnum.Documents,
     DatasheetViewActiveTabEnum.Dataset,
     DatasheetViewActiveTabEnum.Services,
 ] as const;
@@ -115,12 +118,7 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
 
     const isDeleteModalOpen = useIsModalOpen(deleteModal);
 
-    const documentsListQuery = useQuery({
-        queryKey: RQKeys.datastore_datasheet_documents_list(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.datasheetDocument.getList(datastoreId, datasheetName, { signal }),
-        staleTime: 120000,
-        enabled: enabled && isDeleteModalOpen,
-    });
+    const documentsListQuery = useQuery({ ...datasheetDocumentsQueryOptions(datastoreId, datasheetName), enabled: enabled && isDeleteModalOpen });
 
     const storedDataIds = useMemo(
         () =>
@@ -196,6 +194,7 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
                 <DescriptionTab datastoreId={datastoreId} datasheetName={datasheetName} metadataQuery={metadataQuery} />
             </DatasheetViewTab>
         ),
+        [DatasheetViewActiveTabEnum.Documents]: <DocumentsTabNext datastoreId={datastoreId} datasheetName={datasheetName} />,
         [DatasheetViewActiveTabEnum.Dataset]: (
             <DatasetTabNext
                 datastoreId={datastoreId}
@@ -248,7 +247,7 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
 
             <TertiaryNavigation
                 items={DATASHEET_VIEW_NEXT_TABS.map((tab) => ({
-                    text: t(`tab.${tab}` as "tab.description" | "tab.dataset" | "tab.services"),
+                    text: t(`tab.${tab}` as "tab.description" | "tab.documents" | "tab.dataset" | "tab.services"),
                     linkProps: { to: ".", search: { activeTab: tab }, replace: true, activeOptions: searchAwareActiveOptions },
                     isActive: activeTab === tab,
                 }))}
