@@ -358,7 +358,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
-                            title="Retour à la fiche de donnée"
+                            title="Retour à la page du flux"
                             size="large"
                             {...(isDirty
                                 ? { onClick: confirmReturnModal.open }
