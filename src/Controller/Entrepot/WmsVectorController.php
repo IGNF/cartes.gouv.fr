@@ -22,7 +22,7 @@ use Symfony\Component\Uid\Uuid;
     '/api/datastores/{datastoreId}/stored_data/{storedDataId}/wmsvector',
     name: 'cartesgouvfr_api_wmsvector_',
     options: ['expose' => true])]
-#[OA\Tag(name: '[cartes.gouv.fr] WMS-VECTOR', description: 'Création/modification des services WMS-VECTOR')]
+#[OA\Tag(name: '[cartes.gouv.fr] WMS-VECTOR', description: 'Création des services WMS-VECTOR')]
 final class WmsVectorController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(

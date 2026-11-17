@@ -44,7 +44,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
     '/api/datastores/{datastoreId}/pyramid-raster',
     name: 'cartesgouvfr_api_pyramid_raster_',
     options: ['expose' => true])]
-#[OA\Tag(name: '[cartes.gouv.fr] pyramid-raster', description: 'Génération de pyramides de tuiles raster et création/modification des services associés')]
+#[OA\Tag(name: '[cartes.gouv.fr] pyramid-raster', description: 'Génération de pyramides de tuiles raster et création des services associés')]
 final class PyramidRasterController extends AbstractController implements ApiControllerInterface
 {
     private readonly HttpClientInterface $httpClient;

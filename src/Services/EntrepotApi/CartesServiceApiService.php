@@ -829,33 +829,25 @@ class CartesServiceApiService
     }
 
     /**
-     * @param array<mixed> $configMetadata
-     *
      * @return array<mixed>
      */
-    public function getNewConfigMetadata(string $fileIdentifier, array $configMetadata = []): array
+    private function getNewConfigMetadata(string $fileIdentifier): array
     {
         $geonetworkBaseUrl = $this->geonetworkApiService->getBaseUrl();
         $catalogueBaseUrl = (string) $this->params->get('catalogue_url');
 
-        // supprimer les anciennes métadonnées si elles existent déjà
-        $configMetadata = array_filter($configMetadata, function ($md) use ($geonetworkBaseUrl, $catalogueBaseUrl) {
-            return !('application/xml' === $md['format'] && ConfigurationMetadataTypes::ISO19115_2003 === $md['type'] && str_starts_with($md['url'], $geonetworkBaseUrl)) && !('text/html' === $md['format'] && ConfigurationMetadataTypes::OTHER === $md['type'] && str_starts_with($md['url'], $catalogueBaseUrl));
-        });
-        $configMetadata = array_values($configMetadata);
-
-        $configMetadata[] = [
-            'format' => 'application/xml',
-            'url' => $geonetworkBaseUrl.$this->geonetworkApiService->getUrl($fileIdentifier),
-            'type' => ConfigurationMetadataTypes::ISO19115_2003,
+        return [
+            [
+                'format' => 'application/xml',
+                'url' => $geonetworkBaseUrl.$this->geonetworkApiService->getUrl($fileIdentifier),
+                'type' => ConfigurationMetadataTypes::ISO19115_2003,
+            ],
+            [
+                'format' => 'text/html',
+                'url' => implode('/', [$catalogueBaseUrl, 'dataset', rawurlencode($fileIdentifier)]),
+                'type' => ConfigurationMetadataTypes::OTHER,
+            ],
         ];
-        $configMetadata[] = [
-            'format' => 'text/html',
-            'url' => implode('/', [$catalogueBaseUrl, 'dataset', rawurlencode($fileIdentifier)]),
-            'type' => ConfigurationMetadataTypes::OTHER,
-        ];
-
-        return $configMetadata;
     }
 
     /**
@@ -895,7 +887,7 @@ class CartesServiceApiService
             ]);
 
             if (0 === count($endpoints)) {
-                throw new AppException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['type' => $configType, 'open' => $open]);
+                throw new AppException('Aucun point d’accès (endpoint) du datastore ne peut convenir à la demande', Response::HTTP_BAD_REQUEST, ['type' => $configType, 'open' => $open]);
             }
 
             return $endpoints[0]['endpoint'];
