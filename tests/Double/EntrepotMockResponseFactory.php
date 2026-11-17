@@ -35,6 +35,9 @@ final class EntrepotMockResponseFactory
     /** @var array<string, string> contenu XML des métadonnées écrites, par identifiant */
     private static array $metadataFiles = [];
 
+    /** @var array<string, string> contenu des fichiers d’annexe, par identifiant */
+    private static array $annexeFiles = [];
+
     /** @var list<array{string, int, int}> requêtes « MÉTHODE chemin » qui échouent avec le statut indiqué, après le nombre de passages réussis indiqué */
     private static array $failures = [];
 
@@ -72,6 +75,7 @@ final class EntrepotMockResponseFactory
         self::$writeRequests = [];
         self::$store = [];
         self::$metadataFiles = [];
+        self::$annexeFiles = [];
         self::$failures = [];
         self::$nextId = 1;
         self::$datastorePrefixes = [];
@@ -122,6 +126,16 @@ final class EntrepotMockResponseFactory
     public static function stored(string $collection): array
     {
         return self::$store[$collection] ?? [];
+    }
+
+    public static function seedAnnexeFile(string $annexeId, string $content): void
+    {
+        self::$annexeFiles[$annexeId] = $content;
+    }
+
+    public static function annexeFile(string $annexeId): ?string
+    {
+        return self::$annexeFiles[$annexeId] ?? null;
     }
 
     public static function writtenMetadataFile(string $metadataId): ?string
@@ -305,6 +319,12 @@ final class EntrepotMockResponseFactory
             return new MockResponse('', ['http_code' => $taken ? 409 : 204]);
         }
 
+        if ('GET' === $method && 1 === preg_match('#^annexes/([\w-]+)/file$#', $relative, $matches)) {
+            return isset(self::$annexeFiles[$matches[1]])
+                ? new MockResponse(self::$annexeFiles[$matches[1]], ['http_code' => 200, 'response_headers' => ['content-type' => 'application/octet-stream']])
+                : $this->json(['error' => 'NotFound'], 404);
+        }
+
         if ('GET' === $method && 1 === preg_match('#^metadata/([\w-]+)/file$#', $relative, $matches)) {
             return $this->metadataFileResponse($matches[1]);
         }
@@ -465,10 +485,18 @@ final class EntrepotMockResponseFactory
 
         if ('POST' === $method && 'annexes' === $relative) {
             preg_match('#name="paths"\r\n\r\n([^\r]*)#', $body, $matches);
-            $annexe = ['_id' => 'annexe-'.self::$nextId++, 'paths' => explode(',', $matches[1] ?? ''), 'labels' => []];
+            preg_match_all('#name="labels"\r\n\r\n([^\r]*)#', $body, $labels);
+            $annexe = ['_id' => 'annexe-'.self::$nextId++, 'paths' => explode(',', $matches[1] ?? ''), 'labels' => $labels[1], 'creation' => sprintf('2026-11-17T10:00:%02dZ', self::$nextId)];
             self::$store['annexes'][] = $annexe;
+            self::$annexeFiles[$annexe['_id']] = $this->filePart($body);
 
             return $this->json($annexe, 201);
+        }
+
+        if ('PUT' === $method && 1 === preg_match('#^annexes/([\w-]+)$#', $relative, $matches)) {
+            self::$annexeFiles[$matches[1]] = $this->filePart($body);
+
+            return null === ($annexe = $this->find('annexes', $matches[1])) ? $this->json(['error' => 'NotFound'], 404) : $this->json($annexe);
         }
 
         if ('POST' === $method && 'statics' === $relative) {
@@ -579,6 +607,12 @@ final class EntrepotMockResponseFactory
         }
 
         return [];
+    }
+
+    // contenu de la partie « file » d’un corps multipart
+    private function filePart(string $body): string
+    {
+        return 1 === preg_match('#name="file"; filename="[^"]*"\r\n(?:[^\r]+\r\n)*\r\n(.*?)\r\n--#s', $body, $matches) ? $matches[1] : '';
     }
 
     // fichier XML d’un corps multipart

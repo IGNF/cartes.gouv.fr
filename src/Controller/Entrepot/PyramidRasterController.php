@@ -345,7 +345,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             ]);
         }
 
-        // cherchée par son chemin : un échec entre le dépôt du fichier et la pose des libellés ne rend pas l’identifiant
+        // cherchée par son chemin : l’annulation ne reçoit pas l’identifiant de l’annexe
         try {
             foreach ($this->annexeApiService->getAll($datastoreId, null, "/legend/{$pyramidId}.png")->resolve() as $annexe) {
                 $this->annexeApiService->remove($datastoreId, $annexe['_id'])->await();

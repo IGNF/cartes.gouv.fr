@@ -3,6 +3,7 @@
 namespace App\Controller\Entrepot;
 
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
@@ -40,7 +41,10 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getDocumentList(string $datastoreId, string $datasheetName): JsonResponse
     {
-        $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
+        $listAnnexe = $this->findListAnnexe($datastoreId, $datasheetName);
+        if (null === $listAnnexe) {
+            return $this->json([]);
+        }
 
         $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
         $documentsList = json_decode($docsListJson, true);
@@ -56,9 +60,10 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         $documentDescription = $request->request->get('description');
 
         $files = $request->files;
+        $fileAnnexeId = null;
 
         /** @var array<mixed> $listAnnexe entité annexe de l'API entrepôt */
-        $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
+        $listAnnexe = $this->findListAnnexe($datastoreId, $datasheetName) ?? $this->createListAnnexe($datastoreId, $datasheetName);
 
         $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
         $documentsList = json_decode($docsListJson, true);
@@ -97,7 +102,8 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
                 $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
                 $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], ["datasheet_name=$datasheetName", 'type=document'], true);
 
-                $newDocument['id'] = $fileAnnexe['_id'];
+                $fileAnnexeId = $fileAnnexe['_id'];
+                $newDocument['id'] = $fileAnnexeId;
                 $newDocument['url'] = $annexesBaseUrl.$fileAnnexe['paths'][0];
 
                 break;
@@ -105,7 +111,15 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
         $documentsList[] = $newDocument;
 
-        $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
+        try {
+            $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
+        } catch (\Throwable $e) {
+            // fichier déposé mais absent de la liste : on le retire
+            if (null !== $fileAnnexeId) {
+                $this->annexeApiService->remove($datastoreId, $fileAnnexeId)->await();
+            }
+            throw $e;
+        }
 
         $this->updateMetadataDocuments($datastoreId, $datasheetName, $documentsList);
 
@@ -117,7 +131,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     {
         $data = json_decode($request->getContent(), true);
 
-        $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
+        $listAnnexe = $this->findListAnnexe($datastoreId, $datasheetName) ?? throw new AppException('Document introuvable', Response::HTTP_NOT_FOUND);
 
         $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
         $documentsList = json_decode($docsListJson, true);
@@ -147,7 +161,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     #[Route('/{documentId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $datastoreId, string $datasheetName, string $documentId): JsonResponse
     {
-        $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
+        $listAnnexe = $this->findListAnnexe($datastoreId, $datasheetName) ?? throw new AppException('Document introuvable', Response::HTTP_NOT_FOUND);
 
         $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
         $initialDocumentsList = json_decode($docsListJson, true);
@@ -177,29 +191,45 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     }
 
     /**
-     * Retourne l'objet annexe qui décrit la liste des documents.
+     * Annexe qui porte la liste des documents, null si la fiche n’en a pas encore.
+     *
+     * @return array<mixed>|null
+     */
+    private function findListAnnexe(string $datastoreId, string $datasheetName): ?array
+    {
+        $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, $this->listAnnexeLabels($datasheetName))->resolve();
+        if ([] === $annexeList) {
+            return null;
+        }
+
+        // doublons créés par l’ancienne course à la création : la plus ancienne fait foi
+        usort($annexeList, fn (array $a, array $b) => strcmp((string) ($a['creation'] ?? ''), (string) ($b['creation'] ?? '')));
+        if (count($annexeList) > 1) {
+            $this->logger->warning('Plusieurs listes de documents pour la fiche {datasheetName} : {ids}', ['datasheetName' => $datasheetName, 'ids' => implode(', ', array_column($annexeList, '_id'))]);
+        }
+
+        return $annexeList[0];
+    }
+
+    /**
+     * Créée seulement à la première écriture : une lecture ne crée rien.
      *
      * @return array<mixed>
      */
-    private function getListAnnexe(string $datastoreId, string $datasheetName): array
+    private function createListAnnexe(string $datastoreId, string $datasheetName): array
     {
-        $labels = ["datasheet_name=$datasheetName", 'type=document-list'];
-
-        $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, $labels)->resolve();
-
-        // retourne l'annexe s'il existe
-        if (count($annexeList) > 0) {
-            return $annexeList[0];
-        }
-
-        // sinon crée et retourne un annexe vide
-        $json = json_encode([], JSON_THROW_ON_ERROR);
         $tempFilePath = $this->varDataPath.DIRECTORY_SEPARATOR.Uuid::v4().'.json';
-        $this->fs->dumpFile($tempFilePath, $json);
+        $this->fs->dumpFile($tempFilePath, json_encode([], JSON_THROW_ON_ERROR));
 
-        $annexePath = "documents/$datasheetName.json";
+        return $this->annexeApiService->add($datastoreId, $tempFilePath, ["documents/$datasheetName.json"], $this->listAnnexeLabels($datasheetName), true);
+    }
 
-        return $this->annexeApiService->add($datastoreId, $tempFilePath, [$annexePath], $labels, true);
+    /**
+     * @return list<string>
+     */
+    private function listAnnexeLabels(string $datasheetName): array
+    {
+        return ["datasheet_name=$datasheetName", 'type=document-list'];
     }
 
     /**
@@ -212,7 +242,15 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         $tempFilePath = $this->varDataPath.DIRECTORY_SEPARATOR.Uuid::v4().'.json';
         $this->fs->dumpFile($tempFilePath, $json);
 
-        $this->annexeApiService->replaceFile($datastoreId, $listAnnexe['_id'], $tempFilePath);
+        try {
+            $this->annexeApiService->replaceFile($datastoreId, $listAnnexe['_id'], $tempFilePath);
+        } catch (ApiException $e) {
+            // verrou jamais relâché par l’Entrepôt sur les listes créées en double (constaté le 17/11/2026)
+            if (Response::HTTP_CONFLICT === $e->getStatusCode()) {
+                throw new AppException('La liste des documents de cette fiche est bloquée. Contactez le support.', Response::HTTP_CONFLICT, previous: $e);
+            }
+            throw $e;
+        }
     }
 
     /**

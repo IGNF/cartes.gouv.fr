@@ -91,7 +91,6 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         self::assertSame([
             'POST /processings/executions',
             'POST /annexes',
-            'PATCH /annexes/annexe-3',
             'POST /stored_data/stored-data-1/tags',
             'PATCH /stored_data/stored-data-1',
             'POST /processings/executions/execution-2/launch',
@@ -147,12 +146,12 @@ final class PyramidRasterAddRouteTest extends WebTestCase
         self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
     }
 
-    public function testAFailureWhileLabellingTheLegendAnnexeStillRemovesIt(): void
+    public function testAFailureAfterTheLegendAnnexeStillRemovesIt(): void
     {
         $this->seedWmsvService();
         $client = self::createClient();
         $this->logIn($client);
-        EntrepotMockResponseFactory::failNext('PATCH annexes/annexe-3');
+        EntrepotMockResponseFactory::failNext('POST stored_data/stored-data-1/tags');
 
         $this->post($client);
 
