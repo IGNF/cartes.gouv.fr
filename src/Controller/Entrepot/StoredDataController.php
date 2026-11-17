@@ -2,8 +2,6 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Constants\EntrepotApi\ProcessingStatuses;
-use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Constants\EntrepotApi\StoredDataTags;
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
@@ -90,28 +88,11 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     #[Route('/{storedDataId}/uses', name: 'get_uses', methods: ['GET'])]
     public function getUses(string $datastoreId, string $storedDataId): JsonResponse
     {
-        $storedDataList = [];
-        $offeringsList = [];
-
-        $procExecList = $this->processingApiService->getAllExecutions($datastoreId, [
-            'input_stored_data' => $storedDataId,
-        ])->resolve();
-        foreach ($procExecList as &$procExec) {
-            if (ProcessingStatuses::SUCCESS === $procExec['status']) {
-                $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id'])->array();
-
-                if (isset($procExec['output']['stored_data']['status']) && StoredDataStatuses::DELETED !== $procExec['output']['stored_data']['status']) {
-                    $storedDataList[] = $procExec['output']['stored_data'];
-                }
-            }
-        }
-
         $offeringsList = $this->configurationApiService->getAllOfferings($datastoreId, [
             'stored_data' => $storedDataId,
         ])->resolve();
 
         return $this->json([
-            'stored_data_list' => $storedDataList,
             'offerings_list' => $offeringsList,
         ]);
     }
