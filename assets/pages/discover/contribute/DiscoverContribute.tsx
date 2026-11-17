@@ -8,13 +8,13 @@ import { useEffect } from "react";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { externalUrls } from "@/router/externalUrls";
 
-import classes from "../publish/DiscoverPublish.module.css";
+import classes from "../Discover.module.css";
 
-import background1200 from "@/img/discover/publish/background-1200.webp";
-import background1600 from "@/img/discover/publish/background-1600.webp";
-import background2160 from "@/img/discover/publish/background-2160.webp";
-import background800 from "@/img/discover/publish/background-800.webp";
-import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
+import background1200 from "@/img/discover/background-1200.webp";
+import background1600 from "@/img/discover/background-1600.webp";
+import background2160 from "@/img/discover/background-2160.webp";
+import background800 from "@/img/discover/background-800.webp";
+import contributorSvgUrl from "@/img/pictograms/contributor.svg";
 
 const routeApi = getRouteApi("/_public/contribuer-aux-donnees");
 
@@ -58,7 +58,7 @@ export default function DiscoverContribute() {
                                 onClose={() => void navigate({ to: "/contribuer-aux-donnees", replace: true })}
                             />
                         )}
-                        <img src={uploaderSvgUrl} alt="" />
+                        <img src={contributorSvgUrl} alt="" />
 
                         <div className={classes.title}>
                             <h1 className={fr.cx("fr-m-0")}>Contribuer aux données</h1>
@@ -75,7 +75,7 @@ export default function DiscoverContribute() {
                                     {
                                         iconId: "fr-icon-arrow-right-s-line",
                                         iconPosition: "right",
-                                        linkProps: user ? { to: "/espace-colaboratif" } : { href: externalUrls.login },
+                                        linkProps: user ? { to: "/espace-collaboratif" } : { href: externalUrls.login },
                                         children: user ? "Voir mes guichets" : "Connectez-vous pour commencer",
                                     },
                                 ].filter(Boolean) as ButtonsGroupProps["buttons"]
