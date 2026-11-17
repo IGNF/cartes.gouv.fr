@@ -19,7 +19,6 @@ function RouteComponent() {
             datastoreId={params.datastoreId}
             offeringId={params.offeringId}
             datasheetName={search.datasheetName}
-
             styleTechnicalName={params.styleTechnicalName}
         />
     );

@@ -17,6 +17,7 @@ type DatasheetListItemProps = {
 
 const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet }) => {
     const { t } = useTranslation("DatasheetList");
+    const { t: tCommon } = useTranslation("Common");
 
     return (
         <Card
@@ -38,7 +39,7 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
                     iconId="fr-icon-arrow-right-s-line"
                     iconPosition="right"
                 >
-                    Consulter
+                    {tCommon("see")}
                 </Button>
             }
             size="small"
