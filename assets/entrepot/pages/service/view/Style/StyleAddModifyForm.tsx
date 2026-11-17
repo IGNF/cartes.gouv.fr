@@ -63,32 +63,20 @@ type StyleAddModifyPostDataType = {
     >;
 };
 
-export const STYLE_FORM_RETURN_PAGES = ["service_page"] as const;
-export type StyleFormReturnPage = (typeof STYLE_FORM_RETURN_PAGES)[number];
-
 type StyleAddModifyFormProps = {
     datastoreId: string;
     datasheetName: string;
     offeringId: string;
     styleTechnicalName?: string;
-    /** absent : retour vers la vue classique du flux */
-    returnTo?: StyleFormReturnPage;
 };
 
 const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     const navigate = useNavigate();
-    const { datastoreId, datasheetName, offeringId, styleTechnicalName, returnTo } = props;
-    const backLink =
-        returnTo === "service_page"
-            ? ({
-                  to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
-                  params: { datastoreId, datasheetName, offeringId },
-              } as const)
-            : ({
-                  to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
-                  params: { datastoreId, offeringId },
-                  search: { datasheetName },
-              } as const);
+    const { datastoreId, datasheetName, offeringId, styleTechnicalName } = props;
+    const backLink = {
+        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
+        params: { datastoreId, datasheetName, offeringId },
+    } as const;
 
     // const { t } = useTranslation("Style");
     const { t: tCommon } = useTranslation("Common");

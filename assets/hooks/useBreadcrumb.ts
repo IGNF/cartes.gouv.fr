@@ -21,7 +21,6 @@ export default function useBreadcrumb(customBreadcrumbProps?: BreadcrumbProps) {
             communityId: pathParams.communityId !== undefined ? String(pathParams.communityId) : undefined,
             datasheetName: pathParams.datasheetName ?? stringParam(search.datasheetName),
             offeringId: pathParams.offeringId ?? stringParam(search.offeringId),
-            returnTo: stringParam(search.returnTo),
         }),
         [pathParams, search]
     );

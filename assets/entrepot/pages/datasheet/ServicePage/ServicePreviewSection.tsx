@@ -65,7 +65,7 @@ export default function ServicePreviewSection({ datastoreId, datasheetName, serv
             <div className={fr.cx("fr-col-12", canManageStyles && "fr-col-md-8")}>{preview}</div>
             {canManageStyles && (
                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                    <StylesList datastoreId={datastoreId} datasheetName={datasheetName} offeringId={service._id} service={service} returnTo="service_page" />
+                    <StylesList datastoreId={datastoreId} datasheetName={datasheetName} offeringId={service._id} service={service} />
                 </div>
             )}
         </div>
