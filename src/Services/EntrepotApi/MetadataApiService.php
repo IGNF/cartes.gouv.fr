@@ -35,11 +35,6 @@ final readonly class MetadataApiService
         return $this->api->get("datastores/$datastoreId/metadata", $query)->arrayWithHeaders();
     }
 
-    public function get(string $datastoreId, string $metadataId): ResponsePromise
-    {
-        return $this->api->get("datastores/$datastoreId/metadata/$metadataId");
-    }
-
     /**
      * @return array<mixed>
      */

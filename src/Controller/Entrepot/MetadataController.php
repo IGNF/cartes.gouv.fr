@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Requirement\Requirement;
 
 #[Route(
     '/api/datastores/{datastoreId}/metadata',
@@ -50,17 +49,6 @@ class MetadataController extends AbstractController implements ApiControllerInte
         $metadataList = $this->metadataApiService->getAll($datastoreId, $query)->resolve();
 
         return $this->json($metadataList);
-    }
-
-    #[Route('/{metadataId}', name: 'get', methods: ['GET'], requirements: ['metadataId' => Requirement::UUID_V4])]
-    public function get(string $datastoreId, string $metadataId): JsonResponse
-    {
-        $metadata = $this->metadataApiService->get($datastoreId, $metadataId)->array();
-
-        $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
-        $metadata['csw_metadata'] = $this->cswMetadataReader->read($fileContent);
-
-        return $this->json($metadata);
     }
 
     #[Route('/{datasheetName}', name: 'get_by_datasheet_name', methods: ['GET'])]
