@@ -19,6 +19,7 @@ final class ContactFormTest extends WebTestCase
     use KeycloakLoginTrait;
 
     private const SUPPORT_EMAIL = 'support@example.test';
+    private const LEGAL_EMAIL = 'legal@example.test';
     private const USER_EMAIL = FakeKeycloakClient::DEFAULT_RESOURCE_OWNER['email'];
 
     public function testContactUsMailsSupportAndAcknowledgesTheVisitor(): void
@@ -121,6 +122,46 @@ final class ContactFormTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(400);
         self::assertSame('Le message est obligatoire', $this->jsonResponse($client)['detail']);
+        self::assertEmailCount(0);
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>, string, string, string}>
+     */
+    public static function requestTypeProvider(): iterable
+    {
+        yield 'sans type' => [[], self::SUPPORT_EMAIL, '[cartes.gouv.fr] Nouvelle demande', 'Question sur le fonctionnement du site et de nos outils'];
+        yield 'support' => [['request_type' => 'support'], self::SUPPORT_EMAIL, '[cartes.gouv.fr] Nouvelle demande', 'Question sur le fonctionnement du site et de nos outils'];
+        yield 'contenu illicite' => [['request_type' => 'illegal_content'], self::LEGAL_EMAIL, '[cartes.gouv.fr] Signalement de contenu illicite', 'Signaler un contenu illicite'];
+        yield 'réclamation' => [['request_type' => 'content_removal_claim'], self::LEGAL_EMAIL, '[cartes.gouv.fr] Réclamation suite à suppression de contenu', 'Réclamation suite à suppression d’un contenu'];
+    }
+
+    /**
+     * @param array<string, mixed> $requestType
+     */
+    #[DataProvider('requestTypeProvider')]
+    public function testContactUsSendsEachRequestTypeToItsAddress(array $requestType, string $recipient, string $subject, string $label): void
+    {
+        $client = self::createClient();
+
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json($this->contactForm($requestType)));
+
+        self::assertResponseIsSuccessful();
+        self::assertEmailCount(2);
+        self::assertEmailAddressContains($this->sentEmail(0), 'To', $recipient);
+        self::assertEmailHeaderSame($this->sentEmail(0), 'Subject', $subject);
+        self::assertEmailHtmlBodyContains($this->sentEmail(0), htmlspecialchars($label));
+        self::assertEmailAddressContains($this->sentEmail(1), 'To', 'visiteur@example.test');
+    }
+
+    public function testContactUsRejectsAnUnknownRequestType(): void
+    {
+        $client = self::createClient();
+
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json($this->contactForm(['request_type' => 'autre'])));
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertSame('Le type de demande n’est pas valide', $this->jsonResponse($client)['detail']);
         self::assertEmailCount(0);
     }
 

@@ -38,6 +38,7 @@ parameters:
     datasheet_documents_path: "%var_data_path%/datasheet_documents"
 
     support_contact_mail: "%env(resolve:SUPPORT_CONTACT_EMAIL)%"
+    legal_contact_mail: "%env(resolve:LEGAL_CONTACT_EMAIL)%"
     geocaptcha_api_base_url: "%env(resolve:GEOCAPTCHA_API_BASE_URL)%"
     geocaptcha_app_id: "%env(resolve:GEOCAPTCHA_APP_ID)%"
     geocaptcha_api_key: "%env(resolve:GEOCAPTCHA_API_KEY)%"

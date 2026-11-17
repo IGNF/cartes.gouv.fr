@@ -83,7 +83,12 @@ class ContactController extends AbstractController
             throw new BadRequestHttpException('Votre message contient des mots interdits');
         }
 
-        $supportAddress = $this->getParameter('support_contact_mail');
+        // signalements de contenu : adresse dédiée, hors support
+        [$recipient, $subject] = match ($contact->request_type) {
+            ContactUsDTO::REQUEST_TYPE_ILLEGAL_CONTENT => [$this->getParameter('legal_contact_mail'), '[cartes.gouv.fr] Signalement de contenu illicite'],
+            ContactUsDTO::REQUEST_TYPE_CONTENT_REMOVAL_CLAIM => [$this->getParameter('legal_contact_mail'), '[cartes.gouv.fr] Réclamation suite à suppression de contenu'],
+            default => [$this->getParameter('support_contact_mail'), '[cartes.gouv.fr] Nouvelle demande'],
+        };
         $now = new \DateTime();
 
         $supportMailParams = [
@@ -92,6 +97,7 @@ class ContactController extends AbstractController
             'lastName' => $contact->last_name,
             'category' => $contact->category,
             'organization' => $contact->organization,
+            'requestType' => $contact->request_type,
             'sendDate' => $now,
             'message' => $contact->message,
         ];
@@ -105,8 +111,7 @@ class ContactController extends AbstractController
             'is_authenticated' => $user instanceof User,
         ]);
 
-        // envoi du mail à l'adresse du support
-        $this->mailerService->sendMail($supportAddress, '[cartes.gouv.fr] Nouvelle demande', 'Mailer/contact.html.twig', $supportMailParams);
+        $this->mailerService->sendMail($recipient, $subject, 'Mailer/contact.html.twig', $supportMailParams);
 
         // // envoi du mail d'accusé de réception à l'utilisateur
         $this->mailerService->sendMail($contact->email_contact, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [

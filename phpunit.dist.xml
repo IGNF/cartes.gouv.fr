@@ -65,6 +65,8 @@
         <server name="MAILER_SENDER_ADDRESS" value="no-reply@example.test" force="true" />
         <env name="SUPPORT_CONTACT_EMAIL" value="support@example.test" force="true" />
         <server name="SUPPORT_CONTACT_EMAIL" value="support@example.test" force="true" />
+        <env name="LEGAL_CONTACT_EMAIL" value="legal@example.test" force="true" />
+        <server name="LEGAL_CONTACT_EMAIL" value="legal@example.test" force="true" />
         <env name="HTTP_PROXY" value="" force="true" />
         <server name="HTTP_PROXY" value="" force="true" />
         <env name="HTTPS_PROXY" value="" force="true" />

@@ -269,4 +269,6 @@ Limites assumées : un autre onglet garde son alerte jusqu’à son propre clic 
 
 **GéoCaptcha du formulaire de contact** : si `GEOCAPTCHA_ENABLED` vaut `true`, [`GeocaptchaService`](../../../src/Services/GeocaptchaService.php) vérifie le champ `geocaptchaToken` auprès de l’API GéoCaptcha (`GEOCAPTCHA_API_BASE_URL`, en-têtes `x-app-id` et `x-api-key`), après le limiteur et le pot de miel. Jeton absent ou challenge non résolu : 400. API injoignable, clé refusée (401, 403) ou erreur 5xx : 503, aucun courriel ne part sans vérification. À `false`, aucune vérification.
 
+**Destinataire du formulaire de contact** : le champ `request_type` choisit l’adresse. `illegal_content` et `content_removal_claim` partent à `LEGAL_CONTACT_EMAIL`, `support` (valeur par défaut si le champ manque) à `SUPPORT_CONTACT_EMAIL`.
+
 **Pas de session PHP** : le bloc `session:` est intentionnellement absent de `config/packages/framework.yaml`. Ne pas le réintroduire pour des fonctionnalités annexes (flash, CSRF, etc.) sans réévaluer l'architecture stateless.
