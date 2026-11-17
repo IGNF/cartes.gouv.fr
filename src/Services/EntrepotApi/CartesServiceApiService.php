@@ -829,14 +829,6 @@ class CartesServiceApiService
     }
 
     /**
-     * @return array<mixed>
-     */
-    private function getEndpointByAccess(string $datastoreId, string $configType, ServiceAccess $access): array
-    {
-        return $this->getEndpointByShareType($datastoreId, $configType, $access->isOpen() ? 'all_public' : 'your_community');
-    }
-
-    /**
      * @param array<mixed> $configMetadata
      *
      * @return array<mixed>
@@ -890,18 +882,12 @@ class CartesServiceApiService
     /**
      * @return array<mixed>
      */
-    private function getEndpointByShareType(string $datastoreId, string $configType, string $shareWith): array
+    private function getEndpointByAccess(string $datastoreId, string $configType, ServiceAccess $access): array
     {
-        return $this->cache->get("datastore-{$datastoreId}-endpoint-{$configType}-{$shareWith}", function (ItemInterface $item) use ($datastoreId, $configType, $shareWith) {
-            $item->expiresAfter(3600);
+        $open = $access->isOpen();
 
-            if ('all_public' === $shareWith) {
-                $open = true;
-            } elseif ('your_community' === $shareWith) {
-                $open = false;
-            } else {
-                throw new AppException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
-            }
+        return $this->cache->get(sprintf('datastore-%s-endpoint-%s-%s', $datastoreId, $configType, $open ? 'open' : 'closed'), function (ItemInterface $item) use ($datastoreId, $configType, $open) {
+            $item->expiresAfter(3600);
 
             $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
                 'type' => $configType,
@@ -909,7 +895,7 @@ class CartesServiceApiService
             ]);
 
             if (0 === count($endpoints)) {
-                throw new AppException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
+                throw new AppException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['type' => $configType, 'open' => $open]);
             }
 
             return $endpoints[0]['endpoint'];
