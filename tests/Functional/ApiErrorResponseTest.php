@@ -18,7 +18,7 @@ final class ApiErrorResponseTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore_create_request', content: '{}');
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore-create-request', content: '{}');
 
         self::assertResponseStatusCodeSame(401);
         self::assertResponseHeaderSame('content-type', 'application/problem+json');
@@ -63,7 +63,7 @@ final class ApiErrorResponseTest extends WebTestCase
         $client = self::createClient(['debug' => false]);
 
         // message en tableau : TypeError dans le filtre de mots interdits
-        $client->xmlHttpRequest('POST', self::BASE.'/contact_us', content: (string) json_encode([
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: (string) json_encode([
             'email_contact' => 'visiteur@example.test',
             'importance' => '0',
             'message' => ['pas une chaîne'],
@@ -83,7 +83,7 @@ final class ApiErrorResponseTest extends WebTestCase
         $client = self::createClient();
 
         // le site de documentation n’envoie que X-Requested-With
-        $client->request('POST', self::BASE.'/contact_us', server: ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest', 'HTTP_ACCEPT' => '*/*'], content: '{"importance": "0"}');
+        $client->request('POST', self::BASE.'/api/contact/contact-us', server: ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest', 'HTTP_ACCEPT' => '*/*'], content: '{"importance": "0"}');
 
         self::assertResponseStatusCodeSame(400);
         self::assertResponseHeaderSame('content-type', 'application/problem+json');

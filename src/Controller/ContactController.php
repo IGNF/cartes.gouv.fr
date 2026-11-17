@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Route(
-    name: 'cartesgouvfr_contact_',
+    name: 'cartesgouvfr_api_contact_',
     options: ['expose' => true],
 )]
 class ContactController extends AbstractController
@@ -30,7 +30,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/contact_us',
+        '/api/contact/contact-us',
         name: 'contact_us',
         options: ['expose' => true],
         methods: ['POST'])]
@@ -112,7 +112,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/datastore_create_request',
+        '/api/contact/datastore-create-request',
         name: 'datastore_create_request',
         options: ['expose' => true],
         methods: ['POST'])]
@@ -164,7 +164,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/join_community',
+        '/api/contact/join-community',
         name: 'join_community',
         options: ['expose' => true],
         methods: ['POST'])]
@@ -212,7 +212,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/accesses_request',
+        '/api/contact/accesses-request',
         name: 'accesses_request',
         methods: ['POST'],
     )]
@@ -269,7 +269,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/datastore_deletion_request',
+        '/api/contact/datastore-deletion-request',
         name: 'datastore_deletion_request',
         methods: ['POST'],
     )]

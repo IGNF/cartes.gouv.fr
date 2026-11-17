@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Rend les erreurs des routes d'API en application/problem+json, même sans en-tête Accept (appel de /contact_us par le site de documentation).
+ * Rend les erreurs des routes d'API en application/problem+json, même sans en-tête Accept (formulaire de contact du site de documentation).
  */
 final readonly class ApiErrorFormatListener
 {

@@ -22,7 +22,7 @@ final class ContactFormTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->xmlHttpRequest('POST', self::BASE.'/contact_us', content: $this->json([
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json([
             'email_contact' => 'visiteur@example.test',
             'importance' => '0',
             'message' => 'Bonjour, une question.',
@@ -43,7 +43,7 @@ final class ContactFormTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->xmlHttpRequest('POST', self::BASE.'/contact_us', content: $this->json([
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json([
             'email_contact' => 'robot@example.test',
             'importance' => '1',
             'message' => 'spam',
@@ -62,11 +62,11 @@ final class ContactFormTest extends WebTestCase
         $honeypot = $this->json(['importance' => '1']);
 
         for ($i = 1; $i <= 5; ++$i) {
-            $client->xmlHttpRequest('POST', self::BASE.'/contact_us', content: $honeypot);
+            $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $honeypot);
             self::assertResponseIsSuccessful("appel n° {$i}");
         }
 
-        $client->xmlHttpRequest('POST', self::BASE.'/contact_us', content: $honeypot);
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $honeypot);
 
         self::assertResponseStatusCodeSame(429);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json');
@@ -76,7 +76,7 @@ final class ContactFormTest extends WebTestCase
         self::assertArrayNotHasKey('class', $body);
         self::assertArrayNotHasKey('trace', $body);
 
-        $client->xmlHttpRequest('POST', self::BASE.'/contact_us', server: ['REMOTE_ADDR' => '192.0.2.10'], content: $honeypot);
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', server: ['REMOTE_ADDR' => '192.0.2.10'], content: $honeypot);
         self::assertResponseIsSuccessful();
     }
 
@@ -84,7 +84,7 @@ final class ContactFormTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->xmlHttpRequest('POST', self::BASE.'/contact_us', content: $this->json([
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json([
             'email_contact' => 'pas-une-adresse',
             'importance' => '0',
             'message' => 'x',
@@ -103,7 +103,7 @@ final class ContactFormTest extends WebTestCase
         $client = self::createClient();
         $this->logIn($client);
 
-        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore_create_request', content: $this->json([
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore-create-request', content: $this->json([
             'name' => 'Entrepôt test',
             'technical_name' => 'entrepot_test',
             'offer' => 'standard',
@@ -121,7 +121,7 @@ final class ContactFormTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore_create_request', content: $this->json(['name' => 'Entrepôt test']));
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/datastore-create-request', content: $this->json(['name' => 'Entrepôt test']));
 
         self::assertResponseStatusCodeSame(401);
         // refusé par le pare-feu, avant le contrôleur
@@ -134,7 +134,7 @@ final class ContactFormTest extends WebTestCase
         $client = self::createClient();
         $this->logIn($client);
 
-        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/join_community', content: $this->json([
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/join-community', content: $this->json([
             'community' => ['_id' => 'community-1', 'name' => 'Communauté test', 'contact' => 'gestion@example.test'],
             'other_info' => ['Motif' => 'Projet test'],
         ]));
@@ -150,7 +150,7 @@ final class ContactFormTest extends WebTestCase
         $client = self::createClient();
         $this->logIn($client);
 
-        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/accesses_request', content: $this->json([
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/accesses-request', content: $this->json([
             'file_identifier' => 'fid-1',
             'email_contact' => 'producteur@example.test',
             'layers' => [[
