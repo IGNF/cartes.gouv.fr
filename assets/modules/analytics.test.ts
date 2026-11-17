@@ -73,9 +73,9 @@ describe("matomoPageTitle", () => {
             matomoPageTitle([
                 match("/_private"),
                 match("/_private/tableau-de-bord/entrepots/$datastoreId"),
-                match("/_private/tableau-de-bord/entrepots/$datastoreId/service/wfs/ajout", "Publier un service WFS"),
+                match("/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout", "Ajouter un flux"),
             ])
-        ).toBe("[Publier] Publier un service WFS");
+        ).toBe("[Publier] Ajouter un flux");
         expect(
             matomoPageTitle([match("/_private"), match("/_private/espace-collaboratif"), match("/_private/espace-collaboratif/", "Liste des guichets")])
         ).toBe("[Contribuer] Liste des guichets");

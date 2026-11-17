@@ -6,7 +6,7 @@ import { DatasheetStoredDataItem, StoredDataStatusEnum, StoredDataTypeEnum } fro
 import MenuList from "@/components/Utils/MenuList";
 import { useTranslation } from "@/i18n";
 import { type ApiError } from "@/modules/jsonFetch";
-import StoredDataDeleteConfirmDialog from "../DatasetListTab/StoredDataDeleteConfirmDialog";
+import StoredDataDeleteConfirmDialog from "./StoredDataDeleteConfirmDialog";
 
 type StoredDataRowActionsProps = {
     datastoreId: string;

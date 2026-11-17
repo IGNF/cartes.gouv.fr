@@ -40,11 +40,6 @@ const add = (datastoreId: string, path: string, file: File) => {
     return jsonFetch<Annexe>(url, { method: "POST" }, formData, true, true);
 };
 
-const modify = (datastoreId: string, annexeId: string, data: object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_modify", { datastoreId, annexeId });
-    return jsonFetch<Annexe>(url, { method: "PATCH" }, data);
-};
-
 const replaceFile = (datastoreId: string, annexeId: string, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -63,7 +58,6 @@ export default {
     getAll,
     getFileContent,
     add,
-    modify,
     replaceFile,
     remove,
 };

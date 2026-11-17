@@ -1,5 +1,3 @@
-import { type RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
-
 import { type DatastorePermission, OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
 
 /**
@@ -15,56 +13,6 @@ export const editableOfferingTypes: OfferingTypeEnum[] = [
     OfferingTypeEnum.WMSRASTER,
     OfferingTypeEnum.WMTSTMS,
 ];
-
-/** lien vers le formulaire de modification du flux, selon son type */
-export function getServiceEditLink(datastoreId: string, datasheetName: string, service: Service): RegisteredLinkProps {
-    const storedDataId = service.configuration.type_infos.used_data[0].stored_data;
-    const params = { datastoreId, offeringId: service._id };
-
-    switch (service.type) {
-        case OfferingTypeEnum.WMSVECTOR:
-            return {
-                to: "/tableau-de-bord/entrepots/$datastoreId/service/wms-vecteur/$offeringId/modification",
-                params,
-                search: { vectorDbId: storedDataId, datasheetName },
-            };
-
-        case OfferingTypeEnum.WMSRASTER:
-            return {
-                to: "/tableau-de-bord/entrepots/$datastoreId/service/wms-raster/$offeringId/modification",
-                params,
-                search: { pyramidId: storedDataId, datasheetName },
-            };
-
-        case OfferingTypeEnum.WFS:
-            return {
-                to: "/tableau-de-bord/entrepots/$datastoreId/service/wfs/$offeringId/modification",
-                params,
-                search: { vectorDbId: storedDataId, datasheetName },
-            };
-
-        case OfferingTypeEnum.WMTSTMS:
-            switch (service.configuration.pyramid?.type) {
-                case StoredDataTypeEnum.ROK4PYRAMIDVECTOR:
-                    return {
-                        to: "/tableau-de-bord/entrepots/$datastoreId/service/tms/$offeringId/modification",
-                        params,
-                        search: { pyramidId: storedDataId, datasheetName },
-                    };
-                case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
-                    return {
-                        to: "/tableau-de-bord/entrepots/$datastoreId/service/wmts/$offeringId/modification",
-                        params,
-                        search: { pyramidId: storedDataId, datasheetName },
-                    };
-                default:
-                    return { to: "/404" };
-            }
-
-        default:
-            return { to: "/404" };
-    }
-}
 
 export const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
     switch (type) {

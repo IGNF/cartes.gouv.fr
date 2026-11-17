@@ -29,11 +29,9 @@ type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
     datasheetName: string | undefined;
     uploadId: string;
-    /** fiche de retour : nouvelle vue ou ancienne (par défaut) */
-    datasheetView?: "nouvelle";
 };
 
-const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId, datasheetView }) => {
+const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId }) => {
     const { t } = useTranslation("DatasheetUploadIntegration");
     const { t: tCommon } = useTranslation("Common");
 
@@ -81,21 +79,15 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     const integrationDatasheetName = integration?.datasheet_name ?? undefined;
     const error = advance.error ?? integrationQuery.error;
 
-    // onglet Données de la fiche, dans la vue d’où vient l’utilisateur
+    // onglet Données de la fiche
     const goToDatasheet = useCallback(
         (name: string) =>
-            datasheetView === "nouvelle"
-                ? navigate({
-                      to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
-                      params: { datastoreId, datasheetName: name },
-                      search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
-                  })
-                : navigate({
-                      to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                      params: { datastoreId, datasheetName: name },
-                      search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
-                  }),
-        [datasheetView, datastoreId, navigate]
+            navigate({
+                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                params: { datastoreId, datasheetName: name },
+                search: { activeTab: DatasheetViewActiveTabEnum.Dataset },
+            }),
+        [datastoreId, navigate]
     );
 
     // réussite : retour à la fiche une fois la livraison supprimée (ou la suppression abandonnée)

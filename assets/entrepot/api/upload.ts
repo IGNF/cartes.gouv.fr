@@ -1,7 +1,7 @@
 import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 import { UploadReport } from "../../@types/app";
-import { Upload, UploadIntegration, UploadTree } from "../../@types/app";
+import { Upload, UploadIntegration } from "../../@types/app";
 
 const getList = async (datastoreId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", { datastoreId, ...query });
@@ -15,30 +15,10 @@ const getList = async (datastoreId: string, query: QueryParams = {}, otherOption
     };
 };
 
-const getAll = async (datastoreId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", { datastoreId, all: true, ...query });
-    return jsonFetch<Upload[]>(url, {
-        ...otherOptions,
-    });
-};
-
 const add = (datastoreId: string, data: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_add", { datastoreId });
     // corps lu par #[MapRequestPayload] : il exige le type JSON
     return jsonFetch<Upload>(url, { method: "POST", headers: { "Content-Type": "application/json" } }, data);
-};
-
-const getFileTree = (datastoreId: string, uploadId: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_file_tree", { datastoreId, uploadId });
-    return jsonFetch<UploadTree>(url);
-};
-
-const get = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get", { datastoreId, uploadId });
-    return jsonFetch<Upload>(url, {
-        method: "GET",
-        ...otherOptions,
-    });
 };
 
 const getIntegration = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
@@ -66,12 +46,9 @@ const getUploadReport = (datastoreId: string, uploadId: string, otherOptions: Re
 
 const upload = {
     getList,
-    getAll,
     add,
-    get,
     getIntegration,
     advanceIntegration,
-    getFileTree,
     remove,
     getUploadReport,
 };

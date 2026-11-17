@@ -1,5 +1,4 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import { DevTool } from "@hookform/devtools";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { type ReactNode, useMemo } from "react";
@@ -94,7 +93,6 @@ export default function MetadataForm({
     const {
         handleSubmit,
         formState: { isSubmitting, dirtyFields },
-        control,
         setError,
         reset,
     } = form;
@@ -177,7 +175,6 @@ export default function MetadataForm({
                     {renderBottomActions?.(actionsState)}
                 </form>
             </FormProvider>
-            <DevTool control={control} />
         </>
     );
 }

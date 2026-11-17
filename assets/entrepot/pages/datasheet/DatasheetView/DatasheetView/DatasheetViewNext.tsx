@@ -78,7 +78,6 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
     const { userRights, isSupervisor } = useCommunityRights();
     const hasRights = (...rights: CommunityMemberDtoRightsEnum[]) => isSupervisor || rights.every((right) => userRights?.includes(right));
     const canBroadcast = hasRights(CommunityMemberDtoRightsEnum.BROADCAST);
-    // même règle que l’ancienne fiche
     const canDelete = hasRights(
         CommunityMemberDtoRightsEnum.ANNEX,
         CommunityMemberDtoRightsEnum.UPLOAD,

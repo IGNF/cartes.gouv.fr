@@ -56,7 +56,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     const [currentStep, setCurrentStep] = useState(STEPS.TECHNICAL_NAME);
 
     const datasheetView = {
-        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
+        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
         params: { datastoreId, datasheetName },
     } as const;
 

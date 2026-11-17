@@ -1,5 +1,4 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
@@ -14,7 +13,6 @@ import api from "@/entrepot/api";
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
 import useStoredDataUseProcessings from "@/hooks/queries/useStoredDataUseProcessings";
 import { useTranslation } from "@/i18n";
-import { getApiErrorMessage } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
 import { offeringTypeDisplayName } from "@/utils";
@@ -24,8 +22,8 @@ type StoredDataDeleteConfirmDialogProps = {
     datastoreId: string;
     storedData: DatasheetStoredDataItem;
     datasheetName: string;
-    /** fournie : l’appelant affiche l’erreur (null après un succès) à la place du dialogue */
-    onSettled?: (error: ApiError | Error | null) => void;
+    /** l’appelant affiche l’erreur (null après un succès) */
+    onSettled: (error: ApiError | Error | null) => void;
 };
 
 function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps) {
@@ -83,21 +81,12 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
             if (error) {
                 void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_stored_data_uses(datastoreId, storedData._id) });
             }
-            onSettled?.(error);
+            onSettled(error);
         },
     });
 
     return (
         <>
-            {deleteStoredDataMutation.error && !onSettled && (
-                <Alert
-                    title={t("error_deleting", { name: storedData.name, type: storedData.type })}
-                    closable
-                    description={getApiErrorMessage(deleteStoredDataMutation.error)}
-                    as="h2"
-                    severity="error"
-                />
-            )}
             {deleteStoredDataMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>

@@ -17,6 +17,7 @@ type DatasheetListItemProps = {
 
 const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet }) => {
     const { t } = useTranslation("DatasheetList");
+    const { t: tCommon } = useTranslation("Common");
 
     return (
         <Card
@@ -30,28 +31,16 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
                 </Badge>
             }
             footer={
-                <>
-                    <Button
-                        linkProps={{
-                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
-                            params: { datastoreId, datasheetName: datasheet.name },
-                        }}
-                        iconId="fr-icon-arrow-right-s-line"
-                        iconPosition="right"
-                    >
-                        Consulter
-                    </Button>
-                    <Button
-                        linkProps={{
-                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
-                            params: { datastoreId, datasheetName: datasheet.name },
-                        }}
-                        iconId="fr-icon-arrow-right-s-line"
-                        iconPosition="right"
-                    >
-                        Consulter next
-                    </Button>
-                </>
+                <Button
+                    linkProps={{
+                        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
+                        params: { datastoreId, datasheetName: datasheet.name },
+                    }}
+                    iconId="fr-icon-arrow-right-s-line"
+                    iconPosition="right"
+                >
+                    {tCommon("see")}
+                </Button>
             }
             size="small"
         />

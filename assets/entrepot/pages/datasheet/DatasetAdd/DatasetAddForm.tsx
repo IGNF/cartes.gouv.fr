@@ -195,7 +195,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
                                 children: t("cancel"),
                                 priority: "secondary",
                                 linkProps: {
-                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/nouvelle-vue",
+                                    to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName",
                                     params: { datastoreId, datasheetName },
                                     search: { activeTab: "dataset" },
                                 },
@@ -216,12 +216,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
             )}
             {addUploadMutation.isSuccess && (
                 <Wait>
-                    <DatasheetUploadIntegrationDialog
-                        datastoreId={datastoreId}
-                        uploadId={addUploadMutation.data._id}
-                        datasheetName={datasheetName}
-                        datasheetView="nouvelle"
-                    />
+                    <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={addUploadMutation.data._id} datasheetName={datasheetName} />
                 </Wait>
             )}
         </>

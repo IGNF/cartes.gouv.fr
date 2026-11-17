@@ -14,7 +14,6 @@ import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { ApiError } from "@/modules/jsonFetch";
-import { type StyleFormReturnPage } from "./StyleAddModifyForm";
 
 import "@/sass/components/styles-list.css";
 
@@ -23,11 +22,10 @@ interface StylesListProps {
     service: Service;
     datasheetName: string;
     offeringId: string;
-    returnTo?: StyleFormReturnPage;
 }
 
 function StylesList(props: StylesListProps) {
-    const { datastoreId, service, datasheetName, offeringId, returnTo } = props;
+    const { datastoreId, service, datasheetName, offeringId } = props;
 
     const { t: tStyle } = useTranslation("Style");
     const { t: tCommon } = useTranslation("Common");
@@ -117,7 +115,7 @@ function StylesList(props: StylesListProps) {
                             linkProps={{
                                 to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout",
                                 params: { datastoreId, offeringId },
-                                search: { datasheetName, returnTo },
+                                search: { datasheetName },
                             }}
                         >
                             {tCommon("add")}
@@ -167,7 +165,7 @@ function StylesList(props: StylesListProps) {
                                         linkProps={{
                                             to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/$styleTechnicalName/modification",
                                             params: { datastoreId, offeringId, styleTechnicalName: style.technical_name },
-                                            search: { datasheetName, returnTo },
+                                            search: { datasheetName },
                                         }}
                                     />
                                     <Button
