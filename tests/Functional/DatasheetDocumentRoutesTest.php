@@ -150,6 +150,87 @@ final class DatasheetDocumentRoutesTest extends WebTestCase
         self::assertSame(['name'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
     }
 
+    public function testALinkWithAnAttachedFileStaysALink(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('POST', self::DOCUMENTS_URL, ['type' => 'link', 'name' => 'Site', 'url' => 'https://example.test/'], ['file' => $this->upload('rapport.pdf', "%PDF-1.4\n%%EOF")]);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame([['type' => 'link', 'url' => 'https://example.test/']], array_map(fn (array $document) => ['type' => $document['type'], 'url' => $document['url']], $this->jsonResponse($client)));
+        self::assertCount(1, EntrepotMockResponseFactory::stored('annexes'));
+    }
+
+    // nouvelle annexe pour le nouveau fichier, puis suppression de l’ancienne ; la description disparaît
+    public function testReplacingAFileMovesTheDocumentToANewAnnexe(): void
+    {
+        $this->seedList([['id' => 'fichier-1', 'type' => 'file', 'name' => 'Ancien', 'description' => 'à retirer', 'url' => 'https://entrepot.test/ancien.pdf']]);
+        EntrepotMockResponseFactory::seed('annexes', ['_id' => 'fichier-1', 'paths' => ['documents/Fiche/x/ancien.pdf'], 'labels' => ['datasheet_name=Fiche', 'type=document']]);
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('POST', self::DOCUMENTS_URL.'/fichier-1', ['name' => 'Carte'], ['file' => $this->upload('carte.png', (string) base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', true))]);
+
+        self::assertResponseIsSuccessful();
+        [$document] = $this->jsonResponse($client);
+        self::assertNotSame('fichier-1', $document['id']);
+        self::assertSame('Carte', $document['name']);
+        self::assertStringEndsWith('/carte.png', $document['url']);
+        self::assertArrayNotHasKey('description', $document);
+        self::assertSame(['liste', $document['id']], array_column(EntrepotMockResponseFactory::stored('annexes'), '_id'));
+    }
+
+    public function testEditingALinkChangesItsUrl(): void
+    {
+        $this->seedList([['id' => 'lien-1', 'type' => 'link', 'name' => 'Site', 'url' => 'https://ancien.test/']]);
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('POST', self::DOCUMENTS_URL.'/lien-1', ['name' => 'Site', 'url' => 'https://nouveau.test/']);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('https://nouveau.test/', $this->jsonResponse($client)[0]['url']);
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>, array<string, string>, bool, string}>
+     */
+    public static function mismatchedEdits(): iterable
+    {
+        yield 'URL d’un fichier' => [['id' => 'doc-1', 'type' => 'file', 'name' => 'Rapport', 'url' => 'https://entrepot.test/rapport.pdf'], ['name' => 'Rapport', 'url' => 'https://example.test/'], false, 'url'];
+        yield 'fichier d’un lien' => [['id' => 'doc-1', 'type' => 'link', 'name' => 'Site', 'url' => 'https://example.test/'], ['name' => 'Site'], true, 'file'];
+    }
+
+    /**
+     * @param array<string, mixed>  $document
+     * @param array<string, string> $fields
+     */
+    #[DataProvider('mismatchedEdits')]
+    public function testEditMustMatchTheDocumentType(array $document, array $fields, bool $withFile, string $field): void
+    {
+        $this->seedList([$document]);
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('POST', self::DOCUMENTS_URL.'/doc-1', $fields, $withFile ? ['file' => $this->upload('rapport.pdf', "%PDF-1.4\n%%EOF")] : []);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame([$field], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertCount(1, EntrepotMockResponseFactory::stored('annexes'));
+    }
+
+    public function testEditingAnUnknownDocumentAnswers404(): void
+    {
+        $this->seedList([]);
+        $client = self::createClient();
+        $this->logIn($client);
+
+        $client->xmlHttpRequest('POST', self::DOCUMENTS_URL.'/inconnu', ['name' => 'Nom']);
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
     public function testEditingWithoutListAnswers404(): void
     {
         $client = self::createClient();
@@ -167,5 +248,14 @@ final class DatasheetDocumentRoutesTest extends WebTestCase
         file_put_contents($path, $content);
 
         return new UploadedFile($path, $fileName, null, null, true);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $documents
+     */
+    private function seedList(array $documents): void
+    {
+        EntrepotMockResponseFactory::seed('annexes', ['_id' => 'liste', 'paths' => ['documents/Fiche.json'], 'labels' => self::LIST_LABELS, 'creation' => '2026-01-01T10:00:00Z']);
+        EntrepotMockResponseFactory::seedAnnexeFile('liste', json_encode($documents, JSON_THROW_ON_ERROR));
     }
 }

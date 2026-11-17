@@ -67,8 +67,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         #[MapUploadedFile(constraints: new DatasheetDocumentFile())] ?UploadedFile $file = null,
     ): JsonResponse {
         if (DatasheetDocumentDTO::TYPE_FILE === $dto->type && !$file instanceof UploadedFile) {
-            $violations = new ConstraintViolationList([new ConstraintViolation('Le fichier est obligatoire', null, [], $dto, 'file', null)]);
-            throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($dto, $violations));
+            $this->throwViolation($dto, 'file', 'Le fichier est obligatoire');
         }
 
         /** @var array<mixed> $listAnnexe entité annexe de l'API entrepôt */
@@ -78,22 +77,13 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         $newDocument = ['type' => $dto->type, 'name' => trim($dto->name)];
         $fileAnnexeId = null;
 
-        if (!$file instanceof UploadedFile) {
+        // le type décide : un fichier joint à un lien est ignoré
+        if (DatasheetDocumentDTO::TYPE_FILE === $dto->type) {
+            ['id' => $fileAnnexeId, 'url' => $newDocument['url']] = $this->uploadFile($datastoreId, $datasheetName, $file);
+            $newDocument['id'] = $fileAnnexeId;
+        } else {
             $newDocument['id'] = (string) Uuid::v4();
             $newDocument['url'] = $dto->url;
-        } else {
-            $uuid = (string) Uuid::v4();
-            $fileName = $file->getClientOriginalName();
-            $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
-            $file->move($tempFileDir, $fileName);
-
-            $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
-            $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFileDir.DIRECTORY_SEPARATOR.$fileName, [implode('/', ['documents', $datasheetName, $uuid, $fileName])], ["datasheet_name=$datasheetName", 'type=document'], true);
-            $this->fs->remove($tempFileDir);
-
-            $fileAnnexeId = $fileAnnexe['_id'];
-            $newDocument['id'] = $fileAnnexeId;
-            $newDocument['url'] = $annexesBaseUrl.$fileAnnexe['paths'][0];
         }
 
         $documentsList[] = $newDocument;
@@ -113,22 +103,56 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         return $this->json($documentsList);
     }
 
-    // multipart, comme l’ajout ; la description des anciens documents disparaît à la modification
+    // multipart, comme l’ajout : nom, URL d’un lien, fichier de remplacement ; la description des anciens documents disparaît
     #[Route('/{documentId}', name: 'edit', methods: ['POST'])]
-    public function edit(string $datastoreId, string $datasheetName, string $documentId, #[MapRequestPayload] DatasheetDocumentDTO $dto): JsonResponse
-    {
+    public function edit(
+        string $datastoreId,
+        string $datasheetName,
+        string $documentId,
+        #[MapRequestPayload] DatasheetDocumentDTO $dto,
+        #[MapUploadedFile(constraints: new DatasheetDocumentFile())] ?UploadedFile $file = null,
+    ): JsonResponse {
         $listAnnexe = $this->findListAnnexe($datastoreId, $datasheetName) ?? throw new AppException('Document introuvable', Response::HTTP_NOT_FOUND);
+        $documentsList = $this->readList($datastoreId, $listAnnexe);
+        $index = array_search($documentId, array_column($documentsList, 'id'), true);
+        if (false === $index) {
+            throw new AppException('Document introuvable', Response::HTTP_NOT_FOUND);
+        }
 
-        $documentsList = array_map(function (array $document) use ($documentId, $dto) {
-            if ($document['id'] === $documentId) {
-                $document['name'] = trim($dto->name);
-                unset($document['description']);
+        $document = $documentsList[$index];
+        if (null !== $dto->url && DatasheetDocumentDTO::TYPE_LINK !== $document['type']) {
+            $this->throwViolation($dto, 'url', 'Seul un lien a une URL modifiable');
+        }
+        if ($file instanceof UploadedFile && DatasheetDocumentDTO::TYPE_FILE !== $document['type']) {
+            $this->throwViolation($dto, 'file', 'Seul un document fichier peut être remplacé');
+        }
+
+        $document['name'] = trim($dto->name);
+        unset($document['description']);
+        if (null !== $dto->url) {
+            $document['url'] = $dto->url;
+        }
+
+        // nouvelle annexe : l’Entrepôt garde le chemin, donc le nom de fichier, d’une annexe remplacée
+        $newFileAnnexeId = null;
+        if ($file instanceof UploadedFile) {
+            ['id' => $newFileAnnexeId, 'url' => $document['url']] = $this->uploadFile($datastoreId, $datasheetName, $file);
+            $document['id'] = $newFileAnnexeId;
+        }
+        $documentsList[$index] = $document;
+
+        try {
+            $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
+        } catch (\Throwable $e) {
+            if (null !== $newFileAnnexeId) {
+                $this->annexeApiService->remove($datastoreId, $newFileAnnexeId)->await();
             }
+            throw $e;
+        }
 
-            return $document;
-        }, $this->readList($datastoreId, $listAnnexe));
-
-        $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
+        if (null !== $newFileAnnexeId) {
+            $this->removeReplacedFile($datastoreId, $documentId);
+        }
 
         $this->updateMetadataDocuments($datastoreId, $datasheetName, $documentsList);
 
@@ -164,6 +188,43 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         $this->updateMetadataDocuments($datastoreId, $datasheetName, $newDocumentsList);
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
+    // même forme de 422 que les contraintes du DTO
+    private function throwViolation(DatasheetDocumentDTO $dto, string $path, string $message): never
+    {
+        $violations = new ConstraintViolationList([new ConstraintViolation($message, null, [], $dto, $path, null)]);
+        throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($dto, $violations));
+    }
+
+    /**
+     * @return array{id: string, url: string}
+     */
+    private function uploadFile(string $datastoreId, string $datasheetName, UploadedFile $file): array
+    {
+        $uuid = (string) Uuid::v4();
+        $fileName = $file->getClientOriginalName();
+        $tempFileDir = implode(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
+        $file->move($tempFileDir, $fileName);
+
+        try {
+            $annexesBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
+            $fileAnnexe = $this->annexeApiService->add($datastoreId, $tempFileDir.DIRECTORY_SEPARATOR.$fileName, [implode('/', ['documents', $datasheetName, $uuid, $fileName])], ["datasheet_name=$datasheetName", 'type=document'], true);
+        } finally {
+            $this->fs->remove($tempFileDir);
+        }
+
+        return ['id' => $fileAnnexe['_id'], 'url' => $annexesBaseUrl.$fileAnnexe['paths'][0]];
+    }
+
+    // la liste pointe déjà vers le nouveau fichier : un échec ici laisse seulement l’ancien fichier orphelin
+    private function removeReplacedFile(string $datastoreId, string $annexeId): void
+    {
+        try {
+            $this->annexeApiService->remove($datastoreId, $annexeId)->await();
+        } catch (\Throwable $e) {
+            $this->logger->warning('Ancien fichier de document {annexeId} non supprimé : {error}', ['annexeId' => $annexeId, 'error' => $e->getMessage(), 'exception' => $e]);
+        }
     }
 
     /**
