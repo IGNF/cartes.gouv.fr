@@ -5,17 +5,6 @@ const { i18n } = declareComponentKeys<
     | "dashboard"
     | "discover_publish"
     | "datastore_selection"
-    | "news_list"
-    | "news_list_by_tag"
-    | "news_article"
-    | "sitemap"
-    | "accessibility"
-    | "legal_notice"
-    | "personal_data"
-    | "offers"
-    | "join_cartesgouvfr_community"
-    | "terms_of_service"
-    | "service_status"
     | "accesses_request"
     | "stats_scope_selection"
     | "my_account"
@@ -53,17 +42,6 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     dashboard: "Tableau de bord",
     discover_publish: "Publier",
     datastore_selection: "Entrepôts",
-    news_list: "Actualités",
-    news_list_by_tag: "Actualités",
-    news_article: "Actualités",
-    sitemap: "Plan du site",
-    accessibility: "Accessibilité",
-    legal_notice: "Mentions légales",
-    personal_data: "Données à caractère personnel",
-    offers: "Offres",
-    join_cartesgouvfr_community: "Nous rejoindre",
-    terms_of_service: "Conditions générales d'utilisation",
-    service_status: "Niveau de service",
     accesses_request: "Demande d'accès à un service privé",
     stats_scope_selection: "Statistiques de consommation",
     my_account: "Mon compte",
@@ -100,17 +78,6 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     dashboard: "Dashboard",
     discover_publish: "Publish",
     datastore_selection: "Datastores",
-    news_list: "News",
-    news_list_by_tag: "News",
-    news_article: "News",
-    sitemap: "Sitemap",
-    accessibility: "Accessibility",
-    legal_notice: "Legal notice",
-    personal_data: "Personal data",
-    offers: "Offers",
-    join_cartesgouvfr_community: "Join us",
-    terms_of_service: "Terms of Service",
-    service_status: "TODO",
     accesses_request: "Request to private resources",
     stats_scope_selection: "Consumption statistics",
     my_account: "My account",
