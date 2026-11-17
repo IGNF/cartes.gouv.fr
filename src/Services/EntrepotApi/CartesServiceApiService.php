@@ -14,7 +14,6 @@ use App\Constants\EntrepotApi\PermissionTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Constants\ServiceAccess;
 use App\Dto\Datasheet\DatasheetServices;
-use App\Dto\Services\CommonDTO;
 use App\Dto\Services\Form\ServiceAttributionFormDTO;
 use App\Dto\Services\Form\ServiceEditFormDTO;
 use App\Dto\Services\Form\ServiceFormDTO;
@@ -25,7 +24,6 @@ use App\Services\DatastorePrefixValidator;
 use App\Services\GeonetworkApiService;
 use App\Services\MembershipService;
 use App\Services\SandboxService;
-use App\Utils;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -468,187 +466,6 @@ class CartesServiceApiService
     }
 
     /**
-     * Crée ou modifie un service (offering/configuration).
-     *
-     * @param array<mixed>  $configRequestBody
-     * @param ?array<mixed> $oldOffering
-     *
-     * @return array<mixed>
-     */
-    public function saveService(
-        string $datastoreId,
-        string $storedDataId,
-        CommonDTO $dto,
-        string $type,
-        array $configRequestBody,
-        ?array $oldOffering = null,
-    ): array {
-        $datasheetName = null;
-        // valeur vide : refusée par getEndpointByShareType comme toute valeur invalide (400)
-        $endpoint = $this->getEndpointByShareType($datastoreId, $type, $dto->share_with ?? '');
-
-        // Mise à jour des métadonnées de la configuration
-        $configRequestBody['metadata'] = $this->getNewConfigMetadata($dto->identifier, $configRequestBody['metadata'] ?? []);
-        $configTags = [
-            CommonTags::THEME_CATEGORIES => implode(', ', $dto->category),
-        ];
-
-        $access = match (true) {
-            'your_community' !== $dto->share_with => ServiceAccess::Public,
-            true === $dto->allow_view_data => ServiceAccess::RestrictedVisible,
-            default => ServiceAccess::Restricted,
-        };
-        // même règle que la page du flux : permission expirée renouvelée seulement si l’accès change
-        $renewExpired = null !== $oldOffering && $this->getServiceAccess($datastoreId, $oldOffering) !== $access;
-
-        if ($oldOffering) {
-            // Modification d'un service existant
-            $oldConfiguration = $oldOffering['configuration'];
-            $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
-
-            $configTags[CommonTags::DATASHEET_NAME] = $datasheetName;
-
-            // Mise à jour de la configuration
-            $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody)->array();
-            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->array();
-
-            // On recrée l'offering si changement d'endpoint, sinon demande la synchronisation
-            if ($oldOffering['open'] !== $endpoint['open']) {
-                $this->removeOfferingFully($datastoreId, $oldOffering);
-
-                $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open'])->array();
-            } else {
-                $offering = $this->configurationApiService->syncOffering($datastoreId, $oldOffering['_id'])->array();
-            }
-        } else {
-            // Ajout d'un nouveau service
-            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
-            $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
-
-            $configTags[CommonTags::DATASHEET_NAME] = $datasheetName;
-
-            // Ajout de la configuration
-            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody)->array();
-            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags)->array();
-
-            // Création d'une offering
-            try {
-                $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open'])->array();
-            } catch (\Throwable $th) {
-                // si la création de l'offering plante, on défait la création de la config
-                $this->configurationApiService->remove($datastoreId, $configuration['_id'])->await();
-                throw $th;
-            }
-        }
-
-        $offering['configuration'] = $configuration;
-
-        $this->handleAccessPermissions($datastoreId, $offering, $access, $renewExpired);
-
-        $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
-
-        // Services de la fiche (dont celui qui vient d'être écrit), chargés une fois pour la métadonnée et la synchronisation
-        $services = $this->getDatasheetServices($datastoreId, $datasheetName);
-
-        // la publication d’un flux ne touche qu’aux ressources en ligne de la fiche de métadonnées
-        $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $services);
-
-        // Synchronisation des autres services de la même fiche de données
-        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::THEME_CATEGORIES], $dto, $services);
-
-        return $offering;
-    }
-
-    /**
-     * @param array<mixed> $offering
-     */
-    private function synchroniseSiblingServices(string $datastoreId, array $offering, string $configTheme, CommonDTO $dto, DatasheetServices $services): void
-    {
-        $siblingServices = array_filter(array_keys($services->offeringsById), fn (string $serviceId) => $serviceId !== $offering['_id']);
-        $keywords = [...$dto->category, ...$dto->keywords, ...$dto->free_keywords];
-
-        $capabilitiesUpdateArgs = [];
-
-        foreach ($siblingServices as $siblingServiceId) {
-            try {
-                // les couches de la métadonnée viennent de ces mêmes services : pas de relecture
-                $offering = $services->offering($siblingServiceId);
-                $configuration = $services->configurationOfOffering($siblingServiceId);
-                if (null === $offering || null === $configuration) {
-                    continue;
-                }
-
-                // Mise à jour des tags seulement si nécessaire
-                if ($configTheme !== ($configuration['tags'][CommonTags::THEME_CATEGORIES] ?? '')) {
-                    $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
-                        CommonTags::THEME_CATEGORIES => $configTheme,
-                    ])->array();
-                }
-
-                $configMetadata = $this->getNewConfigMetadata($dto->identifier, $configuration['metadata'] ?? []);
-                $currentKeywords = $configuration['type_infos']['keywords'] ?? [];
-
-                $needsMetadataUpdate = !Utils::array_deep_equals($configMetadata, $configuration['metadata'] ?? []);
-                $needsKeywordsUpdate = !Utils::array_deep_equals($keywords, $currentKeywords);
-
-                if ($needsMetadataUpdate || $needsKeywordsUpdate) {
-                    $configRequestBody = [
-                        'type' => $configuration['type'],
-                        'name' => $configuration['name'],
-                        'type_infos' => $configuration['type_infos'],
-                        'metadata' => $configMetadata,
-                    ];
-
-                    // Les services WFS n'ont pas de keywords globaux au niveau de type_infos, mais des keywords pour chaque relation de used_data
-                    if (ConfigurationTypes::WFS !== $configuration['type']) {
-                        $configRequestBody['type_infos']['keywords'] = $keywords;
-                    }
-
-                    // attribution entière, logo compris : le PUT efface tout champ absent du corps
-                    if (isset($configuration['attribution']['title']) && isset($configuration['attribution']['url'])) {
-                        $configRequestBody['attribution'] = $configuration['attribution'];
-                    }
-
-                    $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody)->array();
-                    $offering = $this->configurationApiService->syncOffering($datastoreId, $offering['_id'])->array();
-
-                    $endpoint = $this->getEndpointByShareType($datastoreId, $configuration['type'], 'all_public');
-                    if (!in_array($endpoint['_id'], array_map(fn (array $endpoint) => $endpoint['endpoint']['_id'], $capabilitiesUpdateArgs))) {
-                        $capabilitiesUpdateArgs[] = [
-                            'datastore_id' => $datastoreId,
-                            'endpoint' => $endpoint,
-                            'offering' => $offering,
-                        ];
-                    }
-                }
-            } catch (\Throwable $e) {
-                $this->logger->warning('{class}: Failed to synchronise sibling service {serviceId}: {error}', [
-                    'class' => self::class,
-                    'serviceId' => $siblingServiceId,
-                    'exception' => $e,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        // Mise à jour des capabilities pour les services synchronisés
-        foreach ($capabilitiesUpdateArgs as $args) {
-            try {
-                $this->capabilitiesService->createOrUpdate($args['datastore_id'], $args['endpoint'], $args['offering']['urls'][0]['url']);
-            } catch (\Exception $e) {
-                $this->logger->warning('{class}: Failed to create or update capabilities for endpoint {endpointName} ({endpoint}) after the creation/modification of offering {offeringId}: {error}', [
-                    'class' => self::class,
-                    'endpoint' => $args['endpoint']['_id'],
-                    'endpointName' => $args['endpoint']['technical_name'],
-                    'offeringId' => $args['offering']['_id'],
-                    'exception' => $e,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-    }
-
-    /**
      * Publie un flux depuis le nouveau formulaire : annexes images, configuration, offre, permissions, capabilities,
      * puis ressources en ligne de la fiche de métadonnées. La métadonnée doit exister : elle fournit les liens `metadata` de la configuration.
      *
@@ -734,7 +551,7 @@ class CartesServiceApiService
 
         $offering['configuration'] = $configuration;
 
-        // shortcut: aucune annulation si les permissions ou la métadonnée échouent après la création de l’offre (comme saveService), à reprendre au ticket de nettoyage
+        // shortcut: aucune annulation si les permissions ou la métadonnée échouent après la création de l’offre, à reprendre si ces échecs laissent des flux à moitié publiés
         $this->handleAccessPermissions($datastoreId, $offering, $dto->access);
         $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
 
@@ -1014,39 +831,23 @@ class CartesServiceApiService
     /**
      * @return array<mixed>
      */
-    private function getEndpointByAccess(string $datastoreId, string $configType, ServiceAccess $access): array
-    {
-        return $this->getEndpointByShareType($datastoreId, $configType, $access->isOpen() ? 'all_public' : 'your_community');
-    }
-
-    /**
-     * @param array<mixed> $configMetadata
-     *
-     * @return array<mixed>
-     */
-    public function getNewConfigMetadata(string $fileIdentifier, array $configMetadata = []): array
+    private function getNewConfigMetadata(string $fileIdentifier): array
     {
         $geonetworkBaseUrl = $this->geonetworkApiService->getBaseUrl();
         $catalogueBaseUrl = (string) $this->params->get('catalogue_url');
 
-        // supprimer les anciennes métadonnées si elles existent déjà
-        $configMetadata = array_filter($configMetadata, function ($md) use ($geonetworkBaseUrl, $catalogueBaseUrl) {
-            return !('application/xml' === $md['format'] && ConfigurationMetadataTypes::ISO19115_2003 === $md['type'] && str_starts_with($md['url'], $geonetworkBaseUrl)) && !('text/html' === $md['format'] && ConfigurationMetadataTypes::OTHER === $md['type'] && str_starts_with($md['url'], $catalogueBaseUrl));
-        });
-        $configMetadata = array_values($configMetadata);
-
-        $configMetadata[] = [
-            'format' => 'application/xml',
-            'url' => $geonetworkBaseUrl.$this->geonetworkApiService->getUrl($fileIdentifier),
-            'type' => ConfigurationMetadataTypes::ISO19115_2003,
+        return [
+            [
+                'format' => 'application/xml',
+                'url' => $geonetworkBaseUrl.$this->geonetworkApiService->getUrl($fileIdentifier),
+                'type' => ConfigurationMetadataTypes::ISO19115_2003,
+            ],
+            [
+                'format' => 'text/html',
+                'url' => implode('/', [$catalogueBaseUrl, 'dataset', rawurlencode($fileIdentifier)]),
+                'type' => ConfigurationMetadataTypes::OTHER,
+            ],
         ];
-        $configMetadata[] = [
-            'format' => 'text/html',
-            'url' => implode('/', [$catalogueBaseUrl, 'dataset', rawurlencode($fileIdentifier)]),
-            'type' => ConfigurationMetadataTypes::OTHER,
-        ];
-
-        return $configMetadata;
     }
 
     /**
@@ -1073,18 +874,12 @@ class CartesServiceApiService
     /**
      * @return array<mixed>
      */
-    private function getEndpointByShareType(string $datastoreId, string $configType, string $shareWith): array
+    private function getEndpointByAccess(string $datastoreId, string $configType, ServiceAccess $access): array
     {
-        return $this->cache->get("datastore-{$datastoreId}-endpoint-{$configType}-{$shareWith}", function (ItemInterface $item) use ($datastoreId, $configType, $shareWith) {
-            $item->expiresAfter(3600);
+        $open = $access->isOpen();
 
-            if ('all_public' === $shareWith) {
-                $open = true;
-            } elseif ('your_community' === $shareWith) {
-                $open = false;
-            } else {
-                throw new AppException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
-            }
+        return $this->cache->get(sprintf('datastore-%s-endpoint-%s-%s', $datastoreId, $configType, $open ? 'open' : 'closed'), function (ItemInterface $item) use ($datastoreId, $configType, $open) {
+            $item->expiresAfter(3600);
 
             $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
                 'type' => $configType,
@@ -1092,7 +887,7 @@ class CartesServiceApiService
             ]);
 
             if (0 === count($endpoints)) {
-                throw new AppException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
+                throw new AppException('Aucun point d’accès (endpoint) du datastore ne peut convenir à la demande', Response::HTTP_BAD_REQUEST, ['type' => $configType, 'open' => $open]);
             }
 
             return $endpoints[0]['endpoint'];

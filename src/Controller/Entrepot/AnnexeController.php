@@ -57,22 +57,6 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         return $response;
     }
 
-    #[Route('/{annexeId}', name: 'modify', methods: ['PATCH'])]
-    public function modify(string $datastoreId, string $annexeId, Request $request): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-
-        return $this->json(
-            $this->annexeApiService->modify(
-                $datastoreId,
-                $annexeId,
-                $data['paths'] ?? null,
-                $data['labels'] ?? null,
-                $data['published'] ?? null
-            )->array()
-        );
-    }
-
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, Request $request): JsonResponse
     {

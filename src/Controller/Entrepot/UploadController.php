@@ -105,20 +105,6 @@ class UploadController extends AbstractController implements ApiControllerInterf
         return $this->json($upload);
     }
 
-    #[Route('/{uploadId}', name: 'get', methods: ['GET'])]
-    public function get(string $datastoreId, string $uploadId): JsonResponse
-    {
-        return $this->json($this->uploadApiService->get($datastoreId, $uploadId)->array());
-    }
-
-    #[Route('/{uploadId}/file_tree', name: 'get_file_tree', methods: ['GET'])]
-    public function getFileTree(string $datastoreId, string $uploadId): JsonResponse
-    {
-        $fileTree = $this->uploadApiService->getFileTree($datastoreId, $uploadId);
-
-        return $this->json($fileTree);
-    }
-
     #[Route('/{uploadId}/integration', name: 'integration', methods: ['GET'])]
     public function integration(string $datastoreId, string $uploadId, UploadIntegrationWorkflow $uploadIntegrationWorkflow): JsonResponse
     {

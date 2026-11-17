@@ -10,11 +10,9 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\Services\Form\PyramidServiceFormDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
-use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
 use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\CartesServiceApiService;
-use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StoredDataApiService;
@@ -36,11 +34,10 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
     '/api/datastores/{datastoreId}/pyramid-vector',
     name: 'cartesgouvfr_api_pyramid_vector_',
     options: ['expose' => true])]
-#[OA\Tag(name: '[cartes.gouv.fr] pyramid-vector', description: 'Génération de pyramides de tuiles vectorielles et création/modification des services associés')]
+#[OA\Tag(name: '[cartes.gouv.fr] pyramid-vector', description: 'Génération de pyramides de tuiles vectorielles et création des services associés')]
 final class PyramidVectorController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private readonly ConfigurationApiService $configurationApiService,
         private readonly StoredDataApiService $storedDataApiService,
         private readonly ProcessingApiService $processingApiService,
         private readonly SandboxService $sandboxService,
@@ -181,72 +178,6 @@ final class PyramidVectorController extends AbstractController implements ApiCon
         );
 
         return $this->json($offering, Response::HTTP_CREATED);
-    }
-
-    #[Route('/{pyramidId}/tms', name: 'tms_add', methods: ['POST'])]
-    public function addTms(
-        string $datastoreId,
-        string $pyramidId,
-        #[MapRequestPayload] PyramidVectorTmsServiceDTO $dto,
-    ): JsonResponse {
-        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
-
-        // TODO Suppression de l'Upload ?
-        // TODO Suppression de la base de donnees
-        // NOTE on peut difficilement supprimer la base de données parce qu'il y a peut-être d'autres entités qui en dépendent
-
-        // création de requête pour la config
-        $typeInfos = $this->getConfigTypeInfos($dto, $pyramid);
-        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WMTSTMS, $dto, $typeInfos);
-
-        $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, ConfigurationTypes::WMTSTMS, $configRequestBody);
-
-        return $this->json($offering);
-    }
-
-    #[Route('/{pyramidId}/tms/{offeringId}/edit', name: 'tms_edit', methods: ['POST'])]
-    public function editTms(
-        string $datastoreId,
-        string $pyramidId,
-        string $offeringId,
-        #[MapRequestPayload] PyramidVectorTmsServiceDTO $dto,
-    ): JsonResponse {
-        // récup config et offering existants
-        $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
-        $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
-        $oldOffering['configuration'] = $oldConfiguration;
-
-        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
-
-        // création de requête pour la config
-        $typeInfos = $this->getConfigTypeInfos($dto, $pyramid);
-        $configRequestBody = ServiceConfigurationRequestBuilder::buildFromCommonDto(ConfigurationTypes::WMTSTMS, $dto, $typeInfos, $oldConfiguration);
-
-        $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, ConfigurationTypes::WMTSTMS, $configRequestBody, $oldOffering);
-
-        return $this->json($offering);
-    }
-
-    /**
-     * @param array<mixed> $pyramid
-     *
-     * @return array<mixed>
-     */
-    private function getConfigTypeInfos(PyramidVectorTmsServiceDTO $dto, array $pyramid): array
-    {
-        // Recherche de bottom_level et top_level
-        $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
-
-        return [
-            'title' => $dto->service_name,
-            'abstract' => json_encode($dto->description),
-            'keywords' => [...$dto->category, ...$dto->keywords, ...$dto->free_keywords],
-            'used_data' => [[
-                'bottom_level' => $levels['bottom_level'],
-                'top_level' => $levels['top_level'],
-                'stored_data' => $pyramid['_id'],
-            ]],
-        ];
     }
 
     /**

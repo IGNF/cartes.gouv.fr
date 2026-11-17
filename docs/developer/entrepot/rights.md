@@ -15,29 +15,7 @@
 | Ajouter ou modifier la vignette | ANNEX                                | Ne pas afficher le bouton |
 | Supprimer la fiche de données   | ANNEX, UPLOAD, PROCESSING, BROADCAST | Ne pas afficher le bouton |
 
-### Onglet "Jeux de données"
-
-| Action                                           | Droits nécessaires           | En l'absence de droits                 |
-| ------------------------------------------------ | ---------------------------- | -------------------------------------- |
-| Ajouter un fichier de données                    | UPLOAD, PROCESSING           | Ne pas afficher le bouton              |
-| Livraison non terminée - Reprendre l'intégration | UPLOAD, PROCESSING           | Ne pas afficher le bouton              |
-| Livraison non terminée - Supprimer               | UPLOAD, PROCESSING           | Ne pas afficher le bouton              |
-| BDD Vecteur - Créer un service WFS ou WMS        | BROADCAST                    | Griser les possibilités dans la modale |
-| BDD Vecteur - Créer un service TMS               | PROCESSING                   | Griser les possibilités dans la modale |
-| Pyramides vectorielles - Publier le service TMS  | BROADCAST                    | Ne pas afficher le bouton              |
-| Pyramides raster - Publier                       | BROADCAST                    | Ne pas afficher le bouton              |
-| BDD Vecteur - Supprimer                          | ANNEX, PROCESSING, BROADCAST | Ne pas afficher le bouton              |
-
-### Onglet "Services"
-
-| Action                                        | Droits nécessaires | En l'absence de droits   |
-| --------------------------------------------- | ------------------ | ------------------------ |
-| Modifier les informations de publication      | BROADCAST          | Ne pas afficher l'action |
-| Dépublier                                     | BROADCAST          | Ne pas afficher l'action |
-| Gérer les styles                              | ANNEX, BROADCAST   | Ne pas afficher l'action |
-| Menu WMS-V - Créer un service raster WMS/WMTS | PROCESSING, ANNEX  | Ne pas afficher l'action |
-
-### Onglet "Données" (fiche de données refondue)
+### Onglet "Données"
 
 | Action                                      | Droits nécessaires           | En l'absence de droits    |
 | ------------------------------------------- | ---------------------------- | ------------------------- |
@@ -49,13 +27,15 @@
 
 La suppression d’une donnée stockée supprime aussi ses flux et l’annexe de légende d’une pyramide raster, d’où les droits BROADCAST et ANNEX.
 
-### Onglet "Flux" (fiche de données refondue)
+### Onglet "Flux"
 
-| Action               | Droits nécessaires | En l'absence de droits    |
-| -------------------- | ------------------ | ------------------------- |
-| Créer un flux        | BROADCAST, ANNEX   | Ne pas afficher le bouton |
-| Menu - Mettre à jour | BROADCAST          | Ne pas afficher l'action  |
-| Menu - Supprimer     | BROADCAST          | Ne pas afficher l'action  |
+| Action                                     | Droits nécessaires | En l'absence de droits                   |
+| ------------------------------------------ | ------------------ | ---------------------------------------- |
+| Créer un flux                              | BROADCAST, ANNEX   | Ne pas afficher le bouton                |
+| Menu - Mettre à jour                       | BROADCAST, ANNEX   | Ne pas afficher l'action                 |
+| Menu - Supprimer                           | BROADCAST          | Ne pas afficher l'action                 |
+| Page du flux - Enregistrer                 | BROADCAST, ANNEX   | Ne pas afficher le bouton, champs grisés |
+| Page du flux - Gérer les styles (WFS, TMS) | ANNEX, BROADCAST   | Ne pas afficher la liste des styles      |
 
 La page « Créer un flux » exige les mêmes droits (vignette et logo déposés en annexes). La suppression d’un flux par un membre sans ANNEX laisse sa vignette et son logo en place (refus journalisé).
 

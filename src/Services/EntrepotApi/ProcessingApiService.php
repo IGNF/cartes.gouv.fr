@@ -16,14 +16,6 @@ final readonly class ProcessingApiService
     ) {
     }
 
-    /**
-     * @param array<mixed> $query
-     */
-    public function getAll(string $datastoreId, array $query = []): PaginatedPromise
-    {
-        return $this->api->requestAll("datastores/$datastoreId/processings", $query);
-    }
-
     public function get(string $datastoreId, string $processingId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/processings/$processingId");

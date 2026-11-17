@@ -7,7 +7,7 @@ Le dashboard Grafana/Loki de la plateforme affiche les lignes brutes (pas de par
 `AccessLogSubscriber` (kernel.terminate, donc après envoi de la réponse) émet une ligne logfmt par requête traitée par Symfony :
 
 ```
-method=GET path=/api/datastores/190b.../metadata/arbres status=200 duration_ms=226 route=cartesgouvfr_api_metadata_get request_id=38aa3379... user=fc5a7948-... referer=https://cartes.gouv.fr/explorer-les-cartes user_agent=Mozilla/5.0_(X11;_Linux_x86_64)...
+method=GET path=/api/datastores/190b.../metadata status=200 duration_ms=226 route=cartesgouvfr_api_metadata_get_list request_id=38aa3379... user=fc5a7948-... referer=https://cartes.gouv.fr/explorer-les-cartes user_agent=Mozilla/5.0_(X11;_Linux_x86_64)...
 ```
 
 - Chaque token se cherche tel quel dans le dashboard : `status=500`, un chemin, un request_id, un user.

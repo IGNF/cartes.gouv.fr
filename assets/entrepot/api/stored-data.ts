@@ -1,5 +1,4 @@
 import { Offering, StoredData, StoredDataReport } from "../../@types/app";
-import { ProcessingExecutionStoredDataDto } from "../../@types/entrepot";
 import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 
@@ -31,7 +30,7 @@ const get = <T = StoredData>(datastoreId: string, storedDataId: string, otherOpt
 
 const getUses = (datastoreId: string, storedDataId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_stored_data_get_uses", { datastoreId, storedDataId });
-    return jsonFetch<{ stored_data_list: ProcessingExecutionStoredDataDto[]; offerings_list: Offering[] }>(url, {
+    return jsonFetch<{ offerings_list: Offering[] }>(url, {
         ...otherOptions,
     });
 };

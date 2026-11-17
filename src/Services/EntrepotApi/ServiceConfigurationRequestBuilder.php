@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\ZoomLevels;
-use App\Dto\Services\CommonDTO;
 use App\Dto\Services\Form\ServiceAttributionFormDTO;
 use App\Dto\Services\Form\ServiceFormDTO;
 use App\Dto\Services\Form\WfsTableEditFormDTO;
@@ -72,45 +71,6 @@ class ServiceConfigurationRequestBuilder
     public static function buildThumbnailExtra(string $thumbnailUrl): array
     {
         return ['extra' => ['_search' => ['url_vignette' => $thumbnailUrl]]];
-    }
-
-    /**
-     * Corps de configuration des formulaires classiques, à supprimer avec eux.
-     *
-     * @param array<mixed>  $typeInfos
-     * @param ?array<mixed> $oldConfiguration
-     *
-     * @return array<mixed>
-     */
-    public static function buildFromCommonDto(string $type, CommonDTO $dto, array $typeInfos, ?array $oldConfiguration = null): array
-    {
-        $body = [
-            'name' => $dto->service_name,
-            'type' => $type,
-            'type_infos' => $typeInfos,
-        ];
-
-        // seulement pour la création d'une nouvelle publication
-        if (null === $oldConfiguration) {
-            $body['layer_name'] = $dto->technical_name;
-        }
-
-        if (!empty($dto->attribution_text) && !empty($dto->attribution_url)) {
-            $body['attribution'] = [
-                'title' => $dto->attribution_text,
-                'url' => $dto->attribution_url,
-            ];
-            // le formulaire classique ne gère pas le logo posé par le nouveau formulaire : le PUT l’effacerait
-            if (isset($oldConfiguration['attribution']['logo'])) {
-                $body['attribution']['logo'] = $oldConfiguration['attribution']['logo'];
-            }
-        }
-
-        if (isset($oldConfiguration['metadata'])) {
-            $body['metadata'] = $oldConfiguration['metadata'];
-        }
-
-        return $body;
     }
 
     /**
