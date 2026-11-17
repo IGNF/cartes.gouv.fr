@@ -8,7 +8,8 @@ const Wait: FC<PropsWithChildren> = ({ children }) => {
             style={{
                 position: "fixed",
                 backgroundColor: "rgba(0,0,0,0.6)",
-                zIndex: 1000,
+                // au-dessus des modales DSFR (1750) : une écriture lancée depuis une modale reste visible
+                zIndex: 1800,
                 top: 0,
                 left: 0,
                 right: 0,
