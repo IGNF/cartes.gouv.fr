@@ -4,6 +4,7 @@ import api from "@/espaceco/api";
 import RQKeys from "@/modules/espaceco/RQKeys";
 
 export const Route = createFileRoute("/_private/espace-collaboratif")({
+    staticData: { space: "contribute" },
     // l’utilisateur de l’espace collaboratif n’est pas amorcé depuis la page : chargé avant le sous-arbre
     beforeLoad: async ({ context }) => {
         await context.queryClient.query({

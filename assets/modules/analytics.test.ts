@@ -61,30 +61,52 @@ describe("matomoPageTitle", () => {
     });
     afterEach(() => vi.unstubAllGlobals());
 
-    const match = (routeId: string, matomoLabel?: string) => ({ routeId, staticData: { matomoLabel } });
+    const match = (staticData: { space?: "publish" | "contribute"; matomoLabel?: string } = {}) => ({ staticData });
 
     it("prefixes by space and uses the deepest label", async () => {
         const { matomoPageTitle } = await import("./analytics");
 
-        expect(matomoPageTitle([match("__root__"), match("/_private"), match("/_private/tableau-de-bord/", "Tableau de bord")])).toBe(
-            "[Publier] Tableau de bord"
+        expect(matomoPageTitle([match(), match({ space: "publish" }), match({ matomoLabel: "Publier un service WFS" })])).toBe(
+            "[Publier] Publier un service WFS"
         );
-        expect(
-            matomoPageTitle([
-                match("/_private"),
-                match("/_private/tableau-de-bord/entrepots/$datastoreId"),
-                match("/_private/tableau-de-bord/entrepots/$datastoreId/service/wfs/ajout", "Publier un service WFS"),
-            ])
-        ).toBe("[Publier] Publier un service WFS");
-        expect(
-            matomoPageTitle([match("/_private"), match("/_private/espace-collaboratif"), match("/_private/espace-collaboratif/", "Liste des guichets")])
-        ).toBe("[Contribuer] Liste des guichets");
+        expect(matomoPageTitle([match(), match({ space: "contribute" }), match({ matomoLabel: "Liste des guichets" })])).toBe(
+            "[Contribuer] Liste des guichets"
+        );
+    });
+
+    it("defaults to the publish prefix without a space", async () => {
+        const { matomoPageTitle } = await import("./analytics");
+
+        expect(matomoPageTitle([match(), match({ matomoLabel: "Mon compte" })])).toBe("[Publier] Mon compte");
     });
 
     it("falls back to the not found label without a leaf", async () => {
         const { matomoPageTitle } = await import("./analytics");
 
-        expect(matomoPageTitle([match("__root__")])).toBe("[Publier] Page introuvable");
+        expect(matomoPageTitle([match()])).toBe("[Publier] Page introuvable");
         expect(matomoPageTitle([])).toBe("[Publier] Page introuvable");
+    });
+});
+
+describe("routeSpace", () => {
+    beforeEach(() => {
+        vi.resetModules();
+        stubBrowser();
+    });
+    afterEach(() => vi.unstubAllGlobals());
+
+    it("returns the space of the deepest match declaring one", async () => {
+        const { routeSpace } = await import("./analytics");
+
+        expect(routeSpace([{ staticData: {} }, { staticData: { space: "publish" } }, { staticData: { space: "contribute" } }, { staticData: {} }])).toBe(
+            "contribute"
+        );
+    });
+
+    it("returns undefined when no match declares a space", async () => {
+        const { routeSpace } = await import("./analytics");
+
+        expect(routeSpace([{ staticData: {} }, { staticData: { matomoLabel: "Mon compte" } }])).toBeUndefined();
+        expect(routeSpace([])).toBeUndefined();
     });
 });

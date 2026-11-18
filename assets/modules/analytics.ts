@@ -1,8 +1,7 @@
 import { startEulerianAnalytics } from "@codegouvfr/react-dsfr/eulerianAnalytics";
-import { type AnyRouter } from "@tanstack/react-router";
+import { type AnyRouter, type StaticDataRouteOption } from "@tanstack/react-router";
 
 import { appEnv } from "@/env";
-import type { RouteId } from "@/router";
 
 declare global {
     interface Window {
@@ -62,13 +61,16 @@ function matomoInit() {
     s.parentNode?.insertBefore(g, s);
 }
 
-type MatchForTitle = { routeId: string; staticData: { matomoLabel?: string } };
+type MatchWithStaticData = { staticData: StaticDataRouteOption };
 
-const ESPACECO_LAYOUT: RouteId = "/_private/espace-collaboratif";
+/** espace du match le plus profond qui en déclare un : un layout couvre ses feuilles */
+export function routeSpace(matches: MatchWithStaticData[]): StaticDataRouteOption["space"] {
+    return matches.findLast((match) => match.staticData.space)?.staticData.space;
+}
 
 /** titre de la page vue : préfixe par espace, libellé de la feuille matchée (sans feuille, page introuvable) */
-export function matomoPageTitle(matches: MatchForTitle[]): string {
-    const prefix = matches.some((match) => match.routeId === ESPACECO_LAYOUT) ? "[Contribuer]" : "[Publier]";
+export function matomoPageTitle(matches: MatchWithStaticData[]): string {
+    const prefix = routeSpace(matches) === "contribute" ? "[Contribuer]" : "[Publier]";
     const label = matches.at(-1)?.staticData.matomoLabel ?? "Page introuvable";
 
     return `${prefix} ${label}`;

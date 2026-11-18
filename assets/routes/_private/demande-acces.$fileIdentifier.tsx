@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import AccessesRequest from "@/entrepot/pages/accesses-request/AccessesRequest";
 
 export const Route = createFileRoute("/_private/demande-acces/$fileIdentifier")({
-    staticData: { matomoLabel: "Demande d’accès" },
+    staticData: { space: "publish", matomoLabel: "Demande d’accès" },
     component: RouteComponent,
 });
 
