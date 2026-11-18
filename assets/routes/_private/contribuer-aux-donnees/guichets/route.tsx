@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import api from "@/espaceco/api";
 import RQKeys from "@/modules/espaceco/RQKeys";
 
-export const Route = createFileRoute("/_private/espace-collaboratif")({
+export const Route = createFileRoute("/_private/contribuer-aux-donnees/guichets")({
     staticData: { space: "contribute" },
     // l’utilisateur de l’espace collaboratif n’est pas amorcé depuis la page : chargé avant le sous-arbre
     beforeLoad: async ({ context }) => {

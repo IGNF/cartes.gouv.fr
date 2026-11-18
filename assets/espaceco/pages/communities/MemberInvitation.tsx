@@ -85,7 +85,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
             }
             return Promise.resolve(undefined);
         },
-        onSuccess: () => void navigate({ to: "/espace-collaboratif" }),
+        onSuccess: () => void navigate({ to: "/contribuer-aux-donnees/guichets" }),
     });
 
     const community = useMemo(() => query.data, [query.data]);

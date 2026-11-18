@@ -48,10 +48,10 @@ const breadcrumbNameByRouteId = {
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation": "datastore_service_view",
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout": "datastore_service_style_add",
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/$styleTechnicalName/modification": "datastore_service_style_edit",
-    "/_private/espace-collaboratif/": "espaceco_community_list",
-    "/_private/espace-collaboratif/$communityId/creer-un-guichet": "espaceco_create_community",
-    "/_private/espace-collaboratif/$communityId/gerer-le-guichet": "espaceco_manage_community",
-    "/_private/espace-collaboratif/$communityId/invitation": "espaceco_member_invitation",
+    "/_private/contribuer-aux-donnees/guichets/": "espaceco_community_list",
+    "/_private/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet": "espaceco_create_community",
+    "/_private/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet": "espaceco_manage_community",
+    "/_private/contribuer-aux-donnees/guichets/$communityId/invitation": "espaceco_member_invitation",
 } as const satisfies Partial<Record<RouteId, string>>;
 
 /** paramètres de chemin et de recherche fusionnés par l’appelant */
@@ -108,9 +108,14 @@ const getBreadcrumb = (
         currentPageLabel: tCommon("datastore_name", { name: community?.name, isSandbox }) || "",
     };
 
+    const contributeProps: BreadcrumbProps = {
+        ...dashboardProps,
+        segments: [{ label: t("discover_contribute"), linkProps: { to: "/contribuer-aux-donnees" } }],
+    };
+
     const espacecoBaseProps: BreadcrumbProps = {
-        ...publishProps,
-        segments: [...publishProps.segments, { label: t("espaceco_community_list"), linkProps: { to: "/espace-collaboratif" } }],
+        ...contributeProps,
+        segments: [...contributeProps.segments, { label: t("espaceco_community_list"), linkProps: { to: "/contribuer-aux-donnees/guichets" } }],
     };
 
     switch (name) {
@@ -259,7 +264,7 @@ const getBreadcrumb = (
 
         // espaceco
         case "espaceco_community_list":
-            return { ...publishProps, currentPageLabel: t(name) };
+            return { ...contributeProps, currentPageLabel: t(name) };
         case "espaceco_create_community":
         case "espaceco_manage_community":
         case "espaceco_member_invitation":

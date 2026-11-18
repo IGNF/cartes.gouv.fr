@@ -24,7 +24,7 @@ import { CreateCommunityDialog, CreateCommunityDialogModal } from "./CreateCommu
 import SearchCommunity from "./SearchCommunity";
 import useUserMe from "@/espaceco/hooks/useUserMe";
 
-const routeApi = getRouteApi("/_private/espace-collaboratif/");
+const routeApi = getRouteApi("/_private/contribuer-aux-donnees/guichets/");
 
 const defaultLimit = 10;
 
@@ -78,7 +78,7 @@ const Communities: FC = () => {
 
     const handleFilterChange = (filter: CommunityListFilter) => {
         setCommunity(null);
-        void navigate({ to: "/espace-collaboratif", search: { filter } });
+        void navigate({ to: "/contribuer-aux-donnees/guichets", search: { filter } });
     };
 
     const queryClient = useQueryClient();
@@ -101,7 +101,7 @@ const Communities: FC = () => {
             queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), () => {
                 return community;
             });
-            void navigate({ to: "/espace-collaboratif/$communityId/creer-un-guichet", params: { communityId: community.id } });
+            void navigate({ to: "/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet", params: { communityId: community.id } });
         },
     });
 
@@ -197,7 +197,7 @@ const Communities: FC = () => {
                                         count={communityQuery.data.totalPages}
                                         defaultPage={queryParams.page}
                                         getPageLinkProps={(pageNumber) => ({
-                                            to: "/espace-collaboratif",
+                                            to: "/contribuer-aux-donnees/guichets",
                                             search: { filter, page: pageNumber },
                                             activeOptions: searchAwareActiveOptions,
                                         })}
@@ -217,7 +217,7 @@ const Communities: FC = () => {
                                     count={communitiesAsMemberQuery.data.totalPages}
                                     defaultPage={queryParams.page}
                                     getPageLinkProps={(pageNumber) => ({
-                                        to: "/espace-collaboratif",
+                                        to: "/contribuer-aux-donnees/guichets",
                                         search: { filter, page: pageNumber },
                                         activeOptions: searchAwareActiveOptions,
                                     })}

@@ -303,7 +303,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         $communityName = $community['name'];
         $subject = "[cartes.gouv.fr] Invitation au guichet $communityName";
 
-        $url = $this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL)."espace-collaboratif/$communityId/invitation";
+        $url = $this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL)."contribuer-aux-donnees/guichets/$communityId/invitation";
         $this->mailerService->sendMail($email, $subject, 'Mailer/espaceco/member_invitation.html.twig', ['community' => $community, 'link' => $url]);
     }
 

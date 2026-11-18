@@ -4,6 +4,7 @@ import { Translations } from "../../../i18n/types";
 const { i18n } = declareComponentKeys<
     | "dashboard"
     | "discover_publish"
+    | "discover_contribute"
     | "datastore_selection"
     | "news_list"
     | "news_list_by_tag"
@@ -61,6 +62,7 @@ export type I18n = typeof i18n;
 export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     dashboard: "Tableau de bord",
     discover_publish: "Publier",
+    discover_contribute: "Contribuer",
     datastore_selection: "Entrepôts",
     news_list: "Actualités",
     news_list_by_tag: "Actualités",
@@ -108,7 +110,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     datastore_service_view: "Prévisualisation d'un service",
     datastore_service_style_add: "Ajouter un style",
     datastore_service_style_edit: "Modifier le style",
-    espaceco_community_list: "Espace collaboratif",
+    espaceco_community_list: "Guichets",
     espaceco_create_community: "Création d'un guichet",
     espaceco_manage_community: "Gérer le guichet",
     espaceco_member_invitation: "Invitation",
@@ -117,6 +119,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
 export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     dashboard: "Dashboard",
     discover_publish: "Publish",
+    discover_contribute: "Contribute",
     datastore_selection: "Datastores",
     news_list: "News",
     news_list_by_tag: "News",
@@ -164,7 +167,7 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     datastore_service_view: "Preview a service",
     datastore_service_style_add: "Add a style",
     datastore_service_style_edit: "Modify style",
-    espaceco_community_list: "Collaborative space",
+    espaceco_community_list: "Communities",
     espaceco_create_community: "Create community",
     espaceco_manage_community: "Manage community",
     espaceco_member_invitation: "Invitation",

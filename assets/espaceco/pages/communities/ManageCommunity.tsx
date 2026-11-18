@@ -21,7 +21,7 @@ import Tools from "./management/Tools";
 import ZoomAndCentering from "./management/ZoomAndCentering";
 import { getApiErrorMessage } from "../../../modules/apiError";
 
-const routeApi = getRouteApi("/_private/espace-collaboratif/$communityId/gerer-le-guichet");
+const routeApi = getRouteApi("/_private/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet");
 
 const ManageCommunity: FC = () => {
     const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();
@@ -67,7 +67,7 @@ const ManageCommunity: FC = () => {
                     description={
                         <>
                             <p>{getApiErrorMessage(meError)}</p>
-                            <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
+                            <Button linkProps={{ to: "/contribuer-aux-donnees/guichets" }}>{t("back_to_list")}</Button>
                         </>
                     }
                 />
@@ -79,7 +79,7 @@ const ManageCommunity: FC = () => {
                     description={
                         <>
                             <p>{getApiErrorMessage(communityError)}</p>
-                            <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
+                            <Button linkProps={{ to: "/contribuer-aux-donnees/guichets" }}>{t("back_to_list")}</Button>
                         </>
                     }
                 />

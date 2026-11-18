@@ -90,7 +90,7 @@ const CreateCommunity: FC = () => {
                             description={
                                 <>
                                     <p>{getApiErrorMessage(meError)}</p>
-                                    <Button linkProps={{ to: "/espace-collaboratif" }}>{t("back_to_list")}</Button>
+                                    <Button linkProps={{ to: "/contribuer-aux-donnees/guichets" }}>{t("back_to_list")}</Button>
                                 </>
                             }
                         />

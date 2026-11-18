@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 
 import MemberInvitation from "@/espaceco/pages/communities/MemberInvitation";
 
-export const Route = createFileRoute("/_private/espace-collaboratif/$communityId/invitation")({
+export const Route = createFileRoute("/_private/contribuer-aux-donnees/guichets/$communityId/invitation")({
     staticData: { matomoLabel: "Invitation" },
     params: {
         parse: (raw) => ({ communityId: Number(raw.communityId) }),

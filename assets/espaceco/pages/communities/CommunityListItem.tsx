@@ -25,9 +25,12 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
     const [showDescription, toggleShowDescription] = useToggle();
     const modifyButtonProps = useMemo(() => {
         return community.active
-            ? { link: { to: "/espace-collaboratif/$communityId/gerer-le-guichet", params: { communityId: community.id } } as const, title: tCommon("modify") }
+            ? {
+                  link: { to: "/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet", params: { communityId: community.id } } as const,
+                  title: tCommon("modify"),
+              }
             : {
-                  link: { to: "/espace-collaboratif/$communityId/creer-un-guichet", params: { communityId: community.id } } as const,
+                  link: { to: "/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet", params: { communityId: community.id } } as const,
                   title: t("append_community"),
               };
     }, [community, t, tCommon]);
