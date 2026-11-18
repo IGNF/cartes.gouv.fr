@@ -48,8 +48,8 @@ export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCo
 
 export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCommunityList"] = {
     title: "List of communities",
-    panel_title: "My front offices",
-    panel_description: "Browse front offices and take part in them",
+    panel_title: "My communities",
+    panel_description: "Browse communities and take part in them",
     filters: "Filters",
     open_community: "Access",
     all_public_communities: undefined,
