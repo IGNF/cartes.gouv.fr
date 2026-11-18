@@ -1,8 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
-import Button from "@codegouvfr/react-dsfr/Button";
+import { ButtonProps } from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Card from "@codegouvfr/react-dsfr/Card";
 import { FC } from "react";
+import { tss } from "tss-react";
 
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import { espaceCoSiteUrl } from "@/env";
@@ -22,6 +24,7 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ community }) => {
     const { t } = useTranslation("EspaceCoCommunityList");
     const { t: tCommon } = useTranslation("Common");
     const { data: me } = useUserMe();
+    const { classes } = useStyles();
 
     const role = me?.communities_member.find((m) => m.community_id === community.id)?.role;
     const canOpen = community.active && (role === "member" || role === "admin");
@@ -33,6 +36,23 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ community }) => {
     const groupUrl = role === "admin" && espaceCoSiteUrl ? `${espaceCoSiteUrl}/group/${community.id}` : null;
     const groupLabel = community.active ? tCommon("modify") : t("append_community");
 
+    // rôle inconnu : pas de libellé, donc pas de badge vide
+    const roleLabel = role && t("role", { role });
+
+    const buttons: (ButtonProps | false)[] = [
+        canOpen && {
+            children: t("open_community"),
+            priority: "secondary",
+            linkProps: { href: `${SymfonyRouting.getBaseUrl()}/guichet-collaboratif/${community.id}` },
+        },
+        groupUrl !== null && {
+            children: groupLabel,
+            priority: "secondary",
+            linkProps: { href: groupUrl, target: "_blank", rel: "noreferrer", title: `${groupLabel} - ${tCommon("new_window")}` },
+        },
+    ];
+    const [firstButton, ...otherButtons] = buttons.filter((button) => button !== false);
+
     return (
         <Card
             imageUrl={community.logo_url || placeholder1x1}
@@ -43,42 +63,33 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ community }) => {
                     currentTarget.src = placeholder1x1;
                 },
             }}
+            className={classes.card}
             horizontal={true}
             size="small"
             title={community.name}
             desc={description && (description.length > DESCRIPTION_MAX_LENGTH ? `${description.slice(0, DESCRIPTION_MAX_LENGTH)}…` : description)}
             start={
-                role && (
+                roleLabel && (
                     <Badge as="span" noIcon={true} small={true}>
-                        {t("role", { role })}
+                        {roleLabel}
                     </Badge>
                 )
             }
-            footer={
-                (canOpen || groupUrl) && (
-                    <ul className={fr.cx("fr-btns-group", "fr-btns-group--inline-md", "fr-btns-group--sm")}>
-                        {canOpen && (
-                            <li>
-                                <Button priority="secondary" linkProps={{ href: `${SymfonyRouting.getBaseUrl()}/guichet-collaboratif/${community.id}` }}>
-                                    {t("open_community")}
-                                </Button>
-                            </li>
-                        )}
-                        {groupUrl && (
-                            <li>
-                                <Button
-                                    priority="secondary"
-                                    linkProps={{ href: groupUrl, target: "_blank", rel: "noreferrer", title: `${groupLabel} - ${tCommon("new_window")}` }}
-                                >
-                                    {groupLabel}
-                                </Button>
-                            </li>
-                        )}
-                    </ul>
-                )
-            }
+            footer={firstButton && <ButtonsGroup buttons={[firstButton, ...otherButtons]} inlineLayoutWhen="md and up" buttonsSize="small" />}
         />
     );
 };
 
 export default CommunityListItem;
+
+const useStyles = tss.create(() => ({
+    card: {
+        // logo entier sur fond gris ; && passe devant `.fr-card--horizontal .fr-card__img img`
+        "&& .fr-card__img img": {
+            objectFit: "contain",
+            padding: fr.spacing("4v"),
+            backgroundColor: fr.colors.decisions.background.alt.grey.default,
+            boxSizing: "border-box",
+        },
+    },
+}));

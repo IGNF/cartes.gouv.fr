@@ -32,7 +32,7 @@ export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCo
         filter === "listed"
             ? "Aucun guichet public"
             : filter === "iam_member"
-              ? "Vous n'êtes membre d’aucun guichet"
+              ? "Vous n’êtes membre d’aucun guichet"
               : filter === "affiliation"
                 ? "Aucune affiliation en cours"
                 : "[TODO]",
