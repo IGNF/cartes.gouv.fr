@@ -27,7 +27,7 @@ type QueryParamsType = {
     pending?: boolean;
 };
 
-// page de guichets affichée, quelle que soit la requête active ; sans totalPages, pas de pagination
+// page de guichets affichée, quelle que soit la requête active ; pagination seulement à partir de deux pages
 type CommunityPage = {
     communities: CommunityResponseDTO[];
     totalPages?: number;
@@ -125,7 +125,7 @@ const CommunityPageView: FC<CommunityPageViewProps> = ({ query, filter, page, sk
     return (
         <div>
             <CommunityList communities={communities} />
-            {totalPages !== undefined && (
+            {totalPages !== undefined && totalPages > 1 && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
                     <Pagination
                         count={totalPages}
