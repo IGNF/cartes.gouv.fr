@@ -5,7 +5,7 @@ import Card from "@codegouvfr/react-dsfr/Card";
 import { FC } from "react";
 
 import { CommunityResponseDTO } from "../../../@types/espaceco";
-import { espaceCoUrl } from "@/env";
+import { espaceCoSiteUrl } from "@/env";
 import useUserMe from "../../hooks/useUserMe";
 import { useTranslation } from "../../../i18n/i18n";
 import SymfonyRouting from "../../../modules/Routing";
@@ -30,7 +30,7 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ community }) => {
     const description = new DOMParser().parseFromString(community.description ?? "", "text/html").body.textContent?.trim();
 
     // lien de gestion du groupe sur l’espace collaboratif, réservé aux gestionnaires
-    const groupUrl = role === "admin" && espaceCoUrl ? `${espaceCoUrl.replace("/gcms/api", "")}/group/${community.id}` : null;
+    const groupUrl = role === "admin" && espaceCoSiteUrl ? `${espaceCoSiteUrl}/group/${community.id}` : null;
     const groupLabel = community.active ? tCommon("modify") : t("append_community");
 
     return (
