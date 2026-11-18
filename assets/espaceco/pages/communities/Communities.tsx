@@ -15,7 +15,7 @@ import { getApiErrorTitle, getApiErrorDescription } from "../../../modules/apiEr
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import api from "../../api";
 import CommunityList from "./CommunityList";
-import CommunityListItemSkeleton from "./CommunityListItemSkeleton";
+import Skeleton from "../../../components/Utils/Skeleton";
 
 const routeApi = getRouteApi("/_private/contribuer-aux-donnees/guichets/_panneau/");
 
@@ -109,7 +109,7 @@ const CommunityPageView: FC<CommunityPageViewProps> = ({ query, filter, page, sk
     }
 
     if (query.isLoading) {
-        return <CommunityListItemSkeleton count={skeletonCount} />;
+        return <Skeleton count={skeletonCount} rectangleHeight={200} />;
     }
 
     if (!query.data?.communities.length) {
