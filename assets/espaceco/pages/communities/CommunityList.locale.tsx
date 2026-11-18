@@ -1,6 +1,6 @@
 import { declareComponentKeys } from "i18nifty";
 
-import { CommunityListFilter } from "../../../@types/app_espaceco";
+import { CommunityListFilter, Role } from "../../../@types/app_espaceco";
 import { Translations } from "../../../i18n/types";
 
 // traductions
@@ -12,11 +12,10 @@ const { i18n } = declareComponentKeys<
     | "communities_as_member"
     | "pending_membership"
     | { K: "no_result"; P: { filter: CommunityListFilter }; R: string }
-    | "show_details"
     | "community_creation"
     | "create_community"
     | "append_community"
-    | "no_description"
+    | { K: "role"; P: { role: Role }; R: string }
 >()("EspaceCoCommunityList");
 export type I18n = typeof i18n;
 
@@ -35,11 +34,16 @@ export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCo
               : filter === "affiliation"
                 ? "Aucune affiliation en cours"
                 : "[TODO]",
-    show_details: "Afficher les détails",
     community_creation: "Création du guichet en cours ...",
     create_community: "Création d'un guichet",
     append_community: "Reprendre la configuration de ce guichet",
-    no_description: "Aucune description n’a été renseignée sur ce guichet",
+    role: ({ role }) =>
+        ({
+            member: "Membre",
+            admin: "Gestionnaire",
+            pending: "En attente",
+            invited: "Invité",
+        })[role],
 };
 
 export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCommunityList"] = {
@@ -50,9 +54,14 @@ export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCo
     communities_as_member: undefined,
     pending_membership: undefined,
     no_result: ({ filter }) => `[TODO] ${filter}`,
-    show_details: undefined,
     community_creation: undefined,
     create_community: undefined,
     append_community: undefined,
-    no_description: undefined,
+    role: ({ role }) =>
+        ({
+            member: "Member",
+            admin: "Manager",
+            pending: "Pending",
+            invited: "Invited",
+        })[role],
 };
