@@ -10,7 +10,7 @@ import { useNavigate, useSearch as useRouteSearch } from "@tanstack/react-router
 import { useEffect, useId, useMemo, useState } from "react";
 import { tss } from "tss-react";
 
-import DatastoreMain from "@/components/Layout/DatastoreMain";
+import SidePanelPage from "@/components/Layout/SidePanelPage";
 import { communityMembersQueryOptions } from "@/hooks/queries/communityQueryOptions";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import useMembership from "@/hooks/useMembership";
@@ -169,7 +169,7 @@ function CommunityMembers({ communityId, userId }: CommunityMembersProps) {
     const { classes, cx } = useStyles();
 
     return (
-        <DatastoreMain title="Membres">
+        <SidePanelPage title="Membres">
             {isLoading && <LoadingText />}
             {!isLoading && userId && communityMemberIds.includes(userId) && (
                 <Alert
@@ -342,7 +342,7 @@ function CommunityMembers({ communityId, userId }: CommunityMembersProps) {
                     }
                 }}
             />
-        </DatastoreMain>
+        </SidePanelPage>
     );
 }
 

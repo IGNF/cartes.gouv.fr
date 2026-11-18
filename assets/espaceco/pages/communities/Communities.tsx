@@ -3,9 +3,9 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
-import { useHead } from "@unhead/react";
 import { FC, useMemo } from "react";
 
+import SidePanelPage from "@/components/Layout/SidePanelPage";
 import { GetResponse } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import Skeleton from "../../../components/Utils/Skeleton";
@@ -32,11 +32,6 @@ const Communities: FC = () => {
 
     const { t } = useTranslation("EspaceCoCommunityList");
 
-    useHead({
-        titleTemplate: "%s | cartes.gouv.fr",
-        title: t("title"),
-    });
-
     const queryParams = useMemo<QueryParamsType>(() => {
         const params: QueryParamsType = { page: page, limit: defaultLimit };
         if (["iam_member", "affiliation"].includes(filter)) {
@@ -60,11 +55,15 @@ const Communities: FC = () => {
     });
 
     if (community !== undefined) {
-        return <SearchedCommunity communityId={community} />;
+        return (
+            <SidePanelPage title={t("title")}>
+                <SearchedCommunity communityId={community} />
+            </SidePanelPage>
+        );
     }
 
     return (
-        <>
+        <SidePanelPage title={t("title")}>
             {communityQuery.isError && (
                 <Alert
                     severity="error"
@@ -124,7 +123,7 @@ const Communities: FC = () => {
                     <Alert severity={"info"} title={t("no_result", { filter: filter })} closable />
                 </div>
             )}
-        </>
+        </SidePanelPage>
     );
 };
 
