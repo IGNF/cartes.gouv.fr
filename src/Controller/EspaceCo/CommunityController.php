@@ -94,6 +94,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         });
 
         $this->_sortMembersByName($members);
+        $totalPages = max(1, (int) ceil(count($members) / $limit));
         $members = array_slice(array_values($members), ($page - 1) * $limit, $limit);
 
         $communities = [];
@@ -102,7 +103,6 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $communities[] = $community;
         }
 
-        $totalPages = floor(count($members) / $limit) + 1;
         $previousPage = 1 === $page ? null : $page - 1;
         $nextPage = $page + 1 > $totalPages ? null : $page + 1;
 
