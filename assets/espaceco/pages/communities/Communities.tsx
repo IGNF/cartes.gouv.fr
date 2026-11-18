@@ -1,30 +1,23 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import { FC, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
+import { useHead } from "@unhead/react";
+import { FC, useMemo } from "react";
 
-import Main from "@/components/Layout/Main";
-import { CommunityListFilter, GetResponse } from "../../../@types/app_espaceco";
+import { GetResponse } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
-import LoadingText from "../../../components/Utils/LoadingText";
 import Skeleton from "../../../components/Utils/Skeleton";
-import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { ApiError } from "../../../modules/jsonFetch";
-import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "../../../modules/apiError";
+import { getApiErrorTitle, getApiErrorDescription } from "../../../modules/apiError";
 import { searchAwareActiveOptions } from "@/router/AppLink";
 import api from "../../api";
 import CommunityList from "./CommunityList";
-import { CreateCommunityDialog, CreateCommunityDialogModal } from "./CreateCommunityDialog";
-import SearchCommunity from "./SearchCommunity";
-import useUserMe from "@/espaceco/hooks/useUserMe";
 
-const routeApi = getRouteApi("/_private/contribuer-aux-donnees/guichets/");
+const routeApi = getRouteApi("/_private/contribuer-aux-donnees/guichets/_panneau/");
 
 const defaultLimit = 10;
 
@@ -35,15 +28,14 @@ type QueryParamsType = {
 };
 
 const Communities: FC = () => {
-    const navigate = useNavigate();
-    const { page, filter } = routeApi.useSearch();
+    const { page, filter, community } = routeApi.useSearch();
 
-    const meQuery = useUserMe();
-    const { data: me } = meQuery;
-
-    const { t: tCommon } = useTranslation("Common");
-    const { t: tValid } = useTranslation("ManageCommunityValidations");
     const { t } = useTranslation("EspaceCoCommunityList");
+
+    useHead({
+        titleTemplate: "%s | cartes.gouv.fr",
+        title: t("title"),
+    });
 
     const queryParams = useMemo<QueryParamsType>(() => {
         const params: QueryParamsType = { page: page, limit: defaultLimit };
@@ -53,191 +45,101 @@ const Communities: FC = () => {
         return params;
     }, [page, filter]);
 
-    const [community, setCommunity] = useState<CommunityResponseDTO | null>(null);
-
     const communityQuery = useQuery<GetResponse<CommunityResponseDTO>, ApiError>({
         queryKey: RQKeys.communityList(queryParams),
         queryFn: ({ signal }) => api.community.get(queryParams, signal),
         staleTime: 3600000,
-        enabled: filter === "listed",
+        enabled: community === undefined && filter === "listed",
     });
 
     const communitiesAsMemberQuery = useQuery<GetResponse<CommunityResponseDTO>, ApiError>({
         queryKey: RQKeys.communitiesAsMember(queryParams),
         queryFn: ({ signal }) => api.community.getAsMember(queryParams, signal),
         staleTime: 3600000,
-        enabled: filter === "iam_member" || filter === "affiliation",
+        enabled: community === undefined && (filter === "iam_member" || filter === "affiliation"),
     });
 
-    const hasRights = useMemo(() => {
-        if (me?.administrator) return true;
-
-        const communityMemberHasAdmin = me?.communities_member.filter((m) => m.role === "admin") || [];
-        return communityMemberHasAdmin.length > 0;
-    }, [me]);
-
-    const handleFilterChange = (filter: CommunityListFilter) => {
-        setCommunity(null);
-        void navigate({ to: "/contribuer-aux-donnees/guichets", search: { filter } });
-    };
-
-    const queryClient = useQueryClient();
-
-    /* Creation du guichet */
-    const { isPending, isError, error, mutate } = useMutation<CommunityResponseDTO, ApiError, string>({
-        mutationFn: (name: string) => {
-            return api.community.add({ name });
-        },
-        onSuccess: (community) => {
-            // Mise a jour de users/me
-            void meQuery.refetch();
-
-            queryClient.setQueryData<string[]>(RQKeys.communitiesName(), (oldNames) => {
-                const names = oldNames ? [...oldNames] : [];
-                names.push(community.name);
-                return names;
-            });
-
-            queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), () => {
-                return community;
-            });
-            void navigate({ to: "/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet", params: { communityId: community.id } });
-        },
-    });
+    if (community !== undefined) {
+        return <SearchedCommunity communityId={community} />;
+    }
 
     return (
-        <Main title={t("title")}>
-            <h1>{t("title")}</h1>
-            <div>
-                {isPending && (
-                    <Wait>
-                        <div className={fr.cx("fr-grid-row")}>
-                            <LoadingText as="h6" message={t("community_creation")} withSpinnerIcon={true} />
-                        </div>
-                    </Wait>
-                )}
-                {isError && (
-                    <Alert
-                        severity="error"
-                        closable
-                        title={tCommon("error")}
-                        description={error.status === 400 ? tValid("description.name.unique") : getApiErrorMessage(error)}
-                        className={fr.cx("fr-my-3w")}
-                    />
-                )}
-                {communityQuery.isError && (
-                    <Alert
-                        severity="error"
-                        closable={false}
-                        title={getApiErrorTitle(communityQuery.error)}
-                        description={getApiErrorDescription(communityQuery.error)}
-                    />
-                )}
-                {communitiesAsMemberQuery.isError && (
-                    <Alert
-                        severity="error"
-                        closable={false}
-                        title={getApiErrorTitle(communitiesAsMemberQuery.error)}
-                        description={getApiErrorDescription(communitiesAsMemberQuery.error)}
-                    />
-                )}
-            </div>
-            {hasRights && (
-                <div className={fr.cx("fr-grid-row", "fr-my-2w")}>
-                    <Button onClick={() => CreateCommunityDialogModal.open()}>{t("create_community")}</Button>
-                </div>
+        <>
+            {communityQuery.isError && (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={getApiErrorTitle(communityQuery.error)}
+                    description={getApiErrorDescription(communityQuery.error)}
+                />
             )}
-            <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col-4", "fr-px-2v")}>
-                    <div className={fr.cx("fr-my-4v")}>
-                        <SearchCommunity
-                            filter={filter}
-                            onChange={(community) => {
-                                setCommunity(community);
-                            }}
+            {communitiesAsMemberQuery.isError && (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={getApiErrorTitle(communitiesAsMemberQuery.error)}
+                    description={getApiErrorDescription(communitiesAsMemberQuery.error)}
+                />
+            )}
+            {communityQuery.isLoading || communitiesAsMemberQuery.isLoading ? (
+                <Skeleton count={10} />
+            ) : filter === "listed" ? (
+                communityQuery.data && communityQuery.data.content.length ? (
+                    <div>
+                        <CommunityList communities={communityQuery.data.content} />
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+                            <Pagination
+                                count={communityQuery.data.totalPages}
+                                defaultPage={queryParams.page}
+                                getPageLinkProps={(pageNumber) => ({
+                                    to: "/contribuer-aux-donnees/guichets",
+                                    search: { filter, page: pageNumber },
+                                    activeOptions: searchAwareActiveOptions,
+                                })}
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <div className={fr.cx("fr-my-2v")}>
+                        <Alert severity={"info"} title={t("no_result", { filter: filter })} closable />
+                    </div>
+                )
+            ) : communitiesAsMemberQuery.data && communitiesAsMemberQuery.data.content.length ? (
+                <div>
+                    <CommunityList communities={communitiesAsMemberQuery.data.content} />
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+                        <Pagination
+                            count={communitiesAsMemberQuery.data.totalPages}
+                            defaultPage={queryParams.page}
+                            getPageLinkProps={(pageNumber) => ({
+                                to: "/contribuer-aux-donnees/guichets",
+                                search: { filter, page: pageNumber },
+                                activeOptions: searchAwareActiveOptions,
+                            })}
                         />
                     </div>
-                    <RadioButtons
-                        options={[
-                            {
-                                label: t("all_public_communities"),
-                                nativeInputProps: {
-                                    checked: filter === "listed",
-                                    onChange: () => handleFilterChange("listed"),
-                                },
-                            },
-                            {
-                                label: t("communities_as_member"),
-                                nativeInputProps: {
-                                    checked: filter === "iam_member",
-                                    onChange: () => handleFilterChange("iam_member"),
-                                },
-                            },
-                            {
-                                label: t("pending_membership"),
-                                nativeInputProps: {
-                                    checked: filter === "affiliation",
-                                    onChange: () => handleFilterChange("affiliation"),
-                                },
-                            },
-                        ]}
-                    />
                 </div>
-                <div className={fr.cx("fr-col-8", "fr-px-2v")}>
-                    {communityQuery.isLoading || communitiesAsMemberQuery.isLoading ? (
-                        <Skeleton count={10} />
-                    ) : community ? (
-                        <CommunityList communities={[community]} />
-                    ) : filter === "listed" ? (
-                        communityQuery.data && communityQuery.data.content.length ? (
-                            <div>
-                                <CommunityList communities={communityQuery.data.content} />
-                                <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                                    <Pagination
-                                        count={communityQuery.data.totalPages}
-                                        defaultPage={queryParams.page}
-                                        getPageLinkProps={(pageNumber) => ({
-                                            to: "/contribuer-aux-donnees/guichets",
-                                            search: { filter, page: pageNumber },
-                                            activeOptions: searchAwareActiveOptions,
-                                        })}
-                                    />
-                                </div>
-                            </div>
-                        ) : (
-                            <div className={fr.cx("fr-my-2v")}>
-                                <Alert severity={"info"} title={t("no_result", { filter: filter })} closable />
-                            </div>
-                        )
-                    ) : communitiesAsMemberQuery.data && communitiesAsMemberQuery.data.content.length ? (
-                        <div>
-                            <CommunityList communities={communitiesAsMemberQuery.data.content} />
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                                <Pagination
-                                    count={communitiesAsMemberQuery.data.totalPages}
-                                    defaultPage={queryParams.page}
-                                    getPageLinkProps={(pageNumber) => ({
-                                        to: "/contribuer-aux-donnees/guichets",
-                                        search: { filter, page: pageNumber },
-                                        activeOptions: searchAwareActiveOptions,
-                                    })}
-                                />
-                            </div>
-                        </div>
-                    ) : (
-                        <div className={fr.cx("fr-my-2v")}>
-                            <Alert severity={"info"} title={t("no_result", { filter: filter })} closable />
-                        </div>
-                    )}
+            ) : (
+                <div className={fr.cx("fr-my-2v")}>
+                    <Alert severity={"info"} title={t("no_result", { filter: filter })} closable />
                 </div>
-            </div>
-            <CreateCommunityDialog
-                onAdd={(name) => {
-                    mutate(name);
-                }}
-            />
-        </Main>
+            )}
+        </>
     );
+};
+
+const SearchedCommunity: FC<{ communityId: number }> = ({ communityId }) => {
+    const query = useQuery<CommunityResponseDTO, ApiError>({
+        queryKey: RQKeys.community(communityId),
+        queryFn: ({ signal }) => api.community.getCommunity(communityId, signal),
+        staleTime: 3600000,
+    });
+
+    if (query.isError) {
+        return <Alert severity="error" closable={false} title={getApiErrorTitle(query.error)} description={getApiErrorDescription(query.error)} />;
+    }
+
+    return query.data ? <CommunityList communities={[query.data]} /> : <Skeleton count={1} />;
 };
 
 export default Communities;

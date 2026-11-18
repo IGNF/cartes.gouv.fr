@@ -60,9 +60,9 @@ const getAsMember = (queryParams: Record<string, unknown>, signal: AbortSignal) 
     });
 };
 
-const getCommunity = (communityId: number) => {
+const getCommunity = (communityId: number, signal?: AbortSignal) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_community", { communityId });
-    return jsonFetch<CommunityResponseDTO>(url);
+    return jsonFetch<CommunityResponseDTO>(url, { signal });
 };
 
 const getCommunityMembers = (communityId: number, signal: AbortSignal) => {
