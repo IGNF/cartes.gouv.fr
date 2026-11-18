@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { useMatches } from "@tanstack/react-router";
 
-import { routeSpace } from "@/modules/analytics";
+import { routeSpace } from "@/router/routeSpace";
 
 export default function SiteBadge() {
     const space = useMatches({ select: routeSpace });

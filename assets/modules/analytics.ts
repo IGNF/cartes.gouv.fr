@@ -1,7 +1,8 @@
 import { startEulerianAnalytics } from "@codegouvfr/react-dsfr/eulerianAnalytics";
-import { type AnyRouter, type StaticDataRouteOption } from "@tanstack/react-router";
+import { type AnyRouter } from "@tanstack/react-router";
 
 import { appEnv } from "@/env";
+import { type MatchWithStaticData, routeSpace } from "@/router/routeSpace";
 
 declare global {
     interface Window {
@@ -59,13 +60,6 @@ function matomoInit() {
     g.async = true;
     g.src = MATOMO_HOST + "matomo.js";
     s.parentNode?.insertBefore(g, s);
-}
-
-type MatchWithStaticData = { staticData: StaticDataRouteOption };
-
-/** espace du match le plus profond qui en déclare un : un layout couvre ses feuilles */
-export function routeSpace(matches: MatchWithStaticData[]): StaticDataRouteOption["space"] {
-    return matches.findLast((match) => match.staticData.space)?.staticData.space;
 }
 
 /** titre de la page vue : préfixe par espace, libellé de la feuille matchée (sans feuille, page introuvable) */

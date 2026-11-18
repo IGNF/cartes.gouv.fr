@@ -87,26 +87,3 @@ describe("matomoPageTitle", () => {
         expect(matomoPageTitle([])).toBe("[Publier] Page introuvable");
     });
 });
-
-describe("routeSpace", () => {
-    beforeEach(() => {
-        vi.resetModules();
-        stubBrowser();
-    });
-    afterEach(() => vi.unstubAllGlobals());
-
-    it("returns the space of the deepest match declaring one", async () => {
-        const { routeSpace } = await import("./analytics");
-
-        expect(routeSpace([{ staticData: {} }, { staticData: { space: "publish" } }, { staticData: { space: "contribute" } }, { staticData: {} }])).toBe(
-            "contribute"
-        );
-    });
-
-    it("returns undefined when no match declares a space", async () => {
-        const { routeSpace } = await import("./analytics");
-
-        expect(routeSpace([{ staticData: {} }, { staticData: { matomoLabel: "Mon compte" } }])).toBeUndefined();
-        expect(routeSpace([])).toBeUndefined();
-    });
-});
