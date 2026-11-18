@@ -14,8 +14,6 @@ const { i18n } = declareComponentKeys<
     | "communities_as_member"
     | "pending_membership"
     | { K: "no_result"; P: { filter: CommunityListFilter }; R: string }
-    | "community_creation"
-    | "create_community"
     | "append_community"
     | { K: "role"; P: { role: Role }; R: string }
 >()("EspaceCoCommunityList");
@@ -38,8 +36,6 @@ export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCo
               : filter === "affiliation"
                 ? "Aucune affiliation en cours"
                 : "[TODO]",
-    community_creation: "Création du guichet en cours ...",
-    create_community: "Création d'un guichet",
     append_community: "Reprendre la configuration de ce guichet",
     role: ({ role }) =>
         ({
@@ -60,8 +56,6 @@ export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCo
     communities_as_member: undefined,
     pending_membership: undefined,
     no_result: ({ filter }) => `[TODO] ${filter}`,
-    community_creation: undefined,
-    create_community: undefined,
     append_community: undefined,
     role: ({ role }) =>
         ({
