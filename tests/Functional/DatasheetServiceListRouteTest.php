@@ -170,6 +170,46 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         self::assertSame('https://tms.test/tms/1.0.0/tms/{z}/{x}/{y}.pbf', $service['share_url']);
     }
 
+    public function testTheServiceRouteLeavesTheAccessUnknownWhenThePermissionsReadFails(): void
+    {
+        $this->seedService('private', 'WFS', EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID, 'vector-db-1', open: false, offeringId: self::OFFERING_UUID);
+        EntrepotMockResponseFactory::failNext('GET permissions', status: 403);
+
+        self::assertNull($this->getService()['access']);
+    }
+
+    public function testTheServiceRouteDoesNotReadThePermissionsOfAnOpenService(): void
+    {
+        $this->seedService('public', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1', offeringId: self::OFFERING_UUID);
+        // une lecture des permissions échouerait
+        EntrepotMockResponseFactory::failNext('GET permissions', status: 403);
+
+        self::assertSame('public', $this->getService()['access']);
+    }
+
+    public function testDeletingTheDatasheetUnpublishesItsServicesBeforeRemovingTheOrphanConfigurations(): void
+    {
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vector-db-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
+        // configuration dépubliée dès la suppression de son offre : l’attente ne boucle pas
+        $this->seedService('wfs', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1', configurationStatus: 'UNPUBLISHED');
+        $this->seedConfiguration('orphan', 'WMS-VECTOR', 'vector-db-1');
+
+        $client = $this->client();
+        $client->xmlHttpRequest('DELETE', self::BASE.self::DATASTORE_PATH.'/datasheet/Fiche');
+
+        self::assertResponseStatusCodeSame(204);
+        $deletes = array_values(array_unique(array_filter(
+            array_map(fn (array $request) => $request['method'].' '.$request['path'], EntrepotMockResponseFactory::writeRequests()),
+            fn (string $request) => 1 === preg_match('#^DELETE .*/(offerings|configurations|stored_data)/#', $request),
+        )));
+        self::assertSame([
+            'DELETE '.self::DATASTORE_PATH.'/offerings/offering-wfs',
+            'DELETE '.self::DATASTORE_PATH.'/configurations/configuration-wfs',
+            'DELETE '.self::DATASTORE_PATH.'/configurations/configuration-orphan',
+            'DELETE '.self::DATASTORE_PATH.'/stored_data/vector-db-1',
+        ], $deletes);
+    }
+
     public function testDeletingTheDatasheetRemovesItsConfigurationsWithoutOfferingBeforeTheStoredData(): void
     {
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vector-db-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
@@ -192,9 +232,9 @@ final class DatasheetServiceListRouteTest extends WebTestCase
     /**
      * @param list<array{type: string, url: string}>|null $urls
      */
-    private function seedService(string $key, string $type, string $endpointId, string $storedDataId, ?string $datasheetName = 'Fiche', bool $open = true, ?array $urls = null, ?string $offeringId = null): void
+    private function seedService(string $key, string $type, string $endpointId, string $storedDataId, ?string $datasheetName = 'Fiche', bool $open = true, ?array $urls = null, ?string $offeringId = null, string $configurationStatus = 'PUBLISHED'): void
     {
-        $this->seedConfiguration($key, $type, $storedDataId, $datasheetName);
+        $this->seedConfiguration($key, $type, $storedDataId, $datasheetName, $configurationStatus);
         EntrepotMockResponseFactory::seed('offerings', [
             '_id' => $offeringId ?? "offering-$key",
             'type' => $type,
@@ -217,13 +257,13 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         ]);
     }
 
-    private function seedConfiguration(string $key, string $type, string $storedDataId, ?string $datasheetName = 'Fiche'): void
+    private function seedConfiguration(string $key, string $type, string $storedDataId, ?string $datasheetName = 'Fiche', string $status = 'PUBLISHED'): void
     {
         EntrepotMockResponseFactory::seed('configurations', [
             '_id' => "configuration-$key",
             'name' => $key,
             'type' => $type,
-            'status' => 'PUBLISHED',
+            'status' => $status,
             'tags' => null === $datasheetName ? [] : ['datasheet_name' => $datasheetName],
             'type_infos' => ['used_data' => [['stored_data' => $storedDataId]]],
         ]);
@@ -236,6 +276,19 @@ final class DatasheetServiceListRouteTest extends WebTestCase
     {
         $client ??= $this->client();
         $client->xmlHttpRequest('GET', self::LIST_URL);
+
+        self::assertResponseIsSuccessful();
+
+        return json_decode((string) $client->getResponse()->getContent(), true);
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getService(): array
+    {
+        $client = $this->client();
+        $client->xmlHttpRequest('GET', self::BASE.self::DATASTORE_PATH.'/offerings/'.self::OFFERING_UUID);
 
         self::assertResponseIsSuccessful();
 
