@@ -30,18 +30,15 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * `Service` sur cartes.gouv.fr qui représente un `offering` et une `configuration` de l'`API Entrepôt`, ainsi que les fichiers de style (`styles`), `tms_metadata`, url de partage (`share_url`) et accès (`access`).
+ * `Service` sur cartes.gouv.fr qui représente un `offering` et une `configuration` de l'`API Entrepôt`, ainsi que les fichiers de style (`styles`), url de partage (`share_url`) et accès (`access`).
  */
 class CartesServiceApiService
 {
     // les trois attentes (offering dépubliée, offering supprimée, configuration dépubliée) sont séquentielles et doivent tenir sous max_execution_time (.docker/php.ini, 120 s)
     private const UNPUBLISH_MAX_ATTEMPTS = 6;
     private const UNPUBLISH_RETRY_DELAY_SECONDS = 5;
-
-    private readonly HttpClientInterface $httpClient;
 
     public function __construct(
         private readonly ParameterBagInterface $params,
@@ -61,11 +58,7 @@ class CartesServiceApiService
         private readonly ServiceConfigurationRequestBuilder $configurationRequestBuilder,
         private readonly ServiceImageAnnexeService $serviceImageAnnexeService,
         private readonly DatastorePrefixValidator $datastorePrefixValidator,
-        HttpClientInterface $httpClient,
     ) {
-        $this->httpClient = $httpClient->withOptions([
-            'proxy' => $params->get('http_proxy'),
-        ]);
     }
 
     /**
@@ -76,27 +69,8 @@ class CartesServiceApiService
         $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
         $offering['configuration'] = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
 
-        // traitement spécial pour WMTS-TMS
         if (OfferingTypes::WMTSTMS === $offering['type']) {
-            $storedData = $this->storedDataApiService->get($datastoreId, $offering['configuration']['type_infos']['used_data'][0]['stored_data'])->array();
-            $offering['configuration']['pyramid'] = $storedData;
-
-            // TMS
-            if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $storedData['type']) {
-                // Metadata (TMS)
-                $urls = array_values(array_filter($offering['urls'], static function ($url) {
-                    return 'TMS' == $url['type'];
-                }));
-                $url = $urls[0]['url'].'/metadata.json';
-
-                try {
-                    $response = $this->httpClient->request('GET', $url);
-                    if (Response::HTTP_OK === $response->getStatusCode()) {
-                        $offering['tms_metadata'] = $response->toArray();
-                    }
-                } catch (\Throwable) {
-                }
-            }
+            $offering['configuration']['pyramid'] = $this->storedDataApiService->get($datastoreId, $offering['configuration']['type_infos']['used_data'][0]['stored_data'])->array();
         }
 
         $styles = [];

@@ -156,6 +156,20 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         self::assertSame('restricted_visible', json_decode((string) $client->getResponse()->getContent(), true)['access']);
     }
 
+    public function testTheServiceRouteNoLongerReadsTheTmsMetadata(): void
+    {
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'pyramid-vector-1', 'type' => 'ROK4-PYRAMID-VECTOR', 'tags' => ['datasheet_name' => 'Fiche']]);
+        $this->seedService('tms', 'WMTS-TMS', EntrepotMockResponseFactory::WMTS_PUBLIC_ENDPOINT_ID, 'pyramid-vector-1', offeringId: self::OFFERING_UUID);
+
+        $client = $this->client();
+        $client->xmlHttpRequest('GET', self::BASE.self::DATASTORE_PATH.'/offerings/'.self::OFFERING_UUID);
+
+        self::assertResponseIsSuccessful();
+        $service = json_decode((string) $client->getResponse()->getContent(), true);
+        self::assertArrayNotHasKey('tms_metadata', $service);
+        self::assertSame('https://tms.test/tms/1.0.0/tms/{z}/{x}/{y}.pbf', $service['share_url']);
+    }
+
     public function testDeletingTheDatasheetRemovesItsConfigurationsWithoutOfferingBeforeTheStoredData(): void
     {
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vector-db-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
