@@ -4,21 +4,19 @@
 #----------------------------------------------------------------------
 ARG project_dir=/opt/cartesgouvfr-site
 
-ARG composer_image=docker.io/composer/composer:2-bin@sha256:56a1b0a72bacd78079e3fa49a49e7bf58326365753415c99385ea2b08bded0a5
-# aligné sur .nvmrc
-ARG node_alpine_image=docker.io/library/node:24.22.2-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8
-# binaire node glibc pour la base Ubuntu
-ARG node_slim_image=docker.io/library/node:24.22.2-slim@sha256:01d566e8d94d8c619591d78652babfccd3c6992a3dffa9ed5ab39e11cf6c70e9
-ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+ARG composer_image=docker.io/composer/composer:2-bin@sha256:269d47ef954e254227bccb35e3e40f642756abee44dded405e1fbb6f5e52af0c
+# aligné sur .nvmrc ; glibc comme la base Ubuntu
+ARG node_image=docker.io/library/node:24.22.3-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54
+ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8
 
 # Versions amont (php.net, FrankenPHP) : le dépôt deb y ajoute un suffixe de rebuild (-N) propre à chaque paquet,
 # ignoré ici (globs apt) et par Renovate (extractVersion). La branche du dépôt (82, 85...) découle de php_zts_version.
-ARG php_zts_version=8.5.12
+ARG php_zts_version=8.5.13
 ARG frankenphp_version=1.13.5
 
 # Stages alias : COPY --from n'interpole pas les ARG, contrairement à FROM
 FROM ${composer_image} AS composer_bin
-FROM ${node_slim_image} AS node_dist
+FROM ${node_image} AS node_dist
 
 #----------------------------------------------------------------------
 # Créer l'image de base de l'application
@@ -113,7 +111,7 @@ RUN composer dump-autoload --no-dev --optimize
 #----------------------------------------------------------------------
 # Installer les dépendances JavaScript/nodejs dans une couche dédiée
 #----------------------------------------------------------------------
-FROM ${node_alpine_image} AS deps_nodejs_build
+FROM ${node_image} AS deps_nodejs_build
 ARG project_dir
 WORKDIR ${project_dir}
 
@@ -133,7 +131,7 @@ RUN npm run build
 #----------------------------------------------------------------------
 # node_modules de production (runtime du scraper), indépendant des autres stages
 #----------------------------------------------------------------------
-FROM ${node_alpine_image} AS deps_nodejs_runtime
+FROM ${node_image} AS deps_nodejs_runtime
 ARG project_dir
 WORKDIR ${project_dir}
 
