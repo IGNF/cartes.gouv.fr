@@ -107,9 +107,13 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
 
     const metadataQuery = useQuery({ ...datasheetMetadataQueryOptions(datastoreId, datasheetName), enabled });
 
-    const serviceListQuery = useQuery({ ...datasheetServiceListQueryOptions(datastoreId, datasheetName), enabled });
-
     const isDeleteModalOpen = useIsModalOpen(deleteModal);
+
+    // lue par l’onglet Flux et, pour son compte, par la modale de suppression
+    const serviceListQuery = useQuery({
+        ...datasheetServiceListQueryOptions(datastoreId, datasheetName),
+        enabled: enabled && (activeTab === DatasheetViewActiveTabEnum.Services || isDeleteModalOpen),
+    });
 
     const documentsListQuery = useQuery({ ...datasheetDocumentsQueryOptions(datastoreId, datasheetName), enabled: enabled && isDeleteModalOpen });
 
@@ -173,7 +177,11 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
             : undefined;
 
     const deleteModalLoading =
-        datasheetQuery.isFetching || metadataQuery.isFetching || documentsListQuery.isFetching || processingExecutionsQueries.some((query) => query.isFetching);
+        datasheetQuery.isFetching ||
+        metadataQuery.isFetching ||
+        documentsListQuery.isFetching ||
+        serviceListQuery.isFetching ||
+        processingExecutionsQueries.some((query) => query.isFetching);
     const datasheet = datasheetQuery.data;
 
     const tabContent: Record<(typeof DATASHEET_VIEW_NEXT_TABS)[number], ReactNode> = {
