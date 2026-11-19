@@ -22,6 +22,7 @@ import { formatDateFromISO } from "@/utils";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
+import { invalidateServiceAccess } from "../../../../modules/entrepot/invalidateServiceAccess";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
 import { getApiErrorMessage } from "../../../../modules/apiError";
@@ -67,9 +68,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
             queryClient.setQueryData<DatastorePermission[]>(RQKeys.datastore_permissions(datastoreId), (permissions) => {
                 return permissions?.filter((permission) => permission._id !== currentPermission);
             });
-            // accès des flux, lu dans la liste des flux et dans chaque flux
-            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
-            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_services(datastoreId) });
+            invalidateServiceAccess(queryClient, datastoreId);
         },
     });
 
