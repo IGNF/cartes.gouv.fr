@@ -167,7 +167,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                 <ServiceAccessBadge key={`access-${service._id}`} service={service} />,
                 <ServiceShareUrlCell
                     key={`url-${service._id}`}
-                    shareUrl={offeringUnavailable ? undefined : service.share_url}
+                    shareUrl={offeringUnavailable ? undefined : (service.share_url ?? undefined)}
                     onCopy={() => openCopyUrlDialog(service)}
                 />,
                 <ServiceExploreMapsCell key={`explore-${service._id}`} availability={exploreMapsAvailability} layerParam={exploreMapsLayerParam} />,

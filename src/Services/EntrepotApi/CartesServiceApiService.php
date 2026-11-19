@@ -152,7 +152,7 @@ class CartesServiceApiService
      *
      * @param array<mixed> $offering avec `configuration.pyramid.type` pour un WMTS-TMS
      */
-    public function getShareUrl(string $datastoreId, array $offering): ?string
+    private function getShareUrl(string $datastoreId, array $offering): ?string
     {
         $pyramidType = $offering['configuration']['pyramid']['type'] ?? null;
         if (OfferingTypes::WMTSTMS === $offering['type'] && StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramidType) {
