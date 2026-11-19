@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { type DatastorePermission, OfferingStatusEnum, OfferingTypeEnum, type Service, StoredDataTypeEnum, type VectorDb } from "@/@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, type Service, StoredDataTypeEnum, type VectorDb } from "@/@types/app";
 import { markdownToText, serviceToFormValues } from "./serviceToFormValues";
-
-const NOW = Date.parse("2026-11-13T12:00:00+00:00");
-const CARTES_GOUV = "community-cartes-gouv";
 
 type Fixture = {
     type?: OfferingTypeEnum;
@@ -14,6 +11,7 @@ type Fixture = {
     tags?: Record<string, string>;
     attribution?: { title: string; url: string };
     pyramidType?: StoredDataTypeEnum;
+    access?: Service["access"];
 };
 
 function service({
@@ -24,12 +22,14 @@ function service({
     tags = { datasheet_name: "fiche", theme: "farming, environment" },
     attribution,
     pyramidType,
+    access = "public",
 }: Fixture = {}): Service {
     return {
         _id: "offering-1",
         type,
         status,
         open,
+        access,
         layer_name: "couche_wmsv",
         configuration: {
             _id: "configuration-1",
@@ -43,18 +43,9 @@ function service({
     } as unknown as Service;
 }
 
-function permission(beneficiaryId: string, endDate?: string): DatastorePermission {
-    return { beneficiary: { _id: beneficiaryId }, offerings: [{ _id: "offering-1" }], end_date: endDate } as unknown as DatastorePermission;
-}
-
 describe("serviceToFormValues", () => {
     it("lit un WMS vecteur publié depuis le nouveau formulaire", () => {
-        const values = serviceToFormValues(
-            service({ typeInfos: { abstract: "Description du flux" }, attribution: { title: "IGN", url: "https://ign.fr" } }),
-            [],
-            CARTES_GOUV,
-            NOW
-        );
+        const values = serviceToFormValues(service({ typeInfos: { abstract: "Description du flux" }, attribution: { title: "IGN", url: "https://ign.fr" } }));
         expect(values).toEqual({
             stored_data_id: "stored-data-1",
             title: "Ma couche",
@@ -69,7 +60,7 @@ describe("serviceToFormValues", () => {
     });
 
     it("lit un WFS : pas de description du flux, chaque table a la sienne", () => {
-        const values = serviceToFormValues(service({ type: OfferingTypeEnum.WFS, typeInfos: {} }), [], CARTES_GOUV, NOW);
+        const values = serviceToFormValues(service({ type: OfferingTypeEnum.WFS, typeInfos: {} }));
         expect(values.description).toBe("");
         expect(values.tables).toEqual([]);
         expect(values.attribution.enabled).toBe(false);
@@ -79,7 +70,7 @@ describe("serviceToFormValues", () => {
         ["TMS", StoredDataTypeEnum.ROK4PYRAMIDVECTOR],
         ["WMTS", StoredDataTypeEnum.ROK4PYRAMIDRASTER],
     ])("lit un %s", (_label, pyramidType) => {
-        const values = serviceToFormValues(service({ type: OfferingTypeEnum.WMTSTMS, pyramidType, typeInfos: { abstract: "Pyramide" } }), [], CARTES_GOUV, NOW);
+        const values = serviceToFormValues(service({ type: OfferingTypeEnum.WMTSTMS, pyramidType, typeInfos: { abstract: "Pyramide" } }));
         expect(values.description).toBe("Pyramide");
         expect(values.stored_data_id).toBe("stored-data-1");
     });
@@ -90,10 +81,7 @@ describe("serviceToFormValues", () => {
                 type: OfferingTypeEnum.WMTSTMS,
                 typeInfos: { abstract: JSON.stringify('Description "citée"') },
                 tags: { datasheet_name: "fiche", theme: "Agriculture, Environnement" },
-            }),
-            [],
-            CARTES_GOUV,
-            NOW
+            })
         );
         expect(values.description).toBe('Description "citée"');
         expect(values.themes).toEqual(["farming", "environment"]);
@@ -101,48 +89,34 @@ describe("serviceToFormValues", () => {
     });
 
     it("garde telle quelle une description entre guillemets qui n’est pas du JSON", () => {
-        const values = serviceToFormValues(service({ typeInfos: { abstract: '"a\\q"' } }), [], CARTES_GOUV, NOW);
+        const values = serviceToFormValues(service({ typeInfos: { abstract: '"a\\q"' } }));
         expect(values.description).toBe('"a\\q"');
     });
 
     it("convertit en texte simple la description markdown des anciens formulaires seulement", () => {
         const markdown = "**Gras** et [lien](https://ign.fr)\nsuite\n\nSecond paragraphe";
-        expect(serviceToFormValues(service({ typeInfos: { abstract: JSON.stringify(markdown) } }), [], CARTES_GOUV, NOW).description).toBe(
+        expect(serviceToFormValues(service({ typeInfos: { abstract: JSON.stringify(markdown) } })).description).toBe(
             "Gras et lien\nsuite\n\nSecond paragraphe"
         );
-        expect(serviceToFormValues(service({ typeInfos: { abstract: markdown } }), [], CARTES_GOUV, NOW).description).toBe(markdown);
+        expect(serviceToFormValues(service({ typeInfos: { abstract: markdown } })).description).toBe(markdown);
     });
 
     it("lit les libellés de thématiques qui contiennent « , » et garde un libellé inconnu", () => {
-        const values = serviceToFormValues(service({ tags: { theme: "Biologie, faune et flore, Agriculture, Thème perdu" } }), [], CARTES_GOUV, NOW);
+        const values = serviceToFormValues(service({ tags: { theme: "Biologie, faune et flore, Agriculture, Thème perdu" } }));
         expect(values.themes).toEqual(["biota", "farming", "Thème perdu"]);
     });
 
     it("lit un flux sans thématique", () => {
-        expect(serviceToFormValues(service({ tags: {} }), [], CARTES_GOUV, NOW).themes).toEqual([]);
+        expect(serviceToFormValues(service({ tags: {} })).themes).toEqual([]);
     });
 
     describe("accès", () => {
-        it("restreint visible : permission en cours de la communauté cartes.gouv.fr", () => {
-            const values = serviceToFormValues(service({ open: false }), [permission(CARTES_GOUV)], CARTES_GOUV, NOW);
-            expect(values.access).toBe("restricted_visible");
+        it("lit l’accès calculé par le serveur", () => {
+            expect(serviceToFormValues(service({ open: false, access: "restricted_visible" })).access).toBe("restricted_visible");
         });
 
-        it("restreint : permission cartes.gouv.fr expirée", () => {
-            const values = serviceToFormValues(service({ open: false }), [permission(CARTES_GOUV, "2026-01-01T00:00:00+00:00")], CARTES_GOUV, NOW);
-            expect(values.access).toBe("restricted");
-        });
-
-        it("restreint : permission d’une autre communauté seulement", () => {
-            expect(serviceToFormValues(service({ open: false }), [permission("autre")], CARTES_GOUV, NOW).access).toBe("restricted");
-        });
-
-        it("restreint tant que les permissions ne sont pas lues, comme l’onglet Flux", () => {
-            expect(serviceToFormValues(service({ open: false }), undefined, CARTES_GOUV, NOW).access).toBe("restricted");
-        });
-
-        it("public pour un flux ouvert dépublié", () => {
-            expect(serviceToFormValues(service({ status: OfferingStatusEnum.UNPUBLISHED }), undefined, CARTES_GOUV, NOW).access).toBe("public");
+        it("restreint quand l’accès est inconnu", () => {
+            expect(serviceToFormValues(service({ open: false, access: null })).access).toBe("restricted");
         });
     });
 });
@@ -172,7 +146,7 @@ describe("serviceToFormValues, tables WFS", () => {
     });
 
     it("propose toutes les tables de la base, coche les enregistrées et garde une table disparue non cochable", () => {
-        expect(serviceToFormValues(wfs, [], CARTES_GOUV, NOW, vectorDb).tables).toEqual([
+        expect(serviceToFormValues(wfs, vectorDb).tables).toEqual([
             { native_name: "communes", selected: true, title: "Communes", public_name: "", description: "Les communes", keywords: ["admin"], style: undefined },
             { native_name: "routes", selected: false, title: "routes", public_name: "routes", description: "", keywords: [], style: undefined },
             {
@@ -189,7 +163,7 @@ describe("serviceToFormValues, tables WFS", () => {
     });
 
     it("ne propose aucune table sans la base", () => {
-        expect(serviceToFormValues(wfs, [], CARTES_GOUV, NOW).tables).toEqual([]);
+        expect(serviceToFormValues(wfs).tables).toEqual([]);
     });
 });
 
@@ -212,7 +186,7 @@ describe("serviceToFormValues, tables WMS vecteur", () => {
     const row = (native_name: string) => ({ native_name, title: native_name, public_name: native_name, description: "", keywords: [], style: undefined });
 
     it("lit les tables par leur nom avec leur style enregistré, garde une table disparue non cochable", () => {
-        expect(serviceToFormValues(wmsv, [], CARTES_GOUV, NOW, vectorDb).tables).toEqual([
+        expect(serviceToFormValues(wmsv, vectorDb).tables).toEqual([
             { ...row("communes"), selected: true, saved_style_id: "static-communes" },
             { ...row("routes"), selected: false },
             { ...row("disparue"), selected: false, missing: true, saved_style_id: "static-disparue" },

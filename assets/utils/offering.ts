@@ -1,4 +1,4 @@
-import { type DatastorePermission, OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type ServiceListItem } from "@/@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type ServiceListItem } from "@/@types/app";
 
 /**
  * Indique si l'offering n'est plus diffusée (dépubliée ou en cours de dépublication) :
@@ -37,27 +37,6 @@ export const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
 
 /** Vignette du flux, écrite dans `extra._search.url_vignette` de la configuration */
 export const getServiceThumbnailUrl = (service: ServiceListItem): string | undefined => service.configuration.extra?._search?.url_vignette;
-
-// une permission sans date de fin n’expire pas ; la liste de l’Entrepôt conserve les permissions expirées
-const isPermissionActive = (permission: DatastorePermission, now: number): boolean => !permission.end_date || Date.parse(permission.end_date) > now;
-
-/** Flux privé mais consultable par tous sur cartes.gouv.fr : une permission en cours est accordée à la communauté cartes.gouv.fr */
-export const isPrivateServiceVisibleOnCartesGouv = (
-    service: ServiceListItem,
-    permissions: DatastorePermission[] | undefined,
-    cartesGouvCommunityId: string | null,
-    now: number
-): boolean => {
-    if (service.open || !cartesGouvCommunityId) {
-        return false;
-    }
-    return (permissions ?? []).some(
-        (permission) =>
-            permission.beneficiary?._id === cartesGouvCommunityId &&
-            isPermissionActive(permission, now) &&
-            (permission.offerings?.some((offering) => offering._id === service._id) ?? false)
-    );
-};
 
 /**
  * Nom de couche sans le suffixe `_wms`, `_wmts` ou `_wmsr`, comme `filter_specific_duplicates` du générateur

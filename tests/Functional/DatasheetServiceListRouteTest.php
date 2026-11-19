@@ -18,6 +18,7 @@ final class DatasheetServiceListRouteTest extends WebTestCase
 
     private const DATASTORE_PATH = '/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID;
     private const LIST_URL = self::BASE.self::DATASTORE_PATH.'/datasheet/Fiche/services';
+    private const OFFERING_UUID = '44444444-4444-4444-8444-444444444444';
 
     protected function setUp(): void
     {
@@ -76,6 +77,55 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         self::assertNull($service['share_url']);
     }
 
+    public function testGivesTheAccessOfEachService(): void
+    {
+        $this->seedService('public', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1');
+        $this->seedService('visible', 'WFS', EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID, 'vector-db-1', open: false);
+        $this->seedService('expired', 'WFS', EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID, 'vector-db-1', open: false);
+        $this->seedService('restricted', 'WFS', EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID, 'vector-db-1', open: false);
+        $client = $this->client();
+        $this->seedPermission('offering-visible', '2099-01-01T00:00:00+00:00');
+        $this->seedPermission('offering-expired', '2020-01-01T00:00:00+00:00');
+
+        $services = $this->getList($client)['services'];
+
+        self::assertSame(
+            ['offering-public' => 'public', 'offering-visible' => 'restricted_visible', 'offering-expired' => 'restricted', 'offering-restricted' => 'restricted'],
+            array_column($services, 'access', '_id'),
+        );
+    }
+
+    public function testAFailedPermissionsReadLeavesTheAccessOfPrivateServicesUnknown(): void
+    {
+        $this->seedService('public', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1');
+        $this->seedService('private', 'WFS', EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID, 'vector-db-1', open: false);
+        // 403 : un 500 serait rejoué par le client HTTP
+        EntrepotMockResponseFactory::failNext('GET permissions', status: 403);
+
+        self::assertSame(['offering-public' => 'public', 'offering-private' => null], array_column($this->getList()['services'], 'access', '_id'));
+    }
+
+    public function testDoesNotReadThePermissionsWhenEveryServiceIsOpen(): void
+    {
+        $this->seedService('public', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1');
+        // une lecture des permissions échouerait
+        EntrepotMockResponseFactory::failNext('GET permissions', status: 403);
+
+        self::assertSame('public', $this->getList()['services'][0]['access']);
+    }
+
+    public function testTheServiceRouteGivesTheAccessToo(): void
+    {
+        $this->seedService('visible', 'WFS', EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID, 'vector-db-1', open: false, offeringId: self::OFFERING_UUID);
+        $client = $this->client();
+        $this->seedPermission(self::OFFERING_UUID, '2099-01-01T00:00:00+00:00');
+
+        $client->xmlHttpRequest('GET', self::BASE.self::DATASTORE_PATH.'/offerings/'.self::OFFERING_UUID);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('restricted_visible', json_decode((string) $client->getResponse()->getContent(), true)['access']);
+    }
+
     public function testDeletingTheDatasheetRemovesItsConfigurationsWithoutOfferingBeforeTheStoredData(): void
     {
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vector-db-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
@@ -98,11 +148,11 @@ final class DatasheetServiceListRouteTest extends WebTestCase
     /**
      * @param list<array{type: string, url: string}>|null $urls
      */
-    private function seedService(string $key, string $type, string $endpointId, string $storedDataId, ?string $datasheetName = 'Fiche', bool $open = true, ?array $urls = null): void
+    private function seedService(string $key, string $type, string $endpointId, string $storedDataId, ?string $datasheetName = 'Fiche', bool $open = true, ?array $urls = null, ?string $offeringId = null): void
     {
         $this->seedConfiguration($key, $type, $storedDataId, $datasheetName);
         EntrepotMockResponseFactory::seed('offerings', [
-            '_id' => "offering-$key",
+            '_id' => $offeringId ?? "offering-$key",
             'type' => $type,
             'open' => $open,
             'status' => 'PUBLISHED',
@@ -110,6 +160,16 @@ final class DatasheetServiceListRouteTest extends WebTestCase
             'configuration' => ['_id' => "configuration-$key"],
             'endpoint' => ['_id' => $endpointId],
             'urls' => $urls ?? [['type' => 'TMS', 'url' => "https://tms.test/tms/1.0.0/$key"]],
+        ]);
+    }
+
+    private function seedPermission(string $offeringId, string $endDate): void
+    {
+        EntrepotMockResponseFactory::seed('permissions', [
+            '_id' => "permission-$offeringId",
+            'end_date' => $endDate,
+            'offerings' => [['_id' => $offeringId]],
+            'beneficiary' => ['_id' => self::getContainer()->getParameter('config')['community_id']],
         ]);
     }
 
@@ -128,9 +188,9 @@ final class DatasheetServiceListRouteTest extends WebTestCase
     /**
      * @return array{services: list<array<mixed>>, configurations_without_offering: list<array<mixed>>}
      */
-    private function getList(): array
+    private function getList(?KernelBrowser $client = null): array
     {
-        $client = $this->client();
+        $client ??= $this->client();
         $client->xmlHttpRequest('GET', self::LIST_URL);
 
         self::assertResponseIsSuccessful();

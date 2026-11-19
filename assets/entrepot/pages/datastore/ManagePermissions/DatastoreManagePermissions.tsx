@@ -67,6 +67,9 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
             queryClient.setQueryData<DatastorePermission[]>(RQKeys.datastore_permissions(datastoreId), (permissions) => {
                 return permissions?.filter((permission) => permission._id !== currentPermission);
             });
+            // accès des flux, lu dans la liste des flux et dans chaque flux
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering_list(datastoreId) });
         },
     });
 

@@ -54,6 +54,9 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                 const newPermissions = oldPermissions?.filter((p) => p._id !== permissionId) || [];
                 return [...newPermissions, permission];
             });
+            // accès des flux, lu dans la liste des flux et dans chaque flux
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering_list(datastoreId) });
             void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params: { datastoreId } });
         },
     });

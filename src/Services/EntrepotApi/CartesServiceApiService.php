@@ -33,7 +33,7 @@ use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * `Service` sur cartes.gouv.fr qui représente un `offering` et une `configuration` de l'`API Entrepôt`, ainsi que les fichiers de style (`styles`), `tms_metadata` et url de partage (`share_url`).
+ * `Service` sur cartes.gouv.fr qui représente un `offering` et une `configuration` de l'`API Entrepôt`, ainsi que les fichiers de style (`styles`), `tms_metadata`, url de partage (`share_url`) et accès (`access`).
  */
 class CartesServiceApiService
 {
@@ -107,6 +107,7 @@ class CartesServiceApiService
 
         // url de partage (url capabilities si WFS ou WMS-VECTOR, url spécifique si TMS)
         $offering['share_url'] = $this->getShareUrl($datastoreId, $offering);
+        $offering['access'] = $this->readServiceAccess($offering, true === $offering['open'] ? [] : $this->readPermissionsQuietly($datastoreId));
 
         return $offering;
     }
@@ -151,6 +152,8 @@ class CartesServiceApiService
         ]);
         $datasheetServices = $this->getDatasheetServices($datastoreId, $datasheetName);
         $storedDataTypes = array_column($pendingStoredData->resolve(), 'type', '_id');
+        $allOpen = [] === array_filter($datasheetServices->offeringsById, fn (array $offering) => true !== $offering['open']);
+        $permissions = $allOpen ? [] : $this->readPermissionsQuietly($datastoreId);
 
         $services = [];
         foreach ($datasheetServices->offeringsById as $offering) {
@@ -160,6 +163,7 @@ class CartesServiceApiService
                 $offering['configuration']['pyramid'] = null === $pyramidType ? null : ['type' => $pyramidType];
             }
             $offering['share_url'] = $this->getShareUrl($datastoreId, $offering);
+            $offering['access'] = $this->readServiceAccess($offering, $permissions);
             $services[] = $offering;
         }
 
@@ -590,7 +594,7 @@ class CartesServiceApiService
         $datasheetName = $this->assertEditable($offering, $configuration);
 
         $type = $configuration['type'];
-        $previousAccess = $this->getServiceAccess($datastoreId, $offering);
+        $previousAccess = $this->getServiceAccess($offering, true === $offering['open'] ? [] : $this->datastoreApiService->getPermissions($datastoreId)->resolve());
         $previousEndpoint = $this->getEndpointByAccess($datastoreId, $type, $previousAccess);
         $endpoint = $this->getEndpointByAccess($datastoreId, $type, $dto->access);
 
@@ -704,18 +708,49 @@ class CartesServiceApiService
     }
 
     /**
-     * Accès actuel d’un flux, même règle que `offering.ts` : endpoint ouvert, sinon permission en cours pour la communauté cartes.gouv.fr.
+     * Permissions de l’entrepôt, null si l’Entrepôt ne répond pas : l’accès des flux privés reste alors inconnu.
      *
-     * @param array<mixed> $offering
+     * @return array<array<mixed>>|null
      */
-    private function getServiceAccess(string $datastoreId, array $offering): ServiceAccess
+    private function readPermissionsQuietly(string $datastoreId): ?array
+    {
+        try {
+            return $this->datastoreApiService->getPermissions($datastoreId)->resolve();
+        } catch (ApiException $e) {
+            $this->logger->warning('{class}: Failed to read permissions of datastore {datastoreId}: {error}', [
+                'class' => self::class,
+                'datastoreId' => $datastoreId,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * @param array<mixed>             $offering
+     * @param array<array<mixed>>|null $permissions null : lecture en échec
+     */
+    private function readServiceAccess(array $offering, ?array $permissions): ?ServiceAccess
+    {
+        return true !== $offering['open'] && null === $permissions ? null : $this->getServiceAccess($offering, $permissions ?? []);
+    }
+
+    /**
+     * Accès actuel d’un flux : endpoint ouvert, sinon permission en cours pour la communauté cartes.gouv.fr.
+     *
+     * @param array<mixed>        $offering
+     * @param array<array<mixed>> $permissions permissions de l’entrepôt
+     */
+    private function getServiceAccess(array $offering, array $permissions): ServiceAccess
     {
         if (true === $offering['open']) {
             return ServiceAccess::Public;
         }
 
         $configCommunityId = $this->params->get('config')['community_id'];
-        foreach ($this->datastoreApiService->getPermissions($datastoreId)->resolve() as $permission) {
+        foreach ($permissions as $permission) {
             if (($permission['beneficiary']['_id'] ?? null) === $configCommunityId
                 && !$this->isPermissionExpired($permission)
                 && in_array($offering['_id'], array_column($permission['offerings'] ?? [], '_id'), true)) {

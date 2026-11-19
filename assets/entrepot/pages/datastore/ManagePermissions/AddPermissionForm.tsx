@@ -79,6 +79,9 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                     return [...oldPermissions, ...permissions];
                 }
             });
+            // accès des flux, lu dans la liste des flux et dans chaque flux
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering_list(datastoreId) });
             void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params: { datastoreId } });
         },
     });

@@ -5,7 +5,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { type UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
@@ -18,8 +18,6 @@ import LoadingText from "@/components/Utils/LoadingText";
 import MenuList from "@/components/Utils/MenuList";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import Wait from "@/components/Utils/Wait";
-import api from "@/entrepot/api";
-import { datastorePermissionsQueryOptions } from "@/hooks/queries/datastorePermissionsQueryOptions";
 import useUnpublishServiceMutation from "@/hooks/queries/useUnpublishServiceMutation";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { usePagination } from "@/hooks/usePagination";
@@ -36,7 +34,6 @@ import {
     getServiceThumbnailUrl,
     getServiceTypeLabel,
     isOfferingUnavailable,
-    isPrivateServiceVisibleOnCartesGouv,
 } from "@/utils";
 import DatasheetViewTab from "../../DatasheetViewTab";
 import ConfigurationsWithoutOfferingList from "./ConfigurationsWithoutOfferingList";
@@ -103,9 +100,6 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
     const canGeneratePyramidRaster =
         isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
 
-    // permissions de l’entrepôt, pour repérer les flux privés visibles sur cartes.gouv.fr ; en cas d’échec, ces flux s’affichent « Privé »
-    const permissionsQuery = useQuery(datastorePermissionsQueryOptions(datastoreId));
-
     const deleteServiceMutation = useUnpublishServiceMutation(datastoreId, datasheetName);
 
     // du plus récent au plus ancien
@@ -150,12 +144,10 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
 
     // lignes mémorisées : références stables pour que memo(MenuList) évite de re-rendre les menus de chaque ligne
     const rows = useMemo(() => {
-        const permissions = permissionsQuery.data;
-
         return pageServices.map((service) => {
             const offeringUnavailable = isOfferingUnavailable(service.status);
             const editable = editableOfferingTypes.includes(service.type);
-            const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId, now);
+            const visibleOnCartesGouv = service.access === "restricted_visible";
             const exploreMapsAvailability = getExploreMapsAvailability({ service, services: sortedServices, visibleOnCartesGouv, now });
             const exploreMapsLayerParam = getExploreMapsLayerParam(service);
 
@@ -172,7 +164,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                         </span>
                     </span>
                 </span>,
-                <ServiceAccessBadge key={`access-${service._id}`} service={service} visibleOnCartesGouv={visibleOnCartesGouv} />,
+                <ServiceAccessBadge key={`access-${service._id}`} service={service} />,
                 <ServiceShareUrlCell
                     key={`url-${service._id}`}
                     shareUrl={offeringUnavailable ? undefined : service.share_url}
@@ -246,7 +238,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                 />,
             ];
         });
-    }, [pageServices, sortedServices, permissionsQuery.data, now, canBroadcast, canCreate, canGeneratePyramidRaster, datastoreId, datasheetName, classes, t]);
+    }, [pageServices, sortedServices, now, canBroadcast, canCreate, canGeneratePyramidRaster, datastoreId, datasheetName, classes, t]);
 
     if (serviceListQuery.isPending) {
         return <LoadingText withSpinnerIcon={true} as="p" />;

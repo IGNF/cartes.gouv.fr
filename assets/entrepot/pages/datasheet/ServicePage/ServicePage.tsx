@@ -22,7 +22,6 @@ import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetQueryOptions } from "@/hooks/queries/datasheetQueryOptions";
 import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
-import { datastorePermissionsQueryOptions } from "@/hooks/queries/datastorePermissionsQueryOptions";
 import { serviceQueryOptions } from "@/hooks/queries/serviceQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
 import useCommunityRights from "@/hooks/useCommunityRights";
@@ -41,7 +40,6 @@ import {
     getServiceThumbnailUrl,
     getServiceTypeLabel,
     isOfferingUnavailable,
-    isPrivateServiceVisibleOnCartesGouv,
 } from "@/utils";
 import { delta } from "@/utils/delta";
 import ServiceExploreMapsCell from "../DatasheetView/ServiceListTab/ServiceExploreMapsCell";
@@ -108,7 +106,7 @@ type ServicePageContentProps = {
 /** décide si la page est modifiable et monte le formulaire une fois ses valeurs initiales sûres */
 function ServicePageContent(props: ServicePageContentProps) {
     const { t } = useTranslation("ServicePage");
-    const { datastoreId, service, readAt } = props;
+    const { datastoreId, service } = props;
     const { configuration } = service;
     const storedDataId = configuration.type_infos.used_data[0]?.stored_data ?? "";
     const withTables = TABLE_TYPES.has(service.type);
@@ -120,27 +118,23 @@ function ServicePageContent(props: ServicePageContentProps) {
     // même règle que le serveur : une offre en cours de publication peut le rester longtemps
     const published = service.status === OfferingStatusEnum.PUBLISHED && configuration.status === ConfigurationStatus.PUBLISHED;
 
-    const permissionsQuery = useQuery(datastorePermissionsQueryOptions(datastoreId));
     const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, canSave && withTables ? storedDataId : ""));
 
-    // permissions lues (sinon l’accès initial vaudrait « restreint ») ; l’échec d’une relecture ne démonte pas le formulaire
-    const permissionsReady = service.open || permissionsQuery.data !== undefined;
+    // accès inconnu quand le serveur n’a pas pu lire les permissions
+    const accessKnown = service.access !== null && service.access !== undefined;
     const tablesReady = !withTables || vectorDbQuery.data !== undefined;
-    const editable = canSave && published && permissionsReady && tablesReady;
+    const editable = canSave && published && accessKnown && tablesReady;
 
     let lockReason: string | undefined;
     if (canSave && !published && !isOfferingUnavailable(service.status) && service.status !== OfferingStatusEnum.UNSTABLE) {
         lockReason = t("edit.busy");
-    } else if (canSave && published && !permissionsReady && permissionsQuery.isError) {
+    } else if (canSave && published && !accessKnown) {
         lockReason = t("edit.permissions_error");
     } else if (canSave && published && !tablesReady && vectorDbQuery.isError) {
         lockReason = t("edit.tables_error");
     }
 
-    const values = useMemo(
-        () => serviceToFormValues(service, permissionsQuery.data, api.alerts.communityId, readAt, vectorDbQuery.data),
-        [service, permissionsQuery.data, readAt, vectorDbQuery.data]
-    );
+    const values = useMemo(() => serviceToFormValues(service, vectorDbQuery.data), [service, vectorDbQuery.data]);
 
     return (
         <>
@@ -168,7 +162,6 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
     // message global : il reste affiché quand l’enregistrement mène à la nouvelle offre
     const setSnackbarMessage = useSnackbarStore((state) => state.setMessage);
 
-    const { data: permissions } = useQuery(datastorePermissionsQueryOptions(datastoreId));
     const services = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName)).data?.services;
     const { data: datasheet } = useQuery(datasheetQueryOptions(datastoreId, datasheetName));
     const endpointsQuery = useQuery<DatastoreEndpoint[], ApiError>({
@@ -236,9 +229,10 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
 
+            // la page de gestion des permissions les relira
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_permissions(datastoreId) });
+
             if (offering._id !== service._id) {
-                // permissions de la nouvelle offre lues avant son formulaire, qui en tire l’accès initial
-                await queryClient.invalidateQueries({ queryKey: RQKeys.datastore_permissions(datastoreId) });
                 await navigate({
                     to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
                     params: { datastoreId, datasheetName, offeringId: offering._id },
@@ -251,24 +245,15 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
                 return;
             }
 
-            // la réponse n’a ni `share_url`, ni `styles`, ni `pyramid` : le flux est relu
-            await Promise.all([
-                queryClient.invalidateQueries({ queryKey: serviceKey }),
-                queryClient.invalidateQueries({ queryKey: RQKeys.datastore_permissions(datastoreId) }),
-            ]);
+            // la réponse n’a ni `share_url`, ni `styles`, ni `pyramid`, ni `access` : le flux est relu
+            await queryClient.invalidateQueries({ queryKey: serviceKey });
             const fresh = queryClient.getQueryData<Service>(serviceKey);
             // relecture en échec : le cache est celui d’avant l’enregistrement, les valeurs envoyées deviennent la référence
             if (queryClient.getQueryState(serviceKey)?.status === "error" || !fresh) {
                 form.reset(form.getValues());
             } else {
                 form.reset(
-                    serviceToFormValues(
-                        fresh,
-                        queryClient.getQueryData(RQKeys.datastore_permissions(datastoreId)),
-                        api.alerts.communityId,
-                        Date.now(),
-                        storedDataId ? queryClient.getQueryData(RQKeys.datastore_stored_data(datastoreId, storedDataId)) : undefined
-                    )
+                    serviceToFormValues(fresh, storedDataId ? queryClient.getQueryData(RQKeys.datastore_stored_data(datastoreId, storedDataId)) : undefined)
                 );
             }
             setSnackbarMessage(t("edit.success"));
@@ -298,7 +283,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
         }
     });
 
-    const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId, now);
+    const visibleOnCartesGouv = service.access === "restricted_visible";
     // sans la liste des flux de la fiche, le WMTS jumeau d’un WMS reste inconnu
     const exploreMapsAvailability = services === undefined ? "unavailable" : getExploreMapsAvailability({ service, services, visibleOnCartesGouv, now });
 

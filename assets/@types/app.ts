@@ -271,6 +271,8 @@ export interface Service extends Offering {
     configuration: Configuration;
     tms_metadata?: TmsMetadata;
     share_url?: string;
+    /** calculé par le serveur ; null quand les permissions n’ont pas pu être lues */
+    access?: "public" | "restricted_visible" | "restricted" | null;
 }
 
 /** flux de la liste d’une fiche : pyramide réduite à son type, ni styles ni métadonnées TMS */
