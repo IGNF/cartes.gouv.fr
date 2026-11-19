@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { OfferingTypeEnum, type Service, StoredDataTypeEnum } from "@/@types/app";
 import api from "@/entrepot/api";
-import { readTmsMetadata, serviceQueryOptions } from "./serviceQueryOptions";
+import { keepKnownServiceFields, readTmsMetadata, serviceQueryOptions } from "./serviceQueryOptions";
 
 // le vrai module api lit le DOM au chargement (env.ts)
 vi.mock("@/entrepot/api", () => ({ default: { service: { getService: vi.fn() } } }));
@@ -38,6 +38,25 @@ describe("readTmsMetadata", () => {
         expect(fetchMock).toHaveBeenCalledWith(`${TMS_URL}/metadata.json`, expect.anything());
     });
 
+    it("ne lit rien pour un WMTS raster", async () => {
+        const fetchMock = vi.fn();
+        vi.stubGlobal("fetch", fetchMock);
+        const wmts = { ...tms(), configuration: { pyramid: { type: StoredDataTypeEnum.ROK4PYRAMIDRASTER } } } as unknown as Service;
+
+        expect(await readTmsMetadata(wmts, signal())).toBeUndefined();
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("abandonne la lecture après 5 s", async () => {
+        const expired = AbortSignal.abort(new DOMException("délai dépassé", "TimeoutError"));
+        const timeout = vi.spyOn(AbortSignal, "timeout").mockReturnValue(expired);
+        vi.stubGlobal("fetch", (_url: string, init: RequestInit) => (init.signal?.aborted ? Promise.reject(init.signal.reason) : new Promise(() => {})));
+
+        expect(await readTmsMetadata(tms(), signal())).toBeUndefined();
+        expect(timeout).toHaveBeenCalledWith(5000);
+        timeout.mockRestore();
+    });
+
     it("ne lit rien pour un TMS privé", async () => {
         const fetchMock = vi.fn();
         vi.stubGlobal("fetch", fetchMock);
@@ -52,6 +71,20 @@ describe("readTmsMetadata", () => {
 
         vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("", { status: 404 })));
         expect(await readTmsMetadata(tms(), signal())).toBeUndefined();
+    });
+});
+
+describe("keepKnownServiceFields", () => {
+    it("garde l’accès et les métadonnées TMS déjà lus quand la relecture ne les a pas", () => {
+        const known = { ...tms(), access: "restricted_visible", tms_metadata: METADATA } as Service;
+        const refetched = { ...tms(), access: null, title: "nouveau" } as unknown as Service;
+
+        expect(keepKnownServiceFields(known, refetched)).toMatchObject({ access: "restricted_visible", tms_metadata: METADATA, title: "nouveau" });
+    });
+
+    it("prend l’accès relu quand il est connu", () => {
+        const known = { ...tms(), access: "restricted_visible" } as Service;
+        expect(keepKnownServiceFields(known, { ...tms(), access: "restricted" } as Service).access).toBe("restricted");
     });
 });
 
