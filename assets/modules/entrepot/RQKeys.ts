@@ -62,7 +62,8 @@ const RQKeys = {
 
     datastore_datasheet_documents_list: (datastoreId: string, datasheetName: string) => ["datastore", datastoreId, "datasheet", datasheetName, "documents"],
 
-    datastore_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "offering", offeringId],
+    datastore_services: (datastoreId: string): string[] => ["datastore", datastoreId, "service"],
+    datastore_service: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "service", offeringId],
 
     datastore_annexe_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "annexe"];

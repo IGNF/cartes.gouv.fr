@@ -24,7 +24,7 @@ export async function readTmsMetadata(service: Service, signal: AbortSignal): Pr
 
 export function serviceQueryOptions(datastoreId: string, offeringId: string) {
     return queryOptions<Service, ApiError>({
-        queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
+        queryKey: RQKeys.datastore_service(datastoreId, offeringId),
         queryFn: async ({ signal }) => {
             const service = await api.service.getService(datastoreId, offeringId, { signal });
             const tmsMetadata = await readTmsMetadata(service, signal);

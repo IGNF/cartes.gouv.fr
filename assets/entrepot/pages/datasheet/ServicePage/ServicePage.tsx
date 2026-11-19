@@ -221,7 +221,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
         editable ? { resolver: zodResolver(schema), mode: "onSubmit", reValidateMode: "onBlur", defaultValues: values } : { values, disabled: true }
     );
 
-    const serviceKey = RQKeys.datastore_offering(datastoreId, service._id);
+    const serviceKey = RQKeys.datastore_service(datastoreId, service._id);
     const editMutation = useMutation<Service, ApiError, ServiceEditFormOutput>({
         mutationFn: (formValues) =>
             api.service.edit(datastoreId, service._id, buildServiceEditFormData(formType, formValues, service.type === OfferingTypeEnum.WMSRASTER)),

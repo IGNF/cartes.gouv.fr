@@ -70,7 +70,7 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
             );
 
             dataUsesQuery.data?.offerings_list?.forEach((offering) => {
-                queryClient.removeQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offering._id) });
+                queryClient.removeQueries({ queryKey: RQKeys.datastore_service(datastoreId, offering._id) });
             });
         },
         // rappel du hook, appelé même si la ligne a disparu du tableau entre-temps
