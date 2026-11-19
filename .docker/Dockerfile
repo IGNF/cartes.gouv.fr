@@ -4,7 +4,7 @@
 #----------------------------------------------------------------------
 ARG project_dir=/opt/cartesgouvfr-site
 
-ARG composer_image=docker.io/composer/composer:2-bin@sha256:56a1b0a72bacd78079e3fa49a49e7bf58326365753415c99385ea2b08bded0a5
+ARG composer_image=docker.io/composer/composer:2-bin@sha256:269d47ef954e254227bccb35e3e40f642756abee44dded405e1fbb6f5e52af0c
 # aligné sur .nvmrc
 ARG node_alpine_image=docker.io/library/node:24.22.2-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8
 # binaire node glibc pour la base Ubuntu
