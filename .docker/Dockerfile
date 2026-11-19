@@ -6,7 +6,7 @@ ARG project_dir=/opt/cartesgouvfr-site
 
 ARG composer_image=docker.io/composer/composer:2-bin@sha256:269d47ef954e254227bccb35e3e40f642756abee44dded405e1fbb6f5e52af0c
 # aligné sur .nvmrc ; glibc comme la base Ubuntu
-ARG node_image=docker.io/library/node:24.22.2-slim@sha256:01d566e8d94d8c619591d78652babfccd3c6992a3dffa9ed5ab39e11cf6c70e9
+ARG node_image=docker.io/library/node:24.22.3-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54
 ARG ubuntu_image=docker.io/library/ubuntu:24.04@sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8
 
 # Versions amont (php.net, FrankenPHP) : le dépôt deb y ajoute un suffixe de rebuild (-N) propre à chaque paquet,
