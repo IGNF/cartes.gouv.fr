@@ -10,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
- * Configurations d’une fiche sans offre : liste, puis suppression avec leurs images et fichiers de style.
+ * Configuration d’une fiche sans offre : suppression avec ses images et fichiers de style.
  */
 final class ConfigurationWithoutOfferingRoutesTest extends WebTestCase
 {
@@ -42,16 +42,6 @@ final class ConfigurationWithoutOfferingRoutesTest extends WebTestCase
         EntrepotMockResponseFactory::seed('annexes', ['_id' => 'legacy-styles-1', 'paths' => ['/configuration/'.self::ORPHAN_ID.'/styles.json']]);
         EntrepotMockResponseFactory::seed('statics', ['_id' => 'legend-static-1']);
         EntrepotMockResponseFactory::seed('statics', ['_id' => 'legend-static-2']);
-    }
-
-    public function testListsOnlyTheConfigurationsOfTheDatasheetWithoutOffering(): void
-    {
-        $client = $this->client();
-
-        $client->xmlHttpRequest('GET', self::BASE.self::DATASTORE_PATH.'/datasheet/Fiche/configurations_without_offering');
-
-        self::assertResponseIsSuccessful();
-        self::assertSame([self::ORPHAN_ID], array_column(json_decode((string) $client->getResponse()->getContent(), true), '_id'));
     }
 
     public function testRemovesTheConfigurationThenItsFiles(): void

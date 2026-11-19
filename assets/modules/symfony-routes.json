@@ -711,43 +711,6 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_api_datasheet_get_configurations_without_offering": {
-            "tokens": [
-                [
-                    "text",
-                    "\/configurations_without_offering"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datasheetName",
-                    true
-                ],
-                [
-                    "text",
-                    "\/datasheet"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "GET"
-            ],
-            "schemes": []
-        },
         "cartesgouvfr_api_datasheet_delete": {
             "tokens": [
                 [

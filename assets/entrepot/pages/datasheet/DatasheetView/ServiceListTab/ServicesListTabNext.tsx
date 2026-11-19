@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
-import { type Configuration, type DatasheetServiceList, OfferingTypeEnum, type ServiceListItem, StoredDataTypeEnum } from "@/@types/app";
+import { type DatasheetServiceList, OfferingTypeEnum, type ServiceListItem, StoredDataTypeEnum } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
@@ -86,10 +86,9 @@ type ServicesListTabNextProps = {
     datastoreId: string;
     datasheetName: string;
     serviceListQuery: UseQueryResult<DatasheetServiceList, ApiError>;
-    configurationsWithoutOfferingQuery: UseQueryResult<Configuration[], ApiError>;
 };
 
-export default function ServicesListTabNext({ datastoreId, datasheetName, serviceListQuery, configurationsWithoutOfferingQuery }: ServicesListTabNextProps) {
+export default function ServicesListTabNext({ datastoreId, datasheetName, serviceListQuery }: ServicesListTabNextProps) {
     const { t } = useTranslation("ServicesListTabNext");
     const { classes, cx } = useStyles();
     const [typeFilter, setTypeFilter] = useState<ServiceTypeFilter>("all");
@@ -253,24 +252,18 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         return <LoadingText withSpinnerIcon={true} as="p" />;
     }
 
+    if (serviceListQuery.isError) {
+        return <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceListQuery.error)} small />;
+    }
+
     const configurationsWithoutOffering = (
         <ConfigurationsWithoutOfferingList
             datastoreId={datastoreId}
             datasheetName={datasheetName}
-            query={configurationsWithoutOfferingQuery}
+            configurations={serviceListQuery.data.configurations_without_offering}
             canDelete={!!canBroadcast}
         />
     );
-
-    // les flux non publiés restent accessibles quand la liste des flux est en erreur
-    if (serviceListQuery.isError) {
-        return (
-            <>
-                <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceListQuery.error)} small />
-                {configurationsWithoutOffering}
-            </>
-        );
-    }
 
     const createButton = (
         <Button

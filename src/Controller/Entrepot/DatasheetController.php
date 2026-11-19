@@ -235,13 +235,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         return $this->json($this->cartesServiceApiService->getDatasheetServiceList($datastoreId, $datasheetName));
     }
 
-    // invisibles dans `get_services`, qui part des offres
-    #[Route('/{datasheetName}/configurations_without_offering', name: 'get_configurations_without_offering', methods: ['GET'])]
-    public function getConfigurationsWithoutOffering(string $datastoreId, string $datasheetName): JsonResponse
-    {
-        return $this->json($this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName)->configurationsWithoutOffering());
-    }
-
     /**
      * @param ?array<array<mixed>> $configurations
      * @param ?array<array<mixed>> $annexes
