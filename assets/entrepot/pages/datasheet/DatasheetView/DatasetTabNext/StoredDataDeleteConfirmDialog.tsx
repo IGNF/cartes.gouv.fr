@@ -5,7 +5,7 @@ import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 
-import { DatasheetDetailed, DatasheetStoredDataItem, Service, StoredDataTypeEnum } from "@/@types/app";
+import { DatasheetDetailed, type DatasheetServiceList, DatasheetStoredDataItem, StoredDataTypeEnum } from "@/@types/app";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
@@ -65,9 +65,8 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
             });
             queryClient.setQueryData(
                 RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
-                (servicesList: Service[] | undefined): Service[] | undefined => {
-                    return servicesList?.filter((service) => !offeringsUsingStoredData.includes(service._id));
-                }
+                (serviceList: DatasheetServiceList | undefined): DatasheetServiceList | undefined =>
+                    serviceList && { ...serviceList, services: serviceList.services.filter((service) => !offeringsUsingStoredData.includes(service._id)) }
             );
 
             dataUsesQuery.data?.offerings_list?.forEach((offering) => {

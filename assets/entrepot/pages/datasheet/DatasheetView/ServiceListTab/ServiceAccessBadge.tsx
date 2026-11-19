@@ -1,10 +1,10 @@
 import Tag from "@codegouvfr/react-dsfr/Tag";
 
-import type { Service } from "@/@types/app";
+import type { ServiceListItem } from "@/@types/app";
 import { useTranslation } from "@/i18n";
 
 type ServiceAccessBadgeProps = {
-    service: Service;
+    service: ServiceListItem;
     /** flux privé consultable par tous sur cartes.gouv.fr (permission accordée à la communauté cartes.gouv.fr) */
     visibleOnCartesGouv: boolean;
 };

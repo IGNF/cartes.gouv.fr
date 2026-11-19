@@ -306,7 +306,9 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
                                 {datasheet?.pyramid_raster_list?.length ? (
                                     <li>{t("delete_modal.pyramid_raster", { count: datasheet.pyramid_raster_list.length })}</li>
                                 ) : null}
-                                {serviceListQuery.data?.length ? <li>{t("delete_modal.services", { count: serviceListQuery.data.length })}</li> : null}
+                                {serviceListQuery.data?.services.length ? (
+                                    <li>{t("delete_modal.services", { count: serviceListQuery.data.services.length })}</li>
+                                ) : null}
                                 {datasheet?.upload_list?.length ? <li>{t("delete_modal.uploads", { count: datasheet.upload_list.length })}</li> : null}
                                 {metadata && <li>{t("delete_modal.metadata", { fileIdentifier: metadata.file_identifier })}</li>}
                                 {documentsListQuery.data?.length ? <li>{t("delete_modal.documents", { count: documentsListQuery.data.length })}</li> : null}

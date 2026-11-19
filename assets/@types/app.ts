@@ -273,6 +273,16 @@ export interface Service extends Offering {
     share_url?: string;
 }
 
+/** flux de la liste d’une fiche : pyramide réduite à son type, ni styles ni métadonnées TMS */
+export type ServiceListItem = Omit<Service, "configuration" | "tms_metadata"> & {
+    configuration: Omit<Configuration, "pyramid" | "styles"> & { pyramid?: Pick<PyramidVector | PyramidRaster, "type"> | null };
+};
+
+export interface DatasheetServiceList {
+    services: ServiceListItem[];
+    configurations_without_offering: Configuration[];
+}
+
 export enum MetadataHierarchyLevel {
     Dataset = "dataset",
     Series = "series",

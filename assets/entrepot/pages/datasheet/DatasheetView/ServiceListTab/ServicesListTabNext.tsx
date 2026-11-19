@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
-import { type Configuration, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
+import { type Configuration, type DatasheetServiceList, OfferingTypeEnum, type ServiceListItem, StoredDataTypeEnum } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
@@ -67,7 +67,7 @@ const FILTERS = [
 ] as const satisfies { value: ServiceTypeFilter; label: string | undefined }[];
 
 // un WMTS-TMS dont le type de pyramide est inconnu apparaît sous WMTS et TMS
-function matchesTypeFilter(service: Service, filter: ServiceTypeFilter): boolean {
+function matchesTypeFilter(service: ServiceListItem, filter: ServiceTypeFilter): boolean {
     switch (filter) {
         case "all":
             return true;
@@ -85,7 +85,7 @@ function matchesTypeFilter(service: Service, filter: ServiceTypeFilter): boolean
 type ServicesListTabNextProps = {
     datastoreId: string;
     datasheetName: string;
-    serviceListQuery: UseQueryResult<Service[], ApiError>;
+    serviceListQuery: UseQueryResult<DatasheetServiceList, ApiError>;
     configurationsWithoutOfferingQuery: UseQueryResult<Configuration[], ApiError>;
 };
 
@@ -94,7 +94,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
     const { classes, cx } = useStyles();
     const [typeFilter, setTypeFilter] = useState<ServiceTypeFilter>("all");
     const [page, setPage] = useState(1);
-    const [targetService, setTargetService] = useState<Service>();
+    const [targetService, setTargetService] = useState<ServiceListItem>();
 
     const { userRights, isSupervisor } = useCommunityRights();
     const canBroadcast = isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
@@ -111,7 +111,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
 
     // du plus récent au plus ancien
     const sortedServices = useMemo(
-        () => [...(serviceListQuery.data ?? [])].sort((a, b) => (b.update ?? "").localeCompare(a.update ?? "")),
+        () => [...(serviceListQuery.data?.services ?? [])].sort((a, b) => (b.update ?? "").localeCompare(a.update ?? "")),
         [serviceListQuery.data]
     );
 
@@ -130,7 +130,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         },
     });
 
-    const openCopyUrlDialog = (service: Service) => {
+    const openCopyUrlDialog = (service: ServiceListItem) => {
         setTargetService(service);
         TextCopyToClipboardModal.open();
     };

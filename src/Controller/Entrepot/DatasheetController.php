@@ -232,17 +232,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('/{datasheetName}/services', name: 'get_services', methods: ['GET'])]
     public function getServices(string $datastoreId, string $datasheetName): JsonResponse
     {
-        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-            'fields' => 'status', // on n'a besoin que de l'_id qui est toujours présent, mais on ne peut pas demander "_id" via "fields", donc "status" parce que c'est un champ léger et qui est toujours présent
-        ])->resolve();
-
-        $offeringsById = $this->getOfferingsOfStoredData($datastoreId, $storedDataList);
-        $offeringsById = $this->cartesServiceApiService->getServicesFromOfferings($datastoreId, $offeringsById, false);
-
-        return $this->json(array_values($offeringsById));
+        return $this->json($this->cartesServiceApiService->getDatasheetServiceList($datastoreId, $datasheetName));
     }
 
     // invisibles dans `get_services`, qui part des offres
@@ -250,32 +240,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     public function getConfigurationsWithoutOffering(string $datastoreId, string $datasheetName): JsonResponse
     {
         return $this->json($this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName)->configurationsWithoutOffering());
-    }
-
-    /**
-     * Offerings détaillées publiées à partir des stored_data données, listes lancées en parallèle.
-     *
-     * @param array<array<mixed>> $storedDataList
-     *
-     * @return array<string,array<mixed>> clé : offeringId, valeur : offering
-     */
-    private function getOfferingsOfStoredData(string $datastoreId, array $storedDataList): array
-    {
-        $pendingAllByStoredData = [];
-        foreach ($storedDataList as $storedData) {
-            $pendingAllByStoredData[] = $this->configurationApiService->getAllOfferingsDetailed($datastoreId, [
-                'stored_data' => $storedData['_id'],
-            ]);
-        }
-
-        $offeringsById = [];
-        foreach ($pendingAllByStoredData as $pendingAll) {
-            foreach ($pendingAll->resolve() as $offering) {
-                $offeringsById[$offering['_id']] = $offering;
-            }
-        }
-
-        return $offeringsById;
     }
 
     /**
@@ -344,9 +308,13 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             throw new AppException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
         }
 
-        // suppr des services (config et offering)
-        foreach ($this->getOfferingsOfStoredData($datastoreId, $storedDataList) as $offering) {
+        // suppr des services (offre puis configuration), puis des configurations sans offre
+        $datasheetServices = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
+        foreach ($datasheetServices->offeringsById as $offering) {
             $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id'], $offering);
+        }
+        foreach ($datasheetServices->configurationsWithoutOffering() as $configuration) {
+            $this->cartesServiceApiService->removeConfiguration($datastoreId, $configuration);
         }
 
         // suppr des uploads

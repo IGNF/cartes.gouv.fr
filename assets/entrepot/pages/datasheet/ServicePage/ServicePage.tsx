@@ -169,7 +169,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
     const setSnackbarMessage = useSnackbarStore((state) => state.setMessage);
 
     const { data: permissions } = useQuery(datastorePermissionsQueryOptions(datastoreId));
-    const { data: services } = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName));
+    const services = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName)).data?.services;
     const { data: datasheet } = useQuery(datasheetQueryOptions(datastoreId, datasheetName));
     const endpointsQuery = useQuery<DatastoreEndpoint[], ApiError>({
         queryKey: RQKeys.datastore_endpoints(datastoreId),

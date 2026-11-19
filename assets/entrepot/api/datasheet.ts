@@ -1,6 +1,6 @@
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
-import { Configuration, Datasheet, DatasheetDetailed, Metadata, Service } from "../../@types/app";
+import { Configuration, Datasheet, DatasheetDetailed, DatasheetServiceList, Metadata } from "../../@types/app";
 
 const getList = (datastoreId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_get_list", { datastoreId });
@@ -31,7 +31,7 @@ const replace = (datastoreId: string, datasheetName: string, formData: FormData)
 // Offerings
 const getServices = (datastoreId: string, datasheetName: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_get_services", { datastoreId, datasheetName });
-    return jsonFetch<Service[]>(url, {
+    return jsonFetch<DatasheetServiceList>(url, {
         ...otherOptions,
     });
 };
