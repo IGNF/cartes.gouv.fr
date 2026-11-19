@@ -77,6 +77,36 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         self::assertNull($service['share_url']);
     }
 
+    public function testAPrivateServiceSharesTheGetCapabilitiesUrlOfItsEndpoint(): void
+    {
+        $this->seedService('private', 'WFS', EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID, 'vector-db-1', open: false, urls: [
+            ['type' => 'WFS', 'url' => 'https://wfs.test/private?service=WFS&version=2.0.0&request=GetCapabilities'],
+        ]);
+
+        self::assertSame('https://wfs.test/private?SERVICE=WFS&VERSION=2.0.0&request=GetCapabilities', $this->getList()['services'][0]['share_url']);
+    }
+
+    public function testAPrivateWmtsPicksTheWmtsUrlsByType(): void
+    {
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'pyramid-raster-1', 'type' => 'ROK4-PYRAMID-RASTER', 'tags' => ['datasheet_name' => 'Fiche']]);
+        $this->seedService('wmts', 'WMTS-TMS', EntrepotMockResponseFactory::WMTS_PRIVATE_ENDPOINT_ID, 'pyramid-raster-1', open: false, urls: [
+            ['type' => 'TMS', 'url' => 'https://tms.test/private/tms/1.0.0/couche'],
+            ['type' => 'WMTS', 'url' => 'https://wmts.test/private?service=WMTS&version=1.0.0&request=GetTile&layer=couche'],
+        ]);
+
+        self::assertSame('https://wmts.test/private?SERVICE=WMTS&VERSION=1.0.0&request=GetCapabilities', $this->getList()['services'][0]['share_url']);
+    }
+
+    public function testAPrivateTmsSharesItsTilesUrl(): void
+    {
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'pyramid-vector-1', 'type' => 'ROK4-PYRAMID-VECTOR', 'tags' => ['datasheet_name' => 'Fiche']]);
+        $this->seedService('tms', 'WMTS-TMS', EntrepotMockResponseFactory::WMTS_PUBLIC_ENDPOINT_ID, 'pyramid-vector-1', open: false, urls: [
+            ['type' => 'TMS', 'url' => 'https://tms.test/private/tms/1.0.0/couche'],
+        ]);
+
+        self::assertSame('https://tms.test/private/tms/1.0.0/couche/{z}/{x}/{y}.pbf', $this->getList()['services'][0]['share_url']);
+    }
+
     public function testGivesTheAccessOfEachService(): void
     {
         $this->seedService('public', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1');

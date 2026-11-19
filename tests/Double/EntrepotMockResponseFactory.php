@@ -21,6 +21,8 @@ final class EntrepotMockResponseFactory
     public const WMSV_PRIVATE_ENDPOINT_ID = 'endpoint-wmsv-private';
     public const WMSR_PUBLIC_ENDPOINT_ID = 'endpoint-wmsr-public';
     public const WMTS_PUBLIC_ENDPOINT_ID = 'endpoint-wmts-public';
+    // URL TMS avant l’URL WMTS : l’ordre de l’Entrepôt n’est pas garanti
+    public const WMTS_PRIVATE_ENDPOINT_ID = 'endpoint-wmts-private';
     public const LAYER_WITHOUT_LEGEND = 'couche_sans_legende';
     public const LEGEND_PNG = "\x89PNG légende";
     private const ENTREPOT_HOST = 'entrepot.test';
@@ -286,6 +288,7 @@ final class EntrepotMockResponseFactory
                 ['endpoint' => ['_id' => self::WMSV_PRIVATE_ENDPOINT_ID, 'technical_name' => 'wmsv-private', 'type' => 'WMS-VECTOR', 'open' => false, 'urls' => [['type' => 'WMS', 'url' => 'https://wms.test/private']]]],
                 ['endpoint' => ['_id' => self::WMSR_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wmsr-public', 'type' => 'WMS-RASTER', 'open' => true, 'urls' => [['type' => 'WMS', 'url' => 'https://wms-r.test/public']]]],
                 ['endpoint' => ['_id' => self::WMTS_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wmts-public', 'type' => 'WMTS-TMS', 'open' => true, 'urls' => [['type' => 'WMTS', 'url' => 'https://wmts.test/public']]]],
+                ['endpoint' => ['_id' => self::WMTS_PRIVATE_ENDPOINT_ID, 'technical_name' => 'wmts-private', 'type' => 'WMTS-TMS', 'open' => false, 'urls' => [['type' => 'TMS', 'url' => 'https://tms.test/private'], ['type' => 'WMTS', 'url' => 'https://wmts.test/private']]]],
             ]]);
         }
 

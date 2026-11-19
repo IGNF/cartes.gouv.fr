@@ -174,7 +174,7 @@ class CartesServiceApiService
     }
 
     /**
-     * URL de diffusion : GetCapabilities (espace découverte) ou capabilities filtrées en annexe, tuiles pour un TMS.
+     * URL de diffusion : GetCapabilities (espace découverte ou point d’accès privé) ou capabilities filtrées en annexe, tuiles pour un TMS.
      *
      * @param array<mixed> $offering avec `configuration.pyramid.type` pour un WMTS-TMS
      */
@@ -198,7 +198,8 @@ class CartesServiceApiService
         }
 
         $endpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id'])['endpoint'];
-        if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+        // capabilities filtrées en annexe seulement pour un point d’accès ouvert hors espace découverte (voir CapabilitiesService::createOrUpdate)
+        if (true !== $endpoint['open'] || $this->sandboxService->isSandboxDatastore($datastoreId)) {
             $endpointUrl = $this->getUrlOfType($endpoint['urls'] ?? [], $serviceType);
             $offeringUrl = $this->getUrlOfType($offering['urls'] ?? [], $serviceType);
 
