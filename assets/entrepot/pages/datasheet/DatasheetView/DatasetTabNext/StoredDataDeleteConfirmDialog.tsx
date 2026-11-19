@@ -5,7 +5,7 @@ import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 
-import { DatasheetDetailed, type DatasheetServiceList, DatasheetStoredDataItem, StoredDataTypeEnum } from "@/@types/app";
+import { DatasheetDetailed, DatasheetStoredDataItem, StoredDataTypeEnum } from "@/@types/app";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
@@ -45,7 +45,6 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
     const deleteStoredDataMutation = useMutation({
         mutationFn: () => api.storedData.remove(datastoreId, storedData._id),
         onSuccess() {
-            const offeringsUsingStoredData = dataUsesQuery.data?.offerings_list.map((off) => off._id) ?? [];
             queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (oldDatasheet: DatasheetDetailed) => {
                 return {
                     ...oldDatasheet,
@@ -63,11 +62,6 @@ function StoredDataDeleteConfirmDialog(props: StoredDataDeleteConfirmDialogProps
                             : oldDatasheet.pyramid_vector_list,
                 } satisfies DatasheetDetailed;
             });
-            queryClient.setQueryData(
-                RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
-                (serviceList: DatasheetServiceList | undefined): DatasheetServiceList | undefined =>
-                    serviceList && { ...serviceList, services: serviceList.services.filter((service) => !offeringsUsingStoredData.includes(service._id)) }
-            );
 
             dataUsesQuery.data?.offerings_list?.forEach((offering) => {
                 queryClient.removeQueries({ queryKey: RQKeys.datastore_service(datastoreId, offering._id) });
