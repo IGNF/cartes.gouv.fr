@@ -3,7 +3,7 @@ import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 
 const joinCommunity = (formData: object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_contact_join_community");
+    const url = SymfonyRouting.generate("cartesgouvfr_api_contact_join_community");
     return jsonFetch(
         url,
         {
@@ -18,7 +18,7 @@ const joinCommunity = (formData: object) => {
 };
 
 const requestDatastoreDeletion = (data: object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_contact_datastore_deletion_request");
+    const url = SymfonyRouting.generate("cartesgouvfr_api_contact_datastore_deletion_request");
     return jsonFetch(
         url,
         {
@@ -33,7 +33,7 @@ const requestDatastoreDeletion = (data: object) => {
 };
 
 const requestPrivateServicesAccess = (data: object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_contact_accesses_request");
+    const url = SymfonyRouting.generate("cartesgouvfr_api_contact_accesses_request");
     return jsonFetch(
         url,
         {
