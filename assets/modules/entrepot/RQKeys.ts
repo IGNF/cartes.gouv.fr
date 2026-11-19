@@ -45,13 +45,6 @@ const RQKeys = {
     ],
     datastore_datasheet_metadata: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName, "metadata"],
     datastore_datasheet_service_list: (datastoreId: string, datasheetName: string) => ["datastore", datastoreId, "datasheet", datasheetName, "services"],
-    datastore_datasheet_configurations_without_offering: (datastoreId: string, datasheetName: string) => [
-        "datastore",
-        datastoreId,
-        "datasheet",
-        datasheetName,
-        "configurations_without_offering",
-    ],
 
     datastore_offering_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "offering"];
@@ -69,7 +62,8 @@ const RQKeys = {
 
     datastore_datasheet_documents_list: (datastoreId: string, datasheetName: string) => ["datastore", datastoreId, "datasheet", datasheetName, "documents"],
 
-    datastore_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "offering", offeringId],
+    datastore_services: (datastoreId: string): string[] => ["datastore", datastoreId, "service"],
+    datastore_service: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "service", offeringId],
 
     datastore_annexe_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "annexe"];

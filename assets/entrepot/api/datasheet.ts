@@ -1,6 +1,6 @@
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
-import { Configuration, Datasheet, DatasheetDetailed, Metadata, Service } from "../../@types/app";
+import { Datasheet, DatasheetDetailed, DatasheetServiceList, Metadata } from "../../@types/app";
 
 const getList = (datastoreId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_get_list", { datastoreId });
@@ -31,15 +31,7 @@ const replace = (datastoreId: string, datasheetName: string, formData: FormData)
 // Offerings
 const getServices = (datastoreId: string, datasheetName: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_get_services", { datastoreId, datasheetName });
-    return jsonFetch<Service[]>(url, {
-        ...otherOptions,
-    });
-};
-
-// absentes de getServices, qui part des offres
-const getConfigurationsWithoutOffering = (datastoreId: string, datasheetName: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_get_configurations_without_offering", { datastoreId, datasheetName });
-    return jsonFetch<Configuration[]>(url, {
+    return jsonFetch<DatasheetServiceList>(url, {
         ...otherOptions,
     });
 };
@@ -62,6 +54,6 @@ const unpublish = (datastoreId: string, datasheetName: string) => {
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
-const datasheet = { getList, get, add, replace, getServices, getConfigurationsWithoutOffering, remove, publish, unpublish };
+const datasheet = { getList, get, add, replace, getServices, remove, publish, unpublish };
 
 export default datasheet;

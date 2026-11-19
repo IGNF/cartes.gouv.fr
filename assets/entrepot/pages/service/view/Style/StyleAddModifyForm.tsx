@@ -308,7 +308,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
             return editMode ? api.style.modify(datastoreId, offeringId, data) : api.style.add(datastoreId, offeringId, data);
         },
         onSuccess: (data: CartesStyle[]) => {
-            queryClient.setQueryData(RQKeys.datastore_offering(datastoreId, offeringId), (oldService: Service | undefined) => {
+            queryClient.setQueryData(RQKeys.datastore_service(datastoreId, offeringId), (oldService: Service | undefined) => {
                 if (!oldService) return oldService;
                 return {
                     ...oldService,
@@ -323,7 +323,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                 queryClient.removeQueries({ queryKey: RQKeys.datastore_annexe(datastoreId, annexeId) });
             });
 
-            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offeringId) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_service(datastoreId, offeringId) });
             void navigate(backLink);
         },
     });

@@ -13,13 +13,14 @@ import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { OfferingTypeEnum, type Service } from "@/@types/app";
+import { OfferingTypeEnum } from "@/@types/app";
 import type { ConfigurationWmsVectorDetailsContent } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import ZoomRange from "@/components/Utils/ZoomRange";
 import olDefaults from "@/data/ol-defaults.json";
+import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
 import useServiceQuery from "@/hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "@/hooks/useScrollToTopEffect";
 import { useTranslation } from "@/i18n/i18n";
@@ -61,14 +62,10 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     } as const;
 
     // même requête que l’onglet Flux : servie par le cache
-    const serviceListQuery = useQuery<Service[], ApiError>({
-        queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
-        staleTime: 60000,
-        retry: false,
-    });
+    const serviceListQuery = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName));
     const wmsvServices = useMemo(
-        () => (serviceListQuery.data ?? []).filter((service) => service.type === OfferingTypeEnum.WMSVECTOR && !isOfferingUnavailable(service.status)),
+        () =>
+            (serviceListQuery.data?.services ?? []).filter((service) => service.type === OfferingTypeEnum.WMSVECTOR && !isOfferingUnavailable(service.status)),
         [serviceListQuery.data]
     );
 

@@ -266,11 +266,27 @@ export type Configuration = ConfigurationStandardDetailResponseDto & {
 
 export type Offering = OfferingStandardDetailResponseDto;
 
+/** accès d’un flux, valeurs de l’enum `ServiceAccess` du serveur */
+export const SERVICE_ACCESSES = ["public", "restricted_visible", "restricted"] as const;
+export type ServiceAccess = (typeof SERVICE_ACCESSES)[number];
+
 /** service est un offering avec des informations supplémentaires (configuration complète, métadonnées TMS ou l'URL de diffusion) */
 export interface Service extends Offering {
     configuration: Configuration;
     tms_metadata?: TmsMetadata;
-    share_url?: string;
+    share_url?: string | null;
+    /** calculé par le serveur ; null quand les permissions n’ont pas pu être lues */
+    access?: ServiceAccess | null;
+}
+
+/** flux de la liste d’une fiche : pyramide réduite à son type, ni styles ni métadonnées TMS */
+export type ServiceListItem = Omit<Service, "configuration" | "tms_metadata"> & {
+    configuration: Omit<Configuration, "pyramid" | "styles"> & { pyramid?: Pick<PyramidVector | PyramidRaster, "type"> | null };
+};
+
+export interface DatasheetServiceList {
+    services: ServiceListItem[];
+    configurations_without_offering: Configuration[];
 }
 
 export enum MetadataHierarchyLevel {

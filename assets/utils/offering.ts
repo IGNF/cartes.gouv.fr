@@ -1,4 +1,4 @@
-import { type DatastorePermission, OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type ServiceListItem } from "@/@types/app";
 
 /**
  * Indique si l'offering n'est plus diffusée (dépubliée ou en cours de dépublication) :
@@ -36,28 +36,7 @@ export const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
 };
 
 /** Vignette du flux, écrite dans `extra._search.url_vignette` de la configuration */
-export const getServiceThumbnailUrl = (service: Service): string | undefined => service.configuration.extra?._search?.url_vignette;
-
-// une permission sans date de fin n’expire pas ; la liste de l’Entrepôt conserve les permissions expirées
-const isPermissionActive = (permission: DatastorePermission, now: number): boolean => !permission.end_date || Date.parse(permission.end_date) > now;
-
-/** Flux privé mais consultable par tous sur cartes.gouv.fr : une permission en cours est accordée à la communauté cartes.gouv.fr */
-export const isPrivateServiceVisibleOnCartesGouv = (
-    service: Service,
-    permissions: DatastorePermission[] | undefined,
-    cartesGouvCommunityId: string | null,
-    now: number
-): boolean => {
-    if (service.open || !cartesGouvCommunityId) {
-        return false;
-    }
-    return (permissions ?? []).some(
-        (permission) =>
-            permission.beneficiary?._id === cartesGouvCommunityId &&
-            isPermissionActive(permission, now) &&
-            (permission.offerings?.some((offering) => offering._id === service._id) ?? false)
-    );
-};
+export const getServiceThumbnailUrl = (service: ServiceListItem): string | undefined => service.configuration.extra?._search?.url_vignette;
 
 /**
  * Nom de couche sans le suffixe `_wms`, `_wmts` ou `_wmsr`, comme `filter_specific_duplicates` du générateur
@@ -66,14 +45,14 @@ export const isPrivateServiceVisibleOnCartesGouv = (
 export const getLayerBaseName = (layerName: string): string => layerName.replace(/_(wms|wmts|wmsr)$/, "");
 
 // une offre WMTS-TMS dont le type de pyramide est inconnu est traitée comme un WMTS
-const isWmtsService = (service: Service): boolean =>
+const isWmtsService = (service: ServiceListItem): boolean =>
     service.type === OfferingTypeEnum.WMTSTMS && service.configuration.pyramid?.type !== StoredDataTypeEnum.ROK4PYRAMIDVECTOR;
 
 /**
  * Un WMS a un WMTS « jumeau » quand un WMTS publié de la fiche porte le même nom au suffixe près : le générateur
  * geoportal-configuration retire alors la couche WMS d’Explorer les cartes, son lien n’aboutirait pas.
  */
-export const hasWmtsSibling = (service: Service, services: Service[]): boolean => {
+export const hasWmtsSibling = (service: ServiceListItem, services: ServiceListItem[]): boolean => {
     const baseName = getLayerBaseName(service.layer_name);
     return services.some(
         (other) => other._id !== service._id && isWmtsService(other) && !isOfferingUnavailable(other.status) && getLayerBaseName(other.layer_name) === baseName
@@ -82,7 +61,7 @@ export const hasWmtsSibling = (service: Service, services: Service[]): boolean =
 
 export type ExploreMapsProtocol = "WMS" | "WMTS" | "TMS";
 
-export const getExploreMapsProtocol = (service: Service): ExploreMapsProtocol | undefined => {
+export const getExploreMapsProtocol = (service: ServiceListItem): ExploreMapsProtocol | undefined => {
     switch (service.type) {
         case OfferingTypeEnum.WMSVECTOR:
         case OfferingTypeEnum.WMSRASTER:
@@ -98,7 +77,7 @@ export const getExploreMapsProtocol = (service: Service): ExploreMapsProtocol | 
  * Paramètre `l` d’Explorer les cartes : `{couche}$GEOPORTAIL:{famille}:{protocole}(opacité;visible;gris)`.
  * La configuration geoportal-configuration enregistre les couches TMS sous la famille `GPP`, les WMS et WMTS sous `OGC`.
  */
-export const getExploreMapsLayerParam = (service: Service): string | undefined => {
+export const getExploreMapsLayerParam = (service: ServiceListItem): string | undefined => {
     const protocol = getExploreMapsProtocol(service);
     if (protocol === undefined) {
         return undefined;
@@ -113,9 +92,9 @@ export const EXPLORE_MAPS_CONFIGURATION_DELAY_MS = 90 * 60 * 1000;
 export type ExploreMapsAvailability = "pending" | "available" | "unavailable";
 
 type ExploreMapsAvailabilityParams = {
-    service: Service;
+    service: ServiceListItem;
     /** tous les flux de la fiche, pour détecter un WMTS de même nom */
-    services: Service[];
+    services: ServiceListItem[];
     visibleOnCartesGouv: boolean;
     now?: number;
 };
@@ -140,7 +119,7 @@ export const getExploreMapsAvailability = ({
 };
 
 /** Libellé court du type de flux tel qu’affiché dans les filtres (WMS-V et WMS-R confondus) */
-export const getServiceTypeLabel = (service: Service): string => {
+export const getServiceTypeLabel = (service: ServiceListItem): string => {
     switch (service.type) {
         case OfferingTypeEnum.WFS:
             return "WFS";
@@ -155,7 +134,7 @@ export const getServiceTypeLabel = (service: Service): string => {
 };
 
 /** Prochain instant où un flux de la liste sort du délai « En cours », undefined si aucun n’y est encore */
-export const getNextExploreMapsPendingEnd = (services: Service[], now: number): number | undefined => {
+export const getNextExploreMapsPendingEnd = (services: ServiceListItem[], now: number): number | undefined => {
     const ends = services
         .filter((service) => getExploreMapsProtocol(service) !== undefined)
         .map((service) => Date.parse(service.creation) + EXPLORE_MAPS_CONFIGURATION_DELAY_MS)

@@ -1,7 +1,7 @@
 import { type TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { z } from "zod";
 
-import { ConfigurationTypeEnum, type DatasheetDetailed, type DatastoreEndpoint } from "@/@types/app";
+import { ConfigurationTypeEnum, type DatasheetDetailed, type DatastoreEndpoint, SERVICE_ACCESSES, type ServiceAccess } from "@/@types/app";
 import { type ComponentKey } from "@/i18n/types";
 import { regex } from "@/utils";
 import { TAG_VALUE_MAX_LENGTH } from "../DatasetAdd/datasetAddSchema";
@@ -40,8 +40,7 @@ export const rasterPyramidPublishType = (
     return undefined;
 };
 
-export const SERVICE_ACCESSES = ["public", "restricted_visible", "restricted"] as const;
-export type ServiceAccess = (typeof SERVICE_ACCESSES)[number];
+export { SERVICE_ACCESSES, type ServiceAccess };
 
 /** accès offerts par les endpoints de l’entrepôt pour ce type de configuration ; tous tant que les endpoints ne sont pas lus (le back refuse un accès sans endpoint) */
 export const availableServiceAccesses = (endpoints: DatastoreEndpoint[] | undefined, configurationType: ConfigurationTypeEnum): readonly ServiceAccess[] => {

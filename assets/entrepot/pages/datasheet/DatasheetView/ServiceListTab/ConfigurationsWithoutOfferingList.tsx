@@ -3,7 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { useMutation, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -29,12 +29,12 @@ const deleteConfigurationModal = createModal({
 type ConfigurationsWithoutOfferingListProps = {
     datastoreId: string;
     datasheetName: string;
-    query: UseQueryResult<Configuration[], ApiError>;
+    configurations: Configuration[];
     canDelete: boolean;
 };
 
-/** configurations de la fiche sans offre : invisibles dans la liste des flux, qui part des offres */
-export default function ConfigurationsWithoutOfferingList({ datastoreId, datasheetName, query, canDelete }: ConfigurationsWithoutOfferingListProps) {
+/** configurations de la fiche sans offre, à supprimer ou à republier */
+export default function ConfigurationsWithoutOfferingList({ datastoreId, datasheetName, configurations, canDelete }: ConfigurationsWithoutOfferingListProps) {
     const { t } = useTranslation("ServicesListTabNext");
     const queryClient = useQueryClient();
     const [target, setTarget] = useState<Configuration>();
@@ -44,22 +44,11 @@ export default function ConfigurationsWithoutOfferingList({ datastoreId, datashe
         onSettled: () => {
             // le nom technique redevient libre
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_layernames(datastoreId) });
-            return queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_configurations_without_offering(datastoreId, datasheetName) });
+            return queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
         },
     });
 
-    if (query.isError) {
-        return (
-            <Alert
-                className={fr.cx("fr-mt-4w")}
-                severity="error"
-                title={t("without_offering.load_error")}
-                description={getApiErrorMessage(query.error)}
-                small
-            />
-        );
-    }
-    if (!query.data?.length) {
+    if (!configurations.length) {
         return null;
     }
 
@@ -77,7 +66,7 @@ export default function ConfigurationsWithoutOfferingList({ datastoreId, datashe
                 noCaption
                 columnWidths={COLUMN_WIDTHS}
                 headers={[t("column.name"), t("column.update"), t("column.status"), t("column.action")]}
-                data={query.data.map((configuration) => [
+                data={configurations.map((configuration) => [
                     <span key={`name-${configuration._id}`}>
                         <span className={fr.cx("fr-text--bold")}>{configuration.name}</span>
                         <br />

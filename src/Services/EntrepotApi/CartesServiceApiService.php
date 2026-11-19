@@ -2,7 +2,6 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\ApiClient\ApiClient;
 use App\ApiClient\ResponsePromise;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationMetadataTypes;
@@ -24,25 +23,22 @@ use App\Services\DatastorePrefixValidator;
 use App\Services\GeonetworkApiService;
 use App\Services\MembershipService;
 use App\Services\SandboxService;
+use App\Utils;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * `Service` sur cartes.gouv.fr qui représente un `offering` et une `configuration` de l'`API Entrepôt`, ainsi que les fichiers de style (`styles`), `tms_metadata` et url de partage (`share_url`).
+ * `Service` sur cartes.gouv.fr qui représente un `offering` et une `configuration` de l'`API Entrepôt`, ainsi que les fichiers de style (`styles`), url de partage (`share_url`) et accès (`access`).
  */
 class CartesServiceApiService
 {
     // les trois attentes (offering dépubliée, offering supprimée, configuration dépubliée) sont séquentielles et doivent tenir sous max_execution_time (.docker/php.ini, 120 s)
     private const UNPUBLISH_MAX_ATTEMPTS = 6;
     private const UNPUBLISH_RETRY_DELAY_SECONDS = 5;
-
-    private readonly HttpClientInterface $httpClient;
 
     public function __construct(
         private readonly ParameterBagInterface $params,
@@ -62,98 +58,32 @@ class CartesServiceApiService
         private readonly ServiceConfigurationRequestBuilder $configurationRequestBuilder,
         private readonly ServiceImageAnnexeService $serviceImageAnnexeService,
         private readonly DatastorePrefixValidator $datastorePrefixValidator,
-        HttpClientInterface $httpClient,
-        #[Autowire(service: 'app.api_client.entrepot')]
-        private readonly ApiClient $entrepotApi,
     ) {
-        $this->httpClient = $httpClient->withOptions([
-            'proxy' => $params->get('http_proxy'),
-        ]);
     }
 
     /**
-     * @param array<mixed>|null $offering
-     * @param array<mixed>|null $configuration
-     *
      * @return array<mixed>
      */
-    public function getService(string $datastoreId, string $offeringId, bool $migrateStyles = true, ?array $offering = null, ?array $configuration = null): array
+    public function getService(string $datastoreId, string $offeringId): array
     {
-        $offering ??= $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+        $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
+        $offering['configuration'] = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
 
-        $configuration ??= $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->array();
-        $offering['configuration'] = $configuration;
-
-        // traitement spécial pour WMTS-TMS
         if (OfferingTypes::WMTSTMS === $offering['type']) {
-            $storedData = $this->storedDataApiService->get($datastoreId, $offering['configuration']['type_infos']['used_data'][0]['stored_data'])->array();
-            $offering['configuration']['pyramid'] = $storedData;
-
-            // TMS
-            if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $storedData['type']) {
-                // Metadata (TMS)
-                $urls = array_values(array_filter($offering['urls'], static function ($url) {
-                    return 'TMS' == $url['type'];
-                }));
-                $url = $urls[0]['url'].'/metadata.json';
-
-                try {
-                    $response = $this->httpClient->request('GET', $url);
-                    if (Response::HTTP_OK === $response->getStatusCode()) {
-                        $offering['tms_metadata'] = $response->toArray();
-                    }
-                } catch (\Throwable) {
-                }
-            }
+            $offering['configuration']['pyramid'] = $this->storedDataApiService->get($datastoreId, $offering['configuration']['type_infos']['used_data'][0]['stored_data'])->array();
         }
 
         $styles = [];
         if (OfferingTypes::WFS === $offering['type'] || OfferingTypes::WMTSTMS === $offering['type']) {
-            $styles = $this->cartesStylesApiService->getStyles($datastoreId, $offering['configuration'], $migrateStyles);
+            $styles = $this->cartesStylesApiService->getStyles($datastoreId, $offering['configuration']);
         }
         $offering['configuration']['styles'] = $styles;
 
         // url de partage (url capabilities si WFS ou WMS-VECTOR, url spécifique si TMS)
         $offering['share_url'] = $this->getShareUrl($datastoreId, $offering);
+        $offering['access'] = $this->readServiceAccess($offering, true === $offering['open'] ? [] : $this->readPermissionsQuietly($datastoreId));
 
         return $offering;
-    }
-
-    /**
-     * @param array<string,array<mixed>> $offeringsById
-     *
-     * @return array<string,array<mixed>>
-     */
-    public function getServicesFromOfferings(string $datastoreId, array $offeringsById, bool $migrateStyles = true): array
-    {
-        if ([] === $offeringsById) {
-            return [];
-        }
-
-        /** @var array<string,ResponsePromise> $configurationPendingByOfferingId */
-        $configurationPendingByOfferingId = [];
-        foreach ($offeringsById as $offeringId => $offering) {
-            if (!isset($offering['configuration']['_id']) || !is_string($offering['configuration']['_id'])) {
-                continue;
-            }
-
-            $configurationPendingByOfferingId[$offeringId] = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
-        }
-
-        /** @var array<string,array<mixed>> $configurationsByOfferingId */
-        $configurationsByOfferingId = $this->entrepotApi->resolveAll($configurationPendingByOfferingId);
-
-        foreach ($offeringsById as $offeringId => $offering) {
-            $offeringsById[$offeringId] = $this->getService(
-                $datastoreId,
-                $offeringId,
-                $migrateStyles,
-                $offering,
-                $configurationsByOfferingId[$offeringId] ?? null
-            );
-        }
-
-        return $offeringsById;
     }
 
     /**
@@ -183,51 +113,84 @@ class CartesServiceApiService
     }
 
     /**
-     * @param array<mixed> $offering
+     * Flux de la fiche et configurations sans offre, pour la liste : pyramide réduite à son type, sans styles.
+     *
+     * @return array{services: list<array<mixed>>, configurations_without_offering: list<array<mixed>>}
      */
-    public function getShareUrl(string $datastoreId, array $offering): ?string
+    public function getDatasheetServiceList(string $datastoreId, string $datasheetName): array
     {
-        $isSandboxDatastore = $this->sandboxService->isSandboxDatastore($datastoreId);
+        // lancée avant la lecture des configurations, pour courir en parallèle
+        $pendingStoredData = $this->storedDataApiService->getAll($datastoreId, [
+            'tags' => [CommonTags::DATASHEET_NAME => $datasheetName],
+            'fields' => 'type',
+        ]);
+        $datasheetServices = $this->getDatasheetServices($datastoreId, $datasheetName);
+        $storedDataTypes = array_column($pendingStoredData->resolve(), 'type', '_id');
+        $allOpen = [] === array_filter($datasheetServices->offeringsById, fn (array $offering) => true !== $offering['open']);
+        $permissions = $allOpen ? [] : $this->readPermissionsQuietly($datastoreId);
 
-        $datastore = $this->datastoreApiService->get($datastoreId);
-        $endpointId = $offering['endpoint']['_id'];
-
-        $endpoint = $this->datastoreApiService->getEndpoint($datastoreId, $endpointId);
-
-        $shareUrl = null;
-        switch ($offering['type']) {
-            case OfferingTypes::WFS:
-            case OfferingTypes::WMSVECTOR:
-            case OfferingTypes::WMSRASTER:
-                if ($isSandboxDatastore) {
-                    $serviceType = $this->getServiceType($offering) ?? throw new \LogicException("Type de service inconnu pour l’offre {$offering['type']}");
-                    $shareUrl = $this->capabilitiesService->getGetCapUrl($endpoint['endpoint']['urls'][0]['url'], $offering['urls'][0]['url'], $serviceType);
-                } else {
-                    $annexeUrl = $this->params->get('annexes_url');
-                    $shareUrl = implode('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
-                }
-                break;
-
-            case OfferingTypes::WMTSTMS:
-                if (isset($offering['tms_metadata']['tiles'][0])) {
-                    $shareUrl = $offering['tms_metadata']['tiles'][0];
-                }
-
-                if (isset($offering['configuration']['pyramid']['type']) && StoredDataTypes::ROK4_PYRAMID_RASTER === $offering['configuration']['pyramid']['type']) {
-                    if ($isSandboxDatastore) {
-                        $shareUrl = $this->capabilitiesService->getGetCapUrl($endpoint['endpoint']['urls'][0]['url'], $offering['urls'][0]['url'], 'WMTS');
-                    } else {
-                        $annexeUrl = $this->params->get('annexes_url');
-                        $shareUrl = implode('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
-                    }
-                }
-                break;
-
-            default:
-                break;
+        $services = [];
+        foreach ($datasheetServices->offeringsById as $offering) {
+            $offering['configuration'] = $datasheetServices->configurationOfOffering($offering['_id']) ?? $offering['configuration'];
+            if (OfferingTypes::WMTSTMS === $offering['type']) {
+                $pyramidType = $storedDataTypes[$offering['configuration']['type_infos']['used_data'][0]['stored_data'] ?? ''] ?? null;
+                $offering['configuration']['pyramid'] = null === $pyramidType ? null : ['type' => $pyramidType];
+            }
+            $offering['share_url'] = $this->getShareUrl($datastoreId, $offering);
+            $offering['access'] = $this->readServiceAccess($offering, $permissions);
+            $services[] = $offering;
         }
 
-        return $shareUrl;
+        return [
+            'services' => $services,
+            'configurations_without_offering' => $datasheetServices->configurationsWithoutOffering(),
+        ];
+    }
+
+    /**
+     * URL de diffusion : GetCapabilities (espace découverte ou point d’accès privé) ou capabilities filtrées en annexe, tuiles pour un TMS.
+     *
+     * @param array<mixed> $offering avec `configuration.pyramid.type` pour un WMTS-TMS
+     */
+    private function getShareUrl(string $datastoreId, array $offering): ?string
+    {
+        $pyramidType = $offering['configuration']['pyramid']['type'] ?? null;
+        if (OfferingTypes::WMTSTMS === $offering['type'] && StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramidType) {
+            $tmsUrl = $this->getUrlOfType($offering['urls'] ?? [], 'TMS');
+
+            return null === $tmsUrl ? null : $tmsUrl.'/{z}/{x}/{y}.pbf';
+        }
+
+        $serviceType = match ($offering['type']) {
+            OfferingTypes::WFS => 'WFS',
+            OfferingTypes::WMSVECTOR, OfferingTypes::WMSRASTER => 'WMS',
+            OfferingTypes::WMTSTMS => StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramidType ? 'WMTS' : null,
+            default => null,
+        };
+        if (null === $serviceType) {
+            return null;
+        }
+
+        $endpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id'])['endpoint'];
+        // capabilities filtrées en annexe seulement pour un point d’accès ouvert hors espace découverte (voir CapabilitiesService::createOrUpdate)
+        if (true !== $endpoint['open'] || $this->sandboxService->isSandboxDatastore($datastoreId)) {
+            $endpointUrl = $this->getUrlOfType($endpoint['urls'] ?? [], $serviceType);
+            $offeringUrl = $this->getUrlOfType($offering['urls'] ?? [], $serviceType);
+
+            return null === $endpointUrl || null === $offeringUrl ? null : $this->capabilitiesService->getGetCapUrl($endpointUrl, $offeringUrl, $serviceType);
+        }
+
+        $datastore = $this->datastoreApiService->get($datastoreId);
+
+        return implode('/', [$this->params->get('annexes_url'), $datastore['technical_name'], $endpoint['technical_name'], 'capabilities.xml']);
+    }
+
+    /**
+     * @param array<array{type?: string, url?: string}> $urls
+     */
+    private function getUrlOfType(array $urls, string $type): ?string
+    {
+        return Utils::array_find($urls, fn (array $url) => ($url['type'] ?? null) === $type)['url'] ?? null;
     }
 
     /**
@@ -606,7 +569,7 @@ class CartesServiceApiService
         $datasheetName = $this->assertEditable($offering, $configuration);
 
         $type = $configuration['type'];
-        $previousAccess = $this->getServiceAccess($datastoreId, $offering);
+        $previousAccess = $this->getServiceAccess($offering, true === $offering['open'] ? [] : $this->datastoreApiService->getPermissions($datastoreId)->resolve());
         $previousEndpoint = $this->getEndpointByAccess($datastoreId, $type, $previousAccess);
         $endpoint = $this->getEndpointByAccess($datastoreId, $type, $dto->access);
 
@@ -720,18 +683,49 @@ class CartesServiceApiService
     }
 
     /**
-     * Accès actuel d’un flux, même règle que `offering.ts` : endpoint ouvert, sinon permission en cours pour la communauté cartes.gouv.fr.
+     * Permissions de l’entrepôt, null si l’Entrepôt ne répond pas : l’accès des flux privés reste alors inconnu.
      *
-     * @param array<mixed> $offering
+     * @return array<array<mixed>>|null
      */
-    private function getServiceAccess(string $datastoreId, array $offering): ServiceAccess
+    private function readPermissionsQuietly(string $datastoreId): ?array
+    {
+        try {
+            return $this->datastoreApiService->getPermissions($datastoreId)->resolve();
+        } catch (ApiException $e) {
+            $this->logger->warning('{class}: Failed to read permissions of datastore {datastoreId}: {error}', [
+                'class' => self::class,
+                'datastoreId' => $datastoreId,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * @param array<mixed>             $offering
+     * @param array<array<mixed>>|null $permissions null : lecture en échec
+     */
+    private function readServiceAccess(array $offering, ?array $permissions): ?ServiceAccess
+    {
+        return true !== $offering['open'] && null === $permissions ? null : $this->getServiceAccess($offering, $permissions ?? []);
+    }
+
+    /**
+     * Accès actuel d’un flux : endpoint ouvert, sinon permission en cours pour la communauté cartes.gouv.fr.
+     *
+     * @param array<mixed>        $offering
+     * @param array<array<mixed>> $permissions permissions de l’entrepôt
+     */
+    private function getServiceAccess(array $offering, array $permissions): ServiceAccess
     {
         if (true === $offering['open']) {
             return ServiceAccess::Public;
         }
 
         $configCommunityId = $this->params->get('config')['community_id'];
-        foreach ($this->datastoreApiService->getPermissions($datastoreId)->resolve() as $permission) {
+        foreach ($permissions as $permission) {
             if (($permission['beneficiary']['_id'] ?? null) === $configCommunityId
                 && !$this->isPermissionExpired($permission)
                 && in_array($offering['_id'], array_column($permission['offerings'] ?? [], '_id'), true)) {
@@ -952,26 +946,5 @@ class CartesServiceApiService
         ];
 
         return $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody)->array();
-    }
-
-    /**
-     * @param array<mixed> $offering
-     */
-    private function getServiceType(array $offering): ?string
-    {
-        switch ($offering['type']) {
-            case OfferingTypes::WFS:
-                return 'WFS';
-            case OfferingTypes::WMSVECTOR:
-            case OfferingTypes::WMSRASTER:
-                return 'WMS';
-            case OfferingTypes::WMTSTMS:
-                if (isset($offering['tms_metadata']['tiles'][0])) {
-                    return null;
-                }
-
-                return 'WMTS';
-            default: return null;
-        }
     }
 }

@@ -5,12 +5,12 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { type UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
-import { type Configuration, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "@/@types/app";
+import { type DatasheetServiceList, OfferingTypeEnum, type ServiceListItem, StoredDataTypeEnum } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
@@ -18,8 +18,6 @@ import LoadingText from "@/components/Utils/LoadingText";
 import MenuList from "@/components/Utils/MenuList";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import Wait from "@/components/Utils/Wait";
-import api from "@/entrepot/api";
-import { datastorePermissionsQueryOptions } from "@/hooks/queries/datastorePermissionsQueryOptions";
 import useUnpublishServiceMutation from "@/hooks/queries/useUnpublishServiceMutation";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { usePagination } from "@/hooks/usePagination";
@@ -36,7 +34,6 @@ import {
     getServiceThumbnailUrl,
     getServiceTypeLabel,
     isOfferingUnavailable,
-    isPrivateServiceVisibleOnCartesGouv,
 } from "@/utils";
 import DatasheetViewTab from "../../DatasheetViewTab";
 import ConfigurationsWithoutOfferingList from "./ConfigurationsWithoutOfferingList";
@@ -67,7 +64,7 @@ const FILTERS = [
 ] as const satisfies { value: ServiceTypeFilter; label: string | undefined }[];
 
 // un WMTS-TMS dont le type de pyramide est inconnu apparaît sous WMTS et TMS
-function matchesTypeFilter(service: Service, filter: ServiceTypeFilter): boolean {
+function matchesTypeFilter(service: ServiceListItem, filter: ServiceTypeFilter): boolean {
     switch (filter) {
         case "all":
             return true;
@@ -85,16 +82,15 @@ function matchesTypeFilter(service: Service, filter: ServiceTypeFilter): boolean
 type ServicesListTabNextProps = {
     datastoreId: string;
     datasheetName: string;
-    serviceListQuery: UseQueryResult<Service[], ApiError>;
-    configurationsWithoutOfferingQuery: UseQueryResult<Configuration[], ApiError>;
+    serviceListQuery: UseQueryResult<DatasheetServiceList, ApiError>;
 };
 
-export default function ServicesListTabNext({ datastoreId, datasheetName, serviceListQuery, configurationsWithoutOfferingQuery }: ServicesListTabNextProps) {
+export default function ServicesListTabNext({ datastoreId, datasheetName, serviceListQuery }: ServicesListTabNextProps) {
     const { t } = useTranslation("ServicesListTabNext");
     const { classes, cx } = useStyles();
     const [typeFilter, setTypeFilter] = useState<ServiceTypeFilter>("all");
     const [page, setPage] = useState(1);
-    const [targetService, setTargetService] = useState<Service>();
+    const [targetService, setTargetService] = useState<ServiceListItem>();
 
     const { userRights, isSupervisor } = useCommunityRights();
     const canBroadcast = isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
@@ -104,14 +100,11 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
     const canGeneratePyramidRaster =
         isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
 
-    // permissions de l’entrepôt, pour repérer les flux privés visibles sur cartes.gouv.fr ; en cas d’échec, ces flux s’affichent « Privé »
-    const permissionsQuery = useQuery(datastorePermissionsQueryOptions(datastoreId));
-
     const deleteServiceMutation = useUnpublishServiceMutation(datastoreId, datasheetName);
 
     // du plus récent au plus ancien
     const sortedServices = useMemo(
-        () => [...(serviceListQuery.data ?? [])].sort((a, b) => (b.update ?? "").localeCompare(a.update ?? "")),
+        () => [...(serviceListQuery.data?.services ?? [])].sort((a, b) => (b.update ?? "").localeCompare(a.update ?? "")),
         [serviceListQuery.data]
     );
 
@@ -130,7 +123,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         },
     });
 
-    const openCopyUrlDialog = (service: Service) => {
+    const openCopyUrlDialog = (service: ServiceListItem) => {
         setTargetService(service);
         TextCopyToClipboardModal.open();
     };
@@ -151,12 +144,10 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
 
     // lignes mémorisées : références stables pour que memo(MenuList) évite de re-rendre les menus de chaque ligne
     const rows = useMemo(() => {
-        const permissions = permissionsQuery.data;
-
         return pageServices.map((service) => {
             const offeringUnavailable = isOfferingUnavailable(service.status);
             const editable = editableOfferingTypes.includes(service.type);
-            const visibleOnCartesGouv = isPrivateServiceVisibleOnCartesGouv(service, permissions, api.alerts.communityId, now);
+            const visibleOnCartesGouv = service.access === "restricted_visible";
             const exploreMapsAvailability = getExploreMapsAvailability({ service, services: sortedServices, visibleOnCartesGouv, now });
             const exploreMapsLayerParam = getExploreMapsLayerParam(service);
 
@@ -173,10 +164,10 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                         </span>
                     </span>
                 </span>,
-                <ServiceAccessBadge key={`access-${service._id}`} service={service} visibleOnCartesGouv={visibleOnCartesGouv} />,
+                <ServiceAccessBadge key={`access-${service._id}`} service={service} />,
                 <ServiceShareUrlCell
                     key={`url-${service._id}`}
-                    shareUrl={offeringUnavailable ? undefined : service.share_url}
+                    shareUrl={offeringUnavailable ? undefined : (service.share_url ?? undefined)}
                     onCopy={() => openCopyUrlDialog(service)}
                 />,
                 <ServiceExploreMapsCell key={`explore-${service._id}`} availability={exploreMapsAvailability} layerParam={exploreMapsLayerParam} />,
@@ -247,30 +238,24 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                 />,
             ];
         });
-    }, [pageServices, sortedServices, permissionsQuery.data, now, canBroadcast, canCreate, canGeneratePyramidRaster, datastoreId, datasheetName, classes, t]);
+    }, [pageServices, sortedServices, now, canBroadcast, canCreate, canGeneratePyramidRaster, datastoreId, datasheetName, classes, t]);
 
     if (serviceListQuery.isPending) {
         return <LoadingText withSpinnerIcon={true} as="p" />;
+    }
+
+    if (serviceListQuery.isError) {
+        return <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceListQuery.error)} small />;
     }
 
     const configurationsWithoutOffering = (
         <ConfigurationsWithoutOfferingList
             datastoreId={datastoreId}
             datasheetName={datasheetName}
-            query={configurationsWithoutOfferingQuery}
+            configurations={serviceListQuery.data.configurations_without_offering}
             canDelete={!!canBroadcast}
         />
     );
-
-    // les flux non publiés restent accessibles quand la liste des flux est en erreur
-    if (serviceListQuery.isError) {
-        return (
-            <>
-                <Alert severity="error" title={t("load_error")} description={getApiErrorMessage(serviceListQuery.error)} small />
-                {configurationsWithoutOffering}
-            </>
-        );
-    }
 
     const createButton = (
         <Button

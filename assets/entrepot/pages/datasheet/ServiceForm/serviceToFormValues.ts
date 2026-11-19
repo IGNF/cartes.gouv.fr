@@ -1,10 +1,10 @@
 import markdownit from "markdown-it";
 
-import { type DatastorePermission, OfferingTypeEnum, type Service, type VectorDb } from "@/@types/app";
+import { OfferingTypeEnum, type Service, type VectorDb } from "@/@types/app";
 import { type ConfigurationUsedDataRelationWfsDetailsContent, type ConfigurationUsedDataRelationWmsVectorDetailsContent } from "@/@types/entrepot";
 import { filterGeometricRelations } from "@/helpers";
-import { getThematicCategories, isPrivateServiceVisibleOnCartesGouv } from "@/utils";
-import { type ServiceAccess, type ServiceFormValues, type ServiceTableFormValues } from "./serviceFormSchema";
+import { getThematicCategories } from "@/utils";
+import { type ServiceFormValues, type ServiceTableFormValues } from "./serviceFormSchema";
 
 const md = markdownit();
 const themeCodesByLabel = new Map(getThematicCategories().map((category) => [category.text, category.code]));
@@ -46,12 +46,6 @@ const readThemes = (tag: string): string[] => {
         start = end;
     }
     return themes;
-};
-
-// même lecture que l’accès affiché dans l’onglet Flux
-const readAccess = (service: Service, permissions: DatastorePermission[] | undefined, cartesGouvCommunityId: string | null, now: number): ServiceAccess => {
-    if (service.open) return "public";
-    return isPrivateServiceVisibleOnCartesGouv(service, permissions, cartesGouvCommunityId, now) ? "restricted_visible" : "restricted";
 };
 
 /** une ligne par table géométrique de la base, aucune cochée */
@@ -105,13 +99,7 @@ const toTable = (
 /**
  * Valeurs du formulaire d’un flux publié. `vectorDb` : base du flux WFS ou WMS vecteur, pour proposer toutes ses tables ; sans elle, aucune table.
  */
-export function serviceToFormValues(
-    service: Service,
-    permissions: DatastorePermission[] | undefined,
-    cartesGouvCommunityId: string | null,
-    now: number,
-    vectorDb?: VectorDb
-): ServiceFormValues {
+export function serviceToFormValues(service: Service, vectorDb?: VectorDb): ServiceFormValues {
     const { configuration } = service;
     const typeInfos = configuration.type_infos;
     const abstract = "abstract" in typeInfos && typeof typeInfos.abstract === "string" ? typeInfos.abstract : "";
@@ -132,7 +120,8 @@ export function serviceToFormValues(
         thumbnail: undefined,
         themes: readThemes(configuration.tags.theme ?? ""),
         tables: vectorDb ? readTables(vectorDb) : [],
-        access: readAccess(service, permissions, cartesGouvCommunityId, now),
+        // accès inconnu (permissions non lues) : la page ne permet pas la modification
+        access: service.access ?? "restricted",
         attribution: {
             enabled: Boolean(configuration.attribution),
             title: configuration.attribution?.title ?? "",

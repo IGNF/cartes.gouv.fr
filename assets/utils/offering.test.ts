@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { type DatastorePermission, OfferingStatusEnum, OfferingTypeEnum, type Service, StoredDataTypeEnum } from "@/@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, type Service, StoredDataTypeEnum } from "@/@types/app";
 import {
     EXPLORE_MAPS_CONFIGURATION_DELAY_MS,
     getExploreMapsAvailability,
@@ -8,7 +8,6 @@ import {
     getLayerBaseName,
     getNextExploreMapsPendingEnd,
     hasWmtsSibling,
-    isPrivateServiceVisibleOnCartesGouv,
 } from "./offering";
 
 const CREATION = "2026-10-01T10:00:00+00:00";
@@ -29,12 +28,6 @@ function service(overrides: ServiceFixture = {}): Service {
         ...rest,
     } as unknown as Service;
 }
-
-function permission(beneficiaryId: string, offeringIds: string[], endDate?: string): DatastorePermission {
-    return { beneficiary: { _id: beneficiaryId }, offerings: offeringIds.map((_id) => ({ _id })), end_date: endDate } as unknown as DatastorePermission;
-}
-
-const NOW = Date.parse("2026-10-28T12:00:00+00:00");
 
 describe("getLayerBaseName", () => {
     it("retire le suffixe _wms, _wmts ou _wmsr, en respectant la casse comme le générateur", () => {
@@ -83,28 +76,6 @@ describe("getNextExploreMapsPendingEnd", () => {
         const wfs = service({ _id: "wfs", type: OfferingTypeEnum.WFS, creation: "2026-10-01T11:00:00+00:00" });
         expect(getNextExploreMapsPendingEnd([service(), older, wfs], CREATION_MS)).toBe(end);
         expect(getNextExploreMapsPendingEnd([service(), older, wfs], end)).toBeUndefined();
-    });
-});
-
-describe("isPrivateServiceVisibleOnCartesGouv", () => {
-    const privateService = service({ open: false });
-
-    it("exige un flux privé et une permission pour la communauté cartes.gouv.fr sur ce flux", () => {
-        expect(isPrivateServiceVisibleOnCartesGouv(privateService, [permission("cartes", ["offering-1"])], "cartes", NOW)).toBe(true);
-        expect(isPrivateServiceVisibleOnCartesGouv(privateService, [permission("autre", ["offering-1"])], "cartes", NOW)).toBe(false);
-        expect(isPrivateServiceVisibleOnCartesGouv(privateService, [permission("cartes", ["offering-2"])], "cartes", NOW)).toBe(false);
-        expect(isPrivateServiceVisibleOnCartesGouv(service({ open: true }), [permission("cartes", ["offering-1"])], "cartes", NOW)).toBe(false);
-        expect(isPrivateServiceVisibleOnCartesGouv(privateService, undefined, "cartes", NOW)).toBe(false);
-        expect(isPrivateServiceVisibleOnCartesGouv(privateService, [permission("cartes", ["offering-1"])], null, NOW)).toBe(false);
-    });
-
-    it("ignore une permission expirée, accepte une permission sans date de fin ou en cours", () => {
-        expect(isPrivateServiceVisibleOnCartesGouv(privateService, [permission("cartes", ["offering-1"], "2026-10-28T11:59:00+00:00")], "cartes", NOW)).toBe(
-            false
-        );
-        expect(isPrivateServiceVisibleOnCartesGouv(privateService, [permission("cartes", ["offering-1"], "2026-10-28T12:01:00+00:00")], "cartes", NOW)).toBe(
-            true
-        );
     });
 });
 

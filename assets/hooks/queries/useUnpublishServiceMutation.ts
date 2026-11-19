@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { type Service } from "@/@types/app";
+import { type ServiceListItem } from "@/@types/app";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
@@ -9,7 +9,7 @@ import { type ApiError } from "@/modules/jsonFetch";
 export default function useUnpublishServiceMutation(datastoreId: string, datasheetName: string) {
     const queryClient = useQueryClient();
 
-    return useMutation<null, ApiError, Service>({
+    return useMutation<null, ApiError, ServiceListItem>({
         mutationFn: (service) => api.service.unpublishService(datastoreId, service._id),
         // relecture même après un échec : le second DELETE peut échouer alors que l’offre est déjà dépubliée
         onSettled() {

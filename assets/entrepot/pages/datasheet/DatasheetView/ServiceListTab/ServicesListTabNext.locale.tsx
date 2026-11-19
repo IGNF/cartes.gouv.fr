@@ -54,7 +54,6 @@ const { i18n } = declareComponentKeys<
     | { K: "without_offering.delete_label"; P: { name: string }; R: string }
     | "without_offering.explanation"
     | "without_offering.status"
-    | "without_offering.load_error"
     | { K: "without_offering.delete_modal.title"; P: { name: string }; R: string }
     | "without_offering.deleting"
     | "without_offering.delete_error"
@@ -116,7 +115,6 @@ export const ServicesListTabNextFrTranslations: Translations<"fr">["ServicesList
     "without_offering.explanation":
         "Ces flux n’ont plus d’offre de publication, souvent après une publication ou une suppression interrompue. Ils gardent leur nom technique tant qu’ils ne sont pas supprimés.",
     "without_offering.status": "Non publié",
-    "without_offering.load_error": "La liste des flux non publiés n’a pas pu être chargée",
     "without_offering.delete_modal.title": ({ name }) => `Êtes-vous sûr de vouloir supprimer le flux non publié ${name} ?`,
     "without_offering.deleting": "Suppression du flux non publié en cours",
     "without_offering.delete_error": "Le flux non publié n’a pas été supprimé",
@@ -176,7 +174,6 @@ export const ServicesListTabNextEnTranslations: Translations<"en">["ServicesList
     "without_offering.explanation":
         "These services no longer have a publication offering, often after an interrupted publication or deletion. They keep their technical name until they are deleted.",
     "without_offering.status": "Unpublished",
-    "without_offering.load_error": "The list of unpublished services could not be loaded",
     "without_offering.delete_modal.title": ({ name }) => `Are you sure you want to delete the unpublished service ${name}?`,
     "without_offering.deleting": "Deleting the unpublished service",
     "without_offering.delete_error": "The unpublished service was not deleted",

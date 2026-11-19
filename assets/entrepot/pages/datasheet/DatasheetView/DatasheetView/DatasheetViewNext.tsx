@@ -17,7 +17,6 @@ import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
-import { datasheetConfigurationsWithoutOfferingQueryOptions } from "@/hooks/queries/datasheetConfigurationsWithoutOfferingQueryOptions";
 import { datasheetDocumentsQueryOptions } from "@/hooks/queries/datasheetDocumentsQueryOptions";
 import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
 import { blockingProcessingStatuses } from "@/hooks/queries/useStoredDataUseProcessings";
@@ -108,14 +107,13 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
 
     const metadataQuery = useQuery({ ...datasheetMetadataQueryOptions(datastoreId, datasheetName), enabled });
 
-    const serviceListQuery = useQuery({ ...datasheetServiceListQueryOptions(datastoreId, datasheetName), enabled });
-    // lourde (une lecture par configuration) : seulement sur l’onglet Flux
-    const configurationsWithoutOfferingQuery = useQuery({
-        ...datasheetConfigurationsWithoutOfferingQueryOptions(datastoreId, datasheetName),
-        enabled: enabled && activeTab === DatasheetViewActiveTabEnum.Services,
-    });
-
     const isDeleteModalOpen = useIsModalOpen(deleteModal);
+
+    // lue par l’onglet Flux et, pour son compte, par la modale de suppression
+    const serviceListQuery = useQuery({
+        ...datasheetServiceListQueryOptions(datastoreId, datasheetName),
+        enabled: enabled && (activeTab === DatasheetViewActiveTabEnum.Services || isDeleteModalOpen),
+    });
 
     const documentsListQuery = useQuery({ ...datasheetDocumentsQueryOptions(datastoreId, datasheetName), enabled: enabled && isDeleteModalOpen });
 
@@ -179,7 +177,11 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
             : undefined;
 
     const deleteModalLoading =
-        datasheetQuery.isFetching || metadataQuery.isFetching || documentsListQuery.isFetching || processingExecutionsQueries.some((query) => query.isFetching);
+        datasheetQuery.isFetching ||
+        metadataQuery.isFetching ||
+        documentsListQuery.isFetching ||
+        serviceListQuery.isFetching ||
+        processingExecutionsQueries.some((query) => query.isFetching);
     const datasheet = datasheetQuery.data;
 
     const tabContent: Record<(typeof DATASHEET_VIEW_NEXT_TABS)[number], ReactNode> = {
@@ -203,12 +205,7 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
             />
         ),
         [DatasheetViewActiveTabEnum.Services]: (
-            <ServicesListTabNext
-                datastoreId={datastoreId}
-                datasheetName={datasheetName}
-                serviceListQuery={serviceListQuery}
-                configurationsWithoutOfferingQuery={configurationsWithoutOfferingQuery}
-            />
+            <ServicesListTabNext datastoreId={datastoreId} datasheetName={datasheetName} serviceListQuery={serviceListQuery} />
         ),
     };
 
@@ -306,7 +303,9 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
                                 {datasheet?.pyramid_raster_list?.length ? (
                                     <li>{t("delete_modal.pyramid_raster", { count: datasheet.pyramid_raster_list.length })}</li>
                                 ) : null}
-                                {serviceListQuery.data?.length ? <li>{t("delete_modal.services", { count: serviceListQuery.data.length })}</li> : null}
+                                {serviceListQuery.data?.services.length ? (
+                                    <li>{t("delete_modal.services", { count: serviceListQuery.data.services.length })}</li>
+                                ) : null}
                                 {datasheet?.upload_list?.length ? <li>{t("delete_modal.uploads", { count: datasheet.upload_list.length })}</li> : null}
                                 {metadata && <li>{t("delete_modal.metadata", { fileIdentifier: metadata.file_identifier })}</li>}
                                 {documentsListQuery.data?.length ? <li>{t("delete_modal.documents", { count: documentsListQuery.data.length })}</li> : null}
