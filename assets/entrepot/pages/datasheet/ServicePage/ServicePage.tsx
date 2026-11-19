@@ -225,7 +225,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
     const editMutation = useMutation<Service, ApiError, ServiceEditFormOutput>({
         mutationFn: (formValues) =>
             api.service.edit(datastoreId, service._id, buildServiceEditFormData(formType, formValues, service.type === OfferingTypeEnum.WMSRASTER)),
-        onSuccess: async (offering) => {
+        onSuccess: async (offering, formValues) => {
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
 
@@ -252,8 +252,12 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
             if (queryClient.getQueryState(serviceKey)?.status === "error" || !fresh) {
                 form.reset(form.getValues());
             } else {
+                // accès enregistré : la relecture peut garder l’ancien quand les permissions n’ont pas pu être lues
                 form.reset(
-                    serviceToFormValues(fresh, storedDataId ? queryClient.getQueryData(RQKeys.datastore_stored_data(datastoreId, storedDataId)) : undefined)
+                    serviceToFormValues(
+                        { ...fresh, access: formValues.access },
+                        storedDataId ? queryClient.getQueryData(RQKeys.datastore_stored_data(datastoreId, storedDataId)) : undefined
+                    )
                 );
             }
             setSnackbarMessage(t("edit.success"));
