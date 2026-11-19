@@ -90,7 +90,7 @@ final class DatasheetDocumentRoutesTest extends WebTestCase
     public static function acceptedFiles(): iterable
     {
         yield 'pdf' => ['rapport.pdf', "%PDF-1.4\n%%EOF"];
-        yield 'png' => ['image.png', (string) base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', true)];
+        yield 'png' => ['image.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', true)];
         yield 'svg' => ['image.svg', '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>'];
         yield 'csv' => ['table.csv', "id;nom\n1;Ardennes\n"];
         yield 'qgz' => ['projet.qgz', "PK\x05\x06".str_repeat("\0", 18)];
@@ -173,7 +173,7 @@ final class DatasheetDocumentRoutesTest extends WebTestCase
         $client = self::createClient();
         $this->logIn($client);
 
-        $client->xmlHttpRequest('POST', self::DOCUMENTS_URL.'/fichier-1', ['name' => 'Carte'], ['file' => $this->upload('carte.png', (string) base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', true))]);
+        $client->xmlHttpRequest('POST', self::DOCUMENTS_URL.'/fichier-1', ['name' => 'Carte'], ['file' => $this->upload('carte.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', true))]);
 
         self::assertResponseIsSuccessful();
         [$document] = $this->jsonResponse($client);
