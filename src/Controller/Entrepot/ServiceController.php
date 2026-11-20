@@ -4,13 +4,19 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\Form\ServiceEditFormDTO;
+use App\Dto\Services\Form\ServicePublishFormDTO;
 use App\Dto\Services\Form\WfsTableEditFormDTO;
 use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Exception\AppException;
+use App\Services\DatastorePrefixValidator;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Services\EntrepotApi\Rok4StyleFileService;
+use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
+use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\WmsVectorStyleFileService;
 use App\Services\MultipartPayloadMapper;
 use App\Services\ServiceFormFileValidator;
@@ -23,15 +29,16 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 #[Route(
-    '/api/datastores/{datastoreId}/offerings',
+    '/api/datastores/{datastoreId}/services',
     name: 'cartesgouvfr_api_service_',
     options: ['expose' => true])]
-#[OA\Tag(name: '[cartes.gouv.fr] services', description: 'Actions génériques sur les services')]
+#[OA\Tag(name: '[cartes.gouv.fr] services', description: 'Flux : offre de l’Entrepôt avec sa configuration')]
 final class ServiceController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
@@ -40,36 +47,65 @@ final class ServiceController extends AbstractController implements ApiControlle
         private readonly MultipartPayloadMapper $multipartPayloadMapper,
         private readonly ServiceFormFileValidator $serviceFormFileValidator,
         private readonly WmsVectorStyleFileService $wmsVectorStyleFileService,
+        private readonly Rok4StyleFileService $rok4StyleFileService,
+        private readonly StoredDataApiService $storedDataApiService,
+        private readonly DatastorePrefixValidator $datastorePrefixValidator,
     ) {
     }
 
-    #[Route('', name: 'get_offerings_list', methods: ['GET'])]
-    public function getOfferings(string $datastoreId, #[MapQueryParameter] bool $detailed = false, #[MapQueryParameter] bool $detailedConfiguration = false): JsonResponse
+    private const STORED_DATA_TYPES = [
+        ConfigurationTypes::WFS => [StoredDataTypes::VECTOR_DB],
+        ConfigurationTypes::WMSVECTOR => [StoredDataTypes::VECTOR_DB],
+        ConfigurationTypes::WMSRASTER => [StoredDataTypes::ROK4_PYRAMID_RASTER],
+        ConfigurationTypes::WMTSTMS => [StoredDataTypes::ROK4_PYRAMID_RASTER, StoredDataTypes::ROK4_PYRAMID_VECTOR],
+    ];
+
+    /** Publication : multipart `data` (ServicePublishFormDTO), `thumbnail`, `attribution_logo` et, en WMS vecteur, un fichier SLD `style_files[<table>]` par table. */
+    #[Route('', name: 'publish_service', methods: ['POST'])]
+    public function publishService(string $datastoreId, Request $request): JsonResponse
     {
-        if ($detailed) {
-            $offerings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId)->resolve();
+        $requestedType = json_decode((string) $request->request->get('data'), true)['type'] ?? null;
+        $groups = in_array($requestedType, ServicePublishFormDTO::TYPES, true) ? ['Default', $requestedType] : ['Default'];
+        $dto = $this->multipartPayloadMapper->map($request, ServicePublishFormDTO::class, groups: $groups);
+        [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
+        $styleFiles = ConfigurationTypes::WMSVECTOR === $dto->type ? $this->serviceFormFileValidator->styleFiles($request, $dto->selected_tables) : [];
+
+        // contrôles avant tout dépôt de fichier
+        $this->datastorePrefixValidator->assertLayerName($datastoreId, $dto->technical_name);
+        $storedData = $this->storedDataApiService->get($datastoreId, $dto->stored_data_id)->array();
+        if (!in_array($storedData['type'] ?? null, self::STORED_DATA_TYPES[$dto->type], true)) {
+            throw new AppException('Ce jeu de données ne peut pas être publié dans ce type de flux', Response::HTTP_BAD_REQUEST, ['type' => $dto->type, 'stored_data_type' => $storedData['type'] ?? null]);
+        }
+
+        $usedData = ['stored_data' => $dto->stored_data_id];
+        if (in_array($storedData['type'], [StoredDataTypes::ROK4_PYRAMID_RASTER, StoredDataTypes::ROK4_PYRAMID_VECTOR], true)) {
+            $usedData = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($storedData) + $usedData;
+        }
+        $base = ['used_data' => [$usedData]];
+        $onConfigurationCreated = null;
+        $onRollback = null;
+
+        if (ConfigurationTypes::WMSVECTOR === $dto->type) {
+            // nom temporaire : l’identifiant de la configuration n’existe pas encore
+            $staticIds = $this->wmsVectorStyleFileService->upload($datastoreId, $styleFiles, 'tmp_'.Uuid::v4());
+            $typeInfos = ServiceConfigurationRequestBuilder::buildTypeInfos($dto->type, $dto, $base, $staticIds);
+            // renommage avant l’offre : un échec annule encore la configuration
+            $onConfigurationCreated = fn (string $configurationId) => $this->wmsVectorStyleFileService->rename($datastoreId, $staticIds, $configurationId);
+            // après l’offre, les fichiers restent : le flux les utilise
+            $onRollback = fn () => $this->wmsVectorStyleFileService->removeQuietly($datastoreId, $staticIds);
+        } elseif (StoredDataTypes::ROK4_PYRAMID_RASTER === $storedData['type']) {
+            $configType = ConfigurationTypes::WMSRASTER === $dto->type ? 'wmsr' : 'wmts';
+            $legendStaticId = $this->rok4StyleFileService->upload($datastoreId, $storedData, $configType, ServiceConfigurationRequestBuilder::getPyramidZoomLevels($storedData));
+            $typeInfos = ServiceConfigurationRequestBuilder::buildTypeInfos($dto->type, $dto, $base + ['styles' => [$legendStaticId]]);
+            $onConfigurationCreated = fn (string $configurationId) => $this->rok4StyleFileService->rename($datastoreId, $legendStaticId, $configurationId, $configType);
+            $onRollback = fn () => $this->rok4StyleFileService->removeQuietly($datastoreId, $legendStaticId);
         } else {
-            $offerings = $this->configurationApiService->getAllOfferings($datastoreId)->resolve();
+            $typeInfos = ServiceConfigurationRequestBuilder::buildTypeInfos($dto->type, $dto, $base);
         }
 
-        if ($detailedConfiguration) {
-            $pendingConfigurationsById = [];
+        $offering = $this->cartesServiceApiService->publishFromForm($datastoreId, $storedData, $dto, $typeInfos, $thumbnail, $attributionLogo, $onConfigurationCreated, $onRollback);
 
-            foreach ($offerings as $offering) {
-                $configId = $offering['configuration']['_id'];
-                $pendingConfigurationsById[$configId] = $this->configurationApiService->get($datastoreId, $configId);
-            }
-
-            $configurationsById = $this->configurationApiService->api->resolveAll($pendingConfigurationsById);
-
-            foreach ($offerings as &$offering) {
-                $configId = $offering['configuration']['_id'];
-                $offering['configuration'] = $configurationsById[$configId];
-            }
-            unset($offering);
-        }
-
-        return $this->json($offerings);
+        return $this->json($offering, Response::HTTP_CREATED);
     }
 
     #[Route('/{offeringId}', name: 'get_service', methods: ['GET'], requirements: ['offeringId' => Requirement::UUID_V4])]
@@ -81,7 +117,8 @@ final class ServiceController extends AbstractController implements ApiControlle
     }
 
     /** Modification depuis la page du flux : multipart `data` (ServiceEditFormDTO), `thumbnail`, `attribution_logo`. */
-    #[Route('/{offeringId}/edit', name: 'edit_service', methods: ['POST'], requirements: ['offeringId' => Requirement::UUID_V4])]
+    // POST et non PUT ou PATCH : PHP ne lit les fichiers multipart que dans un POST
+    #[Route('/{offeringId}', name: 'edit_service', methods: ['POST'], requirements: ['offeringId' => Requirement::UUID_V4])]
     public function editService(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
         $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
@@ -148,15 +185,6 @@ final class ServiceController extends AbstractController implements ApiControlle
         if (count($violations) > 0) {
             throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($dto, $violations));
         }
-    }
-
-    #[Route('/{offeringId}/stats', name: 'get_service_stats', methods: ['GET'], requirements: ['offeringId' => Requirement::UUID_V4])]
-    public function getServiceStats(string $datastoreId, string $offeringId, Request $request): JsonResponse
-    {
-        $query = $request->query->all();
-        $stats = $this->configurationApiService->getOfferingStats($datastoreId, $offeringId, $query)->resolve();
-
-        return $this->json($stats);
     }
 
     #[Route('/{offeringId}', name: 'unpublish_service', methods: ['DELETE'])]

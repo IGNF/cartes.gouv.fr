@@ -3,26 +3,18 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
-use App\Constants\EntrepotApi\ConfigurationTypes;
-use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
-use App\Dto\Services\Form\PyramidServiceFormDTO;
 use App\Dto\Services\PyramidRaster\PyramidRasterGenerateDTO;
 use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\AnnexeApiService;
-use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
-use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
-use App\Services\EntrepotApi\StaticApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
-use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
-use App\Services\ServiceFormFileValidator;
 use App\Utils;
 use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
@@ -31,9 +23,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -44,7 +34,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
     '/api/datastores/{datastoreId}/pyramid-raster',
     name: 'cartesgouvfr_api_pyramid_raster_',
     options: ['expose' => true])]
-#[OA\Tag(name: '[cartes.gouv.fr] pyramid-raster', description: 'Génération de pyramides de tuiles raster et création des services associés')]
+#[OA\Tag(name: '[cartes.gouv.fr] pyramid-raster', description: 'Génération de pyramides de tuiles raster')]
 final class PyramidRasterController extends AbstractController implements ApiControllerInterface
 {
     private readonly HttpClientInterface $httpClient;
@@ -55,13 +45,9 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         private readonly StoredDataApiService $storedDataApiService,
         private readonly ProcessingApiService $processingApiService,
         private readonly SandboxService $sandboxService,
-        private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly AnnexeApiService $annexeApiService,
-        private readonly StaticApiService $staticApiService,
         private readonly Filesystem $fs,
-        private readonly MultipartPayloadMapper $multipartPayloadMapper,
-        private readonly ServiceFormFileValidator $serviceFormFileValidator,
         private readonly LoggerInterface $logger,
         ParameterBagInterface $params,
         HttpClientInterface $httpClient,
@@ -182,71 +168,6 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         return new JsonResponse();
     }
 
-    /**
-     * Publication depuis le nouveau formulaire : multipart avec le champ JSON `data` (PyramidServiceFormDTO) et les fichiers `thumbnail`, `attribution_logo`.
-     */
-    #[Route('/{pyramidId}/wms-raster-wmts/publish', name: 'wms_raster_wmts_publish', methods: ['POST'])]
-    public function publish(string $datastoreId, string $pyramidId, #[MapQueryParameter] string $type, Request $request): JsonResponse
-    {
-        $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
-        if (!in_array($type, $acceptedTypes, true)) {
-            throw new AppException(sprintf('Le type %s n’est pas accepté. Les types acceptés sont %s.', $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
-        }
-
-        $dto = $this->multipartPayloadMapper->map($request, PyramidServiceFormDTO::class);
-        [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
-
-        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
-        if (StoredDataTypes::ROK4_PYRAMID_RASTER !== ($pyramid['type'] ?? null)) {
-            throw new AppException('La donnée choisie n’est pas une pyramide raster', Response::HTTP_BAD_REQUEST);
-        }
-        $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
-        $configType = ConfigurationTypes::WMSRASTER === $type ? 'wmsr' : 'wmts';
-        // nom temporaire : l’identifiant de la configuration n’existe pas encore
-        $legendStaticId = $this->saveLegendInStatic($datastoreId, $pyramid, $configType, $levels)['_id'];
-
-        $offering = $this->cartesServiceApiService->publishFromForm(
-            $datastoreId,
-            $pyramidId,
-            $dto,
-            $type,
-            [
-                'title' => $dto->title,
-                'abstract' => $dto->description,
-                'keywords' => $dto->themes,
-                'used_data' => [[
-                    'bottom_level' => $levels['bottom_level'],
-                    'top_level' => $levels['top_level'],
-                    'stored_data' => $pyramidId,
-                ]],
-                'styles' => [$legendStaticId],
-            ],
-            $thumbnail,
-            $attributionLogo,
-            // renommage avant l’offre : un échec annule encore la configuration
-            function (string $configurationId) use ($datastoreId, $legendStaticId, $configType): void {
-                $this->staticApiService->modifyInfo($datastoreId, $legendStaticId, [
-                    'name' => sprintf('config_%s_style_%s', $configurationId, $configType),
-                ])->await();
-            },
-            // après l’offre, le fichier reste : le flux l’utilise
-            function () use ($datastoreId, $legendStaticId): void {
-                try {
-                    $this->staticApiService->delete($datastoreId, $legendStaticId)->await();
-                } catch (\Throwable $e) {
-                    $this->logger->warning('{class}: Failed to remove legend style file {staticId} after a failed publication: {error}', [
-                        'class' => self::class,
-                        'staticId' => $legendStaticId,
-                        'exception' => $e,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            },
-        );
-
-        return $this->json($offering, Response::HTTP_CREATED);
-    }
-
     // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée ; supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
     private function cancelGeneration(string $datastoreId, string $executionId, string $pyramidId): void
     {
@@ -335,54 +256,5 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         }
 
         return $this->annexeApiService->add($datastoreId, $legendFilePath, [$path], $labels, true);
-    }
-
-    /**
-     * @param array<mixed>         $pyramid
-     * @param array<string,string> $zoomLevels
-     *
-     * @return array<mixed>
-     */
-    private function saveLegendInStatic(string $datastoreId, array $pyramid, string $configType, array $zoomLevels): array
-    {
-        // config_[configuration_id]_style_[type_config]
-        $tmpConfigUuid = Uuid::v4();
-        $tmpStyleFileName = sprintf('config_%s_style_%s', "tmp_{$tmpConfigUuid}", $configType);
-
-        $legendUrl = null;
-        if (isset($pyramid['extra'], $pyramid['extra']['legend'], $pyramid['extra']['legend']['url'])) {
-            $legendUrl = $pyramid['extra']['legend']['url'];
-        }
-
-        $legend = [
-            'format' => 'image/png',
-            'width' => 20,
-            'height' => 20,
-            'min_scale_denominator' => intval($zoomLevels['top_level']),
-            'max_scale_denominator' => intval($zoomLevels['bottom_level']),
-        ];
-
-        if (null !== $legendUrl) {
-            $legend['url'] = $legendUrl;
-        }
-
-        $rok4Style = [
-            'identifier' => $pyramid['name'],
-            'title' => $pyramid['name'],
-            'legend' => $legend,
-        ];
-
-        $styleFilesDir = $this->getParameter('style_files_path');
-        $styleFileDir = $styleFilesDir.DIRECTORY_SEPARATOR.Uuid::v4();
-        $styleFilePath = $styleFileDir.DIRECTORY_SEPARATOR.'rok4style_'.Uuid::v4().'.json';
-
-        $this->fs->mkdir($styleFileDir);
-        try {
-            $this->fs->dumpFile($styleFilePath, json_encode($rok4Style, JSON_THROW_ON_ERROR));
-
-            return $this->staticApiService->add($datastoreId, $styleFilePath, $tmpStyleFileName, StaticFileTypes::ROK4_STYLE);
-        } finally {
-            $this->fs->remove($styleFileDir);
-        }
     }
 }

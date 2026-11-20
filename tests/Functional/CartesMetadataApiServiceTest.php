@@ -76,14 +76,14 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
     }
 
-    public function testCreationWithoutTheDatastorePrefixAnswers400BeforeWriting(): void
+    public function testCreationWithoutTheDatastorePrefixAnswers422BeforeWriting(): void
     {
         EntrepotMockResponseFactory::setDatastorePrefixes(['metadata_file_identifier_prefix' => 'IGN']);
         $datastoreApiService = self::getContainer()->get(DatastoreApiService::class);
         $datastoreApiService->invalidate(self::DATASTORE_ID);
 
         try {
-            $this->assertHttpError(400, fn () => $this->service->create(self::DATASTORE_ID, $this->dto(), $this->thumbnail()));
+            $this->assertHttpError(422, fn () => $this->service->create(self::DATASTORE_ID, $this->dto(), $this->thumbnail()));
             self::assertSame([], EntrepotMockResponseFactory::stored('metadata'));
             self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
         } finally {

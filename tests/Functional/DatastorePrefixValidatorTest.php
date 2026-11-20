@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
-use App\Exception\AppException;
 use App\Security\KeycloakTokenManager;
 use App\Services\DatastorePrefixValidator;
 use App\Services\EntrepotApi\DatastoreApiService;
@@ -12,6 +11,8 @@ use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Double\FakeKeycloakClient;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 final class DatastorePrefixValidatorTest extends KernelTestCase
 {
@@ -69,10 +70,13 @@ final class DatastorePrefixValidatorTest extends KernelTestCase
         try {
             $call();
             self::fail("$field accepté à tort");
-        } catch (AppException $e) {
-            self::assertSame(400, $e->getStatusCode());
-            self::assertSame($message, $e->getMessage());
-            self::assertSame(['field' => $field], $e->getDetails());
+        } catch (UnprocessableEntityHttpException $e) {
+            $previous = $e->getPrevious();
+            self::assertInstanceOf(ValidationFailedException::class, $previous);
+            $violations = $previous->getViolations();
+            self::assertCount(1, $violations);
+            self::assertSame($field, $violations->get(0)->getPropertyPath());
+            self::assertSame($message, $violations->get(0)->getMessage());
         }
     }
 }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Exception\AppException;
 use App\Services\EntrepotApi\DatastoreApiService;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 /** Nouveaux noms : préfixe du datastore, casse comprise, suivi de « _ ». Les noms existants en « PREFIXE. » ne passent pas par ici. */
 final readonly class DatastorePrefixValidator
@@ -17,7 +19,7 @@ final readonly class DatastorePrefixValidator
     }
 
     /**
-     * @throws AppException 400 si l’identifiant ne commence pas par « PREFIXE_ »
+     * @throws UnprocessableEntityHttpException 422 sur `file_identifier` si l’identifiant ne commence pas par « PREFIXE_ »
      */
     public function assertFileIdentifier(string $datastoreId, string $fileIdentifier): void
     {
@@ -26,7 +28,7 @@ final readonly class DatastorePrefixValidator
     }
 
     /**
-     * @throws AppException 400 si le nom technique ne commence pas par « PREFIXE_ »
+     * @throws UnprocessableEntityHttpException 422 sur `technical_name` si le nom technique ne commence pas par « PREFIXE_ »
      */
     public function assertLayerName(string $datastoreId, string $layerName): void
     {
@@ -41,7 +43,9 @@ final readonly class DatastorePrefixValidator
         }
 
         if (!str_starts_with($value, $prefix.'_') || $value === $prefix.'_') {
-            throw new AppException(sprintf('%s doit commencer par « %s_ »', $label, $prefix), Response::HTTP_BAD_REQUEST, ['field' => $field]);
+            // même format que les erreurs des DTO : le formulaire affiche le message sur le champ
+            $violations = new ConstraintViolationList([new ConstraintViolation(sprintf('%s doit commencer par « %s_ »', $label, $prefix), null, [], $value, $field, $value)]);
+            throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($value, $violations));
         }
     }
 }

@@ -8,7 +8,7 @@ use App\Dto\Datastore\PermissionDTO;
 use App\Dto\Datastore\UpdatePermissionDTO;
 use App\Dto\Espaceco\Members\AddMembersDTO;
 use App\Dto\Services\Form\ServiceAttributionFormDTO;
-use App\Dto\Services\Form\WfsFormDTO;
+use App\Dto\Services\Form\ServicePublishFormDTO;
 use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
@@ -75,13 +75,17 @@ final class SerializerContractTest extends KernelTestCase
      */
     public static function inputPayloads(): iterable
     {
-        yield 'WfsFormDTO' => [WfsFormDTO::class, [
+        yield 'ServicePublishFormDTO' => [ServicePublishFormDTO::class, [
             'title' => 'Flux',
+            'type' => 'WFS',
+            'stored_data_id' => 'vdb-1',
             'technical_name' => 'tech',
             'themes' => ['Hydrographie'],
             'access' => 'restricted_visible',
             'attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr'],
+            'description' => '',
             'tables' => [['native_name' => 't1', 'title' => 'Table', 'public_name' => 't1', 'description' => 'Résumé', 'keywords' => ['mot']]],
+            'selected_tables' => [],
         ], ['attribution' => ServiceAttributionFormDTO::class, 'tables' => WfsTableFormDTO::class]];
         yield 'PyramidVectorGenerateDTO' => [PyramidVectorGenerateDTO::class, [
             'technical_name' => 'pyr',
@@ -117,15 +121,17 @@ final class SerializerContractTest extends KernelTestCase
         $container = self::getContainer();
         $payload = [
             'title' => 'Flux',
+            'type' => 'WFS',
+            'stored_data_id' => 'vdb-1',
             'technical_name' => 'nom technique',
             'themes' => ['Hydrographie'],
             'tables' => [['native_name' => '', 'title' => 'Table', 'public_name' => 't1', 'description' => 'Résumé']],
         ];
-        $dto = $container->get('serializer')->deserialize(json_encode($payload, JSON_THROW_ON_ERROR), WfsFormDTO::class, 'json');
+        $dto = $container->get('serializer')->deserialize(json_encode($payload, JSON_THROW_ON_ERROR), ServicePublishFormDTO::class, 'json');
 
         /** @var array{violations: list<array{propertyPath: string}>} $violations */
         $violations = $container->get('serializer')->normalize($container->get(ValidatorInterface::class)->validate($dto));
 
-        self::assertSame(['tables[0].native_name', 'technical_name'], array_column($violations['violations'], 'propertyPath'));
+        self::assertSame(['technical_name', 'tables[0].native_name'], array_column($violations['violations'], 'propertyPath'));
     }
 }

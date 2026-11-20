@@ -9,7 +9,7 @@ use App\Dto\Upload\UploadAddDTO;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-/** Champs communs du formulaire de publication d’un flux. */
+/** Champs communs aux formulaires de publication et de modification d’un flux. */
 abstract class ServiceFormDTO
 {
     // un fichier de style par table en WMS vecteur : reste sous max_file_uploads de PHP (20)
@@ -21,10 +21,6 @@ abstract class ServiceFormDTO
     public function __construct(
         #[Assert\NotBlank(message: 'Le titre du flux est obligatoire')]
         public readonly string $title = '',
-
-        #[Assert\NotBlank(message: 'Le nom technique du flux est obligatoire')]
-        #[Assert\Regex(pattern: '/^[A-Za-z_][A-Za-z0-9_.-]*$/', message: 'Le nom technique ne doit contenir ni espace ni caractère spécial')]
-        public readonly string $technical_name = '',
 
         #[Assert\Count(min: 1, minMessage: 'Sélectionnez au moins une thématique')]
         #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()])]

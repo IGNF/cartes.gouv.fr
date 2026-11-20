@@ -11,7 +11,7 @@ const getService = (datastoreId: string, offeringId: string, otherOptions: Reque
 };
 
 const getOfferings = <T = OfferingStandardListResponseDto>(datastoreId: string, queryParams: QueryParams = {}, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_service_get_offerings_list", { datastoreId, ...queryParams });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_offering_list", { datastoreId, ...queryParams });
     return jsonFetch<T[]>(url, {
         ...otherOptions,
     });
@@ -31,6 +31,12 @@ const getExistingLayerNames = (datastoreId: string, type: ConfigurationTypeEnum,
     });
 };
 
+// publication, voir buildServiceFormData
+const publish = (datastoreId: string, formData: FormData) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_service_publish_service", { datastoreId });
+    return jsonFetch<Service>(url, { method: "POST" }, formData, true);
+};
+
 // modification depuis la page du flux : renvoie l’offre, nouvelle si l’endpoint a changé
 const edit = (datastoreId: string, offeringId: string, formData: FormData) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_service_edit_service", { datastoreId, offeringId });
@@ -39,6 +45,7 @@ const edit = (datastoreId: string, offeringId: string, formData: FormData) => {
 
 const service = {
     getService,
+    publish,
     edit,
     getOfferings,
     unpublishService,

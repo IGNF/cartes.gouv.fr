@@ -9,7 +9,6 @@ import {
     configurationTypeFor,
     hasTables,
     isRasterPyramid,
-    rasterPyramidPublishType,
     type ServiceAccess,
     serviceFormDefaultValues,
     type ServiceFormValues,
@@ -87,6 +86,12 @@ describe("buildServiceFormSchema", () => {
             "attribution.title": "validation.attribution.text.required",
             "attribution.url": "validation.attribution.url.invalid",
         });
+    });
+
+    it("exige un domaine de premier niveau dans l’URL d’attribution, comme le serveur", async () => {
+        const withUrl = (url: string) => issueMessages({ ...valid(), attribution: { enabled: true, title: "IGN", url } });
+        expect(await withUrl("http://localhost")).toEqual({ "attribution.url": "validation.attribution.url.invalid" });
+        expect(await withUrl("https://www.ign.fr/licence")).toEqual({});
     });
 
     it("refuse un nom technique déjà pris ou sans le préfixe de l’entrepôt", async () => {
@@ -219,16 +224,6 @@ describe("configurationTypeFor", () => {
         expect(configurationTypeFor("wms", false)).toBe(ConfigurationTypeEnum.WMSVECTOR);
         expect(configurationTypeFor("wfs", true)).toBe(ConfigurationTypeEnum.WFS);
         expect(configurationTypeFor("wmts", true)).toBe(ConfigurationTypeEnum.WMTSTMS);
-    });
-});
-
-describe("rasterPyramidPublishType", () => {
-    it("publie par la route des pyramides raster le WMTS et le WMS sur pyramide raster, rien d’autre", () => {
-        expect(rasterPyramidPublishType("wmts", true)).toBe(ConfigurationTypeEnum.WMTSTMS);
-        expect(rasterPyramidPublishType("wms", true)).toBe(ConfigurationTypeEnum.WMSRASTER);
-        expect(rasterPyramidPublishType("wms", false)).toBeUndefined();
-        expect(rasterPyramidPublishType("wfs", true)).toBeUndefined();
-        expect(rasterPyramidPublishType("tms", true)).toBeUndefined();
     });
 });
 

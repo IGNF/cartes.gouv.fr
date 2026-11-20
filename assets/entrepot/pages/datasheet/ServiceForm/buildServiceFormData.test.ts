@@ -25,6 +25,12 @@ const values: ServiceFormOutput = {
 const payloadOf = (formData: FormData) => JSON.parse(formData.get("data") as string) as Record<string, unknown>;
 
 describe("buildServiceFormData", () => {
+    it("envoie le type de configuration et la donnée stockée", () => {
+        expect(payloadOf(buildServiceFormData("wfs", values))).toMatchObject({ type: "WFS", stored_data_id: "vectordb-1", technical_name: "SANDBOX_mon_flux" });
+        expect(payloadOf(buildServiceFormData("wms", values, true)).type).toBe("WMS-RASTER");
+        expect(payloadOf(buildServiceFormData("tms", values)).type).toBe("WMTS-TMS");
+    });
+
     it("n’envoie que les tables cochées et aucune attribution quand la case est décochée", () => {
         const payload = payloadOf(buildServiceFormData("wfs", values));
         expect(payload.tables).toEqual([

@@ -7,8 +7,6 @@ import storedData from "./stored-data";
 import upload from "./upload";
 import community from "./community";
 import user from "./user";
-import wfs from "./wfs";
-import wmsVector from "./wms-vector";
 import pyramidVector from "./pyramidVector";
 import pyramidRaster from "./pyramidRaster";
 import service from "./service";
@@ -34,8 +32,6 @@ const api = {
     upload,
     community,
     user,
-    wfs,
-    wmsVector,
     pyramidVector,
     pyramidRaster,
     service,

@@ -641,7 +641,7 @@ final class ServiceEditRouteTest extends WebTestCase
      */
     private function post(KernelBrowser $client, array $payload, array $files = []): void
     {
-        $client->xmlHttpRequest('POST', self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/offerings/'.self::OFFERING_ID.'/edit', ['data' => json_encode($payload, JSON_THROW_ON_ERROR)], $files);
+        $client->xmlHttpRequest('POST', self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/services/'.self::OFFERING_ID, ['data' => json_encode($payload, JSON_THROW_ON_ERROR)], $files);
     }
 
     /** @return array<string, mixed> */

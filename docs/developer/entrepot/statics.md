@@ -37,10 +37,8 @@ config_[configuration_id]_style_[type_config]
 
 ## Nom temporaire à la création
 
-L’identifiant de la configuration n’existe pas encore au dépôt du fichier de style : il est d’abord nommé `config_tmp_[uuid]_style_wmsv_[table_name]` (SLD, WMS vecteur) ou `config_tmp_[uuid]_style_wmsr` (ROK4, WMS raster).
+L’identifiant de la configuration n’existe pas encore au dépôt du fichier de style : il est d’abord nommé `config_tmp_[uuid]_style_wmsv_[table_name]` (SLD, WMS vecteur) ou `config_tmp_[uuid]_style_wmsr` et `config_tmp_[uuid]_style_wmts` (ROK4, WMS raster et WMTS).
 
-Les routes `publish` des formulaires de flux WMS vecteur et WMS raster renomment les fichiers juste après la création de la configuration, avant l’offre (rappel `onConfigurationCreated` de `CartesServiceApiService::publishFromForm`). Si le renommage échoue, la configuration est supprimée.
+La route de publication des flux (`POST /api/datastores/{datastoreId}/services`) renomme les fichiers juste après la création de la configuration, avant l’offre (rappel `onConfigurationCreated` de `CartesServiceApiService::publishFromForm`). Si le renommage échoue, la configuration est supprimée.
 
 Si la publication échoue avant la création de l’offre, le rappel `onRollback` supprime les fichiers. Après la création de l’offre, ils sont conservés même si une étape suivante échoue (permissions, capabilities, ressources en ligne de la métadonnée) : le flux les utilise. Un échec de suppression est journalisé.
-
-Les anciennes routes `add` renomment en fin de traitement : un échec après la création de l’offre laisse le fichier sous son nom temporaire.

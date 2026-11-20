@@ -6,7 +6,6 @@ use App\ApiClient\ResponsePromise;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationMetadataTypes;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
-use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\OfferingStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\PermissionTypes;
@@ -15,11 +14,10 @@ use App\Constants\ServiceAccess;
 use App\Dto\Datasheet\DatasheetServices;
 use App\Dto\Services\Form\ServiceAttributionFormDTO;
 use App\Dto\Services\Form\ServiceEditFormDTO;
-use App\Dto\Services\Form\ServiceFormDTO;
+use App\Dto\Services\Form\ServicePublishFormDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\CapabilitiesService;
-use App\Services\DatastorePrefixValidator;
 use App\Services\GeonetworkApiService;
 use App\Services\MembershipService;
 use App\Services\SandboxService;
@@ -58,7 +56,6 @@ class CartesServiceApiService
         private readonly LoggerInterface $logger,
         private readonly ServiceConfigurationRequestBuilder $configurationRequestBuilder,
         private readonly ServiceImageAnnexeService $serviceImageAnnexeService,
-        private readonly DatastorePrefixValidator $datastorePrefixValidator,
     ) {
     }
 
@@ -516,7 +513,8 @@ class CartesServiceApiService
      * Publie un flux depuis le nouveau formulaire : annexes images, configuration, offre, permissions, capabilities,
      * puis ressources en ligne de la fiche de métadonnées. La métadonnée doit exister : elle fournit les liens `metadata` de la configuration.
      *
-     * @param array<mixed>            $typeInfos
+     * @param array<mixed>            $storedData             donnée stockée publiée, de type déjà contrôlé
+     * @param array<mixed>            $typeInfos              voir ServiceConfigurationRequestBuilder::buildTypeInfos
      * @param ?\Closure(string): void $onConfigurationCreated appelé avec l’identifiant de la configuration juste après sa création ; un échec annule la configuration
      * @param ?\Closure(): void       $onRollback             appelé quand la publication échoue avant la création de l’offre ; ne doit pas lever d’exception
      *
@@ -524,9 +522,8 @@ class CartesServiceApiService
      */
     public function publishFromForm(
         string $datastoreId,
-        string $storedDataId,
-        ServiceFormDTO $dto,
-        string $type,
+        array $storedData,
+        ServicePublishFormDTO $dto,
         array $typeInfos,
         ?UploadedFile $thumbnail = null,
         ?UploadedFile $attributionLogo = null,
@@ -536,9 +533,6 @@ class CartesServiceApiService
         $thumbnailUrl = null;
         $logo = null;
         try {
-            // dans le try : un refus annule aussi ce que l’appelant a déjà déposé
-            $this->datastorePrefixValidator->assertLayerName($datastoreId, $dto->technical_name);
-            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME] ?? null;
             if (!is_string($datasheetName)) {
                 throw new AppException('La donnée n’est rattachée à aucune fiche de données', Response::HTTP_BAD_REQUEST);
@@ -549,20 +543,16 @@ class CartesServiceApiService
                 throw new AppException('Renseignez d’abord la description de la fiche de données', Response::HTTP_BAD_REQUEST);
             }
 
-            $endpoint = $this->getEndpointByAccess($datastoreId, $type, $dto->access);
+            $endpoint = $this->getEndpointByAccess($datastoreId, $dto->type, $dto->access);
 
             $configTags = [
                 CommonTags::DATASHEET_NAME => $datasheetName,
                 CommonTags::THEME_CATEGORIES => implode(', ', $dto->themes),
             ];
 
-            // dépôts dans le try : un échec du second ne doit pas laisser le premier orphelin
-            $thumbnailUrl = $thumbnail instanceof UploadedFile ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
-            $logo = $attributionLogo instanceof UploadedFile && $dto->attribution instanceof ServiceAttributionFormDTO
-                ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
-                : null;
+            [$thumbnailUrl, $logo] = $this->uploadImages($datastoreId, $datasheetName, $thumbnail, $attributionLogo, $dto->attribution);
 
-            $configRequestBody = $this->configurationRequestBuilder->build($dto, $type, $typeInfos, $this->getNewConfigMetadata($apiMetadata['file_identifier']), $logo);
+            $configRequestBody = $this->configurationRequestBuilder->build($dto, $typeInfos, $this->getNewConfigMetadata($apiMetadata['file_identifier']), $logo);
 
             $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody)->array();
             try {
@@ -662,24 +652,17 @@ class CartesServiceApiService
         $thumbnailUrl = null;
         $newLogo = null;
         try {
-            $thumbnailUrl = $thumbnail instanceof UploadedFile ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
-            $newLogo = $attributionLogo instanceof UploadedFile && $dto->attribution instanceof ServiceAttributionFormDTO
-                ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
-                : null;
+            [$thumbnailUrl, $newLogo] = $this->uploadImages($datastoreId, $datasheetName, $thumbnail, $attributionLogo, $dto->attribution);
 
             // sans `layer_name` : figé, et l’Entrepôt l’a déjà refusé dans un PUT
             $body = [
                 'name' => $dto->title,
                 'type' => $type,
-                'type_infos' => $this->getEditTypeInfos($configuration, $dto, $styleIds),
+                'type_infos' => ServiceConfigurationRequestBuilder::buildTypeInfos($type, $dto, $configuration['type_infos'], $styleIds),
                 'metadata' => $configuration['metadata'] ?? [],
             ];
             if ($dto->attribution instanceof ServiceAttributionFormDTO) {
-                $body['attribution'] = ['title' => $dto->attribution->title, 'url' => $dto->attribution->url];
-                $logo = $newLogo ?? ($dto->remove_attribution_logo ? null : $oldLogo);
-                if (null !== $logo) {
-                    $body['attribution']['logo'] = $logo;
-                }
+                $body['attribution'] = ServiceConfigurationRequestBuilder::buildAttribution($dto->attribution, $newLogo ?? ($dto->remove_attribution_logo ? null : $oldLogo));
             }
 
             $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $body)->array();
@@ -738,32 +721,6 @@ class CartesServiceApiService
         ]);
 
         return $offering;
-    }
-
-    /**
-     * @param array<mixed>          $configuration
-     * @param array<string, string> $styleIds
-     *
-     * @return array<mixed>
-     */
-    private function getEditTypeInfos(array $configuration, ServiceEditFormDTO $dto, array $styleIds): array
-    {
-        $typeInfos = $configuration['type_infos'];
-
-        if (ConfigurationTypes::WFS === $configuration['type']) {
-            $typeInfos['used_data'][0]['relations'] = ServiceConfigurationRequestBuilder::buildWfsRelations($dto->tables);
-
-            return $typeInfos;
-        }
-
-        $typeInfos['title'] = $dto->title;
-        $typeInfos['abstract'] = $dto->description;
-        $typeInfos['keywords'] = $dto->themes;
-        if (ConfigurationTypes::WMSVECTOR === $configuration['type']) {
-            $typeInfos['used_data'][0]['relations'] = array_map(fn (string $tableName) => ['name' => $tableName, 'style' => $styleIds[$tableName]], $dto->selected_tables);
-        }
-
-        return $typeInfos;
     }
 
     /**
@@ -826,6 +783,26 @@ class CartesServiceApiService
     private function isPermissionExpired(array $permission): bool
     {
         return isset($permission['end_date']) && strtotime($permission['end_date']) <= time();
+    }
+
+    /**
+     * Vignette et logo d’attribution déposés en annexes ; si le logo échoue, la vignette déjà déposée est retirée.
+     *
+     * @return array{0: string|null, 1: array{url: string, width: int, height: int, format: string}|null}
+     */
+    private function uploadImages(string $datastoreId, string $datasheetName, ?UploadedFile $thumbnail, ?UploadedFile $attributionLogo, ?ServiceAttributionFormDTO $attribution): array
+    {
+        $thumbnailUrl = $thumbnail instanceof UploadedFile ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
+        try {
+            $logo = $attributionLogo instanceof UploadedFile && $attribution instanceof ServiceAttributionFormDTO
+                ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
+                : null;
+        } catch (\Throwable $th) {
+            $this->removeImageAnnexesQuietly($datastoreId, [$thumbnailUrl]);
+            throw $th;
+        }
+
+        return [$thumbnailUrl, $logo];
     }
 
     /**
