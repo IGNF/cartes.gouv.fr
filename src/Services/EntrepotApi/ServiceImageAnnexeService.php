@@ -18,7 +18,8 @@ class ServiceImageAnnexeService
 {
     public const THUMBNAIL_TYPE = 'service-thumbnail';
     public const ATTRIBUTION_LOGO_TYPE = 'attribution-logo';
-    public const MAX_SIZE = '5M';
+    // 5 × 1024² octets, comme le contrôle du formulaire
+    public const MAX_SIZE = '5Mi';
     public const MIME_TYPES = ['image/jpeg', 'image/png'];
 
     private const EXTENSIONS = ['image/jpeg' => 'jpg', 'image/png' => 'png'];

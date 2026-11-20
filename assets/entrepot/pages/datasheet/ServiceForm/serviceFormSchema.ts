@@ -162,7 +162,10 @@ export const buildServiceFormSchema = ({
             if (attribution.title === "") ctx.addIssue({ code: "custom", path: ["title"], message: t("validation.attribution.text.required") });
             if (attribution.url === "") {
                 ctx.addIssue({ code: "custom", path: ["url"], message: t("validation.attribution.url.required") });
-            } else if (!z.url({ protocol: /^https?$/ }).safeParse(attribution.url).success) {
+            } else if (
+                // domaine de premier niveau exigé, comme Assert\Url(requireTld: true) côté serveur
+                !z.url({ protocol: /^https?$/, hostname: /\.[a-z]{2,}$/i }).safeParse(attribution.url).success
+            ) {
                 ctx.addIssue({ code: "custom", path: ["url"], message: t("validation.attribution.url.invalid") });
             }
         });

@@ -395,8 +395,11 @@ final class ServicePublishRouteTest extends WebTestCase
         try {
             $this->publish($client, 'WMS-VECTOR', 'vectordb-1');
 
-            self::assertResponseStatusCodeSame(400);
-            self::assertSame('Le nom technique doit commencer par « SANDBOX_ »', $this->jsonResponse($client)['detail']);
+            self::assertResponseStatusCodeSame(422);
+            self::assertSame([['propertyPath' => 'technical_name', 'title' => 'Le nom technique doit commencer par « SANDBOX_ »']], array_map(
+                fn (array $violation) => ['propertyPath' => $violation['propertyPath'], 'title' => $violation['title']],
+                $this->jsonResponse($client)['violations'],
+            ));
             self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
             self::assertSame([], EntrepotMockResponseFactory::stored('configurations'));
         } finally {

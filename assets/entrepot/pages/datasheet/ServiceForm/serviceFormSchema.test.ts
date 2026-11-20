@@ -88,6 +88,12 @@ describe("buildServiceFormSchema", () => {
         });
     });
 
+    it("exige un domaine de premier niveau dans l’URL d’attribution, comme le serveur", async () => {
+        const withUrl = (url: string) => issueMessages({ ...valid(), attribution: { enabled: true, title: "IGN", url } });
+        expect(await withUrl("http://localhost")).toEqual({ "attribution.url": "validation.attribution.url.invalid" });
+        expect(await withUrl("https://www.ign.fr/licence")).toEqual({});
+    });
+
     it("refuse un nom technique déjà pris ou sans le préfixe de l’entrepôt", async () => {
         expect(await issueMessages({ ...valid(), technical_name: "SANDBOX_pris" })).toEqual({ technical_name: "validation.technical_name.taken" });
         expect(await issueMessages({ ...valid(), technical_name: "mon_flux" })).toEqual({ technical_name: "validation.technical_name.prefix" });
