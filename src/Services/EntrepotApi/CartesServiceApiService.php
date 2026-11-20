@@ -80,7 +80,7 @@ class CartesServiceApiService
         $offering['configuration']['styles'] = $styles;
 
         // url de partage (url capabilities si WFS ou WMS-VECTOR, url spécifique si TMS)
-        $offering['share_url'] = $this->getShareUrl($datastoreId, $offering);
+        $offering['share_url'] = $this->getShareUrl($datastoreId, $offering, $this->datastoreApiService->getEndpointsList($datastoreId));
         $offering['access'] = $this->readServiceAccess($offering, true === $offering['open'] ? [] : $this->readPermissionsQuietly($datastoreId));
 
         return $offering;
@@ -128,6 +128,7 @@ class CartesServiceApiService
         $storedDataTypes = array_column($pendingStoredData->resolve(), 'type', '_id');
         $allOpen = [] === array_filter($datasheetServices->offeringsById, fn (array $offering) => true !== $offering['open']);
         $permissions = $allOpen ? [] : $this->readPermissionsQuietly($datastoreId);
+        $endpoints = [] === $datasheetServices->offeringsById ? [] : $this->datastoreApiService->getEndpointsList($datastoreId);
 
         $services = [];
         foreach ($datasheetServices->offeringsById as $offering) {
@@ -136,7 +137,7 @@ class CartesServiceApiService
                 $pyramidType = $storedDataTypes[$offering['configuration']['type_infos']['used_data'][0]['stored_data'] ?? ''] ?? null;
                 $offering['configuration']['pyramid'] = null === $pyramidType ? null : ['type' => $pyramidType];
             }
-            $offering['share_url'] = $this->getShareUrl($datastoreId, $offering);
+            $offering['share_url'] = $this->getShareUrl($datastoreId, $offering, $endpoints);
             $offering['access'] = $this->readServiceAccess($offering, $permissions);
             $services[] = $offering;
         }
@@ -150,9 +151,10 @@ class CartesServiceApiService
     /**
      * URL de diffusion : GetCapabilities (espace découverte ou point d’accès privé) ou capabilities filtrées en annexe, tuiles pour un TMS.
      *
-     * @param array<mixed> $offering avec `configuration.pyramid.type` pour un WMTS-TMS
+     * @param array<mixed> $offering  avec `configuration.pyramid.type` pour un WMTS-TMS
+     * @param array<mixed> $endpoints points d’accès du datastore (DatastoreApiService::getEndpointsList)
      */
-    private function getShareUrl(string $datastoreId, array $offering): ?string
+    private function getShareUrl(string $datastoreId, array $offering, array $endpoints): ?string
     {
         $pyramidType = $offering['configuration']['pyramid']['type'] ?? null;
         if (OfferingTypes::WMTSTMS === $offering['type'] && StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramidType) {
@@ -171,7 +173,7 @@ class CartesServiceApiService
             return null;
         }
 
-        $endpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id'])['endpoint'];
+        $endpoint = DatastoreApiService::findEndpoint($endpoints, $offering['endpoint']['_id'])['endpoint'];
         // capabilities filtrées en annexe seulement pour un point d’accès ouvert hors espace découverte (voir CapabilitiesService::createOrUpdate)
         if (true !== $endpoint['open'] || $this->sandboxService->isSandboxDatastore($datastoreId)) {
             $endpointUrl = $this->getUrlOfType($endpoint['urls'] ?? [], $serviceType);
