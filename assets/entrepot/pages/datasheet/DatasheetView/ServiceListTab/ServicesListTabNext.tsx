@@ -40,14 +40,13 @@ import DatasheetViewTab from "../../DatasheetViewTab";
 import ConfigurationsWithoutOfferingList from "./ConfigurationsWithoutOfferingList";
 import ServiceAccessBadge from "./ServiceAccessBadge";
 import ServiceExploreMapsCell from "./ServiceExploreMapsCell";
-import ServiceShareUrlCell from "./ServiceShareUrlCell";
 
 import placeholder1x1 from "@/img/placeholder.1x1.png";
 
 const LIMIT = 10;
 
 // Flux, Accès, URL, Explorer, Date de modification, Statut, Action, menu
-const COLUMN_WIDTHS = [undefined, "6.5rem", "7.5rem", "6.5rem", "14.5rem", "7.5rem", "8.25rem", "4rem"];
+const COLUMN_WIDTHS = [undefined, "6.5rem", "3rem", "6.5rem", "14.5rem", "10rem", "8.25rem", "4rem"];
 
 const deleteServiceConfirmModal = createModal({
     id: "services-tab-next-delete-service-confirm-modal",
@@ -136,10 +135,14 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                     </span>
                 </span>,
                 <ServiceAccessBadge key={`access-${service._id}`} service={service} />,
-                <ServiceShareUrlCell
+                <Button
                     key={`url-${service._id}`}
-                    shareUrl={offeringUnavailable ? undefined : (service.share_url ?? undefined)}
-                    onCopy={() => openCopyUrlDialog(service)}
+                    iconId="ri-file-copy-line"
+                    priority="tertiary"
+                    size="small"
+                    disabled={offeringUnavailable || !service.share_url}
+                    title={offeringUnavailable || !service.share_url ? t("url.unavailable") : t("url.copy")}
+                    onClick={() => openCopyUrlDialog(service)}
                 />,
                 <ServiceExploreMapsCell key={`explore-${service._id}`} availability={exploreMapsAvailability} layerParam={exploreMapsLayerParam} />,
                 service.update ? formatDateFromISO(service.update) : "",
@@ -310,7 +313,10 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
                                 t("column.name"),
                                 t("column.access"),
                                 t("column.url"),
-                                t("column.explore"),
+                                <>
+                                    <span className={fr.cx("fr-icon-road-map-line", "fr-icon--sm", "fr-mr-2v")} aria-hidden="true" />
+                                    {t("column.explore")}
+                                </>,
                                 t("column.update"),
                                 t("column.status"),
                                 t("column.action"),
