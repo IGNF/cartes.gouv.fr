@@ -214,6 +214,26 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         ], $deletes);
     }
 
+    public function testDeletingTheDatasheetRebuildsTheCapabilitiesOnceForServicesSharingAnEndpoint(): void
+    {
+        EntrepotMockResponseFactory::answerGetCapabilities();
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vector-db-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
+        $wfsUrls = [['type' => 'WFS', 'url' => 'https://wfs.test/public?service=WFS&version=2.0.0']];
+        $this->seedService('wfs1', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1', urls: $wfsUrls, configurationStatus: 'UNPUBLISHED');
+        $this->seedService('wfs2', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1', urls: $wfsUrls, configurationStatus: 'UNPUBLISHED');
+
+        $client = $this->client();
+        $client->xmlHttpRequest('DELETE', self::BASE.self::DATASTORE_PATH.'/datasheet/Fiche');
+
+        self::assertResponseStatusCodeSame(204);
+        $annexWrites = array_filter(
+            array_map(fn (array $request) => $request['method'].' '.$request['path'], EntrepotMockResponseFactory::writeRequests()),
+            fn (string $request) => 1 === preg_match('#^(POST|PUT) .*/annexes#', $request),
+        );
+        self::assertSame(['POST '.self::DATASTORE_PATH.'/annexes'], array_values($annexWrites));
+        self::assertSame(1, EntrepotMockResponseFactory::endpointsCalls());
+    }
+
     public function testDeletingTheDatasheetRemovesItsConfigurationsWithoutOfferingBeforeTheStoredData(): void
     {
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vector-db-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
