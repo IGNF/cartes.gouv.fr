@@ -4,7 +4,6 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
-use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
@@ -17,8 +16,8 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
+use App\Services\EntrepotApi\Rok4StyleFileService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
-use App\Services\EntrepotApi\StaticApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
@@ -58,7 +57,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly AnnexeApiService $annexeApiService,
-        private readonly StaticApiService $staticApiService,
+        private readonly Rok4StyleFileService $rok4StyleFileService,
         private readonly Filesystem $fs,
         private readonly MultipartPayloadMapper $multipartPayloadMapper,
         private readonly ServiceFormFileValidator $serviceFormFileValidator,
@@ -202,8 +201,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         }
         $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
         $configType = ConfigurationTypes::WMSRASTER === $type ? 'wmsr' : 'wmts';
-        // nom temporaire : l’identifiant de la configuration n’existe pas encore
-        $legendStaticId = $this->saveLegendInStatic($datastoreId, $pyramid, $configType, $levels)['_id'];
+        $legendStaticId = $this->rok4StyleFileService->upload($datastoreId, $pyramid, $configType, $levels);
 
         $offering = $this->cartesServiceApiService->publishFromForm(
             $datastoreId,
@@ -224,24 +222,9 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             $thumbnail,
             $attributionLogo,
             // renommage avant l’offre : un échec annule encore la configuration
-            function (string $configurationId) use ($datastoreId, $legendStaticId, $configType): void {
-                $this->staticApiService->modifyInfo($datastoreId, $legendStaticId, [
-                    'name' => sprintf('config_%s_style_%s', $configurationId, $configType),
-                ])->await();
-            },
+            fn (string $configurationId) => $this->rok4StyleFileService->rename($datastoreId, $legendStaticId, $configurationId, $configType),
             // après l’offre, le fichier reste : le flux l’utilise
-            function () use ($datastoreId, $legendStaticId): void {
-                try {
-                    $this->staticApiService->delete($datastoreId, $legendStaticId)->await();
-                } catch (\Throwable $e) {
-                    $this->logger->warning('{class}: Failed to remove legend style file {staticId} after a failed publication: {error}', [
-                        'class' => self::class,
-                        'staticId' => $legendStaticId,
-                        'exception' => $e,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            },
+            fn () => $this->rok4StyleFileService->removeQuietly($datastoreId, $legendStaticId),
         );
 
         return $this->json($offering, Response::HTTP_CREATED);
@@ -335,54 +318,5 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         }
 
         return $this->annexeApiService->add($datastoreId, $legendFilePath, [$path], $labels, true);
-    }
-
-    /**
-     * @param array<mixed>         $pyramid
-     * @param array<string,string> $zoomLevels
-     *
-     * @return array<mixed>
-     */
-    private function saveLegendInStatic(string $datastoreId, array $pyramid, string $configType, array $zoomLevels): array
-    {
-        // config_[configuration_id]_style_[type_config]
-        $tmpConfigUuid = Uuid::v4();
-        $tmpStyleFileName = sprintf('config_%s_style_%s', "tmp_{$tmpConfigUuid}", $configType);
-
-        $legendUrl = null;
-        if (isset($pyramid['extra'], $pyramid['extra']['legend'], $pyramid['extra']['legend']['url'])) {
-            $legendUrl = $pyramid['extra']['legend']['url'];
-        }
-
-        $legend = [
-            'format' => 'image/png',
-            'width' => 20,
-            'height' => 20,
-            'min_scale_denominator' => intval($zoomLevels['top_level']),
-            'max_scale_denominator' => intval($zoomLevels['bottom_level']),
-        ];
-
-        if (null !== $legendUrl) {
-            $legend['url'] = $legendUrl;
-        }
-
-        $rok4Style = [
-            'identifier' => $pyramid['name'],
-            'title' => $pyramid['name'],
-            'legend' => $legend,
-        ];
-
-        $styleFilesDir = $this->getParameter('style_files_path');
-        $styleFileDir = $styleFilesDir.DIRECTORY_SEPARATOR.Uuid::v4();
-        $styleFilePath = $styleFileDir.DIRECTORY_SEPARATOR.'rok4style_'.Uuid::v4().'.json';
-
-        $this->fs->mkdir($styleFileDir);
-        try {
-            $this->fs->dumpFile($styleFilePath, json_encode($rok4Style, JSON_THROW_ON_ERROR));
-
-            return $this->staticApiService->add($datastoreId, $styleFilePath, $tmpStyleFileName, StaticFileTypes::ROK4_STYLE);
-        } finally {
-            $this->fs->remove($styleFileDir);
-        }
     }
 }
