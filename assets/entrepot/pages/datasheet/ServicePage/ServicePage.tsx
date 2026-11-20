@@ -12,7 +12,7 @@ import { createPortal } from "react-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import { tss } from "tss-react";
 
-import { type DatastoreEndpoint, OfferingStatusEnum, OfferingTypeEnum, type Service } from "@/@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum, ConfigurationStatus } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
@@ -22,6 +22,7 @@ import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetQueryOptions } from "@/hooks/queries/datasheetQueryOptions";
 import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
+import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { serviceQueryOptions } from "@/hooks/queries/serviceQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
 import useCommunityRights from "@/hooks/useCommunityRights";
@@ -41,7 +42,6 @@ import {
     getServiceTypeLabel,
     isOfferingUnavailable,
 } from "@/utils";
-import { delta } from "@/utils/delta";
 import ServiceExploreMapsCell from "../DatasheetView/ServiceListTab/ServiceExploreMapsCell";
 import MetadataSection from "../forms/MetadataSection";
 import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
@@ -164,12 +164,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
 
     const services = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName)).data?.services;
     const { data: datasheet } = useQuery(datasheetQueryOptions(datastoreId, datasheetName));
-    const endpointsQuery = useQuery<DatastoreEndpoint[], ApiError>({
-        queryKey: RQKeys.datastore_endpoints(datastoreId),
-        queryFn: ({ signal }) => api.datastore.getEndpoints(datastoreId, {}, { signal }),
-        staleTime: delta.hours(1),
-        enabled: editable,
-    });
+    const endpointsQuery = useQuery({ ...datastoreEndpointsQueryOptions(datastoreId), enabled: editable });
 
     const unavailable = isOfferingUnavailable(service.status);
 
