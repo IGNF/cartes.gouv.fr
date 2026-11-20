@@ -7,7 +7,7 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { notFound, useBlocker, useNavigate } from "@tanstack/react-router";
-import { Fragment, type ReactNode, useEffect, useId, useMemo, useState } from "react";
+import { Fragment, type ReactNode, useEffect, useId, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import { tss } from "tss-react";
@@ -25,6 +25,7 @@ import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServi
 import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { serviceQueryOptions } from "@/hooks/queries/serviceQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
+import useExploreMapsClock from "@/hooks/useExploreMapsClock";
 import useServiceRights from "@/hooks/useServiceRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage, isApiError } from "@/modules/apiError";
@@ -38,7 +39,6 @@ import {
     formatDateFromISO,
     getExploreMapsAvailability,
     getExploreMapsLayerParam,
-    getNextExploreMapsPendingEnd,
     getServiceThumbnailUrl,
     getServiceType,
     getServiceTypeLabel,
@@ -179,15 +179,8 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
         (storedData) => storedData._id === storedDataId
     )?.name;
 
-    // comme l’onglet Flux : réveil à la sortie du délai « En cours » d’Explorer les cartes
-    const [clockTick, setClockTick] = useState(0);
-    const now = Math.max(readAt, clockTick);
-    useEffect(() => {
-        const pendingEnd = getNextExploreMapsPendingEnd([service], now);
-        if (pendingEnd === undefined) return;
-        const timer = window.setTimeout(() => setClockTick(Date.now()), pendingEnd - now + 1000);
-        return () => window.clearTimeout(timer);
-    }, [service, now]);
+    const clockServices = useMemo(() => [service], [service]);
+    const now = useExploreMapsClock(clockServices, readAt);
 
     // `values` suit le flux relu : noms enregistrés au dernier enregistrement
     const savedTablePublicNames = useMemo(

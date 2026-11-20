@@ -6,7 +6,7 @@ import Notice from "@codegouvfr/react-dsfr/Notice";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { type UseQueryResult } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
@@ -18,8 +18,9 @@ import MenuList from "@/components/Utils/MenuList";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import Wait from "@/components/Utils/Wait";
 import useUnpublishServiceMutation from "@/hooks/queries/useUnpublishServiceMutation";
-import useServiceRights from "@/hooks/useServiceRights";
+import useExploreMapsClock from "@/hooks/useExploreMapsClock";
 import { usePagination } from "@/hooks/usePagination";
+import useServiceRights from "@/hooks/useServiceRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
 import { type ApiError } from "@/modules/jsonFetch";
@@ -29,7 +30,6 @@ import {
     formatDateFromISO,
     getExploreMapsAvailability,
     getExploreMapsLayerParam,
-    getNextExploreMapsPendingEnd,
     getServiceThumbnailUrl,
     getServiceType,
     getServiceTypeLabel,
@@ -111,19 +111,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         TextCopyToClipboardModal.open();
     };
 
-    // instant de référence du délai « En cours » : dernière lecture de la liste, ou dernier réveil du minuteur ci-dessous
-    const [clockTick, setClockTick] = useState(0);
-    const now = Math.max(serviceListQuery.dataUpdatedAt, clockTick);
-
-    // réveil à la sortie du délai du prochain flux « En cours », pour ne pas attendre une relecture
-    useEffect(() => {
-        const nextPendingEnd = getNextExploreMapsPendingEnd(sortedServices, now);
-        if (nextPendingEnd === undefined) {
-            return;
-        }
-        const timer = window.setTimeout(() => setClockTick(Date.now()), nextPendingEnd - now + 1000);
-        return () => window.clearTimeout(timer);
-    }, [sortedServices, now]);
+    const now = useExploreMapsClock(sortedServices, serviceListQuery.dataUpdatedAt);
 
     // lignes mémorisées : références stables pour que memo(MenuList) évite de re-rendre les menus de chaque ligne
     const rows = useMemo(() => {
