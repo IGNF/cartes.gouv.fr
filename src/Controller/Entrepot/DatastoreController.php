@@ -41,7 +41,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
         #[MapQueryParameter] ?string $type = null,
         #[MapQueryParameter] ?bool $open = null,
     ): JsonResponse {
-        $endpoints = $this->datastoreApiService->filterEndpoints($this->readDatastore($datastoreId), [
+        $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
             'type' => $type,
             'open' => $open,
         ]);

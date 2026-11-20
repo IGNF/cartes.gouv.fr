@@ -22,7 +22,7 @@ final readonly class DatastoreApiService
 
     /**
      * Cache commun à tous les utilisateurs : réservé aux appelants internes qui interrogent aussi l'Entrepôt avec le jeton de l'utilisateur dans la même requête.
-     * Une route qui renvoie l'entrepôt ou ses points d'accès vérifie d'abord l'appartenance (MembershipService::isMemberOfDatastoreNow), sinon fetch().
+     * Une route qui renvoie l'entrepôt vérifie d'abord l'appartenance (MembershipService::isMemberOfDatastoreNow), sinon fetch().
      *
      * @return array<mixed>
      */
@@ -51,25 +51,25 @@ final readonly class DatastoreApiService
     }
 
     /**
+     * Sans cache : la lecture du datastore complet prend 12 s, celle-ci 0,1 s, avec le jeton de l'utilisateur.
+     *
      * @param array<string,mixed> $query
      *
      * @return array<mixed>
      */
     public function getEndpointsList(string $datastoreId, array $query = []): array
     {
-        return $this->filterEndpoints($this->get($datastoreId), $query);
+        return $this->filterEndpoints($this->api->requestAll("datastores/$datastoreId/endpoints")->resolve(), $query);
     }
 
     /**
-     * @param array<mixed>        $datastore
+     * @param array<mixed>        $endpoints
      * @param array<string,mixed> $query
      *
      * @return array<mixed>
      */
-    public function filterEndpoints(array $datastore, array $query = []): array
+    private function filterEndpoints(array $endpoints, array $query = []): array
     {
-        $endpoints = $datastore['endpoints'];
-
         if (isset($query['type'])) {
             $endpoints = array_filter($endpoints, function ($endpoint) use ($query) {
                 if (isset($endpoint['endpoint']['type'])) {
@@ -98,8 +98,18 @@ final readonly class DatastoreApiService
      */
     public function getEndpoint(string $datastoreId, string $endpointId): array
     {
-        $endpoints = $this->getEndpointsList($datastoreId);
+        return self::findEndpoint($this->getEndpointsList($datastoreId), $endpointId);
+    }
 
+    /**
+     * Recherche dans une liste déjà lue par getEndpointsList, pour une seule lecture par requête.
+     *
+     * @param array<mixed> $endpoints
+     *
+     * @return array<mixed>
+     */
+    public static function findEndpoint(array $endpoints, string $endpointId): array
+    {
         $filteredEndpoints = array_filter($endpoints, function ($endpoint) use ($endpointId) {
             return $endpoint['endpoint']['_id'] === $endpointId;
         });

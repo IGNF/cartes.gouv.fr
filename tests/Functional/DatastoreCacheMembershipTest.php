@@ -69,13 +69,13 @@ final class DatastoreCacheMembershipTest extends KernelTestCase
         self::assertSame(2, EntrepotMockResponseFactory::datastoreCalls());
     }
 
-    public function testANonMemberGetsTheAnswerOfTheEntrepotForTheEndpoints(): void
+    public function testTheEndpointsAreReadWithTheTokenOfTheUserWithoutTheSharedCache(): void
     {
         $this->warmCache();
         EntrepotMockResponseFactory::forbidDatastore();
 
         $this->assertForbidden(fn () => self::getContainer()->get(DatastoreController::class)->getEndpoints(self::ID));
-        self::assertSame(2, EntrepotMockResponseFactory::datastoreCalls());
+        self::assertSame(1, EntrepotMockResponseFactory::datastoreCalls());
     }
 
     public function testANonMemberGetsTheAnswerOfTheEntrepotForTheIdentity(): void
