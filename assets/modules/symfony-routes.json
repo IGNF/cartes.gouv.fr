@@ -1525,43 +1525,6 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_api_pyramid_raster_wms_raster_wmts_publish": {
-            "tokens": [
-                [
-                    "text",
-                    "\/wms-raster-wmts\/publish"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "pyramidId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/pyramid-raster"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "POST"
-            ],
-            "schemes": []
-        },
         "cartesgouvfr_api_pyramid_vector_add": {
             "tokens": [
                 [
@@ -1588,22 +1551,11 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_api_pyramid_vector_tms_publish": {
+        "cartesgouvfr_api_service_publish_service": {
             "tokens": [
                 [
                     "text",
-                    "\/tms\/publish"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "pyramidId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/pyramid-vector"
+                    "\/services"
                 ],
                 [
                     "variable",
@@ -2842,80 +2794,6 @@
             "hosttokens": [],
             "methods": [
                 "DELETE"
-            ],
-            "schemes": []
-        },
-        "cartesgouvfr_api_wfs_publish": {
-            "tokens": [
-                [
-                    "text",
-                    "\/wfs\/publish"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "storedDataId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/stored_data"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "POST"
-            ],
-            "schemes": []
-        },
-        "cartesgouvfr_api_wmsvector_publish": {
-            "tokens": [
-                [
-                    "text",
-                    "\/wmsvector\/publish"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "storedDataId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/stored_data"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "POST"
             ],
             "schemes": []
         },

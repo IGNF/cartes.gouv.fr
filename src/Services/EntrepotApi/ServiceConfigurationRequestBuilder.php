@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\EntrepotApi;
 
+use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\ZoomLevels;
 use App\Dto\Services\Form\ServiceAttributionFormDTO;
-use App\Dto\Services\Form\ServiceFormDTO;
+use App\Dto\Services\Form\ServiceEditFormDTO;
+use App\Dto\Services\Form\ServicePublishFormDTO;
 use App\Dto\Services\Form\WfsTableEditFormDTO;
 use App\Dto\Services\Form\WfsTableFormDTO;
 
@@ -16,18 +18,18 @@ class ServiceConfigurationRequestBuilder
     /**
      * La vignette n’en fait pas partie : l’Entrepôt ignore `extra` à la création, voir buildThumbnailExtra().
      *
-     * @param array<mixed>                                                     $typeInfos      `type_infos` propres au type de flux
+     * @param array<mixed>                                                     $typeInfos      `type_infos` du flux (buildTypeInfos)
      * @param array<mixed>                                                     $configMetadata liens `metadata` vers la fiche (CartesServiceApiService::getNewConfigMetadata)
      * @param array{url: string, width: int, height: int, format: string}|null $logo           logo d’attribution déjà déposé en annexe
      *
      * @return array<mixed>
      */
-    public function build(ServiceFormDTO $dto, string $type, array $typeInfos, array $configMetadata, ?array $logo): array
+    public function build(ServicePublishFormDTO $dto, array $typeInfos, array $configMetadata, ?array $logo): array
     {
         $body = [
             'name' => $dto->title,
             'layer_name' => $dto->technical_name,
-            'type' => $type,
+            'type' => $dto->type,
             'type_infos' => $typeInfos,
             'metadata' => $configMetadata,
         ];
@@ -54,6 +56,32 @@ class ServiceConfigurationRequestBuilder
         }
 
         return $body;
+    }
+
+    /**
+     * `type_infos` d’un flux, à la publication comme à la modification : tables en WFS ; titre, description et thématiques ailleurs, plus les tables et leurs styles en WMS vecteur.
+     *
+     * @param array<mixed>          $base     `used_data` (et `styles`) à la publication, `type_infos` de la configuration à la modification
+     * @param array<string, string> $styleIds WMS vecteur : fichier de style par table cochée
+     *
+     * @return array<mixed>
+     */
+    public static function buildTypeInfos(string $type, ServicePublishFormDTO|ServiceEditFormDTO $dto, array $base, array $styleIds = []): array
+    {
+        if (ConfigurationTypes::WFS === $type) {
+            $base['used_data'][0]['relations'] = self::buildWfsRelations($dto->tables);
+
+            return $base;
+        }
+
+        $base['title'] = $dto->title;
+        $base['abstract'] = $dto->description;
+        $base['keywords'] = $dto->themes;
+        if (ConfigurationTypes::WMSVECTOR === $type) {
+            $base['used_data'][0]['relations'] = array_map(fn (string $tableName) => ['name' => $tableName, 'style' => $styleIds[$tableName]], $dto->selected_tables);
+        }
+
+        return $base;
     }
 
     /**

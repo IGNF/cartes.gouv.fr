@@ -30,16 +30,6 @@ export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean):
 /** tables à choisir : WFS, WMS sur une base vecteur ; ni WMS raster, ni WMTS, ni TMS */
 export const hasTables = (type: ServiceType, rasterPyramid: boolean): boolean => type === "wfs" || (type === "wms" && !rasterPyramid);
 
-/** type de flux publié depuis une pyramide raster (route pyramid-raster), undefined pour les autres routes, TMS compris */
-export const rasterPyramidPublishType = (
-    type: ServiceType,
-    rasterPyramid: boolean
-): ConfigurationTypeEnum.WMSRASTER | ConfigurationTypeEnum.WMTSTMS | undefined => {
-    if (type === "wmts") return ConfigurationTypeEnum.WMTSTMS;
-    if (type === "wms" && rasterPyramid) return ConfigurationTypeEnum.WMSRASTER;
-    return undefined;
-};
-
 export { SERVICE_ACCESSES, type ServiceAccess };
 
 /** accès offerts par les endpoints de l’entrepôt pour ce type de configuration ; tous tant que les endpoints ne sont pas lus (le back refuse un accès sans endpoint) */

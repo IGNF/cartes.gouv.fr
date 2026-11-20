@@ -1,12 +1,16 @@
 import { type ApiError } from "@/modules/jsonFetch";
-import { type ServiceEditFormOutput, type ServiceFormOutput, type ServiceType } from "./serviceFormSchema";
+import { configurationTypeFor, type ServiceEditFormOutput, type ServiceFormOutput, type ServiceType } from "./serviceFormSchema";
 
 /**
- * Requête multipart des routes `publish` : champ `data` (JSON lu par MultipartPayloadMapper côté Symfony)
- * et fichiers `thumbnail`, `attribution_logo`, `style_files[<table>]` (WMS vecteur). La donnée stockée voyage dans l’URL.
+ * Requête multipart de la route de publication : champ `data` (JSON lu par MultipartPayloadMapper côté Symfony, avec le type de configuration et la donnée stockée)
+ * et fichiers `thumbnail`, `attribution_logo`, `style_files[<table>]` (WMS vecteur).
  */
 export function buildServiceFormData(type: ServiceType, values: ServiceFormOutput, rasterPyramid = false): FormData {
-    return buildFormData(type, values, rasterPyramid, { technical_name: values.technical_name });
+    return buildFormData(type, values, rasterPyramid, {
+        type: configurationTypeFor(type, rasterPyramid),
+        stored_data_id: values.stored_data_id,
+        technical_name: values.technical_name,
+    });
 }
 
 /** Requête multipart de la route `edit` : `data` de la publication sans nom technique, avec les retraits d’images (valeur null). */

@@ -6,7 +6,6 @@ use App\ApiClient\ResponsePromise;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationMetadataTypes;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
-use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\OfferingStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\PermissionTypes;
@@ -15,7 +14,7 @@ use App\Constants\ServiceAccess;
 use App\Dto\Datasheet\DatasheetServices;
 use App\Dto\Services\Form\ServiceAttributionFormDTO;
 use App\Dto\Services\Form\ServiceEditFormDTO;
-use App\Dto\Services\Form\ServiceFormDTO;
+use App\Dto\Services\Form\ServicePublishFormDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\CapabilitiesService;
@@ -516,7 +515,8 @@ class CartesServiceApiService
      * Publie un flux depuis le nouveau formulaire : annexes images, configuration, offre, permissions, capabilities,
      * puis ressources en ligne de la fiche de métadonnées. La métadonnée doit exister : elle fournit les liens `metadata` de la configuration.
      *
-     * @param array<mixed>            $typeInfos
+     * @param array<mixed>            $storedData             donnée stockée publiée, de type déjà contrôlé
+     * @param array<mixed>            $typeInfos              voir ServiceConfigurationRequestBuilder::buildTypeInfos
      * @param ?\Closure(string): void $onConfigurationCreated appelé avec l’identifiant de la configuration juste après sa création ; un échec annule la configuration
      * @param ?\Closure(): void       $onRollback             appelé quand la publication échoue avant la création de l’offre ; ne doit pas lever d’exception
      *
@@ -524,9 +524,8 @@ class CartesServiceApiService
      */
     public function publishFromForm(
         string $datastoreId,
-        string $storedDataId,
-        ServiceFormDTO $dto,
-        string $type,
+        array $storedData,
+        ServicePublishFormDTO $dto,
         array $typeInfos,
         ?UploadedFile $thumbnail = null,
         ?UploadedFile $attributionLogo = null,
@@ -538,7 +537,6 @@ class CartesServiceApiService
         try {
             // dans le try : un refus annule aussi ce que l’appelant a déjà déposé
             $this->datastorePrefixValidator->assertLayerName($datastoreId, $dto->technical_name);
-            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME] ?? null;
             if (!is_string($datasheetName)) {
                 throw new AppException('La donnée n’est rattachée à aucune fiche de données', Response::HTTP_BAD_REQUEST);
@@ -549,7 +547,7 @@ class CartesServiceApiService
                 throw new AppException('Renseignez d’abord la description de la fiche de données', Response::HTTP_BAD_REQUEST);
             }
 
-            $endpoint = $this->getEndpointByAccess($datastoreId, $type, $dto->access);
+            $endpoint = $this->getEndpointByAccess($datastoreId, $dto->type, $dto->access);
 
             $configTags = [
                 CommonTags::DATASHEET_NAME => $datasheetName,
@@ -558,7 +556,7 @@ class CartesServiceApiService
 
             [$thumbnailUrl, $logo] = $this->uploadImages($datastoreId, $datasheetName, $thumbnail, $attributionLogo, $dto->attribution);
 
-            $configRequestBody = $this->configurationRequestBuilder->build($dto, $type, $typeInfos, $this->getNewConfigMetadata($apiMetadata['file_identifier']), $logo);
+            $configRequestBody = $this->configurationRequestBuilder->build($dto, $typeInfos, $this->getNewConfigMetadata($apiMetadata['file_identifier']), $logo);
 
             $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody)->array();
             try {
@@ -664,7 +662,7 @@ class CartesServiceApiService
             $body = [
                 'name' => $dto->title,
                 'type' => $type,
-                'type_infos' => $this->getEditTypeInfos($configuration, $dto, $styleIds),
+                'type_infos' => ServiceConfigurationRequestBuilder::buildTypeInfos($type, $dto, $configuration['type_infos'], $styleIds),
                 'metadata' => $configuration['metadata'] ?? [],
             ];
             if ($dto->attribution instanceof ServiceAttributionFormDTO) {
@@ -727,32 +725,6 @@ class CartesServiceApiService
         ]);
 
         return $offering;
-    }
-
-    /**
-     * @param array<mixed>          $configuration
-     * @param array<string, string> $styleIds
-     *
-     * @return array<mixed>
-     */
-    private function getEditTypeInfos(array $configuration, ServiceEditFormDTO $dto, array $styleIds): array
-    {
-        $typeInfos = $configuration['type_infos'];
-
-        if (ConfigurationTypes::WFS === $configuration['type']) {
-            $typeInfos['used_data'][0]['relations'] = ServiceConfigurationRequestBuilder::buildWfsRelations($dto->tables);
-
-            return $typeInfos;
-        }
-
-        $typeInfos['title'] = $dto->title;
-        $typeInfos['abstract'] = $dto->description;
-        $typeInfos['keywords'] = $dto->themes;
-        if (ConfigurationTypes::WMSVECTOR === $configuration['type']) {
-            $typeInfos['used_data'][0]['relations'] = array_map(fn (string $tableName) => ['name' => $tableName, 'style' => $styleIds[$tableName]], $dto->selected_tables);
-        }
-
-        return $typeInfos;
     }
 
     /**

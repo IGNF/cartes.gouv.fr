@@ -63,6 +63,18 @@ final readonly class WmsVectorStyleFileService
     }
 
     /**
+     * Renomme d’après la configuration les fichiers déposés sous un nom temporaire à la publication.
+     *
+     * @param array<string, string> $staticIds identifiant du fichier statique par nom de table
+     */
+    public function rename(string $datastoreId, array $staticIds, string $configurationId): void
+    {
+        foreach ($staticIds as $tableName => $staticId) {
+            $this->staticApiService->modifyInfo($datastoreId, $staticId, ['name' => self::name($configurationId, (string) $tableName)])->await();
+        }
+    }
+
+    /**
      * Après un échec de modification : supprime ceux de ces fichiers que la configuration relue n’utilise plus, qu’elle ait été enregistrée ou non.
      *
      * @param array<string> $staticIds fichiers enregistrés et déposés

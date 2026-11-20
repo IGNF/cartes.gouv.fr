@@ -3,25 +3,18 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
-use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
-use App\Dto\Services\Form\PyramidServiceFormDTO;
 use App\Dto\Services\PyramidRaster\PyramidRasterGenerateDTO;
 use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\AnnexeApiService;
-use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
-use App\Services\EntrepotApi\Rok4StyleFileService;
-use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StoredDataApiService;
-use App\Services\MultipartPayloadMapper;
 use App\Services\SandboxService;
-use App\Services\ServiceFormFileValidator;
 use App\Utils;
 use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
@@ -30,9 +23,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -54,13 +45,9 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         private readonly StoredDataApiService $storedDataApiService,
         private readonly ProcessingApiService $processingApiService,
         private readonly SandboxService $sandboxService,
-        private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly AnnexeApiService $annexeApiService,
-        private readonly Rok4StyleFileService $rok4StyleFileService,
         private readonly Filesystem $fs,
-        private readonly MultipartPayloadMapper $multipartPayloadMapper,
-        private readonly ServiceFormFileValidator $serviceFormFileValidator,
         private readonly LoggerInterface $logger,
         ParameterBagInterface $params,
         HttpClientInterface $httpClient,
@@ -179,55 +166,6 @@ final class PyramidRasterController extends AbstractController implements ApiCon
         }
 
         return new JsonResponse();
-    }
-
-    /**
-     * Publication depuis le nouveau formulaire : multipart avec le champ JSON `data` (PyramidServiceFormDTO) et les fichiers `thumbnail`, `attribution_logo`.
-     */
-    #[Route('/{pyramidId}/wms-raster-wmts/publish', name: 'wms_raster_wmts_publish', methods: ['POST'])]
-    public function publish(string $datastoreId, string $pyramidId, #[MapQueryParameter] string $type, Request $request): JsonResponse
-    {
-        $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
-        if (!in_array($type, $acceptedTypes, true)) {
-            throw new AppException(sprintf('Le type %s n’est pas accepté. Les types acceptés sont %s.', $type, implode(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
-        }
-
-        $dto = $this->multipartPayloadMapper->map($request, PyramidServiceFormDTO::class);
-        [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
-
-        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
-        if (StoredDataTypes::ROK4_PYRAMID_RASTER !== ($pyramid['type'] ?? null)) {
-            throw new AppException('La donnée choisie n’est pas une pyramide raster', Response::HTTP_BAD_REQUEST);
-        }
-        $levels = ServiceConfigurationRequestBuilder::getPyramidZoomLevels($pyramid);
-        $configType = ConfigurationTypes::WMSRASTER === $type ? 'wmsr' : 'wmts';
-        $legendStaticId = $this->rok4StyleFileService->upload($datastoreId, $pyramid, $configType, $levels);
-
-        $offering = $this->cartesServiceApiService->publishFromForm(
-            $datastoreId,
-            $pyramidId,
-            $dto,
-            $type,
-            [
-                'title' => $dto->title,
-                'abstract' => $dto->description,
-                'keywords' => $dto->themes,
-                'used_data' => [[
-                    'bottom_level' => $levels['bottom_level'],
-                    'top_level' => $levels['top_level'],
-                    'stored_data' => $pyramidId,
-                ]],
-                'styles' => [$legendStaticId],
-            ],
-            $thumbnail,
-            $attributionLogo,
-            // renommage avant l’offre : un échec annule encore la configuration
-            fn (string $configurationId) => $this->rok4StyleFileService->rename($datastoreId, $legendStaticId, $configurationId, $configType),
-            // après l’offre, le fichier reste : le flux l’utilise
-            fn () => $this->rok4StyleFileService->removeQuietly($datastoreId, $legendStaticId),
-        );
-
-        return $this->json($offering, Response::HTTP_CREATED);
     }
 
     // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée ; supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)

@@ -16,14 +16,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
 import { buildServiceFormData } from "../ServiceForm/buildServiceFormData";
 import ServiceForm from "../ServiceForm/ServiceForm";
-import { configurationTypeFor, isRasterPyramid, rasterPyramidPublishType, type ServiceFormOutput, type ServiceType } from "../ServiceForm/serviceFormSchema";
-
-// WMTS et WMS raster passent par api.pyramidRaster.publish
-const publishers: Partial<Record<ServiceType, (datastoreId: string, storedDataId: string, formData: FormData) => Promise<Service>>> = {
-    wfs: api.wfs.publish,
-    wms: api.wmsVector.publish,
-    tms: api.pyramidVector.publishTms,
-};
+import { configurationTypeFor, isRasterPyramid, type ServiceFormOutput, type ServiceType } from "../ServiceForm/serviceFormSchema";
 
 type ServiceAddPageProps = {
     datastoreId: string;
@@ -51,15 +44,8 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     const servicesTab = { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName", params: { datastoreId, datasheetName } } as const;
 
     const publishMutation = useMutation<Service, ApiError, ServiceFormOutput>({
-        mutationFn: (values) => {
-            const rasterType = rasterPyramidPublishType(type, isRasterPyramid(datasheetQuery.data, values.stored_data_id));
-            if (rasterType !== undefined) {
-                return api.pyramidRaster.publish(datastoreId, values.stored_data_id, rasterType, buildServiceFormData(type, values, true));
-            }
-            const publish = publishers[type];
-            if (publish === undefined) throw new Error(`Type de flux sans route de publication : ${type}`);
-            return publish(datastoreId, values.stored_data_id, buildServiceFormData(type, values));
-        },
+        mutationFn: (values) =>
+            api.service.publish(datastoreId, buildServiceFormData(type, values, isRasterPyramid(datasheetQuery.data, values.stored_data_id))),
         // aussi après un échec : le flux peut exister si l’erreur survient après la création de l’offre
         onSettled: (_data, _error, values) => {
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
