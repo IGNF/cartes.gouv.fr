@@ -14,11 +14,13 @@ import { CommunityMemberDtoRightsEnum, StoredDataPrivateDetailResponseDtoTypeEnu
 import StoredDataStatusBadge from "@/components/Utils/Badges/StoredDataStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
 import LoadingText from "@/components/Utils/LoadingText";
+import MenuList from "@/components/Utils/MenuList";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import useDeleteUploadMutation from "@/hooks/queries/useDeleteUploadMutation";
 import useUploadIntegrations from "@/hooks/queries/useUploadIntegrations";
 import useCommunityRights from "@/hooks/useCommunityRights";
+import useServiceRights from "@/hooks/useServiceRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -26,7 +28,7 @@ import { type ApiError } from "@/modules/jsonFetch";
 import { formatDateFromISO } from "@/utils";
 import DatasheetViewTab from "../../DatasheetViewTab";
 import DatasetAddBanners from "./DatasetAddBanners";
-import StoredDataRowActions from "./StoredDataRowActions";
+import StoredDataRowMenu from "./StoredDataRowMenu";
 
 type StoredDataType = `${StoredDataTypeEnum.VECTORDB | StoredDataTypeEnum.ROK4PYRAMIDVECTOR | StoredDataTypeEnum.ROK4PYRAMIDRASTER}`;
 type TypeFilter = "all" | "vector" | "raster";
@@ -43,7 +45,7 @@ const TYPE_LABELS = {
     "ROK4-PYRAMID-RASTER": "type.pyramid_raster",
 } as const satisfies Record<StoredDataType, string>;
 
-const COLUMN_WIDTHS = [undefined, "11rem", "15rem", "10rem", "14rem"];
+const COLUMN_WIDTHS = [undefined, "11rem", "14rem", "10rem", "8rem", "4rem"];
 
 type DatasetRow = {
     id: string;
@@ -52,6 +54,7 @@ type DatasetRow = {
     creation?: string;
     status: ReactNode;
     action: ReactNode;
+    menu: ReactNode;
 };
 
 type DatasetTabNextProps = {
@@ -72,6 +75,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
     const { userRights, isSupervisor } = useCommunityRights();
     const hasRights = (...rights: CommunityMemberDtoRightsEnum[]) => isSupervisor || rights.every((right) => userRights?.includes(right));
     const canGeneratePyramidVector = hasRights(CommunityMemberDtoRightsEnum.PROCESSING);
+    const canGeneratePyramidRaster = useServiceRights().canGeneratePyramid("raster");
     // la suppression emporte les flux et l’annexe de légende
     const canDeleteStoredData = hasRights(CommunityMemberDtoRightsEnum.ANNEX, CommunityMemberDtoRightsEnum.PROCESSING, CommunityMemberDtoRightsEnum.BROADCAST);
     const canAddData =
@@ -132,47 +136,45 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                         {failed ? t("status.failed") : t("status.in_progress")}
                     </Badge>
                 ),
-                action: (
-                    <div className={classes.actions}>
-                        {failed ? (
-                            <Button
-                                priority="tertiary"
-                                size="small"
-                                linkProps={{
-                                    to: "/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport",
-                                    params: { datastoreId, uploadId: upload._id },
-                                    search: { datasheetName },
-                                }}
-                            >
-                                {t("view_report")}
-                            </Button>
-                        ) : (
-                            canAddData && (
-                                <Button
-                                    priority="tertiary"
-                                    size="small"
-                                    linkProps={{
-                                        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/integration",
-                                        params: { datastoreId },
-                                        search: { uploadId: upload._id, datasheetName },
-                                    }}
-                                >
-                                    {t("resume_integration")}
-                                </Button>
-                            )
-                        )}
-                        {canAddData && (
-                            <Button
-                                iconId="fr-icon-delete-line"
-                                priority="tertiary"
-                                size="small"
-                                disabled={hasMetadata === undefined}
-                                onClick={() => (deletingRemovesDatasheet ? onDeleteDatasheet() : deleteUploadMutate(upload._id))}
-                            >
-                                {t("delete")}
-                            </Button>
-                        )}
-                    </div>
+                action: failed ? (
+                    <Button
+                        priority="tertiary"
+                        size="small"
+                        linkProps={{
+                            to: "/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport",
+                            params: { datastoreId, uploadId: upload._id },
+                            search: { datasheetName },
+                        }}
+                    >
+                        {t("view_report")}
+                    </Button>
+                ) : (
+                    canAddData && (
+                        <Button
+                            priority="tertiary"
+                            size="small"
+                            linkProps={{
+                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/integration",
+                                params: { datastoreId },
+                                search: { uploadId: upload._id, datasheetName },
+                            }}
+                        >
+                            {t("resume_integration")}
+                        </Button>
+                    )
+                ),
+                menu: canAddData && (
+                    <MenuList
+                        menuOpenButtonProps={{ iconId: "ri-more-2-line", priority: "tertiary no outline", title: t("menu.open"), size: "small" }}
+                        items={[
+                            {
+                                text: t("delete"),
+                                iconId: "fr-icon-delete-line",
+                                disabled: hasMetadata === undefined,
+                                onClick: () => (deletingRemovesDatasheet ? onDeleteDatasheet() : deleteUploadMutate(upload._id)),
+                            },
+                        ]}
+                    />
                 ),
             }));
 
@@ -185,18 +187,29 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                 creation: storedData.creation,
                 status: <StoredDataStatusBadge status={storedData.status} />,
                 action: (
-                    <div className={classes.actions}>
-                        {/* clé : les lignes du tableau sont indexées par position, l’état du dialogue suit la donnée */}
-                        <StoredDataRowActions
-                            key={storedData._id}
-                            datastoreId={datastoreId}
-                            datasheetName={datasheetName}
-                            storedData={storedData}
-                            canGeneratePyramidVector={canGeneratePyramidVector}
-                            canDelete={canDeleteStoredData}
-                            onDeleteSettled={onStoredDataDeleteSettled}
-                        />
-                    </div>
+                    <Button
+                        priority="tertiary"
+                        size="small"
+                        linkProps={{
+                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
+                            params: { datastoreId, storedDataId: storedData._id },
+                            search: { datasheetName },
+                        }}
+                    >
+                        {t("view")}
+                    </Button>
+                ),
+                menu: (
+                    // clé : les lignes du tableau sont indexées par position, l’état du dialogue suit la donnée
+                    <StoredDataRowMenu
+                        key={storedData._id}
+                        datastoreId={datastoreId}
+                        datasheetName={datasheetName}
+                        storedData={storedData}
+                        canGeneratePyramidVector={canGeneratePyramidVector}
+                        canDelete={canDeleteStoredData}
+                        onDeleteSettled={onStoredDataDeleteSettled}
+                    />
                 ),
             })
         );
@@ -215,7 +228,6 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
         canGeneratePyramidVector,
         canDeleteStoredData,
         onStoredDataDeleteSettled,
-        classes.actions,
         failedUploadIds,
         deleteUploadMutate,
         onDeleteDatasheet,
@@ -288,8 +300,38 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                                     segments={[segment(FILTERS[0]), segment(FILTERS[1]), segment(FILTERS[2])]}
                                 />
                             </div>
+                            {(canGeneratePyramidVector || canGeneratePyramidRaster) && (
+                                <MenuList
+                                    menuOpenButtonProps={{
+                                        iconId: "fr-icon-settings-5-line",
+                                        priority: "secondary",
+                                        size: "small",
+                                        title: t("pyramid"),
+                                        className: fr.cx("fr-mr-2w"),
+                                        children: t("pyramid"),
+                                    }}
+                                    items={[
+                                        canGeneratePyramidVector && {
+                                            text: t("type.pyramid_vector"),
+                                            linkProps: {
+                                                to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout",
+                                                params: { datastoreId },
+                                                search: { datasheetName },
+                                            },
+                                        },
+                                        canGeneratePyramidRaster && {
+                                            text: t("type.pyramid_raster"),
+                                            linkProps: {
+                                                to: "/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout",
+                                                params: { datastoreId },
+                                                search: { datasheetName },
+                                            },
+                                        },
+                                    ]}
+                                />
+                            )}
                             {canAddData && (
-                                <Button iconId="fr-icon-add-line" linkProps={addDataLink}>
+                                <Button iconId="fr-icon-add-line" size="small" linkProps={addDataLink}>
                                     {t("add")}
                                 </Button>
                             )}
@@ -301,7 +343,16 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                             caption={t("caption")}
                             noCaption
                             columnWidths={COLUMN_WIDTHS}
-                            headers={[t("column.name"), t("column.type"), t("column.creation"), t("column.status"), t("column.action")]}
+                            headers={[
+                                t("column.name"),
+                                t("column.type"),
+                                t("column.creation"),
+                                t("column.status"),
+                                t("column.action"),
+                                <span key="menu" className={fr.cx("fr-sr-only")}>
+                                    {t("menu.open")}
+                                </span>,
+                            ]}
                             data={filteredRows.map((row) => [
                                 <span key={`name-${row.id}`} title={row.name}>
                                     {row.name}
@@ -312,6 +363,7 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                                 row.creation ? formatDateFromISO(row.creation) : "",
                                 row.status,
                                 row.action,
+                                row.menu,
                             ])}
                         />
                     </>
@@ -328,12 +380,6 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
 }
 
 const useStyles = tss.withName({ DatasetTabNext }).create({
-    actions: {
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        gap: fr.spacing("1w"),
-    },
     results: {
         color: fr.colors.decisions.text.mention.grey.default,
     },

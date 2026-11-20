@@ -4,6 +4,7 @@ import { type Translations } from "@/i18n/types";
 const { i18n } = declareComponentKeys<
     | "title"
     | "add"
+    | "pyramid"
     | "no_data"
     | "load_error"
     | "filter_legend"
@@ -45,7 +46,8 @@ export type I18n = typeof i18n;
 
 export const DatasetTabNextFrTranslations: Translations<"fr">["DatasetTabNext"] = {
     title: "Données",
-    add: "Ajouter une donnée",
+    add: "Base vecteur",
+    pyramid: "Pyramide",
     no_data: "Aucune donnée",
     load_error: "La fiche de données n’a pas pu être chargée",
     filter_legend: "Filtrer par type de donnée",
@@ -85,7 +87,8 @@ export const DatasetTabNextFrTranslations: Translations<"fr">["DatasetTabNext"] 
 
 export const DatasetTabNextEnTranslations: Translations<"en">["DatasetTabNext"] = {
     title: "Data",
-    add: "Add data",
+    add: "Vector database",
+    pyramid: "Pyramid",
     no_data: "No data",
     load_error: "The datasheet could not be loaded",
     filter_legend: "Filter by data type",
