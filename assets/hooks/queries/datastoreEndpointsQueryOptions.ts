@@ -5,7 +5,7 @@ import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { delta } from "@/utils/delta";
 
-// 0,1 s contre 12 s pour le DTO entrepôt complet
+// bien plus rapide que le DTO entrepôt complet
 export function datastoreEndpointsQueryOptions(datastoreId: string) {
     return queryOptions<DatastoreEndpoint[]>({
         queryKey: RQKeys.datastore_endpoints(datastoreId),

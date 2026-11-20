@@ -41,7 +41,7 @@ type MetadataFormProps = {
 };
 
 export default function MetadataForm(props: MetadataFormProps) {
-    // le préfixe ne sert qu’à saisir l’identifiant : un identifiant enregistré n’attend pas le DTO entrepôt (12 s)
+    // le préfixe ne sert qu’à saisir l’identifiant : un identifiant enregistré n’attend pas le DTO entrepôt, lent à lire
     return props.fileIdentifierLocked ? <MetadataFormContent {...props} /> : <MetadataFormWithPrefix {...props} />;
 }
 

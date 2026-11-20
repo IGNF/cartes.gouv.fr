@@ -51,7 +51,7 @@ final readonly class DatastoreApiService
     }
 
     /**
-     * Sans cache : la lecture du datastore complet prend 12 s, celle-ci 0,1 s, avec le jeton de l'utilisateur.
+     * Sans cache, avec le jeton de l'utilisateur : bien plus rapide que la lecture du datastore complet.
      *
      * @param array<string,mixed> $query
      *

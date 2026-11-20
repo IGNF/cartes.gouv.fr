@@ -127,7 +127,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
      */
     private function readDatastore(string $datastoreId): array
     {
-        // le cache est commun à tous les utilisateurs et la lecture de l'entrepôt est lente (7 à 8 s) : appartenance relue à chaque requête,
+        // le cache est commun à tous les utilisateurs et la lecture de l'entrepôt est lente : appartenance relue à chaque requête,
         // un non-membre interroge l'Entrepôt avec son propre jeton
         return $this->membershipService->isMemberOfDatastoreNow($datastoreId)
             ? $this->datastoreApiService->get($datastoreId)
