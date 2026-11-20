@@ -5,9 +5,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum } from "@/@types/app";
+import { type DatasheetDetailed, StoredDataStatusEnum } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import api from "@/entrepot/api";
+import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
 import useCommunityRights from "@/hooks/useCommunityRights";
@@ -71,11 +72,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, configurationType, { signal }),
         staleTime: delta.minutes(1),
     });
-    const endpointsQuery = useQuery<DatastoreEndpoint[], ApiError>({
-        queryKey: RQKeys.datastore_endpoints(datastoreId),
-        queryFn: ({ signal }) => api.datastore.getEndpoints(datastoreId, {}, { signal }),
-        staleTime: delta.hours(1),
-    });
+    const endpointsQuery = useQuery(datastoreEndpointsQueryOptions(datastoreId));
 
     const availableAccesses = useMemo(() => availableServiceAccesses(endpointsQuery.data, configurationType), [endpointsQuery.data, configurationType]);
 

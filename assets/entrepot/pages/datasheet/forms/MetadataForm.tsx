@@ -40,7 +40,17 @@ type MetadataFormProps = {
     fileIdentifierLocked?: boolean;
 };
 
-export default function MetadataForm({
+export default function MetadataForm(props: MetadataFormProps) {
+    // le préfixe ne sert qu’à saisir l’identifiant : un identifiant enregistré n’attend pas le DTO entrepôt, lent à lire
+    return props.fileIdentifierLocked ? <MetadataFormContent {...props} /> : <MetadataFormWithPrefix {...props} />;
+}
+
+function MetadataFormWithPrefix(props: MetadataFormProps) {
+    const { data: datastore } = useSuspenseQuery(datastoreQueryOptions(props.datastoreId));
+    return <MetadataFormContent {...props} fileIdentifierPrefix={datastore.metadata_file_identifier_prefix || undefined} />;
+}
+
+function MetadataFormContent({
     datastoreId,
     mode = "create",
     defaultValues = defaultMetadataValues,
@@ -50,15 +60,14 @@ export default function MetadataForm({
     renderBottomActions,
     existingThumbnailUrl,
     fileIdentifierLocked = false,
-}: MetadataFormProps) {
+    fileIdentifierPrefix,
+}: MetadataFormProps & { fileIdentifierPrefix?: string }) {
     const { t } = useTranslation("DatasheetSections");
     const isEditMode = mode === "edit";
     const queryClient = useQueryClient();
 
     // aide à la saisie seulement : la création revérifie le nom (409)
     const datasheetListQuery = useQuery({ ...datasheetListQueryOptions(datastoreId), throwOnError: false, retry: false, enabled: !isEditMode });
-    const { data: datastore } = useSuspenseQuery(datastoreQueryOptions(datastoreId));
-    const fileIdentifierPrefix = datastore.metadata_file_identifier_prefix || undefined;
 
     const schema = useMemo(
         () =>

@@ -20,7 +20,6 @@ use App\Services\CswMetadataXmlWriter;
 use App\Services\DatasheetMetadataMapper;
 use App\Services\DatastorePrefixValidator;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
@@ -35,7 +34,6 @@ class CartesMetadataApiService
     private const THUMBNAIL_LABEL = 'type=thumbnail';
 
     public function __construct(
-        private readonly ParameterBagInterface $parameterBag,
         private readonly DatastoreApiService $datastoreApiService,
         private readonly AnnexeApiService $annexeApiService,
         private readonly MetadataApiService $metadataApiService,
@@ -352,20 +350,23 @@ class CartesMetadataApiService
     // couches, styles et GetCapabilities rebâtis depuis l’API ; documents et autres ressources conservés
     private function replaceServiceResources(CswMetadata $cswMetadata, string $datastoreId, DatasheetServices $services): void
     {
+        $endpoints = [] === $services->offeringsById ? [] : $this->datastoreApiService->getEndpointsList($datastoreId);
         $cswMetadata->replaceResources(
             [CswOnlineResourceType::Layer, CswOnlineResourceType::Style, CswOnlineResourceType::Capabilities],
             [
-                ...$this->getMetadataLayers($datastoreId, $services),
+                ...$this->getMetadataLayers($datastoreId, $services, $endpoints),
                 ...$this->getStyleFiles($datastoreId, $services->configurationsById),
-                ...$this->getCapabilitiesFiles($datastoreId, $services),
+                ...$this->getCapabilitiesFiles($datastoreId, $services, $endpoints),
             ],
         );
     }
 
     /**
+     * @param array<mixed> $endpoints
+     *
      * @return list<CswOnlineResource>
      */
-    private function getMetadataLayers(string $datastoreId, DatasheetServices $services): array
+    private function getMetadataLayers(string $datastoreId, DatasheetServices $services, array $endpoints): array
     {
         $layers = [];
 
@@ -375,7 +376,7 @@ class CartesMetadataApiService
                 continue;
             }
 
-            $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
+            $serviceEndpoint = DatastoreApiService::findEndpoint($endpoints, $offering['endpoint']['_id']);
 
             switch ($configuration['type']) {
                 case ConfigurationTypes::WFS:
@@ -416,11 +417,10 @@ class CartesMetadataApiService
                         break;
                     }
 
-                    $endpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']);
-                    $endpoints = array_values($endpoints);
+                    $urls = array_values(array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']));
 
-                    if (count($endpoints) > 0) {
-                        $endpointUrl = $endpoints[0]['url'];
+                    if (count($urls) > 0) {
+                        $endpointUrl = $urls[0]['url'];
                         if ('TMS' === $actualType) {
                             $endpointUrl .= '/1.0.0';
                             // la version 1.0.0 du TMS est aussi écrite en dur
@@ -500,22 +500,21 @@ class CartesMetadataApiService
     }
 
     /**
+     * @param array<mixed> $endpoints
+     *
      * @return list<CswOnlineResource>
      */
-    private function getCapabilitiesFiles(string $datastoreId, DatasheetServices $services): array
+    private function getCapabilitiesFiles(string $datastoreId, DatasheetServices $services, array $endpoints): array
     {
-        $datastore = $this->datastoreApiService->get($datastoreId);
-        $datastoreName = $datastore['technical_name'];
-
         $publishedConfigurations = array_filter($services->configurationsById, fn (array $configuration) => ConfigurationStatuses::PUBLISHED === $configuration['status']);
         $layerTypes = array_map(fn ($config) => $config['type'], $publishedConfigurations);
         $layerTypes = array_values(array_unique($layerTypes));
 
-        $annexeUrl = $this->parameterBag->get('annexes_url');
+        $annexeBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
 
         $capabilitiesFiles = [];
         foreach ($layerTypes as $type) {
-            $endpoint = $this->getEndpoint($datastoreId, $type);
+            $endpoint = $this->getOpenEndpointOfType($endpoints, $type);
             if (!$endpoint) {
                 continue;
             }
@@ -527,7 +526,7 @@ class CartesMetadataApiService
                 $capabilitiesFiles[] = CswOnlineResource::capabilities(
                     "GetCapabilities - $type",
                     $endpoint['name'],
-                    "$annexeUrl/$datastoreName/$technicalName/capabilities.xml",
+                    "$annexeBaseUrl/$technicalName/capabilities.xml",
                     self::CAPABILITIES_SERVICES[$type],
                     $this->serviceUrls($services, $type),
                 );
@@ -588,14 +587,13 @@ class CartesMetadataApiService
     }
 
     /**
+     * @param array<mixed> $endpoints
+     *
      * @return array<mixed>|null
      */
-    private function getEndpoint(string $datastoreId, string $type): ?array
+    private function getOpenEndpointOfType(array $endpoints, string $type): ?array
     {
-        $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
-            'type' => $type,
-            'open' => true,
-        ]);
+        $endpoints = DatastoreApiService::filterEndpoints($endpoints, ['type' => $type, 'open' => true]);
 
         return (1 === count($endpoints)) ? $endpoints[0]['endpoint'] : null;
     }

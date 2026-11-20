@@ -27,6 +27,8 @@ final class DatasheetServiceListRouteTest extends WebTestCase
 
     public function testReturnsTheServicesAndTheConfigurationsWithoutOfferingOfTheDatasheet(): void
     {
+        // membre : nom technique lu dans l’appartenance, sans lecture du datastore complet
+        EntrepotMockResponseFactory::makeUserMemberOfDatastore();
         $this->seedService('wfs', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1');
         $this->seedConfiguration('orphan', 'WMS-VECTOR', 'vector-db-1');
         // flux d’une autre fiche, et flux dont la configuration n’a pas le tag
@@ -40,6 +42,8 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         self::assertSame(['configuration-orphan'], array_column($list['configurations_without_offering'], '_id'));
         self::assertArrayNotHasKey('styles', $list['services'][0]['configuration']);
         self::assertSame('https://entrepot.test/annexes/entrepot_test/wfs-public/capabilities.xml', $list['services'][0]['share_url']);
+        self::assertSame(0, EntrepotMockResponseFactory::datastoreCalls());
+        self::assertSame(1, EntrepotMockResponseFactory::endpointsCalls());
     }
 
     public function testReducesThePyramidToItsTypeAndBuildsTheTmsUrlFromTheOffering(): void
