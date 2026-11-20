@@ -224,7 +224,7 @@ final class EntrepotMockResponseFactory
                 'email' => FakeKeycloakClient::DEFAULT_RESOURCE_OWNER['email'],
                 'creation' => '2026-01-01T00:00:00Z',
                 'last_login' => '2026-10-29T08:00:00Z',
-                'communities_member' => self::$usersMeMember ? [['rights' => [], 'community' => ['_id' => 'community-1', 'name' => 'Communauté de test', 'technical_name' => 'test', 'datastore' => self::DATASTORE_ID]]] : [],
+                'communities_member' => self::$usersMeMember ? [['rights' => [], 'community' => ['_id' => 'community-1', 'name' => 'Communauté de test', 'technical_name' => 'entrepot_test', 'datastore' => self::DATASTORE_ID]]] : [],
                 'documents_quota' => 10,
                 'documents_use' => 0,
                 'keys_quota' => 10,
@@ -258,7 +258,7 @@ final class EntrepotMockResponseFactory
     /**
      * @return list<array<string, mixed>>
      */
-    private static function endpoints(): array
+    private function endpoints(): array
     {
         return [
             ['endpoint' => ['_id' => self::METADATA_ENDPOINT_ID, 'type' => 'METADATA', 'open' => true, 'urls' => [['type' => 'CSW', 'url' => 'https://csw.test/csw']]]],
@@ -297,14 +297,14 @@ final class EntrepotMockResponseFactory
                 return $this->json(['error' => 'Forbidden', 'error_description' => 'Accès refusé'], 403);
             }
 
-            return $this->json([...self::$datastorePrefixes, '_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => self::$datastoreCommunityId], 'endpoints' => self::endpoints()]);
+            return $this->json([...self::$datastorePrefixes, '_id' => self::DATASTORE_ID, 'name' => 'Entrepôt test', 'technical_name' => 'entrepot_test', 'community' => ['_id' => self::$datastoreCommunityId], 'endpoints' => $this->endpoints()]);
         }
 
         if ('GET' === $method && 'endpoints' === $relative) {
             if (self::$datastoreForbidden) {
                 return $this->json(['error' => 'Forbidden', 'error_description' => 'Accès refusé'], 403);
             }
-            $endpoints = self::endpoints();
+            $endpoints = $this->endpoints();
 
             return $this->json($endpoints, 200, ['content-range' => sprintf('0-%d/%d', count($endpoints) - 1, count($endpoints))]);
         }

@@ -182,9 +182,7 @@ class CartesServiceApiService
             return null === $endpointUrl || null === $offeringUrl ? null : $this->capabilitiesService->getGetCapUrl($endpointUrl, $offeringUrl, $serviceType);
         }
 
-        $datastore = $this->datastoreApiService->get($datastoreId);
-
-        return implode('/', [$this->params->get('annexes_url'), $datastore['technical_name'], $endpoint['technical_name'], 'capabilities.xml']);
+        return implode('/', [$this->annexeApiService->getBaseUrl($datastoreId), $endpoint['technical_name'], 'capabilities.xml']);
     }
 
     /**

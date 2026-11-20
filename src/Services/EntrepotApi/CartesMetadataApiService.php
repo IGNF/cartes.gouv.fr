@@ -20,7 +20,6 @@ use App\Services\CswMetadataXmlWriter;
 use App\Services\DatasheetMetadataMapper;
 use App\Services\DatastorePrefixValidator;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
@@ -35,7 +34,6 @@ class CartesMetadataApiService
     private const THUMBNAIL_LABEL = 'type=thumbnail';
 
     public function __construct(
-        private readonly ParameterBagInterface $parameterBag,
         private readonly DatastoreApiService $datastoreApiService,
         private readonly AnnexeApiService $annexeApiService,
         private readonly MetadataApiService $metadataApiService,
@@ -509,14 +507,11 @@ class CartesMetadataApiService
      */
     private function getCapabilitiesFiles(string $datastoreId, DatasheetServices $services, array $endpoints): array
     {
-        $datastore = $this->datastoreApiService->get($datastoreId);
-        $datastoreName = $datastore['technical_name'];
-
         $publishedConfigurations = array_filter($services->configurationsById, fn (array $configuration) => ConfigurationStatuses::PUBLISHED === $configuration['status']);
         $layerTypes = array_map(fn ($config) => $config['type'], $publishedConfigurations);
         $layerTypes = array_values(array_unique($layerTypes));
 
-        $annexeUrl = $this->parameterBag->get('annexes_url');
+        $annexeBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
 
         $capabilitiesFiles = [];
         foreach ($layerTypes as $type) {
@@ -532,7 +527,7 @@ class CartesMetadataApiService
                 $capabilitiesFiles[] = CswOnlineResource::capabilities(
                     "GetCapabilities - $type",
                     $endpoint['name'],
-                    "$annexeUrl/$datastoreName/$technicalName/capabilities.xml",
+                    "$annexeBaseUrl/$technicalName/capabilities.xml",
                     self::CAPABILITIES_SERVICES[$type],
                     $this->serviceUrls($services, $type),
                 );

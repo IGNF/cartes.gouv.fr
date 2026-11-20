@@ -74,7 +74,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, #[MapRequestPayload] PyramidRasterGenerateDTO $dto): JsonResponse
     {
-        $datastore = $this->datastoreApiService->get($datastoreId);
+        $annexeBaseUrl = $this->annexeApiService->getBaseUrl($datastoreId);
         $processingId = $this->sandboxService->getProcGeneratePyramidRaster($datastoreId);
 
         $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $dto->wmsv_offering_id)->array();
@@ -158,7 +158,7 @@ final class PyramidRasterController extends AbstractController implements ApiCon
             ], fn ($value) => null !== $value);
 
             $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME] ?? null);
-            $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
+            $legendAnnexeUrlAbs = $annexeBaseUrl.$legendAnnexe['paths'][0];
 
             $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
             $this->storedDataApiService->modify($datastoreId, $pyramidId, [

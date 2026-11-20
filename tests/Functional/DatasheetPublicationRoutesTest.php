@@ -36,6 +36,7 @@ final class DatasheetPublicationRoutesTest extends WebTestCase
         $client->xmlHttpRequest('DELETE', self::PUBLISH_URL);
         self::assertResponseStatusCodeSame(204);
         self::assertSame([], EntrepotMockResponseFactory::stored('metadata')[0]['endpoints']);
+        self::assertSame(0, EntrepotMockResponseFactory::datastoreCalls());
     }
 
     public function testPublishingAPublishedMetadataCallsNothingUpstream(): void
