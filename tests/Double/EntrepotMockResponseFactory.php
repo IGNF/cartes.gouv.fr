@@ -58,6 +58,7 @@ final class EntrepotMockResponseFactory
     private static string $usersMeId = self::USER_ID;
     private static bool $usersMeMember = false;
     private static int $datastoreCalls = 0;
+    private static int $endpointsCalls = 0;
     private static bool $datastoreForbidden = false;
 
     /**
@@ -90,6 +91,7 @@ final class EntrepotMockResponseFactory
         self::$usersMeId = self::USER_ID;
         self::$usersMeMember = false;
         self::$datastoreCalls = 0;
+        self::$endpointsCalls = 0;
         self::$datastoreForbidden = false;
     }
 
@@ -107,6 +109,11 @@ final class EntrepotMockResponseFactory
     public static function datastoreCalls(): int
     {
         return self::$datastoreCalls;
+    }
+
+    public static function endpointsCalls(): int
+    {
+        return self::$endpointsCalls;
     }
 
     // GET datastores/{id} et datastores/{id}/endpoints répondent 403 jusqu’au prochain reset()
@@ -267,7 +274,7 @@ final class EntrepotMockResponseFactory
             ['endpoint' => ['_id' => self::WMSV_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wmsv-public', 'type' => 'WMS-VECTOR', 'open' => true, 'urls' => [['type' => 'WMS', 'url' => 'https://wms.test/public']]]],
             ['endpoint' => ['_id' => self::WMSV_PRIVATE_ENDPOINT_ID, 'technical_name' => 'wmsv-private', 'type' => 'WMS-VECTOR', 'open' => false, 'urls' => [['type' => 'WMS', 'url' => 'https://wms.test/private']]]],
             ['endpoint' => ['_id' => self::WMSR_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wmsr-public', 'type' => 'WMS-RASTER', 'open' => true, 'urls' => [['type' => 'WMS', 'url' => 'https://wms-r.test/public']]]],
-            ['endpoint' => ['_id' => self::WMTS_PUBLIC_ENDPOINT_ID, 'technical_name' => 'wmts-public', 'type' => 'WMTS-TMS', 'open' => true, 'urls' => [['type' => 'WMTS', 'url' => 'https://wmts.test/public']]]],
+            ['endpoint' => ['_id' => self::WMTS_PUBLIC_ENDPOINT_ID, 'name' => 'WMTS public', 'technical_name' => 'wmts-public', 'type' => 'WMTS-TMS', 'open' => true, 'urls' => [['type' => 'WMTS', 'url' => 'https://wmts.test/public']]]],
             ['endpoint' => ['_id' => self::WMTS_PRIVATE_ENDPOINT_ID, 'technical_name' => 'wmts-private', 'type' => 'WMTS-TMS', 'open' => false, 'urls' => [['type' => 'TMS', 'url' => 'https://tms.test/private'], ['type' => 'WMTS', 'url' => 'https://wmts.test/private']]]],
         ];
     }
@@ -301,6 +308,7 @@ final class EntrepotMockResponseFactory
         }
 
         if ('GET' === $method && 'endpoints' === $relative) {
+            ++self::$endpointsCalls;
             if (self::$datastoreForbidden) {
                 return $this->json(['error' => 'Forbidden', 'error_description' => 'Accès refusé'], 403);
             }

@@ -43,6 +43,7 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         self::assertArrayNotHasKey('styles', $list['services'][0]['configuration']);
         self::assertSame('https://entrepot.test/annexes/entrepot_test/wfs-public/capabilities.xml', $list['services'][0]['share_url']);
         self::assertSame(0, EntrepotMockResponseFactory::datastoreCalls());
+        self::assertSame(1, EntrepotMockResponseFactory::endpointsCalls());
     }
 
     public function testReducesThePyramidToItsTypeAndBuildsTheTmsUrlFromTheOffering(): void
