@@ -55,5 +55,7 @@ declare module "@tanstack/react-router" {
         public?: boolean;
         /** titre de la page vue Matomo, obligatoire sur chaque feuille */
         matomoLabel?: string;
+        /** espace du badge d’en-tête et du préfixe Matomo, hérité par les routes enfants */
+        space?: "publish" | "contribute";
     }
 }

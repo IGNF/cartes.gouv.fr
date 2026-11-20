@@ -84,7 +84,7 @@ export default function Dashboard() {
                 {isApiEspaceCoDefined() && (
                     <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                         <Tile
-                            linkProps={{ to: "/espace-collaboratif" }}
+                            linkProps={{ to: "/contribuer-aux-donnees/guichets" }}
                             imageUrl={contributorSvgUrl}
                             title="Mes guichets"
                             desc="Consulter les guichets et y participer"

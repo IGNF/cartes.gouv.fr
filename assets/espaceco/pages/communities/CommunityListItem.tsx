@@ -1,107 +1,78 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { FC, useMemo } from "react";
+import Badge from "@codegouvfr/react-dsfr/Badge";
+import { ButtonProps } from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Card from "@codegouvfr/react-dsfr/Card";
+import { FC } from "react";
 
 import { CommunityResponseDTO } from "../../../@types/espaceco";
+import { espaceCoSiteUrl } from "@/env";
 import useUserMe from "../../hooks/useUserMe";
-import { useToggle } from "@mantine/hooks";
 import { useTranslation } from "../../../i18n/i18n";
-import placeholder1x1 from "../../../img/placeholder.1x1.png";
 import SymfonyRouting from "../../../modules/Routing";
 
-import "../../../sass/pages/espaceco/community.scss";
+import placeholder1x1 from "../../../img/placeholder.1x1.png";
+
+const DESCRIPTION_MAX_LENGTH = 150;
 
 type CommunityListItemProps = {
-    className?: string;
     community: CommunityResponseDTO;
 };
 
-const CommunityListItem: FC<CommunityListItemProps> = ({ className, community }) => {
+const CommunityListItem: FC<CommunityListItemProps> = ({ community }) => {
     const { t } = useTranslation("EspaceCoCommunityList");
     const { t: tCommon } = useTranslation("Common");
     const { data: me } = useUserMe();
 
-    const [showDescription, toggleShowDescription] = useToggle();
-    const modifyButtonProps = useMemo(() => {
-        return community.active
-            ? { link: { to: "/espace-collaboratif/$communityId/gerer-le-guichet", params: { communityId: community.id } } as const, title: tCommon("modify") }
-            : {
-                  link: { to: "/espace-collaboratif/$communityId/creer-un-guichet", params: { communityId: community.id } } as const,
-                  title: t("append_community"),
-              };
-    }, [community, t, tCommon]);
+    const role = me?.communities_member.find((m) => m.community_id === community.id)?.role;
+    const canOpen = community.active && (role === "member" || role === "admin");
 
-    const communityRole = useMemo(() => {
-        return me?.communities_member.find((m) => m.community_id === community.id)?.role;
-    }, [me, community.id]);
+    // DOMParser n’exécute ni script ni chargement : texte brut sans injection de HTML
+    const description = new DOMParser().parseFromString(community.description ?? "", "text/html").body.textContent?.trim();
 
-    const isMember = useMemo(() => {
-        return communityRole === "member" || communityRole === "admin";
-    }, [communityRole]);
+    // lien de gestion du groupe sur l’espace collaboratif, réservé aux gestionnaires
+    const groupUrl = role === "admin" && espaceCoSiteUrl ? `${espaceCoSiteUrl}/group/${community.id}` : null;
+    const groupLabel = community.active ? tCommon("modify") : t("append_community");
 
-    const isAdmin = useMemo(() => {
-        return communityRole === "admin";
-    }, [communityRole]);
+    // rôle inconnu : pas de libellé, donc pas de badge vide
+    const roleLabel = role && t("role", { role });
 
-    const guichetButtonProps = useMemo(() => {
-        if (!community.active || !isMember) {
-            return null;
-        }
-        return {
-            link: {
-                href: `${SymfonyRouting.getBaseUrl()}/guichet-collaboratif/${community.id}`,
-            },
-            title: t("open_community"),
-        };
-    }, [community.active, community.id, isMember, t]);
+    const buttons: (ButtonProps | false)[] = [
+        canOpen && {
+            children: t("open_community"),
+            priority: "secondary",
+            linkProps: { href: `${SymfonyRouting.getBaseUrl()}/guichet-collaboratif/${community.id}` },
+        },
+        groupUrl !== null && {
+            children: groupLabel,
+            priority: "secondary",
+            linkProps: { href: groupUrl, target: "_blank", rel: "noreferrer", title: `${groupLabel} - ${tCommon("new_window")}` },
+        },
+    ];
+    const [firstButton, ...otherButtons] = buttons.filter((button) => button !== false);
 
     return (
-        <>
-            <div className={cx(fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-my-2v", "fr-my-2v", "fr-p-2v"), className ?? "")}>
-                <div className={fr.cx("fr-col-7")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--left")}>
-                        <Button
-                            iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
-                            size="small"
-                            title={t("show_details")}
-                            className={fr.cx("fr-mr-2v")}
-                            priority="secondary"
-                            onClick={() => toggleShowDescription()}
-                        />
-                        <img
-                            src={community.logo_url ? community.logo_url : placeholder1x1}
-                            width={"48px"}
-                            height={"48px"}
-                            onError={({ currentTarget }) => {
-                                currentTarget.onerror = null; // prevents looping
-                                currentTarget.src = placeholder1x1;
-                            }}
-                            alt={`Logo de la communauté ${community.name}`}
-                        />
-                        <span className={fr.cx("fr-ml-2v")}>{community.name}</span>
-                    </div>
-                </div>
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-col-5", "fr-px-2v")}>
-                    {guichetButtonProps && (
-                        <Button priority="secondary" size="small" linkProps={guichetButtonProps.link} className={fr.cx("fr-mr-1v")}>
-                            {guichetButtonProps.title}
-                        </Button>
-                    )}
-                    {isAdmin && (
-                        <Button priority="secondary" size="small" linkProps={modifyButtonProps.link}>
-                            {modifyButtonProps.title}
-                        </Button>
-                    )}
-                </div>
-            </div>
-
-            {showDescription && (
-                <div style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}>
-                    {community.description ? <p dangerouslySetInnerHTML={{ __html: community.description }} /> : t("no_description")}
-                </div>
-            )}
-        </>
+        <Card
+            imageUrl={community.logo_url || placeholder1x1}
+            imageAlt=""
+            nativeImgProps={{
+                onError: ({ currentTarget }) => {
+                    currentTarget.onerror = null; // évite une boucle si l’image de repli échoue aussi
+                    currentTarget.src = placeholder1x1;
+                },
+            }}
+            horizontal={true}
+            size="small"
+            title={community.name}
+            desc={description && (description.length > DESCRIPTION_MAX_LENGTH ? `${description.slice(0, DESCRIPTION_MAX_LENGTH)}…` : description)}
+            start={
+                roleLabel && (
+                    <Badge as="span" noIcon={true} small={true}>
+                        {roleLabel}
+                    </Badge>
+                )
+            }
+            footer={firstButton && <ButtonsGroup buttons={[firstButton, ...otherButtons]} inlineLayoutWhen="md and up" buttonsSize="small" />}
+        />
     );
 };
 

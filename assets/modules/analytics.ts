@@ -2,7 +2,7 @@ import { startEulerianAnalytics } from "@codegouvfr/react-dsfr/eulerianAnalytics
 import { type AnyRouter } from "@tanstack/react-router";
 
 import { appEnv } from "@/env";
-import type { RouteId } from "@/router";
+import { type MatchWithStaticData, routeSpace } from "@/router/routeSpace";
 
 declare global {
     interface Window {
@@ -62,13 +62,9 @@ function matomoInit() {
     s.parentNode?.insertBefore(g, s);
 }
 
-type MatchForTitle = { routeId: string; staticData: { matomoLabel?: string } };
-
-const ESPACECO_LAYOUT: RouteId = "/_private/espace-collaboratif";
-
 /** titre de la page vue : préfixe par espace, libellé de la feuille matchée (sans feuille, page introuvable) */
-export function matomoPageTitle(matches: MatchForTitle[]): string {
-    const prefix = matches.some((match) => match.routeId === ESPACECO_LAYOUT) ? "[Contribuer]" : "[Publier]";
+export function matomoPageTitle(matches: MatchWithStaticData[]): string {
+    const prefix = routeSpace(matches) === "contribute" ? "[Contribuer]" : "[Publier]";
     const label = matches.at(-1)?.staticData.matomoLabel ?? "Page introuvable";
 
     return `${prefix} ${label}`;

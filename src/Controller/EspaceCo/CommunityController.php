@@ -94,6 +94,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         });
 
         $this->_sortMembersByName($members);
+        $totalPages = max(1, (int) ceil(count($members) / $limit));
         $members = array_slice(array_values($members), ($page - 1) * $limit, $limit);
 
         $communities = [];
@@ -102,7 +103,6 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $communities[] = $community;
         }
 
-        $totalPages = floor(count($members) / $limit) + 1;
         $previousPage = 1 === $page ? null : $page - 1;
         $nextPage = $page + 1 > $totalPages ? null : $page + 1;
 
@@ -303,7 +303,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         $communityName = $community['name'];
         $subject = "[cartes.gouv.fr] Invitation au guichet $communityName";
 
-        $url = $this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL)."espace-collaboratif/$communityId/invitation";
+        $url = $this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL)."contribuer-aux-donnees/guichets/$communityId/invitation";
         $this->mailerService->sendMail($email, $subject, 'Mailer/espaceco/member_invitation.html.twig', ['community' => $community, 'link' => $url]);
     }
 

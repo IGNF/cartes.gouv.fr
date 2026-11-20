@@ -13,7 +13,7 @@ import { FC, useState } from "react";
 import { useStyles } from "tss-react/mui";
 
 import { DatastorePermission } from "@/@types/app";
-import DatastoreMain from "@/components/Layout/DatastoreMain";
+import SidePanelPage from "@/components/Layout/SidePanelPage";
 import { ListHeader } from "@/components/Layout/ListHeader";
 import Skeleton from "@/components/Utils/Skeleton";
 import useMembership from "@/hooks/useMembership";
@@ -80,7 +80,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     const { css } = useStyles();
 
     return (
-        <DatastoreMain
+        <SidePanelPage
             title={t("title", { datastoreName: tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox }) })}
         >
             {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={getApiErrorMessage(removeError)} />}
@@ -268,7 +268,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                     }
                 }}
             />
-        </DatastoreMain>
+        </SidePanelPage>
     );
 };
 

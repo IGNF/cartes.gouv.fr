@@ -1,4 +1,4 @@
-import DatastoreMain from "@/components/Layout/DatastoreMain";
+import SidePanelPage from "@/components/Layout/SidePanelPage";
 import { fr } from "@codegouvfr/react-dsfr";
 import { getRouteApi } from "@tanstack/react-router";
 import Card from "@codegouvfr/react-dsfr/Card";
@@ -25,7 +25,7 @@ export default function DatastoreSelection() {
     const { paginatedItems, totalPages } = usePagination(datastoreList, page, limit);
 
     return (
-        <DatastoreMain title="Entrepôts">
+        <SidePanelPage title="Entrepôts">
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 <div className={fr.cx("fr-col-12", "fr-col-sm-4")}>
                     <SearchBar />
@@ -85,6 +85,6 @@ export default function DatastoreSelection() {
                     />
                 </div>
             )}
-        </DatastoreMain>
+        </SidePanelPage>
     );
 }
