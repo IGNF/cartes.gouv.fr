@@ -8,6 +8,7 @@ const { i18n } = declareComponentKeys<
     | "title"
     | "panel_title"
     | "panel_description"
+    | "beta_badge"
     | "filters"
     | "open_community"
     | "all_public_communities"
@@ -23,6 +24,7 @@ export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCo
     title: "Liste des guichets",
     panel_title: "Mes guichets",
     panel_description: "Consulter les guichets et y participer",
+    beta_badge: "Service bêta",
     filters: "Filtres",
     open_community: "Ouvrir",
     all_public_communities: "Tous les guichets publics",
@@ -50,6 +52,7 @@ export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCo
     title: "List of communities",
     panel_title: "My communities",
     panel_description: "Browse communities and take part in them",
+    beta_badge: "Beta service",
     filters: "Filters",
     open_community: "Access",
     all_public_communities: undefined,
