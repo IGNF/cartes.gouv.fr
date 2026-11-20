@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
-import { type DatasheetServiceList, OfferingTypeEnum, type ServiceListItem, StoredDataTypeEnum } from "@/@types/app";
+import { type DatasheetServiceList, OfferingTypeEnum, type ServiceListItem } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
@@ -32,8 +32,10 @@ import {
     getExploreMapsLayerParam,
     getNextExploreMapsPendingEnd,
     getServiceThumbnailUrl,
+    getServiceType,
     getServiceTypeLabel,
     isOfferingUnavailable,
+    type ServiceType,
 } from "@/utils";
 import DatasheetViewTab from "../../DatasheetViewTab";
 import ConfigurationsWithoutOfferingList from "./ConfigurationsWithoutOfferingList";
@@ -53,7 +55,7 @@ const deleteServiceConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
-type ServiceTypeFilter = "all" | "wfs" | "wms" | "tms" | "wmts";
+type ServiceTypeFilter = "all" | ServiceType;
 
 const FILTERS = [
     { value: "all", label: undefined },
@@ -62,22 +64,6 @@ const FILTERS = [
     { value: "tms", label: "TMS" },
     { value: "wmts", label: "WMTS" },
 ] as const satisfies { value: ServiceTypeFilter; label: string | undefined }[];
-
-// un WMTS-TMS dont le type de pyramide est inconnu apparaît sous WMTS et TMS
-function matchesTypeFilter(service: ServiceListItem, filter: ServiceTypeFilter): boolean {
-    switch (filter) {
-        case "all":
-            return true;
-        case "wfs":
-            return service.type === OfferingTypeEnum.WFS;
-        case "wms":
-            return service.type === OfferingTypeEnum.WMSVECTOR || service.type === OfferingTypeEnum.WMSRASTER;
-        case "wmts":
-            return service.type === OfferingTypeEnum.WMTSTMS && service.configuration.pyramid?.type !== StoredDataTypeEnum.ROK4PYRAMIDVECTOR;
-        case "tms":
-            return service.type === OfferingTypeEnum.WMTSTMS && service.configuration.pyramid?.type !== StoredDataTypeEnum.ROK4PYRAMIDRASTER;
-    }
-}
 
 type ServicesListTabNextProps = {
     datastoreId: string;
@@ -108,7 +94,10 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         [serviceListQuery.data]
     );
 
-    const filteredServices = useMemo(() => sortedServices.filter((service) => matchesTypeFilter(service, typeFilter)), [sortedServices, typeFilter]);
+    const filteredServices = useMemo(
+        () => sortedServices.filter((service) => typeFilter === "all" || getServiceType(service) === typeFilter),
+        [sortedServices, typeFilter]
+    );
 
     const { paginatedItems: pageServices, totalPages: pageCount, page: currentPage } = usePagination(filteredServices, page, LIMIT);
 

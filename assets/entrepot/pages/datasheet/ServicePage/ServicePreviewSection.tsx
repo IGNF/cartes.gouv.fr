@@ -3,13 +3,14 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import type Layer from "ol/layer/Layer";
 import { useEffect, useState } from "react";
 
-import { OfferingTypeEnum, type Service, StoredDataTypeEnum } from "@/@types/app";
+import { type Service } from "@/@types/app";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import RMap from "@/components/Utils/RMap";
 import StylesList from "@/entrepot/pages/service/view/Style/StylesList";
 import useCommunityRights from "@/hooks/useCommunityRights";
 import { useTranslation } from "@/i18n";
 import getWebService from "@/modules/WebServices/WebServices";
+import { getServiceType } from "@/utils";
 
 type ServicePreviewSectionProps = {
     datastoreId: string;
@@ -23,8 +24,7 @@ export default function ServicePreviewSection({ datastoreId, datasheetName, serv
     // l’ajout d’un style dépose ses fichiers en annexes
     const canManageStyles =
         (isSupervisor || (!!userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST) && !!userRights.includes(CommunityMemberDtoRightsEnum.ANNEX))) &&
-        (service.type === OfferingTypeEnum.WFS ||
-            (service.type === OfferingTypeEnum.WMTSTMS && service.configuration.pyramid?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR));
+        ["wfs", "tms"].includes(getServiceType(service) ?? "");
 
     const typeInfos = service.configuration.type_infos;
     const bbox = "bbox" in typeInfos ? typeInfos.bbox : undefined;

@@ -39,6 +39,7 @@ import {
     getExploreMapsLayerParam,
     getNextExploreMapsPendingEnd,
     getServiceThumbnailUrl,
+    getServiceType,
     getServiceTypeLabel,
     isOfferingUnavailable,
 } from "@/utils";
@@ -171,8 +172,9 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
     const { configuration } = service;
     const isWfs = service.type === OfferingTypeEnum.WFS;
     const isWmsVector = service.type === OfferingTypeEnum.WMSVECTOR;
-    // type du formulaire : WFS et WMS vecteur ont des tables, les pyramides une description du flux
-    const formType = isWfs ? "wfs" : isWmsVector ? "wms" : "wmts";
+    // offre hors formulaire (téléchargement...) : lecture seule, le type ne sert pas
+    const formType = getServiceType(service) ?? "wmts";
+    const rasterPyramid = service.type === OfferingTypeEnum.WMSRASTER;
     const pyramid = service.type === OfferingTypeEnum.WMTSTMS;
     const storedDataId = configuration.type_infos.used_data[0]?.stored_data;
     const storedDataName = [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_vector_list ?? []), ...(datasheet?.pyramid_raster_list ?? [])].find(
@@ -207,10 +209,11 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
             buildServiceEditFormSchema({
                 t: tForm,
                 type: formType,
+                rasterPyramid,
                 availableAccesses: availableServiceAccesses(endpointsQuery.data, configuration.type),
                 savedTablePublicNames,
             }),
-        [tForm, formType, endpointsQuery.data, configuration.type, savedTablePublicNames]
+        [tForm, formType, rasterPyramid, endpointsQuery.data, configuration.type, savedTablePublicNames]
     );
     const form = useForm<ServiceEditFormValues, unknown, ServiceEditFormOutput>(
         editable ? { resolver: zodResolver(schema), mode: "onSubmit", reValidateMode: "onBlur", defaultValues: values } : { values, disabled: true }
@@ -218,8 +221,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
 
     const serviceKey = RQKeys.datastore_service(datastoreId, service._id);
     const editMutation = useMutation<Service, ApiError, ServiceEditFormOutput>({
-        mutationFn: (formValues) =>
-            api.service.edit(datastoreId, service._id, buildServiceEditFormData(formType, formValues, service.type === OfferingTypeEnum.WMSRASTER)),
+        mutationFn: (formValues) => api.service.edit(datastoreId, service._id, buildServiceEditFormData(formType, formValues, rasterPyramid)),
         onSuccess: async (offering, formValues) => {
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });

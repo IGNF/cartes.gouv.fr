@@ -7,6 +7,7 @@ import {
     getExploreMapsLayerParam,
     getLayerBaseName,
     getNextExploreMapsPendingEnd,
+    getServiceType,
     hasWmtsSibling,
 } from "./offering";
 
@@ -37,6 +38,17 @@ describe("getLayerBaseName", () => {
         expect(getLayerBaseName("couche_WMTS")).toBe("couche_WMTS");
         expect(getLayerBaseName("couche")).toBe("couche");
         expect(getLayerBaseName("couche_wms_v2")).toBe("couche_wms_v2");
+    });
+});
+
+describe("getServiceType", () => {
+    it("donne le type de flux du formulaire, WMTS ou TMS selon la pyramide", () => {
+        expect(getServiceType(service({ type: OfferingTypeEnum.WFS }))).toBe("wfs");
+        expect(getServiceType(service({ type: OfferingTypeEnum.WMSVECTOR }))).toBe("wms");
+        expect(getServiceType(service({ type: OfferingTypeEnum.WMSRASTER }))).toBe("wms");
+        expect(getServiceType(service({ type: OfferingTypeEnum.WMTSTMS, pyramidType: StoredDataTypeEnum.ROK4PYRAMIDVECTOR }))).toBe("tms");
+        expect(getServiceType(service({ type: OfferingTypeEnum.WMTSTMS, pyramidType: StoredDataTypeEnum.ROK4PYRAMIDRASTER }))).toBe("wmts");
+        expect(getServiceType(service({ type: OfferingTypeEnum.DOWNLOAD }))).toBeUndefined();
     });
 });
 
