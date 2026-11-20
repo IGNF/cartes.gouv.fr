@@ -417,11 +417,10 @@ class CartesMetadataApiService
                         break;
                     }
 
-                    $endpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']);
-                    $endpoints = array_values($endpoints);
+                    $urls = array_values(array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']));
 
-                    if (count($endpoints) > 0) {
-                        $endpointUrl = $endpoints[0]['url'];
+                    if (count($urls) > 0) {
+                        $endpointUrl = $urls[0]['url'];
                         if ('TMS' === $actualType) {
                             $endpointUrl .= '/1.0.0';
                             // la version 1.0.0 du TMS est aussi écrite en dur

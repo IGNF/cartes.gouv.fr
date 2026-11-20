@@ -213,6 +213,26 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
         self::assertSame([], $this->requestsTo('metadata/publication', 'DELETE'));
     }
 
+    // une seule lecture des points d’accès pour toute la boucle : un WMTS lu avant un autre flux ne doit pas la remplacer
+    public function testRefreshWritesALayerForAServiceAfterAWmts(): void
+    {
+        $this->seedExistingMetadata();
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'pyramid-raster-1', 'type' => 'ROK4-PYRAMID-RASTER']);
+        $configurations = [
+            'configuration-wmts' => ['_id' => 'configuration-wmts', 'type' => 'WMTS-TMS', 'status' => 'PUBLISHED', 'type_infos' => ['used_data' => [['stored_data' => 'pyramid-raster-1']]]],
+            'configuration-wmsr' => ['_id' => 'configuration-wmsr', 'type' => 'WMS-RASTER', 'status' => 'PUBLISHED', 'type_infos' => ['used_data' => [['stored_data' => 'pyramid-raster-1']]]],
+        ];
+        $offerings = [
+            'offering-wmts' => ['_id' => 'offering-wmts', 'layer_name' => 'couche_wmts', 'open' => true, 'configuration' => ['_id' => 'configuration-wmts'], 'endpoint' => ['_id' => EntrepotMockResponseFactory::WMTS_PUBLIC_ENDPOINT_ID]],
+            'offering-wmsr' => ['_id' => 'offering-wmsr', 'layer_name' => 'couche_wmsr', 'open' => true, 'configuration' => ['_id' => 'configuration-wmsr'], 'endpoint' => ['_id' => EntrepotMockResponseFactory::WMSR_PUBLIC_ENDPOINT_ID]],
+        ];
+
+        $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', new DatasheetServices($configurations, $offerings));
+
+        $layers = $this->readWritten('metadata-1')->resourcesOfType(CswOnlineResourceType::Layer);
+        self::assertSame(['couche_wmts', 'couche_wmsr'], array_map(fn (CswOnlineResource $layer) => $layer->name, $layers));
+    }
+
     public function testRefreshWithoutMetadataWritesNothing(): void
     {
         $this->service->refreshOnlineResources(self::DATASTORE_ID, 'Fiche', $this->noServices()());
