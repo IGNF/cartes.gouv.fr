@@ -234,6 +234,28 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         self::assertSame(1, EntrepotMockResponseFactory::endpointsCalls());
     }
 
+    public function testCapabilitiesAreRebuiltForTheServicesAlreadyRemovedWhenAnUnpublicationFails(): void
+    {
+        EntrepotMockResponseFactory::answerGetCapabilities();
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vector-db-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
+        $wfsUrls = [['type' => 'WFS', 'url' => 'https://wfs.test/public?service=WFS&version=2.0.0']];
+        $this->seedService('wfs1', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1', urls: $wfsUrls, configurationStatus: 'UNPUBLISHED');
+        $this->seedService('wfs2', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1', urls: $wfsUrls, configurationStatus: 'UNPUBLISHED');
+        // premier DELETE de la seconde offre refusé (403 : pas de nouvelle tentative)
+        EntrepotMockResponseFactory::failNext('DELETE offerings/offering-wfs2', status: 403);
+
+        $client = $this->client();
+        $client->xmlHttpRequest('DELETE', self::BASE.self::DATASTORE_PATH.'/datasheet/Fiche');
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertSame(['offering-wfs2'], array_column(EntrepotMockResponseFactory::stored('offerings'), '_id'));
+        $capabilities = EntrepotMockResponseFactory::stored('annexes');
+        self::assertCount(1, $capabilities);
+        $xml = (string) EntrepotMockResponseFactory::annexeFile($capabilities[0]['_id']);
+        self::assertStringNotContainsString('wfs1:table', $xml);
+        self::assertStringContainsString('wfs2:table', $xml);
+    }
+
     public function testDeletingTheDatasheetRemovesItsConfigurationsWithoutOfferingBeforeTheStoredData(): void
     {
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vector-db-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);

@@ -46,6 +46,7 @@ final class EntrepotMockResponseFactory
     /** @var list<array{string, int, int}> requêtes « MÉTHODE chemin » qui échouent avec le statut indiqué, après le nombre de passages réussis indiqué */
     private static array $failures = [];
     private static bool $getCapabilitiesAnswered = false;
+    private static bool $sandboxCommunityDown = false;
 
     private static int $nextId = 1;
 
@@ -86,6 +87,7 @@ final class EntrepotMockResponseFactory
         self::$concurrentAnnexes = [];
         self::$failures = [];
         self::$getCapabilitiesAnswered = false;
+        self::$sandboxCommunityDown = false;
         self::$nextId = 1;
         self::$datastorePrefixes = [];
         self::$usersMeCalls = 0;
@@ -172,6 +174,12 @@ final class EntrepotMockResponseFactory
         self::$getCapabilitiesAnswered = true;
     }
 
+    // GET communities/sandbox-community répond 503 jusqu’au prochain reset()
+    public static function takeSandboxCommunityDown(): void
+    {
+        self::$sandboxCommunityDown = true;
+    }
+
     // la prochaine requête « MÉTHODE chemin relatif au datastore » échoue avec $status (ex. « POST metadata »), après $passes passages réussis
     public static function failNext(string $request, int $passes = 0, int $status = 500): void
     {
@@ -255,6 +263,10 @@ final class EntrepotMockResponseFactory
 
         // communauté du bac à sable : son datastore n’est pas celui des tests
         if (self::ENTREPOT_HOST === $host && 'GET' === $method && str_ends_with($path, '/communities/sandbox-community')) {
+            if (self::$sandboxCommunityDown) {
+                return $this->json(['error' => 'Service Unavailable'], 503);
+            }
+
             return $this->json(['_id' => 'sandbox-community', 'datastore' => ['_id' => 'sandbox-datastore']]);
         }
 

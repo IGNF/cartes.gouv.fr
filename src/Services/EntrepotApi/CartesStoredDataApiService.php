@@ -25,11 +25,7 @@ class CartesStoredDataApiService
         $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
 
         // Suppression des offerings et configurations associées
-        $offerings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId, ['stored_data' => $storedDataId])->resolve();
-        foreach ($offerings as $offering) {
-            $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id'], $offering);
-        }
-        $this->cartesServiceApiService->updateCapabilities($datastoreId, $offerings);
+        $this->cartesServiceApiService->unpublishAll($datastoreId, $this->configurationApiService->getAllOfferingsDetailed($datastoreId, ['stored_data' => $storedDataId])->resolve());
 
         // configurations restées sans offre : l’Entrepôt refuserait la suppression d’une donnée encore utilisée
         foreach ($this->configurationApiService->getAll($datastoreId, ['stored_data' => $storedDataId])->resolve() as $configuration) {

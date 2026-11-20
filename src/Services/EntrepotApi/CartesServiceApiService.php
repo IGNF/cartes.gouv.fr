@@ -28,6 +28,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
@@ -200,7 +201,10 @@ class CartesServiceApiService
     {
         try {
             $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $this->getDatasheetServices($datastoreId, $datasheetName));
-        } catch (AppException $e) {
+        } catch (\Exception $e) {
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
             $this->logger->warning('{class}: Failed to refresh online resources of datasheet {datasheetName}: {error}', [
                 'class' => self::class,
                 'datasheetName' => $datasheetName,
@@ -211,7 +215,7 @@ class CartesServiceApiService
     }
 
     /**
-     * Renvoie la configuration supprimée (dernier état lu avant suppression). Capabilities à mettre à jour ensuite par l’appelant (updateCapabilities), une fois pour toutes ses dépublications.
+     * Renvoie la configuration supprimée (dernier état lu avant suppression). Capabilities à mettre à jour ensuite par l’appelant (updateCapabilities), une fois pour toutes ses dépublications, ou par unpublishAll.
      *
      * @param array<mixed>|null $offering offering déjà chargée par l'appelant (avec `type` et `configuration`), évite un GET
      *
@@ -228,6 +232,25 @@ class CartesServiceApiService
     }
 
     /**
+     * Dépublie ces offres puis met à jour les capabilities une fois, même si une dépublication échoue en cours de route.
+     *
+     * @param array<array<mixed>> $offerings offres détaillées (avec `type`, `status`, `configuration`, `open`, `endpoint`, `urls`)
+     */
+    public function unpublishAll(string $datastoreId, array $offerings): void
+    {
+        $attempted = [];
+        try {
+            foreach ($offerings as $offering) {
+                $attempted[] = $offering;
+                $this->unpublish($datastoreId, $offering['_id'], $offering);
+            }
+        } finally {
+            // une offre en échec peut être déjà supprimée : les capabilities sont rebâties depuis les offres restantes de l’endpoint
+            $this->updateCapabilities($datastoreId, $attempted);
+        }
+    }
+
+    /**
      * Capabilities filtrées des endpoints ouverts de ces offres dépubliées, une seule fois par endpoint ; un échec est journalisé.
      *
      * @param array<array<mixed>> $offerings offres avec `open`, `endpoint` et `urls`
@@ -240,13 +263,19 @@ class CartesServiceApiService
                 $offeringsByEndpoint[$offering['endpoint']['_id']] ??= $offering;
             }
         }
-        if ([] === $offeringsByEndpoint || $this->sandboxService->isSandboxDatastore($datastoreId)) {
+        if ([] === $offeringsByEndpoint) {
             return;
         }
 
         try {
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                return;
+            }
             $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId);
-        } catch (ApiException $e) {
+        } catch (\Exception $e) {
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
             $this->logger->warning('{class}: Failed to read endpoints of datastore {datastoreId} to update capabilities: {error}', [
                 'class' => self::class,
                 'datastoreId' => $datastoreId,

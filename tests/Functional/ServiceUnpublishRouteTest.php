@@ -77,6 +77,18 @@ final class ServiceUnpublishRouteTest extends WebTestCase
         self::assertSame(['offering-2'], array_column(EntrepotMockResponseFactory::stored('offerings'), '_id'));
     }
 
+    public function testUnpublicationSucceedsWhenTheSandboxCommunityCannotBeRead(): void
+    {
+        EntrepotMockResponseFactory::seed('offerings', $this->offering('offering-1', 'retire', true));
+        EntrepotMockResponseFactory::takeSandboxCommunityDown();
+        $client = $this->client();
+
+        $client->xmlHttpRequest('DELETE', self::UNPUBLISH_URL);
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame(['offering-2'], array_column(EntrepotMockResponseFactory::stored('offerings'), '_id'));
+    }
+
     /**
      * @return array<string, mixed>
      */
