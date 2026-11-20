@@ -6,12 +6,11 @@ import Notice from "@codegouvfr/react-dsfr/Notice";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { type UseQueryResult } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
-import { type DatasheetServiceList, OfferingTypeEnum, type ServiceListItem, StoredDataTypeEnum } from "@/@types/app";
-import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import { type DatasheetServiceList, OfferingTypeEnum, type ServiceListItem } from "@/@types/app";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
 import LoadingText from "@/components/Utils/LoadingText";
@@ -19,8 +18,9 @@ import MenuList from "@/components/Utils/MenuList";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import Wait from "@/components/Utils/Wait";
 import useUnpublishServiceMutation from "@/hooks/queries/useUnpublishServiceMutation";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useExploreMapsClock from "@/hooks/useExploreMapsClock";
 import { usePagination } from "@/hooks/usePagination";
+import useServiceRights from "@/hooks/useServiceRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
 import { type ApiError } from "@/modules/jsonFetch";
@@ -30,10 +30,11 @@ import {
     formatDateFromISO,
     getExploreMapsAvailability,
     getExploreMapsLayerParam,
-    getNextExploreMapsPendingEnd,
     getServiceThumbnailUrl,
+    getServiceType,
     getServiceTypeLabel,
     isOfferingUnavailable,
+    type ServiceType,
 } from "@/utils";
 import DatasheetViewTab from "../../DatasheetViewTab";
 import ConfigurationsWithoutOfferingList from "./ConfigurationsWithoutOfferingList";
@@ -53,7 +54,7 @@ const deleteServiceConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
-type ServiceTypeFilter = "all" | "wfs" | "wms" | "tms" | "wmts";
+type ServiceTypeFilter = "all" | ServiceType;
 
 const FILTERS = [
     { value: "all", label: undefined },
@@ -62,22 +63,6 @@ const FILTERS = [
     { value: "tms", label: "TMS" },
     { value: "wmts", label: "WMTS" },
 ] as const satisfies { value: ServiceTypeFilter; label: string | undefined }[];
-
-// un WMTS-TMS dont le type de pyramide est inconnu apparaît sous WMTS et TMS
-function matchesTypeFilter(service: ServiceListItem, filter: ServiceTypeFilter): boolean {
-    switch (filter) {
-        case "all":
-            return true;
-        case "wfs":
-            return service.type === OfferingTypeEnum.WFS;
-        case "wms":
-            return service.type === OfferingTypeEnum.WMSVECTOR || service.type === OfferingTypeEnum.WMSRASTER;
-        case "wmts":
-            return service.type === OfferingTypeEnum.WMTSTMS && service.configuration.pyramid?.type !== StoredDataTypeEnum.ROK4PYRAMIDVECTOR;
-        case "tms":
-            return service.type === OfferingTypeEnum.WMTSTMS && service.configuration.pyramid?.type !== StoredDataTypeEnum.ROK4PYRAMIDRASTER;
-    }
-}
 
 type ServicesListTabNextProps = {
     datastoreId: string;
@@ -92,13 +77,8 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
     const [page, setPage] = useState(1);
     const [targetService, setTargetService] = useState<ServiceListItem>();
 
-    const { userRights, isSupervisor } = useCommunityRights();
-    const canBroadcast = isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
-    // la page « Créer un flux » dépose vignette et logo en annexes
-    const canCreate = canBroadcast && (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
-    // la génération dépose la légende du flux en annexe
-    const canGeneratePyramidRaster =
-        isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
+    const { canBroadcast, canEdit: canCreate, canGeneratePyramid } = useServiceRights();
+    const canGeneratePyramidRaster = canGeneratePyramid("raster");
 
     const deleteServiceMutation = useUnpublishServiceMutation(datastoreId, datasheetName);
 
@@ -108,7 +88,10 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         [serviceListQuery.data]
     );
 
-    const filteredServices = useMemo(() => sortedServices.filter((service) => matchesTypeFilter(service, typeFilter)), [sortedServices, typeFilter]);
+    const filteredServices = useMemo(
+        () => sortedServices.filter((service) => typeFilter === "all" || getServiceType(service) === typeFilter),
+        [sortedServices, typeFilter]
+    );
 
     const { paginatedItems: pageServices, totalPages: pageCount, page: currentPage } = usePagination(filteredServices, page, LIMIT);
 
@@ -128,19 +111,7 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
         TextCopyToClipboardModal.open();
     };
 
-    // instant de référence du délai « En cours » : dernière lecture de la liste, ou dernier réveil du minuteur ci-dessous
-    const [clockTick, setClockTick] = useState(0);
-    const now = Math.max(serviceListQuery.dataUpdatedAt, clockTick);
-
-    // réveil à la sortie du délai du prochain flux « En cours », pour ne pas attendre une relecture
-    useEffect(() => {
-        const nextPendingEnd = getNextExploreMapsPendingEnd(sortedServices, now);
-        if (nextPendingEnd === undefined) {
-            return;
-        }
-        const timer = window.setTimeout(() => setClockTick(Date.now()), nextPendingEnd - now + 1000);
-        return () => window.clearTimeout(timer);
-    }, [sortedServices, now]);
+    const now = useExploreMapsClock(sortedServices, serviceListQuery.dataUpdatedAt);
 
     // lignes mémorisées : références stables pour que memo(MenuList) évite de re-rendre les menus de chaque ligne
     const rows = useMemo(() => {

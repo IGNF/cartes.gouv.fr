@@ -7,13 +7,13 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { notFound, useBlocker, useNavigate } from "@tanstack/react-router";
-import { Fragment, type ReactNode, useEffect, useId, useMemo, useState } from "react";
+import { Fragment, type ReactNode, useEffect, useId, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import { tss } from "tss-react";
 
 import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "@/@types/app";
-import { CommunityMemberDtoRightsEnum, ConfigurationStatus } from "@/@types/entrepot";
+import { ConfigurationStatus } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import LoadingText from "@/components/Utils/LoadingText";
@@ -25,7 +25,8 @@ import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServi
 import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { serviceQueryOptions } from "@/hooks/queries/serviceQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useExploreMapsClock from "@/hooks/useExploreMapsClock";
+import useServiceRights from "@/hooks/useServiceRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage, isApiError } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -34,11 +35,12 @@ import { setApiFormErrors } from "@/modules/setApiFormErrors";
 import AppLink from "@/router/AppLink";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import {
+    editableOfferingTypes,
     formatDateFromISO,
     getExploreMapsAvailability,
     getExploreMapsLayerParam,
-    getNextExploreMapsPendingEnd,
     getServiceThumbnailUrl,
+    getServiceType,
     getServiceTypeLabel,
     isOfferingUnavailable,
 } from "@/utils";
@@ -61,7 +63,6 @@ import {
 import { serviceToFormValues } from "../ServiceForm/serviceToFormValues";
 import ServicePreviewSection from "./ServicePreviewSection";
 
-const PAGE_EDITABLE_TYPES = new Set<OfferingTypeEnum>([OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WMTSTMS]);
 // flux sur une base vecteur : tables à choisir
 const TABLE_TYPES = new Set<OfferingTypeEnum>([OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR]);
 
@@ -111,10 +112,8 @@ function ServicePageContent(props: ServicePageContentProps) {
     const storedDataId = configuration.type_infos.used_data[0]?.stored_data ?? "";
     const withTables = TABLE_TYPES.has(service.type);
 
-    const { userRights, isSupervisor } = useCommunityRights();
-    const hasRight = (right: CommunityMemberDtoRightsEnum) => isSupervisor || !!userRights?.includes(right);
-    // mêmes droits que la création : publication et dépôt des images en annexe
-    const canSave = PAGE_EDITABLE_TYPES.has(service.type) && hasRight(CommunityMemberDtoRightsEnum.BROADCAST) && hasRight(CommunityMemberDtoRightsEnum.ANNEX);
+    const { canEdit } = useServiceRights();
+    const canSave = editableOfferingTypes.includes(service.type) && canEdit;
     // même règle que le serveur : une offre en cours de publication peut le rester longtemps
     const published = service.status === OfferingStatusEnum.PUBLISHED && configuration.status === ConfigurationStatus.PUBLISHED;
 
@@ -171,23 +170,17 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
     const { configuration } = service;
     const isWfs = service.type === OfferingTypeEnum.WFS;
     const isWmsVector = service.type === OfferingTypeEnum.WMSVECTOR;
-    // type du formulaire : WFS et WMS vecteur ont des tables, les pyramides une description du flux
-    const formType = isWfs ? "wfs" : isWmsVector ? "wms" : "wmts";
+    // offre hors formulaire (téléchargement...) : lecture seule, le type ne sert pas
+    const formType = getServiceType(service) ?? "wmts";
+    const rasterPyramid = service.type === OfferingTypeEnum.WMSRASTER;
     const pyramid = service.type === OfferingTypeEnum.WMTSTMS;
     const storedDataId = configuration.type_infos.used_data[0]?.stored_data;
     const storedDataName = [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_vector_list ?? []), ...(datasheet?.pyramid_raster_list ?? [])].find(
         (storedData) => storedData._id === storedDataId
     )?.name;
 
-    // comme l’onglet Flux : réveil à la sortie du délai « En cours » d’Explorer les cartes
-    const [clockTick, setClockTick] = useState(0);
-    const now = Math.max(readAt, clockTick);
-    useEffect(() => {
-        const pendingEnd = getNextExploreMapsPendingEnd([service], now);
-        if (pendingEnd === undefined) return;
-        const timer = window.setTimeout(() => setClockTick(Date.now()), pendingEnd - now + 1000);
-        return () => window.clearTimeout(timer);
-    }, [service, now]);
+    const clockServices = useMemo(() => [service], [service]);
+    const now = useExploreMapsClock(clockServices, readAt);
 
     // `values` suit le flux relu : noms enregistrés au dernier enregistrement
     const savedTablePublicNames = useMemo(
@@ -207,10 +200,11 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
             buildServiceEditFormSchema({
                 t: tForm,
                 type: formType,
+                rasterPyramid,
                 availableAccesses: availableServiceAccesses(endpointsQuery.data, configuration.type),
                 savedTablePublicNames,
             }),
-        [tForm, formType, endpointsQuery.data, configuration.type, savedTablePublicNames]
+        [tForm, formType, rasterPyramid, endpointsQuery.data, configuration.type, savedTablePublicNames]
     );
     const form = useForm<ServiceEditFormValues, unknown, ServiceEditFormOutput>(
         editable ? { resolver: zodResolver(schema), mode: "onSubmit", reValidateMode: "onBlur", defaultValues: values } : { values, disabled: true }
@@ -218,8 +212,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
 
     const serviceKey = RQKeys.datastore_service(datastoreId, service._id);
     const editMutation = useMutation<Service, ApiError, ServiceEditFormOutput>({
-        mutationFn: (formValues) =>
-            api.service.edit(datastoreId, service._id, buildServiceEditFormData(formType, formValues, service.type === OfferingTypeEnum.WMSRASTER)),
+        mutationFn: (formValues) => api.service.edit(datastoreId, service._id, buildServiceEditFormData(formType, formValues, rasterPyramid)),
         onSuccess: async (offering, formValues) => {
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });

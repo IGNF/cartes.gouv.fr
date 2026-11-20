@@ -3,14 +3,11 @@ import { z } from "zod";
 
 import { ConfigurationTypeEnum, type DatasheetDetailed, type DatastoreEndpoint, SERVICE_ACCESSES, type ServiceAccess } from "@/@types/app";
 import { type ComponentKey } from "@/i18n/types";
-import { regex } from "@/utils";
+import { regex, SERVICE_TYPES, type ServiceType } from "@/utils";
 import { TAG_VALUE_MAX_LENGTH } from "../DatasetAdd/datasetAddSchema";
 import { type SldError, validateSld } from "./validateSld";
 
 type T = TranslationFunction<"ServiceForm", ComponentKey>;
-
-export const SERVICE_TYPES = ["wfs", "wms", "tms", "wmts"] as const;
-export type ServiceType = (typeof SERVICE_TYPES)[number];
 
 /** type de configuration Entrepôt (et d’endpoint) du type de flux */
 export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeEnum> = {
@@ -31,6 +28,7 @@ export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean):
 export const hasTables = (type: ServiceType, rasterPyramid: boolean): boolean => type === "wfs" || (type === "wms" && !rasterPyramid);
 
 export { SERVICE_ACCESSES, type ServiceAccess };
+export { SERVICE_TYPES, type ServiceType };
 
 /** accès offerts par les endpoints de l’entrepôt pour ce type de configuration ; tous tant que les endpoints ne sont pas lus (le back refuse un accès sans endpoint) */
 export const availableServiceAccesses = (endpoints: DatastoreEndpoint[] | undefined, configurationType: ConfigurationTypeEnum): readonly ServiceAccess[] => {

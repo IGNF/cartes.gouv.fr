@@ -44,9 +44,23 @@ export const getServiceThumbnailUrl = (service: ServiceListItem): string | undef
  */
 export const getLayerBaseName = (layerName: string): string => layerName.replace(/_(wms|wmts|wmsr)$/, "");
 
-// une offre WMTS-TMS dont le type de pyramide est inconnu est traitée comme un WMTS
-const isWmtsService = (service: ServiceListItem): boolean =>
-    service.type === OfferingTypeEnum.WMTSTMS && service.configuration.pyramid?.type !== StoredDataTypeEnum.ROK4PYRAMIDVECTOR;
+export const SERVICE_TYPES = ["wfs", "wms", "tms", "wmts"] as const;
+export type ServiceType = (typeof SERVICE_TYPES)[number];
+
+/** type de flux du formulaire ; undefined pour les offres que cartes.gouv.fr ne publie pas (téléchargement, altimétrie...) */
+export const getServiceType = (service: ServiceListItem): ServiceType | undefined => {
+    switch (service.type) {
+        case OfferingTypeEnum.WFS:
+            return "wfs";
+        case OfferingTypeEnum.WMSVECTOR:
+        case OfferingTypeEnum.WMSRASTER:
+            return "wms";
+        case OfferingTypeEnum.WMTSTMS:
+            return service.configuration.pyramid?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR ? "tms" : "wmts";
+        default:
+            return undefined;
+    }
+};
 
 /**
  * Un WMS a un WMTS « jumeau » quand un WMTS publié de la fiche porte le même nom au suffixe près : le générateur
@@ -55,22 +69,19 @@ const isWmtsService = (service: ServiceListItem): boolean =>
 export const hasWmtsSibling = (service: ServiceListItem, services: ServiceListItem[]): boolean => {
     const baseName = getLayerBaseName(service.layer_name);
     return services.some(
-        (other) => other._id !== service._id && isWmtsService(other) && !isOfferingUnavailable(other.status) && getLayerBaseName(other.layer_name) === baseName
+        (other) =>
+            other._id !== service._id &&
+            getServiceType(other) === "wmts" &&
+            !isOfferingUnavailable(other.status) &&
+            getLayerBaseName(other.layer_name) === baseName
     );
 };
 
 export type ExploreMapsProtocol = "WMS" | "WMTS" | "TMS";
 
 export const getExploreMapsProtocol = (service: ServiceListItem): ExploreMapsProtocol | undefined => {
-    switch (service.type) {
-        case OfferingTypeEnum.WMSVECTOR:
-        case OfferingTypeEnum.WMSRASTER:
-            return "WMS";
-        case OfferingTypeEnum.WMTSTMS:
-            return isWmtsService(service) ? "WMTS" : "TMS";
-        default:
-            return undefined;
-    }
+    const type = getServiceType(service);
+    return type === undefined || type === "wfs" ? undefined : (type.toUpperCase() as ExploreMapsProtocol);
 };
 
 /**
@@ -119,19 +130,7 @@ export const getExploreMapsAvailability = ({
 };
 
 /** Libellé court du type de flux tel qu’affiché dans les filtres (WMS-V et WMS-R confondus) */
-export const getServiceTypeLabel = (service: ServiceListItem): string => {
-    switch (service.type) {
-        case OfferingTypeEnum.WFS:
-            return "WFS";
-        case OfferingTypeEnum.WMSVECTOR:
-        case OfferingTypeEnum.WMSRASTER:
-            return "WMS";
-        case OfferingTypeEnum.WMTSTMS:
-            return isWmtsService(service) ? "WMTS" : "TMS";
-        default:
-            return service.type;
-    }
-};
+export const getServiceTypeLabel = (service: ServiceListItem): string => getServiceType(service)?.toUpperCase() ?? service.type;
 
 /** Prochain instant où un flux de la liste sort du délai « En cours », undefined si aucun n’y est encore */
 export const getNextExploreMapsPendingEnd = (services: ServiceListItem[], now: number): number | undefined => {
