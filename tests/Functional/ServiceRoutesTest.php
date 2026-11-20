@@ -7,11 +7,12 @@ namespace App\Tests\Functional;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
- * Flux sous `/services` (offre avec sa configuration), offres brutes de l’Entrepôt sous `/offerings` ; aucune route générique dans les contrôleurs par type.
+ * Flux sous `/services` (offre avec sa configuration), offres brutes de l’Entrepôt sous `/offerings` ; plus de route de publication par type.
  */
 final class ServiceRoutesTest extends KernelTestCase
 {
     private const ROUTES = [
+        'cartesgouvfr_api_service_publish_service' => ['POST', '/api/datastores/{datastoreId}/services'],
         'cartesgouvfr_api_service_get_service' => ['GET', '/api/datastores/{datastoreId}/services/{offeringId}'],
         'cartesgouvfr_api_service_edit_service' => ['POST', '/api/datastores/{datastoreId}/services/{offeringId}'],
         'cartesgouvfr_api_service_unpublish_service' => ['DELETE', '/api/datastores/{datastoreId}/services/{offeringId}'],
@@ -31,10 +32,9 @@ final class ServiceRoutesTest extends KernelTestCase
             self::assertSame([$method], $route->getMethods(), $name);
         }
 
-        foreach (['wfs', 'wmsvector', 'pyramid_raster', 'pyramid_vector'] as $prefix) {
-            foreach (['get_service', 'unpublish_service', 'get_existing_layer_names', 'get_offerings_list'] as $route) {
-                self::assertNull($routes->get(sprintf('cartesgouvfr_api_%s_%s', $prefix, $route)), $prefix.'_'.$route);
-            }
+        // anciennes routes de publication par type et anciens noms des routes d’offres
+        foreach (['wfs_publish', 'wmsvector_publish', 'pyramid_raster_wms_raster_wmts_publish', 'pyramid_vector_tms_publish', 'service_get_offerings_list', 'service_get_service_stats'] as $route) {
+            self::assertNull($routes->get('cartesgouvfr_api_'.$route), $route);
         }
     }
 }

@@ -106,7 +106,7 @@ final class ServicePublishRouteTest extends WebTestCase
     }
 
     #[DataProvider('publishedTypes')]
-    public function testServiceIsPublishedWhenTheOnlineResourcesRefreshFails(string $type, string $storedDataId): void
+    public function testServiceAndStyleFilesAreKeptWhenTheOnlineResourcesRefreshFails(string $type, string $storedDataId): void
     {
         $this->seedMetadata();
         $client = $this->client();
@@ -116,6 +116,14 @@ final class ServicePublishRouteTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(201);
         self::assertCount(1, EntrepotMockResponseFactory::stored('offerings'));
+        $configurationId = EntrepotMockResponseFactory::stored('configurations')[0]['_id'];
+        $styleSuffix = match (true) {
+            'WMS-VECTOR' === $type => 'wmsv_communes',
+            'WMS-RASTER' === $type => 'wmsr',
+            'pyramid-raster' === $storedDataId => 'wmts',
+            default => null,
+        };
+        self::assertSame(null === $styleSuffix ? [] : ["config_{$configurationId}_style_$styleSuffix"], array_column(EntrepotMockResponseFactory::stored('statics'), 'name'));
     }
 
     /**
@@ -157,9 +165,11 @@ final class ServicePublishRouteTest extends WebTestCase
         self::assertSame(['type'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
 
         // inséré dans le chemin des requêtes Entrepôt
-        $this->post($client, $this->payload('WFS', '../uploads/upload-1'));
-        self::assertResponseStatusCodeSame(422);
-        self::assertSame(['stored_data_id'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        foreach (['../uploads/upload-1', "vectordb-1\n"] as $storedDataId) {
+            $this->post($client, $this->payload('WFS', $storedDataId));
+            self::assertResponseStatusCodeSame(422);
+            self::assertSame(['stored_data_id'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        }
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 
@@ -167,7 +177,7 @@ final class ServicePublishRouteTest extends WebTestCase
     {
         $client = $this->client();
 
-        foreach (['WMS-RASTER' => 'pyramid-raster', 'WMTS-TMS' => 'pyramid-vector'] as $type => $storedDataId) {
+        foreach (['WMS-VECTOR' => 'vectordb-1', 'WMS-RASTER' => 'pyramid-raster', 'WMTS-TMS' => 'pyramid-vector'] as $type => $storedDataId) {
             $this->post($client, ['description' => ''] + $this->payload($type, $storedDataId));
 
             self::assertResponseStatusCodeSame(422);
@@ -383,7 +393,7 @@ final class ServicePublishRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
     }
 
-    public function testStyleFilesAreRemovedWhenTheTechnicalNameLacksTheDatastorePrefix(): void
+    public function testTechnicalNameWithoutTheDatastorePrefixAnswers422BeforeAnyUpload(): void
     {
         $this->seedMetadata();
         EntrepotMockResponseFactory::setDatastorePrefixes(['configuration_layer_name_prefix' => 'SANDBOX']);
@@ -400,8 +410,7 @@ final class ServicePublishRouteTest extends WebTestCase
                 fn (array $violation) => ['propertyPath' => $violation['propertyPath'], 'title' => $violation['title']],
                 $this->jsonResponse($client)['violations'],
             ));
-            self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
-            self::assertSame([], EntrepotMockResponseFactory::stored('configurations'));
+            self::assertSame([], EntrepotMockResponseFactory::writeRequests(), 'refus avant tout dépôt de fichier');
         } finally {
             $datastoreApiService->invalidate(EntrepotMockResponseFactory::DATASTORE_ID);
         }

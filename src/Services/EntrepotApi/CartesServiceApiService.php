@@ -18,7 +18,6 @@ use App\Dto\Services\Form\ServicePublishFormDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\CapabilitiesService;
-use App\Services\DatastorePrefixValidator;
 use App\Services\GeonetworkApiService;
 use App\Services\MembershipService;
 use App\Services\SandboxService;
@@ -57,7 +56,6 @@ class CartesServiceApiService
         private readonly LoggerInterface $logger,
         private readonly ServiceConfigurationRequestBuilder $configurationRequestBuilder,
         private readonly ServiceImageAnnexeService $serviceImageAnnexeService,
-        private readonly DatastorePrefixValidator $datastorePrefixValidator,
     ) {
     }
 
@@ -535,8 +533,6 @@ class CartesServiceApiService
         $thumbnailUrl = null;
         $logo = null;
         try {
-            // dans le try : un refus annule aussi ce que l’appelant a déjà déposé
-            $this->datastorePrefixValidator->assertLayerName($datastoreId, $dto->technical_name);
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME] ?? null;
             if (!is_string($datasheetName)) {
                 throw new AppException('La donnée n’est rattachée à aucune fiche de données', Response::HTTP_BAD_REQUEST);

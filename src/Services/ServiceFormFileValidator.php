@@ -39,7 +39,7 @@ final readonly class ServiceFormFileValidator
                     maxSize: ServiceImageAnnexeService::MAX_SIZE,
                     mimeTypes: ServiceImageAnnexeService::MIME_TYPES,
                     minWidth: 1,
-                    maxSizeMessage: 'L’image ne peut pas dépasser {{ limit }} Mo',
+                    maxSizeMessage: 'L’image ne peut pas dépasser 5 Mo',
                     mimeTypesMessage: 'L’image doit être au format jpg ou png',
                     sizeNotDetectedMessage: 'L’image est illisible',
                 ));

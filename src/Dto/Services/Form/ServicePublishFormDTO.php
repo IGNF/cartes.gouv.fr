@@ -31,11 +31,11 @@ class ServicePublishFormDTO extends ServiceFormDTO
 
         // inséré dans le chemin des requêtes Entrepôt
         #[Assert\NotBlank(message: 'Choisissez un jeu de données')]
-        #[Assert\Regex(pattern: '/^[\w-]+$/', message: 'L’identifiant du jeu de données est invalide')]
+        #[Assert\Regex(pattern: '/^[\w-]+\z/', message: 'L’identifiant du jeu de données est invalide')]
         public readonly string $stored_data_id = '',
 
         #[Assert\NotBlank(message: 'Le nom technique du flux est obligatoire')]
-        #[Assert\Regex(pattern: '/^[A-Za-z_][A-Za-z0-9_.-]*$/', message: 'Le nom technique ne doit contenir ni espace ni caractère spécial')]
+        #[Assert\Regex(pattern: '/^[A-Za-z_][A-Za-z0-9_.-]*\z/', message: 'Le nom technique ne doit contenir ni espace ni caractère spécial')]
         public readonly string $technical_name = '',
 
         // l’Entrepôt exige `type_infos.abstract` hors WFS

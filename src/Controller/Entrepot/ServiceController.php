@@ -11,6 +11,7 @@ use App\Dto\Services\Form\ServicePublishFormDTO;
 use App\Dto\Services\Form\WfsTableEditFormDTO;
 use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Exception\AppException;
+use App\Services\DatastorePrefixValidator;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\Rok4StyleFileService;
@@ -48,6 +49,7 @@ final class ServiceController extends AbstractController implements ApiControlle
         private readonly WmsVectorStyleFileService $wmsVectorStyleFileService,
         private readonly Rok4StyleFileService $rok4StyleFileService,
         private readonly StoredDataApiService $storedDataApiService,
+        private readonly DatastorePrefixValidator $datastorePrefixValidator,
     ) {
     }
 
@@ -68,7 +70,8 @@ final class ServiceController extends AbstractController implements ApiControlle
         [$thumbnail, $attributionLogo] = $this->serviceFormFileValidator->images($request, 'thumbnail', 'attribution_logo');
         $styleFiles = ConfigurationTypes::WMSVECTOR === $dto->type ? $this->serviceFormFileValidator->styleFiles($request, $dto->selected_tables) : [];
 
-        // contrôlée avant tout dépôt de fichier
+        // contrôles avant tout dépôt de fichier
+        $this->datastorePrefixValidator->assertLayerName($datastoreId, $dto->technical_name);
         $storedData = $this->storedDataApiService->get($datastoreId, $dto->stored_data_id)->array();
         if (!in_array($storedData['type'] ?? null, self::STORED_DATA_TYPES[$dto->type], true)) {
             throw new AppException('Ce jeu de données ne peut pas être publié dans ce type de flux', Response::HTTP_BAD_REQUEST, ['type' => $dto->type, 'stored_data_type' => $storedData['type'] ?? null]);

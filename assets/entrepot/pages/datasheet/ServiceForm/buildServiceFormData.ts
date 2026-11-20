@@ -13,7 +13,7 @@ export function buildServiceFormData(type: ServiceType, values: ServiceFormOutpu
     });
 }
 
-/** Requête multipart de la route `edit` : `data` de la publication sans nom technique, avec les retraits d’images (valeur null). */
+/** Requête multipart de la route de modification : `data` de la publication sans type, donnée stockée ni nom technique, avec les retraits d’images (valeur null). */
 export function buildServiceEditFormData(type: ServiceType, values: ServiceEditFormOutput, rasterPyramid = false): FormData {
     return buildFormData(type, values, rasterPyramid, {
         remove_thumbnail: values.thumbnail === null,
