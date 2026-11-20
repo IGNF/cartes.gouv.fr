@@ -11,7 +11,6 @@ import { createPortal } from "react-dom";
 import { tss } from "tss-react";
 
 import { type DatasheetServiceList, OfferingTypeEnum, type ServiceListItem } from "@/@types/app";
-import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import CardRowsTable from "@/components/Utils/CardRowsTable";
 import LoadingText from "@/components/Utils/LoadingText";
@@ -19,7 +18,7 @@ import MenuList from "@/components/Utils/MenuList";
 import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 import Wait from "@/components/Utils/Wait";
 import useUnpublishServiceMutation from "@/hooks/queries/useUnpublishServiceMutation";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useServiceRights from "@/hooks/useServiceRights";
 import { usePagination } from "@/hooks/usePagination";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
@@ -78,13 +77,8 @@ export default function ServicesListTabNext({ datastoreId, datasheetName, servic
     const [page, setPage] = useState(1);
     const [targetService, setTargetService] = useState<ServiceListItem>();
 
-    const { userRights, isSupervisor } = useCommunityRights();
-    const canBroadcast = isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST);
-    // la page « Créer un flux » dépose vignette et logo en annexes
-    const canCreate = canBroadcast && (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
-    // la génération dépose la légende du flux en annexe
-    const canGeneratePyramidRaster =
-        isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) && userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX));
+    const { canBroadcast, canEdit: canCreate, canGeneratePyramid } = useServiceRights();
+    const canGeneratePyramidRaster = canGeneratePyramid("raster");
 
     const deleteServiceMutation = useUnpublishServiceMutation(datastoreId, datasheetName);
 

@@ -13,7 +13,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { tss } from "tss-react";
 
 import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "@/@types/app";
-import { CommunityMemberDtoRightsEnum, ConfigurationStatus } from "@/@types/entrepot";
+import { ConfigurationStatus } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import OfferingStatusBadge from "@/components/Utils/Badges/OfferingStatusBadge";
 import LoadingText from "@/components/Utils/LoadingText";
@@ -25,7 +25,7 @@ import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServi
 import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { serviceQueryOptions } from "@/hooks/queries/serviceQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useServiceRights from "@/hooks/useServiceRights";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage, isApiError } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -112,11 +112,8 @@ function ServicePageContent(props: ServicePageContentProps) {
     const storedDataId = configuration.type_infos.used_data[0]?.stored_data ?? "";
     const withTables = TABLE_TYPES.has(service.type);
 
-    const { userRights, isSupervisor } = useCommunityRights();
-    const hasRight = (right: CommunityMemberDtoRightsEnum) => isSupervisor || !!userRights?.includes(right);
-    // mêmes droits que la création : publication et dépôt des images en annexe
-    const canSave =
-        editableOfferingTypes.includes(service.type) && hasRight(CommunityMemberDtoRightsEnum.BROADCAST) && hasRight(CommunityMemberDtoRightsEnum.ANNEX);
+    const { canEdit } = useServiceRights();
+    const canSave = editableOfferingTypes.includes(service.type) && canEdit;
     // même règle que le serveur : une offre en cours de publication peut le rester longtemps
     const published = service.status === OfferingStatusEnum.PUBLISHED && configuration.status === ConfigurationStatus.PUBLISHED;
 

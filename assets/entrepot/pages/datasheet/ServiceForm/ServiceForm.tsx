@@ -6,12 +6,11 @@ import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { type DatasheetDetailed, StoredDataStatusEnum } from "@/@types/app";
-import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import api from "@/entrepot/api";
 import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
-import useCommunityRights from "@/hooks/useCommunityRights";
+import useServiceRights from "@/hooks/useServiceRights";
 import { useTranslation } from "@/i18n";
 import { isApiError } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -62,11 +61,8 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
     const withTables = hasTables(type, rasterPyramidSelected);
 
     const { data: datastore } = useQuery(datastoreQueryOptions(datastoreId));
-    const { userRights, isSupervisor } = useCommunityRights();
-    const hasRight = (right: CommunityMemberDtoRightsEnum) => isSupervisor || !!userRights?.includes(right);
+    const { canGeneratePyramid } = useServiceRights();
     const pyramidKind = type === "tms" ? "vector" : "raster";
-    // mêmes droits que les routes de génération : la pyramide raster dépose aussi une légende en annexe
-    const canGeneratePyramid = hasRight(CommunityMemberDtoRightsEnum.PROCESSING) && (pyramidKind === "vector" || hasRight(CommunityMemberDtoRightsEnum.ANNEX));
     const existingLayerNamesQuery = useQuery<string[], ApiError>({
         queryKey: RQKeys.datastore_layernames_list(datastoreId, configurationType),
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, configurationType, { signal }),
@@ -157,7 +153,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                                         datasheetName={datasheetName}
                                         service={type.toUpperCase()}
                                         kind={pyramidKind}
-                                        canGenerate={canGeneratePyramid}
+                                        canGenerate={canGeneratePyramid(pyramidKind)}
                                     />
                                 )
                             }
