@@ -34,6 +34,7 @@ import { setApiFormErrors } from "@/modules/setApiFormErrors";
 import AppLink from "@/router/AppLink";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
 import {
+    editableOfferingTypes,
     formatDateFromISO,
     getExploreMapsAvailability,
     getExploreMapsLayerParam,
@@ -62,7 +63,6 @@ import {
 import { serviceToFormValues } from "../ServiceForm/serviceToFormValues";
 import ServicePreviewSection from "./ServicePreviewSection";
 
-const PAGE_EDITABLE_TYPES = new Set<OfferingTypeEnum>([OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WMTSTMS]);
 // flux sur une base vecteur : tables à choisir
 const TABLE_TYPES = new Set<OfferingTypeEnum>([OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR]);
 
@@ -115,7 +115,8 @@ function ServicePageContent(props: ServicePageContentProps) {
     const { userRights, isSupervisor } = useCommunityRights();
     const hasRight = (right: CommunityMemberDtoRightsEnum) => isSupervisor || !!userRights?.includes(right);
     // mêmes droits que la création : publication et dépôt des images en annexe
-    const canSave = PAGE_EDITABLE_TYPES.has(service.type) && hasRight(CommunityMemberDtoRightsEnum.BROADCAST) && hasRight(CommunityMemberDtoRightsEnum.ANNEX);
+    const canSave =
+        editableOfferingTypes.includes(service.type) && hasRight(CommunityMemberDtoRightsEnum.BROADCAST) && hasRight(CommunityMemberDtoRightsEnum.ANNEX);
     // même règle que le serveur : une offre en cours de publication peut le rester longtemps
     const published = service.status === OfferingStatusEnum.PUBLISHED && configuration.status === ConfigurationStatus.PUBLISHED;
 
