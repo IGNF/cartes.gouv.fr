@@ -110,7 +110,7 @@ final class WmsRasterPublishRouteTest extends WebTestCase
         self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
     }
 
-    public function testLegendStyleIsKeptWhenAStepAfterTheOfferingFails(): void
+    public function testLegendStyleIsKeptWhenTheOnlineResourcesRefreshFails(): void
     {
         $this->seedMetadata();
         $client = $this->client();
@@ -118,7 +118,7 @@ final class WmsRasterPublishRouteTest extends WebTestCase
 
         $this->post($client, 'WMS-RASTER', $this->payload());
 
-        self::assertResponseStatusCodeSame(500);
+        self::assertResponseStatusCodeSame(201);
         self::assertCount(1, EntrepotMockResponseFactory::stored('offerings'));
         self::assertSame([sprintf('config_%s_style_wmsr', EntrepotMockResponseFactory::stored('configurations')[0]['_id'])], array_column(EntrepotMockResponseFactory::stored('statics'), 'name'));
     }

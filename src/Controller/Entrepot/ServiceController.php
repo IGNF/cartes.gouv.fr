@@ -9,16 +9,12 @@ use App\Dto\Services\Form\ServiceEditFormDTO;
 use App\Dto\Services\Form\WfsTableEditFormDTO;
 use App\Dto\Services\Form\WfsTableFormDTO;
 use App\Exception\AppException;
-use App\Services\CapabilitiesService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\WmsVectorStyleFileService;
 use App\Services\MultipartPayloadMapper;
 use App\Services\ServiceFormFileValidator;
 use OpenApi\Attributes as OA;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,12 +35,8 @@ use Symfony\Component\Validator\Exception\ValidationFailedException;
 final class ServiceController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private readonly DatastoreApiService $datastoreApiService,
         private readonly ConfigurationApiService $configurationApiService,
         private readonly CartesServiceApiService $cartesServiceApiService,
-        private readonly CapabilitiesService $capabilitiesService,
-        private readonly CartesMetadataApiService $cartesMetadataApiService,
-        private readonly LoggerInterface $logger,
         private readonly MultipartPayloadMapper $multipartPayloadMapper,
         private readonly ServiceFormFileValidator $serviceFormFileValidator,
         private readonly WmsVectorStyleFileService $wmsVectorStyleFileService,
@@ -170,35 +162,13 @@ final class ServiceController extends AbstractController implements ApiControlle
     #[Route('/{offeringId}', name: 'unpublish_service', methods: ['DELETE'])]
     public function unpublishService(string $datastoreId, string $offeringId): Response
     {
-        $datastore = $this->datastoreApiService->get($datastoreId);
-
         $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
         $configuration = $this->cartesServiceApiService->unpublish($datastoreId, $offeringId, $offering);
+        $this->cartesServiceApiService->updateCapabilities($datastoreId, [$offering]);
 
-        // Mise a jour du capabilities
-        try {
-            // Recherche du endpoint
-            $endpoints = array_values(array_filter($datastore['endpoints'], function ($ep) use ($offering) {
-                return $ep['endpoint']['_id'] === $offering['endpoint']['_id'];
-            }));
-            if (1 === count($endpoints)) {
-                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoints[0]['endpoint'], $offering['urls'][0]['url']);
-            }
-        } catch (\Exception $e) {
-            // la dépublication a réussi : un échec des capabilities ne doit pas la faire paraître en erreur
-            $this->logger->warning('{class}: Failed to update capabilities after unpublishing offering {offeringId}: {error}', [
-                'class' => self::class,
-                'offeringId' => $offeringId,
-                'exception' => $e,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        if (isset($configuration['tags'][CommonTags::DATASHEET_NAME])) {
-            $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
-
-            $services = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
-            $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $services);
+        $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME] ?? null;
+        if (is_string($datasheetName)) {
+            $this->cartesServiceApiService->refreshDatasheetOnlineResources($datastoreId, $datasheetName);
         }
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);

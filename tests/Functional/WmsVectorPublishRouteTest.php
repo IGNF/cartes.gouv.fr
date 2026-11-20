@@ -109,7 +109,7 @@ final class WmsVectorPublishRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
     }
 
-    public function testStyleFilesAreKeptWhenAStepAfterTheOfferingFails(): void
+    public function testStyleFilesAreKeptWhenTheOnlineResourcesRefreshFails(): void
     {
         $this->seedMetadata();
         $client = $this->client();
@@ -117,7 +117,7 @@ final class WmsVectorPublishRouteTest extends WebTestCase
 
         $this->post($client, $this->payload(['communes']), ['communes' => $this->sld('communes.sld')]);
 
-        self::assertResponseStatusCodeSame(500);
+        self::assertResponseStatusCodeSame(201);
         self::assertCount(1, EntrepotMockResponseFactory::stored('offerings'));
         self::assertSame([sprintf('config_%s_style_wmsv_communes', EntrepotMockResponseFactory::stored('configurations')[0]['_id'])], array_column(EntrepotMockResponseFactory::stored('statics'), 'name'));
     }

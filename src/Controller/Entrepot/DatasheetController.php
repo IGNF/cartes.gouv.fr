@@ -306,6 +306,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         foreach ($datasheetServices->offeringsById as $offering) {
             $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id'], $offering);
         }
+        $this->cartesServiceApiService->updateCapabilities($datastoreId, $datasheetServices->offeringsById);
         foreach ($datasheetServices->configurationsWithoutOffering() as $configuration) {
             $this->cartesServiceApiService->removeConfiguration($datastoreId, $configuration);
         }

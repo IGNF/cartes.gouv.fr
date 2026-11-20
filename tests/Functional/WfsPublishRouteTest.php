@@ -199,6 +199,19 @@ final class WfsPublishRouteTest extends WebTestCase
         self::assertStringContainsString('POST configurations/configuration-1/offerings', $this->jsonResponse($client)['detail']);
     }
 
+    public function testFluxIsPublishedWhenTheOnlineResourcesRefreshFails(): void
+    {
+        $this->seedMetadata();
+        // la première lecture fournit les liens de la configuration, la seconde est celle de la mise à jour des ressources en ligne
+        EntrepotMockResponseFactory::failNext('GET metadata', passes: 1, status: 403);
+        $client = $this->client();
+
+        $this->post($client, $this->payload());
+
+        self::assertResponseStatusCodeSame(201);
+        self::assertCount(1, EntrepotMockResponseFactory::stored('offerings'));
+    }
+
     private function client(): KernelBrowser
     {
         $client = self::createClient();
