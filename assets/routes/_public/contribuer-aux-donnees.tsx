@@ -1,0 +1,18 @@
+import { createFileRoute, SearchSchemaInput } from "@tanstack/react-router";
+
+import DiscoverContribute from "@/pages/discover/contribute/DiscoverContribute";
+import { integerParam } from "@/router/searchParams";
+
+export const Route = createFileRoute("/_public/contribuer-aux-donnees")({
+    validateSearch: (search: { login_failed?: number } & SearchSchemaInput): { login_failed?: number } => ({
+        login_failed: integerParam(search.login_failed),
+    }),
+    staticData: { matomoLabel: "Contribuer aux données" },
+    // page d’accueil : rendue sans attendre de chunk, comme avant la bascule
+    codeSplitGroupings: [],
+    component: RouteComponent,
+});
+
+function RouteComponent() {
+    return <DiscoverContribute />;
+}

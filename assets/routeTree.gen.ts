@@ -18,6 +18,7 @@ import { Route as PrivateMesPermissionsRouteImport } from './routes/_private/mes
 import { Route as PrivateMonCompteRouteImport } from './routes/_private/mon-compte'
 import { Route as Public404RouteImport } from './routes/_public/404'
 import { Route as PublicConnexionDesactiveeRouteImport } from './routes/_public/connexion-desactivee'
+import { Route as PublicContribuerAuxDonneesRouteImport } from './routes/_public/contribuer-aux-donnees'
 import { Route as PublicPublierUneDonneeRouteImport } from './routes/_public/publier-une-donnee'
 import { Route as PrivatePanneauRejoindreDesCommunautesRouteImport } from './routes/_private/_panneau/rejoindre-des-communautes'
 import { Route as PrivateConfigurationAlertesRouteImport } from './routes/_private/configuration/alertes'
@@ -110,6 +111,12 @@ const PublicConnexionDesactiveeRoute =
   PublicConnexionDesactiveeRouteImport.update({
     id: '/connexion-desactivee',
     path: '/connexion-desactivee',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
+const PublicContribuerAuxDonneesRoute =
+  PublicContribuerAuxDonneesRouteImport.update({
+    id: '/contribuer-aux-donnees',
+    path: '/contribuer-aux-donnees',
     getParentRoute: () => PublicRouteRoute,
   } as any)
 const PublicPublierUneDonneeRoute = PublicPublierUneDonneeRouteImport.update({
@@ -457,6 +464,7 @@ export interface FileRoutesByFullPath {
   '/mon-compte': typeof PrivateMonCompteRoute
   '/404': typeof Public404Route
   '/connexion-desactivee': typeof PublicConnexionDesactiveeRoute
+  '/contribuer-aux-donnees': typeof PublicContribuerAuxDonneesRoute
   '/publier-une-donnee': typeof PublicPublierUneDonneeRoute
   '/rejoindre-des-communautes': typeof PrivatePanneauRejoindreDesCommunautesRoute
   '/configuration/alertes': typeof PrivateConfigurationAlertesRoute
@@ -512,6 +520,7 @@ export interface FileRoutesByTo {
   '/mon-compte': typeof PrivateMonCompteRoute
   '/404': typeof Public404Route
   '/connexion-desactivee': typeof PublicConnexionDesactiveeRoute
+  '/contribuer-aux-donnees': typeof PublicContribuerAuxDonneesRoute
   '/publier-une-donnee': typeof PublicPublierUneDonneeRoute
   '/rejoindre-des-communautes': typeof PrivatePanneauRejoindreDesCommunautesRoute
   '/configuration/alertes': typeof PrivateConfigurationAlertesRoute
@@ -570,6 +579,7 @@ export interface FileRoutesById {
   '/_private/mon-compte': typeof PrivateMonCompteRoute
   '/_public/404': typeof Public404Route
   '/_public/connexion-desactivee': typeof PublicConnexionDesactiveeRoute
+  '/_public/contribuer-aux-donnees': typeof PublicContribuerAuxDonneesRoute
   '/_public/publier-une-donnee': typeof PublicPublierUneDonneeRoute
   '/_private/_panneau/rejoindre-des-communautes': typeof PrivatePanneauRejoindreDesCommunautesRoute
   '/_private/configuration/alertes': typeof PrivateConfigurationAlertesRoute
@@ -630,6 +640,7 @@ export interface FileRouteTypes {
     | '/mon-compte'
     | '/404'
     | '/connexion-desactivee'
+    | '/contribuer-aux-donnees'
     | '/publier-une-donnee'
     | '/rejoindre-des-communautes'
     | '/configuration/alertes'
@@ -685,6 +696,7 @@ export interface FileRouteTypes {
     | '/mon-compte'
     | '/404'
     | '/connexion-desactivee'
+    | '/contribuer-aux-donnees'
     | '/publier-une-donnee'
     | '/rejoindre-des-communautes'
     | '/configuration/alertes'
@@ -742,6 +754,7 @@ export interface FileRouteTypes {
     | '/_private/mon-compte'
     | '/_public/404'
     | '/_public/connexion-desactivee'
+    | '/_public/contribuer-aux-donnees'
     | '/_public/publier-une-donnee'
     | '/_private/_panneau/rejoindre-des-communautes'
     | '/_private/configuration/alertes'
@@ -861,6 +874,13 @@ declare module '@tanstack/react-router' {
       path: '/connexion-desactivee'
       fullPath: '/connexion-desactivee'
       preLoaderRoute: typeof PublicConnexionDesactiveeRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/contribuer-aux-donnees': {
+      id: '/_public/contribuer-aux-donnees'
+      path: '/contribuer-aux-donnees'
+      fullPath: '/contribuer-aux-donnees'
+      preLoaderRoute: typeof PublicContribuerAuxDonneesRouteImport
       parentRoute: typeof PublicRouteRoute
     }
     '/_public/publier-une-donnee': {
@@ -1440,12 +1460,14 @@ const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(
 interface PublicRouteRouteChildren {
   Public404Route: typeof Public404Route
   PublicConnexionDesactiveeRoute: typeof PublicConnexionDesactiveeRoute
+  PublicContribuerAuxDonneesRoute: typeof PublicContribuerAuxDonneesRoute
   PublicPublierUneDonneeRoute: typeof PublicPublierUneDonneeRoute
 }
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   Public404Route: Public404Route,
   PublicConnexionDesactiveeRoute: PublicConnexionDesactiveeRoute,
+  PublicContribuerAuxDonneesRoute: PublicContribuerAuxDonneesRoute,
   PublicPublierUneDonneeRoute: PublicPublierUneDonneeRoute,
 }
 

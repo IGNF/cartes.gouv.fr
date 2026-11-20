@@ -7,6 +7,7 @@ import SymfonyRouting from "@/modules/Routing";
 import { externalLink, externalUrls } from "@/router/externalUrls";
 import HeaderMenu from "./HeaderMenu";
 import "../../../sass/components/buttons.scss";
+import Badge from "@codegouvfr/react-dsfr/Badge";
 
 export function HeaderMenuHelp() {
     return (
@@ -65,18 +66,42 @@ export function HeaderMenuServices() {
                     children: "Publier une donnée",
                     linkProps: { to: "/publier-une-donnee" },
                 },
-                // {
-                //     iconId: "fr-icon-brush-line",
-                //     children: (
-                //         <>
-                //             Créer une carte{" "}
-                //             <Badge severity="success" className={"fr-ml-auto"}>
-                //                 Bêta
-                //             </Badge>
-                //         </>
-                //     ),
-                //     linkProps: { href: externalUrls.create_map },
-                // },
+                {
+                    iconId: "fr-icon-brush-line",
+                    children: (
+                        <>
+                            Créer une carte{" "}
+                            <Badge severity="success" noIcon as="span" className={"fr-ml-auto"}>
+                                Bêta
+                            </Badge>
+                        </>
+                    ),
+                    linkProps: { href: externalUrls.editor, target: "_self" },
+                },
+                {
+                    iconId: "ri-contacts-book-upload-line",
+                    children: (
+                        <>
+                            Extraire une donnée{" "}
+                            <Badge severity="success" noIcon as="span" className={"fr-ml-auto"}>
+                                Bêta
+                            </Badge>
+                        </>
+                    ),
+                    linkProps: { href: externalUrls.extraction, target: "_self" },
+                },
+                {
+                    iconId: "fr-icon-message-2-line",
+                    children: (
+                        <>
+                            Contribuer aux données{" "}
+                            <Badge severity="success" noIcon as="span" className={"fr-ml-auto"}>
+                                Bêta
+                            </Badge>
+                        </>
+                    ),
+                    linkProps: { to: "/contribuer-aux-donnees" },
+                },
             ]}
             actionButtonProps={{
                 children: "Découvrir cartes.gouv.fr",
