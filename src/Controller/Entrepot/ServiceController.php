@@ -28,10 +28,10 @@ use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 #[Route(
-    '/api/datastores/{datastoreId}/offerings',
+    '/api/datastores/{datastoreId}/services',
     name: 'cartesgouvfr_api_service_',
     options: ['expose' => true])]
-#[OA\Tag(name: '[cartes.gouv.fr] services', description: 'Actions génériques sur les services')]
+#[OA\Tag(name: '[cartes.gouv.fr] services', description: 'Flux : offre de l’Entrepôt avec sa configuration')]
 final class ServiceController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
@@ -43,35 +43,6 @@ final class ServiceController extends AbstractController implements ApiControlle
     ) {
     }
 
-    #[Route('', name: 'get_offerings_list', methods: ['GET'])]
-    public function getOfferings(string $datastoreId, #[MapQueryParameter] bool $detailed = false, #[MapQueryParameter] bool $detailedConfiguration = false): JsonResponse
-    {
-        if ($detailed) {
-            $offerings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId)->resolve();
-        } else {
-            $offerings = $this->configurationApiService->getAllOfferings($datastoreId)->resolve();
-        }
-
-        if ($detailedConfiguration) {
-            $pendingConfigurationsById = [];
-
-            foreach ($offerings as $offering) {
-                $configId = $offering['configuration']['_id'];
-                $pendingConfigurationsById[$configId] = $this->configurationApiService->get($datastoreId, $configId);
-            }
-
-            $configurationsById = $this->configurationApiService->api->resolveAll($pendingConfigurationsById);
-
-            foreach ($offerings as &$offering) {
-                $configId = $offering['configuration']['_id'];
-                $offering['configuration'] = $configurationsById[$configId];
-            }
-            unset($offering);
-        }
-
-        return $this->json($offerings);
-    }
-
     #[Route('/{offeringId}', name: 'get_service', methods: ['GET'], requirements: ['offeringId' => Requirement::UUID_V4])]
     public function getService(string $datastoreId, string $offeringId): JsonResponse
     {
@@ -81,7 +52,8 @@ final class ServiceController extends AbstractController implements ApiControlle
     }
 
     /** Modification depuis la page du flux : multipart `data` (ServiceEditFormDTO), `thumbnail`, `attribution_logo`. */
-    #[Route('/{offeringId}/edit', name: 'edit_service', methods: ['POST'], requirements: ['offeringId' => Requirement::UUID_V4])]
+    // POST et non PUT ou PATCH : PHP ne lit les fichiers multipart que dans un POST
+    #[Route('/{offeringId}', name: 'edit_service', methods: ['POST'], requirements: ['offeringId' => Requirement::UUID_V4])]
     public function editService(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
         $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
@@ -148,15 +120,6 @@ final class ServiceController extends AbstractController implements ApiControlle
         if (count($violations) > 0) {
             throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($dto, $violations));
         }
-    }
-
-    #[Route('/{offeringId}/stats', name: 'get_service_stats', methods: ['GET'], requirements: ['offeringId' => Requirement::UUID_V4])]
-    public function getServiceStats(string $datastoreId, string $offeringId, Request $request): JsonResponse
-    {
-        $query = $request->query->all();
-        $stats = $this->configurationApiService->getOfferingStats($datastoreId, $offeringId, $query)->resolve();
-
-        return $this->json($stats);
     }
 
     #[Route('/{offeringId}', name: 'unpublish_service', methods: ['DELETE'])]

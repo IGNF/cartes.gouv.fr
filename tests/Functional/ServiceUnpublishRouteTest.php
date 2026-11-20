@@ -17,7 +17,7 @@ final class ServiceUnpublishRouteTest extends WebTestCase
     use KeycloakLoginTrait;
 
     private const DATASTORE_PATH = '/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID;
-    private const UNPUBLISH_URL = self::BASE.self::DATASTORE_PATH.'/offerings/offering-1';
+    private const UNPUBLISH_URL = self::BASE.self::DATASTORE_PATH.'/services/offering-1';
 
     protected function setUp(): void
     {

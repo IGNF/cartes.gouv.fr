@@ -11,7 +11,7 @@ const getService = (datastoreId: string, offeringId: string, otherOptions: Reque
 };
 
 const getOfferings = <T = OfferingStandardListResponseDto>(datastoreId: string, queryParams: QueryParams = {}, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_service_get_offerings_list", { datastoreId, ...queryParams });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_offering_list", { datastoreId, ...queryParams });
     return jsonFetch<T[]>(url, {
         ...otherOptions,
     });

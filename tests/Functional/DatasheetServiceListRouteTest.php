@@ -154,7 +154,7 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         $client = $this->client();
         $this->seedPermission(self::OFFERING_UUID, '2099-01-01T00:00:00+00:00');
 
-        $client->xmlHttpRequest('GET', self::BASE.self::DATASTORE_PATH.'/offerings/'.self::OFFERING_UUID);
+        $client->xmlHttpRequest('GET', self::BASE.self::DATASTORE_PATH.'/services/'.self::OFFERING_UUID);
 
         self::assertResponseIsSuccessful();
         self::assertSame('restricted_visible', json_decode((string) $client->getResponse()->getContent(), true)['access']);
@@ -166,7 +166,7 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         $this->seedService('tms', 'WMTS-TMS', EntrepotMockResponseFactory::WMTS_PUBLIC_ENDPOINT_ID, 'pyramid-vector-1', offeringId: self::OFFERING_UUID);
 
         $client = $this->client();
-        $client->xmlHttpRequest('GET', self::BASE.self::DATASTORE_PATH.'/offerings/'.self::OFFERING_UUID);
+        $client->xmlHttpRequest('GET', self::BASE.self::DATASTORE_PATH.'/services/'.self::OFFERING_UUID);
 
         self::assertResponseIsSuccessful();
         $service = json_decode((string) $client->getResponse()->getContent(), true);
@@ -334,7 +334,7 @@ final class DatasheetServiceListRouteTest extends WebTestCase
     private function getService(): array
     {
         $client = $this->client();
-        $client->xmlHttpRequest('GET', self::BASE.self::DATASTORE_PATH.'/offerings/'.self::OFFERING_UUID);
+        $client->xmlHttpRequest('GET', self::BASE.self::DATASTORE_PATH.'/services/'.self::OFFERING_UUID);
 
         self::assertResponseIsSuccessful();
 
