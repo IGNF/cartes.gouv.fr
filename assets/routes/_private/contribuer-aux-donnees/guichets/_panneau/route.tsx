@@ -19,7 +19,7 @@ function PanelLayout() {
             panel={
                 <div>
                     <SidePanelHeader iconId="fr-icon-message-2-fill" title={t("panel_title")} description={t("panel_description")} />
-                    <Badge severity="success" noIcon small className={fr.cx("fr-mb-4v")}>
+                    <Badge severity="success" noIcon className={fr.cx("fr-mb-4v")}>
                         {t("beta_badge")}
                     </Badge>
                     <CommunityListFilters />
