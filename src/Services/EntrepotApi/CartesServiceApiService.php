@@ -872,12 +872,9 @@ class CartesServiceApiService
             $permissions = $this->removeExpiredPermissions($datastoreId, $offering, $permissions, [$communityId, $configCommunityId]);
         }
 
-        // POST /permissions renvoie la liste des permissions créées
-        $permissions = [...$permissions, ...$this->addPermissionForCommunity($datastoreId, $communityId, $offering, $permissions)];
+        $this->addMissingPermissions($datastoreId, $offering, $permissions, $access->allowsCartesGouvView() ? [$communityId, $configCommunityId] : [$communityId]);
 
-        if ($access->allowsCartesGouvView()) {
-            $this->addPermissionForCommunity($datastoreId, $configCommunityId, $offering, $permissions);
-        } elseif ($communityId !== $configCommunityId) {
+        if (!$access->allowsCartesGouvView() && $communityId !== $configCommunityId) {
             // entrepôt de cartes.gouv.fr : cette permission est celle de sa propre communauté, elle reste
             $this->removeExistingConfigPermission($datastoreId, $offering, $permissions);
         }
@@ -906,6 +903,8 @@ class CartesServiceApiService
     }
 
     /**
+     * Retire l’offre des permissions de la communauté cartes.gouv.fr : une permission partagée garde ses autres offres.
+     *
      * @param array<mixed> $offering
      * @param array<mixed> $permissions
      */
@@ -913,16 +912,18 @@ class CartesServiceApiService
     {
         $configCommunityId = $this->params->get('config')['community_id'];
 
-        $existingPermission = array_filter($permissions, function ($permission) use ($offering, $configCommunityId) {
-            return isset($permission['offerings'])
-                && in_array($offering['_id'], array_column($permission['offerings'], '_id'))
-                && isset($permission['beneficiary']['_id'])
-                && $permission['beneficiary']['_id'] === $configCommunityId;
-        });
+        foreach ($permissions as $permission) {
+            $offeringIds = array_column($permission['offerings'] ?? [], '_id');
+            if (($permission['beneficiary']['_id'] ?? null) !== $configCommunityId || !in_array($offering['_id'], $offeringIds, true)) {
+                continue;
+            }
 
-        if ([] !== $existingPermission) {
-            $permissionId = reset($existingPermission)['_id'];
-            $this->datastoreApiService->removePermission($datastoreId, $permissionId)->await();
+            $otherOfferingIds = array_values(array_diff($offeringIds, [$offering['_id']]));
+            if ([] === $otherOfferingIds) {
+                $this->datastoreApiService->removePermission($datastoreId, $permission['_id'])->await();
+            } else {
+                $this->datastoreApiService->updatePermission($datastoreId, $permission['_id'], ['offerings' => $otherOfferingIds])->await();
+            }
         }
     }
 
@@ -973,24 +974,25 @@ class CartesServiceApiService
     }
 
     /**
-     * Retourne les permissions créées (aucune si elle existait déjà).
+     * Un seul POST pour les communautés sans permission sur l’offre : l’Entrepôt crée une permission par communauté, tout ou rien.
      *
      * @param array<mixed> $offering
-     * @param array<mixed> $permissions permissions existantes du datastore
-     *
-     * @return array<mixed>
+     * @param array<mixed> $permissions  permissions existantes du datastore
+     * @param list<string> $communityIds
      */
-    private function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering, array $permissions): array
+    private function addMissingPermissions(string $datastoreId, array $offering, array $permissions, array $communityIds): void
     {
         $offeringId = $offering['_id'];
 
-        $communityPermissions = array_filter($permissions, function ($permission) use ($offeringId, $consumerCommunityId) {
-            return isset($permission['offerings']) && in_array($offeringId, array_column($permission['offerings'], '_id'))
-                && isset($permission['beneficiary']['_id']) && $permission['beneficiary']['_id'] === $consumerCommunityId;
-        });
+        // l’Entrepôt accepte les doublons : on n’envoie que les communautés sans permission sur l’offre
+        $missingCommunityIds = array_values(array_unique(array_filter($communityIds, fn (string $communityId) => [] === array_filter(
+            $permissions,
+            fn ($permission) => isset($permission['offerings']) && in_array($offeringId, array_column($permission['offerings'], '_id'))
+                && ($permission['beneficiary']['_id'] ?? null) === $communityId,
+        ))));
 
-        if ([] !== $communityPermissions) {
-            return [];
+        if ([] === $missingCommunityIds) {
+            return;
         }
 
         $endDate = new \DateTime();
@@ -1003,9 +1005,9 @@ class CartesServiceApiService
             'offerings' => [$offering['_id']],
             'type' => PermissionTypes::COMMUNITY,
             'only_oauth' => false,
-            'communities' => [$consumerCommunityId],
+            'communities' => $missingCommunityIds,
         ];
 
-        return $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody)->array();
+        $this->datastoreApiService->addPermission($datastoreId, $permissionRequestBody)->await();
     }
 }
