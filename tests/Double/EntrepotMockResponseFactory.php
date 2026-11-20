@@ -578,6 +578,13 @@ final class EntrepotMockResponseFactory
             return $this->json($static, 201);
         }
 
+        // comme l’Entrepôt (vérifié le 20/11/2026) : PATCH remplace la liste des offres, le reste de la permission est gardé
+        if ('PATCH' === $method && 1 === preg_match('#^permissions/([\w-]+)$#', $relative, $matches)) {
+            $offeringIds = json_decode($body, true, flags: JSON_THROW_ON_ERROR)['offerings'];
+
+            return $this->json($this->update('permissions', $matches[1], fn (array $item) => ['offerings' => array_map(fn (string $id) => ['_id' => $id], $offeringIds)] + $item));
+        }
+
         if ('PATCH' === $method && 1 === preg_match('#^(annexes|statics|stored_data)/([\w-]+)$#', $relative, $matches)) {
             return $this->json($this->update($matches[1], $matches[2], fn (array $item) => json_decode($body, true, flags: JSON_THROW_ON_ERROR) + $item));
         }

@@ -312,6 +312,41 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertSame([$this->cartesGouvCommunityId()], json_decode($posts[0]['body'])->communities);
     }
 
+    public function testRestrictedAccessRemovesEveryCartesGouvPermissionOfTheOffering(): void
+    {
+        $client = $this->client();
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('own', 'community-1', '2099-01-01T00:00:00+00:00');
+        // l’Entrepôt accepte les doublons
+        $this->seedPermission('cartes-1', $this->cartesGouvCommunityId(), '2099-01-01T00:00:00+00:00');
+        $this->seedPermission('cartes-2', $this->cartesGouvCommunityId(), '2099-01-01T00:00:00+00:00');
+
+        $this->post($client, ['access' => 'restricted'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(['own'], array_column(EntrepotMockResponseFactory::stored('permissions'), '_id'));
+    }
+
+    public function testRestrictedAccessKeepsTheOtherOfferingsOfASharedCartesGouvPermission(): void
+    {
+        $client = $this->client();
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('own', 'community-1', '2099-01-01T00:00:00+00:00');
+        EntrepotMockResponseFactory::seed('permissions', [
+            '_id' => 'shared',
+            'end_date' => '2099-01-01T00:00:00+00:00',
+            'offerings' => [['_id' => self::OFFERING_ID], ['_id' => 'other-offering']],
+            'beneficiary' => ['_id' => $this->cartesGouvCommunityId()],
+        ]);
+
+        $this->post($client, ['access' => 'restricted'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        $permissions = EntrepotMockResponseFactory::stored('permissions');
+        self::assertSame(['own', 'shared'], array_column($permissions, '_id'));
+        self::assertSame([['_id' => 'other-offering']], $permissions[1]['offerings']);
+    }
+
     public function testPermissionsAreLeftIntactWhenTheAccessIsUnchanged(): void
     {
         $this->seedService('WFS', open: false);

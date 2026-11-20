@@ -903,6 +903,8 @@ class CartesServiceApiService
     }
 
     /**
+     * Retire l’offre des permissions de la communauté cartes.gouv.fr : une permission partagée garde ses autres offres.
+     *
      * @param array<mixed> $offering
      * @param array<mixed> $permissions
      */
@@ -910,16 +912,18 @@ class CartesServiceApiService
     {
         $configCommunityId = $this->params->get('config')['community_id'];
 
-        $existingPermission = array_filter($permissions, function ($permission) use ($offering, $configCommunityId) {
-            return isset($permission['offerings'])
-                && in_array($offering['_id'], array_column($permission['offerings'], '_id'))
-                && isset($permission['beneficiary']['_id'])
-                && $permission['beneficiary']['_id'] === $configCommunityId;
-        });
+        foreach ($permissions as $permission) {
+            $offeringIds = array_column($permission['offerings'] ?? [], '_id');
+            if (($permission['beneficiary']['_id'] ?? null) !== $configCommunityId || !in_array($offering['_id'], $offeringIds, true)) {
+                continue;
+            }
 
-        if ([] !== $existingPermission) {
-            $permissionId = reset($existingPermission)['_id'];
-            $this->datastoreApiService->removePermission($datastoreId, $permissionId)->await();
+            $otherOfferingIds = array_values(array_diff($offeringIds, [$offering['_id']]));
+            if ([] === $otherOfferingIds) {
+                $this->datastoreApiService->removePermission($datastoreId, $permission['_id'])->await();
+            } else {
+                $this->datastoreApiService->updatePermission($datastoreId, $permission['_id'], ['offerings' => $otherOfferingIds])->await();
+            }
         }
     }
 
