@@ -59,7 +59,7 @@ final readonly class DatastoreApiService
      */
     public function getEndpointsList(string $datastoreId, array $query = []): array
     {
-        return $this->filterEndpoints($this->api->requestAll("datastores/$datastoreId/endpoints")->resolve(), $query);
+        return self::filterEndpoints($this->api->requestAll("datastores/$datastoreId/endpoints")->resolve(), $query);
     }
 
     /**
@@ -68,7 +68,7 @@ final readonly class DatastoreApiService
      *
      * @return array<mixed>
      */
-    private function filterEndpoints(array $endpoints, array $query = []): array
+    public static function filterEndpoints(array $endpoints, array $query = []): array
     {
         if (isset($query['type'])) {
             $endpoints = array_filter($endpoints, function ($endpoint) use ($query) {

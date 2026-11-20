@@ -593,7 +593,7 @@ class CartesMetadataApiService
      */
     private function getOpenEndpointOfType(array $endpoints, string $type): ?array
     {
-        $endpoints = array_values(array_filter($endpoints, fn (array $endpoint) => strtoupper($endpoint['endpoint']['type'] ?? '') === strtoupper($type) && true === ($endpoint['endpoint']['open'] ?? null)));
+        $endpoints = DatastoreApiService::filterEndpoints($endpoints, ['type' => $type, 'open' => true]);
 
         return (1 === count($endpoints)) ? $endpoints[0]['endpoint'] : null;
     }
