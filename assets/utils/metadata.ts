@@ -1,6 +1,16 @@
+import type { CswMetadata, CswMetadataProducer, Metadata } from "@/@types/app";
+
 // Themes et mot cles INSPIRE
 import inspireKeywords from "@/data/thematic-inspire.json";
 import categories from "@/data/topic_categories.json";
+
+/** organisme gestionnaire de la donnée, à défaut le point de contact */
+export const getMetadataCustodianName = (metadata: Metadata | undefined): string | undefined => {
+    const producers = metadata?.csw_metadata?.producers;
+    const custodian = producers?.find((producer) => producer.role === "custodian") ?? producers?.find((producer) => producer.role === "pointOfContact");
+
+    return custodian?.organization_name;
+};
 
 export const getInspireKeywords = () => {
     // récupérer et applatir tous les sous-tableaux
@@ -14,3 +24,7 @@ export const getThematicCategories = () => {
         .map(([key, value]) => ({ code: key, text: value }))
         .sort((a, b) => a.text.localeCompare(b.text));
 };
+
+// le premier producteur est le point de contact ; le rôle contact est le contact des métadonnées, sinon le point de contact
+export const getMetadataContact = (metadata?: CswMetadata): CswMetadataProducer | undefined =>
+    metadata?.producers?.find((producer) => producer.role === "contact") ?? metadata?.producers?.[0];

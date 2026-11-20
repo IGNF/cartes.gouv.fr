@@ -1,16 +1,9 @@
 import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 
-import { delta } from "@/utils";
-import type { Service } from "../../@types/app";
-import api from "../../entrepot/api";
-import RQKeys from "../../modules/entrepot/RQKeys";
-import { type ApiError } from "../../modules/jsonFetch";
+import type { Service } from "@/@types/app";
+import { type ApiError } from "@/modules/jsonFetch";
+import { serviceQueryOptions } from "./serviceQueryOptions";
 
 export default function useServiceQuery(datastoreId: string, offeringId: string, otherOptions?: Partial<UndefinedInitialDataOptions<Service, ApiError>>) {
-    return useQuery<Service, ApiError>({
-        queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
-        queryFn: ({ signal }) => api.service.getService(datastoreId, offeringId, { signal }),
-        staleTime: delta.minutes(1),
-        ...otherOptions,
-    });
+    return useQuery<Service, ApiError>({ ...serviceQueryOptions(datastoreId, offeringId), ...otherOptions });
 }

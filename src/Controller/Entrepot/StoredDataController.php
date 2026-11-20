@@ -2,8 +2,7 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Constants\EntrepotApi\ProcessingStatuses;
-use App\Constants\EntrepotApi\StoredDataStatuses;
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
@@ -89,28 +88,11 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     #[Route('/{storedDataId}/uses', name: 'get_uses', methods: ['GET'])]
     public function getUses(string $datastoreId, string $storedDataId): JsonResponse
     {
-        $storedDataList = [];
-        $offeringsList = [];
-
-        $procExecList = $this->processingApiService->getAllExecutions($datastoreId, [
-            'input_stored_data' => $storedDataId,
-        ])->resolve();
-        foreach ($procExecList as &$procExec) {
-            if (ProcessingStatuses::SUCCESS === $procExec['status']) {
-                $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id'])->array();
-
-                if (isset($procExec['output']['stored_data']['status']) && StoredDataStatuses::DELETED !== $procExec['output']['stored_data']['status']) {
-                    $storedDataList[] = $procExec['output']['stored_data'];
-                }
-            }
-        }
-
         $offeringsList = $this->configurationApiService->getAllOfferings($datastoreId, [
             'stored_data' => $storedDataId,
         ])->resolve();
 
         return $this->json([
-            'stored_data_list' => $storedDataList,
             'offerings_list' => $offeringsList,
         ]);
     }
@@ -121,8 +103,8 @@ class StoredDataController extends AbstractController implements ApiControllerIn
         $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
 
         // récupération de détails sur l'upload s'il y en a un qui a servi à créer la stored_data
-        if (isset($storedData['tags']['upload_id'])) {
-            $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id'])->array();
+        if (isset($storedData['tags'][StoredDataTags::UPLOAD_ID])) {
+            $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags'][StoredDataTags::UPLOAD_ID])->array();
             $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id'], $inputUpload);
             $inputUpload['checks'] = [];
             $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
@@ -139,8 +121,8 @@ class StoredDataController extends AbstractController implements ApiControllerIn
             }
         }
 
-        $procIntegrationId = $storedData['tags']['proc_int_id'] ?? null;
-        $procPyramidCreationId = $storedData['tags']['proc_pyr_creat_id'] ?? null;
+        $procIntegrationId = $storedData['tags'][StoredDataTags::PROC_INT_ID] ?? null;
+        $procPyramidCreationId = $storedData['tags'][StoredDataTags::PROC_PYR_CREAT_ID] ?? null;
         $procExections = [];
 
         // récupération de l'exécution de traitement d'intégration en base de données

@@ -28,24 +28,16 @@ const breadcrumbNameByRouteId = {
     "/_private/tableau-de-bord/entrepots/$datastoreId/permissions/ajout": "datastore_add_permission",
     "/_private/tableau-de-bord/entrepots/$datastoreId/permissions/$permissionId/modification": "datastore_edit_permission",
     "/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/donnees/": "datasheet_list",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/televersement": "datastore_datasheet_upload",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/creer": "datastore_datasheet_create",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/integration": "datastore_datasheet_upload_integration",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName": "datastore_datasheet_view",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/": "datastore_datasheet_view",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement": "datastore_datasheet_upload",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout": "datastore_datasheet_service_add",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId": "datastore_datasheet_service_view",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details": "datastore_stored_data_details",
     "/_private/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport": "datastore_upload_details",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/wfs/ajout": "datastore_wfs_service_new",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/wfs/$offeringId/modification": "datastore_wfs_service_edit",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/wms-vecteur/ajout": "datastore_wms_vector_service_new",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/wms-vecteur/$offeringId/modification": "datastore_wms_vector_service_edit",
     "/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout": "datastore_pyramid_vector_generate",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/tms/ajout": "datastore_pyramid_vector_tms_service_new",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/tms/$offeringId/modification": "datastore_pyramid_vector_tms_service_edit",
     "/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout": "datastore_pyramid_raster_generate",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/wms-raster/ajout": "datastore_pyramid_raster_wms_raster_service_new",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/wms-raster/$offeringId/modification": "datastore_pyramid_raster_wms_raster_service_edit",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/wmts/ajout": "datastore_pyramid_raster_wmts_service_new",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/wmts/$offeringId/modification": "datastore_pyramid_raster_wmts_service_edit",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation": "datastore_service_view",
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout": "datastore_service_style_add",
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/$styleTechnicalName/modification": "datastore_service_style_edit",
     "/_private/espace-collaboratif/": "espaceco_community_list",
@@ -178,19 +170,22 @@ const getBreadcrumb = (
                 currentPageLabel: tCommon("datastore_name", { name: community?.name, isSandbox }),
             };
 
-        case "datastore_datasheet_upload": {
-            const breadcrumbProps: BreadcrumbProps = {
-                ...datastoreBaseProps,
-            };
+        case "datastore_datasheet_create":
+            return { ...datastoreBaseProps, currentPageLabel: t("datastore_create_datasheet") };
 
-            if (datasheetName) {
-                breadcrumbProps.segments.push({ label: datasheetName, linkProps: datasheetLink() });
-                breadcrumbProps["currentPageLabel"] = t("upload");
-            } else {
-                breadcrumbProps["currentPageLabel"] = t("datastore_create_datasheet");
-            }
-            return breadcrumbProps;
-        }
+        case "datastore_datasheet_upload":
+            return {
+                ...datastoreBaseProps,
+                segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: datasheetLink() }],
+                currentPageLabel: t("upload"),
+            };
+        case "datastore_datasheet_service_add":
+        case "datastore_datasheet_service_view":
+            return {
+                ...datastoreBaseProps,
+                segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: datasheetLink("services") }],
+                currentPageLabel: t(name),
+            };
         case "datastore_datasheet_upload_integration": {
             const breadcrumbProps: BreadcrumbProps = {
                 ...datastoreBaseProps,
@@ -222,19 +217,8 @@ const getBreadcrumb = (
             return { ...breadcrumbProps, currentPageLabel: t("datastore_upload_details") };
         }
 
-        case "datastore_wfs_service_new":
-        case "datastore_wfs_service_edit":
-        case "datastore_wms_vector_service_new":
-        case "datastore_wms_vector_service_edit":
         case "datastore_pyramid_vector_generate":
-        case "datastore_pyramid_vector_tms_service_new":
-        case "datastore_pyramid_vector_tms_service_edit":
         case "datastore_pyramid_raster_generate":
-        case "datastore_pyramid_raster_wms_raster_service_new":
-        case "datastore_pyramid_raster_wms_raster_service_edit":
-        case "datastore_pyramid_raster_wmts_service_new":
-        case "datastore_pyramid_raster_wmts_service_edit":
-        case "datastore_service_view":
             datastoreBaseProps.segments = [
                 ...datastoreBaseProps.segments,
                 { label: datasheetName, linkProps: datasheetLink(offeringId !== undefined ? "services" : "dataset") },
@@ -247,11 +231,10 @@ const getBreadcrumb = (
                 ...datastoreBaseProps.segments,
                 { label: datasheetName, linkProps: datasheetLink("services") },
                 {
-                    label: t("datastore_service_view"),
+                    label: t("datastore_datasheet_service_view"),
                     linkProps: {
-                        to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
-                        params: { datastoreId: datastoreId ?? "", offeringId: offeringId ?? "" },
-                        search: { datasheetName: datasheetName ?? "" },
+                        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
+                        params: { datastoreId: datastoreId ?? "", datasheetName: datasheetName ?? "", offeringId: offeringId ?? "" },
                     },
                 },
             ];

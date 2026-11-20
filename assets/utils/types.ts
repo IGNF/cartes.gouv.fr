@@ -1,14 +1,3 @@
-import { StyleFormat } from "@/@types/app";
-
-export const getStyleExtension = (format: StyleFormat) => {
-    switch (format) {
-        case "mapbox":
-            return "json";
-        default:
-            return format;
-    }
-};
-
 export const getFileExtension = (filename: string) => {
     if (!filename) return "";
     return filename.split(".").pop()?.toLowerCase();
@@ -27,9 +16,6 @@ export const looksLikeShapefileComponent = (filename: string) => {
         extension === "qix"
     );
 };
-
-export const getArrayRange = (start: number, stop: number, step: number = 1): number[] =>
-    Array.from({ length: (stop - start) / step + 1 }, (_, index) => start + index * step);
 
 const rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
 const reEscapeChar = /\\(\\)?/g;

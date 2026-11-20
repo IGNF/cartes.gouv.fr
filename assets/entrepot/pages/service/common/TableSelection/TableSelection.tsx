@@ -7,13 +7,12 @@ import { type VectorDb } from "../../../../../@types/app";
 import { filterGeometricRelations } from "../../../../../helpers";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { type PyramidVectorGenerateFormValuesType } from "../../tms/PyramidVectorGenerateForm/PyramidVectorGenerateForm";
-import { type WmsVectorServiceFormValuesType } from "../../wms-vector/WmsVectorServiceForm";
 
 type TablesSelectionProps = {
     filterGeometric?: boolean;
     vectorDb: VectorDb;
     visible: boolean;
-    form: UseFormReturn<WmsVectorServiceFormValuesType | PyramidVectorGenerateFormValuesType>;
+    form: UseFormReturn<PyramidVectorGenerateFormValuesType>;
 };
 
 const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vectorDb, visible, form }) => {

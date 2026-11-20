@@ -1,0 +1,733 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Functional;
+
+use App\Tests\Double\EntrepotMockResponseFactory;
+use App\Tests\Support\KeycloakLoginTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+
+/**
+ * Modification d’un flux depuis sa page : multipart avec le champ `data` et les fichiers `thumbnail`, `attribution_logo`.
+ */
+final class ServiceEditRouteTest extends WebTestCase
+{
+    use KeycloakLoginTrait;
+
+    private const OFFERING_ID = '5d3c1b2a-8e7f-4a6b-9c0d-1e2f3a4b5c6d';
+    private const CONFIGURATION_ID = 'configuration-edit';
+    private const ANNEXES_URL = 'https://entrepot.test/annexes/entrepot_test';
+    private const OLD_THUMBNAIL_PATH = '/thumbnail/0f9e8d7c-6b5a-4c3d-8e1f-a0b1c2d3e4f5.png';
+    private const OLD_LOGO_PATH = '/attribution-logo/1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d.png';
+    // style déjà migré : getStyles ne le réécrit pas
+    private const STYLE = ['name' => 'Mon style', 'technical_name' => 'mon_style', 'layers' => []];
+    private const SLD = '<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld"><NamedLayer><Name>communes</Name></NamedLayer></StyledLayerDescriptor>';
+    private const PNG_1X1 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
+    protected function setUp(): void
+    {
+        EntrepotMockResponseFactory::reset();
+        EntrepotMockResponseFactory::seed(
+            'metadata',
+            ['_id' => 'metadata-1', 'file_identifier' => 'ign.fiche', 'tags' => ['datasheet_name' => 'Fiche'], 'endpoints' => []],
+            (string) file_get_contents(__DIR__.'/../Fixture/metadata/expected-minimal.xml'),
+        );
+        foreach ([self::OLD_THUMBNAIL_PATH => 'service-thumbnail', self::OLD_LOGO_PATH => 'attribution-logo'] as $path => $type) {
+            EntrepotMockResponseFactory::seed('annexes', ['_id' => 'annexe-'.$type, 'paths' => [$path], 'labels' => ['datasheet_name=Fiche', "type=$type"]]);
+        }
+    }
+
+    public function testWfsConfigurationIsReplacedWithoutLayerNameAndWithRebuiltRelations(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+
+        $this->post($client, ['tables' => [
+            ['native_name' => 'routes', 'title' => 'Routes', 'public_name' => '', 'description' => 'Les routes', 'keywords' => []],
+        ]] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        $put = $this->configurationPut();
+        self::assertArrayNotHasKey('layer_name', $put);
+        self::assertSame('Flux modifié', $put['name']);
+        self::assertSame([[
+            'stored_data' => 'vectordb-1',
+            'relations' => [['native_name' => 'routes', 'title' => 'Routes', 'abstract' => 'Les routes']],
+        ]], $put['type_infos']['used_data']);
+        self::assertTrue($put['type_infos']['expose_primary_key']);
+        self::assertSame($this->seededConfiguration('WFS')['metadata'], $put['metadata']);
+
+        $configuration = EntrepotMockResponseFactory::stored('configurations')[0];
+        self::assertSame('SANDBOX.mon_flux', $configuration['layer_name']);
+        self::assertSame('Hydrographie, Transports', $configuration['tags']['theme']);
+        self::assertSame(self::OFFERING_ID, EntrepotMockResponseFactory::stored('offerings')[0]['_id']);
+        self::assertContains(['method' => 'PUT', 'path' => '/api/datastores/ds-1/offerings/'.self::OFFERING_ID, 'body' => ''], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function pyramidTypes(): iterable
+    {
+        yield 'WMS raster' => ['WMS-RASTER'];
+        yield 'WMTS ou TMS' => ['WMTS-TMS'];
+    }
+
+    #[DataProvider('pyramidTypes')]
+    public function testPyramidTypeInfosGetTheTitleDescriptionAndThemes(string $type): void
+    {
+        $this->seedService($type);
+        $client = $this->client();
+
+        $this->post($client, ['description' => 'Nouvelle description'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame([
+            'used_data' => [['stored_data' => 'pyramid-1', 'bottom_level' => '18', 'top_level' => '5']],
+            'styles' => ['static-legend'],
+            'title' => 'Flux modifié',
+            'abstract' => 'Nouvelle description',
+            'keywords' => ['Hydrographie', 'Transports'],
+        ], $this->configurationPut()['type_infos']);
+        // même endpoint public : l’offre est synchronisée, pas recréée
+        self::assertSame([self::OFFERING_ID], array_column(EntrepotMockResponseFactory::stored('offerings'), '_id'));
+    }
+
+    public function testNewLogoReplacesTheOldOneWhichIsRemoved(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+
+        $this->post($client, ['attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr']] + $this->payload(), ['attribution_logo' => $this->png()]);
+
+        self::assertResponseIsSuccessful();
+        $logoUrl = $this->configurationPut()['attribution']['logo']['url'];
+        self::assertStringStartsWith(self::ANNEXES_URL.'/attribution-logo/', $logoUrl);
+        self::assertNotSame(self::ANNEXES_URL.self::OLD_LOGO_PATH, $logoUrl);
+        self::assertSame(['annexe-service-thumbnail'], $this->remainingSeededAnnexes());
+    }
+
+    public function testOldLogoIsKeptWithoutANewFileAndRemovedOnRequest(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+
+        $this->post($client, ['attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr']] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(self::ANNEXES_URL.self::OLD_LOGO_PATH, $this->configurationPut()['attribution']['logo']['url']);
+        self::assertSame(['annexe-service-thumbnail', 'annexe-attribution-logo'], $this->remainingSeededAnnexes());
+
+        $this->post($client, ['attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr'], 'remove_attribution_logo' => true] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(['title' => 'IGN', 'url' => 'https://www.ign.fr'], $this->configurationPut()['attribution']);
+        self::assertSame(['annexe-service-thumbnail'], $this->remainingSeededAnnexes());
+    }
+
+    public function testUncheckedAttributionRemovesTheAttributionAndItsLogo(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+
+        $this->post($client, $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertArrayNotHasKey('attribution', $this->configurationPut());
+        self::assertArrayNotHasKey('attribution', EntrepotMockResponseFactory::stored('configurations')[0]);
+        self::assertSame(['annexe-service-thumbnail'], $this->remainingSeededAnnexes());
+    }
+
+    public function testThumbnailRemovalKeepsTheOtherExtraKeys(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+
+        $this->post($client, ['remove_thumbnail' => true] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(['styles' => [self::STYLE], '_search' => ['autre' => 'valeur']], EntrepotMockResponseFactory::stored('configurations')[0]['extra']);
+        self::assertSame([], $this->remainingSeededAnnexes());
+    }
+
+    public function testNewThumbnailReplacesTheOldOne(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+
+        $this->post($client, $this->payload(), ['thumbnail' => $this->png()]);
+
+        self::assertResponseIsSuccessful();
+        $extra = EntrepotMockResponseFactory::stored('configurations')[0]['extra'];
+        self::assertStringStartsWith(self::ANNEXES_URL.'/thumbnail/', $extra['_search']['url_vignette']);
+        self::assertNotSame(self::ANNEXES_URL.self::OLD_THUMBNAIL_PATH, $extra['_search']['url_vignette']);
+        self::assertSame([self::STYLE], $extra['styles']);
+    }
+
+    public function testNewAnnexesAreRemovedWhenTheConfigurationCannotBeReplaced(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PUT configurations/'.self::CONFIGURATION_ID);
+
+        $this->post($client, ['attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr']] + $this->payload(), [
+            'thumbnail' => $this->png(),
+            'attribution_logo' => $this->png(),
+        ]);
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame(['annexe-service-thumbnail', 'annexe-attribution-logo'], array_column(EntrepotMockResponseFactory::stored('annexes'), '_id'));
+    }
+
+    public function testNewThumbnailIsRemovedWhenExtraCannotBeWritten(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PATCH configurations/'.self::CONFIGURATION_ID);
+
+        $this->post($client, $this->payload(), ['thumbnail' => $this->png()]);
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame(['annexe-service-thumbnail', 'annexe-attribution-logo'], array_column(EntrepotMockResponseFactory::stored('annexes'), '_id'));
+        self::assertSame(self::ANNEXES_URL.self::OLD_THUMBNAIL_PATH, EntrepotMockResponseFactory::stored('configurations')[0]['extra']['_search']['url_vignette']);
+    }
+
+    public function testPublicToRestrictedVisibleRecreatesTheOfferingOnThePrivateEndpoint(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+
+        $this->post($client, ['access' => 'restricted_visible'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        $offerings = EntrepotMockResponseFactory::stored('offerings');
+        self::assertCount(1, $offerings);
+        self::assertNotSame(self::OFFERING_ID, $offerings[0]['_id']);
+        self::assertSame($offerings[0]['_id'], $this->jsonResponse($client)['_id']);
+        self::assertSame(EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID, $offerings[0]['endpoint']['_id']);
+        self::assertSame(
+            ['community-1', $this->cartesGouvCommunityId()],
+            array_map(fn (array $permission) => $permission['beneficiary']['_id'], EntrepotMockResponseFactory::stored('permissions')),
+        );
+    }
+
+    public function testRestrictedToPublicRecreatesTheOfferingOnThePublicEndpointWithoutPermission(): void
+    {
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('own', 'community-1', '2099-01-01T00:00:00+00:00');
+        // permission partagée avec un autre flux : elle garde l’autre flux
+        EntrepotMockResponseFactory::seed('permissions', [
+            '_id' => 'shared',
+            'end_date' => '2099-01-01T00:00:00+00:00',
+            'offerings' => [['_id' => self::OFFERING_ID], ['_id' => 'other-offering']],
+            'beneficiary' => ['_id' => 'community-1'],
+        ]);
+        $client = $this->client();
+
+        $this->post($client, ['access' => 'public'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        $offerings = EntrepotMockResponseFactory::stored('offerings');
+        self::assertCount(1, $offerings);
+        self::assertNotSame(self::OFFERING_ID, $offerings[0]['_id']);
+        self::assertSame(EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, $offerings[0]['endpoint']['_id']);
+        $permissions = EntrepotMockResponseFactory::stored('permissions');
+        self::assertSame(['shared'], array_column($permissions, '_id'));
+        self::assertSame([['_id' => 'other-offering']], $permissions[0]['offerings']);
+    }
+
+    public function testFailedOfferingCreationLeavesTheFluxWithoutOffering(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('POST configurations/'.self::CONFIGURATION_ID.'/offerings');
+
+        $this->post($client, ['access' => 'restricted'] + $this->payload());
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame([], EntrepotMockResponseFactory::stored('offerings'));
+    }
+
+    public function testExpiredPermissionsAreRenewedWhenTheAccessChanges(): void
+    {
+        $client = $this->client();
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('expired-own', 'community-1', '2020-01-01T00:00:00+00:00');
+        $this->seedPermission('expired-cartes', $this->cartesGouvCommunityId(), '2020-01-01T00:00:00+00:00');
+
+        $this->post($client, ['access' => 'restricted_visible'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        $permissions = EntrepotMockResponseFactory::stored('permissions');
+        self::assertNotContains('expired-own', array_column($permissions, '_id'));
+        self::assertNotContains('expired-cartes', array_column($permissions, '_id'));
+        self::assertSame(['community-1', $this->cartesGouvCommunityId()], array_map(fn (array $permission) => $permission['beneficiary']['_id'], $permissions));
+        self::assertCount(1, $this->permissionPosts());
+    }
+
+    public function testExpiredPermissionIsRenewedOnceWhenTheDatastoreCommunityIsTheCartesGouvCommunity(): void
+    {
+        $client = $this->client();
+        EntrepotMockResponseFactory::setDatastoreCommunity($this->cartesGouvCommunityId());
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('expired-cartes', $this->cartesGouvCommunityId(), '2020-01-01T00:00:00+00:00');
+
+        $this->post($client, ['access' => 'restricted_visible'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame([$this->cartesGouvCommunityId()], array_map(fn (array $permission) => $permission['beneficiary']['_id'], EntrepotMockResponseFactory::stored('permissions')));
+    }
+
+    public function testRestrictedAccessKeepsTheOwnPermissionWhenTheDatastoreCommunityIsTheCartesGouvCommunity(): void
+    {
+        $client = $this->client();
+        EntrepotMockResponseFactory::setDatastoreCommunity($this->cartesGouvCommunityId());
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('own', $this->cartesGouvCommunityId(), '2099-01-01T00:00:00+00:00');
+        $this->seedPermission('other', 'community-other', '2099-01-01T00:00:00+00:00');
+
+        // accès enregistré « restreint visible » (permission cartes.gouv.fr en cours), demandé « restreint »
+        $this->post($client, ['access' => 'restricted'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(['own', 'other'], array_column(EntrepotMockResponseFactory::stored('permissions'), '_id'));
+    }
+
+    public function testRestrictedToRestrictedVisibleSendsOnlyTheMissingCommunityAsAList(): void
+    {
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('own', 'community-1', '2099-01-01T00:00:00+00:00');
+        $client = $this->client();
+
+        $this->post($client, ['access' => 'restricted_visible'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        $posts = $this->permissionPosts();
+        self::assertCount(1, $posts);
+        // décodé sans tableau associatif : une liste à clés non continues deviendrait un objet JSON
+        self::assertSame([$this->cartesGouvCommunityId()], json_decode($posts[0]['body'])->communities);
+    }
+
+    public function testRestrictedAccessRemovesEveryCartesGouvPermissionOfTheOffering(): void
+    {
+        $client = $this->client();
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('own', 'community-1', '2099-01-01T00:00:00+00:00');
+        // l’Entrepôt accepte les doublons
+        $this->seedPermission('cartes-1', $this->cartesGouvCommunityId(), '2099-01-01T00:00:00+00:00');
+        $this->seedPermission('cartes-2', $this->cartesGouvCommunityId(), '2099-01-01T00:00:00+00:00');
+
+        $this->post($client, ['access' => 'restricted'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(['own'], array_column(EntrepotMockResponseFactory::stored('permissions'), '_id'));
+    }
+
+    public function testRestrictedAccessKeepsTheOtherOfferingsOfASharedCartesGouvPermission(): void
+    {
+        $client = $this->client();
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('own', 'community-1', '2099-01-01T00:00:00+00:00');
+        EntrepotMockResponseFactory::seed('permissions', [
+            '_id' => 'shared',
+            'end_date' => '2099-01-01T00:00:00+00:00',
+            'offerings' => [['_id' => self::OFFERING_ID], ['_id' => 'other-offering']],
+            'beneficiary' => ['_id' => $this->cartesGouvCommunityId()],
+        ]);
+
+        $this->post($client, ['access' => 'restricted'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        $permissions = EntrepotMockResponseFactory::stored('permissions');
+        self::assertSame(['own', 'shared'], array_column($permissions, '_id'));
+        self::assertSame([['_id' => 'other-offering']], $permissions[1]['offerings']);
+    }
+
+    public function testPermissionsAreLeftIntactWhenTheAccessIsUnchanged(): void
+    {
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('expired-own', 'community-1', '2020-01-01T00:00:00+00:00');
+        $client = $this->client();
+
+        $this->post($client, ['access' => 'restricted'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(['expired-own'], array_column(EntrepotMockResponseFactory::stored('permissions'), '_id'));
+    }
+
+    public function testWmsVectorKeepsAddsAndRemovesTablesWithTheirStyleFiles(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+
+        // communes gardée sans nouveau fichier, routes décochée, rivieres ajoutée
+        $this->post($client, ['selected_tables' => ['communes', 'rivieres']] + $this->wmsVectorPayload(), ['style_files' => ['rivieres' => $this->sld()]]);
+
+        self::assertResponseIsSuccessful();
+        $statics = EntrepotMockResponseFactory::stored('statics');
+        self::assertCount(2, $statics);
+        self::assertSame('static-communes', $statics[0]['_id']);
+        self::assertSame(sprintf('config_%s_style_wmsv_rivieres', self::CONFIGURATION_ID), $statics[1]['name']);
+        $put = $this->configurationPut();
+        self::assertArrayNotHasKey('layer_name', $put);
+        self::assertSame([
+            'stored_data' => 'vectordb-1',
+            'relations' => [['name' => 'communes', 'style' => 'static-communes'], ['name' => 'rivieres', 'style' => $statics[1]['_id']]],
+        ], $put['type_infos']['used_data'][0]);
+        self::assertSame(['Flux modifié', 'Nouvelle description', ['Hydrographie', 'Transports']], [$put['type_infos']['title'], $put['type_infos']['abstract'], $put['type_infos']['keywords']]);
+    }
+
+    public function testWmsVectorNewStyleFileReplacesTheOldOneAfterTheSave(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+
+        $this->post($client, $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseIsSuccessful();
+        $statics = EntrepotMockResponseFactory::stored('statics');
+        self::assertSame(['static-routes'], array_values(array_intersect(array_column($statics, '_id'), ['static-communes', 'static-routes'])));
+        $newStatic = array_values(array_filter($statics, fn (array $static) => 'static-routes' !== $static['_id']))[0];
+        self::assertSame(sprintf('config_%s_style_wmsv_communes', self::CONFIGURATION_ID), $newStatic['name']);
+        self::assertSame([['name' => 'communes', 'style' => $newStatic['_id']], ['name' => 'routes', 'style' => 'static-routes']], $this->configurationPut()['type_infos']['used_data'][0]['relations']);
+    }
+
+    public function testWmsVectorTableNamedWithDigitsOnlyKeepsItsSavedStyle(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [['name' => '2024', 'style' => 'static-2024']]);
+        $client = $this->client();
+
+        // PHP range une clé « 2024 » en entier
+        $this->post($client, ['selected_tables' => ['2024']] + $this->wmsVectorPayload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame([['name' => '2024', 'style' => 'static-2024']], $this->configurationPut()['type_infos']['used_data'][0]['relations']);
+    }
+
+    public function testWmsVectorAddedTableWithoutStyleFileAnswers422WithoutWriting(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+
+        $this->post($client, ['selected_tables' => ['communes', 'rivieres']] + $this->wmsVectorPayload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['style_files[rivieres]'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    public function testWmsVectorFailedSaveRemovesTheNewStyleFilesAndKeepsTheOldOnes(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PUT configurations/'.self::CONFIGURATION_ID);
+
+        $this->post($client, $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame(['static-communes', 'static-routes'], array_column(EntrepotMockResponseFactory::stored('statics'), '_id'));
+    }
+
+    public function testWmsVectorFailureAfterTheSaveRemovesTheStyleFilesTheConfigurationNoLongerUses(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PUT offerings/'.self::OFFERING_ID);
+
+        $this->post($client, $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseStatusCodeSame(500);
+        $statics = array_column(EntrepotMockResponseFactory::stored('statics'), '_id');
+        $relations = EntrepotMockResponseFactory::stored('configurations')[0]['type_infos']['used_data'][0]['relations'];
+        // configuration enregistrée : le nouveau fichier reste, l’ancien part
+        self::assertEqualsCanonicalizing(array_column($relations, 'style'), $statics);
+        self::assertNotContains('static-communes', $statics);
+    }
+
+    public function testWmsVectorAccessChangeKeepsTheNewStyleFileAndRemovesTheOldOne(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+
+        $this->post($client, ['access' => 'restricted'] + $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseIsSuccessful();
+        $offerings = EntrepotMockResponseFactory::stored('offerings');
+        self::assertSame([EntrepotMockResponseFactory::WMSV_PRIVATE_ENDPOINT_ID], array_column(array_column($offerings, 'endpoint'), '_id'));
+        $relations = EntrepotMockResponseFactory::stored('configurations')[0]['type_infos']['used_data'][0]['relations'];
+        self::assertEqualsCanonicalizing(array_column($relations, 'style'), array_column(EntrepotMockResponseFactory::stored('statics'), '_id'));
+        self::assertNotContains('static-communes', array_column($relations, 'style'));
+    }
+
+    public function testWmsVectorFluxBeingPublishedAnswers409WithoutUploadingStyleFiles(): void
+    {
+        $this->seedService('WMS-VECTOR', offeringStatus: 'PUBLISHING');
+        $client = $this->client();
+
+        $this->post($client, $this->wmsVectorPayload(), ['style_files' => ['communes' => $this->sld()]]);
+
+        self::assertResponseStatusCodeSame(409);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    public function testWmsVectorEmptyDescriptionOrTooManyTablesAnswer422(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $client = $this->client();
+
+        $this->post($client, ['description' => '', 'selected_tables' => []] + $this->wmsVectorPayload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['description', 'selected_tables'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+
+        $this->post($client, ['selected_tables' => array_map(fn (int $i) => "table_$i", range(1, 11))] + $this->wmsVectorPayload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['selected_tables'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    public function testFluxBeingPublishedAnswers409WithoutWriting(): void
+    {
+        $this->seedService('WFS', offeringStatus: 'PUBLISHING');
+        $client = $this->client();
+
+        $this->post($client, $this->payload(), ['thumbnail' => $this->png()]);
+
+        self::assertResponseStatusCodeSame(409);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    public function testConfigurationBeingSynchronizedAnswers409WithoutWriting(): void
+    {
+        $this->seedService('WFS', configurationStatus: 'SYNCHRONIZING');
+        $client = $this->client();
+
+        $this->post($client, $this->payload());
+
+        self::assertResponseStatusCodeSame(409);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    public function testInvalidFieldsAnswer422ByType(): void
+    {
+        $this->seedService('WFS');
+        $client = $this->client();
+
+        $this->post($client, ['tables' => []] + $this->payload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['tables'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+
+        $table = $this->payload()['tables'][0];
+        $this->post($client, ['tables' => [['public_name' => 'Nom Invalide'] + $table]] + $this->payload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['tables[0].public_name'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+
+        // nom déjà enregistré d’un ancien flux, hors de la règle des minuscules
+        $this->post($client, ['tables' => [['public_name' => 'Communes_2020'] + $table]] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+    }
+
+    public function testEmptyDescriptionAnswers422OutsideWfs(): void
+    {
+        $this->seedService('WMS-RASTER');
+        $client = $this->client();
+
+        $this->post($client, ['description' => ''] + $this->payload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['description'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    public function testFluxIsSavedWhenTheOnlineResourcesRefreshFails(): void
+    {
+        $this->seedService('WFS');
+        EntrepotMockResponseFactory::failNext('GET metadata', status: 403);
+        $client = $this->client();
+
+        $this->post($client, $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('Flux modifié', $this->configurationPut()['name']);
+    }
+
+    private function client(): KernelBrowser
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+
+        return $client;
+    }
+
+    private function cartesGouvCommunityId(): string
+    {
+        return self::getContainer()->getParameter('config')['community_id'];
+    }
+
+    /**
+     * @param ?list<array{name: string, style: string}> $wmsVectorRelations relations enregistrées d’un WMS vecteur, communes et routes par défaut
+     */
+    private function seedService(string $type, bool $open = true, string $offeringStatus = 'PUBLISHED', string $configurationStatus = 'PUBLISHED', ?array $wmsVectorRelations = null): void
+    {
+        $configuration = $this->seededConfiguration($type);
+        if (null !== $wmsVectorRelations) {
+            $configuration['type_infos']['used_data'][0]['relations'] = $wmsVectorRelations;
+        }
+        EntrepotMockResponseFactory::seed('configurations', ['status' => $configurationStatus] + $configuration);
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'pyramid-1', 'type' => 'ROK4-PYRAMID-RASTER', 'tags' => ['datasheet_name' => 'Fiche']]);
+        if ('WMS-VECTOR' === $type) {
+            EntrepotMockResponseFactory::seed('statics', ['_id' => 'static-communes', 'name' => 'config_'.self::CONFIGURATION_ID.'_style_wmsv_communes']);
+            EntrepotMockResponseFactory::seed('statics', ['_id' => 'static-routes', 'name' => 'config_'.self::CONFIGURATION_ID.'_style_wmsv_routes']);
+        }
+        EntrepotMockResponseFactory::seed('offerings', [
+            '_id' => self::OFFERING_ID,
+            'type' => $type,
+            'layer_name' => 'SANDBOX.mon_flux',
+            'open' => $open,
+            'status' => $offeringStatus,
+            'endpoint' => ['_id' => match ($type) {
+                'WMS-RASTER' => EntrepotMockResponseFactory::WMSR_PUBLIC_ENDPOINT_ID,
+                'WMTS-TMS' => EntrepotMockResponseFactory::WMTS_PUBLIC_ENDPOINT_ID,
+                'WMS-VECTOR' => EntrepotMockResponseFactory::WMSV_PUBLIC_ENDPOINT_ID,
+                default => $open ? EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID : EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID,
+            }],
+            'configuration' => ['_id' => self::CONFIGURATION_ID],
+            'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/public']],
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function seededConfiguration(string $type): array
+    {
+        $typeInfos = match ($type) {
+            'WFS' => ['used_data' => [[
+                'stored_data' => 'vectordb-1',
+                'relations' => [['native_name' => 'communes', 'public_name' => 'Communes_2020', 'title' => 'Communes', 'abstract' => 'Les communes']],
+            ]], 'expose_primary_key' => true],
+            'WMS-VECTOR' => [
+                'used_data' => [['stored_data' => 'vectordb-1', 'relations' => [['name' => 'communes', 'style' => 'static-communes'], ['name' => 'routes', 'style' => 'static-routes']]]],
+                'title' => 'Ancien titre',
+                'abstract' => 'Ancienne description',
+                'keywords' => ['Ancien mot-clé'],
+            ],
+            default => [
+                'used_data' => [['stored_data' => 'pyramid-1', 'bottom_level' => '18', 'top_level' => '5']],
+                'styles' => ['static-legend'],
+                'title' => 'Ancien titre',
+                'abstract' => '"Ancienne description"',
+                'keywords' => ['Ancien mot-clé'],
+            ],
+        };
+
+        return [
+            '_id' => self::CONFIGURATION_ID,
+            'type' => $type,
+            'status' => 'PUBLISHED',
+            'name' => 'Ancien titre',
+            'layer_name' => 'SANDBOX.mon_flux',
+            'tags' => ['datasheet_name' => 'Fiche', 'theme' => 'Hydrographie'],
+            'type_infos' => $typeInfos,
+            'metadata' => [['format' => 'text/html', 'url' => 'https://catalogue.test/dataset/ign.fiche', 'type' => 'Other']],
+            'attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr', 'logo' => ['url' => self::ANNEXES_URL.self::OLD_LOGO_PATH, 'width' => 1, 'height' => 1, 'format' => 'image/png']],
+            'extra' => ['styles' => [self::STYLE], '_search' => ['url_vignette' => self::ANNEXES_URL.self::OLD_THUMBNAIL_PATH, 'autre' => 'valeur']],
+        ];
+    }
+
+    /** @return list<array{method: string, path: string, body: string}> */
+    private function permissionPosts(): array
+    {
+        return array_values(array_filter(
+            EntrepotMockResponseFactory::writeRequests(),
+            fn (array $request) => 'POST' === $request['method'] && str_ends_with($request['path'], '/permissions'),
+        ));
+    }
+
+    private function seedPermission(string $id, string $communityId, string $endDate): void
+    {
+        EntrepotMockResponseFactory::seed('permissions', [
+            '_id' => $id,
+            'end_date' => $endDate,
+            'offerings' => [['_id' => self::OFFERING_ID]],
+            'beneficiary' => ['_id' => $communityId],
+        ]);
+    }
+
+    /** @return array<mixed> corps du dernier PUT de la configuration */
+    private function configurationPut(): array
+    {
+        $puts = array_values(array_filter(
+            EntrepotMockResponseFactory::writeRequests(),
+            fn (array $request) => 'PUT' === $request['method'] && str_ends_with($request['path'], '/configurations/'.self::CONFIGURATION_ID),
+        ));
+        self::assertNotEmpty($puts);
+
+        return json_decode(end($puts)['body'], true, flags: JSON_THROW_ON_ERROR);
+    }
+
+    /** @return list<string> annexes semées encore présentes */
+    private function remainingSeededAnnexes(): array
+    {
+        return array_values(array_intersect(array_column(EntrepotMockResponseFactory::stored('annexes'), '_id'), ['annexe-service-thumbnail', 'annexe-attribution-logo']));
+    }
+
+    private function sld(): UploadedFile
+    {
+        $path = (string) tempnam(sys_get_temp_dir(), 'style');
+        file_put_contents($path, self::SLD);
+
+        return new UploadedFile($path, 'style.sld', 'application/octet-stream', null, true);
+    }
+
+    private function png(): UploadedFile
+    {
+        $path = (string) tempnam(sys_get_temp_dir(), 'image');
+        file_put_contents($path, base64_decode(self::PNG_1X1, true));
+
+        return new UploadedFile($path, 'image.png', 'image/png', null, true);
+    }
+
+    /**
+     * @param array<string, mixed>                                    $payload
+     * @param array<string, UploadedFile|array<string, UploadedFile>> $files
+     */
+    private function post(KernelBrowser $client, array $payload, array $files = []): void
+    {
+        $client->xmlHttpRequest('POST', self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/services/'.self::OFFERING_ID, ['data' => json_encode($payload, JSON_THROW_ON_ERROR)], $files);
+    }
+
+    /** @return array<string, mixed> */
+    private function wmsVectorPayload(): array
+    {
+        return ['description' => 'Nouvelle description', 'tables' => [], 'selected_tables' => ['communes', 'routes']] + $this->payload();
+    }
+
+    /** @return array<string, mixed> */
+    private function payload(): array
+    {
+        return [
+            'title' => 'Flux modifié',
+            'themes' => ['Hydrographie', 'Transports'],
+            'access' => 'public',
+            'attribution' => null,
+            'description' => '',
+            'tables' => [[
+                'native_name' => 'communes',
+                'title' => 'Communes',
+                'public_name' => 'communes',
+                'description' => 'Les communes',
+                'keywords' => [],
+            ]],
+            'remove_thumbnail' => false,
+            'remove_attribution_logo' => false,
+        ];
+    }
+}

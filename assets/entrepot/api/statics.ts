@@ -14,14 +14,6 @@ const getList = async (datastoreId: string, queryParams: QueryParams = {}, other
     };
 };
 
-const getAll = (datastoreId: string, queryParams: QueryParams = {}, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_statics_get_list", { datastoreId, ...queryParams, all: true });
-    return jsonFetch<StaticFile[]>(url, {
-        method: "GET",
-        ...otherOptions,
-    });
-};
-
 const remove = (datastoreId: string, staticFileId: string) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_statics_delete", { datastoreId, staticFileId });
     return jsonFetch<null>(url, { method: "DELETE" });
@@ -35,7 +27,6 @@ const download = async (datastoreId: string, staticFileId: string) => {
 
 const statics = {
     download,
-    getAll,
     getList,
     remove,
 };

@@ -1,103 +1,105 @@
 # Workflow : intégration upload vecteur (VECTOR-DB)
 
-Ce document décrit le fonctionnement actuel de notre workflow d'intégration d'un upload vecteur. Le frontend fait un polling régulier qui déclenche une route symfony qui orchestre pour le processus.
+Ce document décrit l'intégration d'une livraison vecteur : envoi des fichiers à l'Entrepôt, attente des vérifications, lancement du traitement d'intégration en base, puis suppression de la livraison.
 
-## Objectif
+Le navigateur pilote l'intégration : l'utilisateur reste sur la page de suivi. Il n'y a pas de tâche de fond. S'il quitte la page avant le lancement du traitement, l'intégration s'arrête et reprend par « Reprendre l'intégration ». Une fois le traitement lancé, l'Entrepôt termine seul.
 
-- Envoyer les fichiers à l'API Entrepôt.
-- Attendre les checks automatiques côté Entrepôt.
-- Lancer le traitement d'intégration en base (VECTOR-DB).
+## Deux routes
 
-## Principe du workflow
+- `GET /api/datastores/{datastoreId}/upload/{uploadId}/integration` : calcule et renvoie l'état. Aucun effet de bord.
+- `POST /api/datastores/{datastoreId}/upload/{uploadId}/integration` : exécute la prochaine action en attente, puis renvoie l'état.
 
-- Le workflow contient une liste d'étapes fixes et ordonnées.
-- Chaque étape a un statut : waiting, in_progress, successful, failed.
-- Le backend calcule l'état global à partir des statuts des étapes.
-- Une seule étape avec effet de bord peut être exécutée à la fois.
-- L'étape courante est la première étape non successful.
+L'état n'est stocké nulle part : `UploadIntegrationWorkflow::getState` le recalcule à chaque appel à partir de la livraison, de ses vérifications, de l'exécution du traitement et de la donnée stockée.
 
-## Diagramme de progression
-
-```mermaid
-flowchart LR
-    A[send_files_api] --> B[wait_checks] --> C[integration_processing]
-    A -->|failed| F[failed]
-    B -->|failed| F
-    C -->|failed| F
-    C -->|successful| S[done]
+```json
+{
+    "steps": {
+        "send_files_api": "successful",
+        "wait_checks": "successful",
+        "integration_processing": "in_progress"
+    },
+    "status": "in_progress",
+    "next_action": null,
+    "vectordb_id": "…",
+    "datasheet_name": "…"
+}
 ```
+
+- `status` : statut de la première étape non réussie, `successful` si les trois ont réussi.
+- `next_action` : ce que le `POST` exécuterait (`send_files`, `launch_processing`, `delete_upload`), `null` s'il n'y a rien à faire.
 
 ## Étapes et règles de statut
 
-Le workflow a 3 étapes fixes. Chaque étape est un couple (nom, statut).
+```mermaid
+flowchart LR
+    A[send_files_api] --> B[wait_checks] --> C[integration_processing] --> D[suppression de la livraison]
+    A -->|failed| F[failed]
+    B -->|failed| F
+    C -->|failed| F
+```
+
+Une étape n'est calculée que si la précédente a réussi.
 
 - send_files_api
-    - successful : upload en CLOSED ou CHECKING
-    - waiting : upload en OPEN
-    - failed : autre statut
+    - successful : livraison en CLOSED ou CHECKING
+    - waiting : livraison en OPEN, fichier téléversé encore présent
+    - failed : autre statut, ou fichier téléversé supprimé par le nettoyage quotidien de `var/data` (fichiers de plus d'un jour)
 
 - wait_checks
-    - failed : au moins un check en FAILED
-    - in_progress : au moins un check en ASKED ou IN_PROGRESS, ou upload en CHECKING
-    - successful : au moins un check en PASSED et aucun failed
-    - waiting : aucun check lancé et upload pas en CHECKING
+    - failed : au moins une vérification en FAILED
+    - in_progress : au moins une vérification en ASKED ou IN_PROGRESS, ou livraison en CHECKING
+    - successful : au moins une vérification en PASSED et aucune en FAILED
+    - waiting : aucune vérification lancée et livraison pas en CHECKING
 
 - integration_processing
-    - waiting : tags proc_int_id et vectordb_id absents
+    - waiting : tags `proc_int_id` et `vectordb_id` absents
     - failed : un seul des deux tags présent
-    - in_progress : processing en CREATED, WAITING ou PROGRESS
-    - successful : processing SUCCESS et stored_data vectordb en GENERATED
-    - in_progress : processing SUCCESS et stored_data en CREATED, GENERATING ou MODIFYING
+    - in_progress : traitement en CREATED, WAITING ou PROGRESS
+    - successful : traitement en SUCCESS et donnée stockée en GENERATED
+    - in_progress : traitement en SUCCESS et donnée stockée en CREATED, GENERATING ou MODIFYING
     - failed : autres cas
 
-## Fonctionnement pas à pas (backend)
+Le statut de la livraison ne dit pas si les vérifications ont réussi : une livraison passe de CHECKING à CLOSED dans les deux cas (mesuré le 10/11/2026). Seules les exécutions de vérification (`/checks`) font la différence.
 
-1. Création de l'upload
-    - Le backend déclare une livraison côté Entrepôt (type VECTOR, srs, name).
-    - Il ajoute les tags : data_upload_path, datasheet_name, producer, production_year.
+## Actions du POST
 
-2. Calcul de progression
-    - Le backend calcule un tableau progress (étape -> statut).
-    - Il détermine l'étape courante (première étape non successful).
-    - Il écrit les tags :
-        - integration_progress (json encodé)
-        - integration_current_step (index de l'étape courante)
+Une seule action par appel.
 
-3. Avancement contrôlé
-    - Si l'étape courante est en waiting, le backend peut avancer d'une étape.
-    - Le workflow n'exécute jamais plus d'une action avec effet de bord par appel.
+| `next_action`       | Condition                                              | Action                                                                             |
+| ------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `send_files`        | livraison en OPEN                                      | envoi des fichiers et de leurs md5 à l'Entrepôt, puis fermeture de la livraison    |
+| `launch_processing` | vérifications réussies, traitement pas encore créé     | création de l'exécution, tags sur la livraison et sur la donnée stockée, lancement |
+| `delete_upload`     | les trois étapes ont réussi, ou donnée stockée DELETED | suppression de la livraison                                                        |
 
-4. Actions avec effet de bord
-    - send_files_api : envoi des fichiers à Entrepôt, calcul des md5, puis fermeture de l'upload.
-    - integration_processing : création et lancement du processing d'intégration en base.
+- Envoi des fichiers : pas de limite de temps (`set_time_limit(0)`), un gros fichier dépasse `max_execution_time`.
+- Lancement interrompu : si l'écriture des tags ou le lancement échoue, l'exécution créée est supprimée, puis les tags `proc_int_id` et `vectordb_id` sont retirés de la livraison. Si l'Entrepôt refuse la suppression (l'exécution a pu démarrer), les tags restent : l'état suit alors l'exécution réelle. Supprimer une exécution non lancée supprime aussi sa donnée stockée de sortie ; l'inverse est refusé (409). L'erreur d'origine remonte.
+- Suppression : un échec ne change pas l'état `successful`. La suppression est retentée à la prochaine ouverture de la fiche.
+- Donnée stockée supprimée : l'Entrepôt la renvoie encore, avec le statut DELETED. L'état est `failed` et `next_action` vaut `delete_upload` : la livraison ne sert plus. Une donnée stockée UNSTABLE garde sa livraison, pour le rapport.
 
-5. Fin du workflow
-    - Quand les 3 étapes sont successful, l'upload est supprimé.
+## Verrou
+
+Le `POST` prend un verrou par livraison (`upload_integration_{uploadId}`), sans attendre. Un second appel simultané n'exécute rien et renvoie l'état courant.
+
+Les fichiers verrous sont dans `var/data/locks` (`framework.lock`), sur le volume partagé entre les pods : le verrou vaut pour toute l'application, pas pour un seul pod. Le nettoyage quotidien de `var/data` ne les supprime pas : la date d'un fichier verrou ne change pas tant qu'il est tenu. Si ce stockage est indisponible, le `POST` répond 503 et n'exécute rien. Le `GET` ne dépend pas du verrou.
+
+## Côté navigateur
+
+- Page de suivi (`DatasheetUploadIntegrationDialog`) : lit le `GET` toutes les 3 secondes et envoie le `POST` dès que `next_action` n'est pas `null` et que l'état n'est pas `failed`. Jamais deux `POST` à la fois. Après une erreur (lecture ou action), elle s'arrête et affiche l'erreur avec un bouton « Réessayer ».
+- Onglet Données (`useUploadIntegrations`) :
+    - une livraison sans tag `vectordb_id` n'est pas lancée : sa ligne lit le `GET` pour savoir si une vérification a échoué (« Voir le rapport ») ou non (« Reprendre l'intégration ») ;
+    - une livraison dont la donnée stockée est GENERATED, ou absente de la liste de la fiche, n'est pas affichée : l'onglet envoie le `POST`, qui la supprime si la donnée stockée est GENERATED ou DELETED ;
+    - si la fiche n'existe plus après ce nettoyage (404), l'onglet renvoie à la liste des fiches.
 
 ## Tags utilisés
 
 - upload
     - data_upload_path
     - datasheet_name
-    - producer
-    - production_year
-    - proc_int_id
-    - vectordb_id
-    - integration_progress
-    - integration_current_step
+    - producer, producer_short (optionnel), production_year, date, theme, zone, email_notification
+    - proc_int_id, vectordb_id : écrits au lancement du traitement
+    - file_tree : écrit juste avant la suppression
 - stored_data (VECTOR-DB)
     - upload_id
     - proc_int_id
     - datasheet_name
-    - producer (optionnel)
-    - production_year (optionnel)
-
-## Exemple de integration_progress
-
-```json
-{
-    "send_files_api": "successful",
-    "wait_checks": "successful",
-    "integration_processing": "in_progress"
-}
-```
+    - producer, producer_short, production_year, date, theme, zone : recopiés de l'upload quand il les porte (`UploadIntegrationWorkflow::forwardedTags`)

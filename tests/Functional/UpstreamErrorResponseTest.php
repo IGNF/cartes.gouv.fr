@@ -20,7 +20,7 @@ final class UpstreamErrorResponseTest extends WebTestCase
         $client = self::createClient();
         $this->logIn($client);
 
-        $client->xmlHttpRequest('GET', self::METADATA_URL.'/0f8fad5b-d9cb-469f-a165-70867728950e');
+        $client->xmlHttpRequest('GET', self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/upload/0f8fad5b-d9cb-469f-a165-70867728950e/upload-report');
 
         self::assertResponseStatusCodeSame(404);
         self::assertResponseHeaderSame('content-type', 'application/problem+json');

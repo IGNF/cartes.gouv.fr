@@ -1,5 +1,5 @@
 import { AnnexStandardListResponseDto } from "@/@types/entrepot";
-import { Annexe, DatasheetThumbnailAnnexe } from "../../@types/app";
+import { Annexe } from "../../@types/app";
 import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 
@@ -40,34 +40,12 @@ const add = (datastoreId: string, path: string, file: File) => {
     return jsonFetch<Annexe>(url, { method: "POST" }, formData, true, true);
 };
 
-const modify = (datastoreId: string, annexeId: string, data: object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_modify", { datastoreId, annexeId });
-    return jsonFetch<Annexe>(url, { method: "PATCH" }, data);
-};
-
 const replaceFile = (datastoreId: string, annexeId: string, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
 
     const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_replace_file", { datastoreId, annexeId });
     return jsonFetch<Annexe>(url, { method: "POST" }, formData, true, true);
-};
-
-const addThumbnail = (datastoreId: string, data: FormData) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_thumbnail_add", { datastoreId });
-    return jsonFetch<DatasheetThumbnailAnnexe>(
-        url,
-        {
-            method: "POST",
-        },
-        data,
-        true
-    );
-};
-
-const removeThumbnail = (datastoreId: string, datasheetName: string, annexeId: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_thumbnail_delete", { datastoreId, datasheetName, annexeId });
-    return jsonFetch<null>(url, { method: "DELETE" });
 };
 
 const remove = (datastoreId: string, annexeId: string) => {
@@ -80,9 +58,6 @@ export default {
     getAll,
     getFileContent,
     add,
-    modify,
     replaceFile,
-    addThumbnail,
-    removeThumbnail,
     remove,
 };

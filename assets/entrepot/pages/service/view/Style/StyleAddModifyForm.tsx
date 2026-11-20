@@ -73,6 +73,10 @@ type StyleAddModifyFormProps = {
 const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     const navigate = useNavigate();
     const { datastoreId, datasheetName, offeringId, styleTechnicalName } = props;
+    const backLink = {
+        to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId",
+        params: { datastoreId, datasheetName, offeringId },
+    } as const;
 
     // const { t } = useTranslation("Style");
     const { t: tCommon } = useTranslation("Common");
@@ -304,7 +308,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
             return editMode ? api.style.modify(datastoreId, offeringId, data) : api.style.add(datastoreId, offeringId, data);
         },
         onSuccess: (data: CartesStyle[]) => {
-            queryClient.setQueryData(RQKeys.datastore_offering(datastoreId, offeringId), (oldService: Service | undefined) => {
+            queryClient.setQueryData(RQKeys.datastore_service(datastoreId, offeringId), (oldService: Service | undefined) => {
                 if (!oldService) return oldService;
                 return {
                     ...oldService,
@@ -319,12 +323,8 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                 queryClient.removeQueries({ queryKey: RQKeys.datastore_annexe(datastoreId, annexeId) });
             });
 
-            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offeringId) });
-            void navigate({
-                to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
-                params: { datastoreId, offeringId },
-                search: { datasheetName },
-            });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_service(datastoreId, offeringId) });
+            void navigate(backLink);
         },
     });
 
@@ -358,16 +358,12 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
-                            title="Retour à la fiche de donnée"
+                            title="Retour à la page du flux"
                             size="large"
                             {...(isDirty
                                 ? { onClick: confirmReturnModal.open }
                                 : {
-                                      linkProps: {
-                                          to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
-                                          params: { datastoreId, offeringId },
-                                          search: { datasheetName },
-                                      },
+                                      linkProps: backLink,
                                   })}
                         />
                         <h1 className={fr.cx("fr-m-0")}>{editMode ? `Modifier le style "${style.name}"` : "Ajouter un style"}</h1>
@@ -446,12 +442,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         {
                             children: "Annuler",
                             priority: "secondary",
-                            onClick: () =>
-                                void navigate({
-                                    to: "/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation",
-                                    params: { datastoreId, offeringId },
-                                    search: { datasheetName },
-                                }),
+                            onClick: () => void navigate(backLink),
                         },
                         {
                             children: "Enregistrer les modifications",

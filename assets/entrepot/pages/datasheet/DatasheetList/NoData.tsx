@@ -32,7 +32,7 @@ export default function NoData({ datastoreId, canCreate }: NoDataProps) {
                             ? [
                                   {
                                       children: "Créer une fiche de données",
-                                      linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement" as const, params: { datastoreId } },
+                                      linkProps: { to: "/tableau-de-bord/entrepots/$datastoreId/donnees/creer" as const, params: { datastoreId } },
                                       iconId: "fr-icon-arrow-right-s-line" as const,
                                       iconPosition: "right" as const,
                                   },

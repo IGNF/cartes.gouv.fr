@@ -29,32 +29,19 @@ export type ComponentKey =
     | import("../entrepot/pages/users/keys/UserKeysListTab/UserKeysListTab.locale").I18n
     | import("../entrepot/pages/users/keys/UserKey.locale").I18n
     | import("../entrepot/pages/users/permissions/Permissions.locale").I18n
-    | import("../entrepot/pages/service/metadata/MetadataForm.locale").I18n
-    | import("../entrepot/pages/service/metadata/MetadataValidation.locale").I18n
     | import("../entrepot/pages/accesses-request/AccessesRequest.locale").I18n
     | import("../entrepot/pages/communities/CommunityInfo/CommunityInfo.locale").I18n
     | import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage.locale").I18n
     | import("../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale").I18n
-    | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegration.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale").I18n
-    | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale").I18n
-    | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbList.locale").I18n
-    | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale").I18n
-    | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DatasetTabNext/StoredDataDeleteConfirmDialog.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.locale").I18n
     | import("../validations/sld/SldStyleValidation.locale").I18n
     | import("../validations/mapbox/MapboxStyleValidator.locale").I18n
-    | import("../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale").I18n
-    | import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm.locale").I18n
-    | import("../entrepot/pages/service/wfs/WfsServiceForm.locale").I18n
-    | import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm.locale").I18n
     | import("../entrepot/pages/service/tms/PyramidVectorGenerateForm/PyramidVectorGenerateForm.locale").I18n
     | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm.locale").I18n
-    | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm.locale").I18n
-    | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale").I18n
     | import("../entrepot/pages/service/common/TableSelection/TableSelection.locale").I18n
-    | import("../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale").I18n
     | import("../components/Utils/Geostyler/UploadStyleFile.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
     | import("../espaceco/pages/communities/CommunityList.locale").I18n
@@ -84,6 +71,20 @@ export type ComponentKey =
     | import("../components/Input/InputCollection/InputCollection.locale").I18n
     | import("../entrepot/pages/config/Alerts.locale").I18n
     | import("../components/Input/KeyValueList.locale").I18n
+    | import("../components/Input/AddressFields.locale").I18n
+    | import("../components/Input/AutocompleteSelect.locale").I18n
+    | import("../components/Input/ImageCropModal/ImageCropModal.locale").I18n
+    | import("../components/Input/ImageFieldUpload.locale").I18n
+    | import("../entrepot/pages/datasheet/forms/sections.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetCreate/DatasheetCreate.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DescriptionTab/DescriptionTab.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetViewNext.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DatasetTabNext/DatasetTabNext.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/ServiceListTab/ServicesListTabNext.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DocumentsTabNext/DocumentsTabNext.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasetAdd/DatasetAdd.locale").I18n
+    | import("../entrepot/pages/datasheet/ServiceForm/ServiceForm.locale").I18n
+    | import("../entrepot/pages/datasheet/ServicePage/ServicePage.locale").I18n
     | import("../entrepot/pages/stats/Stats.locale").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;

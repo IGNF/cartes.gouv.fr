@@ -6,6 +6,7 @@ export * from "./lang";
 export * from "./map";
 export * from "./offering";
 export * from "./types";
+export * from "./upload";
 export * from "./user";
 export * from "./image";
 export * from "./form";

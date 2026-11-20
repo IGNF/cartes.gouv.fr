@@ -97,8 +97,8 @@ final readonly class ApiClient
     /**
      * Envoie un fichier via une requête multipart/form-data. Utile pour les endpoints d'upload de fichiers.
      *
-     * @param array<string,mixed> $formFields
-     * @param array<string,mixed> $query
+     * @param array<int|string,mixed> $formFields clé entière : [nom => valeur], pour répéter un champ
+     * @param array<string,mixed>     $query
      */
     public function sendFile(string $method, string $url, string $filepath, array $formFields = [], array $query = [], string $fieldName = 'file'): ResponsePromise
     {
@@ -108,9 +108,9 @@ final readonly class ApiClient
     /**
      * Envoie plusieurs fichiers via une requête multipart/form-data. Utile pour les endpoints d'upload de fichiers.
      *
-     * @param array<string,string> $filepaths  (field name => file path)
-     * @param array<string,mixed>  $formFields
-     * @param array<string,mixed>  $query
+     * @param array<string,string>    $filepaths  (field name => file path)
+     * @param array<int|string,mixed> $formFields
+     * @param array<string,mixed>     $query
      */
     public function sendFiles(string $method, string $url, array $filepaths, array $formFields = [], array $query = []): ResponsePromise
     {

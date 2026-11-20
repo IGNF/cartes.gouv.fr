@@ -90,6 +90,17 @@ final readonly class ConfigurationApiService
         return $this->api->patch("datastores/$datastoreId/configurations/$configurationId", $body);
     }
 
+    /**
+     * Le PATCH remplace `extra` en entier : l’objet envoyé est le nouvel `extra`, sans fusion (voir modify()).
+     *
+     * @param array<mixed> $extra
+     */
+    public function replaceExtra(string $datastoreId, string $configurationId, array $extra): ResponsePromise
+    {
+        // objet JSON même vide : un tableau vide serait encodé en liste
+        return $this->api->patch("datastores/$datastoreId/configurations/$configurationId", ['extra' => [] === $extra ? new \stdClass() : $extra]);
+    }
+
     public function remove(string $datastoreId, string $configurationId): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/configurations/$configurationId");

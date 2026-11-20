@@ -1,9 +1,7 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import MainNavigation from "@codegouvfr/react-dsfr/MainNavigation";
 import { useMatches } from "@tanstack/react-router";
-import { tss } from "tss-react";
 
 import type { RouteId } from "@/router";
+import TertiaryNavigation from "./TertiaryNavigation";
 
 type DatastoreTertiaryNavigationProps = {
     datastoreId: string;
@@ -23,10 +21,8 @@ export default function DatastoreTertiaryNavigation({ datastoreId }: DatastoreTe
     const params = { datastoreId };
     const isTab = (tab: keyof typeof TAB_ROUTES) => routeId !== undefined && (TAB_ROUTES[tab] as RouteId[]).includes(routeId);
 
-    const { classes } = useStyles();
-
     return (
-        <MainNavigation
+        <TertiaryNavigation
             items={[
                 {
                     text: "Fiches de données",
@@ -54,18 +50,6 @@ export default function DatastoreTertiaryNavigation({ datastoreId }: DatastoreTe
                     isActive: isTab("info"),
                 },
             ]}
-            classes={{
-                root: classes.root,
-            }}
         />
     );
 }
-
-const useStyles = tss.withName({ DatastoreTertiaryNavigation }).create({
-    root: {
-        backgroundImage: `linear-gradient(to right, ${fr.colors.decisions.border.default.grey.default}, ${fr.colors.decisions.border.default.grey.default})`,
-        backgroundPosition: "bottom",
-        backgroundRepeat: "no-repeat",
-        backgroundSize: "100% 2px",
-    },
-});

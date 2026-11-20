@@ -2,6 +2,24 @@
 
 Il s'agit d'une propriété nommée `extra` qui sont présentes dans certaines [entités](https://geoplateforme.github.io/entrepot/production/concepts/) de l'API qui permet de stocker des informations supplémentaires.
 
+Sur une configuration, seul un `PATCH` écrit `extra` : le `POST` de création et le `PUT` de remplacement l’ignorent (vérifié le 10/11/2026). Le `PATCH` remplace l’objet entier : `ConfigurationApiService::modify` fusionne avec la valeur existante avant l’envoi.
+
+## vignette d’un flux
+
+Chemin dans extra : "_search.url_vignette"
+
+```json
+{
+    "extra": {
+        "_search": {
+            "url_vignette": "https://data.geopf.fr/annexes/{technical_name}/thumbnail/{uuid}.png"
+        }
+    }
+}
+```
+
+URL de l’annexe vignette déposée par le formulaire de publication (voir [annexes/README.md](annexes/README.md)), écrite par un `PATCH` juste après la création de la configuration. Lue par l’onglet « Flux » de la fiche.
+
 ## un ensemble de fichiers de style associés à une configuration
 
 Chemin dans extra : "styles"

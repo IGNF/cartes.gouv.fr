@@ -48,8 +48,13 @@ const schema = (t: TranslationFunction<"ManageCommunityValidations", ComponentKe
             .test("check-file-dimensions", t("description.logo.dimensions_error"), async (files) => {
                 const file = files?.[0] ?? undefined;
                 if (file) {
-                    const size: ImageSize = await getImageSize(file);
-                    if (size.width > 400 || size.height > 400) {
+                    try {
+                        const size: ImageSize = await getImageSize(file);
+                        if (size.width > 400 || size.height > 400) {
+                            return false;
+                        }
+                    } catch {
+                        // image non décodable
                         return false;
                     }
                 }

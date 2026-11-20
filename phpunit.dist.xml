@@ -37,6 +37,8 @@
         <server name="API_ENTREPOT_URL" value="https://entrepot.test/api" force="true" />
         <env name="ANNEXES_URL" value="https://entrepot.test/annexes" force="true" />
         <server name="ANNEXES_URL" value="https://entrepot.test/annexes" force="true" />
+        <env name="API_ENTREPOT_PROC_INT_VECT_FILES_DB" value="processing-int-vect" force="true" />
+        <server name="API_ENTREPOT_PROC_INT_VECT_FILES_DB" value="processing-int-vect" force="true" />
         <env name="CATALOGUE_URL" value="https://catalogue.test" force="true" />
         <server name="CATALOGUE_URL" value="https://catalogue.test" force="true" />
         <env name="S3_ENDPOINT" value="http://s3.test" force="true" />

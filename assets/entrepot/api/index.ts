@@ -7,11 +7,10 @@ import storedData from "./stored-data";
 import upload from "./upload";
 import community from "./community";
 import user from "./user";
-import wfs from "./wfs";
-import wmsVector from "./wms-vector";
 import pyramidVector from "./pyramidVector";
 import pyramidRaster from "./pyramidRaster";
 import service from "./service";
+import configuration from "./configuration";
 import epsg from "./epsg";
 import annexe from "./annexe";
 import style from "./style";
@@ -19,6 +18,7 @@ import metadata from "./metadata";
 import processing from "./processing";
 import statics from "./statics";
 import geonetwork from "./geonetwork";
+import geocoding from "./geocoding";
 import alerts from "./alerts";
 
 const api = {
@@ -32,11 +32,10 @@ const api = {
     upload,
     community,
     user,
-    wfs,
-    wmsVector,
     pyramidVector,
     pyramidRaster,
     service,
+    configuration,
     annexe,
     style,
     metadata,
@@ -46,5 +45,7 @@ const api = {
     // epsg.io
     epsg,
     geonetwork,
+    // Géoplateforme (géocodage)
+    geocoding,
 };
 export default api;

@@ -1,0 +1,230 @@
+import { type TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
+import { z } from "zod";
+
+import { ConfigurationTypeEnum, type DatasheetDetailed, type DatastoreEndpoint, SERVICE_ACCESSES, type ServiceAccess } from "@/@types/app";
+import { type ComponentKey } from "@/i18n/types";
+import { regex, SERVICE_TYPES, type ServiceType } from "@/utils";
+import { TAG_VALUE_MAX_LENGTH } from "../DatasetAdd/datasetAddSchema";
+import { type SldError, validateSld } from "./validateSld";
+
+type T = TranslationFunction<"ServiceForm", ComponentKey>;
+
+/** type de configuration Entrepôt (et d’endpoint) du type de flux */
+export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeEnum> = {
+    wfs: ConfigurationTypeEnum.WFS,
+    wms: ConfigurationTypeEnum.WMSVECTOR,
+    tms: ConfigurationTypeEnum.WMTSTMS,
+    wmts: ConfigurationTypeEnum.WMTSTMS,
+};
+
+/** un flux WMS publié depuis une pyramide raster est un WMS raster */
+export const isRasterPyramid = (datasheet: DatasheetDetailed | undefined, storedDataId: string): boolean =>
+    (datasheet?.pyramid_raster_list ?? []).some((item) => item._id === storedDataId);
+
+export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean): ConfigurationTypeEnum =>
+    type === "wms" && rasterPyramid ? ConfigurationTypeEnum.WMSRASTER : SERVICE_CONFIGURATION_TYPES[type];
+
+/** tables à choisir : WFS, WMS sur une base vecteur ; ni WMS raster, ni WMTS, ni TMS */
+export const hasTables = (type: ServiceType, rasterPyramid: boolean): boolean => type === "wfs" || (type === "wms" && !rasterPyramid);
+
+export { SERVICE_ACCESSES, type ServiceAccess };
+export { SERVICE_TYPES, type ServiceType };
+
+/** accès offerts par les endpoints de l’entrepôt pour ce type de configuration ; tous tant que les endpoints ne sont pas lus (le back refuse un accès sans endpoint) */
+export const availableServiceAccesses = (endpoints: DatastoreEndpoint[] | undefined, configurationType: ConfigurationTypeEnum): readonly ServiceAccess[] => {
+    if (!endpoints) return SERVICE_ACCESSES;
+    const ofType = endpoints.filter((item) => item.endpoint.type.toUpperCase() === configurationType);
+    const hasOpen = ofType.some((item) => item.endpoint.open);
+    const hasPrivate = ofType.some((item) => !item.endpoint.open);
+    return SERVICE_ACCESSES.filter((access) => (access === "public" ? hasOpen : hasPrivate));
+};
+
+/** même regex que WfsTableFormDTO : nom technique d’une table WFS en minuscules */
+export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;
+
+export const SERVICE_IMAGE_ACCEPT = ["jpg", "jpeg", "png"];
+export const SERVICE_IMAGE_MAX_SIZE_MB = 5;
+
+/** même limite que ServiceFormDTO::TABLES_MAX */
+export const SERVICE_TABLES_MAX = 10;
+
+type SchemaDeps = {
+    t: T;
+    type: ServiceType;
+    /** donnée choisie = pyramide raster (toujours en WMTS) : un flux sans tables ni styles */
+    rasterPyramid?: boolean;
+    /** noms de couches déjà pris pour ce type de flux */
+    existingLayerNames: readonly string[];
+    /** préfixe imposé par l’entrepôt aux noms techniques, suivi de « _ » */
+    layerNamePrefix?: string;
+    /** accès offerts par les endpoints de l’entrepôt pour ce type de flux */
+    availableAccesses: readonly ServiceAccess[];
+    /** modification : noms techniques enregistrés par table (`native_name` → `public_name`) ; nom facultatif, ancien nom accepté hors de la règle des minuscules, pas de plafond de tables en WFS */
+    savedTablePublicNames?: Readonly<Record<string, string>>;
+};
+
+// undefined : inchangée, null : supprimée, File : nouvelle image
+const imageFile = z.instanceof(File).nullish();
+
+// fichier modifié ou déplacé sur le disque après son choix : le navigateur refuse de le lire
+type StyleFileError = SldError | { code: "unreadable" };
+
+// un même fichier n’est relu qu’une fois par table, même quand le formulaire revalide à chaque changement
+const sldValidations = new WeakMap<File, Map<string, Promise<StyleFileError[]>>>();
+// shortcut: lu en UTF-8 ; noms de table GeoPackage en ASCII (GpkgFormatHandler), autres formats non contrôlés, à revoir si un nom accentué est refusé à tort
+const validateSldFile = (file: File, tableName: string): Promise<StyleFileError[]> => {
+    const byTable = sldValidations.get(file) ?? new Map<string, Promise<StyleFileError[]>>();
+    sldValidations.set(file, byTable);
+    const validation =
+        byTable.get(tableName) ??
+        file
+            .text()
+            .then((text) => validateSld(text, tableName))
+            .catch((): StyleFileError[] => {
+                // échec non gardé : le prochain envoi relit le fichier
+                byTable.delete(tableName);
+                return [{ code: "unreadable" }];
+            });
+    byTable.set(tableName, validation);
+    return validation;
+};
+
+const sldErrorMessage = (t: T, error: StyleFileError): string =>
+    error.code === "layer_name" ? t("validation.table.style.layer_name", { expected: error.expected }) : t(`validation.table.style.${error.code}`);
+
+const storedDataRequiredMessage = (t: T, type: ServiceType): string => {
+    if (type === "wms") return t("validation.stored_data.required_wms");
+    if (type === "wmts") return t("validation.stored_data.required_wmts");
+    if (type === "tms") return t("validation.stored_data.required_tms");
+    return t("validation.stored_data.required");
+};
+
+export const buildServiceFormSchema = ({
+    t,
+    type,
+    rasterPyramid = false,
+    existingLayerNames,
+    layerNamePrefix,
+    availableAccesses,
+    savedTablePublicNames,
+}: SchemaDeps) => {
+    const edit = savedTablePublicNames !== undefined;
+    const tableSchema = z
+        .object({
+            native_name: z.string(),
+            selected: z.boolean(),
+            title: z.string().trim(),
+            public_name: z.string().trim(),
+            description: z.string().trim(),
+            keywords: z.array(z.string()),
+            // fichier SLD (WMS vecteur)
+            style: z.instanceof(File).optional(),
+            // modification WMS vecteur : fichier de style enregistré, gardé sans nouveau fichier
+            saved_style_id: z.string().optional(),
+            // modification : table enregistrée absente de la base, affichée mais non cochable
+            missing: z.boolean().optional(),
+        })
+        // champs obligatoires seulement sur les tables cochées
+        .superRefine(async (table, ctx) => {
+            if (!table.selected) return;
+            if (type === "wms") {
+                if (table.style === undefined) {
+                    if (table.saved_style_id === undefined) ctx.addIssue({ code: "custom", path: ["style"], message: t("validation.table.style.required") });
+                } else if (!table.style.name.toLowerCase().endsWith(".sld")) {
+                    ctx.addIssue({ code: "custom", path: ["style"], message: t("validation.table.style.extension") });
+                } else {
+                    const [error] = await validateSldFile(table.style, table.native_name);
+                    if (error !== undefined) ctx.addIssue({ code: "custom", path: ["style"], message: sldErrorMessage(t, error) });
+                }
+            }
+            if (type !== "wfs") return;
+            if (table.title === "") ctx.addIssue({ code: "custom", path: ["title"], message: t("validation.table.title.required") });
+            if (table.public_name === "") {
+                // modification : vide = l’Entrepôt sert `native_name`
+                if (!edit) ctx.addIssue({ code: "custom", path: ["public_name"], message: t("validation.table.public_name.required") });
+            } else if (!WFS_TABLE_TECHNICAL_NAME_REGEX.test(table.public_name) && savedTablePublicNames?.[table.native_name] !== table.public_name) {
+                ctx.addIssue({ code: "custom", path: ["public_name"], message: t("validation.table.public_name.chars") });
+            }
+            if (table.description === "") ctx.addIssue({ code: "custom", path: ["description"], message: t("validation.table.description.required") });
+        });
+
+    const attributionSchema = z
+        .object({
+            enabled: z.boolean(),
+            title: z.string().trim(),
+            url: z.string().trim(),
+            logo: imageFile,
+        })
+        .superRefine((attribution, ctx) => {
+            if (!attribution.enabled) return;
+            if (attribution.title === "") ctx.addIssue({ code: "custom", path: ["title"], message: t("validation.attribution.text.required") });
+            if (attribution.url === "") {
+                ctx.addIssue({ code: "custom", path: ["url"], message: t("validation.attribution.url.required") });
+            } else if (
+                // domaine de premier niveau exigé, comme Assert\Url(requireTld: true) côté serveur
+                !z.url({ protocol: /^https?$/, hostname: /\.[a-z]{2,}$/i }).safeParse(attribution.url).success
+            ) {
+                ctx.addIssue({ code: "custom", path: ["url"], message: t("validation.attribution.url.invalid") });
+            }
+        });
+
+    return z.object({
+        stored_data_id: z.string().min(1, storedDataRequiredMessage(t, type)),
+        title: z.string().trim().min(1, t("validation.title.required")),
+        technical_name: z
+            .string()
+            .trim()
+            .min(1, t("validation.technical_name.required"))
+            .regex(regex.technical_name, t("validation.technical_name.chars"))
+            .refine((value) => !existingLayerNames.includes(value), t("validation.technical_name.taken"))
+            .refine(
+                (value) => !layerNamePrefix || value.startsWith(`${layerNamePrefix}_`),
+                t("validation.technical_name.prefix", { prefix: layerNamePrefix ?? "" })
+            )
+            .refine((value) => !layerNamePrefix || value !== `${layerNamePrefix}_`, t("validation.technical_name.prefix_only")),
+        thumbnail: imageFile,
+        themes: z
+            .array(z.string())
+            .min(1, t("validation.themes.required"))
+            .refine((themes) => themes.join(", ").length <= TAG_VALUE_MAX_LENGTH, t("validation.themes.max", { max: TAG_VALUE_MAX_LENGTH })),
+        // une entrée par table géométrique de la base choisie, cochée ou non
+        // WFS : pas de description du flux, chaque table a la sienne
+        description: type === "wfs" ? z.string() : z.string().trim().min(1, t("validation.description.required")),
+        tables: hasTables(type, rasterPyramid)
+            ? z
+                  .array(tableSchema)
+                  .refine((tables) => tables.some((table) => table.selected), t("validation.tables.required"))
+                  .refine(
+                      // plafond des fichiers de style du WMS vecteur, publication WFS comprise ; pas en modification WFS
+                      (tables) => (edit && type === "wfs") || tables.filter((table) => table.selected).length <= SERVICE_TABLES_MAX,
+                      t("validation.tables.max", { max: SERVICE_TABLES_MAX })
+                  )
+            : z.array(tableSchema),
+        access: z.enum(SERVICE_ACCESSES).refine((access) => availableAccesses.includes(access), t("validation.access.unavailable")),
+        attribution: attributionSchema,
+    });
+};
+
+// type, donnée stockée et nom technique figés en modification
+export const buildServiceEditFormSchema = (
+    deps: Omit<SchemaDeps, "existingLayerNames" | "layerNamePrefix"> & { savedTablePublicNames: Readonly<Record<string, string>> }
+) => buildServiceFormSchema({ ...deps, existingLayerNames: [] }).omit({ stored_data_id: true, technical_name: true });
+
+export type ServiceEditFormValues = z.input<ReturnType<typeof buildServiceEditFormSchema>>;
+export type ServiceEditFormOutput = z.output<ReturnType<typeof buildServiceEditFormSchema>>;
+
+export type ServiceFormValues = z.input<ReturnType<typeof buildServiceFormSchema>>;
+export type ServiceFormOutput = z.output<ReturnType<typeof buildServiceFormSchema>>;
+export type ServiceTableFormValues = ServiceFormValues["tables"][number];
+
+export const serviceFormDefaultValues: ServiceFormValues = {
+    stored_data_id: "",
+    title: "",
+    technical_name: "",
+    description: "",
+    thumbnail: undefined,
+    themes: [],
+    tables: [],
+    access: "public",
+    attribution: { enabled: false, title: "", url: "", logo: undefined },
+};

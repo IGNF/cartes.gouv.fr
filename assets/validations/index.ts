@@ -1,5 +1,3 @@
-import metadata from "./metadata";
-import sldStyle from "./sld/sldStyle";
 import SldStyleValidator from "./sld/SldStyleValidator";
 import QGisStyleValidator from "./QGisStyleValidator";
 import MapboxStyleValidator from "./mapbox/MapboxStyleValidator";
@@ -25,8 +23,6 @@ const getValidator = (service: Service, format: StyleFormat | undefined) => {
 };
 
 const validations = {
-    metadata,
-    sldStyle,
     getValidator,
 };
 

@@ -73,6 +73,7 @@
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "react-dsfr-tiptap": "^3.0.2",
+        "react-easy-crop": "^6.2.4",
         "react-error-boundary": "^6.0.0",
         "react-hook-form": "^7.45.1",
         "sass-embedded": "^1.83.4",
@@ -88,6 +89,7 @@
         "vite-plugin-symfony": "^8.0",
         "vitest": "^5.0.5",
         "yup": "^1.2.0",
+        "zod": "^4.6.7",
         "zustand": "^5.0.0"
     },
     "overrides": {

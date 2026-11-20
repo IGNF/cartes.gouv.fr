@@ -145,7 +145,7 @@ function serviceRequest({ datastoreId, service }: Record<string, string>): Stats
     if (!datastoreId || !parsed) return undefined;
     return parsed.kind === "endpoint"
         ? { route: "cartesgouvfr_api_datastore_get_endpoint_stats", routeParams: { datastoreId, endpointId: parsed.id } }
-        : { route: "cartesgouvfr_api_service_get_service_stats", routeParams: { datastoreId, offeringId: parsed.id } };
+        : { route: "cartesgouvfr_api_offering_stats", routeParams: { datastoreId, offeringId: parsed.id } };
 }
 
 // ---------- configuration ----------

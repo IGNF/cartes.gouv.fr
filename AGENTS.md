@@ -48,7 +48,7 @@ Project vocabulary (membership, snapshot, grant-path...): `docs/developer/glossa
 - SVG illustrations using DSFR CSS variables must be inlined (`import svg from "@/img/....svg?raw"` + `dangerouslySetInnerHTML`), never loaded via `<img src>`: an external SVG document doesn't resolve the page's CSS variables and falls back to fixed light-theme colors.
 - Name hooks/components by the artifact they produce, not their current usage role: `usePlanIgnWmtsLayer`, not `useBackgroundLayer`.
 - Routing: TanStack Router, file routes in `assets/routes/` (French file names, they mirror URLs); `assets/routeTree.gen.ts` is generated and committed. Route metadata goes in `staticData` (`requiredRights`, `public`, `matomoLabel`, required on every leaf). See `docs/developer/routing/README.md`.
-- Forms: React Hook Form + yup resolver; `Controller` for complex controlled inputs.
+- Forms: React Hook Form; new or rewritten forms use zod (v4) with `zodResolver`, validation messages in the form's `.locale.tsx` file; existing yup forms migrate only when touched. `Controller` for complex controlled inputs.
 - Guard optional inputs: yup `.test()` callbacks must handle `undefined` values; route/search param parsing must handle `NaN`/empty values and validate against an enum with a fallback.
 - Never pass a state setter/toggle directly as a DOM event handler (it would receive the event object): write `onClick={() => toggle()}`. Buttons inside forms that don't submit need `type="button"`.
 - React Query cache: don't build query keys from possibly-undefined ids; don't seed `setQueryData` with placeholder data when the cache is empty; in mutation `onSuccess`, use `variables` when the API returns no body.
