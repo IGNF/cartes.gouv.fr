@@ -266,6 +266,7 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertNotContains('expired-own', array_column($permissions, '_id'));
         self::assertNotContains('expired-cartes', array_column($permissions, '_id'));
         self::assertSame(['community-1', $this->cartesGouvCommunityId()], array_map(fn (array $permission) => $permission['beneficiary']['_id'], $permissions));
+        self::assertCount(1, $this->permissionPosts());
     }
 
     public function testExpiredPermissionIsRenewedOnceWhenTheDatastoreCommunityIsTheCartesGouvCommunity(): void
@@ -294,6 +295,21 @@ final class ServiceEditRouteTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSame(['own', 'other'], array_column(EntrepotMockResponseFactory::stored('permissions'), '_id'));
+    }
+
+    public function testRestrictedToRestrictedVisibleSendsOnlyTheMissingCommunityAsAList(): void
+    {
+        $this->seedService('WFS', open: false);
+        $this->seedPermission('own', 'community-1', '2099-01-01T00:00:00+00:00');
+        $client = $this->client();
+
+        $this->post($client, ['access' => 'restricted_visible'] + $this->payload());
+
+        self::assertResponseIsSuccessful();
+        $posts = $this->permissionPosts();
+        self::assertCount(1, $posts);
+        // décodé sans tableau associatif : une liste à clés non continues deviendrait un objet JSON
+        self::assertSame([$this->cartesGouvCommunityId()], json_decode($posts[0]['body'])->communities);
     }
 
     public function testPermissionsAreLeftIntactWhenTheAccessIsUnchanged(): void
@@ -589,6 +605,15 @@ final class ServiceEditRouteTest extends WebTestCase
             'attribution' => ['title' => 'IGN', 'url' => 'https://www.ign.fr', 'logo' => ['url' => self::ANNEXES_URL.self::OLD_LOGO_PATH, 'width' => 1, 'height' => 1, 'format' => 'image/png']],
             'extra' => ['styles' => [self::STYLE], '_search' => ['url_vignette' => self::ANNEXES_URL.self::OLD_THUMBNAIL_PATH, 'autre' => 'valeur']],
         ];
+    }
+
+    /** @return list<array{method: string, path: string, body: string}> */
+    private function permissionPosts(): array
+    {
+        return array_values(array_filter(
+            EntrepotMockResponseFactory::writeRequests(),
+            fn (array $request) => 'POST' === $request['method'] && str_ends_with($request['path'], '/permissions'),
+        ));
     }
 
     private function seedPermission(string $id, string $communityId, string $endDate): void

@@ -238,6 +238,22 @@ final class ServicePublishRouteTest extends WebTestCase
             ['community-1', self::getContainer()->getParameter('config')['community_id']],
             array_map(fn (array $permission) => $permission['beneficiary']['_id'], EntrepotMockResponseFactory::stored('permissions')),
         );
+        self::assertCount(1, $this->permissionPosts());
+    }
+
+    // garde contre le doublon : les deux communautés sont la même
+    public function testRestrictedVisibleServiceOfTheCartesGouvDatastoreGivesASinglePermission(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+        $cartesGouvCommunityId = self::getContainer()->getParameter('config')['community_id'];
+        EntrepotMockResponseFactory::setDatastoreCommunity($cartesGouvCommunityId);
+
+        $this->post($client, ['access' => 'restricted_visible'] + $this->payload('WFS', 'vectordb-1'));
+
+        self::assertResponseStatusCodeSame(201);
+        self::assertSame([$cartesGouvCommunityId], array_map(fn (array $permission) => $permission['beneficiary']['_id'], EntrepotMockResponseFactory::stored('permissions')));
+        self::assertCount(1, $this->permissionPosts());
     }
 
     public function testRestrictedServiceGivesAPermissionToTheDatastoreCommunityOnly(): void
@@ -595,5 +611,14 @@ final class ServicePublishRouteTest extends WebTestCase
             ]],
             'selected_tables' => ['communes'],
         ];
+    }
+
+    /** @return list<array{method: string, path: string, body: string}> */
+    private function permissionPosts(): array
+    {
+        return array_values(array_filter(
+            EntrepotMockResponseFactory::writeRequests(),
+            fn (array $request) => 'POST' === $request['method'] && str_ends_with($request['path'], '/permissions'),
+        ));
     }
 }
