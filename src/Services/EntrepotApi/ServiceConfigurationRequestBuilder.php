@@ -33,13 +33,24 @@ class ServiceConfigurationRequestBuilder
         ];
 
         if ($dto->attribution instanceof ServiceAttributionFormDTO) {
-            $body['attribution'] = [
-                'title' => $dto->attribution->title,
-                'url' => $dto->attribution->url,
-            ];
-            if (null !== $logo) {
-                $body['attribution']['logo'] = $logo;
-            }
+            $body['attribution'] = self::buildAttribution($dto->attribution, $logo);
+        }
+
+        return $body;
+    }
+
+    /**
+     * Corps `attribution` d’une configuration, à la publication comme à la modification.
+     *
+     * @param array{url: string, width: int, height: int, format: string}|null $logo logo déjà déposé en annexe, ou gardé
+     *
+     * @return array<string, mixed>
+     */
+    public static function buildAttribution(ServiceAttributionFormDTO $attribution, ?array $logo): array
+    {
+        $body = ['title' => $attribution->title, 'url' => $attribution->url];
+        if (null !== $logo) {
+            $body['logo'] = $logo;
         }
 
         return $body;

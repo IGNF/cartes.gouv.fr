@@ -556,11 +556,7 @@ class CartesServiceApiService
                 CommonTags::THEME_CATEGORIES => implode(', ', $dto->themes),
             ];
 
-            // dépôts dans le try : un échec du second ne doit pas laisser le premier orphelin
-            $thumbnailUrl = $thumbnail instanceof UploadedFile ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
-            $logo = $attributionLogo instanceof UploadedFile && $dto->attribution instanceof ServiceAttributionFormDTO
-                ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
-                : null;
+            [$thumbnailUrl, $logo] = $this->uploadImages($datastoreId, $datasheetName, $thumbnail, $attributionLogo, $dto->attribution);
 
             $configRequestBody = $this->configurationRequestBuilder->build($dto, $type, $typeInfos, $this->getNewConfigMetadata($apiMetadata['file_identifier']), $logo);
 
@@ -662,10 +658,7 @@ class CartesServiceApiService
         $thumbnailUrl = null;
         $newLogo = null;
         try {
-            $thumbnailUrl = $thumbnail instanceof UploadedFile ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
-            $newLogo = $attributionLogo instanceof UploadedFile && $dto->attribution instanceof ServiceAttributionFormDTO
-                ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
-                : null;
+            [$thumbnailUrl, $newLogo] = $this->uploadImages($datastoreId, $datasheetName, $thumbnail, $attributionLogo, $dto->attribution);
 
             // sans `layer_name` : figé, et l’Entrepôt l’a déjà refusé dans un PUT
             $body = [
@@ -675,11 +668,7 @@ class CartesServiceApiService
                 'metadata' => $configuration['metadata'] ?? [],
             ];
             if ($dto->attribution instanceof ServiceAttributionFormDTO) {
-                $body['attribution'] = ['title' => $dto->attribution->title, 'url' => $dto->attribution->url];
-                $logo = $newLogo ?? ($dto->remove_attribution_logo ? null : $oldLogo);
-                if (null !== $logo) {
-                    $body['attribution']['logo'] = $logo;
-                }
+                $body['attribution'] = ServiceConfigurationRequestBuilder::buildAttribution($dto->attribution, $newLogo ?? ($dto->remove_attribution_logo ? null : $oldLogo));
             }
 
             $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $body)->array();
@@ -826,6 +815,26 @@ class CartesServiceApiService
     private function isPermissionExpired(array $permission): bool
     {
         return isset($permission['end_date']) && strtotime($permission['end_date']) <= time();
+    }
+
+    /**
+     * Vignette et logo d’attribution déposés en annexes ; si le logo échoue, la vignette déjà déposée est retirée.
+     *
+     * @return array{0: string|null, 1: array{url: string, width: int, height: int, format: string}|null}
+     */
+    private function uploadImages(string $datastoreId, string $datasheetName, ?UploadedFile $thumbnail, ?UploadedFile $attributionLogo, ?ServiceAttributionFormDTO $attribution): array
+    {
+        $thumbnailUrl = $thumbnail instanceof UploadedFile ? $this->serviceImageAnnexeService->addThumbnail($datastoreId, $datasheetName, $thumbnail) : null;
+        try {
+            $logo = $attributionLogo instanceof UploadedFile && $attribution instanceof ServiceAttributionFormDTO
+                ? $this->serviceImageAnnexeService->addAttributionLogo($datastoreId, $datasheetName, $attributionLogo)
+                : null;
+        } catch (\Throwable $th) {
+            $this->removeImageAnnexesQuietly($datastoreId, [$thumbnailUrl]);
+            throw $th;
+        }
+
+        return [$thumbnailUrl, $logo];
     }
 
     /**
