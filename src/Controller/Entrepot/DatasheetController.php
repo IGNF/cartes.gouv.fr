@@ -303,9 +303,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         // suppr des services (offre puis configuration), puis des configurations sans offre
         $datasheetServices = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
-        foreach ($datasheetServices->offeringsById as $offering) {
-            $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id'], $offering);
-        }
+        $this->cartesServiceApiService->unpublishAll($datastoreId, array_values($datasheetServices->offeringsById));
         foreach ($datasheetServices->configurationsWithoutOffering() as $configuration) {
             $this->cartesServiceApiService->removeConfiguration($datastoreId, $configuration);
         }

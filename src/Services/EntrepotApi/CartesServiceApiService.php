@@ -28,6 +28,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
@@ -194,7 +195,27 @@ class CartesServiceApiService
     }
 
     /**
-     * Renvoie la configuration supprimée (dernier état lu avant suppression).
+     * Ressources en ligne de la fiche rebâties depuis ses flux ; un échec est journalisé : elles se rattrapent à l’écriture suivante sur la fiche.
+     */
+    public function refreshDatasheetOnlineResources(string $datastoreId, string $datasheetName): void
+    {
+        try {
+            $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $this->getDatasheetServices($datastoreId, $datasheetName));
+        } catch (\Exception $e) {
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
+            $this->logger->warning('{class}: Failed to refresh online resources of datasheet {datasheetName}: {error}', [
+                'class' => self::class,
+                'datasheetName' => $datasheetName,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Renvoie la configuration supprimée (dernier état lu avant suppression). Capabilities à mettre à jour ensuite par l’appelant (updateCapabilities), une fois pour toutes ses dépublications, ou par unpublishAll.
      *
      * @param array<mixed>|null $offering offering déjà chargée par l'appelant (avec `type` et `configuration`), évite un GET
      *
@@ -208,6 +229,69 @@ class CartesServiceApiService
             OfferingTypes::WFS, OfferingTypes::WMTSTMS, OfferingTypes::WMSVECTOR, OfferingTypes::WMSRASTER => $this->unpublishOfferingAndConfiguration($datastoreId, $offering),
             default => throw new AppException('Type de service invalide pour la suppression', Response::HTTP_BAD_REQUEST, ['offering_type' => $offering['type']]),
         };
+    }
+
+    /**
+     * Dépublie ces offres puis met à jour les capabilities une fois, même si une dépublication échoue en cours de route.
+     *
+     * @param array<array<mixed>> $offerings offres détaillées (avec `type`, `status`, `configuration`, `open`, `endpoint`, `urls`)
+     */
+    public function unpublishAll(string $datastoreId, array $offerings): void
+    {
+        $attempted = [];
+        try {
+            foreach ($offerings as $offering) {
+                $attempted[] = $offering;
+                $this->unpublish($datastoreId, $offering['_id'], $offering);
+            }
+        } finally {
+            // une offre en échec peut être déjà supprimée : les capabilities sont rebâties depuis les offres restantes de l’endpoint
+            $this->updateCapabilities($datastoreId, $attempted);
+        }
+    }
+
+    /**
+     * Capabilities filtrées des endpoints ouverts de ces offres dépubliées, une seule fois par endpoint ; un échec est journalisé.
+     *
+     * @param array<array<mixed>> $offerings offres avec `open`, `endpoint` et `urls`
+     */
+    public function updateCapabilities(string $datastoreId, array $offerings): void
+    {
+        $offeringsByEndpoint = [];
+        foreach ($offerings as $offering) {
+            if (true === $offering['open']) {
+                $offeringsByEndpoint[$offering['endpoint']['_id']] ??= $offering;
+            }
+        }
+        if ([] === $offeringsByEndpoint) {
+            return;
+        }
+
+        try {
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                return;
+            }
+            $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId);
+        } catch (\Exception $e) {
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
+            $this->logger->warning('{class}: Failed to read endpoints of datastore {datastoreId} to update capabilities: {error}', [
+                'class' => self::class,
+                'datastoreId' => $datastoreId,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+
+            return;
+        }
+
+        foreach ($offeringsByEndpoint as $endpointId => $offering) {
+            $endpoint = Utils::array_find($endpoints, fn (array $item) => $item['endpoint']['_id'] === $endpointId)['endpoint'] ?? null;
+            if (null !== $endpoint) {
+                $this->createOrUpdateCapabilities($datastoreId, $offering, $endpoint);
+            }
+        }
     }
 
     /**
@@ -514,11 +598,11 @@ class CartesServiceApiService
 
         $offering['configuration'] = $configuration;
 
-        // shortcut: aucune annulation si les permissions ou la métadonnée échouent après la création de l’offre, à reprendre si ces échecs laissent des flux à moitié publiés
+        // shortcut: aucune annulation si les permissions échouent après la création de l’offre, à reprendre si ces échecs laissent des flux à moitié publiés
         $this->handleAccessPermissions($datastoreId, $offering, $dto->access);
-        $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
+        $this->createOrUpdateCapabilities($datastoreId, $offering, $endpoint);
 
-        $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $this->getDatasheetServices($datastoreId, $datasheetName));
+        $this->refreshDatasheetOnlineResources($datastoreId, $datasheetName);
 
         return $offering;
     }
@@ -642,11 +726,11 @@ class CartesServiceApiService
 
         // l’ancien endpoint public perd la couche ; createOrUpdate ignore un endpoint privé
         if ($endpointChanged) {
-            $this->createOrUpdateCapabilities($datastoreId, $previousEndpoint, $oldOffering);
+            $this->createOrUpdateCapabilities($datastoreId, $oldOffering, $previousEndpoint);
         }
-        $this->createOrUpdateCapabilities($datastoreId, $endpoint, $offering);
+        $this->createOrUpdateCapabilities($datastoreId, $offering, $endpoint);
 
-        $this->cartesMetadataApiService->refreshOnlineResources($datastoreId, $datasheetName, $this->getDatasheetServices($datastoreId, $datasheetName));
+        $this->refreshDatasheetOnlineResources($datastoreId, $datasheetName);
 
         $this->removeImageAnnexesQuietly($datastoreId, [
             null !== $thumbnailUrl || $dto->remove_thumbnail ? $oldThumbnailUrl : null,
@@ -766,22 +850,22 @@ class CartesServiceApiService
     }
 
     /**
-     * Capabilities filtrées, sauf dans l’espace découverte (sandbox) ; un échec ne remet pas en cause la publication.
+     * Capabilities filtrées de l’endpoint de l’offre, ouvert et hors espace découverte (sandbox) ; un échec ne remet pas en cause l’écriture du flux.
      *
-     * @param array<mixed> $endpoint
      * @param array<mixed> $offering
+     * @param array<mixed> $endpoint
      */
-    private function createOrUpdateCapabilities(string $datastoreId, array $endpoint, array $offering): void
+    private function createOrUpdateCapabilities(string $datastoreId, array $offering, array $endpoint): void
     {
         try {
-            if (!$this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            if (true !== $offering['open'] || $this->sandboxService->isSandboxDatastore($datastoreId)) {
+                return;
             }
+            $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
         } catch (\Exception $e) {
-            $this->logger->warning('{class}: Failed to create or update capabilities for endpoint {endpointName} ({endpoint}) after the creation/modification of offering {offeringId}: {error}', [
+            $this->logger->warning('{class}: Failed to create or update capabilities for endpoint {endpoint} after a write on offering {offeringId}: {error}', [
                 'class' => self::class,
-                'endpoint' => $endpoint['_id'],
-                'endpointName' => $endpoint['technical_name'],
+                'endpoint' => $offering['endpoint']['_id'],
                 'offeringId' => $offering['_id'],
                 'exception' => $e,
                 'error' => $e->getMessage(),

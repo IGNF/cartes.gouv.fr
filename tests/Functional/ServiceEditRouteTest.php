@@ -497,6 +497,18 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::writeRequests());
     }
 
+    public function testFluxIsSavedWhenTheOnlineResourcesRefreshFails(): void
+    {
+        $this->seedService('WFS');
+        EntrepotMockResponseFactory::failNext('GET metadata', status: 403);
+        $client = $this->client();
+
+        $this->post($client, $this->payload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('Flux modifié', $this->configurationPut()['name']);
+    }
+
     private function client(): KernelBrowser
     {
         $client = self::createClient();
