@@ -1,4 +1,4 @@
-// import GetFeatureInfo from "geopf-extensions-openlayers/src/packages/Controls/GetFeatureInfo/GetFeatureInfo";
+import GetFeatureInfo from "geopf-extensions-openlayers/src/packages/Controls/GetFeatureInfo/GetFeatureInfo";
 import LayerSwitcher from "geopf-extensions-openlayers/src/packages/Controls/LayerSwitcher/LayerSwitcher";
 import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
 import GeoportalZoom from "geopf-extensions-openlayers/src/packages/Controls/Zoom/GeoportalZoom";
@@ -15,7 +15,7 @@ import { fromLonLat, transformExtent } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useEffect, useRef, useState } from "react";
 
-import type { CartesStyle, GeostylerStyles, OfferingTypeEnum } from "../../@types/app";
+import { type CartesStyle, type GeostylerStyles, OfferingTypeEnum } from "../../@types/app";
 import { BoundingBox } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
@@ -32,6 +32,16 @@ function getWorkingLayers(layers: BaseLayer[]): BaseLayer[] {
     return layers.filter((l) => l.get("name") !== olDefaults.default_background_layer);
 }
 
+// le fond de carte n’a pas d’infobulle : une requête de moins par clic
+class DataLayerGetFeatureInfo extends GetFeatureInfo {
+    // reçoit l’entrée du contrôle ({ layer, url… }), déclarée Layer par la bibliothèque
+    getGetFeatureInfoContent(gfiLayer: Layer & { layer?: BaseLayer }): Promise<unknown> {
+        return gfiLayer.layer?.get("name") === olDefaults.default_background_layer
+            ? Promise.resolve(null)
+            : (super.getGetFeatureInfoContent(gfiLayer) as Promise<unknown>);
+    }
+}
+
 export interface RMapProps {
     type: OfferingTypeEnum;
     bbox?: BoundingBox;
@@ -39,13 +49,7 @@ export interface RMapProps {
     layers: Layer[];
 }
 
-const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
-    // const gfinfo = useMemo(() => {
-    //     return [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
-    //         initial.type
-    //     );
-    // }, [initial.type]);
-
+const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox, type }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map | undefined>(undefined);
     // useState paresseux : instance unique, conservée par Fast Refresh (useMemo serait recalculé et détaché de la carte)
@@ -73,15 +77,8 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
             apiKey: "essentiels",
             zoomTo: "auto",
         }),
-        // gfinfo
-        //     ? new GetFeatureInfo({
-        //           options: {
-        //               active: true,
-        //               hidden: true,
-        //           },
-        //           position: "top-right",
-        //       })
-        //     : undefined,
+        // WMS vecteur seulement : le contrôle insère sans filtre le HTML des propriétés des couches vecteur (WFS, TMS)
+        ...(type === OfferingTypeEnum.WMSVECTOR ? [new DataLayerGetFeatureInfo({ button: false })] : []),
     ]);
     const bkLayer = useRef(new TileLayer({ properties: { title: null, description: null } }));
 
@@ -152,17 +149,11 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
         addLayer(bkLayer.current);
 
         // Ajout des autres couches
-        // const gfiLayers: object[] = [];
         layers.forEach((layer) => {
             if (mapRef.current !== undefined) {
                 addLayer(layer);
             }
-            // if (gfinfo) {
-            //     gfiLayers.push({ obj: layer });
-            // }
         });
-        // NOTE : il me semble que ce n'est plus nécessaire et plus possible sur geopf-ext-ol, à vérifier
-        // getControl("GetFeatureInfo")?.setLayers(gfiLayers);
 
         // On zoom sur l'extent de la couche au premier rendu
         // if (extent) {
