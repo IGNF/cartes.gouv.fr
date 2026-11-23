@@ -180,6 +180,18 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    public function testAFailedConfigurationDetailKeepsItsStatusWhenItsOfferingsReadFailsToo(): void
+    {
+        // liste d’offres lancée avec les détails et jamais lue : son erreur ne doit pas remplacer celle du détail
+        $this->seedService('wfs', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1');
+        EntrepotMockResponseFactory::failNext('GET configurations/configuration-wfs', status: 404);
+        EntrepotMockResponseFactory::failNext('GET configurations/configuration-wfs/offerings', status: 403);
+
+        $this->client()->xmlHttpRequest('GET', self::LIST_URL);
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
     public function testTheFirstFailedConfigurationDetailOfABatchKeepsItsStatus(): void
     {
         // détail en 404 lu le premier : l’erreur de l’autre détail, jamais lue, ne doit pas la remplacer
