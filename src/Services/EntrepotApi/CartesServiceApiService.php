@@ -2,6 +2,7 @@
 
 namespace App\Services\EntrepotApi;
 
+use App\ApiClient\PaginatedPromise;
 use App\ApiClient\ResponsePromise;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationMetadataTypes;
@@ -79,7 +80,7 @@ class CartesServiceApiService
 
         // url de partage (url capabilities si WFS ou WMS-VECTOR, url spécifique si TMS)
         $offering['share_url'] = $this->getShareUrl($datastoreId, $offering, $this->datastoreApiService->getEndpointsList($datastoreId));
-        $offering['access'] = $this->readServiceAccess($offering, true === $offering['open'] ? [] : $this->readPermissionsQuietly($datastoreId));
+        $offering['access'] = $this->readServiceAccess($offering, true === $offering['open'] ? [] : $this->readPermissionsQuietly($datastoreId, $this->datastoreApiService->getPermissions($datastoreId)));
 
         return $offering;
     }
@@ -117,16 +118,25 @@ class CartesServiceApiService
      */
     public function getDatasheetServiceList(string $datastoreId, string $datasheetName): array
     {
-        // lancée avant la lecture des configurations, pour courir en parallèle
+        // lancées avant la lecture des configurations, pour courir en parallèle, même si les permissions ou les points d’accès ne servent pas
         $pendingStoredData = $this->storedDataApiService->getAll($datastoreId, [
             'tags' => [CommonTags::DATASHEET_NAME => $datasheetName],
             'fields' => 'type',
         ]);
-        $datasheetServices = $this->getDatasheetServices($datastoreId, $datasheetName);
-        $storedDataTypes = array_column($pendingStoredData->resolve(), 'type', '_id');
-        $allOpen = [] === array_filter($datasheetServices->offeringsById, fn (array $offering) => true !== $offering['open']);
-        $permissions = $allOpen ? [] : $this->readPermissionsQuietly($datastoreId);
-        $endpoints = [] === $datasheetServices->offeringsById ? [] : $this->datastoreApiService->getEndpointsList($datastoreId);
+        $pendingPermissions = $this->datastoreApiService->getPermissions($datastoreId);
+        $pendingEndpoints = $this->datastoreApiService->getEndpoints($datastoreId);
+
+        try {
+            $datasheetServices = $this->getDatasheetServices($datastoreId, $datasheetName);
+            $storedDataTypes = array_column($pendingStoredData->resolve(), 'type', '_id');
+            $permissions = $this->readPermissionsQuietly($datastoreId, $pendingPermissions);
+            $endpoints = $this->readEndpoints($datastoreId, $pendingEndpoints, [] !== $datasheetServices->offeringsById);
+        } finally {
+            // une lecture non consommée lèverait son erreur HTTP à sa destruction, à la place de l’exception en cours
+            $pendingStoredData->cancel();
+            $pendingPermissions->cancel();
+            $pendingEndpoints->cancel();
+        }
 
         $services = [];
         foreach ($datasheetServices->offeringsById as $offering) {
@@ -728,10 +738,10 @@ class CartesServiceApiService
      *
      * @return array<array<mixed>>|null
      */
-    private function readPermissionsQuietly(string $datastoreId): ?array
+    private function readPermissionsQuietly(string $datastoreId, PaginatedPromise $pendingPermissions): ?array
     {
         try {
-            return $this->datastoreApiService->getPermissions($datastoreId)->resolve();
+            return $pendingPermissions->resolve();
         } catch (ApiException $e) {
             $this->logger->warning('{class}: Failed to read permissions of datastore {datastoreId}: {error}', [
                 'class' => self::class,
@@ -741,6 +751,30 @@ class CartesServiceApiService
             ]);
 
             return null;
+        }
+    }
+
+    /**
+     * Points d’accès du datastore ; sans offre, ils ne servent pas : un échec est seulement journalisé.
+     *
+     * @return array<mixed>
+     */
+    private function readEndpoints(string $datastoreId, PaginatedPromise $pendingEndpoints, bool $needed): array
+    {
+        try {
+            return $pendingEndpoints->resolve();
+        } catch (ApiException $e) {
+            if ($needed) {
+                throw $e;
+            }
+            $this->logger->warning('{class}: Failed to read endpoints of datastore {datastoreId}: {error}', [
+                'class' => self::class,
+                'datastoreId' => $datastoreId,
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [];
         }
     }
 
