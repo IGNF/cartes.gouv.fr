@@ -54,7 +54,7 @@ export default function ServicePreviewSection({ datastoreId, datasheetName, serv
     ) : bbox === undefined ? (
         <p className={fr.cx("fr-mb-0")}>{t("preview.no_bbox")}</p>
     ) : (
-        <RMap layers={olLayers} currentStyle={currentStyle} type={service.type} bbox={bbox} />
+        <RMap key={service._id} layers={olLayers} currentStyle={currentStyle} type={service.type} bbox={bbox} />
     );
 
     return (

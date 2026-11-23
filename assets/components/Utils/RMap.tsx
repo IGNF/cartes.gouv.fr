@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import GetFeatureInfo from "geopf-extensions-openlayers/src/packages/Controls/GetFeatureInfo/GetFeatureInfo";
 import LayerSwitcher from "geopf-extensions-openlayers/src/packages/Controls/LayerSwitcher/LayerSwitcher";
 import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
@@ -32,13 +33,31 @@ function getWorkingLayers(layers: BaseLayer[]): BaseLayer[] {
     return layers.filter((l) => l.get("name") !== olDefaults.default_background_layer);
 }
 
-// le fond de carte n’a pas d’infobulle : une requête de moins par clic
+const isBackgroundLayer = (layer: BaseLayer | undefined) => layer?.get("name") === olDefaults.default_background_layer;
+
+const HTML_ENTITIES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+
+// titre et réponse insérés en HTML par la bibliothèque : échappés ou assainis ; fond de carte ignoré (source WMTS sans getFeatureInfoUrl)
 class DataLayerGetFeatureInfo extends GetFeatureInfo {
+    constructor() {
+        // comme entree-carto : `position` place le panneau dans le conteneur des boutons (sinon .fr-modal du DSFR l’écrase) ; option absente des types
+        super({ active: true, position: "top-left" } as ConstructorParameters<typeof GetFeatureInfo>[0]);
+    }
+
+    getLayerTitle(gfiLayer: Layer): string {
+        return super.getLayerTitle(gfiLayer).replace(/[&<>"']/g, (char) => HTML_ENTITIES[char]);
+    }
+
+    getGetFeatureInfoLayer(layer: Layer): unknown {
+        return isBackgroundLayer(layer) ? { format: "unknown", layer } : super.getGetFeatureInfoLayer(layer);
+    }
+
     // reçoit l’entrée du contrôle ({ layer, url… }), déclarée Layer par la bibliothèque
     getGetFeatureInfoContent(gfiLayer: Layer & { layer?: BaseLayer }): Promise<unknown> {
-        return gfiLayer.layer?.get("name") === olDefaults.default_background_layer
-            ? Promise.resolve(null)
-            : (super.getGetFeatureInfoContent(gfiLayer) as Promise<unknown>);
+        if (isBackgroundLayer(gfiLayer.layer)) return Promise.resolve(null);
+        return (super.getGetFeatureInfoContent(gfiLayer) as Promise<unknown>).then((content) =>
+            typeof content === "string" ? DOMPurify.sanitize(content) : content
+        );
     }
 }
 
@@ -78,7 +97,7 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox, type }) => {
             zoomTo: "auto",
         }),
         // WMS vecteur seulement : le contrôle insère sans filtre le HTML des propriétés des couches vecteur (WFS, TMS)
-        ...(type === OfferingTypeEnum.WMSVECTOR ? [new DataLayerGetFeatureInfo({ button: false })] : []),
+        ...(type === OfferingTypeEnum.WMSVECTOR ? [new DataLayerGetFeatureInfo()] : []),
     ]);
     const bkLayer = useRef(new TileLayer({ properties: { title: null, description: null } }));
 
