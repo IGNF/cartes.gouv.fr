@@ -129,9 +129,7 @@ class CartesServiceApiService
         try {
             $datasheetServices = $this->getDatasheetServices($datastoreId, $datasheetName);
             $storedDataTypes = array_column($pendingStoredData->resolve(), 'type', '_id');
-            $allOpen = [] === array_filter($datasheetServices->offeringsById, fn (array $offering) => true !== $offering['open']);
             $permissions = $this->readPermissionsQuietly($datastoreId, $pendingPermissions);
-            $permissions = $allOpen ? [] : $permissions;
             $endpoints = $this->readEndpoints($datastoreId, $pendingEndpoints, [] !== $datasheetServices->offeringsById);
         } finally {
             // une lecture non consommée lèverait son erreur HTTP à sa destruction, à la place de l’exception en cours
@@ -764,7 +762,7 @@ class CartesServiceApiService
     private function readEndpoints(string $datastoreId, PaginatedPromise $pendingEndpoints, bool $needed): array
     {
         try {
-            return DatastoreApiService::filterEndpoints($pendingEndpoints->resolve());
+            return $pendingEndpoints->resolve();
         } catch (ApiException $e) {
             if ($needed) {
                 throw $e;

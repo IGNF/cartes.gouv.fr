@@ -173,13 +173,14 @@ final class DatasheetServiceListRouteTest extends WebTestCase
     public function testAFailedConfigurationsReadKeepsItsStatusWhenTheParallelReadsFailToo(): void
     {
         // lectures parallèles en échec et jamais consommées : leur erreur ne doit pas remplacer celle des configurations
-        EntrepotMockResponseFactory::failNext('GET configurations', status: 403);
+        EntrepotMockResponseFactory::failNext('GET configurations', status: 404);
+        EntrepotMockResponseFactory::failNext('GET stored_data', status: 403);
         EntrepotMockResponseFactory::failNext('GET permissions', status: 403);
         EntrepotMockResponseFactory::forbidDatastore();
 
         $this->client()->xmlHttpRequest('GET', self::LIST_URL);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testTheServiceRouteGivesTheAccessToo(): void
