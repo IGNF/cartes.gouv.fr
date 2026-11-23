@@ -144,29 +144,4 @@ class UploadController extends AbstractController implements ApiControllerInterf
     {
         return $this->json($this->uploadApiService->getCheckExecutionLogs($datastoreId, $executionId)->array());
     }
-
-    #[Route('/{uploadId}/upload-report', name: 'get_upload_report', methods: ['GET'])]
-    public function getUploadReport(string $datastoreId, string $uploadId): JsonResponse
-    {
-        // Récupération des détails de l'upload ayant échoué
-        $inputUpload = $this->uploadApiService->get($datastoreId, $uploadId)->array();
-        $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id'], $inputUpload);
-        $inputUpload['checks'] = [];
-        $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
-
-        foreach ($uploadChecks as &$checkType) {
-            foreach ($checkType as &$checkExecution) {
-                $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->array());
-                try {
-                    $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->array();
-                } catch (ApiException) {
-                }
-                $inputUpload['checks'][] = $checkExecution;
-            }
-        }
-
-        return $this->json([
-            'input_upload' => $inputUpload,
-        ]);
-    }
 }

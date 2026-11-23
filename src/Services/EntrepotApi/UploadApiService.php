@@ -333,11 +333,6 @@ final readonly class UploadApiService
         return $this->api->get("datastores/$datastoreId/checks/$checkId");
     }
 
-    public function getCheckExecution(string $datastoreId, string $checkExecutionId): ResponsePromise
-    {
-        return $this->api->get("datastores/$datastoreId/checks/executions/$checkExecutionId");
-    }
-
     public function getCheckExecutionLogs(string $datastoreId, string $checkExecutionId): ResponsePromise
     {
         return $this->api->get("datastores/$datastoreId/checks/executions/$checkExecutionId/logs");

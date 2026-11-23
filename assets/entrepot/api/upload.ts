@@ -1,6 +1,5 @@
 import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
-import { UploadReport } from "../../@types/app";
 import { DataDetailsUpload, Upload, UploadIntegration } from "../../@types/app";
 
 const getList = async (datastoreId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
@@ -37,13 +36,6 @@ const remove = (datastoreId: string, uploadId: string) => {
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
-const getUploadReport = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_upload_report", { datastoreId, uploadId });
-    return jsonFetch<UploadReport>(url, {
-        ...otherOptions,
-    });
-};
-
 const getDetails = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_details", { datastoreId, uploadId });
     return jsonFetch<DataDetailsUpload>(url, { ...otherOptions });
@@ -60,7 +52,6 @@ const upload = {
     getIntegration,
     advanceIntegration,
     remove,
-    getUploadReport,
     getDetails,
     getCheckLogs,
 };

@@ -5,7 +5,6 @@ import {
     AnnexStandardDetailResponseDto,
     BasicInfoDto,
     BoundingBox,
-    CheckingExecutionStandardDetailResponseDto,
     CheckingExecutionStandardDetailResponseDtoStatusEnum,
     CommunityDetailResponseDto,
     CommunityMemberDto,
@@ -19,7 +18,6 @@ import {
     OAuth2InfoDto,
     OfferingStandardDetailResponseDto,
     PermissionStandardListResponseDto,
-    ProcessingExecutionOutputStoredDataDto,
     ProcessingExecutionStandardDetailResponseDto,
     StaticFileStandardDetailResponseDto,
     StoredDataDetailsRelationDto,
@@ -302,37 +300,10 @@ export enum MetadataHierarchyLevel {
 /** endpoints */
 export type DatastoreEndpoint = DatastoreEndpointStandardResponseDto;
 
-export type CheckOrProcessingExecutionLogs = [string];
-export type CheckDetailed = CheckingExecutionStandardDetailResponseDto & {
-    logs?: CheckOrProcessingExecutionLogs;
-};
 export { CheckingExecutionStandardDetailResponseDtoStatusEnum as CheckStatusEnum };
 
 export type ProcessingExecution = ProcessingExecutionStandardDetailResponseDto;
 export { ProcessingExecutionStandardDetailResponseDtoStatusEnum as ProcessingExecutionStatusEnum } from "./entrepot";
-
-export type StoredDataReport = {
-    stored_data: VectorDb | PyramidVector | PyramidRaster;
-    input_upload:
-        | (Upload & {
-              file_tree: UploadTree;
-              checks: CheckDetailed[];
-          })
-        | null;
-    processing_executions: StoredDataReportProcessingExecution[];
-};
-
-export type UploadReport = {
-    input_upload: Upload & {
-        file_tree: UploadTree;
-        checks: CheckDetailed[];
-    };
-};
-
-export type StoredDataReportProcessingExecution = ProcessingExecution & {
-    output: ProcessingExecutionOutputStoredDataDto;
-    logs?: CheckOrProcessingExecutionLogs;
-};
 
 /** pages de détail : seuls les tags affichés sont renvoyés par le serveur */
 export type DataDetailsCheck = { _id: string; name: string | null; status: CheckingExecutionStandardDetailResponseDtoStatusEnum };

@@ -1984,43 +1984,6 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_api_stored_data_get_report_data": {
-            "tokens": [
-                [
-                    "text",
-                    "\/report"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "storedDataId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/stored_data"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
-            "hosttokens": [],
-            "methods": [
-                "GET"
-            ],
-            "schemes": []
-        },
         "cartesgouvfr_api_stored_data_delete": {
             "tokens": [
                 [
@@ -2445,43 +2408,6 @@
                 "uploadId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
                 "executionId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
             },
-            "hosttokens": [],
-            "methods": [
-                "GET"
-            ],
-            "schemes": []
-        },
-        "cartesgouvfr_api_upload_get_upload_report": {
-            "tokens": [
-                [
-                    "text",
-                    "\/upload-report"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "uploadId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/upload"
-                ],
-                [
-                    "variable",
-                    "\/",
-                    "[^\/]++",
-                    "datastoreId",
-                    true
-                ],
-                [
-                    "text",
-                    "\/api\/datastores"
-                ]
-            ],
-            "defaults": [],
-            "requirements": [],
             "hosttokens": [],
             "methods": [
                 "GET"
