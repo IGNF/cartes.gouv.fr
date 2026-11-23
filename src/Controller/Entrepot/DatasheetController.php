@@ -310,7 +310,8 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         // suppr des uploads
         foreach ($uploadList as $upload) {
-            $this->uploadApiService->remove($datastoreId, $upload['_id'], $upload)->await();
+            // pas la livraison de la liste : elle ne porte pas `extra`, que remove() doit préserver
+            $this->uploadApiService->remove($datastoreId, $upload['_id'])->await();
         }
 
         // suppr des stored_data (bases vecteur et pyramides)

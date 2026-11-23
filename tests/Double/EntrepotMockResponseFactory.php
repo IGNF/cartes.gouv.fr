@@ -368,8 +368,8 @@ final class EntrepotMockResponseFactory
             return $this->json(($this->find('uploads', $matches[1])['checks'] ?? []) + ['asked' => [], 'in_progress' => [], 'passed' => [], 'failed' => []]);
         }
 
-        if ('GET' === $method && 1 === preg_match('#^uploads/[\w-]+/tree$#', $relative)) {
-            return $this->json([]);
+        if ('GET' === $method && 1 === preg_match('#^uploads/([\w-]+)/tree$#', $relative, $matches)) {
+            return $this->json($this->find('uploads', $matches[1])['tree'] ?? []);
         }
 
         // journaux : une ligne qui nomme l’exécution

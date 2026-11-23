@@ -291,16 +291,20 @@ final readonly class UploadApiService
     }
 
     /**
-     * @param array<mixed>|null $upload livraison déjà chargée par l'appelant (avec `status` et `tags`), évite un GET
+     * @param array<mixed>|null $upload livraison déjà chargée par l'appelant via un GET unitaire (la liste ne renvoie pas `extra`), évite un GET
      */
     public function remove(string $datastoreId, string $uploadId, ?array $upload = null): ResponsePromise
     {
         // l'arborescence n'est plus lisible une fois la livraison supprimée : sauvegarde dans `extra`, qui y survit (les tags sont limités à 99 caractères)
         try {
+            $upload ??= $this->get($datastoreId, $uploadId)->array();
             $fileTree = $this->getFileTree($datastoreId, $uploadId, $upload);
-            $this->api->patch("datastores/$datastoreId/uploads/$uploadId", ['extra' => ['file_tree' => $fileTree]])->await();
+            if ([] !== $fileTree) {
+                // le PATCH remplace `extra` en entier : on garde les autres clés
+                $this->api->patch("datastores/$datastoreId/uploads/$uploadId", ['extra' => [...$upload['extra'] ?? [], 'file_tree' => $fileTree]])->await();
+            }
         } catch (ApiException) {
-            // ne rien faire, tant pis si la récupération de l'arborescence a échoué
+            // sauvegarde facultative : son échec ne bloque pas la suppression
         }
 
         return $this->api->delete("datastores/$datastoreId/uploads/$uploadId");
