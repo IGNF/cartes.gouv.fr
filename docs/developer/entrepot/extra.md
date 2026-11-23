@@ -4,6 +4,30 @@ Il s'agit d'une propriété nommée `extra` qui sont présentes dans certaines [
 
 Sur une configuration, seul un `PATCH` écrit `extra` : le `POST` de création et le `PUT` de remplacement l’ignorent (vérifié le 10/11/2026). Le `PATCH` remplace l’objet entier : `ConfigurationApiService::modify` fusionne avec la valeur existante avant l’envoi.
 
+Sur une livraison, l’OpenAPI ne documente pas `extra`, mais un `PATCH` l’écrit et le remplace en entier (vérifié le 23/11/2026). Seul le `GET` d’une livraison le renvoie : la liste refuse `fields=extra`.
+
+## arborescence d’une livraison supprimée
+
+Chemin dans extra : "file_tree"
+
+```json
+{
+    "extra": {
+        "file_tree": [
+            {
+                "type": "DIRECTORY",
+                "name": "data",
+                "size": 240,
+                "children": [{ "type": "FILE", "name": "donnee.geojson", "size": 240 }]
+            },
+            { "type": "FILE", "name": "donnee.geojson.md5", "size": 63 }
+        ]
+    }
+}
+```
+
+Réponse de `GET uploads/{id}/tree`, illisible une fois la livraison supprimée. `UploadApiService::remove` l’écrit juste avant la suppression, en gardant les autres clés d’`extra`. `extra` survit à la suppression : `UploadApiService::getFileTree` le relit pour une livraison supprimée. Un tag ne convient pas, sa valeur est limitée à 99 caractères.
+
 ## vignette d’un flux
 
 Chemin dans extra : "_search.url_vignette"

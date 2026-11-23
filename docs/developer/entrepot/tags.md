@@ -11,8 +11,6 @@ Certaines entités portent une propriété `tags`, qui est un dictionnaire clé/
 | `vectordb_id`      | identifiant de la donnée stockée en sortie du traitement `proc_int_id`                    | uuidv4 |
 | `data_upload_path` | chemin vers le fichier téléversé                                                          |        |
 
-L'arborescence des fichiers n'est pas un tag : elle est sauvegardée dans `extra.file_tree` juste avant la suppression de la livraison, parce qu'un tag est limité à 99 caractères.
-
 La progression de l'intégration n'est pas un tag : le backend la calcule à chaque lecture (voir [workflow d'intégration](../workflows/upload-integration-vector/README.md)). Les livraisons antérieures portent encore `integration_progress` et `integration_current_step`, que plus rien ne lit.
 
 Tags métier posés à la déclaration de livraison (formulaire « Ajouter une donnée ») et recopiés sur la donnée stockée à l'intégration :
