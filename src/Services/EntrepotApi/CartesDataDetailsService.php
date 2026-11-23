@@ -143,6 +143,7 @@ final readonly class CartesDataDetailsService
         return ['tags' => array_intersect_key($entity['tags'] ?? [], array_flip(self::DISPLAYED_TAGS))] + $entity;
     }
 
+    // shortcut: seul appelant d’une résolution en lot tolérante au 404 ; à déplacer dans ApiClient au deuxième appelant
     /**
      * Les requêtes sont déjà en vol : les lire une à une ne les sérialise pas.
      *
