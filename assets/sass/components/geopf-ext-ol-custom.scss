@@ -25,3 +25,8 @@ form[id^="GPcoordinateSearchForm"] {
         height: 70vh;
     }
 }
+
+/* titres des infobulles à 1,25rem, comme Explorer les cartes */
+.GPgetFeatureInfoAccordionContent :is(h1, h2, h3, h4, h5) {
+    font-size: 1.25rem;
+}
