@@ -102,6 +102,8 @@ export default function DatasheetViewNext({ datastoreId, datasheetName, activeTa
         queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
         staleTime: 60000,
         retry: false,
+        // fiche absente : page « Page non trouvée » de l’errorComponent de l’entrepôt
+        throwOnError: (error) => error.status === 404,
         enabled,
     });
 
