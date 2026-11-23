@@ -50,6 +50,7 @@ import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
 import { buildServiceEditFormData, mapServiceViolationPaths } from "../ServiceForm/buildServiceFormData";
 import AccessSection from "../ServiceForm/sections/AccessSection";
 import ServiceDescriptionSection from "../ServiceForm/sections/ServiceDescriptionSection";
+import FeatureInfoSection from "../ServiceForm/sections/FeatureInfoSection";
 import StylesSection from "../ServiceForm/sections/StylesSection";
 import TablesSection from "../ServiceForm/sections/TablesSection";
 import {
@@ -60,7 +61,7 @@ import {
     type ServiceEditFormValues,
     type ServiceFormValues,
 } from "../ServiceForm/serviceFormSchema";
-import { serviceToFormValues } from "../ServiceForm/serviceToFormValues";
+import { featureInfoColumns, serviceToFormValues } from "../ServiceForm/serviceToFormValues";
 import ServicePreviewSection from "./ServicePreviewSection";
 
 // flux sur une base vecteur : tables à choisir
@@ -122,7 +123,9 @@ function ServicePageContent(props: ServicePageContentProps) {
     // accès inconnu quand le serveur n’a pas pu lire les permissions
     const accessKnown = service.access !== null && service.access !== undefined;
     const tablesReady = !withTables || vectorDbQuery.data !== undefined;
-    const editable = canSave && published && accessKnown && tablesReady;
+    // modèle d’infobulle illisible : un enregistrement supprimerait ceux générés par cartes.gouv.fr
+    const featureInfoKnown = service.type !== OfferingTypeEnum.WMSVECTOR || configuration.featureinfo !== null;
+    const editable = canSave && published && accessKnown && tablesReady && featureInfoKnown;
 
     let lockReason: string | undefined;
     if (canSave && !published && !isOfferingUnavailable(service.status) && service.status !== OfferingStatusEnum.UNSTABLE) {
@@ -131,6 +134,8 @@ function ServicePageContent(props: ServicePageContentProps) {
         lockReason = t("edit.permissions_error");
     } else if (canSave && published && !tablesReady && vectorDbQuery.isError) {
         lockReason = t("edit.tables_error");
+    } else if (canSave && published && !featureInfoKnown) {
+        lockReason = t("edit.featureinfo_error");
     }
 
     const values = useMemo(() => serviceToFormValues(service, vectorDbQuery.data), [service, vectorDbQuery.data]);
@@ -164,6 +169,14 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
     const services = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName)).data?.services;
     const { data: datasheet } = useQuery(datasheetQueryOptions(datastoreId, datasheetName));
     const endpointsQuery = useQuery({ ...datastoreEndpointsQueryOptions(datastoreId), enabled: editable });
+    // déjà lue par la page pour proposer les tables
+    const vectorDb = useQuery(
+        vectorDbQueryOptions(
+            datastoreId,
+            editable && service.type === OfferingTypeEnum.WMSVECTOR ? (service.configuration.type_infos.used_data[0]?.stored_data ?? "") : ""
+        )
+    ).data;
+    const featureInfoTableColumns = useMemo(() => featureInfoColumns(vectorDb), [vectorDb]);
 
     const unavailable = isOfferingUnavailable(service.status);
 
@@ -368,6 +381,12 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
                     {editable && isWmsVector && (
                         <MetadataSection title={tForm("section.styles")}>
                             <StylesSection datastoreId={datastoreId} />
+                        </MetadataSection>
+                    )}
+
+                    {editable && isWmsVector && (
+                        <MetadataSection title={tForm("section.featureinfo")}>
+                            <FeatureInfoSection columns={featureInfoTableColumns} />
                         </MetadataSection>
                     )}
 

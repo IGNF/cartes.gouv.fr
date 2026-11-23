@@ -45,6 +45,9 @@ export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;
 export const SERVICE_IMAGE_ACCEPT = ["jpg", "jpeg", "png"];
 export const SERVICE_IMAGE_MAX_SIZE_MB = 5;
 
+/** formats d’infobulle, même liste que WmsVectorFeatureInfoService::FORMATS */
+export const FEATURE_INFO_FORMATS = ["list", "table"] as const;
+
 /** même limite que ServiceFormDTO::TABLES_MAX */
 export const SERVICE_TABLES_MAX = 10;
 
@@ -99,7 +102,8 @@ const storedDataRequiredMessage = (t: T, type: ServiceType): string => {
     return t("validation.stored_data.required");
 };
 
-export const buildServiceFormSchema = ({
+// le schéma objet reste sans raffinement : la modification en retire des champs
+const buildServiceFormObject = ({
     t,
     type,
     rasterPyramid = false,
@@ -123,6 +127,8 @@ export const buildServiceFormSchema = ({
             saved_style_id: z.string().optional(),
             // modification : table enregistrée absente de la base, affichée mais non cochable
             missing: z.boolean().optional(),
+            // WMS vecteur : attributs affichés dans l’infobulle
+            featureinfo_attributes: z.array(z.string()),
         })
         // champs obligatoires seulement sur les tables cochées
         .superRefine(async (table, ctx) => {
@@ -202,13 +208,36 @@ export const buildServiceFormSchema = ({
             : z.array(tableSchema),
         access: z.enum(SERVICE_ACCESSES).refine((access) => availableAccesses.includes(access), t("validation.access.unavailable")),
         attribution: attributionSchema,
+        featureinfo: z.object({ enabled: z.boolean(), format: z.enum(FEATURE_INFO_FORMATS) }),
     });
 };
+
+type FeatureInfoValues = {
+    featureinfo: { enabled: boolean };
+    tables: { selected: boolean; featureinfo_attributes: string[] }[];
+};
+
+// WMS vecteur, infobulles activées : au moins un attribut par table cochée
+const checkFeatureInfo =
+    ({ t, type, rasterPyramid = false }: Pick<SchemaDeps, "t" | "type" | "rasterPyramid">) =>
+    (values: FeatureInfoValues, ctx: z.RefinementCtx) => {
+        if (type !== "wms" || rasterPyramid || !values.featureinfo.enabled) return;
+        values.tables.forEach((table, index) => {
+            if (table.selected && table.featureinfo_attributes.length === 0) {
+                ctx.addIssue({ code: "custom", path: ["tables", index, "featureinfo_attributes"], message: t("validation.featureinfo.attributes.required") });
+            }
+        });
+    };
+
+export const buildServiceFormSchema = (deps: SchemaDeps) => buildServiceFormObject(deps).superRefine(checkFeatureInfo(deps));
 
 // type, donnée stockée et nom technique figés en modification
 export const buildServiceEditFormSchema = (
     deps: Omit<SchemaDeps, "existingLayerNames" | "layerNamePrefix"> & { savedTablePublicNames: Readonly<Record<string, string>> }
-) => buildServiceFormSchema({ ...deps, existingLayerNames: [] }).omit({ stored_data_id: true, technical_name: true });
+) =>
+    buildServiceFormObject({ ...deps, existingLayerNames: [] })
+        .omit({ stored_data_id: true, technical_name: true })
+        .superRefine(checkFeatureInfo(deps));
 
 export type ServiceEditFormValues = z.input<ReturnType<typeof buildServiceEditFormSchema>>;
 export type ServiceEditFormOutput = z.output<ReturnType<typeof buildServiceEditFormSchema>>;
@@ -227,4 +256,5 @@ export const serviceFormDefaultValues: ServiceFormValues = {
     tables: [],
     access: "public",
     attribution: { enabled: false, title: "", url: "", logo: undefined },
+    featureinfo: { enabled: false, format: "list" },
 };

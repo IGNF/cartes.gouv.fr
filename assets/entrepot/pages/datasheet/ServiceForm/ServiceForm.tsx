@@ -23,6 +23,7 @@ import { mapServiceViolationPaths } from "./buildServiceFormData";
 import AccessSection from "./sections/AccessSection";
 import PyramidNotice from "./sections/PyramidNotice";
 import ServiceDescriptionSection from "./sections/ServiceDescriptionSection";
+import FeatureInfoSection from "./sections/FeatureInfoSection";
 import ServiceTypeSection from "./sections/ServiceTypeSection";
 import StylesSection from "./sections/StylesSection";
 import TablesSection from "./sections/TablesSection";
@@ -37,7 +38,7 @@ import {
     type ServiceFormValues,
     type ServiceType,
 } from "./serviceFormSchema";
-import { defaultTables } from "./serviceToFormValues";
+import { defaultTables, featureInfoColumns } from "./serviceToFormValues";
 
 type ServiceFormProps = {
     datastoreId: string;
@@ -95,6 +96,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
 
     const storedDataId = useWatch({ control, name: "stored_data_id" });
     const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, withTables ? storedDataId : ""));
+    const featureInfoTableColumns = useMemo(() => featureInfoColumns(vectorDbQuery.data), [vectorDbQuery.data]);
 
     // les tables appartiennent au jeu précédent : vidées, puis remplies quand la base choisie est lue
     const loadTables = (id: string) => {
@@ -173,6 +175,11 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                     {(type === "wms" || type === "wmts") && (
                         <MetadataSection title={t("section.styles")}>
                             {raster ? <p className={fr.cx("fr-mb-0")}>{t("styles.raster")}</p> : <StylesSection />}
+                        </MetadataSection>
+                    )}
+                    {withTables && type === "wms" && (
+                        <MetadataSection title={t("section.featureinfo")}>
+                            <FeatureInfoSection columns={featureInfoTableColumns} />
                         </MetadataSection>
                     )}
                     <MetadataSection title={t("section.access")}>

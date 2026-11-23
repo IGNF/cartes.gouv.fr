@@ -10,7 +10,7 @@ const values: ServiceFormOutput = {
     technical_name: "SANDBOX_mon_flux",
     themes: ["Agriculture"],
     tables: [
-        { native_name: "brouillon", selected: false, title: "", public_name: "brouillon", description: "", keywords: [] },
+        { native_name: "brouillon", selected: false, title: "", public_name: "brouillon", description: "", keywords: [], featureinfo_attributes: [] },
         {
             native_name: "communes",
             selected: true,
@@ -18,6 +18,7 @@ const values: ServiceFormOutput = {
             public_name: "communes",
             description: "Les communes",
             keywords: ["Unités administratives"],
+            featureinfo_attributes: [],
         },
     ],
 };
@@ -64,6 +65,16 @@ describe("buildServiceFormData", () => {
         expect(payload).not.toHaveProperty("tables");
         expect(formData.get("style_files[communes]")).toBe(style);
         expect(formData.get("style_files[brouillon]")).toBeNull();
+        expect(payload.featureinfo).toBeNull();
+    });
+
+    it("WMS vecteur : envoie les attributs d’infobulle des tables cochées, par ordre alphabétique", () => {
+        const tables = values.tables.map((table) => ({ ...table, featureinfo_attributes: table.selected ? ["nom", "code"] : ["ignore"] }));
+        const payload = payloadOf(buildServiceFormData("wms", { ...values, tables, featureinfo: { enabled: true, format: "table" } }));
+        expect(payload.featureinfo).toEqual({ format: "table", attributes: { communes: ["code", "nom"] } });
+        expect(payloadOf(buildServiceFormData("wfs", { ...values, tables, featureinfo: { enabled: true, format: "table" } }))).not.toHaveProperty(
+            "featureinfo"
+        );
     });
 
     it("WMS raster : envoie la description, ni tables ni fichiers de style", () => {
@@ -128,6 +139,21 @@ describe("mapServiceViolationPaths", () => {
             values.tables
         );
         expect(error.violations?.map((violation) => violation.propertyPath)).toEqual(["tables[1].style", "tables"]);
+    });
+
+    it("ramène les attributs d’infobulle d’une table à leur champ", () => {
+        const error = mapServiceViolationPaths(
+            {
+                status: 422,
+                title: "Validation Failed",
+                violations: [
+                    { propertyPath: "featureinfo.attributes[communes]", title: "invalide" },
+                    { propertyPath: "featureinfo.attributes[communes][0]", title: "invalide" },
+                ],
+            },
+            values.tables
+        );
+        expect(error.violations?.map((violation) => violation.propertyPath)).toEqual(["tables[1].featureinfo_attributes", "tables[1].featureinfo_attributes"]);
     });
 });
 

@@ -17,6 +17,7 @@ const { i18n } = declareComponentKeys<
     | "section.description"
     | "section.tables"
     | "section.styles"
+    | "section.featureinfo"
     | "section.access"
     | "type.legend"
     | "type.help_link"
@@ -74,6 +75,14 @@ const { i18n } = declareComponentKeys<
     | "styles.current"
     | { K: "styles.download"; P: { table: string }; R: string }
     | "styles.download_error"
+    | "featureinfo.enabled"
+    | "featureinfo.hint"
+    | "featureinfo.no_table"
+    | "featureinfo.attributes.legend"
+    | "featureinfo.format.legend"
+    | "featureinfo.format.list"
+    | "featureinfo.format.table"
+    | "featureinfo.example"
     | "access.legend"
     | "access.public"
     | "access.public.hint"
@@ -121,6 +130,7 @@ const { i18n } = declareComponentKeys<
     | { K: "validation.table.style.layer_name"; P: { expected: string }; R: string }
     | "validation.table.style.no_rule"
     | "validation.table.style.rule_without_symbolizer"
+    | "validation.featureinfo.attributes.required"
     | "validation.access.unavailable"
     | "validation.attribution.text.required"
     | "validation.attribution.url.required"
@@ -145,6 +155,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "section.description": "Description du flux",
     "section.tables": "Tables",
     "section.styles": "Styles",
+    "section.featureinfo": "Infobulles (GetFeatureInfo)",
     "section.access": "Droits et accès",
     "type.legend": "Type de flux",
     "type.help_link": "Comment choisir le type de flux à publier ?",
@@ -205,6 +216,15 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "styles.current": "Style actuel conservé.",
     "styles.download": ({ table }) => `Télécharger le style actuel de la table ${table}`,
     "styles.download_error": "Le style actuel n’a pas pu être téléchargé.",
+    "featureinfo.enabled": "Activer les infobulles",
+    "featureinfo.hint":
+        "Sans infobulle paramétrée, la carte affiche tous les attributs de l’objet cliqué. Ce choix règle seulement l’affichage : tous les attributs restent accessibles dans le flux.",
+    "featureinfo.no_table": "Cochez d’abord une ou plusieurs tables.",
+    "featureinfo.attributes.legend": "Attributs à afficher",
+    "featureinfo.format.legend": "Format d’affichage",
+    "featureinfo.format.list": "Liste",
+    "featureinfo.format.table": "Tableau",
+    "featureinfo.example": "Exemple",
     "access.legend": "Accès",
     "access.public": "Accès libre pour tous",
     "access.public.hint": "En acceptant, le service sera accessible à tout utilisateur, dans cartes.gouv.fr ou tout autre outil tiers.",
@@ -256,6 +276,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "validation.table.style.layer_name": ({ expected }) => `Le nom du NamedLayer doit être celui de la table : ${expected}`,
     "validation.table.style.no_rule": "Le SLD doit contenir au moins une règle (Rule)",
     "validation.table.style.rule_without_symbolizer": "Chaque règle (Rule) du SLD doit contenir au moins un symboliseur",
+    "validation.featureinfo.attributes.required": "Choisissez au moins un attribut à afficher",
     "validation.access.unavailable": "Ce type d’accès n’est pas disponible pour cet entrepôt",
     "validation.attribution.text.required": "Le texte de l’attribution est obligatoire",
     "validation.attribution.url.required": "L’URL de l’attribution est obligatoire",
@@ -278,6 +299,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "section.description": "Service description",
     "section.tables": "Tables",
     "section.styles": "Styles",
+    "section.featureinfo": "Pop-ups (GetFeatureInfo)",
     "section.access": "Rights and access",
     "type.legend": "Service type",
     "type.help_link": "How to choose the type of service to publish?",
@@ -337,6 +359,15 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "styles.current": "Current style kept.",
     "styles.download": ({ table }) => `Download the current style of table ${table}`,
     "styles.download_error": "The current style could not be downloaded.",
+    "featureinfo.enabled": "Enable pop-ups",
+    "featureinfo.hint":
+        "Without pop-up settings, the map shows every attribute of the clicked feature. This only sets the display: every attribute stays available in the service.",
+    "featureinfo.no_table": "First check one or more tables.",
+    "featureinfo.attributes.legend": "Attributes to display",
+    "featureinfo.format.legend": "Display format",
+    "featureinfo.format.list": "List",
+    "featureinfo.format.table": "Table",
+    "featureinfo.example": "Example",
     "access.legend": "Access",
     "access.public": "Open access for everyone",
     "access.public.hint": "The service will be available to any user, in cartes.gouv.fr or any third-party tool.",
@@ -386,6 +417,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "validation.table.style.layer_name": ({ expected }) => `The NamedLayer name must be the table name: ${expected}`,
     "validation.table.style.no_rule": "The SLD must contain at least one Rule",
     "validation.table.style.rule_without_symbolizer": "Each SLD Rule must contain at least one symbolizer",
+    "validation.featureinfo.attributes.required": "Choose at least one attribute to display",
     "validation.access.unavailable": "This access type is not available for this datastore",
     "validation.attribution.text.required": "The attribution text is required",
     "validation.attribution.url.required": "The attribution URL is required",

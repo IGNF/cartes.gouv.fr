@@ -47,6 +47,15 @@ function buildFormData(type: ServiceType, values: ServiceEditFormOutput, rasterP
     }
     if (wmsVector) {
         payload.selected_tables = selectedTables.map((table) => table.native_name);
+        // attributs dans l’ordre alphabétique, celui du modèle généré
+        payload.featureinfo = values.featureinfo.enabled
+            ? {
+                  format: values.featureinfo.format,
+                  attributes: Object.fromEntries(
+                      selectedTables.map((table) => [table.native_name, [...table.featureinfo_attributes].sort((a, b) => a.localeCompare(b))])
+                  ),
+              }
+            : null;
     }
 
     const formData = new FormData();
@@ -68,8 +77,8 @@ function buildFormData(type: ServiceType, values: ServiceEditFormOutput, rasterP
 
 /**
  * Ramène les chemins d’une erreur 422 sur les champs du formulaire : le back ne reçoit que les tables cochées
- * (`tables[i]` = i-ème table cochée, `selected_tables` = leurs noms), le logo voyage comme fichier `attribution_logo`
- * et le style d’une table comme fichier `style_files[<table>]`.
+ * (`tables[i]` = i-ème table cochée, `selected_tables` = leurs noms), le logo voyage comme fichier `attribution_logo`,
+ * le style d’une table comme fichier `style_files[<table>]` et ses attributs d’infobulle sous `featureinfo.attributes[<table>]`.
  */
 export function mapServiceViolationPaths(error: ApiError, tables: readonly { native_name: string; selected: boolean }[]): ApiError {
     const formIndexes = tables.flatMap((table, index) => (table.selected ? [index] : []));
@@ -80,6 +89,12 @@ export function mapServiceViolationPaths(error: ApiError, tables: readonly { nat
         if (styleTable !== undefined) {
             const formIndex = tables.findIndex((table) => table.native_name === styleTable);
             return formIndex === -1 ? path : `tables[${formIndex}].style`;
+        }
+        // `featureinfo.attributes[<table>]`, suivi de `[i]` pour un attribut
+        const featureInfoTable = /^featureinfo\.attributes\[([^\]]*)\]/.exec(path)?.[1];
+        if (featureInfoTable !== undefined) {
+            const formIndex = tables.findIndex((table) => table.native_name === featureInfoTable);
+            return formIndex === -1 ? path : `tables[${formIndex}].featureinfo_attributes`;
         }
         return path.replace(/^tables\[(\d+)\]/, (match, sent: string) => {
             const formIndex = formIndexes[Number(sent)];
