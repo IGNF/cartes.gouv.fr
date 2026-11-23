@@ -161,18 +161,40 @@ final class ServiceController extends AbstractController implements ApiControlle
 
         // flux occupé refusé avant tout dépôt de fichier
         $this->cartesServiceApiService->assertEditable($offering, $configuration);
-        // nouveau fichier puis suppression de l’ancien après l’enregistrement : un échec laisse le flux intact
+
+        /** @var array<string, string> $savedFtlIds modèle d’infobulle enregistré par table */
+        $savedFtlIds = array_column($configuration['type_infos']['used_data'][0]['relations'] ?? [], 'ftl', 'name');
+        // seuls nos modèles sont remplacés ou supprimés ; un modèle personnalisé (null) reste tel quel
+        $generatedFtlIds = array_intersect_key($savedFtlIds, array_filter($this->wmsVectorFeatureInfoService->read($datastoreId, $savedFtlIds), fn (?array $settings) => null !== $settings));
+        if (null !== $dto->featureinfo) {
+            $this->assertFeatureInfoAttributes($dto, $dto->featureinfo, $this->storedDataApiService->get($datastoreId, $configuration['type_infos']['used_data'][0]['stored_data'])->array());
+        }
+
+        // nouveaux fichiers puis suppression des anciens après l’enregistrement : un échec laisse le flux intact
         $newStyleIds = $this->wmsVectorStyleFileService->upload($datastoreId, $styleFiles, $configuration['_id']);
         $styleIds = $newStyleIds + array_intersect_key($savedStyleIds, array_flip($dto->selected_tables));
         try {
-            $offering = $this->cartesServiceApiService->editFromForm($datastoreId, $offering, $configuration, $dto, $thumbnail, $attributionLogo, $styleIds);
+            $newFtlIds = null === $dto->featureinfo ? [] : $this->wmsVectorFeatureInfoService->upload($datastoreId, $dto->featureinfo->format, $dto->featureinfo->attributes, $configuration['_id']);
         } catch (\Throwable $th) {
-            $this->wmsVectorStyleFileService->removeUnused($datastoreId, $configuration['_id'], [...array_values($savedStyleIds), ...array_values($newStyleIds)]);
+            $this->wmsVectorStyleFileService->removeQuietly($datastoreId, $newStyleIds);
+            throw $th;
+        }
+        // infobulles désactivées : les modèles personnalisés des tables gardées restent
+        $ftlIds = null === $dto->featureinfo ? array_intersect_key(array_diff_key($savedFtlIds, $generatedFtlIds), array_flip($dto->selected_tables)) : $newFtlIds;
+        try {
+            $offering = $this->cartesServiceApiService->editFromForm($datastoreId, $offering, $configuration, $dto, $thumbnail, $attributionLogo, $styleIds, $ftlIds);
+        } catch (\Throwable $th) {
+            $this->wmsVectorStyleFileService->removeUnused(
+                $datastoreId,
+                $configuration['_id'],
+                [...array_values($savedStyleIds), ...array_values($newStyleIds), ...array_values($generatedFtlIds), ...array_values($newFtlIds)],
+                ['style', 'ftl'],
+            );
             throw $th;
         }
 
         // fichiers remplacés et tables décochées
-        $this->wmsVectorStyleFileService->removeQuietly($datastoreId, array_diff($savedStyleIds, $styleIds));
+        $this->wmsVectorStyleFileService->removeQuietly($datastoreId, [...array_values(array_diff($savedStyleIds, $styleIds)), ...array_values(array_diff($generatedFtlIds, $ftlIds))]);
 
         return $this->json($offering);
     }

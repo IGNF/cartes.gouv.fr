@@ -57,6 +57,7 @@ class CartesServiceApiService
         private readonly LoggerInterface $logger,
         private readonly ServiceConfigurationRequestBuilder $configurationRequestBuilder,
         private readonly ServiceImageAnnexeService $serviceImageAnnexeService,
+        private readonly WmsVectorFeatureInfoService $wmsVectorFeatureInfoService,
     ) {
     }
 
@@ -77,6 +78,10 @@ class CartesServiceApiService
             $styles = $this->cartesStylesApiService->getStyles($datastoreId, $offering['configuration']);
         }
         $offering['configuration']['styles'] = $styles;
+
+        if (OfferingTypes::WMSVECTOR === $offering['type']) {
+            $offering['configuration']['featureinfo'] = $this->readFeatureInfo($datastoreId, $offering['configuration']);
+        }
 
         // url de partage (url capabilities si WFS ou WMS-VECTOR, url spécifique si TMS)
         $offering['share_url'] = $this->getShareUrl($datastoreId, $offering, $this->datastoreApiService->getEndpointsList($datastoreId));
@@ -521,10 +526,12 @@ class CartesServiceApiService
             $remove('legacy styles annexe '.$annexe['_id'], $this->annexeApiService->remove($datastoreId, $annexe['_id']));
         }
 
-        // WMS-VECTOR
+        // WMS-VECTOR : styles et modèles d’infobulle ; un modèle utilisé par une autre configuration reste (409 journalisé)
         foreach ($configuration['type_infos']['used_data'][0]['relations'] ?? [] as $relation) {
-            if (isset($relation['style'])) {
-                $remove('style static '.$relation['style'], $this->staticApiService->delete($datastoreId, $relation['style']));
+            foreach (['style', 'ftl'] as $field) {
+                if (isset($relation[$field])) {
+                    $remove("$field static ".$relation[$field], $this->staticApiService->delete($datastoreId, $relation[$field]));
+                }
             }
         }
 
@@ -651,6 +658,7 @@ class CartesServiceApiService
      * @param array<mixed>          $offering      offre brute
      * @param array<mixed>          $configuration configuration brute de l’offre
      * @param array<string, string> $styleIds      WMS vecteur : fichier de style (gardé ou déposé) par table cochée
+     * @param array<string, string> $ftlIds        WMS vecteur : modèle d’infobulle des tables qui en ont un
      *
      * @return array<mixed> offre (nouvelle si l’endpoint change), avec sa configuration
      *
@@ -664,6 +672,7 @@ class CartesServiceApiService
         ?UploadedFile $thumbnail = null,
         ?UploadedFile $attributionLogo = null,
         array $styleIds = [],
+        array $ftlIds = [],
     ): array {
         $datasheetName = $this->assertEditable($offering, $configuration);
 
@@ -683,7 +692,7 @@ class CartesServiceApiService
             $body = [
                 'name' => $dto->title,
                 'type' => $type,
-                'type_infos' => ServiceConfigurationRequestBuilder::buildTypeInfos($type, $dto, $configuration['type_infos'], $styleIds),
+                'type_infos' => ServiceConfigurationRequestBuilder::buildTypeInfos($type, $dto, $configuration['type_infos'], $styleIds, $ftlIds),
                 'metadata' => $configuration['metadata'] ?? [],
             ];
             if ($dto->attribution instanceof ServiceAttributionFormDTO) {
@@ -746,6 +755,35 @@ class CartesServiceApiService
         ]);
 
         return $offering;
+    }
+
+    /**
+     * Infobulles d’un flux WMS vecteur pour son formulaire : réglages de nos modèles par table, modèles personnalisés ignorés.
+     * Null si un modèle est illisible : la page n’est alors pas modifiable, un enregistrement supprimerait nos modèles.
+     *
+     * @param array<mixed> $configuration
+     *
+     * @return array{format: ?string, attributes: array<string, list<string>>}|null
+     */
+    private function readFeatureInfo(string $datastoreId, array $configuration): ?array
+    {
+        try {
+            $settings = array_filter($this->wmsVectorFeatureInfoService->read($datastoreId, array_column($configuration['type_infos']['used_data'][0]['relations'] ?? [], 'ftl', 'name')));
+        } catch (\Throwable $e) {
+            $this->logger->warning('{class}: Failed to read feature info templates of configuration {configurationId}: {error}', [
+                'class' => self::class,
+                'configurationId' => $configuration['_id'],
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+
+        return [
+            'format' => [] === $settings ? null : array_values($settings)[0]['format'],
+            'attributes' => array_map(fn (array $setting) => $setting['attributes'], $settings),
+        ];
     }
 
     /**

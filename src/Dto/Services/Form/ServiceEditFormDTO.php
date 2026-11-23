@@ -7,6 +7,7 @@ namespace App\Dto\Services\Form;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\ServiceAccess;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /** Modification d’un flux depuis sa page, validée avec les groupes Default et le type de la configuration. */
 class ServiceEditFormDTO extends ServiceFormDTO
@@ -40,7 +41,17 @@ class ServiceEditFormDTO extends ServiceFormDTO
         public readonly bool $remove_thumbnail = false,
 
         public readonly bool $remove_attribution_logo = false,
+
+        // WMS vecteur ; null : infobulles désactivées (les modèles personnalisés restent)
+        #[Assert\Valid]
+        public readonly ?FeatureInfoFormDTO $featureinfo = null,
     ) {
         parent::__construct($title, $themes, $access, $attribution);
+    }
+
+    #[Assert\Callback(groups: [ConfigurationTypes::WMSVECTOR])]
+    public function validateFeatureInfoTables(ExecutionContextInterface $context): void
+    {
+        $this->featureinfo?->validateTables($this->selected_tables, $context);
     }
 }
