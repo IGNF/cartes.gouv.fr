@@ -41,6 +41,7 @@ const { i18n } = declareComponentKeys<
     | "report.steps"
     | "report.no_upload"
     | "report.no_processing"
+    | "report.no_checks"
     | { K: "step.upload"; P: { number: number }; R: string }
     | { K: "step.checks"; P: { number: number }; R: string }
     | { K: "step.processing"; P: { number: number; name: string }; R: string }
@@ -104,6 +105,7 @@ export const DataDetailsFrTranslations: Translations<"fr">["DataDetails"] = {
     "report.steps": "Étapes de publication",
     "report.no_upload": "Aucune livraison n’est associée à cette donnée.",
     "report.no_processing": "Aucune information sur les traitements de génération de cette donnée n’a été trouvée.",
+    "report.no_checks": "Aucune vérification n’a été lancée.",
     "step.upload": ({ number }) => `${number}. Dépôt des données`,
     "step.checks": ({ number }) => `${number}. Vérifications`,
     "step.processing": ({ number, name }) => `${number}. Traitement : ${name}`,
@@ -166,6 +168,7 @@ export const DataDetailsEnTranslations: Translations<"en">["DataDetails"] = {
     "report.steps": "Publication steps",
     "report.no_upload": "No upload is linked to this data.",
     "report.no_processing": "No information was found about the processings that generated this data.",
+    "report.no_checks": "No check was run.",
     "step.upload": ({ number }) => `${number}. Data upload`,
     "step.checks": ({ number }) => `${number}. Checks`,
     "step.processing": ({ number, name }) => `${number}. Processing: ${name}`,

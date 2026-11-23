@@ -1,13 +1,12 @@
-import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
+import { type AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
-import { FC, memo } from "react";
+import { type FC, memo } from "react";
 
-import { CheckStatusEnum, ProcessingExecution, StoredDataStatusEnum, UploadStatusEnum } from "@/@types/app";
+import { type CheckStatusEnum, type ProcessingExecution, type StoredDataStatusEnum, type UploadStatusEnum } from "@/@types/app";
 import { useTranslation } from "@/i18n";
 
 type ReportStatusBadgeProps = {
     status: ProcessingExecution["status"] | StoredDataStatusEnum | UploadStatusEnum | CheckStatusEnum;
-    className?: string;
 };
 
 type BadgeLook = {
@@ -32,15 +31,11 @@ const LOOKS: Record<string, BadgeLook> = {
     ABORTED: { severity: "error", key: "status.aborted" },
 };
 
-const ReportStatusBadge: FC<ReportStatusBadgeProps> = ({ status, className }) => {
+const ReportStatusBadge: FC<ReportStatusBadgeProps> = ({ status }) => {
     const { t } = useTranslation("DataDetails");
     const look = LOOKS[status];
 
-    return (
-        <Badge severity={look?.severity} className={className}>
-            {look ? t(look.key) : ""}
-        </Badge>
-    );
+    return <Badge severity={look?.severity}>{look ? t(look.key) : ""}</Badge>;
 };
 
 export default memo(ReportStatusBadge);

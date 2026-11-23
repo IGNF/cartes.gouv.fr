@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
     }),
     staticData: { matomoLabel: "Détails de donnée stockée" },
     beforeLoad: ({ params, search }) => {
-        if (search.datasheetName === undefined) throw notFound();
+        if (!search.datasheetName) throw notFound();
         throw redirect({
             to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/donnees/$storedDataId",
             params: { datastoreId: params.datastoreId, datasheetName: search.datasheetName, storedDataId: params.storedDataId },

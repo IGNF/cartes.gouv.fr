@@ -27,17 +27,13 @@ export function storedDataDetailsData(storedData: StoredDataDetails["stored_data
 }
 
 // niveaux non contigus possibles : liste complète, triée numériquement
-const sortLevels = (levels: string[] | undefined) =>
-    levels
-        ?.map(Number)
-        .sort((a, b) => a - b)
-        .join(", ");
+const sortLevels = (levels: string[] | undefined) => levels && [...levels].sort((a, b) => Number(a) - Number(b)).join(", ");
 
 export function descriptionRows(details: DetailsData): DescriptionRow[] {
     const { data } = details;
     const rows: DescriptionRow[] = [
         ["technical_name", data.name],
-        ["size", data.size ? niceBytes(String(data.size)) : undefined],
+        ["size", data.size !== undefined && data.size !== null ? niceBytes(String(data.size)) : undefined],
         ["id", data._id],
     ];
 

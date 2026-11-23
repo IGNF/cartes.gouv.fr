@@ -6,6 +6,7 @@ import { type ComponentProps, Fragment, type ReactNode, useState } from "react";
 import { tss } from "tss-react";
 
 import { type DataDetailsProcessingExecution, type DataDetailsUpload } from "@/@types/app";
+import Skeleton from "@/components/Utils/Skeleton";
 import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -56,7 +57,7 @@ export default function ReportSteps({ datastoreId, upload, processing }: ReportS
                                     [t("field.id"), upload._id],
                                     [t("field.srs"), upload.srs],
                                     [t("report.status"), <ReportStatusBadge key="status" status={upload.status} />],
-                                    [t("field.size"), upload.size ? niceBytes(String(upload.size)) : t("not_provided")],
+                                    [t("field.size"), upload.size !== undefined && upload.size !== null ? niceBytes(String(upload.size)) : t("not_provided")],
                                 ] satisfies [string, ReactNode][]
                             ).map(([label, value]) => (
                                 <Fragment key={label}>
@@ -70,6 +71,7 @@ export default function ReportSteps({ datastoreId, upload, processing }: ReportS
                     </Accordion>
 
                     <Accordion titleAs="h4" label={t("step.checks", { number: 2 })}>
+                        {upload.checks.length === 0 && <p className={fr.cx("fr-mb-0")}>{t("report.no_checks")}</p>}
                         {upload.checks.map((check) => (
                             <LogStep
                                 key={check._id}
@@ -137,7 +139,8 @@ function LogStep({ titleAs, label, status, queryKey, queryFn, children }: LogSte
     const running = !FINAL_STEP_STATUSES.has(status);
 
     const logsQuery = useQuery<string[], ApiError>({
-        queryKey,
+        // statut dans la clé : une étape qui se termine relit son journal une dernière fois
+        queryKey: [...queryKey, status],
         queryFn: ({ signal }) => queryFn(signal),
         enabled: expanded,
         refetchInterval: expanded && running ? delta.seconds(30) : false,
@@ -158,7 +161,10 @@ function LogStep({ titleAs, label, status, queryKey, queryFn, children }: LogSte
             {children}
             <p className={fr.cx("fr-text--sm", "fr-text--bold", "fr-mb-1v")}>{t("logs.title")}</p>
             {logsQuery.isPending ? (
-                <p>{t("logs.loading")}</p>
+                <>
+                    <span className={fr.cx("fr-sr-only")}>{t("logs.loading")}</span>
+                    <Skeleton count={1} rectangleHeight={120} />
+                </>
             ) : logsQuery.isError ? (
                 <p>{t("logs.error")}</p>
             ) : logsQuery.data.length === 0 ? (

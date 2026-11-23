@@ -34,6 +34,8 @@ final class DataDetailsRoutesTest extends WebTestCase
             'tags' => [
                 'datasheet_name' => 'Fiche',
                 'producer' => 'IGN',
+                'date' => '2026-11-13',
+                'production_year' => '2026',
                 'upload_id' => self::UPLOAD_ID,
                 'vectordb_id' => self::VECTORDB_ID,
                 'proc_int_id' => self::INTEGRATION_ID,
@@ -54,6 +56,8 @@ final class DataDetailsRoutesTest extends WebTestCase
             'status' => 'CLOSED',
             'tags' => ['datasheet_name' => 'Fiche', 'data_upload_path' => 'abc/fichier.gpkg', 'zone' => 'France'],
             'checks' => [
+                'asked' => [['_id' => 'check-0', 'check' => ['name' => 'Vérification antivirus']]],
+                'in_progress' => [['_id' => 'check-3', 'check' => ['name' => 'Vérification raster']]],
                 'passed' => [['_id' => 'check-1', 'check' => ['name' => 'Vérification standard']]],
                 'failed' => [['_id' => 'check-2', 'check' => ['name' => 'Vérification vecteur']]],
             ],
@@ -80,7 +84,7 @@ final class DataDetailsRoutesTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         $json = $this->jsonResponse($client);
-        self::assertSame(['datasheet_name' => 'Fiche', 'producer' => 'IGN'], $json['stored_data']['tags']);
+        self::assertSame(['datasheet_name' => 'Fiche', 'producer' => 'IGN', 'date' => '2026-11-13', 'production_year' => '2026'], $json['stored_data']['tags']);
         self::assertSame([
             '_id' => self::VECTORDB_ID,
             'name' => 'base',
@@ -90,6 +94,8 @@ final class DataDetailsRoutesTest extends WebTestCase
         self::assertSame(['datasheet_name' => 'Fiche', 'zone' => 'France'], $json['upload']['tags']);
         self::assertSame([], $json['upload']['file_tree']);
         self::assertSame([
+            ['_id' => 'check-0', 'name' => 'Vérification antivirus', 'status' => 'WAITING'],
+            ['_id' => 'check-3', 'name' => 'Vérification raster', 'status' => 'PROGRESS'],
             ['_id' => 'check-1', 'name' => 'Vérification standard', 'status' => 'SUCCESS'],
             ['_id' => 'check-2', 'name' => 'Vérification vecteur', 'status' => 'FAILURE'],
         ], $json['upload']['checks']);
@@ -99,24 +105,44 @@ final class DataDetailsRoutesTest extends WebTestCase
         ], $json['processing_executions']);
     }
 
-    public function testVanishedLineageIsLeftOut(): void
+    public function testVanishedUploadIsLeftOut(): void
     {
-        EntrepotMockResponseFactory::reset();
-        EntrepotMockResponseFactory::seed('stored_data', [
-            '_id' => self::PYRAMID_ID,
-            'name' => 'pyramide',
-            'type' => 'ROK4-PYRAMID-VECTOR',
-            'tags' => ['upload_id' => self::UPLOAD_ID, 'vectordb_id' => self::VECTORDB_ID, 'proc_int_id' => self::INTEGRATION_ID],
-        ]);
-        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('GET uploads/'.self::UPLOAD_ID, status: 404);
 
-        $client->xmlHttpRequest('GET', self::DATASTORE_PATH.'/stored_data/'.self::PYRAMID_ID.'/details');
+        $json = $this->pyramidDetails();
 
-        self::assertResponseIsSuccessful();
-        $json = $this->jsonResponse($client);
         self::assertNull($json['upload']);
+        self::assertNotNull($json['source_vectordb']);
+        self::assertCount(2, $json['processing_executions']);
+    }
+
+    public function testVanishedSourceVectorDbIsLeftOut(): void
+    {
+        EntrepotMockResponseFactory::failNext('GET stored_data/'.self::VECTORDB_ID, status: 404);
+
+        $json = $this->pyramidDetails();
+
         self::assertNull($json['source_vectordb']);
-        self::assertSame([], $json['processing_executions']);
+        self::assertNotNull($json['upload']);
+    }
+
+    public function testVanishedExecutionIsDroppedAndOthersKept(): void
+    {
+        EntrepotMockResponseFactory::failNext('GET processings/executions/'.self::INTEGRATION_ID, status: 404);
+
+        $json = $this->pyramidDetails();
+
+        self::assertSame([self::PYRAMID_CREATION_ID], array_column($json['processing_executions'], '_id'));
+    }
+
+    public function testVanishedFileTreeIsEmpty(): void
+    {
+        EntrepotMockResponseFactory::failNext('GET uploads/'.self::UPLOAD_ID.'/tree', status: 404);
+
+        $json = $this->pyramidDetails();
+
+        self::assertSame([], $json['upload']['file_tree']);
+        self::assertCount(4, $json['upload']['checks']);
     }
 
     public function testStoredDataWithoutLineageTags(): void
@@ -163,7 +189,7 @@ final class DataDetailsRoutesTest extends WebTestCase
         $json = $this->jsonResponse($client);
         self::assertSame('livraison', $json['name']);
         self::assertSame(['datasheet_name' => 'Fiche', 'zone' => 'France'], $json['tags']);
-        self::assertCount(2, $json['checks']);
+        self::assertCount(4, $json['checks']);
     }
 
     public function testMissingUploadIsNotFound(): void
@@ -187,6 +213,16 @@ final class DataDetailsRoutesTest extends WebTestCase
         $client->xmlHttpRequest('GET', self::DATASTORE_PATH.'/upload/'.self::UPLOAD_ID.'/check_executions/'.self::UPLOAD_ID.'/logs');
         self::assertResponseIsSuccessful();
         self::assertSame(['journal de '.self::UPLOAD_ID], $this->jsonResponse($client));
+    }
+
+    /** @return array<mixed> */
+    private function pyramidDetails(): array
+    {
+        $client = $this->client();
+        $client->xmlHttpRequest('GET', self::DATASTORE_PATH.'/stored_data/'.self::PYRAMID_ID.'/details');
+        self::assertResponseIsSuccessful();
+
+        return $this->jsonResponse($client);
     }
 
     private function client(): KernelBrowser
