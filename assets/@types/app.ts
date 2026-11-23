@@ -5,7 +5,6 @@ import {
     AnnexStandardDetailResponseDto,
     BasicInfoDto,
     BoundingBox,
-    CheckingExecutionStandardDetailResponseDto,
     CheckingExecutionStandardDetailResponseDtoStatusEnum,
     CommunityDetailResponseDto,
     CommunityMemberDto,
@@ -19,7 +18,6 @@ import {
     OAuth2InfoDto,
     OfferingStandardDetailResponseDto,
     PermissionStandardListResponseDto,
-    ProcessingExecutionOutputStoredDataDto,
     ProcessingExecutionStandardDetailResponseDto,
     StaticFileStandardDetailResponseDto,
     StoredDataDetailsRelationDto,
@@ -124,6 +122,9 @@ export interface StoredData extends StoredDataPrivateDetailResponseDto {
         production_year?: string;
         /** thématiques choisies au dépôt, jointes par « , » */
         theme?: string;
+        /** date de production saisie au dépôt (AAAA-MM-JJ) */
+        date?: string;
+        zone?: string;
     };
 }
 export {
@@ -186,6 +187,8 @@ export type Upload = UploadPrivateDetailResponseDto & {
         data_upload_path?: string;
         producer?: string;
         production_year?: string;
+        date?: string;
+        zone?: string;
     };
 };
 
@@ -297,36 +300,20 @@ export enum MetadataHierarchyLevel {
 /** endpoints */
 export type DatastoreEndpoint = DatastoreEndpointStandardResponseDto;
 
-export type CheckOrProcessingExecutionLogs = [string];
-export type CheckDetailed = CheckingExecutionStandardDetailResponseDto & {
-    logs?: CheckOrProcessingExecutionLogs;
-};
 export { CheckingExecutionStandardDetailResponseDtoStatusEnum as CheckStatusEnum };
 
 export type ProcessingExecution = ProcessingExecutionStandardDetailResponseDto;
 export { ProcessingExecutionStandardDetailResponseDtoStatusEnum as ProcessingExecutionStatusEnum } from "./entrepot";
 
-export type StoredDataReport = {
+/** pages de détail : seuls les tags affichés sont renvoyés par le serveur */
+export type DataDetailsCheck = { _id: string; name: string | null; status: CheckingExecutionStandardDetailResponseDtoStatusEnum };
+export type DataDetailsUpload = Upload & { file_tree: UploadTree; checks: DataDetailsCheck[] };
+export type DataDetailsProcessingExecution = { _id: string; name: string | null; status: ProcessingExecution["status"]; output_id: string | null };
+export type StoredDataDetails = {
     stored_data: VectorDb | PyramidVector | PyramidRaster;
-    input_upload:
-        | (Upload & {
-              file_tree: UploadTree;
-              checks: CheckDetailed[];
-          })
-        | null;
-    processing_executions: StoredDataReportProcessingExecution[];
-};
-
-export type UploadReport = {
-    input_upload: Upload & {
-        file_tree: UploadTree;
-        checks: CheckDetailed[];
-    };
-};
-
-export type StoredDataReportProcessingExecution = ProcessingExecution & {
-    output: ProcessingExecutionOutputStoredDataDto;
-    logs?: CheckOrProcessingExecutionLogs;
+    source_vectordb: (Pick<VectorDb, "_id" | "name" | "extent"> & { relations: StoredDataRelation[] }) | null;
+    upload: DataDetailsUpload | null;
+    processing_executions: DataDetailsProcessingExecution[];
 };
 
 export type UserRightsResponseDto = {

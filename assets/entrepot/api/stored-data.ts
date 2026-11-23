@@ -1,4 +1,4 @@
-import { Offering, StoredData, StoredDataReport } from "../../@types/app";
+import { Offering, StoredData, StoredDataDetails } from "../../@types/app";
 import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 
@@ -35,11 +35,14 @@ const getUses = (datastoreId: string, storedDataId: string, otherOptions: Reques
     });
 };
 
-const getReportData = (datastoreId: string, storedDataId: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_stored_data_get_report_data", { datastoreId, storedDataId });
-    return jsonFetch<StoredDataReport>(url, {
-        ...otherOptions,
-    });
+const getDetails = (datastoreId: string, storedDataId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_stored_data_get_details", { datastoreId, storedDataId });
+    return jsonFetch<StoredDataDetails>(url, { ...otherOptions });
+};
+
+const getProcessingLogs = (datastoreId: string, storedDataId: string, executionId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_stored_data_get_processing_logs", { datastoreId, storedDataId, executionId });
+    return jsonFetch<string[]>(url, { ...otherOptions });
 };
 
 const remove = (datastoreId: string, storedDataId: string) => {
@@ -52,7 +55,8 @@ const storedData = {
     getAll,
     get,
     getUses,
-    getReportData,
+    getDetails,
+    getProcessingLogs,
     remove,
 };
 

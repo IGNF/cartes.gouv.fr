@@ -1894,16 +1894,16 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_api_stored_data_get_report_data": {
+        "cartesgouvfr_api_stored_data_get_details": {
             "tokens": [
                 [
                     "text",
-                    "\/report"
+                    "\/details"
                 ],
                 [
                     "variable",
                     "\/",
-                    "[^\/]++",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
                     "storedDataId",
                     true
                 ],
@@ -1924,7 +1924,60 @@
                 ]
             ],
             "defaults": [],
-            "requirements": [],
+            "requirements": {
+                "storedDataId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_stored_data_get_processing_logs": {
+            "tokens": [
+                [
+                    "text",
+                    "\/logs"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "executionId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/processing_executions"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "storedDataId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/stored_data"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "storedDataId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                "executionId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
             "hosttokens": [],
             "methods": [
                 "GET"
@@ -2271,16 +2324,16 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_api_upload_get_upload_report": {
+        "cartesgouvfr_api_upload_get_details": {
             "tokens": [
                 [
                     "text",
-                    "\/upload-report"
+                    "\/details"
                 ],
                 [
                     "variable",
                     "\/",
-                    "[^\/]++",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
                     "uploadId",
                     true
                 ],
@@ -2301,7 +2354,60 @@
                 ]
             ],
             "defaults": [],
-            "requirements": [],
+            "requirements": {
+                "uploadId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_api_upload_get_check_logs": {
+            "tokens": [
+                [
+                    "text",
+                    "\/logs"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "executionId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/check_executions"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                    "uploadId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/upload"
+                ],
+                [
+                    "variable",
+                    "\/",
+                    "[^\/]++",
+                    "datastoreId",
+                    true
+                ],
+                [
+                    "text",
+                    "\/api\/datastores"
+                ]
+            ],
+            "defaults": [],
+            "requirements": {
+                "uploadId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+                "executionId": "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            },
             "hosttokens": [],
             "methods": [
                 "GET"

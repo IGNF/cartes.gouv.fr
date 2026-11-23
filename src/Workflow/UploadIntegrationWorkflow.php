@@ -305,9 +305,9 @@ class UploadIntegrationWorkflow
                     'type' => 'email',
                     'to_address' => [$userEmail],
                     'entity_url' => sprintf(
-                        '%stableau-de-bord/entrepots/{{ datastore }}/donnees/{{ output }}/details?datasheetName=%s',
+                        '%stableau-de-bord/entrepots/{{ datastore }}/donnees/%s/donnees/{{ output }}',
                         $baseUrl,
-                        urlencode($datasheetName)
+                        rawurlencode($datasheetName)
                     ),
                 ];
             }

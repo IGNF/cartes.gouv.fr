@@ -2,16 +2,15 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Constants\EntrepotApi\StoredDataTags;
 use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
 use App\Exception\AppException;
+use App\Services\EntrepotApi\CartesDataDetailsService;
 use App\Services\EntrepotApi\CartesStoredDataApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
-use App\Services\EntrepotApi\UploadApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,6 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 
 #[Route(
     '/api/datastores/{datastoreId}/stored_data',
@@ -33,7 +33,6 @@ class StoredDataController extends AbstractController implements ApiControllerIn
         private StoredDataApiService $storedDataApiService,
         private ConfigurationApiService $configurationApiService,
         private ProcessingApiService $processingApiService,
-        private UploadApiService $uploadApiService,
         private CartesStoredDataApiService $cartesStoredDataApiService,
     ) {
     }
@@ -97,60 +96,17 @@ class StoredDataController extends AbstractController implements ApiControllerIn
         ]);
     }
 
-    #[Route('/{storedDataId}/report', name: 'get_report_data', methods: ['GET'])]
-    public function getReport(string $datastoreId, string $storedDataId): JsonResponse
+    #[Route('/{storedDataId}/details', name: 'get_details', methods: ['GET'], requirements: ['storedDataId' => Requirement::UUID_V4])]
+    public function getDetails(string $datastoreId, string $storedDataId, CartesDataDetailsService $dataDetailsService): JsonResponse
     {
-        $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->array();
+        return $this->json($dataDetailsService->getStoredDataDetails($datastoreId, $storedDataId));
+    }
 
-        // récupération de détails sur l'upload s'il y en a un qui a servi à créer la stored_data
-        if (isset($storedData['tags'][StoredDataTags::UPLOAD_ID])) {
-            $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags'][StoredDataTags::UPLOAD_ID])->array();
-            $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id'], $inputUpload);
-            $inputUpload['checks'] = [];
-            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->array();
-
-            foreach ($uploadChecks as &$checkType) {
-                foreach ($checkType as &$checkExecution) {
-                    $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->array());
-                    try {
-                        $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->array();
-                    } catch (ApiException) {
-                    }
-                    $inputUpload['checks'][] = $checkExecution;
-                }
-            }
-        }
-
-        $procIntegrationId = $storedData['tags'][StoredDataTags::PROC_INT_ID] ?? null;
-        $procPyramidCreationId = $storedData['tags'][StoredDataTags::PROC_PYR_CREAT_ID] ?? null;
-        $procExections = [];
-
-        // récupération de l'exécution de traitement d'intégration en base de données
-        if ($procIntegrationId) {
-            $procIntegrationExec = $this->processingApiService->getExecution($datastoreId, $procIntegrationId)->array();
-            try {
-                $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId)->array();
-            } catch (ApiException) {
-            }
-
-            $procExections[] = $procIntegrationExec;
-        }
-
-        // récupération de l'exécution de traitement de création de pyramide vecteur
-        if ($procPyramidCreationId) {
-            $procPyramidCreationExec = $this->processingApiService->getExecution($datastoreId, $procPyramidCreationId)->array();
-            try {
-                $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId)->array();
-            } catch (ApiException) {
-            }
-            $procExections[] = $procPyramidCreationExec;
-        }
-
-        return $this->json([
-            'stored_data' => $storedData,
-            'input_upload' => $inputUpload ?? null,
-            'processing_executions' => $procExections,
-        ]);
+    // journaux lus à l’ouverture d’une étape du rapport, première page seulement
+    #[Route('/{storedDataId}/processing_executions/{executionId}/logs', name: 'get_processing_logs', methods: ['GET'], requirements: ['storedDataId' => Requirement::UUID_V4, 'executionId' => Requirement::UUID_V4])]
+    public function getProcessingLogs(string $datastoreId, string $executionId): JsonResponse
+    {
+        return $this->json($this->processingApiService->getExecutionLogs($datastoreId, $executionId)->array());
     }
 
     #[Route('/{storedDataId}', name: 'delete', methods: ['DELETE'])]

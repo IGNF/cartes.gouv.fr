@@ -372,6 +372,11 @@ final class EntrepotMockResponseFactory
             return $this->json([]);
         }
 
+        // journaux : une ligne qui nomme l’exécution
+        if ('GET' === $method && 1 === preg_match('#^(checks|processings)/executions/([\w-]+)/logs$#', $relative, $matches)) {
+            return $this->json(["journal de {$matches[2]}"]);
+        }
+
         if ('DELETE' === $method && 1 === preg_match('#^uploads/([\w-]+)/tags$#', $relative, $matches)) {
             self::$writeRequests[] = ['method' => $method, 'path' => '/api/datastores/'.self::DATASTORE_ID.$path, 'body' => ''];
             $this->update('uploads', $matches[1], fn (array $item) => ['tags' => array_diff_key($item['tags'], array_flip(explode(',', is_string($query['tags'] ?? null) ? $query['tags'] : '')))] + $item);

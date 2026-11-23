@@ -141,9 +141,8 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                         priority="tertiary"
                         size="small"
                         linkProps={{
-                            to: "/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport",
-                            params: { datastoreId, uploadId: upload._id },
-                            search: { datasheetName },
+                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/livraisons/$uploadId",
+                            params: { datastoreId, datasheetName, uploadId: upload._id },
                         }}
                     >
                         {t("view_report")}
@@ -191,9 +190,8 @@ export default function DatasetTabNext({ datastoreId, datasheetName, hasMetadata
                         priority="tertiary"
                         size="small"
                         linkProps={{
-                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
-                            params: { datastoreId, storedDataId: storedData._id },
-                            search: { datasheetName },
+                            to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/donnees/$storedDataId",
+                            params: { datastoreId, datasheetName, storedDataId: storedData._id },
                         }}
                     >
                         {t("view")}

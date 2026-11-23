@@ -400,7 +400,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
                             {reportColumns.map(({ title, rows }) => (
                                 <div key={title} className={fr.cx("fr-col-12", "fr-col-md-6")}>
                                     <h3 className={fr.cx("fr-text--md", "fr-text--bold", "fr-mb-2w")}>{title}</h3>
-                                    <dl className={fr.cx("fr-m-0")}>
+                                    <dl className={fr.cx("fr-m-0", "fr-p-0")}>
                                         {rows.map(([label, value]) => (
                                             <Fragment key={label}>
                                                 <dt className={fr.cx("fr-text--sm", "fr-mb-0")}>{label}</dt>
@@ -476,6 +476,7 @@ const useStyles = tss.withName({ ServiceSheet }).create({
     },
     value: {
         marginLeft: 0,
+        paddingLeft: 0,
         marginBottom: fr.spacing("2w"),
         overflowWrap: "anywhere",
     },

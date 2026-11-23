@@ -34,8 +34,8 @@ const breadcrumbNameByRouteId = {
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement": "datastore_datasheet_upload",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout": "datastore_datasheet_service_add",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId": "datastore_datasheet_service_view",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details": "datastore_stored_data_details",
-    "/_private/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport": "datastore_upload_details",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/donnees/$storedDataId": "datastore_stored_data_details",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/livraisons/$uploadId": "datastore_upload_details",
     "/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout": "datastore_pyramid_vector_generate",
     "/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-raster/ajout": "datastore_pyramid_raster_generate",
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout": "datastore_service_style_add",
@@ -198,24 +198,13 @@ const getBreadcrumb = (
         }
         case "datastore_datasheet_view":
             return { ...datastoreBaseProps, currentPageLabel: datasheetName };
-        case "datastore_stored_data_details": {
-            const breadcrumbProps: BreadcrumbProps = {
+        case "datastore_stored_data_details":
+        case "datastore_upload_details":
+            return {
                 ...datastoreBaseProps,
+                segments: [...datastoreBaseProps.segments, { label: datasheetName ?? "", linkProps: datasheetLink("dataset") }],
+                currentPageLabel: t(name),
             };
-            if (datasheetName) {
-                breadcrumbProps.segments.push({ label: datasheetName, linkProps: datasheetLink() });
-            }
-            return { ...breadcrumbProps, currentPageLabel: t("datastore_stored_data_details") };
-        }
-        case "datastore_upload_details": {
-            const breadcrumbProps: BreadcrumbProps = {
-                ...datastoreBaseProps,
-            };
-            if (datasheetName) {
-                breadcrumbProps.segments.push({ label: datasheetName, linkProps: datasheetLink() });
-            }
-            return { ...breadcrumbProps, currentPageLabel: t("datastore_upload_details") };
-        }
 
         case "datastore_pyramid_vector_generate":
         case "datastore_pyramid_raster_generate":

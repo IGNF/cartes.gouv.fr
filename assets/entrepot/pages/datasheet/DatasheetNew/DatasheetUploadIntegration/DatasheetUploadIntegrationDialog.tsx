@@ -27,11 +27,10 @@ const isIntegrationFinished = (integration: UploadIntegration | undefined): bool
 
 type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
-    datasheetName: string | undefined;
     uploadId: string;
 };
 
-const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId }) => {
+const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, uploadId }) => {
     const { t } = useTranslation("DatasheetUploadIntegration");
     const { t: tCommon } = useTranslation("Common");
 
@@ -126,7 +125,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
 
             <DatasheetUploadIntegrationView
                 datastoreId={datastoreId}
-                datasheetName={datasheetName}
+                datasheetName={integrationDatasheetName}
                 steps={steps}
                 failed={failed}
                 processingLaunched={processingLaunched}
