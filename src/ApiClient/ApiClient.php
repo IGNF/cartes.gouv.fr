@@ -201,7 +201,7 @@ final readonly class ApiClient
 
     /**
      * Consomme les réponses et retourne un tableau de résultats (clé => payload) ou lève l'ApiException (statut amont) de la première réponse en erreur, en annulant les autres.
-     * Les erreurs sont ignorées si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
+     * Les erreurs HTTP et les timeouts sont ignorés si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
      *
      * @param array<int|string,ResponsePromise> $pendingsByKey
      *

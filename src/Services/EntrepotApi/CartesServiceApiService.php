@@ -103,7 +103,7 @@ class CartesServiceApiService
             }
             $configurations = $this->configurationApiService->api->fetchAllDetailsAsync(
                 $configurations,
-                fn (array $configuration) => $this->configurationApiService->get($datastoreId, $configuration['_id'])
+                fn (array $configuration): ResponsePromise => $this->configurationApiService->get($datastoreId, $configuration['_id'])
             );
 
             $offeringsById = [];
@@ -112,11 +112,13 @@ class CartesServiceApiService
                     $offeringsById[$offering['_id']] = $offering;
                 }
             }
-        } finally {
+        } catch (\Throwable $e) {
             // une lecture non consommée lèverait son erreur HTTP à sa destruction, à la place de l’exception en cours
             foreach ($pendingOfferingsLists as $pendingOfferings) {
                 $pendingOfferings->cancel();
             }
+
+            throw $e;
         }
 
         return new DatasheetServices(array_column($configurations, null, '_id'), $offeringsById);
@@ -142,11 +144,13 @@ class CartesServiceApiService
             $storedDataTypes = array_column($pendingStoredData->resolve(), 'type', '_id');
             $permissions = $this->readPermissionsQuietly($datastoreId, $pendingPermissions);
             $endpoints = $this->readEndpoints($datastoreId, $pendingEndpoints, [] !== $datasheetServices->offeringsById);
-        } finally {
+        } catch (\Throwable $e) {
             // une lecture non consommée lèverait son erreur HTTP à sa destruction, à la place de l’exception en cours
             $pendingStoredData->cancel();
             $pendingPermissions->cancel();
             $pendingEndpoints->cancel();
+
+            throw $e;
         }
 
         $services = [];

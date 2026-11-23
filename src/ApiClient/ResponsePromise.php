@@ -100,7 +100,7 @@ final readonly class ResponsePromise
     /**
      * Consomme plusieurs ResponsePromises en parallèle (équivalent de Promise.all).
      * Toutes les réponses doivent provenir de la même instance de HttpClient pour permettre le streaming.
-     * Les erreurs sont ignorées si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
+     * Les erreurs HTTP et les timeouts sont ignorés si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
      * Sinon, la première réponse en erreur lève son ApiException (statut amont) et toutes les réponses du lot sont annulées.
      *
      * @param array<int|string,ResponsePromise> $pendingsByKey
