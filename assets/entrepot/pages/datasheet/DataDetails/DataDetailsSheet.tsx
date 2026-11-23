@@ -34,7 +34,7 @@ export default function DataDetailsSheet({ details, statusBadge, extent, relatio
     const valueOrNotProvided = (value: ReactNode) => value || t("not_provided");
 
     const fields = (rows: [string, ReactNode][]) => (
-        <dl className={fr.cx("fr-m-0")}>
+        <dl className={fr.cx("fr-m-0", "fr-p-0")}>
             {rows.map(([label, value]) => (
                 <Fragment key={label}>
                     <dt className={fr.cx("fr-text--sm", "fr-mb-0")}>{label}</dt>
@@ -134,6 +134,7 @@ const useStyles = tss.withName({ DataDetailsSheet }).create({
     },
     value: {
         marginLeft: 0,
+        paddingLeft: 0,
         marginBottom: fr.spacing("2w"),
         overflowWrap: "anywhere",
     },

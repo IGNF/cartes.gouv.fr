@@ -49,7 +49,7 @@ export default function ReportSteps({ datastoreId, upload, processing }: ReportS
             {upload && (
                 <>
                     <Accordion titleAs="h4" label={t("step.upload", { number: 1 })}>
-                        <dl className={fr.cx("fr-m-0")}>
+                        <dl className={fr.cx("fr-m-0", "fr-p-0")}>
                             {(
                                 [
                                     [t("step.name"), upload.name],
@@ -107,7 +107,7 @@ function ExecutionIds({ executionId, outputId }: { executionId: string; outputId
     const { classes } = useStyles();
 
     return (
-        <dl className={fr.cx("fr-m-0")}>
+        <dl className={fr.cx("fr-m-0", "fr-p-0")}>
             <dt className={fr.cx("fr-text--sm", "fr-mb-0")}>{t("step.execution_id")}</dt>
             <dd className={classes.value}>{executionId}</dd>
             {outputId && (
@@ -175,6 +175,7 @@ function LogStep({ titleAs, label, status, queryKey, queryFn, children }: LogSte
 const useStyles = tss.withName({ ReportSteps }).create({
     value: {
         marginLeft: 0,
+        paddingLeft: 0,
         marginBottom: fr.spacing("2w"),
         overflowWrap: "anywhere",
     },
