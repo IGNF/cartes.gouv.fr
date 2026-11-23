@@ -6,6 +6,7 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\Form\FeatureInfoFormDTO;
 use App\Dto\Services\Form\ServiceEditFormDTO;
 use App\Dto\Services\Form\ServicePublishFormDTO;
 use App\Dto\Services\Form\WfsTableEditFormDTO;
@@ -17,6 +18,7 @@ use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\Rok4StyleFileService;
 use App\Services\EntrepotApi\ServiceConfigurationRequestBuilder;
 use App\Services\EntrepotApi\StoredDataApiService;
+use App\Services\EntrepotApi\WmsVectorFeatureInfoService;
 use App\Services\EntrepotApi\WmsVectorStyleFileService;
 use App\Services\MultipartPayloadMapper;
 use App\Services\ServiceFormFileValidator;
@@ -47,6 +49,7 @@ final class ServiceController extends AbstractController implements ApiControlle
         private readonly MultipartPayloadMapper $multipartPayloadMapper,
         private readonly ServiceFormFileValidator $serviceFormFileValidator,
         private readonly WmsVectorStyleFileService $wmsVectorStyleFileService,
+        private readonly WmsVectorFeatureInfoService $wmsVectorFeatureInfoService,
         private readonly Rok4StyleFileService $rok4StyleFileService,
         private readonly StoredDataApiService $storedDataApiService,
         private readonly DatastorePrefixValidator $datastorePrefixValidator,
@@ -86,13 +89,24 @@ final class ServiceController extends AbstractController implements ApiControlle
         $onRollback = null;
 
         if (ConfigurationTypes::WMSVECTOR === $dto->type) {
+            $this->assertFeatureInfoAttributes($dto, $dto->featureinfo, $storedData);
             // nom temporaire : l’identifiant de la configuration n’existe pas encore
-            $staticIds = $this->wmsVectorStyleFileService->upload($datastoreId, $styleFiles, 'tmp_'.Uuid::v4());
-            $typeInfos = ServiceConfigurationRequestBuilder::buildTypeInfos($dto->type, $dto, $base, $staticIds);
+            $tmpId = 'tmp_'.Uuid::v4();
+            $staticIds = $this->wmsVectorStyleFileService->upload($datastoreId, $styleFiles, $tmpId);
+            try {
+                $ftlIds = null === $dto->featureinfo ? [] : $this->wmsVectorFeatureInfoService->upload($datastoreId, $dto->featureinfo->format, $dto->featureinfo->attributes, $tmpId);
+            } catch (\Throwable $th) {
+                $this->wmsVectorStyleFileService->removeQuietly($datastoreId, $staticIds);
+                throw $th;
+            }
+            $typeInfos = ServiceConfigurationRequestBuilder::buildTypeInfos($dto->type, $dto, $base, $staticIds, $ftlIds);
             // renommage avant l’offre : un échec annule encore la configuration
-            $onConfigurationCreated = fn (string $configurationId) => $this->wmsVectorStyleFileService->rename($datastoreId, $staticIds, $configurationId);
+            $onConfigurationCreated = function (string $configurationId) use ($datastoreId, $staticIds, $ftlIds): void {
+                $this->wmsVectorStyleFileService->rename($datastoreId, $staticIds, $configurationId);
+                $this->wmsVectorFeatureInfoService->rename($datastoreId, $ftlIds, $configurationId);
+            };
             // après l’offre, les fichiers restent : le flux les utilise
-            $onRollback = fn () => $this->wmsVectorStyleFileService->removeQuietly($datastoreId, $staticIds);
+            $onRollback = fn () => $this->wmsVectorStyleFileService->removeQuietly($datastoreId, [...array_values($staticIds), ...array_values($ftlIds)]);
         } elseif (StoredDataTypes::ROK4_PYRAMID_RASTER === $storedData['type']) {
             $configType = ConfigurationTypes::WMSRASTER === $dto->type ? 'wmsr' : 'wmts';
             $legendStaticId = $this->rok4StyleFileService->upload($datastoreId, $storedData, $configType, ServiceConfigurationRequestBuilder::getPyramidZoomLevels($storedData));
@@ -161,6 +175,33 @@ final class ServiceController extends AbstractController implements ApiControlle
         $this->wmsVectorStyleFileService->removeQuietly($datastoreId, array_diff($savedStyleIds, $styleIds));
 
         return $this->json($offering);
+    }
+
+    /**
+     * Attributs d’infobulle parmi les colonnes non géométriques des tables : un attribut absent casse tout le GetFeatureInfo de la couche.
+     *
+     * @param array<mixed> $storedData base vecteur du flux
+     */
+    private function assertFeatureInfoAttributes(object $dto, ?FeatureInfoFormDTO $featureInfo, array $storedData): void
+    {
+        if (!$featureInfo instanceof FeatureInfoFormDTO) {
+            return;
+        }
+        $columns = [];
+        foreach ($storedData['type_infos']['relations'] ?? [] as $relation) {
+            $columns[(string) $relation['name']] = array_keys(array_filter($relation['attributes'] ?? [], fn ($type) => !str_starts_with((string) $type, 'geometry')));
+        }
+
+        $violations = new ConstraintViolationList();
+        foreach ($featureInfo->attributes as $table => $attributes) {
+            if ([] !== array_diff($attributes, array_map(strval(...), $columns[(string) $table] ?? []))) {
+                $violations->add(new ConstraintViolation('Un attribut ne fait pas partie de la table', null, [], $dto, "featureinfo.attributes[$table]", $attributes));
+            }
+        }
+
+        if (count($violations) > 0) {
+            throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($dto, $violations));
+        }
     }
 
     /**

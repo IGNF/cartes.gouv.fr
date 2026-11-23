@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\WmsVectorFeatureInfoService;
 use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Support\KeycloakLoginTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -26,7 +27,15 @@ final class ServicePublishRouteTest extends WebTestCase
     protected function setUp(): void
     {
         EntrepotMockResponseFactory::reset();
-        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vectordb-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche']]);
+        EntrepotMockResponseFactory::seed('stored_data', [
+            '_id' => 'vectordb-1',
+            'type' => 'VECTOR-DB',
+            'tags' => ['datasheet_name' => 'Fiche'],
+            'type_infos' => ['relations' => [
+                ['name' => 'communes', 'attributes' => ['geom' => 'geometry(MultiPolygon,2154)', 'nom' => 'character varying', 'population' => 'integer']],
+                ['name' => 'routes nationales', 'attributes' => ['geom' => 'geometry(LineString,2154)', 'numero' => 'character varying']],
+            ]],
+        ]);
         EntrepotMockResponseFactory::seed('stored_data', [
             '_id' => 'pyramid-raster',
             'name' => 'pyramide',
@@ -403,6 +412,90 @@ final class ServicePublishRouteTest extends WebTestCase
         EntrepotMockResponseFactory::failNext('PATCH statics/static-1');
 
         $this->publish($client, 'WMS-VECTOR', 'vectordb-1');
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame([], EntrepotMockResponseFactory::stored('configurations'));
+        self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
+    }
+
+    public function testWmsVectorFeatureInfoTemplatesAreRenamedAfterTheConfigurationAndReferencedByTheirTables(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+        $tmpEntries = $this->styleFilesDirEntries();
+
+        $this->post(
+            $client,
+            ['selected_tables' => ['communes', 'routes nationales'], 'featureinfo' => ['format' => 'table', 'attributes' => ['communes' => ['nom', 'population'], 'routes nationales' => ['numero']]]] + $this->payload('WMS-VECTOR', 'vectordb-1'),
+            styleFiles: ['communes' => $this->sld('communes.sld'), 'routes nationales' => $this->sld('routes.sld')],
+        );
+
+        self::assertResponseStatusCodeSame(201);
+        $configuration = EntrepotMockResponseFactory::stored('configurations')[0];
+        $statics = EntrepotMockResponseFactory::stored('statics');
+        self::assertSame([
+            sprintf('config_%s_style_wmsv_communes', $configuration['_id']),
+            sprintf('config_%s_style_wmsv_routes nationales', $configuration['_id']),
+            sprintf('config_%s_featureinfo_wmsv_communes', $configuration['_id']),
+            sprintf('config_%s_featureinfo_wmsv_routes nationales', $configuration['_id']),
+        ], array_column($statics, 'name'));
+        self::assertSame([
+            ['name' => 'communes', 'style' => $statics[0]['_id'], 'ftl' => $statics[2]['_id']],
+            ['name' => 'routes nationales', 'style' => $statics[1]['_id'], 'ftl' => $statics[3]['_id']],
+        ], $configuration['type_infos']['used_data'][0]['relations']);
+        self::assertSame(WmsVectorFeatureInfoService::build('communes', 'table', ['nom', 'population']), EntrepotMockResponseFactory::staticFile($statics[2]['_id']));
+        self::assertSame($tmpEntries, $this->styleFilesDirEntries(), 'aucun dossier temporaire ne reste sur le disque');
+    }
+
+    /**
+     * @param array<string, mixed> $featureInfo
+     */
+    #[DataProvider('invalidFeatureInfos')]
+    public function testInvalidFeatureInfoAnswers422OnItsTableWithoutWriting(array $featureInfo, string $path): void
+    {
+        $client = $this->client();
+
+        $this->post($client, ['featureinfo' => $featureInfo] + $this->payload('WMS-VECTOR', 'vectordb-1'), styleFiles: ['communes' => $this->sld('communes.sld')]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame([$path], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>, string}>
+     */
+    public static function invalidFeatureInfos(): iterable
+    {
+        yield 'attribut absent de la table' => [['format' => 'list', 'attributes' => ['communes' => ['absent']]], 'featureinfo.attributes[communes]'];
+        yield 'colonne géométrique' => [['format' => 'list', 'attributes' => ['communes' => ['geom']]], 'featureinfo.attributes[communes]'];
+        yield 'table cochée sans attribut' => [['format' => 'list', 'attributes' => []], 'featureinfo.attributes[communes]'];
+        yield 'table non cochée' => [['format' => 'list', 'attributes' => ['communes' => ['nom'], 'routes nationales' => ['numero']]], 'featureinfo.attributes[routes nationales]'];
+        yield 'liste vide' => [['format' => 'list', 'attributes' => ['communes' => []]], 'featureinfo.attributes[communes]'];
+        yield 'nom avec guillemet' => [['format' => 'list', 'attributes' => ['communes' => ['a"b']]], 'featureinfo.attributes[communes][0]'];
+        yield 'format inconnu' => [['format' => 'json', 'attributes' => ['communes' => ['nom']]], 'featureinfo.format'];
+    }
+
+    public function testStyleFilesAreRemovedWhenAFeatureInfoTemplateIsRefused(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('POST statics', passes: 1);
+
+        $this->post($client, ['featureinfo' => ['format' => 'list', 'attributes' => ['communes' => ['nom']]]] + $this->payload('WMS-VECTOR', 'vectordb-1'), styleFiles: ['communes' => $this->sld('communes.sld')]);
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
+        self::assertSame([], EntrepotMockResponseFactory::stored('configurations'));
+    }
+
+    public function testConfigurationStyleAndFeatureInfoFilesAreRemovedWhenTheFeatureInfoRenamingFails(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PATCH statics/static-2');
+
+        $this->post($client, ['featureinfo' => ['format' => 'list', 'attributes' => ['communes' => ['nom']]]] + $this->payload('WMS-VECTOR', 'vectordb-1'), styleFiles: ['communes' => $this->sld('communes.sld')]);
 
         self::assertResponseStatusCodeSame(500);
         self::assertSame([], EntrepotMockResponseFactory::stored('configurations'));

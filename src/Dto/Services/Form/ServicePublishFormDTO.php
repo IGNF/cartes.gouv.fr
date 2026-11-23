@@ -7,6 +7,7 @@ namespace App\Dto\Services\Form;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\ServiceAccess;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Publication d’un flux, validée avec les groupes Default et le type de configuration. La vignette, le logo d’attribution et les fichiers SLD voyagent dans la même requête multipart, hors de ce DTO.
@@ -51,7 +52,17 @@ class ServicePublishFormDTO extends ServiceFormDTO
         #[Assert\Unique(groups: [ConfigurationTypes::WMSVECTOR])]
         #[Assert\All([new Assert\Type('string'), new Assert\NotBlank()], groups: [ConfigurationTypes::WMSVECTOR])]
         public readonly array $selected_tables = [],
+
+        // WMS vecteur ; null : infobulles désactivées
+        #[Assert\Valid]
+        public readonly ?FeatureInfoFormDTO $featureinfo = null,
     ) {
         parent::__construct($title, $themes, $access, $attribution);
+    }
+
+    #[Assert\Callback(groups: [ConfigurationTypes::WMSVECTOR])]
+    public function validateFeatureInfoTables(ExecutionContextInterface $context): void
+    {
+        $this->featureinfo?->validateTables($this->selected_tables, $context);
     }
 }
