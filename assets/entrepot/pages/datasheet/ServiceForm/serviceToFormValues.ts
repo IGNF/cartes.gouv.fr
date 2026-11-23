@@ -61,8 +61,12 @@ export const featureInfoColumns = (vectorDb: VectorDb | undefined): Record<strin
     );
 
 /** une ligne par table géométrique de la base, aucune cochée */
-export const defaultTables = (vectorDb: VectorDb): ServiceTableFormValues[] =>
-    filterGeometricRelations(vectorDb.type_infos?.relations ?? [], true).map((relation) => defaultTable(relation.name));
+export const defaultTables = (vectorDb: VectorDb): ServiceTableFormValues[] => {
+    const columns = featureInfoColumns(vectorDb);
+    return filterGeometricRelations(vectorDb.type_infos?.relations ?? [], true).map((relation) =>
+        columns[relation.name].length === 0 ? { ...defaultTable(relation.name), featureinfo_unavailable: true } : defaultTable(relation.name)
+    );
+};
 
 const defaultTable = (name: string): ServiceTableFormValues => ({
     native_name: name,

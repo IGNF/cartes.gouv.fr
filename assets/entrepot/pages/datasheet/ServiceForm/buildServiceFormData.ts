@@ -51,8 +51,11 @@ function buildFormData(type: ServiceType, values: ServiceEditFormOutput, rasterP
         payload.featureinfo = values.featureinfo.enabled
             ? {
                   format: values.featureinfo.format,
+                  // une table sans colonne à afficher n’a pas d’infobulle
                   attributes: Object.fromEntries(
-                      selectedTables.map((table) => [table.native_name, [...table.featureinfo_attributes].sort((a, b) => a.localeCompare(b))])
+                      selectedTables
+                          .filter((table) => table.featureinfo_attributes.length > 0)
+                          .map((table) => [table.native_name, [...table.featureinfo_attributes].sort((a, b) => a.localeCompare(b))])
                   ),
               }
             : null;

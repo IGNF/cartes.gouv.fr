@@ -44,16 +44,16 @@ class DataLayerGetFeatureInfo extends GetFeatureInfo {
         super({ active: true, position: "top-left" } as ConstructorParameters<typeof GetFeatureInfo>[0]);
     }
 
-    getLayerTitle(gfiLayer: Layer): string {
+    override getLayerTitle(gfiLayer: Layer): string {
         return super.getLayerTitle(gfiLayer).replace(/[&<>"']/g, (char) => HTML_ENTITIES[char]);
     }
 
-    getGetFeatureInfoLayer(layer: Layer): unknown {
+    override getGetFeatureInfoLayer(layer: Layer): unknown {
         return isBackgroundLayer(layer) ? { format: "unknown", layer } : super.getGetFeatureInfoLayer(layer);
     }
 
     // reçoit l’entrée du contrôle ({ layer, url… }), déclarée Layer par la bibliothèque
-    getGetFeatureInfoContent(gfiLayer: Layer & { layer?: BaseLayer }): Promise<unknown> {
+    override getGetFeatureInfoContent(gfiLayer: Layer & { layer?: BaseLayer }): Promise<unknown> {
         if (isBackgroundLayer(gfiLayer.layer)) return Promise.resolve(null);
         return (super.getGetFeatureInfoContent(gfiLayer) as Promise<unknown>).then((content) =>
             typeof content === "string" ? DOMPurify.sanitize(content) : content

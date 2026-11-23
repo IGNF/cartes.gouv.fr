@@ -78,6 +78,7 @@ const { i18n } = declareComponentKeys<
     | "featureinfo.enabled"
     | "featureinfo.hint"
     | "featureinfo.no_table"
+    | "featureinfo.no_attribute"
     | "featureinfo.attributes.legend"
     | "featureinfo.format.legend"
     | "featureinfo.format.list"
@@ -220,6 +221,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "featureinfo.hint":
         "Sans infobulle paramétrée, la carte affiche tous les attributs de l’objet cliqué. Ce choix règle seulement l’affichage : tous les attributs restent accessibles dans le flux.",
     "featureinfo.no_table": "Cochez d’abord une ou plusieurs tables.",
+    "featureinfo.no_attribute": "Cette table n’a aucun attribut à afficher.",
     "featureinfo.attributes.legend": "Attributs à afficher",
     "featureinfo.format.legend": "Format d’affichage",
     "featureinfo.format.list": "Liste",
@@ -363,6 +365,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "featureinfo.hint":
         "Without pop-up settings, the map shows every attribute of the clicked feature. This only sets the display: every attribute stays available in the service.",
     "featureinfo.no_table": "First check one or more tables.",
+    "featureinfo.no_attribute": "This table has no attribute to display.",
     "featureinfo.attributes.legend": "Attributes to display",
     "featureinfo.format.legend": "Display format",
     "featureinfo.format.list": "List",

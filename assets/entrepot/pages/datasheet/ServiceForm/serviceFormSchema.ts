@@ -129,6 +129,8 @@ const buildServiceFormObject = ({
             missing: z.boolean().optional(),
             // WMS vecteur : attributs affichés dans l’infobulle
             featureinfo_attributes: z.array(z.string()),
+            // WMS vecteur : table sans colonne à afficher, donc sans infobulle
+            featureinfo_unavailable: z.boolean().optional(),
         })
         // champs obligatoires seulement sur les tables cochées
         .superRefine(async (table, ctx) => {
@@ -214,7 +216,7 @@ const buildServiceFormObject = ({
 
 type FeatureInfoValues = {
     featureinfo: { enabled: boolean };
-    tables: { selected: boolean; featureinfo_attributes: string[] }[];
+    tables: { selected: boolean; featureinfo_attributes: string[]; featureinfo_unavailable?: boolean }[];
 };
 
 // WMS vecteur, infobulles activées : au moins un attribut par table cochée
@@ -223,7 +225,7 @@ const checkFeatureInfo =
     (values: FeatureInfoValues, ctx: z.RefinementCtx) => {
         if (type !== "wms" || rasterPyramid || !values.featureinfo.enabled) return;
         values.tables.forEach((table, index) => {
-            if (table.selected && table.featureinfo_attributes.length === 0) {
+            if (table.selected && !table.featureinfo_unavailable && table.featureinfo_attributes.length === 0) {
                 ctx.addIssue({ code: "custom", path: ["tables", index, "featureinfo_attributes"], message: t("validation.featureinfo.attributes.required") });
             }
         });

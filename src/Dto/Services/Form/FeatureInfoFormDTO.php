@@ -21,6 +21,8 @@ class FeatureInfoFormDTO
         #[Assert\All([
             new Assert\Type('array'),
             new Assert\Count(min: 1, minMessage: 'Choisissez au moins un attribut'),
+            // un doublon rendrait le modèle méconnaissable à la relecture
+            new Assert\Unique(message: 'Un attribut est en double'),
             new Assert\All([new Assert\Type('string'), new Assert\Regex(pattern: WmsVectorFeatureInfoService::NAME_PATTERN, message: 'Ce nom d’attribut n’est pas pris en charge')]),
         ])]
         public readonly array $attributes = [],
@@ -28,19 +30,15 @@ class FeatureInfoFormDTO
     }
 
     /**
-     * Une entrée par table cochée, aucune autre.
+     * Tables cochées seulement ; une table cochée absente n’a pas d’infobulle (aucune colonne à afficher).
      *
      * @param array<mixed> $selectedTables
      */
     public function validateTables(array $selectedTables, ExecutionContextInterface $context): void
     {
-        $selectedTables = array_map(strval(...), $selectedTables);
         // une clé « 2024 » devient un entier en PHP
         $tables = array_map(strval(...), array_keys($this->attributes));
-        foreach (array_diff($selectedTables, $tables) as $table) {
-            $context->buildViolation('Choisissez au moins un attribut')->atPath("featureinfo.attributes[$table]")->addViolation();
-        }
-        foreach (array_diff($tables, $selectedTables) as $table) {
+        foreach (array_diff($tables, array_map(strval(...), $selectedTables)) as $table) {
             $context->buildViolation('Cette table n’est pas cochée')->atPath("featureinfo.attributes[$table]")->addViolation();
         }
     }

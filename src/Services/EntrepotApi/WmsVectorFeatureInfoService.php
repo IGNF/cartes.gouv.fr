@@ -9,10 +9,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * Infobulles (GetFeatureInfo) d’un flux WMS vecteur : un modèle FreeMarker (static GEOSERVER-FTL) par table, généré par cartes.gouv.fr.
- * Seuls les modèles qu’on sait régénérer à l’identique sont relus ; les autres sont des modèles personnalisés, jamais modifiés.
- */
+/** Infobulles d’un flux WMS vecteur : un modèle FreeMarker par table, voir docs/developer/entrepot/statics.md. */
 final readonly class WmsVectorFeatureInfoService
 {
     public const FORMAT_LIST = 'list';

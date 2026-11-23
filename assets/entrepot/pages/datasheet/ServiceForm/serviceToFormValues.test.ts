@@ -132,7 +132,7 @@ describe("markdownToText", () => {
 });
 
 describe("serviceToFormValues, tables WFS", () => {
-    const geometric = (name: string) => ({ name, attributes: { geom: "geometry(Point)" }, type: "TABLE", primary_key: [] });
+    const geometric = (name: string) => ({ name, attributes: { geom: "geometry(Point)", nom: "text" }, type: "TABLE", primary_key: [] });
     const vectorDb = { type_infos: { relations: [geometric("communes"), geometric("routes")] } } as unknown as VectorDb;
     const wfs = service({
         type: OfferingTypeEnum.WFS,
@@ -191,7 +191,7 @@ describe("serviceToFormValues, tables WFS", () => {
 });
 
 describe("serviceToFormValues, tables WMS vecteur", () => {
-    const geometric = (name: string) => ({ name, attributes: { geom: "geometry(Point)" }, type: "TABLE", primary_key: [] });
+    const geometric = (name: string) => ({ name, attributes: { geom: "geometry(Point)", nom: "text" }, type: "TABLE", primary_key: [] });
     const vectorDb = { type_infos: { relations: [geometric("communes"), geometric("routes")] } } as unknown as VectorDb;
     const wmsv = service({
         typeInfos: {
@@ -255,5 +255,12 @@ describe("featureInfoColumns", () => {
         } as unknown as VectorDb;
         expect(featureInfoColumns(vectorDb)).toEqual({ communes: ["code", "nom"] });
         expect(featureInfoColumns(undefined)).toEqual({});
+    });
+
+    it("marque sans infobulle une table qui n’a que sa géométrie", () => {
+        const vectorDb = {
+            type_infos: { relations: [{ name: "points", attributes: { geom: "geometry(Point)" }, type: "TABLE", primary_key: [] }] },
+        } as unknown as VectorDb;
+        expect(serviceToFormValues(service(), vectorDb).tables[0].featureinfo_unavailable).toBe(true);
     });
 });

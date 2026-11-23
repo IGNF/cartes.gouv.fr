@@ -89,7 +89,9 @@ final class ServiceController extends AbstractController implements ApiControlle
         $onRollback = null;
 
         if (ConfigurationTypes::WMSVECTOR === $dto->type) {
-            $this->assertFeatureInfoAttributes($dto, $dto->featureinfo, $storedData);
+            if (null !== $dto->featureinfo) {
+                $this->assertFeatureInfoAttributes($dto, $dto->featureinfo, $storedData);
+            }
             // nom temporaire : l’identifiant de la configuration n’existe pas encore
             $tmpId = 'tmp_'.Uuid::v4();
             $staticIds = $this->wmsVectorStyleFileService->upload($datastoreId, $styleFiles, $tmpId);
@@ -204,11 +206,8 @@ final class ServiceController extends AbstractController implements ApiControlle
      *
      * @param array<mixed> $storedData base vecteur du flux
      */
-    private function assertFeatureInfoAttributes(object $dto, ?FeatureInfoFormDTO $featureInfo, array $storedData): void
+    private function assertFeatureInfoAttributes(object $dto, FeatureInfoFormDTO $featureInfo, array $storedData): void
     {
-        if (!$featureInfo instanceof FeatureInfoFormDTO) {
-            return;
-        }
         $columns = [];
         foreach ($storedData['type_infos']['relations'] ?? [] as $relation) {
             $columns[(string) $relation['name']] = array_keys(array_filter($relation['attributes'] ?? [], fn ($type) => !str_starts_with((string) $type, 'geometry')));

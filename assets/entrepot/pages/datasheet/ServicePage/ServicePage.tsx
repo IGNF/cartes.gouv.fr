@@ -139,24 +139,34 @@ function ServicePageContent(props: ServicePageContentProps) {
     }
 
     const values = useMemo(() => serviceToFormValues(service, vectorDbQuery.data), [service, vectorDbQuery.data]);
+    const featureInfoTableColumns = useMemo(() => featureInfoColumns(vectorDbQuery.data), [vectorDbQuery.data]);
 
     return (
         <>
             {lockReason && <Alert className={fr.cx("fr-mt-2w")} severity="info" title={t("edit.locked")} description={lockReason} small />}
-            <ServiceSheet key={editable ? "edit" : "view"} {...props} values={values} editable={editable} canSave={canSave} />
+            <ServiceSheet
+                key={editable ? "edit" : "view"}
+                {...props}
+                values={values}
+                featureInfoTableColumns={featureInfoTableColumns}
+                editable={editable}
+                canSave={canSave}
+            />
         </>
     );
 }
 
 type ServiceSheetProps = ServicePageContentProps & {
     values: ServiceFormValues;
+    /** WMS vecteur : attributs proposés dans l’infobulle, par table */
+    featureInfoTableColumns: Readonly<Record<string, string[]>>;
     /** formulaire initialisé une fois depuis `values` ; sinon lecture seule, qui suit le flux relu */
     editable: boolean;
     /** bouton « Enregistrer » affiché (droits et type), actif seulement quand la page est modifiable */
     canSave: boolean;
 };
 
-function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, editable, canSave }: ServiceSheetProps) {
+function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, featureInfoTableColumns, editable, canSave }: ServiceSheetProps) {
     const { t } = useTranslation("ServicePage");
     const { t: tForm } = useTranslation("ServiceForm");
     const { classes, cx } = useStyles();
@@ -169,14 +179,6 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
     const services = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName)).data?.services;
     const { data: datasheet } = useQuery(datasheetQueryOptions(datastoreId, datasheetName));
     const endpointsQuery = useQuery({ ...datastoreEndpointsQueryOptions(datastoreId), enabled: editable });
-    // déjà lue par la page pour proposer les tables
-    const vectorDb = useQuery(
-        vectorDbQueryOptions(
-            datastoreId,
-            editable && service.type === OfferingTypeEnum.WMSVECTOR ? (service.configuration.type_infos.used_data[0]?.stored_data ?? "") : ""
-        )
-    ).data;
-    const featureInfoTableColumns = useMemo(() => featureInfoColumns(vectorDb), [vectorDb]);
 
     const unavailable = isOfferingUnavailable(service.status);
 

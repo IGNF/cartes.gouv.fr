@@ -134,6 +134,7 @@ describe("buildServiceFormSchema", () => {
                 "tables.0.featureinfo_attributes": "validation.featureinfo.attributes.required",
             });
             expect(await issueMessages(enabled({ featureinfo_attributes: ["nom"] }), undefined, "wms")).toEqual({});
+            expect(await issueMessages(enabled({ featureinfo_unavailable: true }), undefined, "wms")).toEqual({});
             expect(await issueMessages(enabled({ selected: false }), undefined, "wms")).toEqual({ tables: "validation.tables.required" });
             expect(await issueMessages({ ...valid(), featureinfo: { enabled: true, format: "list" } })).toEqual({});
         });

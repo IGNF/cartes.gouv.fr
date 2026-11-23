@@ -469,11 +469,28 @@ final class ServicePublishRouteTest extends WebTestCase
     {
         yield 'attribut absent de la table' => [['format' => 'list', 'attributes' => ['communes' => ['absent']]], 'featureinfo.attributes[communes]'];
         yield 'colonne géométrique' => [['format' => 'list', 'attributes' => ['communes' => ['geom']]], 'featureinfo.attributes[communes]'];
-        yield 'table cochée sans attribut' => [['format' => 'list', 'attributes' => []], 'featureinfo.attributes[communes]'];
+        yield 'attribut en double' => [['format' => 'list', 'attributes' => ['communes' => ['nom', 'nom']]], 'featureinfo.attributes[communes]'];
         yield 'table non cochée' => [['format' => 'list', 'attributes' => ['communes' => ['nom'], 'routes nationales' => ['numero']]], 'featureinfo.attributes[routes nationales]'];
         yield 'liste vide' => [['format' => 'list', 'attributes' => ['communes' => []]], 'featureinfo.attributes[communes]'];
         yield 'nom avec guillemet' => [['format' => 'list', 'attributes' => ['communes' => ['a"b']]], 'featureinfo.attributes[communes][0]'];
         yield 'format inconnu' => [['format' => 'json', 'attributes' => ['communes' => ['nom']]], 'featureinfo.format'];
+    }
+
+    public function testCheckedTableWithoutFeatureInfoAttributesGetsNoTemplate(): void
+    {
+        $this->seedMetadata();
+        $client = $this->client();
+
+        $this->post(
+            $client,
+            ['selected_tables' => ['communes', 'routes nationales'], 'featureinfo' => ['format' => 'list', 'attributes' => ['communes' => ['nom']]]] + $this->payload('WMS-VECTOR', 'vectordb-1'),
+            styleFiles: ['communes' => $this->sld('communes.sld'), 'routes nationales' => $this->sld('routes.sld')],
+        );
+
+        self::assertResponseStatusCodeSame(201);
+        $relations = EntrepotMockResponseFactory::stored('configurations')[0]['type_infos']['used_data'][0]['relations'];
+        self::assertArrayHasKey('ftl', $relations[0]);
+        self::assertArrayNotHasKey('ftl', $relations[1]);
     }
 
     public function testStyleFilesAreRemovedWhenAFeatureInfoTemplateIsRefused(): void

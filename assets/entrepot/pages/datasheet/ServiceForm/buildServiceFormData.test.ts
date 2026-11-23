@@ -72,6 +72,13 @@ describe("buildServiceFormData", () => {
         const tables = values.tables.map((table) => ({ ...table, featureinfo_attributes: table.selected ? ["nom", "code"] : ["ignore"] }));
         const payload = payloadOf(buildServiceFormData("wms", { ...values, tables, featureinfo: { enabled: true, format: "table" } }));
         expect(payload.featureinfo).toEqual({ format: "table", attributes: { communes: ["code", "nom"] } });
+        const withoutAttributes = values.tables.map((table) => ({ ...table, featureinfo_attributes: [] }));
+        expect(
+            payloadOf(buildServiceFormData("wms", { ...values, tables: withoutAttributes, featureinfo: { enabled: true, format: "list" } })).featureinfo
+        ).toEqual({
+            format: "list",
+            attributes: {},
+        });
         expect(payloadOf(buildServiceFormData("wfs", { ...values, tables, featureinfo: { enabled: true, format: "table" } }))).not.toHaveProperty(
             "featureinfo"
         );

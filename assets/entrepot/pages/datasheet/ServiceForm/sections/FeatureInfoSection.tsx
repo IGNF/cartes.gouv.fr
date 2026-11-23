@@ -57,6 +57,7 @@ export default function FeatureInfoSection({ columns }: FeatureInfoSectionProps)
                                 <Checkbox
                                     key={table.native_name}
                                     legend={table.native_name}
+                                    hintText={columns[table.native_name]?.length === 0 ? t("featureinfo.no_attribute") : undefined}
                                     state={errors.tables?.[index]?.featureinfo_attributes ? "error" : "default"}
                                     stateRelatedMessage={errors.tables?.[index]?.featureinfo_attributes?.message}
                                     options={(columns[table.native_name] ?? []).map((name) => ({

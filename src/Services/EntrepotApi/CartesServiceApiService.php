@@ -758,8 +758,7 @@ class CartesServiceApiService
     }
 
     /**
-     * Infobulles d’un flux WMS vecteur pour son formulaire : réglages de nos modèles par table, modèles personnalisés ignorés.
-     * Null si un modèle est illisible : la page n’est alors pas modifiable, un enregistrement supprimerait nos modèles.
+     * Réglages des infobulles générées par table, null si un modèle est illisible (page non modifiable).
      *
      * @param array<mixed> $configuration
      *
@@ -769,7 +768,7 @@ class CartesServiceApiService
     {
         try {
             $settings = array_filter($this->wmsVectorFeatureInfoService->read($datastoreId, array_column($configuration['type_infos']['used_data'][0]['relations'] ?? [], 'ftl', 'name')));
-        } catch (\Throwable $e) {
+        } catch (ApiException $e) {
             $this->logger->warning('{class}: Failed to read feature info templates of configuration {configurationId}: {error}', [
                 'class' => self::class,
                 'configurationId' => $configuration['_id'],
