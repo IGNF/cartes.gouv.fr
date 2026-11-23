@@ -216,7 +216,7 @@ export default function DatasetAddForm({ datastoreId, datasheetName, defaultProd
             )}
             {addUploadMutation.isSuccess && (
                 <Wait>
-                    <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={addUploadMutation.data._id} datasheetName={datasheetName} />
+                    <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={addUploadMutation.data._id} />
                 </Wait>
             )}
         </>

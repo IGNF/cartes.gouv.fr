@@ -10,7 +10,7 @@ import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { ApiError } from "../../../../modules/jsonFetch";
 import { niceBytes } from "../../../../utils";
 import api from "../../../api";
-import ReportStatusBadge from "../ReportTab/ReportStatusBadge";
+import ReportStatusBadge from "@/entrepot/pages/datasheet/DataDetails/ReportStatusBadge";
 
 type StoredDataPreviewTabProps = {
     datastoreId: string;

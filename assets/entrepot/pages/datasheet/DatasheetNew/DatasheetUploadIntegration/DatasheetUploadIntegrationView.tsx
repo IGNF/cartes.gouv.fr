@@ -79,7 +79,7 @@ const DatasheetUploadIntegrationView: FC<DatasheetUploadIntegrationViewProps> = 
                 />
             )}
 
-            {failed && vectorDbId && (
+            {failed && vectorDbId && datasheetName && (
                 <ButtonsGroup
                     className={fr.cx("fr-mt-3w")}
                     alignment="center"
@@ -87,9 +87,8 @@ const DatasheetUploadIntegrationView: FC<DatasheetUploadIntegrationViewProps> = 
                         {
                             children: t("check_error_report"),
                             linkProps: {
-                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details",
-                                params: { datastoreId, storedDataId: vectorDbId },
-                                search: { datasheetName },
+                                to: "/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/donnees/$storedDataId",
+                                params: { datastoreId, datasheetName, storedDataId: vectorDbId },
                             },
                         },
                         {

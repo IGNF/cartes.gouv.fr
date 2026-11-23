@@ -1,7 +1,7 @@
 import SymfonyRouting, { type QueryParams } from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 import { UploadReport } from "../../@types/app";
-import { Upload, UploadIntegration } from "../../@types/app";
+import { DataDetailsUpload, Upload, UploadIntegration } from "../../@types/app";
 
 const getList = async (datastoreId: string, query: QueryParams = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", { datastoreId, ...query });
@@ -44,6 +44,16 @@ const getUploadReport = (datastoreId: string, uploadId: string, otherOptions: Re
     });
 };
 
+const getDetails = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_details", { datastoreId, uploadId });
+    return jsonFetch<DataDetailsUpload>(url, { ...otherOptions });
+};
+
+const getCheckLogs = (datastoreId: string, uploadId: string, executionId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_check_logs", { datastoreId, uploadId, executionId });
+    return jsonFetch<string[]>(url, { ...otherOptions });
+};
+
 const upload = {
     getList,
     add,
@@ -51,6 +61,8 @@ const upload = {
     advanceIntegration,
     remove,
     getUploadReport,
+    getDetails,
+    getCheckLogs,
 };
 
 export default upload;

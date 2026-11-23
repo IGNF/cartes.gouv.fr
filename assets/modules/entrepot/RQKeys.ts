@@ -16,6 +16,16 @@ const RQKeys = {
     },
     datastore_upload_integration: (datastoreId: string, uploadId: string): string[] => ["datastore", datastoreId, "upload", uploadId, "integration"],
     datastore_upload_report: (datastoreId: string, uploadId: string): string[] => ["datastore", datastoreId, "upload", uploadId, "report"],
+    datastore_upload_details: (datastoreId: string, uploadId: string): string[] => ["datastore", datastoreId, "upload", uploadId, "details"],
+    datastore_upload_check_logs: (datastoreId: string, uploadId: string, executionId: string): string[] => [
+        "datastore",
+        datastoreId,
+        "upload",
+        uploadId,
+        "check_executions",
+        executionId,
+        "logs",
+    ],
 
     datastore_stored_data_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "stored_data"];
@@ -25,6 +35,16 @@ const RQKeys = {
     datastore_stored_data: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId],
     datastore_stored_data_uses: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId, "uses"],
     datastore_stored_data_report: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId, "report"],
+    datastore_stored_data_details: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId, "details"],
+    datastore_stored_data_processing_logs: (datastoreId: string, storedDataId: string, executionId: string): string[] => [
+        "datastore",
+        datastoreId,
+        "stored_data",
+        storedDataId,
+        "processing_executions",
+        executionId,
+        "logs",
+    ],
 
     datastore_processing_execution_list: (datastoreId: string, queryParams?: QueryParams): string[] => {
         const keys = ["datastore", datastoreId, "processing", "executions"];

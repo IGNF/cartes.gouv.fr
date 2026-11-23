@@ -4,7 +4,7 @@ import { FC } from "react";
 
 import { UploadReport } from "../../../../@types/app";
 import { niceBytes } from "../../../../utils";
-import ReportStatusBadge from "../ReportTab/ReportStatusBadge";
+import ReportStatusBadge from "@/entrepot/pages/datasheet/DataDetails/ReportStatusBadge";
 
 type UploadPreviewTabProps = {
     reportData: UploadReport;

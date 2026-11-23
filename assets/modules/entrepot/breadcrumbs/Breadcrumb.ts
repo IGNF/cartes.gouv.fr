@@ -34,6 +34,8 @@ const breadcrumbNameByRouteId = {
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/televersement": "datastore_datasheet_upload",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/ajout": "datastore_datasheet_service_add",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/flux/$offeringId": "datastore_datasheet_service_view",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/donnees/$storedDataId": "datastore_stored_data_details",
+    "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$datasheetName/livraisons/$uploadId": "datastore_upload_details",
     "/_private/tableau-de-bord/entrepots/$datastoreId/donnees/$storedDataId/details": "datastore_stored_data_details",
     "/_private/tableau-de-bord/entrepots/$datastoreId/livraisons/$uploadId/rapport": "datastore_upload_details",
     "/_private/tableau-de-bord/entrepots/$datastoreId/pyramide-vecteur/ajout": "datastore_pyramid_vector_generate",
@@ -203,7 +205,7 @@ const getBreadcrumb = (
                 ...datastoreBaseProps,
             };
             if (datasheetName) {
-                breadcrumbProps.segments.push({ label: datasheetName, linkProps: datasheetLink() });
+                breadcrumbProps.segments.push({ label: datasheetName, linkProps: datasheetLink("dataset") });
             }
             return { ...breadcrumbProps, currentPageLabel: t("datastore_stored_data_details") };
         }
@@ -212,7 +214,7 @@ const getBreadcrumb = (
                 ...datastoreBaseProps,
             };
             if (datasheetName) {
-                breadcrumbProps.segments.push({ label: datasheetName, linkProps: datasheetLink() });
+                breadcrumbProps.segments.push({ label: datasheetName, linkProps: datasheetLink("dataset") });
             }
             return { ...breadcrumbProps, currentPageLabel: t("datastore_upload_details") };
         }

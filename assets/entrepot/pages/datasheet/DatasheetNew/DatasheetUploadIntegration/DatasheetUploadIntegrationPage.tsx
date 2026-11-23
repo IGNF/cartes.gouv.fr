@@ -8,9 +8,8 @@ import Main from "../../../../../components/Layout/Main";
 type DatasheetUploadIntegrationPageProps = {
     datastoreId: string;
     uploadId: string;
-    datasheetName: string | undefined;
 };
-const DatasheetUploadIntegrationPage: FC<DatasheetUploadIntegrationPageProps> = ({ datastoreId, uploadId, datasheetName }) => {
+const DatasheetUploadIntegrationPage: FC<DatasheetUploadIntegrationPageProps> = ({ datastoreId, uploadId }) => {
     const { t } = useTranslation("DatasheetUploadIntegration");
 
     return (
@@ -19,7 +18,7 @@ const DatasheetUploadIntegrationPage: FC<DatasheetUploadIntegrationPageProps> = 
                 <h1>{t("integration_page.title")}</h1>
             </div>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--center", "fr-mt-2v")}>
-                <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} datasheetName={datasheetName} />
+                <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} />
             </div>
         </Main>
     );

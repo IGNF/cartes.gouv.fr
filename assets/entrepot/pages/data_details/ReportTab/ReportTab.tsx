@@ -8,9 +8,9 @@ import { CheckStatusEnum, ProcessingExecutionStatusEnum, type StoredDataReport, 
 import { ApiError } from "../../../../modules/jsonFetch";
 import { niceBytes } from "../../../../utils";
 import ProcessingExecutionReport from "./ProcessingExecutionReport";
-import ReportStatusBadge from "./ReportStatusBadge";
+import ReportStatusBadge from "@/entrepot/pages/datasheet/DataDetails/ReportStatusBadge";
 import UploadCheckExecutionReport from "./UploadCheckExecutionReport";
-import UploadFileTree from "./UploadFileTree";
+import UploadFileTree from "@/entrepot/pages/datasheet/DataDetails/UploadFileTree";
 
 type ReportTabProps = {
     datastoreName?: string;
