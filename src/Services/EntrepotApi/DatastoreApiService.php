@@ -52,14 +52,20 @@ final readonly class DatastoreApiService
 
     /**
      * Sans cache, avec le jeton de l'utilisateur : bien plus rapide que la lecture du datastore complet.
-     *
+     */
+    public function getEndpoints(string $datastoreId): PaginatedPromise
+    {
+        return $this->api->requestAll("datastores/$datastoreId/endpoints");
+    }
+
+    /**
      * @param array<string,mixed> $query
      *
      * @return array<mixed>
      */
     public function getEndpointsList(string $datastoreId, array $query = []): array
     {
-        return self::filterEndpoints($this->api->requestAll("datastores/$datastoreId/endpoints")->resolve(), $query);
+        return self::filterEndpoints($this->getEndpoints($datastoreId)->resolve(), $query);
     }
 
     /**

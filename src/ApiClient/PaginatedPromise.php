@@ -29,6 +29,14 @@ final class PaginatedPromise
     }
 
     /**
+     * Abandonne la lecture : détruite sans lecture de son statut, la réponse lèverait son erreur HTTP.
+     */
+    public function cancel(): void
+    {
+        $this->page1Pending->getResponse()->cancel();
+    }
+
+    /**
      * Applique une transformation sur le tableau résolu, en restant lazy.
      *
      * @param callable(array<mixed>): array<mixed> $transform

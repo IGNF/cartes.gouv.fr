@@ -139,13 +139,47 @@ final class DatasheetServiceListRouteTest extends WebTestCase
         self::assertSame(['offering-public' => 'public', 'offering-private' => null], array_column($this->getList()['services'], 'access', '_id'));
     }
 
-    public function testDoesNotReadThePermissionsWhenEveryServiceIsOpen(): void
+    public function testIgnoresAFailedPermissionsReadWhenEveryServiceIsOpen(): void
     {
         $this->seedService('public', 'WFS', EntrepotMockResponseFactory::WFS_PUBLIC_ENDPOINT_ID, 'vector-db-1');
-        // une lecture des permissions échouerait
         EntrepotMockResponseFactory::failNext('GET permissions', status: 403);
 
         self::assertSame('public', $this->getList()['services'][0]['access']);
+    }
+
+    public function testIgnoresAFailedEndpointsReadWhenTheDatasheetHasNoOffering(): void
+    {
+        $this->seedConfiguration('orphan', 'WMS-VECTOR', 'vector-db-1');
+        EntrepotMockResponseFactory::forbidDatastore();
+
+        $list = $this->getList();
+
+        self::assertSame([], $list['services']);
+        self::assertSame(['configuration-orphan'], array_column($list['configurations_without_offering'], '_id'));
+        self::assertSame(1, EntrepotMockResponseFactory::endpointsCalls());
+    }
+
+    public function testAFailedEndpointsReadFailsTheListWhenTheDatasheetHasOfferings(): void
+    {
+        $this->seedService('private', 'WFS', EntrepotMockResponseFactory::WFS_PRIVATE_ENDPOINT_ID, 'vector-db-1', open: false);
+        EntrepotMockResponseFactory::failNext('GET permissions', status: 403);
+        EntrepotMockResponseFactory::forbidDatastore();
+
+        $this->client()->xmlHttpRequest('GET', self::LIST_URL);
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testAFailedConfigurationsReadKeepsItsStatusWhenTheParallelReadsFailToo(): void
+    {
+        // lectures parallèles en échec et jamais consommées : leur erreur ne doit pas remplacer celle des configurations
+        EntrepotMockResponseFactory::failNext('GET configurations', status: 403);
+        EntrepotMockResponseFactory::failNext('GET permissions', status: 403);
+        EntrepotMockResponseFactory::forbidDatastore();
+
+        $this->client()->xmlHttpRequest('GET', self::LIST_URL);
+
+        self::assertResponseStatusCodeSame(403);
     }
 
     public function testTheServiceRouteGivesTheAccessToo(): void
