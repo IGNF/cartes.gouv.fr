@@ -442,8 +442,8 @@ final class EntrepotMockResponseFactory
             return $this->json($configuration, 201);
         }
 
-        if ('PATCH' === $method && 1 === preg_match('#^configurations/([\w-]+)$#', $relative, $matches)) {
-            return $this->json($this->update('configurations', $matches[1], fn (array $item) => json_decode($body, true, flags: JSON_THROW_ON_ERROR) + $item));
+        if ('PATCH' === $method && 1 === preg_match('#^(configurations|uploads)/([\w-]+)$#', $relative, $matches)) {
+            return $this->json($this->update($matches[1], $matches[2], fn (array $item) => json_decode($body, true, flags: JSON_THROW_ON_ERROR) + $item));
         }
 
         // comme l’Entrepôt (vérifié le 16/11/2026) : le PUT remplace la configuration mais garde `layer_name`, `extra` et les tags

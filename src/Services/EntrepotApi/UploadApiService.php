@@ -7,7 +7,6 @@ use App\ApiClient\PaginatedPromise;
 use App\ApiClient\PaginatedResponse;
 use App\ApiClient\ResponsePromise;
 use App\Constants\EntrepotApi\UploadStatuses;
-use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\FileUploader\Format\Zip\ZipUploadPolicy;
@@ -241,7 +240,7 @@ final readonly class UploadApiService
     }
 
     /**
-     * @param array<mixed>|null $upload livraison déjà chargée par l'appelant (avec `status` et `tags`), évite un GET
+     * @param array<mixed>|null $upload livraison déjà chargée par l'appelant via un GET unitaire (la liste ne renvoie pas `extra`), évite un GET
      *
      * @return array<mixed>
      */
@@ -249,11 +248,7 @@ final readonly class UploadApiService
     {
         $upload ??= $this->get($datastoreId, $uploadId)->array();
         if (UploadStatuses::DELETED == $upload['status'] || UploadStatuses::OPEN == $upload['status']) {
-            if (array_key_exists(UploadTags::FILE_TREE, $upload['tags'])) {
-                return json_decode($upload['tags'][UploadTags::FILE_TREE], true);
-            }
-
-            return [];
+            return $upload['extra']['file_tree'] ?? [];
         }
 
         return $this->api->get("datastores/$datastoreId/uploads/$uploadId/tree")->array();
@@ -300,12 +295,10 @@ final readonly class UploadApiService
      */
     public function remove(string $datastoreId, string $uploadId, ?array $upload = null): ResponsePromise
     {
-        // sauvegarde dans les tags de l'arborescence de fichiers de la livraison avant de la supprimer, parce qu'une fois supprimée elle ne sera plus récupérable
+        // l'arborescence n'est plus lisible une fois la livraison supprimée : sauvegarde dans `extra`, qui y survit (les tags sont limités à 99 caractères)
         try {
             $fileTree = $this->getFileTree($datastoreId, $uploadId, $upload);
-            $this->addTags($datastoreId, $uploadId, [
-                UploadTags::FILE_TREE => json_encode($fileTree),
-            ])->await();
+            $this->api->patch("datastores/$datastoreId/uploads/$uploadId", ['extra' => ['file_tree' => $fileTree]])->await();
         } catch (ApiException) {
             // ne rien faire, tant pis si la récupération de l'arborescence a échoué
         }

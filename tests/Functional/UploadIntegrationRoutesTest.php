@@ -252,6 +252,9 @@ final class UploadIntegrationRoutesTest extends WebTestCase
         self::assertSame('successful', $state['status']);
         self::assertNull($state['next_action']);
         self::assertSame([], EntrepotMockResponseFactory::stored('uploads'));
+        $writes = array_slice(EntrepotMockResponseFactory::writeRequests(), -2);
+        self::assertSame(['PATCH', 'DELETE'], array_column($writes, 'method'));
+        self::assertSame(['extra' => ['file_tree' => []]], json_decode($writes[0]['body'], true));
     }
 
     public function testFailedDeletionKeepsTheIntegrationSuccessful(): void
