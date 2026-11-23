@@ -7,6 +7,7 @@ use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
 use App\Exception\AppException;
+use App\Services\EntrepotApi\CartesDataDetailsService;
 use App\Services\EntrepotApi\CartesStoredDataApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 
 #[Route(
     '/api/datastores/{datastoreId}/stored_data',
@@ -95,6 +97,19 @@ class StoredDataController extends AbstractController implements ApiControllerIn
         return $this->json([
             'offerings_list' => $offeringsList,
         ]);
+    }
+
+    #[Route('/{storedDataId}/details', name: 'get_details', methods: ['GET'], requirements: ['storedDataId' => Requirement::UUID_V4])]
+    public function getDetails(string $datastoreId, string $storedDataId, CartesDataDetailsService $dataDetailsService): JsonResponse
+    {
+        return $this->json($dataDetailsService->getStoredDataDetails($datastoreId, $storedDataId));
+    }
+
+    // journaux lus à l’ouverture d’une étape du rapport, première page seulement
+    #[Route('/{storedDataId}/processing_executions/{executionId}/logs', name: 'get_processing_logs', methods: ['GET'], requirements: ['storedDataId' => Requirement::UUID_V4, 'executionId' => Requirement::UUID_V4])]
+    public function getProcessingLogs(string $datastoreId, string $executionId): JsonResponse
+    {
+        return $this->json($this->processingApiService->getExecutionLogs($datastoreId, $executionId)->array());
     }
 
     #[Route('/{storedDataId}/report', name: 'get_report_data', methods: ['GET'])]

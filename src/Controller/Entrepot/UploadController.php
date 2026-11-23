@@ -9,6 +9,7 @@ use App\Controller\ApiControllerInterface;
 use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Dto\Upload\UploadAddDTO;
 use App\Exception\ApiException;
+use App\Services\EntrepotApi\CartesDataDetailsService;
 use App\Services\EntrepotApi\UploadApiService;
 use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 
 #[Route(
     '/api/datastores/{datastoreId}/upload',
@@ -128,6 +130,19 @@ class UploadController extends AbstractController implements ApiControllerInterf
         $this->uploadApiService->remove($datastoreId, $uploadId)->await();
 
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+    }
+
+    #[Route('/{uploadId}/details', name: 'get_details', methods: ['GET'], requirements: ['uploadId' => Requirement::UUID_V4])]
+    public function getDetails(string $datastoreId, string $uploadId, CartesDataDetailsService $dataDetailsService): JsonResponse
+    {
+        return $this->json($dataDetailsService->getUploadDetails($datastoreId, $uploadId));
+    }
+
+    // journaux lus à l’ouverture d’une étape du rapport, première page seulement
+    #[Route('/{uploadId}/check_executions/{executionId}/logs', name: 'get_check_logs', methods: ['GET'], requirements: ['uploadId' => Requirement::UUID_V4, 'executionId' => Requirement::UUID_V4])]
+    public function getCheckLogs(string $datastoreId, string $executionId): JsonResponse
+    {
+        return $this->json($this->uploadApiService->getCheckExecutionLogs($datastoreId, $executionId)->array());
     }
 
     #[Route('/{uploadId}/upload-report', name: 'get_upload_report', methods: ['GET'])]
