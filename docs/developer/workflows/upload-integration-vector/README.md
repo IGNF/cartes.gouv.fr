@@ -97,7 +97,6 @@ Les fichiers verrous sont dans `var/data/locks` (`framework.lock`), sur le volum
     - datasheet_name
     - producer, producer_short (optionnel), production_year, date, theme, zone, email_notification
     - proc_int_id, vectordb_id : écrits au lancement du traitement
-    - file_tree : écrit juste avant la suppression
 - stored_data (VECTOR-DB)
     - upload_id
     - proc_int_id

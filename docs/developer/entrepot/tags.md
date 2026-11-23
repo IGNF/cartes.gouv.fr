@@ -4,13 +4,12 @@ Certaines entités portent une propriété `tags`, qui est un dictionnaire clé/
 
 ## `upload`
 
-| tag                | description                                                                               |             |
-| ------------------ | ----------------------------------------------------------------------------------------- | ----------- |
-| `datasheet_name`   | nom de la fiche de donnée                                                                 | string      |
-| `proc_int_id`      | identifiant de l'exécution du traitement "Intégration de données vecteur livrées en base" | uuidv4      |
-| `vectordb_id`      | identifiant de la donnée stockée en sortie du traitement `proc_int_id`                    | uuidv4      |
-| `data_upload_path` | chemin vers le fichier téléversé                                                          |             |
-| `file_tree`        | arborescence des fichiers, écrite juste avant la suppression de la livraison              | json encodé |
+| tag                | description                                                                               |        |
+| ------------------ | ----------------------------------------------------------------------------------------- | ------ |
+| `datasheet_name`   | nom de la fiche de donnée                                                                 | string |
+| `proc_int_id`      | identifiant de l'exécution du traitement "Intégration de données vecteur livrées en base" | uuidv4 |
+| `vectordb_id`      | identifiant de la donnée stockée en sortie du traitement `proc_int_id`                    | uuidv4 |
+| `data_upload_path` | chemin vers le fichier téléversé                                                          |        |
 
 La progression de l'intégration n'est pas un tag : le backend la calcule à chaque lecture (voir [workflow d'intégration](../workflows/upload-integration-vector/README.md)). Les livraisons antérieures portent encore `integration_progress` et `integration_current_step`, que plus rien ne lit.
 

@@ -192,6 +192,18 @@ final class DataDetailsRoutesTest extends WebTestCase
         self::assertCount(4, $json['checks']);
     }
 
+    public function testDeletedUploadShowsTheSavedFileTree(): void
+    {
+        $fileTree = [['type' => 'FILE', 'name' => 'fichier.gpkg', 'size' => 12]];
+        EntrepotMockResponseFactory::seed('uploads', ['_id' => 'b5d1c3f2-6a4e-4c8b-9f0a-2d7e1a3b4c5d', 'name' => 'supprimée', 'status' => 'DELETED', 'tags' => [], 'extra' => ['file_tree' => $fileTree]]);
+        $client = $this->client();
+
+        $client->xmlHttpRequest('GET', self::DATASTORE_PATH.'/upload/b5d1c3f2-6a4e-4c8b-9f0a-2d7e1a3b4c5d/details');
+
+        self::assertResponseIsSuccessful();
+        self::assertSame($fileTree, $this->jsonResponse($client)['file_tree']);
+    }
+
     public function testMissingUploadIsNotFound(): void
     {
         $client = $this->client();

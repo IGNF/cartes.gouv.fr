@@ -21,6 +21,7 @@ final class UploadIntegrationRoutesTest extends WebTestCase
     private const UPLOAD_ID = 'upload-a';
     private const URL = self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/upload/'.self::UPLOAD_ID.'/integration';
     private const UPLOADED_FILE = '0f8e3c2a-1b2c-4d5e-8f90-123456789abc/donnee.geojson';
+    private const FILE_TREE = [['type' => 'DIRECTORY', 'name' => 'data', 'size' => 42, 'children' => [['type' => 'FILE', 'name' => 'donnee.geojson', 'size' => 42]]]];
 
     protected function setUp(): void
     {
@@ -252,6 +253,9 @@ final class UploadIntegrationRoutesTest extends WebTestCase
         self::assertSame('successful', $state['status']);
         self::assertNull($state['next_action']);
         self::assertSame([], EntrepotMockResponseFactory::stored('uploads'));
+        $writes = array_slice(EntrepotMockResponseFactory::writeRequests(), -2);
+        self::assertSame(['PATCH', 'DELETE'], array_column($writes, 'method'));
+        self::assertSame(['extra' => ['other' => 'kept', 'file_tree' => self::FILE_TREE]], json_decode($writes[0]['body'], true));
     }
 
     public function testFailedDeletionKeepsTheIntegrationSuccessful(): void
@@ -295,7 +299,7 @@ final class UploadIntegrationRoutesTest extends WebTestCase
 
     private function seedLaunchedUpload(string $executionStatus, string $storedDataStatus): void
     {
-        $this->seedUpload(['status' => 'CLOSED', 'checks' => ['passed' => [['_id' => 'c']]], 'tags' => ['vectordb_id' => 'stored-data-a', 'proc_int_id' => 'execution-a']]);
+        $this->seedUpload(['status' => 'CLOSED', 'checks' => ['passed' => [['_id' => 'c']]], 'tags' => ['vectordb_id' => 'stored-data-a', 'proc_int_id' => 'execution-a'], 'tree' => self::FILE_TREE, 'extra' => ['other' => 'kept']]);
         EntrepotMockResponseFactory::seed('processings/executions', ['_id' => 'execution-a', 'status' => $executionStatus]);
         EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'stored-data-a', 'status' => $storedDataStatus, 'tags' => []]);
     }
