@@ -86,26 +86,39 @@ class CartesServiceApiService
     }
 
     /**
-     * Configurations détaillées et offerings d'une fiche de données, en une passe (listes d'offerings lancées en parallèle).
+     * Configurations détaillées et offerings d'une fiche de données, en une passe (listes d'offerings lancées avec les détails).
      */
     public function getDatasheetServices(string $datastoreId, string $datasheetName): DatasheetServices
     {
-        $configurations = $this->configurationApiService->getAllDetailed($datastoreId, [
+        $configurations = $this->configurationApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
-        ]);
+        ])->resolve();
 
         $pendingOfferingsLists = [];
-        foreach ($configurations as $configuration) {
-            $pendingOfferingsLists[] = $this->configurationApiService->getConfigurationOfferingsDetailed($datastoreId, $configuration['_id']);
-        }
-
-        $offeringsById = [];
-        foreach ($pendingOfferingsLists as $pendingOfferings) {
-            foreach ($pendingOfferings->resolve() as $offering) {
-                $offeringsById[$offering['_id']] = $offering;
+        try {
+            foreach ($configurations as $configuration) {
+                $pendingOfferingsLists[] = $this->configurationApiService->getConfigurationOfferingsDetailed($datastoreId, $configuration['_id']);
             }
+            $configurations = $this->configurationApiService->api->fetchAllDetailsAsync(
+                $configurations,
+                fn (array $configuration): ResponsePromise => $this->configurationApiService->get($datastoreId, $configuration['_id'])
+            );
+
+            $offeringsById = [];
+            foreach ($pendingOfferingsLists as $pendingOfferings) {
+                foreach ($pendingOfferings->resolve() as $offering) {
+                    $offeringsById[$offering['_id']] = $offering;
+                }
+            }
+        } catch (\Throwable $e) {
+            // une lecture non consommée lèverait son erreur HTTP à sa destruction, à la place de l’exception en cours
+            foreach ($pendingOfferingsLists as $pendingOfferings) {
+                $pendingOfferings->cancel();
+            }
+
+            throw $e;
         }
 
         return new DatasheetServices(array_column($configurations, null, '_id'), $offeringsById);
@@ -131,11 +144,13 @@ class CartesServiceApiService
             $storedDataTypes = array_column($pendingStoredData->resolve(), 'type', '_id');
             $permissions = $this->readPermissionsQuietly($datastoreId, $pendingPermissions);
             $endpoints = $this->readEndpoints($datastoreId, $pendingEndpoints, [] !== $datasheetServices->offeringsById);
-        } finally {
+        } catch (\Throwable $e) {
             // une lecture non consommée lèverait son erreur HTTP à sa destruction, à la place de l’exception en cours
             $pendingStoredData->cancel();
             $pendingPermissions->cancel();
             $pendingEndpoints->cancel();
+
+            throw $e;
         }
 
         $services = [];
