@@ -23,11 +23,7 @@ type FeatureInfoSectionProps = {
 /** infobulles d’un flux WMS vecteur : attributs affichés par table cochée et format */
 export default function FeatureInfoSection({ columns }: FeatureInfoSectionProps) {
     const { t } = useTranslation("ServiceForm");
-    const {
-        register,
-        control,
-        formState: { errors },
-    } = useFormContext<ServiceFormValues>();
+    const { register, control } = useFormContext<ServiceFormValues>();
     const enabled = useWatch({ control, name: "featureinfo.enabled" });
     const format = useWatch({ control, name: "featureinfo.format" });
     const tables = useWatch({ control, name: "tables" });
@@ -54,17 +50,38 @@ export default function FeatureInfoSection({ columns }: FeatureInfoSectionProps)
                         <h3 className={fr.cx("fr-text--md", "fr-mt-3w", "fr-mb-1w")}>{t("featureinfo.attributes.legend")}</h3>
                         {tables.map((table, index) =>
                             table.selected ? (
-                                <Checkbox
+                                // Controller : avec une seule case, register rendrait une chaîne ou false au lieu d’un tableau
+                                <Controller
                                     key={table.native_name}
-                                    legend={table.native_name}
-                                    hintText={columns[table.native_name]?.length === 0 ? t("featureinfo.no_attribute") : undefined}
-                                    state={errors.tables?.[index]?.featureinfo_attributes ? "error" : "default"}
-                                    stateRelatedMessage={errors.tables?.[index]?.featureinfo_attributes?.message}
-                                    options={(columns[table.native_name] ?? []).map((name) => ({
-                                        label: name,
-                                        nativeInputProps: { ...register(`tables.${index}.featureinfo_attributes`), value: name },
-                                    }))}
-                                    small
+                                    control={control}
+                                    name={`tables.${index}.featureinfo_attributes`}
+                                    render={({ field: { value, onChange, onBlur, ref }, fieldState: { error } }) => {
+                                        const tableColumns = Object.hasOwn(columns, table.native_name) ? columns[table.native_name] : [];
+                                        return (
+                                            <Checkbox
+                                                legend={table.native_name}
+                                                hintText={tableColumns.length === 0 ? t("featureinfo.no_attribute") : undefined}
+                                                state={error ? "error" : "default"}
+                                                stateRelatedMessage={error?.message}
+                                                options={tableColumns.map((name, columnIndex) => ({
+                                                    label: name,
+                                                    nativeInputProps: {
+                                                        value: name,
+                                                        checked: value.includes(name),
+                                                        onBlur,
+                                                        // focus sur la première case quand la table est en erreur
+                                                        ref: columnIndex === 0 ? ref : undefined,
+                                                        // ordre des colonnes, quel que soit l’ordre des clics : pas de faux changement
+                                                        onChange: (e) =>
+                                                            onChange(
+                                                                tableColumns.filter((column) => (column === name ? e.target.checked : value.includes(column)))
+                                                            ),
+                                                    },
+                                                }))}
+                                                small
+                                            />
+                                        );
+                                    }}
                                 />
                             ) : null
                         )}

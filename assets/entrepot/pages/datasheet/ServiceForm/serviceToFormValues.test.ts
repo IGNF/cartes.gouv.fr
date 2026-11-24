@@ -238,6 +238,20 @@ describe("serviceToFormValues, tables WMS vecteur", () => {
         expect(values.tables[0].featureinfo_attributes).toEqual(["nom"]);
     });
 
+    it("lit une table nommée comme une propriété d’objet sans modèle généré", () => {
+        const db = {
+            type_infos: { relations: [{ name: "constructor", attributes: { geom: "geometry(Point)", nom: "text" }, type: "TABLE", primary_key: [] }] },
+        } as unknown as VectorDb;
+        const constructorService = service({
+            typeInfos: { used_data: [{ stored_data: "vectordb-1", relations: [{ name: "constructor", style: "static-1" }] }] },
+        });
+        const values = serviceToFormValues(
+            { ...constructorService, configuration: { ...constructorService.configuration, featureinfo: { format: null, attributes: {} } } },
+            db
+        );
+        expect(values.tables[0].featureinfo_attributes).toEqual([]);
+    });
+
     it("désactive les infobulles sans modèle généré", () => {
         expect(serviceToFormValues(service({ featureinfo: { format: null, attributes: {} } })).featureinfo).toEqual({ enabled: false, format: "list" });
     });

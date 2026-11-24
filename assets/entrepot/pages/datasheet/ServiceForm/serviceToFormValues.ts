@@ -93,7 +93,11 @@ const wmsVectorTables = (
                   ...table,
                   selected: true,
                   saved_style_id: savedStyles.get(table.native_name),
-                  featureinfo_attributes: (featureInfo?.attributes[table.native_name] ?? []).filter((name) => columns[table.native_name]?.includes(name)),
+                  // propre seulement : une table « constructor » ne doit pas lire Object.prototype
+                  featureinfo_attributes: (featureInfo && Object.hasOwn(featureInfo.attributes, table.native_name)
+                      ? featureInfo.attributes[table.native_name]
+                      : []
+                  ).filter((name) => columns[table.native_name]?.includes(name)),
               }
             : table
     );

@@ -99,7 +99,8 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox, type }) => {
         // WMS vecteur seulement : le contrôle insère sans filtre le HTML des propriétés des couches vecteur (WFS, TMS)
         ...(type === OfferingTypeEnum.WMSVECTOR ? [new DataLayerGetFeatureInfo()] : []),
     ]);
-    const bkLayer = useRef(new TileLayer({ properties: { title: null, description: null } }));
+    // nommé dès sa création : le contrôle GetFeatureInfo l’ignore même si les capacités WMTS ne sont pas lues
+    const bkLayer = useRef(new TileLayer({ properties: { title: null, description: null, name: olDefaults.default_background_layer } }));
 
     const { data: capabilities } = useCapabilities();
 
