@@ -95,7 +95,13 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
                     </div>
                     <div className={fr.cx("fr-grid-row", "fr-mb-4v")}>
                         {"bbox" in service.configuration.type_infos && service.configuration.type_infos.bbox !== undefined && (
-                            <RMap layers={olLayers} type={service.type} currentStyle={currentStyle} bbox={service.configuration.type_infos.bbox} />
+                            <RMap
+                                key={service._id}
+                                layers={olLayers}
+                                type={service.type}
+                                currentStyle={currentStyle}
+                                bbox={service.configuration.type_infos.bbox}
+                            />
                         )}
                     </div>
                 </>

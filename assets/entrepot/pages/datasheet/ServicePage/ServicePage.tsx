@@ -50,6 +50,7 @@ import MetadataSectionsContainer from "../forms/MetadataSectionsContainer";
 import { buildServiceEditFormData, mapServiceViolationPaths } from "../ServiceForm/buildServiceFormData";
 import AccessSection from "../ServiceForm/sections/AccessSection";
 import ServiceDescriptionSection from "../ServiceForm/sections/ServiceDescriptionSection";
+import FeatureInfoSection from "../ServiceForm/sections/FeatureInfoSection";
 import StylesSection from "../ServiceForm/sections/StylesSection";
 import TablesSection from "../ServiceForm/sections/TablesSection";
 import {
@@ -60,7 +61,7 @@ import {
     type ServiceEditFormValues,
     type ServiceFormValues,
 } from "../ServiceForm/serviceFormSchema";
-import { serviceToFormValues } from "../ServiceForm/serviceToFormValues";
+import { featureInfoColumns, serviceToFormValues } from "../ServiceForm/serviceToFormValues";
 import ServicePreviewSection from "./ServicePreviewSection";
 
 // flux sur une base vecteur : tables à choisir
@@ -122,7 +123,9 @@ function ServicePageContent(props: ServicePageContentProps) {
     // accès inconnu quand le serveur n’a pas pu lire les permissions
     const accessKnown = service.access !== null && service.access !== undefined;
     const tablesReady = !withTables || vectorDbQuery.data !== undefined;
-    const editable = canSave && published && accessKnown && tablesReady;
+    // modèle d’infobulle illisible : un enregistrement supprimerait ceux générés par cartes.gouv.fr
+    const featureInfoKnown = service.type !== OfferingTypeEnum.WMSVECTOR || configuration.featureinfo !== null;
+    const editable = canSave && published && accessKnown && tablesReady && featureInfoKnown;
 
     let lockReason: string | undefined;
     if (canSave && !published && !isOfferingUnavailable(service.status) && service.status !== OfferingStatusEnum.UNSTABLE) {
@@ -131,27 +134,39 @@ function ServicePageContent(props: ServicePageContentProps) {
         lockReason = t("edit.permissions_error");
     } else if (canSave && published && !tablesReady && vectorDbQuery.isError) {
         lockReason = t("edit.tables_error");
+    } else if (canSave && published && !featureInfoKnown) {
+        lockReason = t("edit.featureinfo_error");
     }
 
     const values = useMemo(() => serviceToFormValues(service, vectorDbQuery.data), [service, vectorDbQuery.data]);
+    const featureInfoTableColumns = useMemo(() => featureInfoColumns(vectorDbQuery.data), [vectorDbQuery.data]);
 
     return (
         <>
             {lockReason && <Alert className={fr.cx("fr-mt-2w")} severity="info" title={t("edit.locked")} description={lockReason} small />}
-            <ServiceSheet key={editable ? "edit" : "view"} {...props} values={values} editable={editable} canSave={canSave} />
+            <ServiceSheet
+                key={editable ? "edit" : "view"}
+                {...props}
+                values={values}
+                featureInfoTableColumns={featureInfoTableColumns}
+                editable={editable}
+                canSave={canSave}
+            />
         </>
     );
 }
 
 type ServiceSheetProps = ServicePageContentProps & {
     values: ServiceFormValues;
+    /** WMS vecteur : attributs proposés dans l’infobulle, par table */
+    featureInfoTableColumns: Readonly<Record<string, string[]>>;
     /** formulaire initialisé une fois depuis `values` ; sinon lecture seule, qui suit le flux relu */
     editable: boolean;
     /** bouton « Enregistrer » affiché (droits et type), actif seulement quand la page est modifiable */
     canSave: boolean;
 };
 
-function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, editable, canSave }: ServiceSheetProps) {
+function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, featureInfoTableColumns, editable, canSave }: ServiceSheetProps) {
     const { t } = useTranslation("ServicePage");
     const { t: tForm } = useTranslation("ServiceForm");
     const { classes, cx } = useStyles();
@@ -368,6 +383,12 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, edi
                     {editable && isWmsVector && (
                         <MetadataSection title={tForm("section.styles")}>
                             <StylesSection datastoreId={datastoreId} />
+                        </MetadataSection>
+                    )}
+
+                    {editable && isWmsVector && (
+                        <MetadataSection title={tForm("section.featureinfo")}>
+                            <FeatureInfoSection columns={featureInfoTableColumns} />
                         </MetadataSection>
                     )}
 

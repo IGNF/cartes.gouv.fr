@@ -1,4 +1,5 @@
-// import GetFeatureInfo from "geopf-extensions-openlayers/src/packages/Controls/GetFeatureInfo/GetFeatureInfo";
+import DOMPurify from "dompurify";
+import GetFeatureInfo from "geopf-extensions-openlayers/src/packages/Controls/GetFeatureInfo/GetFeatureInfo";
 import LayerSwitcher from "geopf-extensions-openlayers/src/packages/Controls/LayerSwitcher/LayerSwitcher";
 import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
 import GeoportalZoom from "geopf-extensions-openlayers/src/packages/Controls/Zoom/GeoportalZoom";
@@ -15,7 +16,7 @@ import { fromLonLat, transformExtent } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useEffect, useRef, useState } from "react";
 
-import type { CartesStyle, GeostylerStyles, OfferingTypeEnum } from "../../@types/app";
+import { type CartesStyle, type GeostylerStyles, OfferingTypeEnum } from "../../@types/app";
 import { BoundingBox } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
@@ -32,6 +33,34 @@ function getWorkingLayers(layers: BaseLayer[]): BaseLayer[] {
     return layers.filter((l) => l.get("name") !== olDefaults.default_background_layer);
 }
 
+const isBackgroundLayer = (layer: BaseLayer | undefined) => layer?.get("name") === olDefaults.default_background_layer;
+
+const HTML_ENTITIES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+
+// titre et réponse insérés en HTML par la bibliothèque : échappés ou assainis ; fond de carte ignoré (source WMTS sans getFeatureInfoUrl)
+class DataLayerGetFeatureInfo extends GetFeatureInfo {
+    constructor() {
+        // comme entree-carto : `position` place le panneau dans le conteneur des boutons (sinon .fr-modal du DSFR l’écrase) ; option absente des types
+        super({ active: true, position: "top-left" } as ConstructorParameters<typeof GetFeatureInfo>[0]);
+    }
+
+    override getLayerTitle(gfiLayer: Layer): string {
+        return super.getLayerTitle(gfiLayer).replace(/[&<>"']/g, (char) => HTML_ENTITIES[char]);
+    }
+
+    override getGetFeatureInfoLayer(layer: Layer): unknown {
+        return isBackgroundLayer(layer) ? { format: "unknown", layer } : super.getGetFeatureInfoLayer(layer);
+    }
+
+    // reçoit l’entrée du contrôle ({ layer, url… }), déclarée Layer par la bibliothèque
+    override getGetFeatureInfoContent(gfiLayer: Layer & { layer?: BaseLayer }): Promise<unknown> {
+        if (isBackgroundLayer(gfiLayer.layer)) return Promise.resolve(null);
+        return (super.getGetFeatureInfoContent(gfiLayer) as Promise<unknown>).then((content) =>
+            typeof content === "string" ? DOMPurify.sanitize(content) : content
+        );
+    }
+}
+
 export interface RMapProps {
     type: OfferingTypeEnum;
     bbox?: BoundingBox;
@@ -39,13 +68,7 @@ export interface RMapProps {
     layers: Layer[];
 }
 
-const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
-    // const gfinfo = useMemo(() => {
-    //     return [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
-    //         initial.type
-    //     );
-    // }, [initial.type]);
-
+const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox, type }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map | undefined>(undefined);
     // useState paresseux : instance unique, conservée par Fast Refresh (useMemo serait recalculé et détaché de la carte)
@@ -73,17 +96,11 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
             apiKey: "essentiels",
             zoomTo: "auto",
         }),
-        // gfinfo
-        //     ? new GetFeatureInfo({
-        //           options: {
-        //               active: true,
-        //               hidden: true,
-        //           },
-        //           position: "top-right",
-        //       })
-        //     : undefined,
+        // WMS vecteur seulement : le contrôle insère sans filtre le HTML des propriétés des couches vecteur (WFS, TMS)
+        ...(type === OfferingTypeEnum.WMSVECTOR ? [new DataLayerGetFeatureInfo()] : []),
     ]);
-    const bkLayer = useRef(new TileLayer({ properties: { title: null, description: null } }));
+    // nommé dès sa création : le contrôle GetFeatureInfo l’ignore même si les capacités WMTS ne sont pas lues
+    const bkLayer = useRef(new TileLayer({ properties: { title: null, description: null, name: olDefaults.default_background_layer } }));
 
     const { data: capabilities } = useCapabilities();
 
@@ -152,17 +169,11 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
         addLayer(bkLayer.current);
 
         // Ajout des autres couches
-        // const gfiLayers: object[] = [];
         layers.forEach((layer) => {
             if (mapRef.current !== undefined) {
                 addLayer(layer);
             }
-            // if (gfinfo) {
-            //     gfiLayers.push({ obj: layer });
-            // }
         });
-        // NOTE : il me semble que ce n'est plus nécessaire et plus possible sur geopf-ext-ol, à vérifier
-        // getControl("GetFeatureInfo")?.setLayers(gfiLayers);
 
         // On zoom sur l'extent de la couche au premier rendu
         // if (extent) {

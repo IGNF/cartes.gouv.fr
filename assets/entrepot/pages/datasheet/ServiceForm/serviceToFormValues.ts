@@ -1,6 +1,6 @@
 import markdownit from "markdown-it";
 
-import { OfferingTypeEnum, type Service, type VectorDb } from "@/@types/app";
+import { type ConfigurationFeatureInfo, OfferingTypeEnum, type Service, type VectorDb } from "@/@types/app";
 import { type ConfigurationUsedDataRelationWfsDetailsContent, type ConfigurationUsedDataRelationWmsVectorDetailsContent } from "@/@types/entrepot";
 import { filterGeometricRelations } from "@/helpers";
 import { getThematicCategories } from "@/utils";
@@ -48,9 +48,25 @@ const readThemes = (tag: string): string[] => {
     return themes;
 };
 
+/** attributs proposés dans l’infobulle, par table géométrique : colonnes non géométriques par ordre alphabétique */
+export const featureInfoColumns = (vectorDb: VectorDb | undefined): Record<string, string[]> =>
+    Object.fromEntries(
+        filterGeometricRelations(vectorDb?.type_infos?.relations ?? [], true).map((relation) => [
+            relation.name,
+            Object.entries("attributes" in relation ? relation.attributes : {})
+                .filter(([, type]) => !type.startsWith("geometry"))
+                .map(([name]) => name)
+                .sort((a, b) => a.localeCompare(b)),
+        ])
+    );
+
 /** une ligne par table géométrique de la base, aucune cochée */
-export const defaultTables = (vectorDb: VectorDb): ServiceTableFormValues[] =>
-    filterGeometricRelations(vectorDb.type_infos?.relations ?? [], true).map((relation) => defaultTable(relation.name));
+export const defaultTables = (vectorDb: VectorDb): ServiceTableFormValues[] => {
+    const columns = featureInfoColumns(vectorDb);
+    return filterGeometricRelations(vectorDb.type_infos?.relations ?? [], true).map((relation) =>
+        columns[relation.name].length === 0 ? { ...defaultTable(relation.name), featureinfo_unavailable: true } : defaultTable(relation.name)
+    );
+};
 
 const defaultTable = (name: string): ServiceTableFormValues => ({
     native_name: name,
@@ -60,13 +76,30 @@ const defaultTable = (name: string): ServiceTableFormValues => ({
     description: "",
     keywords: [],
     style: undefined,
+    featureinfo_attributes: [],
 });
 
-// WMS vecteur : tables enregistrées par `name`, avec leur fichier de style ; même règle qu’en WFS pour une table disparue
-const wmsVectorTables = (relations: ConfigurationUsedDataRelationWmsVectorDetailsContent[], vectorDb: VectorDb): ServiceTableFormValues[] => {
+// WMS vecteur : tables enregistrées par `name`, avec leur fichier de style et les attributs d’infobulle encore présents dans la table ; même règle qu’en WFS pour une table disparue
+const wmsVectorTables = (
+    relations: ConfigurationUsedDataRelationWmsVectorDetailsContent[],
+    vectorDb: VectorDb,
+    featureInfo: ConfigurationFeatureInfo | null | undefined
+): ServiceTableFormValues[] => {
     const savedStyles = new Map(relations.map((relation) => [relation.name, relation.style]));
+    const columns = featureInfoColumns(vectorDb);
     const tables = defaultTables(vectorDb).map((table) =>
-        savedStyles.has(table.native_name) ? { ...table, selected: true, saved_style_id: savedStyles.get(table.native_name) } : table
+        savedStyles.has(table.native_name)
+            ? {
+                  ...table,
+                  selected: true,
+                  saved_style_id: savedStyles.get(table.native_name),
+                  // propre seulement : une table « constructor » ne doit pas lire Object.prototype
+                  featureinfo_attributes: (featureInfo && Object.hasOwn(featureInfo.attributes, table.native_name)
+                      ? featureInfo.attributes[table.native_name]
+                      : []
+                  ).filter((name) => columns[table.native_name]?.includes(name)),
+              }
+            : table
     );
     const missing = relations.filter((relation) => !tables.some((table) => table.native_name === relation.name));
     return [...tables, ...missing.map((relation) => ({ ...defaultTable(relation.name), missing: true, saved_style_id: relation.style }))];
@@ -93,6 +126,7 @@ const toTable = (
     description: relation.abstract,
     keywords: relation.keywords ?? [],
     style: undefined,
+    featureinfo_attributes: [],
     ...state,
 });
 
@@ -108,7 +142,7 @@ export function serviceToFormValues(service: Service, vectorDb?: VectorDb): Serv
     const relations = usedData && "relations" in usedData ? usedData.relations : [];
     const readTables = (db: VectorDb) =>
         service.type === OfferingTypeEnum.WMSVECTOR
-            ? wmsVectorTables(relations as ConfigurationUsedDataRelationWmsVectorDetailsContent[], db)
+            ? wmsVectorTables(relations as ConfigurationUsedDataRelationWmsVectorDetailsContent[], db, configuration.featureinfo)
             : wfsTables(relations as ConfigurationUsedDataRelationWfsDetailsContent[], db);
 
     return {
@@ -127,6 +161,10 @@ export function serviceToFormValues(service: Service, vectorDb?: VectorDb): Serv
             title: configuration.attribution?.title ?? "",
             url: configuration.attribution?.url ?? "",
             logo: undefined,
+        },
+        featureinfo: {
+            enabled: Object.keys(configuration.featureinfo?.attributes ?? {}).length > 0,
+            format: configuration.featureinfo?.format ?? "list",
         },
     };
 }

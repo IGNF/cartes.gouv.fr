@@ -7,6 +7,7 @@ namespace App\Tests\Functional;
 use App\Dto\Datastore\PermissionDTO;
 use App\Dto\Datastore\UpdatePermissionDTO;
 use App\Dto\Espaceco\Members\AddMembersDTO;
+use App\Dto\Services\Form\FeatureInfoFormDTO;
 use App\Dto\Services\Form\ServiceAttributionFormDTO;
 use App\Dto\Services\Form\ServicePublishFormDTO;
 use App\Dto\Services\Form\WfsTableFormDTO;
@@ -86,7 +87,8 @@ final class SerializerContractTest extends KernelTestCase
             'description' => '',
             'tables' => [['native_name' => 't1', 'title' => 'Table', 'public_name' => 't1', 'description' => 'Résumé', 'keywords' => ['mot']]],
             'selected_tables' => [],
-        ], ['attribution' => ServiceAttributionFormDTO::class, 'tables' => WfsTableFormDTO::class]];
+            'featureinfo' => ['format' => 'table', 'attributes' => ['t1' => ['nom']]],
+        ], ['attribution' => ServiceAttributionFormDTO::class, 'tables' => WfsTableFormDTO::class, 'featureinfo' => FeatureInfoFormDTO::class]];
         yield 'PyramidVectorGenerateDTO' => [PyramidVectorGenerateDTO::class, [
             'technical_name' => 'pyr',
             'tippecanoe' => '-zg',

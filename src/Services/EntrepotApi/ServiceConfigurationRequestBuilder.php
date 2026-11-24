@@ -59,14 +59,15 @@ class ServiceConfigurationRequestBuilder
     }
 
     /**
-     * `type_infos` d’un flux, à la publication comme à la modification : tables en WFS ; titre, description et thématiques ailleurs, plus les tables et leurs styles en WMS vecteur.
+     * `type_infos` d’un flux, à la publication comme à la modification : tables en WFS ; titre, description et thématiques ailleurs, plus les tables, leurs styles et leurs infobulles en WMS vecteur.
      *
      * @param array<mixed>          $base     `used_data` (et `styles`) à la publication, `type_infos` de la configuration à la modification
      * @param array<string, string> $styleIds WMS vecteur : fichier de style par table cochée
+     * @param array<string, string> $ftlIds   WMS vecteur : modèle d’infobulle des tables qui en ont un
      *
      * @return array<mixed>
      */
-    public static function buildTypeInfos(string $type, ServicePublishFormDTO|ServiceEditFormDTO $dto, array $base, array $styleIds = []): array
+    public static function buildTypeInfos(string $type, ServicePublishFormDTO|ServiceEditFormDTO $dto, array $base, array $styleIds = [], array $ftlIds = []): array
     {
         if (ConfigurationTypes::WFS === $type) {
             $base['used_data'][0]['relations'] = self::buildWfsRelations($dto->tables);
@@ -78,7 +79,10 @@ class ServiceConfigurationRequestBuilder
         $base['abstract'] = $dto->description;
         $base['keywords'] = $dto->themes;
         if (ConfigurationTypes::WMSVECTOR === $type) {
-            $base['used_data'][0]['relations'] = array_map(fn (string $tableName) => ['name' => $tableName, 'style' => $styleIds[$tableName]], $dto->selected_tables);
+            $base['used_data'][0]['relations'] = array_map(
+                fn (string $tableName) => ['name' => $tableName, 'style' => $styleIds[$tableName]] + (isset($ftlIds[$tableName]) ? ['ftl' => $ftlIds[$tableName]] : []),
+                $dto->selected_tables,
+            );
         }
 
         return $base;

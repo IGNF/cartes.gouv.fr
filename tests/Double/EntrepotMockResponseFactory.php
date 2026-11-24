@@ -39,6 +39,8 @@ final class EntrepotMockResponseFactory
 
     /** @var array<string, string> contenu des fichiers d’annexe, par identifiant */
     private static array $annexeFiles = [];
+    /** @var array<string, string> contenu des fichiers statiques par identifiant */
+    private static array $staticFiles = [];
 
     /** @var list<array{array<mixed>, string}> annexes créées par une autre requête pendant le prochain dépôt d’annexe */
     private static array $concurrentAnnexes = [];
@@ -84,6 +86,7 @@ final class EntrepotMockResponseFactory
         self::$store = [];
         self::$metadataFiles = [];
         self::$annexeFiles = [];
+        self::$staticFiles = [];
         self::$concurrentAnnexes = [];
         self::$failures = [];
         self::$getCapabilitiesAnswered = false;
@@ -156,6 +159,16 @@ final class EntrepotMockResponseFactory
     public static function createConcurrentlyWithNextAnnexe(array $annexe, string $content): void
     {
         self::$concurrentAnnexes[] = [$annexe, $content];
+    }
+
+    public static function seedStaticFile(string $staticId, string $content): void
+    {
+        self::$staticFiles[$staticId] = $content;
+    }
+
+    public static function staticFile(string $staticId): ?string
+    {
+        return self::$staticFiles[$staticId] ?? null;
     }
 
     public static function annexeFile(string $annexeId): ?string
@@ -396,6 +409,12 @@ final class EntrepotMockResponseFactory
                 : $this->json(['error' => 'NotFound'], 404);
         }
 
+        if ('GET' === $method && 1 === preg_match('#^statics/([\w-]+)/file$#', $relative, $matches)) {
+            return isset(self::$staticFiles[$matches[1]])
+                ? new MockResponse(self::$staticFiles[$matches[1]], ['http_code' => 200, 'response_headers' => ['content-type' => 'application/octet-stream']])
+                : $this->json(['error' => 'NotFound'], 404);
+        }
+
         if ('GET' === $method && 1 === preg_match('#^metadata/([\w-]+)/file$#', $relative, $matches)) {
             return $this->metadataFileResponse($matches[1]);
         }
@@ -579,6 +598,7 @@ final class EntrepotMockResponseFactory
             preg_match('#name="name"\r\n\r\n([^\r]*)#', $body, $matches);
             $static = ['_id' => 'static-'.self::$nextId++, 'name' => $matches[1] ?? null];
             self::$store['statics'][] = $static;
+            self::$staticFiles[$static['_id']] = $this->filePart($body);
 
             return $this->json($static, 201);
         }

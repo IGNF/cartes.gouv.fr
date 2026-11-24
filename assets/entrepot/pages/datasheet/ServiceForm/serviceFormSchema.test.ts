@@ -28,6 +28,7 @@ const table = (overrides: Partial<ServiceFormValues["tables"][number]> = {}) => 
     public_name: "communes",
     description: "Les communes",
     keywords: [],
+    featureinfo_attributes: [],
     ...overrides,
 });
 
@@ -122,6 +123,20 @@ describe("buildServiceFormSchema", () => {
 
         it("accepte un SLD conforme sans contrôler les champs WFS des tables", async () => {
             expect(await issueMessages(wms(), undefined, "wms")).toEqual({});
+        });
+
+        it("exige un attribut d’infobulle par table cochée quand les infobulles sont activées", async () => {
+            const enabled = (overrides: Partial<ServiceFormValues["tables"][number]> = {}): ServiceFormValues => ({
+                ...wms(overrides),
+                featureinfo: { enabled: true, format: "list" },
+            });
+            expect(await issueMessages(enabled(), undefined, "wms")).toEqual({
+                "tables.0.featureinfo_attributes": "validation.featureinfo.attributes.required",
+            });
+            expect(await issueMessages(enabled({ featureinfo_attributes: ["nom"] }), undefined, "wms")).toEqual({});
+            expect(await issueMessages(enabled({ featureinfo_unavailable: true }), undefined, "wms")).toEqual({});
+            expect(await issueMessages(enabled({ selected: false }), undefined, "wms")).toEqual({ tables: "validation.tables.required" });
+            expect(await issueMessages({ ...valid(), featureinfo: { enabled: true, format: "list" } })).toEqual({});
         });
 
         it("exige la description du flux, sans limite de longueur", async () => {
@@ -228,14 +243,14 @@ describe("configurationTypeFor", () => {
 });
 
 describe("buildServiceEditFormSchema", () => {
-    const editIssues = async (tables: ServiceFormValues["tables"], type: ServiceType = "wfs") => {
+    const editIssues = async (tables: ServiceFormValues["tables"], type: ServiceType = "wfs", featureinfo = valid().featureinfo) => {
         const { stored_data_id: _storedDataId, technical_name: _technicalName, ...values } = valid();
         const result = await buildServiceEditFormSchema({
             t,
             type,
             availableAccesses: ["public"],
             savedTablePublicNames: { communes: "Communes_2020" },
-        }).safeParseAsync({ ...values, description: "Les communes", tables });
+        }).safeParseAsync({ ...values, description: "Les communes", tables, featureinfo });
         return (result.error?.issues ?? []).map((issue) => `${issue.path.join(".")}: ${issue.message}`);
     };
 
@@ -254,6 +269,14 @@ describe("buildServiceEditFormSchema", () => {
     });
 
     describe("WMS vecteur", () => {
+        it("exige un attribut d’infobulle par table cochée quand les infobulles sont activées", async () => {
+            const enabled = { enabled: true, format: "table" } as const;
+            expect(await editIssues([table({ saved_style_id: "static-communes" })], "wms", enabled)).toEqual([
+                "tables.0.featureinfo_attributes: validation.featureinfo.attributes.required",
+            ]);
+            expect(await editIssues([table({ saved_style_id: "static-communes", featureinfo_attributes: ["nom"] })], "wms", enabled)).toEqual([]);
+        });
+
         it("garde le style enregistré sans nouveau fichier, en exige un pour une table sans style", async () => {
             expect(await editIssues([table({ saved_style_id: "static-communes" })], "wms")).toEqual([]);
             expect(await editIssues([table({ native_name: "routes" })], "wms")).toEqual(["tables.0.style: validation.table.style.required"]);

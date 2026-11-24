@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
+use App\Services\EntrepotApi\WmsVectorFeatureInfoService;
 use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Support\KeycloakLoginTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -448,6 +449,179 @@ final class ServiceEditRouteTest extends WebTestCase
         self::assertNotContains('static-communes', $statics);
     }
 
+    public function testWmsVectorFeatureInfoTemplatesAreUploadedForTheCheckedTables(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $this->seedVectorDb();
+        $client = $this->client();
+
+        $this->post($client, ['featureinfo' => ['format' => 'list', 'attributes' => ['communes' => ['nom'], 'routes' => ['numero']]]] + $this->wmsVectorPayload());
+
+        self::assertResponseIsSuccessful();
+        $ftls = array_values(array_filter(EntrepotMockResponseFactory::stored('statics'), fn (array $static) => str_contains((string) $static['name'], '_featureinfo_')));
+        self::assertSame([sprintf('config_%s_featureinfo_wmsv_communes', self::CONFIGURATION_ID), sprintf('config_%s_featureinfo_wmsv_routes', self::CONFIGURATION_ID)], array_column($ftls, 'name'));
+        self::assertSame([
+            ['name' => 'communes', 'style' => 'static-communes', 'ftl' => $ftls[0]['_id']],
+            ['name' => 'routes', 'style' => 'static-routes', 'ftl' => $ftls[1]['_id']],
+        ], $this->configurationPut()['type_infos']['used_data'][0]['relations']);
+        self::assertSame(WmsVectorFeatureInfoService::build('routes', 'list', ['numero']), EntrepotMockResponseFactory::staticFile($ftls[1]['_id']));
+    }
+
+    public function testWmsVectorNewFeatureInfoTemplateReplacesOursAfterTheSave(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [['name' => 'communes', 'style' => 'static-communes', 'ftl' => 'ftl-communes'], ['name' => 'routes', 'style' => 'static-routes']]);
+        $this->seedFtl('ftl-communes', WmsVectorFeatureInfoService::build('communes', 'list', ['nom']));
+        $this->seedVectorDb();
+        $client = $this->client();
+
+        $this->post($client, ['featureinfo' => ['format' => 'table', 'attributes' => ['communes' => ['nom', 'population'], 'routes' => ['numero']]]] + $this->wmsVectorPayload());
+
+        self::assertResponseIsSuccessful();
+        $relations = $this->configurationPut()['type_infos']['used_data'][0]['relations'];
+        self::assertNotSame('ftl-communes', $relations[0]['ftl']);
+        self::assertSame(WmsVectorFeatureInfoService::build('communes', 'table', ['nom', 'population']), EntrepotMockResponseFactory::staticFile($relations[0]['ftl']));
+        self::assertNotContains('ftl-communes', array_column(EntrepotMockResponseFactory::stored('statics'), '_id'));
+    }
+
+    public function testWmsVectorDisabledFeatureInfoRemovesOurTemplatesAndKeepsCustomOnes(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [
+            ['name' => 'communes', 'style' => 'static-communes', 'ftl' => 'ftl-communes'],
+            ['name' => 'routes', 'style' => 'static-routes', 'ftl' => 'ftl-custom'],
+        ]);
+        $this->seedFtl('ftl-communes', WmsVectorFeatureInfoService::build('communes', 'list', ['nom']));
+        $this->seedFtl('ftl-custom', '<#list features as feature>${feature.numero.value}</#list>');
+        $client = $this->client();
+
+        $this->post($client, ['featureinfo' => null] + $this->wmsVectorPayload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(
+            [['name' => 'communes', 'style' => 'static-communes'], ['name' => 'routes', 'style' => 'static-routes', 'ftl' => 'ftl-custom']],
+            $this->configurationPut()['type_infos']['used_data'][0]['relations'],
+        );
+        $statics = array_column(EntrepotMockResponseFactory::stored('statics'), '_id');
+        self::assertNotContains('ftl-communes', $statics);
+        self::assertContains('ftl-custom', $statics);
+    }
+
+    public function testWmsVectorEnabledFeatureInfoReplacesACustomTemplateWithoutRemovingIt(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [['name' => 'communes', 'style' => 'static-communes', 'ftl' => 'ftl-custom']]);
+        $this->seedFtl('ftl-custom', '<#list features as feature>${feature.nom.value}</#list>');
+        $this->seedVectorDb();
+        $client = $this->client();
+
+        $this->post($client, ['selected_tables' => ['communes'], 'featureinfo' => ['format' => 'list', 'attributes' => ['communes' => ['nom']]]] + $this->wmsVectorPayload());
+
+        self::assertResponseIsSuccessful();
+        self::assertNotSame('ftl-custom', $this->configurationPut()['type_infos']['used_data'][0]['relations'][0]['ftl']);
+        self::assertContains('ftl-custom', array_column(EntrepotMockResponseFactory::stored('statics'), '_id'));
+    }
+
+    public function testWmsVectorUncheckedTableLosesOurTemplateButNotACustomOne(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [
+            ['name' => 'communes', 'style' => 'static-communes'],
+            ['name' => 'routes', 'style' => 'static-routes', 'ftl' => 'ftl-routes'],
+            ['name' => 'rivieres', 'style' => 'static-rivieres', 'ftl' => 'ftl-custom'],
+        ]);
+        $this->seedFtl('ftl-routes', WmsVectorFeatureInfoService::build('routes', 'list', ['numero']));
+        $this->seedFtl('ftl-custom', '<p>personnalisé</p>');
+        $client = $this->client();
+
+        $this->post($client, ['selected_tables' => ['communes']] + $this->wmsVectorPayload());
+
+        self::assertResponseIsSuccessful();
+        self::assertSame([['name' => 'communes', 'style' => 'static-communes']], $this->configurationPut()['type_infos']['used_data'][0]['relations']);
+        $statics = array_column(EntrepotMockResponseFactory::stored('statics'), '_id');
+        self::assertNotContains('ftl-routes', $statics);
+        self::assertContains('ftl-custom', $statics);
+    }
+
+    public function testWmsVectorFailureAfterTheSaveRemovesTheTemplatesTheConfigurationNoLongerUses(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [['name' => 'communes', 'style' => 'static-communes', 'ftl' => 'ftl-communes'], ['name' => 'routes', 'style' => 'static-routes']]);
+        $this->seedFtl('ftl-communes', WmsVectorFeatureInfoService::build('communes', 'list', ['nom']));
+        $this->seedVectorDb();
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PUT offerings/'.self::OFFERING_ID);
+
+        $this->post($client, ['featureinfo' => ['format' => 'list', 'attributes' => ['communes' => ['population'], 'routes' => ['numero']]]] + $this->wmsVectorPayload());
+
+        self::assertResponseStatusCodeSame(500);
+        $relations = EntrepotMockResponseFactory::stored('configurations')[0]['type_infos']['used_data'][0]['relations'];
+        $statics = array_column(EntrepotMockResponseFactory::stored('statics'), '_id');
+        // configuration enregistrée : les nouveaux modèles restent, l’ancien part
+        self::assertEqualsCanonicalizing([...array_column($relations, 'style'), ...array_column($relations, 'ftl')], $statics);
+        self::assertNotContains('ftl-communes', $statics);
+    }
+
+    public function testWmsVectorFailedSaveRemovesTheNewTemplatesAndKeepsOurs(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [['name' => 'communes', 'style' => 'static-communes', 'ftl' => 'ftl-communes'], ['name' => 'routes', 'style' => 'static-routes']]);
+        $this->seedFtl('ftl-communes', WmsVectorFeatureInfoService::build('communes', 'list', ['nom']));
+        $this->seedVectorDb();
+        $client = $this->client();
+        EntrepotMockResponseFactory::failNext('PUT configurations/'.self::CONFIGURATION_ID);
+
+        $this->post($client, ['featureinfo' => ['format' => 'list', 'attributes' => ['communes' => ['population'], 'routes' => ['numero']]]] + $this->wmsVectorPayload());
+
+        self::assertResponseStatusCodeSame(500);
+        self::assertSame(['static-communes', 'static-routes', 'ftl-communes'], array_column(EntrepotMockResponseFactory::stored('statics'), '_id'));
+    }
+
+    public function testWmsVectorUnreadableTemplateAnswersAnErrorWithoutWriting(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [['name' => 'communes', 'style' => 'static-communes', 'ftl' => 'ftl-absent']]);
+        $client = $this->client();
+
+        $this->post($client, ['selected_tables' => ['communes'], 'featureinfo' => null] + $this->wmsVectorPayload());
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    public function testWmsVectorUnknownFeatureInfoAttributeAnswers422WithoutWriting(): void
+    {
+        $this->seedService('WMS-VECTOR');
+        $this->seedVectorDb();
+        $client = $this->client();
+
+        $this->post($client, ['featureinfo' => ['format' => 'list', 'attributes' => ['communes' => ['geom'], 'routes' => ['numero']]]] + $this->wmsVectorPayload());
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['featureinfo.attributes[communes]'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+        self::assertSame([], EntrepotMockResponseFactory::writeRequests());
+    }
+
+    public function testServiceGivesTheSettingsOfOurFeatureInfoTemplatesOnly(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [
+            ['name' => 'communes', 'style' => 'static-communes', 'ftl' => 'ftl-communes'],
+            ['name' => 'routes', 'style' => 'static-routes', 'ftl' => 'ftl-custom'],
+        ]);
+        $this->seedFtl('ftl-communes', WmsVectorFeatureInfoService::build('communes', 'table', ['nom', 'population']));
+        $this->seedFtl('ftl-custom', '<p>personnalisé</p>');
+        $client = $this->client();
+
+        $client->xmlHttpRequest('GET', self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/services/'.self::OFFERING_ID);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(['format' => 'table', 'attributes' => ['communes' => ['nom', 'population']]], $this->jsonResponse($client)['configuration']['featureinfo']);
+    }
+
+    public function testServiceGivesANullFeatureInfoWhenATemplateCannotBeRead(): void
+    {
+        $this->seedService('WMS-VECTOR', wmsVectorRelations: [['name' => 'communes', 'style' => 'static-communes', 'ftl' => 'ftl-absent']]);
+        $client = $this->client();
+
+        $client->xmlHttpRequest('GET', self::BASE.'/api/datastores/'.EntrepotMockResponseFactory::DATASTORE_ID.'/services/'.self::OFFERING_ID);
+
+        self::assertResponseIsSuccessful();
+        self::assertNull($this->jsonResponse($client)['configuration']['featureinfo']);
+    }
+
     public function testWmsVectorAccessChangeKeepsTheNewStyleFileAndRemovesTheOldOne(): void
     {
         $this->seedService('WMS-VECTOR');
@@ -574,7 +748,7 @@ final class ServiceEditRouteTest extends WebTestCase
     }
 
     /**
-     * @param ?list<array{name: string, style: string}> $wmsVectorRelations relations enregistrées d’un WMS vecteur, communes et routes par défaut
+     * @param ?list<array<string, string>> $wmsVectorRelations relations enregistrées d’un WMS vecteur, communes et routes par défaut
      */
     private function seedService(string $type, bool $open = true, string $offeringStatus = 'PUBLISHED', string $configurationStatus = 'PUBLISHED', ?array $wmsVectorRelations = null): void
     {
@@ -603,6 +777,20 @@ final class ServiceEditRouteTest extends WebTestCase
             'configuration' => ['_id' => self::CONFIGURATION_ID],
             'urls' => [['type' => 'WFS', 'url' => 'https://wfs.test/public']],
         ]);
+    }
+
+    private function seedFtl(string $id, string $content): void
+    {
+        EntrepotMockResponseFactory::seed('statics', ['_id' => $id, 'name' => 'ftl']);
+        EntrepotMockResponseFactory::seedStaticFile($id, $content);
+    }
+
+    private function seedVectorDb(): void
+    {
+        EntrepotMockResponseFactory::seed('stored_data', ['_id' => 'vectordb-1', 'type' => 'VECTOR-DB', 'tags' => ['datasheet_name' => 'Fiche'], 'type_infos' => ['relations' => [
+            ['name' => 'communes', 'attributes' => ['geom' => 'geometry(MultiPolygon,2154)', 'nom' => 'character varying', 'population' => 'integer']],
+            ['name' => 'routes', 'attributes' => ['geom' => 'geometry(LineString,2154)', 'numero' => 'character varying']],
+        ]]]);
     }
 
     /** @return array<string, mixed> */

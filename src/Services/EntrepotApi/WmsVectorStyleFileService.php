@@ -78,12 +78,13 @@ final readonly class WmsVectorStyleFileService
      * Après un échec de modification : supprime ceux de ces fichiers que la configuration relue n’utilise plus, qu’elle ait été enregistrée ou non.
      *
      * @param array<string> $staticIds fichiers enregistrés et déposés
+     * @param list<string>  $fields    champs des tables qui référencent un fichier (`style`, `ftl`)
      */
-    public function removeUnused(string $datastoreId, string $configurationId, array $staticIds): void
+    public function removeUnused(string $datastoreId, string $configurationId, array $staticIds, array $fields = ['style']): void
     {
         try {
             $relations = $this->configurationApiService->get($datastoreId, $configurationId)->array()['type_infos']['used_data'][0]['relations'] ?? [];
-            $used = array_column($relations, 'style');
+            $used = array_merge(...array_map(fn (string $field) => array_column($relations, $field), $fields));
         } catch (\Throwable $e) {
             // configuration illisible : rien n’est supprimé, un fichier peut être encore utilisé
             $this->logger->warning('{class}: Failed to read configuration {configurationId} after a failed edit: {error}', [

@@ -89,6 +89,27 @@ final class ServiceUnpublishRouteTest extends WebTestCase
         self::assertSame(['offering-2'], array_column(EntrepotMockResponseFactory::stored('offerings'), '_id'));
     }
 
+    public function testWmsVectorStyleAndFeatureInfoFilesAreRemoved(): void
+    {
+        EntrepotMockResponseFactory::reset();
+        EntrepotMockResponseFactory::seed('configurations', [
+            '_id' => 'config-1',
+            'type' => 'WMS-VECTOR',
+            'status' => 'UNPUBLISHED',
+            'tags' => ['datasheet_name' => 'Fiche'],
+            'type_infos' => ['used_data' => [['stored_data' => 'vectordb-1', 'relations' => [['name' => 'communes', 'style' => 'static-style', 'ftl' => 'static-ftl']]]]],
+        ]);
+        EntrepotMockResponseFactory::seed('statics', ['_id' => 'static-style']);
+        EntrepotMockResponseFactory::seed('statics', ['_id' => 'static-ftl']);
+        EntrepotMockResponseFactory::seed('offerings', $this->offering('offering-1', 'retire', false));
+        $client = $this->client();
+
+        $client->xmlHttpRequest('DELETE', self::UNPUBLISH_URL);
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame([], EntrepotMockResponseFactory::stored('statics'));
+    }
+
     /**
      * @return array<string, mixed>
      */

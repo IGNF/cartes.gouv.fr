@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { OfferingStatusEnum, OfferingTypeEnum, type Service, StoredDataTypeEnum, type VectorDb } from "@/@types/app";
-import { markdownToText, serviceToFormValues } from "./serviceToFormValues";
+import { featureInfoColumns, markdownToText, serviceToFormValues } from "./serviceToFormValues";
 
 type Fixture = {
     type?: OfferingTypeEnum;
@@ -12,6 +12,7 @@ type Fixture = {
     attribution?: { title: string; url: string };
     pyramidType?: StoredDataTypeEnum;
     access?: Service["access"];
+    featureinfo?: Service["configuration"]["featureinfo"];
 };
 
 function service({
@@ -23,6 +24,7 @@ function service({
     attribution,
     pyramidType,
     access = "public",
+    featureinfo,
 }: Fixture = {}): Service {
     return {
         _id: "offering-1",
@@ -38,6 +40,7 @@ function service({
             tags,
             attribution,
             pyramid: pyramidType ? { type: pyramidType } : undefined,
+            featureinfo,
             type_infos: { used_data: [{ stored_data: "stored-data-1" }], ...typeInfos },
         },
     } as unknown as Service;
@@ -56,6 +59,7 @@ describe("serviceToFormValues", () => {
             tables: [],
             access: "public",
             attribution: { enabled: true, title: "IGN", url: "https://ign.fr", logo: undefined },
+            featureinfo: { enabled: false, format: "list" },
         });
     });
 
@@ -128,7 +132,7 @@ describe("markdownToText", () => {
 });
 
 describe("serviceToFormValues, tables WFS", () => {
-    const geometric = (name: string) => ({ name, attributes: { geom: "geometry(Point)" }, type: "TABLE", primary_key: [] });
+    const geometric = (name: string) => ({ name, attributes: { geom: "geometry(Point)", nom: "text" }, type: "TABLE", primary_key: [] });
     const vectorDb = { type_infos: { relations: [geometric("communes"), geometric("routes")] } } as unknown as VectorDb;
     const wfs = service({
         type: OfferingTypeEnum.WFS,
@@ -147,8 +151,26 @@ describe("serviceToFormValues, tables WFS", () => {
 
     it("propose toutes les tables de la base, coche les enregistrées et garde une table disparue non cochable", () => {
         expect(serviceToFormValues(wfs, vectorDb).tables).toEqual([
-            { native_name: "communes", selected: true, title: "Communes", public_name: "", description: "Les communes", keywords: ["admin"], style: undefined },
-            { native_name: "routes", selected: false, title: "routes", public_name: "routes", description: "", keywords: [], style: undefined },
+            {
+                native_name: "communes",
+                selected: true,
+                title: "Communes",
+                public_name: "",
+                description: "Les communes",
+                keywords: ["admin"],
+                style: undefined,
+                featureinfo_attributes: [],
+            },
+            {
+                native_name: "routes",
+                selected: false,
+                title: "routes",
+                public_name: "routes",
+                description: "",
+                keywords: [],
+                style: undefined,
+                featureinfo_attributes: [],
+            },
             {
                 native_name: "disparue",
                 selected: false,
@@ -158,6 +180,7 @@ describe("serviceToFormValues, tables WFS", () => {
                 description: "Table supprimée",
                 keywords: [],
                 style: undefined,
+                featureinfo_attributes: [],
             },
         ]);
     });
@@ -168,7 +191,7 @@ describe("serviceToFormValues, tables WFS", () => {
 });
 
 describe("serviceToFormValues, tables WMS vecteur", () => {
-    const geometric = (name: string) => ({ name, attributes: { geom: "geometry(Point)" }, type: "TABLE", primary_key: [] });
+    const geometric = (name: string) => ({ name, attributes: { geom: "geometry(Point)", nom: "text" }, type: "TABLE", primary_key: [] });
     const vectorDb = { type_infos: { relations: [geometric("communes"), geometric("routes")] } } as unknown as VectorDb;
     const wmsv = service({
         typeInfos: {
@@ -183,7 +206,15 @@ describe("serviceToFormValues, tables WMS vecteur", () => {
             ],
         },
     });
-    const row = (native_name: string) => ({ native_name, title: native_name, public_name: native_name, description: "", keywords: [], style: undefined });
+    const row = (native_name: string) => ({
+        native_name,
+        title: native_name,
+        public_name: native_name,
+        description: "",
+        keywords: [],
+        style: undefined,
+        featureinfo_attributes: [],
+    });
 
     it("lit les tables par leur nom avec leur style enregistré, garde une table disparue non cochable", () => {
         expect(serviceToFormValues(wmsv, vectorDb).tables).toEqual([
@@ -191,5 +222,59 @@ describe("serviceToFormValues, tables WMS vecteur", () => {
             { ...row("routes"), selected: false },
             { ...row("disparue"), selected: false, missing: true, saved_style_id: "static-disparue" },
         ]);
+    });
+
+    it("lit les infobulles générées et retire les attributs absents de la table", () => {
+        const db = {
+            type_infos: {
+                relations: [{ name: "communes", attributes: { geom: "geometry(Point)", nom: "text", code: "text" }, type: "TABLE", primary_key: [] }],
+            },
+        } as unknown as VectorDb;
+        const values = serviceToFormValues(
+            { ...wmsv, configuration: { ...wmsv.configuration, featureinfo: { format: "table", attributes: { communes: ["nom", "supprime"] } } } },
+            db
+        );
+        expect(values.featureinfo).toEqual({ enabled: true, format: "table" });
+        expect(values.tables[0].featureinfo_attributes).toEqual(["nom"]);
+    });
+
+    it("lit une table nommée comme une propriété d’objet sans modèle généré", () => {
+        const db = {
+            type_infos: { relations: [{ name: "constructor", attributes: { geom: "geometry(Point)", nom: "text" }, type: "TABLE", primary_key: [] }] },
+        } as unknown as VectorDb;
+        const constructorService = service({
+            typeInfos: { used_data: [{ stored_data: "vectordb-1", relations: [{ name: "constructor", style: "static-1" }] }] },
+        });
+        const values = serviceToFormValues(
+            { ...constructorService, configuration: { ...constructorService.configuration, featureinfo: { format: null, attributes: {} } } },
+            db
+        );
+        expect(values.tables[0].featureinfo_attributes).toEqual([]);
+    });
+
+    it("désactive les infobulles sans modèle généré", () => {
+        expect(serviceToFormValues(service({ featureinfo: { format: null, attributes: {} } })).featureinfo).toEqual({ enabled: false, format: "list" });
+    });
+});
+
+describe("featureInfoColumns", () => {
+    it("propose les colonnes non géométriques des tables géométriques, par ordre alphabétique", () => {
+        const vectorDb = {
+            type_infos: {
+                relations: [
+                    { name: "communes", attributes: { nom: "text", geom: "geometry(Point)", code: "integer" }, type: "TABLE", primary_key: [] },
+                    { name: "sans_geometrie", attributes: { nom: "text" }, type: "TABLE", primary_key: [] },
+                ],
+            },
+        } as unknown as VectorDb;
+        expect(featureInfoColumns(vectorDb)).toEqual({ communes: ["code", "nom"] });
+        expect(featureInfoColumns(undefined)).toEqual({});
+    });
+
+    it("marque sans infobulle une table qui n’a que sa géométrie", () => {
+        const vectorDb = {
+            type_infos: { relations: [{ name: "points", attributes: { geom: "geometry(Point)" }, type: "TABLE", primary_key: [] }] },
+        } as unknown as VectorDb;
+        expect(serviceToFormValues(service(), vectorDb).tables[0].featureinfo_unavailable).toBe(true);
     });
 });

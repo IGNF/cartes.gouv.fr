@@ -265,6 +265,15 @@ export type Configuration = ConfigurationStandardDetailResponseDto & {
         theme?: string;
     };
     pyramid?: PyramidVector | PyramidRaster;
+    /** WMS vecteur : réglages des infobulles générées par cartes.gouv.fr, null si un modèle n’a pas pu être lu */
+    featureinfo?: ConfigurationFeatureInfo | null;
+};
+
+export type ConfigurationFeatureInfo = {
+    /** null sans infobulle générée */
+    format: "list" | "table" | null;
+    /** attributs affichés par table ; les tables sans infobulle générée sont absentes */
+    attributes: Record<string, string[]>;
 };
 
 export type Offering = OfferingStandardDetailResponseDto;
