@@ -7,6 +7,7 @@ use App\ApiClient\Auth\ServiceAccountHttpClient;
 use App\ApiClient\Auth\ServiceAccountRetryStrategy;
 use App\ApiClient\ErrorParser\EntrepotErrorParser;
 use App\ApiClient\ErrorParser\EspaceCoErrorParser;
+use App\ApiClient\ErrorParser\GeocaptchaErrorParser;
 use App\Security\KeycloakTokenManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -70,6 +71,22 @@ final readonly class ApiClientFactory
         $retrying = new RetryableHttpClient($authenticated, new ServiceAccountRetryStrategy($authenticated), 1, $this->logger);
 
         return new ApiClient($retrying, new EntrepotErrorParser(), $this->logger);
+    }
+
+    // clé d’application, sans jeton utilisateur : l’API GéoCaptcha valide des challenges anonymes
+    public function createGeocaptchaClient(): ApiClient
+    {
+        $baseUrl = $this->parameters->get('geocaptcha_api_base_url');
+        if ('' === $baseUrl) {
+            throw new \LogicException('Paramètre geocaptcha_api_base_url absent ou invalide');
+        }
+
+        $client = $this->scopedClient($baseUrl)->withOptions(['headers' => [
+            'x-app-id' => (string) $this->parameters->get('geocaptcha_app_id'),
+            'x-api-key' => (string) $this->parameters->get('geocaptcha_api_key'),
+        ]]);
+
+        return new ApiClient($client, new GeocaptchaErrorParser(), $this->logger);
     }
 
     private function buildAuthenticatedClient(string $urlParameter): AuthenticatedHttpClient

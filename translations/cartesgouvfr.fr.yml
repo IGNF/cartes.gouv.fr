@@ -19,11 +19,16 @@ contact:
         user_email: "Adresse mail de l’utilisateur"
         last_name: "Nom de l’utilisateur"
         first_name: "Prénom de l’utilisateur"
+        request_type: "Type de demande"
         category: "Catégorie"
         organization: "Organisme"
         date: "Date d’envoi"
         message: "Corps du message"
         not_specified: "Non renseigné"
+    request_type:
+        support: "Question sur le fonctionnement du site et de nos outils"
+        illegal_content: "Signaler un contenu illicite"
+        content_removal_claim: "Réclamation suite à suppression d’un contenu"
     email_acknowledgement:
         heading: "Votre demande a été envoyée à l’IGN et une réponse vous sera apportée dans les meilleurs délais."
         date: "Date d’envoi"

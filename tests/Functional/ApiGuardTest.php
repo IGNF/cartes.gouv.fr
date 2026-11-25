@@ -23,7 +23,7 @@ final class ApiGuardTest extends WebTestCase
     {
         yield 'lecture' => ['GET', '/api/users/me'];
         yield 'chemin encodé' => ['GET', '/%61pi/users/me'];
-        yield 'écriture' => ['POST', '/api/contact/join_community'];
+        yield 'écriture' => ['POST', '/api/contact/join-community'];
     }
 
     #[DataProvider('requestsWithoutXRequestedWith')]
@@ -63,7 +63,7 @@ final class ApiGuardTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->request('POST', self::BASE.'/contact_us', content: '{}');
+        $client->request('POST', self::BASE.'/api/contact/contact-us', content: '{}');
 
         self::assertResponseStatusCodeSame(403);
     }

@@ -84,6 +84,13 @@ common:
     resolution_error: "La résolution n’est pas valide"
     share_with_error: "La restriction n’est pas valide"
 
+contact_us:
+    email_contact_mandatory: "L’adresse électronique est obligatoire"
+    email_contact_error: "L’adresse électronique n’est pas valide"
+    message_mandatory: "Le message est obligatoire"
+    message_too_long: "Le message ne doit pas dépasser {{ limit }} caractères"
+    request_type_error: "Le type de demande n’est pas valide"
+
 espaceco:
     add_members:
         email_error: "L’email n'est pas valide"
