@@ -13,7 +13,7 @@
         <gco:CharacterString>Collection des données</gco:CharacterString>
     </gmd:hierarchyLevelName>
     <gmd:dateStamp>
-        <gco:DateTime>2026-11-09T12:00:00</gco:DateTime>
+        <gco:DateTime>2026-11-09T12:00:00.000000Z</gco:DateTime>
     </gmd:dateStamp>
     <gmd:identificationInfo>
         <gmd:MD_DataIdentification>
