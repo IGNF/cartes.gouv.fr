@@ -208,7 +208,9 @@ const buildServiceFormObject = ({
                       t("validation.tables.max", { max: SERVICE_TABLES_MAX })
                   )
             : z.array(tableSchema),
-        access: z.enum(SERVICE_ACCESSES).refine((access) => availableAccesses.includes(access), t("validation.access.unavailable")),
+        access: z
+            .enum(SERVICE_ACCESSES, { error: t(availableAccesses.length === 0 ? "validation.access.unavailable" : "validation.access.required") })
+            .refine((access) => availableAccesses.includes(access), t("validation.access.unavailable")),
         attribution: attributionSchema,
         featureinfo: z.object({ enabled: z.boolean(), format: z.enum(FEATURE_INFO_FORMATS) }),
     });
@@ -248,7 +250,8 @@ export type ServiceFormValues = z.input<ReturnType<typeof buildServiceFormSchema
 export type ServiceFormOutput = z.output<ReturnType<typeof buildServiceFormSchema>>;
 export type ServiceTableFormValues = ServiceFormValues["tables"][number];
 
-export const serviceFormDefaultValues: ServiceFormValues = {
+// pas d’accès par défaut : l’utilisateur le choisit
+export const serviceFormDefaultValues: Omit<ServiceFormValues, "access"> = {
     stored_data_id: "",
     title: "",
     technical_name: "",
@@ -256,7 +259,6 @@ export const serviceFormDefaultValues: ServiceFormValues = {
     thumbnail: undefined,
     themes: [],
     tables: [],
-    access: "public",
     attribution: { enabled: false, title: "", url: "", logo: undefined },
     featureinfo: { enabled: false, format: "list" },
 };

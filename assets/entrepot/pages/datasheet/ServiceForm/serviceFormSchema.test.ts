@@ -38,6 +38,7 @@ const valid = (): ServiceFormValues => ({
     title: "Mon flux",
     technical_name: "SANDBOX_mon_flux",
     themes: ["Hydrographie"],
+    access: "public",
     tables: [table()],
 });
 
@@ -107,8 +108,22 @@ describe("buildServiceFormSchema", () => {
         expect(await issueMessages(valid(), ["restricted_visible", "restricted"])).toEqual({ access: "validation.access.unavailable" });
     });
 
+    it("exige un accès, ou signale qu’aucun n’est disponible", async () => {
+        const { access: _access, ...withoutAccess } = valid();
+        expect(await issueMessages(withoutAccess as ServiceFormValues)).toEqual({ access: "validation.access.required" });
+        expect(await issueMessages({ ...valid(), access: null } as unknown as ServiceFormValues)).toEqual({ access: "validation.access.required" });
+        expect(await issueMessages(withoutAccess as ServiceFormValues, [])).toEqual({ access: "validation.access.unavailable" });
+    });
+
     it("signale les champs vides du formulaire initial", async () => {
-        expect(Object.keys(await issueMessages(serviceFormDefaultValues)).sort()).toEqual(["stored_data_id", "tables", "technical_name", "themes", "title"]);
+        expect(Object.keys(await issueMessages(serviceFormDefaultValues as ServiceFormValues)).sort()).toEqual([
+            "access",
+            "stored_data_id",
+            "tables",
+            "technical_name",
+            "themes",
+            "title",
+        ]);
     });
 
     describe("WMS vecteur", () => {

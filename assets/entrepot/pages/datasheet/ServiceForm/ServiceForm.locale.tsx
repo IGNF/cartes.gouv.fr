@@ -132,6 +132,7 @@ const { i18n } = declareComponentKeys<
     | "validation.table.style.no_rule"
     | "validation.table.style.rule_without_symbolizer"
     | "validation.featureinfo.attributes.required"
+    | "validation.access.required"
     | "validation.access.unavailable"
     | "validation.attribution.text.required"
     | "validation.attribution.url.required"
@@ -279,6 +280,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "validation.table.style.no_rule": "Le SLD doit contenir au moins une règle (Rule)",
     "validation.table.style.rule_without_symbolizer": "Chaque règle (Rule) du SLD doit contenir au moins un symboliseur",
     "validation.featureinfo.attributes.required": "Choisissez au moins un attribut à afficher",
+    "validation.access.required": "Choisissez un type d’accès.",
     "validation.access.unavailable": "Ce type d’accès n’est pas disponible pour cet entrepôt",
     "validation.attribution.text.required": "Le texte de l’attribution est obligatoire",
     "validation.attribution.url.required": "L’URL de l’attribution est obligatoire",
@@ -421,6 +423,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "validation.table.style.no_rule": "The SLD must contain at least one Rule",
     "validation.table.style.rule_without_symbolizer": "Each SLD Rule must contain at least one symbolizer",
     "validation.featureinfo.attributes.required": "Choose at least one attribute to display",
+    "validation.access.required": "Choose an access type.",
     "validation.access.unavailable": "This access type is not available for this datastore",
     "validation.attribution.text.required": "The attribution text is required",
     "validation.attribution.url.required": "The attribution URL is required",
