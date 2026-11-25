@@ -7,7 +7,7 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { notFound, useBlocker, useNavigate } from "@tanstack/react-router";
-import { Fragment, type ReactNode, useEffect, useId, useMemo } from "react";
+import { Fragment, type ReactNode, useEffect, useId, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import { tss } from "tss-react";
@@ -22,7 +22,7 @@ import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetQueryOptions } from "@/hooks/queries/datasheetQueryOptions";
 import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
-import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
+import { freshEndpoints, quotaEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { serviceQueryOptions } from "@/hooks/queries/serviceQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
 import useExploreMapsClock from "@/hooks/useExploreMapsClock";
@@ -56,6 +56,7 @@ import TablesSection from "../ServiceForm/sections/TablesSection";
 import {
     availableServiceAccesses,
     buildServiceEditFormSchema,
+    isEndpointFull,
     SERVICE_ACCESSES,
     type ServiceEditFormOutput,
     type ServiceEditFormValues,
@@ -178,7 +179,10 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
 
     const services = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName)).data?.services;
     const { data: datasheet } = useQuery(datasheetQueryOptions(datastoreId, datasheetName));
-    const endpointsQuery = useQuery({ ...datastoreEndpointsQueryOptions(datastoreId), enabled: editable });
+    // lecture en échec : seul l’accès enregistré est proposé
+    const endpointsQuery = useQuery({ ...quotaEndpointsQueryOptions(datastoreId), enabled: editable });
+    // refus affiché en haut de page, près du bouton « Enregistrer »
+    const [switchRefused, setSwitchRefused] = useState(false);
 
     const unavailable = isOfferingUnavailable(service.status);
 
@@ -210,16 +214,26 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
         );
     }, [configuration.styles, values.tables]);
 
+    // changer d’endpoint supprime l’offre avant de la recréer : jamais de données périmées
+    const endpoints = freshEndpoints(endpointsQuery);
+    // l’accès enregistré reste proposé : le flux tient déjà sa place sur son endpoint
+    const availableAccesses = useMemo(
+        () => availableServiceAccesses(endpoints, configuration.type, values.access),
+        [endpoints, configuration.type, values.access]
+    );
+    const savedOpen = values.access === "public";
+    const switchFull = editable && isEndpointFull(endpoints, configuration.type, !savedOpen);
+
     const schema = useMemo(
         () =>
             buildServiceEditFormSchema({
                 t: tForm,
                 type: formType,
                 rasterPyramid,
-                availableAccesses: availableServiceAccesses(endpointsQuery.data, configuration.type),
+                availableAccesses,
                 savedTablePublicNames,
             }),
-        [tForm, formType, rasterPyramid, endpointsQuery.data, configuration.type, savedTablePublicNames]
+        [tForm, formType, rasterPyramid, availableAccesses, savedTablePublicNames]
     );
     const form = useForm<ServiceEditFormValues, unknown, ServiceEditFormOutput>(
         editable ? { resolver: zodResolver(schema), mode: "onSubmit", reValidateMode: "onBlur", defaultValues: values } : { values, disabled: true }
@@ -283,6 +297,16 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
     useIsModalOpen(leaveModal, { onConceal: () => blocker.reset?.() });
 
     const submit = form.handleSubmit(async (formValues) => {
+        setSwitchRefused(false);
+        // changement d’endpoint : quotas relus juste avant, la page a pu rester ouverte longtemps
+        if ((formValues.access === "public") !== savedOpen) {
+            const { data, isSuccess } = await endpointsQuery.refetch();
+            if (!isSuccess || !availableServiceAccesses(data, configuration.type, values.access).includes(formValues.access)) {
+                form.setError("access", { message: tForm("validation.access.unavailable") });
+                setSwitchRefused(true);
+                return;
+            }
+        }
         try {
             await editMutation.mutateAsync(formValues);
         } catch (error) {
@@ -333,6 +357,9 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
             {editMutation.isError && (
                 <Alert className={fr.cx("fr-mt-2w")} severity="error" title={t("edit.error")} description={getApiErrorMessage(editMutation.error)} small />
             )}
+            {switchRefused && (
+                <Alert className={fr.cx("fr-mt-2w")} severity="error" title={t("edit.error")} description={tForm("validation.access.unavailable")} small />
+            )}
 
             {/* champs hors du formulaire HTML : seul le bouton « Enregistrer » le soumet, pas la touche Entrée ni les boutons des autres sections */}
             <form id={formId} onSubmit={(e) => void submit(e)} noValidate />
@@ -347,7 +374,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
                             </div>
                         </div>
                         {canSave && (
-                            <Button type="submit" nativeButtonProps={{ form: formId }} disabled={!editable || editMutation.isPending}>
+                            <Button type="submit" nativeButtonProps={{ form: formId }} disabled={!editable || form.formState.isSubmitting}>
                                 {t("save")}
                             </Button>
                         )}
@@ -401,9 +428,18 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
                     <MetadataSection title={tForm("section.access")}>
                         <fieldset disabled={!editable} className={classes.fieldset}>
                             <AccessSection
-                                availableAccesses={editable ? availableServiceAccesses(endpointsQuery.data, configuration.type) : SERVICE_ACCESSES}
+                                availableAccesses={editable ? availableAccesses : SERVICE_ACCESSES}
                                 logoUrl={configuration.attribution?.logo?.url}
                                 savedAccess={editable ? values.access : undefined}
+                                alert={
+                                    switchFull && (
+                                        <Alert
+                                            severity="warning"
+                                            small
+                                            description={tForm("quota.switch_full", { access: tForm("quota.access", { open: !savedOpen }) })}
+                                        />
+                                    )
+                                }
                             />
                         </fieldset>
                         {!service.open && !unavailable && (
@@ -456,7 +492,8 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
                 document.body
             )}
 
-            {editMutation.isPending && (
+            {/* relecture des quotas comprise */}
+            {form.formState.isSubmitting && (
                 <Wait>
                     <LoadingText as="h6" message={t("edit.saving")} withSpinnerIcon />
                 </Wait>

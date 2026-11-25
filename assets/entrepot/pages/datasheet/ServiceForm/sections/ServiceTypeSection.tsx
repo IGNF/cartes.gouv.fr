@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Tag from "@codegouvfr/react-dsfr/Tag";
+import { type ReactNode } from "react";
 import { tss } from "tss-react";
 
 import { useTranslation } from "@/i18n";
@@ -16,12 +17,14 @@ const dataKinds: Record<ServiceType, ("vector" | "raster")[]> = {
 type ServiceTypeSectionProps = {
     value: ServiceType;
     onChange: (type: ServiceType) => void;
+    disabledTypes: readonly ServiceType[];
+    alert?: ReactNode;
 };
 
 /** cartes de la maquette : chaque carte est le libellé d’un vrai bouton radio, masqué visuellement */
-export default function ServiceTypeSection({ value, onChange }: ServiceTypeSectionProps) {
+export default function ServiceTypeSection({ value, onChange, disabledTypes, alert }: ServiceTypeSectionProps) {
     const { t } = useTranslation("ServiceForm");
-    const { classes } = useStyles();
+    const { classes, cx } = useStyles();
 
     return (
         <fieldset className={fr.cx("fr-fieldset")}>
@@ -36,6 +39,7 @@ export default function ServiceTypeSection({ value, onChange }: ServiceTypeSecti
                             name="service-type"
                             value={type}
                             checked={value === type}
+                            disabled={disabledTypes.includes(type)}
                             onChange={() => onChange(type)}
                         />
                         <span className={fr.cx("fr-text--lg", "fr-mb-0")}>{t(`type.${type}`)}</span>
@@ -47,9 +51,13 @@ export default function ServiceTypeSection({ value, onChange }: ServiceTypeSecti
                                 </Tag>
                             ))}
                         </span>
+                        {disabledTypes.includes(type) && (
+                            <span className={cx(fr.cx("fr-text--xs", "fr-mb-0"), classes.quotaReached)}>{t("type.quota_reached")}</span>
+                        )}
                     </label>
                 ))}
             </div>
+            {alert && <div className={fr.cx("fr-fieldset__element", "fr-mt-3w", "fr-mb-0")}>{alert}</div>}
             <div className={fr.cx("fr-fieldset__element", "fr-mt-3w")}>
                 <a {...externalLinkToUrl(externalUrls.helpProducerGuideChooseServiceType, t("type.help_link"))} className={fr.cx("fr-link")}>
                     {t("type.help_link")}
@@ -86,10 +94,19 @@ const useStyles = tss.withName({ ServiceTypeSection }).create({
             outlineOffset: "-2px",
             backgroundColor: fr.colors.decisions.background.contrast.blueFrance.default,
         },
+        // après :hover pour l’emporter ; une carte cochée garde son contour
+        "&:has(input:disabled)": {
+            cursor: "not-allowed",
+            color: fr.colors.decisions.text.disabled.grey.default,
+            backgroundColor: fr.colors.decisions.background.disabled.grey.default,
+        },
         "&:has(input:focus-visible)": {
             outline: `2px solid ${fr.colors.decisions.border.active.blueFrance.default}`,
             outlineOffset: "2px",
         },
+    },
+    quotaReached: {
+        color: fr.colors.decisions.text.default.warning.default,
     },
     tags: {
         display: "flex",

@@ -10,6 +10,7 @@ import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
+import { freshEndpoints, quotaEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -30,6 +31,9 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     const { t } = useTranslation("ServiceForm");
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+    // lecture en échec : la page fait sans quotas
+    const endpointsQuery = useQuery(quotaEndpointsQueryOptions(datastoreId));
+    const endpoints = freshEndpoints(endpointsQuery);
     const [type, setType] = useState(initialType);
 
     const datasheetQuery = useQuery<DatasheetDetailed, ApiError>({
@@ -50,6 +54,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
         onSettled: (_data, _error, values) => {
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
             void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            void queryClient.invalidateQueries({ queryKey: RQKeys.datastore_endpoints(datastoreId) });
             // sinon un second flux au même nom passe le contrôle du formulaire
             void queryClient.invalidateQueries({
                 queryKey: RQKeys.datastore_layernames_list(
@@ -62,7 +67,8 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     });
 
     const renderContent = () => {
-        if (datasheetQuery.isPending || metadataQuery.isPending) {
+        // endpoints attendus : sinon les quotas changent sous les yeux de l’utilisateur
+        if (datasheetQuery.isPending || metadataQuery.isPending || !endpointsQuery.isFetchedAfterMount) {
             return <LoadingText as="p" message={t("loading")} withSpinnerIcon />;
         }
         if (datasheetQuery.isError) {
@@ -101,6 +107,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
                     datastoreId={datastoreId}
                     datasheetName={datasheetName}
                     datasheet={datasheetQuery.data}
+                    endpoints={endpoints}
                     type={type}
                     onTypeChange={setType}
                     onSubmit={(values) => publishMutation.mutateAsync(values)}

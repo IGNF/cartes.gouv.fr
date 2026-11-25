@@ -9,6 +9,7 @@ const values: ServiceFormOutput = {
     title: "Mon flux",
     technical_name: "SANDBOX_mon_flux",
     themes: ["Agriculture"],
+    access: "public",
     tables: [
         { native_name: "brouillon", selected: false, title: "", public_name: "brouillon", description: "", keywords: [], featureinfo_attributes: [] },
         {

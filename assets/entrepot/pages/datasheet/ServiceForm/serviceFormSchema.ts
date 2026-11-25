@@ -9,8 +9,10 @@ import { type SldError, validateSld } from "./validateSld";
 
 type T = TranslationFunction<"ServiceForm", ComponentKey>;
 
+type ServiceEndpointType = ConfigurationTypeEnum.WFS | ConfigurationTypeEnum.WMSVECTOR | ConfigurationTypeEnum.WMSRASTER | ConfigurationTypeEnum.WMTSTMS;
+
 /** type de configuration Entrepôt (et d’endpoint) du type de flux */
-export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeEnum> = {
+export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ServiceEndpointType> = {
     wfs: ConfigurationTypeEnum.WFS,
     wms: ConfigurationTypeEnum.WMSVECTOR,
     tms: ConfigurationTypeEnum.WMTSTMS,
@@ -21,7 +23,7 @@ export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeE
 export const isRasterPyramid = (datasheet: DatasheetDetailed | undefined, storedDataId: string): boolean =>
     (datasheet?.pyramid_raster_list ?? []).some((item) => item._id === storedDataId);
 
-export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean): ConfigurationTypeEnum =>
+export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean): ServiceEndpointType =>
     type === "wms" && rasterPyramid ? ConfigurationTypeEnum.WMSRASTER : SERVICE_CONFIGURATION_TYPES[type];
 
 /** tables à choisir : WFS, WMS sur une base vecteur ; ni WMS raster, ni WMTS, ni TMS */
@@ -30,14 +32,56 @@ export const hasTables = (type: ServiceType, rasterPyramid: boolean): boolean =>
 export { SERVICE_ACCESSES, type ServiceAccess };
 export { SERVICE_TYPES, type ServiceType };
 
-/** accès offerts par les endpoints de l’entrepôt pour ce type de configuration ; tous tant que les endpoints ne sont pas lus (le back refuse un accès sans endpoint) */
-export const availableServiceAccesses = (endpoints: DatastoreEndpoint[] | undefined, configurationType: ConfigurationTypeEnum): readonly ServiceAccess[] => {
-    if (!endpoints) return SERVICE_ACCESSES;
-    const ofType = endpoints.filter((item) => item.endpoint.type.toUpperCase() === configurationType);
-    const hasOpen = ofType.some((item) => item.endpoint.open);
-    const hasPrivate = ofType.some((item) => !item.endpoint.open);
-    return SERVICE_ACCESSES.filter((access) => (access === "public" ? hasOpen : hasPrivate));
+const isFull = (item: DatastoreEndpoint) => item.use >= item.quota;
+
+// premier endpoint du type et de l’ouverture, comme le back
+const endpointFor = (endpoints: DatastoreEndpoint[], configurationType: ConfigurationTypeEnum, open: boolean) =>
+    endpoints.find((item) => item.endpoint.type.toUpperCase() === configurationType && item.endpoint.open === open);
+
+export const isEndpointFull = (endpoints: DatastoreEndpoint[] | undefined, configurationType: ConfigurationTypeEnum, open: boolean): boolean => {
+    const item = endpoints && endpointFor(endpoints, configurationType, open);
+    return item !== undefined && isFull(item);
 };
+
+/** accès offerts par les endpoints non pleins de l’entrepôt pour ce type de configuration (le back refuse un accès sans endpoint) */
+export const availableServiceAccesses = (
+    endpoints: DatastoreEndpoint[] | undefined,
+    configurationType: ConfigurationTypeEnum,
+    savedAccess?: ServiceAccess
+): readonly ServiceAccess[] => {
+    const savedOpen = savedAccess === undefined ? undefined : savedAccess === "public";
+    const usable = (open: boolean) => {
+        // l’endpoint du flux enregistré reste proposé, et seul lui tant que les endpoints ne sont pas lus
+        if (open === savedOpen) return true;
+        if (!endpoints) return savedOpen === undefined;
+        const item = endpointFor(endpoints, configurationType, open);
+        return item !== undefined && !isFull(item);
+    };
+    return SERVICE_ACCESSES.filter((access) => usable(access === "public"));
+};
+
+// WMS : vecteur ou raster selon la donnée choisie
+const endpointTypesOf = (type: ServiceType) => [...new Set([false, true].map((raster) => configurationTypeFor(type, raster)))];
+
+const presentEndpoints = (endpoints: DatastoreEndpoint[], type: ServiceType) =>
+    endpointTypesOf(type).flatMap((configurationType) => [true, false].flatMap((open) => endpointFor(endpoints, configurationType, open) ?? []));
+
+/** carte de type désactivée : tous les endpoints présents derrière elle sont pleins ; un type sans endpoint est ignoré */
+export const isServiceTypeFull = (endpoints: DatastoreEndpoint[] | undefined, type: ServiceType): boolean => {
+    if (!endpoints) return false;
+    const present = presentEndpoints(endpoints, type);
+    return present.length > 0 && present.every(isFull);
+};
+
+/** plus rien à publier : aucun endpoint présent n’a de place, un type sans endpoint comptant comme plein */
+export const isDatastoreFull = (endpoints: DatastoreEndpoint[] | undefined): boolean =>
+    !!endpoints && !SERVICE_TYPES.some((type) => presentEndpoints(endpoints, type).some((item) => !isFull(item)));
+
+/** endpoints pleins derrière la carte de type, ouvert avant privé */
+export const fullServiceEndpoints = (endpoints: DatastoreEndpoint[] | undefined, type: ServiceType) =>
+    endpointTypesOf(type).flatMap((configurationType) =>
+        [true, false].flatMap((open) => (isEndpointFull(endpoints, configurationType, open) ? [{ configurationType, open }] : []))
+    );
 
 /** même regex que WfsTableFormDTO : nom technique d’une table WFS en minuscules */
 export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;
@@ -208,7 +252,9 @@ const buildServiceFormObject = ({
                       t("validation.tables.max", { max: SERVICE_TABLES_MAX })
                   )
             : z.array(tableSchema),
-        access: z.enum(SERVICE_ACCESSES).refine((access) => availableAccesses.includes(access), t("validation.access.unavailable")),
+        access: z
+            .enum(SERVICE_ACCESSES, { error: t(availableAccesses.length === 0 ? "validation.access.unavailable" : "validation.access.required") })
+            .refine((access) => availableAccesses.includes(access), t("validation.access.unavailable")),
         attribution: attributionSchema,
         featureinfo: z.object({ enabled: z.boolean(), format: z.enum(FEATURE_INFO_FORMATS) }),
     });
@@ -248,7 +294,8 @@ export type ServiceFormValues = z.input<ReturnType<typeof buildServiceFormSchema
 export type ServiceFormOutput = z.output<ReturnType<typeof buildServiceFormSchema>>;
 export type ServiceTableFormValues = ServiceFormValues["tables"][number];
 
-export const serviceFormDefaultValues: ServiceFormValues = {
+// pas d’accès par défaut : l’utilisateur le choisit
+export const serviceFormDefaultValues: Omit<ServiceFormValues, "access"> = {
     stored_data_id: "",
     title: "",
     technical_name: "",
@@ -256,7 +303,6 @@ export const serviceFormDefaultValues: ServiceFormValues = {
     thumbnail: undefined,
     themes: [],
     tables: [],
-    access: "public",
     attribution: { enabled: false, title: "", url: "", logo: undefined },
     featureinfo: { enabled: false, format: "list" },
 };

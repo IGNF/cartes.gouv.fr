@@ -8,7 +8,11 @@ import {
     buildServiceFormSchema,
     configurationTypeFor,
     hasTables,
+    fullServiceEndpoints,
+    isDatastoreFull,
+    isEndpointFull,
     isRasterPyramid,
+    isServiceTypeFull,
     type ServiceAccess,
     serviceFormDefaultValues,
     type ServiceFormValues,
@@ -38,6 +42,7 @@ const valid = (): ServiceFormValues => ({
     title: "Mon flux",
     technical_name: "SANDBOX_mon_flux",
     themes: ["Hydrographie"],
+    access: "public",
     tables: [table()],
 });
 
@@ -107,8 +112,22 @@ describe("buildServiceFormSchema", () => {
         expect(await issueMessages(valid(), ["restricted_visible", "restricted"])).toEqual({ access: "validation.access.unavailable" });
     });
 
+    it("exige un accès, ou signale qu’aucun n’est disponible", async () => {
+        const { access: _access, ...withoutAccess } = valid();
+        expect(await issueMessages(withoutAccess as ServiceFormValues)).toEqual({ access: "validation.access.required" });
+        expect(await issueMessages({ ...valid(), access: null } as unknown as ServiceFormValues)).toEqual({ access: "validation.access.required" });
+        expect(await issueMessages(withoutAccess as ServiceFormValues, [])).toEqual({ access: "validation.access.unavailable" });
+    });
+
     it("signale les champs vides du formulaire initial", async () => {
-        expect(Object.keys(await issueMessages(serviceFormDefaultValues)).sort()).toEqual(["stored_data_id", "tables", "technical_name", "themes", "title"]);
+        expect(Object.keys(await issueMessages(serviceFormDefaultValues as ServiceFormValues)).sort()).toEqual([
+            "access",
+            "stored_data_id",
+            "tables",
+            "technical_name",
+            "themes",
+            "title",
+        ]);
     });
 
     describe("WMS vecteur", () => {
@@ -295,12 +314,102 @@ describe("buildServiceEditFormSchema", () => {
     });
 });
 
-describe("availableServiceAccesses", () => {
-    const endpoint = (type: string, open: boolean) => ({ endpoint: { type, open } }) as unknown as DatastoreEndpoint;
+const endpoint = (type: string, open: boolean, use = 0, quota = 10) => ({ endpoint: { type, open }, use, quota }) as unknown as DatastoreEndpoint;
 
+describe("availableServiceAccesses", () => {
     it("propose les accès des endpoints du type, tous tant qu’ils ne sont pas lus", () => {
         expect(availableServiceAccesses(undefined, ConfigurationTypeEnum.WFS)).toEqual(["public", "restricted_visible", "restricted"]);
         expect(availableServiceAccesses([endpoint("WFS", true), endpoint("WMTS-TMS", false)], ConfigurationTypeEnum.WFS)).toEqual(["public"]);
         expect(availableServiceAccesses([endpoint("wfs", false)], ConfigurationTypeEnum.WFS)).toEqual(["restricted_visible", "restricted"]);
+    });
+
+    it("retire l’accès dont l’endpoint est plein, quota nul compris", () => {
+        expect(availableServiceAccesses([endpoint("WFS", true, 10), endpoint("WFS", false, 9)], ConfigurationTypeEnum.WFS)).toEqual([
+            "restricted_visible",
+            "restricted",
+        ]);
+        expect(availableServiceAccesses([endpoint("WFS", true), endpoint("WFS", false, 0, 0)], ConfigurationTypeEnum.WFS)).toEqual(["public"]);
+    });
+
+    it("garde l’accès enregistré même sur un endpoint plein", () => {
+        const full = [endpoint("WFS", true, 10), endpoint("WFS", false, 10)];
+        expect(availableServiceAccesses(full, ConfigurationTypeEnum.WFS, "restricted_visible")).toEqual(["restricted_visible", "restricted"]);
+        expect(availableServiceAccesses(full, ConfigurationTypeEnum.WFS, "public")).toEqual(["public"]);
+    });
+
+    it("en modification, ne propose que l’endpoint enregistré tant que les endpoints ne sont pas lus", () => {
+        expect(availableServiceAccesses(undefined, ConfigurationTypeEnum.WFS, "public")).toEqual(["public"]);
+        expect(availableServiceAccesses(undefined, ConfigurationTypeEnum.WFS, "restricted")).toEqual(["restricted_visible", "restricted"]);
+    });
+});
+
+describe("isServiceTypeFull", () => {
+    it("ne désactive rien tant que les endpoints ne sont pas lus", () => {
+        expect(isServiceTypeFull(undefined, "wfs")).toBe(false);
+    });
+
+    it("désactive le type quand ses endpoints présents sont tous pleins", () => {
+        expect(isServiceTypeFull([endpoint("WFS", true, 10), endpoint("WFS", false, 9)], "wfs")).toBe(false);
+        expect(isServiceTypeFull([endpoint("WFS", true, 10), endpoint("WFS", false, 10)], "wfs")).toBe(true);
+        expect(isServiceTypeFull([endpoint("WFS", true, 10)], "wfs")).toBe(true);
+    });
+
+    it("ignore un type sans endpoint", () => {
+        expect(isServiceTypeFull([endpoint("WMS-VECTOR", true)], "wfs")).toBe(false);
+    });
+
+    it("WMS : actif tant que le vecteur ou le raster a de la place", () => {
+        const vectorFull = [endpoint("WMS-VECTOR", true, 10), endpoint("WMS-VECTOR", false, 10)];
+        expect(isServiceTypeFull([...vectorFull, endpoint("WMS-RASTER", true)], "wms")).toBe(false);
+        expect(isServiceTypeFull([...vectorFull, endpoint("WMS-RASTER", true, 10)], "wms")).toBe(true);
+        expect(isServiceTypeFull(vectorFull, "wms")).toBe(true);
+    });
+
+    it("WMTS et TMS partagent l’endpoint WMTS-TMS", () => {
+        const full = [endpoint("WMTS-TMS", true, 10), endpoint("WMTS-TMS", false, 10)];
+        expect(isServiceTypeFull(full, "wmts")).toBe(true);
+        expect(isServiceTypeFull(full, "tms")).toBe(true);
+    });
+});
+
+describe("fullServiceEndpoints", () => {
+    it("rien tant que les endpoints ne sont pas lus ni pleins", () => {
+        expect(fullServiceEndpoints(undefined, "wfs")).toEqual([]);
+        expect(fullServiceEndpoints([endpoint("WFS", true, 9), endpoint("WFS", false)], "wfs")).toEqual([]);
+    });
+
+    it("liste les endpoints pleins derrière la carte, ouvert avant privé, quota nul compris", () => {
+        expect(fullServiceEndpoints([endpoint("WFS", false, 10), endpoint("WFS", true, 0, 0)], "wfs")).toEqual([
+            { configurationType: "WFS", open: true },
+            { configurationType: "WFS", open: false },
+        ]);
+    });
+
+    it("WMS : vecteur puis raster", () => {
+        expect(fullServiceEndpoints([endpoint("WMS-RASTER", true, 10), endpoint("WMS-VECTOR", false, 10)], "wms")).toEqual([
+            { configurationType: "WMS-VECTOR", open: false },
+            { configurationType: "WMS-RASTER", open: true },
+        ]);
+    });
+});
+
+describe("isEndpointFull", () => {
+    it("vrai seulement pour un endpoint présent et plein", () => {
+        const endpoints = [endpoint("WFS", true, 10), endpoint("WFS", false, 9)];
+        expect(isEndpointFull(endpoints, ConfigurationTypeEnum.WFS, true)).toBe(true);
+        expect(isEndpointFull(endpoints, ConfigurationTypeEnum.WFS, false)).toBe(false);
+        expect(isEndpointFull(endpoints, ConfigurationTypeEnum.WMSVECTOR, true)).toBe(false);
+        expect(isEndpointFull(undefined, ConfigurationTypeEnum.WFS, true)).toBe(false);
+    });
+});
+
+describe("isDatastoreFull", () => {
+    it("faux tant que les endpoints ne sont pas lus, ou qu’un endpoint a de la place", () => {
+        expect(isDatastoreFull(undefined)).toBe(false);
+        expect(isDatastoreFull([endpoint("WFS", true, 10), endpoint("WMTS-TMS", false, 9)])).toBe(false);
+    });
+
+    it("vrai quand aucun endpoint présent n’a de place, types sans endpoint compris", () => {
+        expect(isDatastoreFull([endpoint("WFS", true, 10), endpoint("WFS", false, 10), endpoint("WMS-VECTOR", true, 10)])).toBe(true);
     });
 });

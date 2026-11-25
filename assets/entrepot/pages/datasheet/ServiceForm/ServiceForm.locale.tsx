@@ -36,6 +36,15 @@ const { i18n } = declareComponentKeys<
     | "type.wmts.description"
     | "type.vector"
     | "type.raster"
+    | "type.quota_reached"
+    | { K: "quota.full"; P: { service: string; access: string }; R: string }
+    | { K: "quota.switch_full"; P: { access: string }; R: string }
+    | "quota.all_full"
+    | "quota.service.WFS"
+    | "quota.service.WMS-VECTOR"
+    | "quota.service.WMS-RASTER"
+    | "quota.service.WMTS-TMS"
+    | { K: "quota.access"; P: { open: boolean }; R: string }
     | "stored_data.label"
     | "stored_data.label_pyramid"
     | "stored_data.placeholder"
@@ -132,6 +141,7 @@ const { i18n } = declareComponentKeys<
     | "validation.table.style.no_rule"
     | "validation.table.style.rule_without_symbolizer"
     | "validation.featureinfo.attributes.required"
+    | "validation.access.required"
     | "validation.access.unavailable"
     | "validation.attribution.text.required"
     | "validation.attribution.url.required"
@@ -176,6 +186,16 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "type.wmts.description": "Web Map Tile Service",
     "type.vector": "Vecteur",
     "type.raster": "Raster",
+    "type.quota_reached": "Quota atteint",
+    "quota.full": ({ service, access }) => `Le quota des ${service} en accès ${access} est atteint.`,
+    "quota.switch_full": ({ access }) => `Le quota des flux en accès ${access} est atteint.`,
+    "quota.all_full":
+        "Les quotas de publication de cet entrepôt sont atteints pour tous les types de flux. Supprimez un flux existant ou contactez le support afin de demander plus de quota.",
+    "quota.service.WFS": "flux WFS",
+    "quota.service.WMS-VECTOR": "flux WMS vecteur",
+    "quota.service.WMS-RASTER": "flux WMS raster",
+    "quota.service.WMTS-TMS": "flux WMTS et TMS",
+    "quota.access": ({ open }) => (open ? "libre" : "restreint"),
     "stored_data.label": "Jeu de données",
     "stored_data.label_pyramid": "Pyramide de données",
     "stored_data.placeholder": "Sélectionner une option",
@@ -279,6 +299,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "validation.table.style.no_rule": "Le SLD doit contenir au moins une règle (Rule)",
     "validation.table.style.rule_without_symbolizer": "Chaque règle (Rule) du SLD doit contenir au moins un symboliseur",
     "validation.featureinfo.attributes.required": "Choisissez au moins un attribut à afficher",
+    "validation.access.required": "Veuillez choisir un type d’accès",
     "validation.access.unavailable": "Ce type d’accès n’est pas disponible pour cet entrepôt",
     "validation.attribution.text.required": "Le texte de l’attribution est obligatoire",
     "validation.attribution.url.required": "L’URL de l’attribution est obligatoire",
@@ -321,6 +342,16 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "type.wmts.description": "Web Map Tile Service",
     "type.vector": "Vector",
     "type.raster": "Raster",
+    "type.quota_reached": "Quota reached",
+    "quota.full": ({ service, access }) => `The quota for ${service} with ${access} access is reached.`,
+    "quota.switch_full": ({ access }) => `The quota for services with ${access} access is reached.`,
+    "quota.all_full":
+        "This datastore has reached its publication quotas for every service type. Delete an existing service or contact support to request more quota.",
+    "quota.service.WFS": "WFS services",
+    "quota.service.WMS-VECTOR": "WMS vector services",
+    "quota.service.WMS-RASTER": "WMS raster services",
+    "quota.service.WMTS-TMS": "WMTS and TMS services",
+    "quota.access": ({ open }) => (open ? "open" : "restricted"),
     "stored_data.label": "Dataset",
     "stored_data.label_pyramid": "Data pyramid",
     "stored_data.placeholder": "Select an option",
@@ -421,6 +452,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "validation.table.style.no_rule": "The SLD must contain at least one Rule",
     "validation.table.style.rule_without_symbolizer": "Each SLD Rule must contain at least one symbolizer",
     "validation.featureinfo.attributes.required": "Choose at least one attribute to display",
+    "validation.access.required": "Please choose an access type",
     "validation.access.unavailable": "This access type is not available for this datastore",
     "validation.attribution.text.required": "The attribution text is required",
     "validation.attribution.url.required": "The attribution URL is required",

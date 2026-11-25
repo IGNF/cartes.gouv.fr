@@ -1,13 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { type DatasheetDetailed, StoredDataStatusEnum } from "@/@types/app";
+import { type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum } from "@/@types/app";
 import api from "@/entrepot/api";
-import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
 import useServiceRights from "@/hooks/useServiceRights";
@@ -31,8 +31,12 @@ import {
     availableServiceAccesses,
     buildServiceFormSchema,
     configurationTypeFor,
+    fullServiceEndpoints,
     hasTables,
+    isDatastoreFull,
     isRasterPyramid,
+    isServiceTypeFull,
+    SERVICE_TYPES,
     serviceFormDefaultValues,
     type ServiceFormOutput,
     type ServiceFormValues,
@@ -44,6 +48,8 @@ type ServiceFormProps = {
     datastoreId: string;
     datasheetName: string;
     datasheet: DatasheetDetailed;
+    /** endpoints relus par la page ; absents si la lecture a échoué : le formulaire fait alors sans quotas */
+    endpoints: DatastoreEndpoint[] | undefined;
     /** type de flux tenu par la page : il décide des requêtes et du schéma */
     type: ServiceType;
     onTypeChange: (type: ServiceType) => void;
@@ -51,7 +57,7 @@ type ServiceFormProps = {
     onSubmit: (values: ServiceFormOutput) => Promise<unknown>;
 };
 
-export default function ServiceForm({ datastoreId, datasheetName, datasheet, type, onTypeChange, onSubmit }: ServiceFormProps) {
+export default function ServiceForm({ datastoreId, datasheetName, datasheet, endpoints, type, onTypeChange, onSubmit }: ServiceFormProps) {
     const { t } = useTranslation("ServiceForm");
     const queryClient = useQueryClient();
     // tenu à part : le schéma en dépend et se construit avant le formulaire
@@ -69,9 +75,12 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, configurationType, { signal }),
         staleTime: delta.minutes(1),
     });
-    const endpointsQuery = useQuery(datastoreEndpointsQueryOptions(datastoreId));
 
-    const availableAccesses = useMemo(() => availableServiceAccesses(endpointsQuery.data, configurationType), [endpointsQuery.data, configurationType]);
+    const allFull = isDatastoreFull(endpoints);
+    const disabledTypes = allFull ? SERVICE_TYPES : SERVICE_TYPES.filter((serviceType) => isServiceTypeFull(endpoints, serviceType));
+    const quotaWarnings = fullServiceEndpoints(endpoints, type);
+
+    const availableAccesses = useMemo(() => availableServiceAccesses(endpoints, configurationType), [endpoints, configurationType]);
 
     const schema = useMemo(
         () =>
@@ -141,7 +150,35 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
             <form onSubmit={(e) => void submit(e)} noValidate>
                 <MetadataSectionsContainer>
                     <MetadataSection title={t("section.type")}>
-                        <ServiceTypeSection value={type} onChange={changeType} />
+                        <ServiceTypeSection
+                            value={type}
+                            onChange={changeType}
+                            disabledTypes={disabledTypes}
+                            alert={
+                                allFull ? (
+                                    <Alert severity="warning" small description={t("quota.all_full")} />
+                                ) : (
+                                    quotaWarnings.length > 0 && (
+                                        <Alert
+                                            severity="warning"
+                                            small
+                                            description={
+                                                <ul className={fr.cx("fr-raw-list")}>
+                                                    {quotaWarnings.map((warning) => (
+                                                        <li key={`${warning.configurationType}-${warning.open}`}>
+                                                            {t("quota.full", {
+                                                                service: t(`quota.service.${warning.configurationType}`),
+                                                                access: t("quota.access", { open: warning.open }),
+                                                            })}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            }
+                                        />
+                                    )
+                                )
+                            }
+                        />
                     </MetadataSection>
                     <MetadataSection title={t("section.description")}>
                         <ServiceDescriptionSection
@@ -198,7 +235,8 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                                 search: { activeTab: "services" },
                             },
                         },
-                        { children: t("submit"), type: "submit" },
+                        // quotas tous atteints : rien à publier
+                        ...(allFull ? [] : [{ children: t("submit"), type: "submit" as const }]),
                     ]}
                     inlineLayoutWhen="always"
                     alignment="right"
