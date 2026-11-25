@@ -32,7 +32,6 @@ export const hasTables = (type: ServiceType, rasterPyramid: boolean): boolean =>
 export { SERVICE_ACCESSES, type ServiceAccess };
 export { SERVICE_TYPES, type ServiceType };
 
-const QUOTA_WARNING_RATIO = 0.9;
 const isFull = (item: DatastoreEndpoint) => item.use >= item.quota;
 
 // premier endpoint du type et de l’ouverture, comme le back
@@ -73,33 +72,14 @@ export const isServiceTypeFull = (endpoints: DatastoreEndpoint[] | undefined, ty
     return present.length > 0 && present.every(isFull);
 };
 
-export type ServiceQuotaWarning = {
-    configurationType: ServiceEndpointType;
-    open: boolean;
-    remaining: number;
-    full: boolean;
-    /** l’endpoint de l’autre ouverture existe et n’est pas plein */
-    otherAvailable: boolean;
-};
-
-/** endpoints à 90 % ou plus derrière la carte de type, ouvert avant privé ; une seule entrée par type quand les deux sont pleins */
-export const serviceQuotaWarnings = (endpoints: DatastoreEndpoint[] | undefined, type: ServiceType): ServiceQuotaWarning[] => {
-    if (!endpoints) return [];
-    return endpointTypesOf(type).flatMap((configurationType) =>
+/** endpoints pleins derrière la carte de type, ouvert avant privé */
+export const fullServiceEndpoints = (endpoints: DatastoreEndpoint[] | undefined, type: ServiceType) =>
+    endpointTypesOf(type).flatMap((configurationType) =>
         [true, false].flatMap((open) => {
-            const item = endpointFor(endpoints, configurationType, open);
-            if (!item || item.use < QUOTA_WARNING_RATIO * item.quota) return [];
-            const other = endpointFor(endpoints, configurationType, !open);
-            // les deux pleins : l’entrée de l’endpoint ouvert suffit
-            if (!open && isFull(item) && other && isFull(other)) return [];
-            return [{ configurationType, open, remaining: Math.max(0, item.quota - item.use), full: isFull(item), otherAvailable: !!other && !isFull(other) }];
+            const item = endpoints && endpointFor(endpoints, configurationType, open);
+            return item && isFull(item) ? [{ configurationType, open }] : [];
         })
     );
-};
-
-/** type coché à l’ouverture du formulaire : celui demandé, sinon le premier qui a de la place, sinon celui demandé */
-export const startServiceType = (endpoints: DatastoreEndpoint[] | undefined, requested: ServiceType): ServiceType =>
-    isServiceTypeFull(endpoints, requested) ? (SERVICE_TYPES.find((type) => !isServiceTypeFull(endpoints, type)) ?? requested) : requested;
 
 /** même regex que WfsTableFormDTO : nom technique d’une table WFS en minuscules */
 export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;

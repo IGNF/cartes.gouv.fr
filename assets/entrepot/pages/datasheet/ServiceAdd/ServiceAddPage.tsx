@@ -17,7 +17,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
 import { buildServiceFormData } from "../ServiceForm/buildServiceFormData";
 import ServiceForm from "../ServiceForm/ServiceForm";
-import { configurationTypeFor, isRasterPyramid, type ServiceFormOutput, type ServiceType, startServiceType } from "../ServiceForm/serviceFormSchema";
+import { configurationTypeFor, isRasterPyramid, type ServiceFormOutput, type ServiceType } from "../ServiceForm/serviceFormSchema";
 
 type ServiceAddPageProps = {
     datastoreId: string;
@@ -32,12 +32,9 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     const endpointsQuery = useQuery(datastoreEndpointsQueryOptions(datastoreId));
-    // type de départ fixé une fois les endpoints relus (le cache persisté peut dater) : un type qui se remplit ensuite reste coché
     // lecture en échec : la copie persistée peut dater, la page fait sans quotas
     const endpoints = endpointsQuery.isSuccess ? endpointsQuery.data : undefined;
-    const [selectedType, setSelectedType] = useState<ServiceType>();
-    if (selectedType === undefined && endpointsQuery.isFetchedAfterMount) setSelectedType(startServiceType(endpoints, initialType));
-    const type = selectedType ?? initialType;
+    const [type, setType] = useState(initialType);
 
     const datasheetQuery = useQuery<DatasheetDetailed, ApiError>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
@@ -69,7 +66,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     });
 
     const renderContent = () => {
-        if (datasheetQuery.isPending || metadataQuery.isPending || selectedType === undefined) {
+        if (datasheetQuery.isPending || metadataQuery.isPending) {
             return <LoadingText as="p" message={t("loading")} withSpinnerIcon />;
         }
         if (datasheetQuery.isError) {
@@ -110,7 +107,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
                     datasheet={datasheetQuery.data}
                     endpoints={endpoints}
                     type={type}
-                    onTypeChange={setSelectedType}
+                    onTypeChange={setType}
                     onSubmit={(values) => publishMutation.mutateAsync(values)}
                 />
             </>

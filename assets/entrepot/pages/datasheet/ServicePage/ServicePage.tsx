@@ -416,16 +416,12 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
                                 logoUrl={configuration.attribution?.logo?.url}
                                 savedAccess={editable ? values.access : undefined}
                                 alert={
-                                    switchFull ? (
+                                    switchFull && (
                                         <Alert
                                             severity="warning"
                                             small
-                                            description={tForm("quota.switch_full", {
-                                                access: tForm("quota.access", { open: !savedOpen }),
-                                            })}
+                                            description={tForm("quota.switch_full", { access: tForm("quota.access", { open: !savedOpen }) })}
                                         />
-                                    ) : (
-                                        editable && endpointsQuery.isError && <Alert severity="warning" small description={tForm("quota.read_error")} />
                                     )
                                 }
                             />

@@ -8,15 +8,14 @@ import {
     buildServiceFormSchema,
     configurationTypeFor,
     hasTables,
+    fullServiceEndpoints,
     isEndpointFull,
     isRasterPyramid,
     isServiceTypeFull,
-    serviceQuotaWarnings,
     type ServiceAccess,
     serviceFormDefaultValues,
     type ServiceFormValues,
     type ServiceType,
-    startServiceType,
 } from "./serviceFormSchema";
 
 // la clé sert de message : les tests vérifient quel message est posé, pas sa traduction
@@ -372,52 +371,24 @@ describe("isServiceTypeFull", () => {
     });
 });
 
-describe("serviceQuotaWarnings", () => {
-    it("rien sous 90 %, ni tant que les endpoints ne sont pas lus", () => {
-        expect(serviceQuotaWarnings(undefined, "wfs")).toEqual([]);
-        expect(serviceQuotaWarnings([endpoint("WFS", true, 8), endpoint("WFS", false, 89, 100)], "wfs")).toEqual([]);
+describe("fullServiceEndpoints", () => {
+    it("rien tant que les endpoints ne sont pas lus ni pleins", () => {
+        expect(fullServiceEndpoints(undefined, "wfs")).toEqual([]);
+        expect(fullServiceEndpoints([endpoint("WFS", true, 9), endpoint("WFS", false)], "wfs")).toEqual([]);
     });
 
-    it("liste les endpoints à 90 % ou pleins, ouvert avant privé", () => {
-        expect(serviceQuotaWarnings([endpoint("WFS", false, 9), endpoint("WFS", true, 63, 70)], "wfs")).toEqual([
-            { configurationType: "WFS", open: true, remaining: 7, full: false, otherAvailable: true },
-            { configurationType: "WFS", open: false, remaining: 1, full: false, otherAvailable: true },
-        ]);
-    });
-
-    it("dit si l’autre ouverture reste disponible : libre, pleine ou absente", () => {
-        expect(serviceQuotaWarnings([endpoint("WFS", true, 10), endpoint("WFS", false)], "wfs")).toEqual([
-            { configurationType: "WFS", open: true, remaining: 0, full: true, otherAvailable: true },
-        ]);
-        // les deux pleins : une seule entrée pour le type
-        expect(serviceQuotaWarnings([endpoint("WFS", true, 10), endpoint("WFS", false, 10)], "wfs")).toEqual([
-            { configurationType: "WFS", open: true, remaining: 0, full: true, otherAvailable: false },
-        ]);
-        expect(serviceQuotaWarnings([endpoint("WFS", true, 0, 0)], "wfs")).toEqual([
-            { configurationType: "WFS", open: true, remaining: 0, full: true, otherAvailable: false },
+    it("liste les endpoints pleins derrière la carte, ouvert avant privé, quota nul compris", () => {
+        expect(fullServiceEndpoints([endpoint("WFS", false, 10), endpoint("WFS", true, 0, 0)], "wfs")).toEqual([
+            { configurationType: "WFS", open: true },
+            { configurationType: "WFS", open: false },
         ]);
     });
 
     it("WMS : vecteur puis raster", () => {
-        expect(serviceQuotaWarnings([endpoint("WMS-RASTER", true, 10), endpoint("WMS-VECTOR", false, 9)], "wms").map((w) => w.configurationType)).toEqual([
-            "WMS-VECTOR",
-            "WMS-RASTER",
+        expect(fullServiceEndpoints([endpoint("WMS-RASTER", true, 10), endpoint("WMS-VECTOR", false, 10)], "wms")).toEqual([
+            { configurationType: "WMS-VECTOR", open: false },
+            { configurationType: "WMS-RASTER", open: true },
         ]);
-    });
-});
-
-describe("startServiceType", () => {
-    const wfsFull = [endpoint("WFS", true, 10), endpoint("WFS", false, 10)];
-
-    it("garde le type demandé s’il a de la place", () => {
-        expect(startServiceType(undefined, "wfs")).toBe("wfs");
-        expect(startServiceType(wfsFull, "wms")).toBe("wms");
-    });
-
-    it("passe au premier type libre, ou garde le type demandé si tout est plein", () => {
-        expect(startServiceType(wfsFull, "wfs")).toBe("wms");
-        const allFull = ["WFS", "WMS-VECTOR", "WMS-RASTER", "WMTS-TMS"].flatMap((type) => [endpoint(type, true, 10), endpoint(type, false, 10)]);
-        expect(startServiceType(allFull, "tms")).toBe("tms");
     });
 });
 
