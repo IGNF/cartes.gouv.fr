@@ -30,10 +30,10 @@ export default function AccessSection({ availableAccesses, logoUrl, savedAccess,
     } = useFormContext<ServiceFormValues>();
     const attributionEnabled = useWatch({ control, name: "attribution.enabled" });
     const access = useWatch({ control, name: "access" });
-    // accès coché devenu indisponible (type, donnée ou relecture des endpoints) : décoché, ou accès enregistré en modification
+    // accès coché devenu indisponible (type, donnée ou relecture des endpoints) : décoché, ou accès enregistré en modification ; un refus d’enregistrement reste affiché
     useEffect(() => {
         const checked = getValues("access");
-        if (checked && !availableAccesses.includes(checked)) resetField("access");
+        if (checked && !availableAccesses.includes(checked)) resetField("access", { keepError: true });
     }, [availableAccesses, getValues, resetField]);
     const endpointChange = savedAccess !== undefined && (savedAccess === "public") !== (access === "public");
 

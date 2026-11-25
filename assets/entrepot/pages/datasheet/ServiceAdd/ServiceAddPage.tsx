@@ -31,7 +31,8 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     const { t } = useTranslation("ServiceForm");
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const endpointsQuery = useQuery(datastoreEndpointsQueryOptions(datastoreId));
+    // un échec ne bloque pas la page : sans quotas plutôt que des relances, ou une attente sans fin hors ligne
+    const endpointsQuery = useQuery({ ...datastoreEndpointsQueryOptions(datastoreId), retry: false, networkMode: "always" });
     // lecture en échec : la page fait sans quotas
     const endpoints = freshEndpoints(endpointsQuery);
     const [type, setType] = useState(initialType);

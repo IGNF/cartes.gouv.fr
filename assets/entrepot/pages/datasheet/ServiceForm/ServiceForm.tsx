@@ -32,6 +32,7 @@ import {
     buildServiceFormSchema,
     configurationTypeFor,
     hasTables,
+    isDatastoreFull,
     isRasterPyramid,
     isServiceTypeFull,
     SERVICE_TYPES,
@@ -75,8 +76,11 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, end
         staleTime: delta.minutes(1),
     });
 
-    const disabledTypes = useMemo(() => SERVICE_TYPES.filter((serviceType) => isServiceTypeFull(endpoints, serviceType)), [endpoints]);
-    const allFull = disabledTypes.length === SERVICE_TYPES.length;
+    const allFull = isDatastoreFull(endpoints);
+    const disabledTypes = useMemo(
+        () => (allFull ? SERVICE_TYPES : SERVICE_TYPES.filter((serviceType) => isServiceTypeFull(endpoints, serviceType))),
+        [allFull, endpoints]
+    );
     const quotaWarnings = fullServiceEndpoints(endpoints, type);
 
     const availableAccesses = useMemo(() => availableServiceAccesses(endpoints, configurationType), [endpoints, configurationType]);

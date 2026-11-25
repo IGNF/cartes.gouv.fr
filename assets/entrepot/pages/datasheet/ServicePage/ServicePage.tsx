@@ -297,7 +297,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
         // changement d’endpoint : quotas relus juste avant, la page a pu rester ouverte longtemps
         if ((formValues.access === "public") !== savedOpen) {
             const { data, isSuccess } = await endpointsQuery.refetch();
-            if (!isSuccess || isEndpointFull(data, configuration.type, !savedOpen)) {
+            if (!isSuccess || !availableServiceAccesses(data, configuration.type, values.access).includes(formValues.access)) {
                 form.setError("access", { message: tForm("validation.access.unavailable") });
                 return;
             }
@@ -366,7 +366,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
                             </div>
                         </div>
                         {canSave && (
-                            <Button type="submit" nativeButtonProps={{ form: formId }} disabled={!editable || editMutation.isPending}>
+                            <Button type="submit" nativeButtonProps={{ form: formId }} disabled={!editable || form.formState.isSubmitting}>
                                 {t("save")}
                             </Button>
                         )}
@@ -484,7 +484,8 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
                 document.body
             )}
 
-            {editMutation.isPending && (
+            {/* relecture des quotas comprise */}
+            {form.formState.isSubmitting && (
                 <Wait>
                     <LoadingText as="h6" message={t("edit.saving")} withSpinnerIcon />
                 </Wait>

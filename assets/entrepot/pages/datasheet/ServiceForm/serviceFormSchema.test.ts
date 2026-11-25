@@ -9,6 +9,7 @@ import {
     configurationTypeFor,
     hasTables,
     fullServiceEndpoints,
+    isDatastoreFull,
     isEndpointFull,
     isRasterPyramid,
     isServiceTypeFull,
@@ -399,5 +400,16 @@ describe("isEndpointFull", () => {
         expect(isEndpointFull(endpoints, ConfigurationTypeEnum.WFS, false)).toBe(false);
         expect(isEndpointFull(endpoints, ConfigurationTypeEnum.WMSVECTOR, true)).toBe(false);
         expect(isEndpointFull(undefined, ConfigurationTypeEnum.WFS, true)).toBe(false);
+    });
+});
+
+describe("isDatastoreFull", () => {
+    it("faux tant que les endpoints ne sont pas lus, ou qu’un endpoint a de la place", () => {
+        expect(isDatastoreFull(undefined)).toBe(false);
+        expect(isDatastoreFull([endpoint("WFS", true, 10), endpoint("WMTS-TMS", false, 9)])).toBe(false);
+    });
+
+    it("vrai quand aucun endpoint présent n’a de place, types sans endpoint compris", () => {
+        expect(isDatastoreFull([endpoint("WFS", true, 10), endpoint("WFS", false, 10), endpoint("WMS-VECTOR", true, 10)])).toBe(true);
     });
 });
