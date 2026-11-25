@@ -46,7 +46,7 @@ import placeholder1x1 from "@/img/placeholder.1x1.png";
 const LIMIT = 10;
 
 // Flux, Accès, URL, Explorer, Date de modification, Statut, Action, menu
-const COLUMN_WIDTHS = [undefined, "6.5rem", "3rem", "6.5rem", "14.5rem", "10rem", "8.25rem", "4rem"];
+const COLUMN_WIDTHS = [undefined, "6.5rem", "3rem", "7.5rem", "14.5rem", "10rem", "8.25rem", "4rem"];
 
 const deleteServiceConfirmModal = createModal({
     id: "services-tab-next-delete-service-confirm-modal",
