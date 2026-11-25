@@ -46,8 +46,7 @@ const { i18n } = declareComponentKeys<
     | "quota.service.WMS-VECTOR"
     | "quota.service.WMS-RASTER"
     | "quota.service.WMTS-TMS"
-    | "quota.access.open"
-    | "quota.access.private"
+    | { K: "quota.access"; P: { open: boolean }; R: string }
     | "stored_data.label"
     | "stored_data.label_pyramid"
     | "stored_data.placeholder"
@@ -200,8 +199,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "quota.service.WMS-VECTOR": "flux WMS vecteur",
     "quota.service.WMS-RASTER": "flux WMS raster",
     "quota.service.WMTS-TMS": "flux WMTS et TMS",
-    "quota.access.open": "libre",
-    "quota.access.private": "restreint",
+    "quota.access": ({ open }) => (open ? "libre" : "restreint"),
     "stored_data.label": "Jeu de données",
     "stored_data.label_pyramid": "Pyramide de données",
     "stored_data.placeholder": "Sélectionner une option",
@@ -359,8 +357,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "quota.service.WMS-VECTOR": "WMS vector services",
     "quota.service.WMS-RASTER": "WMS raster services",
     "quota.service.WMTS-TMS": "WMTS and TMS services",
-    "quota.access.open": "open",
-    "quota.access.private": "restricted",
+    "quota.access": ({ open }) => (open ? "open" : "restricted"),
     "stored_data.label": "Dataset",
     "stored_data.label_pyramid": "Data pyramid",
     "stored_data.placeholder": "Select an option",

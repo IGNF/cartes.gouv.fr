@@ -211,8 +211,8 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
         );
     }, [configuration.styles, values.tables]);
 
-    // relus par cette page seulement : changer d’endpoint supprime l’offre avant de la recréer
-    const endpoints = endpointsQuery.isFetchedAfterMount ? endpointsQuery.data : undefined;
+    // relus avec succès par cette page seulement : changer d’endpoint supprime l’offre avant de la recréer
+    const endpoints = endpointsQuery.isSuccess && endpointsQuery.isFetchedAfterMount ? endpointsQuery.data : undefined;
     // l’accès enregistré reste proposé : le flux tient déjà sa place sur son endpoint
     const availableAccesses = useMemo(
         () => availableServiceAccesses(endpoints, configuration.type, values.access),
@@ -421,7 +421,7 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
                                             severity="warning"
                                             small
                                             description={tForm("quota.switch_full", {
-                                                access: tForm(savedOpen ? "quota.access.private" : "quota.access.open"),
+                                                access: tForm("quota.access", { open: !savedOpen }),
                                             })}
                                         />
                                     )

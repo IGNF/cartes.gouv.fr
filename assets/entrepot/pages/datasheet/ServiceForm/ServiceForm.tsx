@@ -74,12 +74,14 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
         staleTime: delta.minutes(1),
     });
     const endpointsQuery = useQuery(datastoreEndpointsQueryOptions(datastoreId));
+    // lecture en échec : la copie persistée peut dater, le formulaire fait sans quotas
+    const endpoints = endpointsQuery.isSuccess ? endpointsQuery.data : undefined;
 
-    const disabledTypes = useMemo(() => SERVICE_TYPES.filter((serviceType) => isServiceTypeFull(endpointsQuery.data, serviceType)), [endpointsQuery.data]);
+    const disabledTypes = useMemo(() => SERVICE_TYPES.filter((serviceType) => isServiceTypeFull(endpoints, serviceType)), [endpoints]);
     const allFull = disabledTypes.length === SERVICE_TYPES.length;
-    const quotaWarnings = serviceQuotaWarnings(endpointsQuery.data, type);
+    const quotaWarnings = serviceQuotaWarnings(endpoints, type);
 
-    const availableAccesses = useMemo(() => availableServiceAccesses(endpointsQuery.data, configurationType), [endpointsQuery.data, configurationType]);
+    const availableAccesses = useMemo(() => availableServiceAccesses(endpoints, configurationType), [endpoints, configurationType]);
 
     const schema = useMemo(
         () =>
@@ -149,39 +151,44 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
             <form onSubmit={(e) => void submit(e)} noValidate>
                 <MetadataSectionsContainer>
                     <MetadataSection title={t("section.type")}>
-                        <ServiceTypeSection value={type} onChange={changeType} disabledTypes={disabledTypes}>
-                            {allFull ? (
-                                <Alert severity="warning" small description={t("quota.all_full")} />
-                            ) : (
-                                quotaWarnings.length > 0 && (
-                                    <Alert
-                                        severity="warning"
-                                        small
-                                        description={
-                                            <ul className={fr.cx("fr-raw-list")}>
-                                                {quotaWarnings.map((warning) => {
-                                                    const service = t(`quota.service.${warning.configurationType}`);
-                                                    const access = t(warning.open ? "quota.access.open" : "quota.access.private");
-                                                    return (
-                                                        <li key={`${warning.configurationType}-${warning.open}`}>
-                                                            {!warning.full
-                                                                ? t("quota.near", { remaining: warning.remaining, service, access })
-                                                                : warning.otherAvailable
-                                                                  ? t("quota.full", {
-                                                                        service,
-                                                                        access,
-                                                                        other: t(warning.open ? "quota.access.private" : "quota.access.open"),
-                                                                    })
-                                                                  : t("quota.full_both", { service })}
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        }
-                                    />
+                        <ServiceTypeSection
+                            value={type}
+                            onChange={changeType}
+                            disabledTypes={disabledTypes}
+                            alert={
+                                allFull ? (
+                                    <Alert severity="warning" small description={t("quota.all_full")} />
+                                ) : (
+                                    quotaWarnings.length > 0 && (
+                                        <Alert
+                                            severity="warning"
+                                            small
+                                            description={
+                                                <ul className={fr.cx("fr-raw-list")}>
+                                                    {quotaWarnings.map((warning) => {
+                                                        const service = t(`quota.service.${warning.configurationType}`);
+                                                        const access = t("quota.access", { open: warning.open });
+                                                        return (
+                                                            <li key={`${warning.configurationType}-${warning.open}`}>
+                                                                {!warning.full
+                                                                    ? t("quota.near", { remaining: warning.remaining, service, access })
+                                                                    : warning.otherAvailable
+                                                                      ? t("quota.full", {
+                                                                            service,
+                                                                            access,
+                                                                            other: t("quota.access", { open: !warning.open }),
+                                                                        })
+                                                                      : t("quota.full_both", { service })}
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            }
+                                        />
+                                    )
                                 )
-                            )}
-                        </ServiceTypeSection>
+                            }
+                        />
                     </MetadataSection>
                     <MetadataSection title={t("section.description")}>
                         <ServiceDescriptionSection

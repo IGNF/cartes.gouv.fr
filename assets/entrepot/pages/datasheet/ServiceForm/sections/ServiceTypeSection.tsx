@@ -20,11 +20,11 @@ type ServiceTypeSectionProps = {
     /** types dont les endpoints sont tous pleins */
     disabledTypes: readonly ServiceType[];
     /** alerte de quota affichée sous les cartes */
-    children?: ReactNode;
+    alert?: ReactNode;
 };
 
 /** cartes de la maquette : chaque carte est le libellé d’un vrai bouton radio, masqué visuellement */
-export default function ServiceTypeSection({ value, onChange, disabledTypes, children }: ServiceTypeSectionProps) {
+export default function ServiceTypeSection({ value, onChange, disabledTypes, alert }: ServiceTypeSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const { classes, cx } = useStyles();
 
@@ -59,7 +59,7 @@ export default function ServiceTypeSection({ value, onChange, disabledTypes, chi
                     </label>
                 ))}
             </div>
-            {children && <div className={fr.cx("fr-fieldset__element", "fr-mt-3w", "fr-mb-0")}>{children}</div>}
+            {alert && <div className={fr.cx("fr-fieldset__element", "fr-mt-3w", "fr-mb-0")}>{alert}</div>}
             <div className={fr.cx("fr-fieldset__element", "fr-mt-3w")}>
                 <a {...externalLinkToUrl(externalUrls.helpProducerGuideChooseServiceType, t("type.help_link"))} className={fr.cx("fr-link")}>
                     {t("type.help_link")}

@@ -30,6 +30,7 @@ export const hasTables = (type: ServiceType, rasterPyramid: boolean): boolean =>
 export { SERVICE_ACCESSES, type ServiceAccess };
 export { SERVICE_TYPES, type ServiceType };
 
+const QUOTA_WARNING_RATIO = 0.9;
 const isFull = (item: DatastoreEndpoint) => item.use >= item.quota;
 
 // premier endpoint du type et de l’ouverture, comme le back
@@ -42,10 +43,7 @@ export const isEndpointFull = (endpoints: DatastoreEndpoint[] | undefined, confi
     return item !== undefined && isFull(item);
 };
 
-/**
- * accès offerts par les endpoints non pleins de l’entrepôt pour ce type de configuration (le back refuse un accès sans endpoint) ;
- * `savedAccess` : l’endpoint du flux enregistré reste proposé, et seul lui tant que les endpoints ne sont pas lus
- */
+/** accès offerts par les endpoints non pleins de l’entrepôt pour ce type de configuration (le back refuse un accès sans endpoint) */
 export const availableServiceAccesses = (
     endpoints: DatastoreEndpoint[] | undefined,
     configurationType: ConfigurationTypeEnum,
@@ -53,6 +51,7 @@ export const availableServiceAccesses = (
 ): readonly ServiceAccess[] => {
     const savedOpen = savedAccess === undefined ? undefined : savedAccess === "public";
     const usable = (open: boolean) => {
+        // l’endpoint du flux enregistré reste proposé, et seul lui tant que les endpoints ne sont pas lus
         if (open === savedOpen) return true;
         if (!endpoints) return savedOpen === undefined;
         const item = endpointFor(endpoints, configurationType, open);
@@ -61,7 +60,6 @@ export const availableServiceAccesses = (
     return SERVICE_ACCESSES.filter((access) => usable(access === "public"));
 };
 
-/** types d’endpoint qu’un flux du formulaire peut utiliser */
 export type ServiceEndpointType = ConfigurationTypeEnum.WFS | ConfigurationTypeEnum.WMSVECTOR | ConfigurationTypeEnum.WMSRASTER | ConfigurationTypeEnum.WMTSTMS;
 
 // WMS : vecteur ou raster selon la donnée choisie
@@ -91,7 +89,7 @@ export const serviceQuotaWarnings = (endpoints: DatastoreEndpoint[] | undefined,
     return endpointTypesOf(type).flatMap((configurationType) =>
         [true, false].flatMap((open) => {
             const item = endpointFor(endpoints, configurationType, open);
-            if (!item || item.use < 0.9 * item.quota) return [];
+            if (!item || item.use < QUOTA_WARNING_RATIO * item.quota) return [];
             const other = endpointFor(endpoints, configurationType, !open);
             // les deux pleins : l’entrée de l’endpoint ouvert suffit
             if (!open && isFull(item) && other && isFull(other)) return [];

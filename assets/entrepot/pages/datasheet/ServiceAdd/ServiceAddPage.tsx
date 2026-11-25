@@ -33,9 +33,10 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     const navigate = useNavigate();
     const endpointsQuery = useQuery(datastoreEndpointsQueryOptions(datastoreId));
     // type de départ fixé une fois les endpoints relus (le cache persisté peut dater) : un type qui se remplit ensuite reste coché
-    const [chosenType, setChosenType] = useState<ServiceType>();
-    if (chosenType === undefined && endpointsQuery.isFetchedAfterMount) setChosenType(startServiceType(endpointsQuery.data, initialType));
-    const type = chosenType ?? initialType;
+    const [selectedType, setSelectedType] = useState<ServiceType>();
+    if (selectedType === undefined && endpointsQuery.isFetchedAfterMount)
+        setSelectedType(startServiceType(endpointsQuery.isSuccess ? endpointsQuery.data : undefined, initialType));
+    const type = selectedType ?? initialType;
 
     const datasheetQuery = useQuery<DatasheetDetailed, ApiError>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
@@ -67,7 +68,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     });
 
     const renderContent = () => {
-        if (datasheetQuery.isPending || metadataQuery.isPending || chosenType === undefined) {
+        if (datasheetQuery.isPending || metadataQuery.isPending || selectedType === undefined) {
             return <LoadingText as="p" message={t("loading")} withSpinnerIcon />;
         }
         if (datasheetQuery.isError) {
@@ -107,7 +108,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
                     datasheetName={datasheetName}
                     datasheet={datasheetQuery.data}
                     type={type}
-                    onTypeChange={setChosenType}
+                    onTypeChange={setSelectedType}
                     onSubmit={(values) => publishMutation.mutateAsync(values)}
                 />
             </>
