@@ -63,10 +63,10 @@ export const availableServiceAccesses = (
 // WMS : vecteur ou raster selon la donnée choisie
 const endpointTypesOf = (type: ServiceType) => [...new Set([false, true].map((raster) => configurationTypeFor(type, raster)))];
 
-/** carte de type désactivée : tous les endpoints présents derrière elle sont pleins ; un type sans endpoint est ignoré */
 const presentEndpoints = (endpoints: DatastoreEndpoint[], type: ServiceType) =>
     endpointTypesOf(type).flatMap((configurationType) => [true, false].flatMap((open) => endpointFor(endpoints, configurationType, open) ?? []));
 
+/** carte de type désactivée : tous les endpoints présents derrière elle sont pleins ; un type sans endpoint est ignoré */
 export const isServiceTypeFull = (endpoints: DatastoreEndpoint[] | undefined, type: ServiceType): boolean => {
     if (!endpoints) return false;
     const present = presentEndpoints(endpoints, type);
@@ -80,10 +80,7 @@ export const isDatastoreFull = (endpoints: DatastoreEndpoint[] | undefined): boo
 /** endpoints pleins derrière la carte de type, ouvert avant privé */
 export const fullServiceEndpoints = (endpoints: DatastoreEndpoint[] | undefined, type: ServiceType) =>
     endpointTypesOf(type).flatMap((configurationType) =>
-        [true, false].flatMap((open) => {
-            const item = endpoints && endpointFor(endpoints, configurationType, open);
-            return item && isFull(item) ? [{ configurationType, open }] : [];
-        })
+        [true, false].flatMap((open) => (isEndpointFull(endpoints, configurationType, open) ? [{ configurationType, open }] : []))
     );
 
 /** même regex que WfsTableFormDTO : nom technique d’une table WFS en minuscules */

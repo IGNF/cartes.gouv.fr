@@ -22,7 +22,7 @@ import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetQueryOptions } from "@/hooks/queries/datasheetQueryOptions";
 import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
-import { datastoreEndpointsQueryOptions, freshEndpoints } from "@/hooks/queries/datastoreEndpointsQueryOptions";
+import { freshEndpoints, quotaEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { serviceQueryOptions } from "@/hooks/queries/serviceQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
 import useExploreMapsClock from "@/hooks/useExploreMapsClock";
@@ -179,14 +179,8 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
 
     const services = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName)).data?.services;
     const { data: datasheet } = useQuery(datasheetQueryOptions(datastoreId, datasheetName));
-    // échec immédiat, même hors ligne : seul l’accès enregistré est alors proposé
-    const endpointsQuery = useQuery({
-        ...datastoreEndpointsQueryOptions(datastoreId),
-        enabled: editable,
-        retry: false,
-        networkMode: "always",
-        refetchOnReconnect: true,
-    });
+    // lecture en échec : seul l’accès enregistré est proposé
+    const endpointsQuery = useQuery({ ...quotaEndpointsQueryOptions(datastoreId), enabled: editable });
     // refus affiché en haut de page, près du bouton « Enregistrer »
     const [switchRefused, setSwitchRefused] = useState(false);
 

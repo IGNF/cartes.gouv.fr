@@ -12,6 +12,11 @@ export function datastoreEndpointsQueryOptions(datastoreId: string) {
     });
 }
 
+/** lecture des quotas avant publication : échec immédiat, même hors ligne, plutôt que des relances ; à lire avec `freshEndpoints` */
+export function quotaEndpointsQueryOptions(datastoreId: string) {
+    return queryOptions({ ...datastoreEndpointsQueryOptions(datastoreId), retry: false, networkMode: "always", refetchOnReconnect: true });
+}
+
 /** endpoints relus avec succès depuis le montage : la copie persistée (localStorage) peut dater de 24 h */
 export const freshEndpoints = (query: UseQueryResult<DatastoreEndpoint[]>): DatastoreEndpoint[] | undefined =>
     query.isSuccess && query.isFetchedAfterMount ? query.data : undefined;

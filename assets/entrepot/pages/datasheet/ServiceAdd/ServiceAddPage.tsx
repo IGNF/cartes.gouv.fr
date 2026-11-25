@@ -10,7 +10,7 @@ import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
-import { datastoreEndpointsQueryOptions, freshEndpoints } from "@/hooks/queries/datastoreEndpointsQueryOptions";
+import { freshEndpoints, quotaEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -31,9 +31,8 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     const { t } = useTranslation("ServiceForm");
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    // un échec ne bloque pas la page : sans quotas plutôt que des relances, ou une attente sans fin hors ligne
-    const endpointsQuery = useQuery({ ...datastoreEndpointsQueryOptions(datastoreId), retry: false, networkMode: "always", refetchOnReconnect: true });
     // lecture en échec : la page fait sans quotas
+    const endpointsQuery = useQuery(quotaEndpointsQueryOptions(datastoreId));
     const endpoints = freshEndpoints(endpointsQuery);
     const [type, setType] = useState(initialType);
 
