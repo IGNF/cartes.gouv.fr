@@ -33,9 +33,10 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     const navigate = useNavigate();
     const endpointsQuery = useQuery(datastoreEndpointsQueryOptions(datastoreId));
     // type de départ fixé une fois les endpoints relus (le cache persisté peut dater) : un type qui se remplit ensuite reste coché
+    // lecture en échec : la copie persistée peut dater, la page fait sans quotas
+    const endpoints = endpointsQuery.isSuccess ? endpointsQuery.data : undefined;
     const [selectedType, setSelectedType] = useState<ServiceType>();
-    if (selectedType === undefined && endpointsQuery.isFetchedAfterMount)
-        setSelectedType(startServiceType(endpointsQuery.isSuccess ? endpointsQuery.data : undefined, initialType));
+    if (selectedType === undefined && endpointsQuery.isFetchedAfterMount) setSelectedType(startServiceType(endpoints, initialType));
     const type = selectedType ?? initialType;
 
     const datasheetQuery = useQuery<DatasheetDetailed, ApiError>({
@@ -107,6 +108,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
                     datastoreId={datastoreId}
                     datasheetName={datasheetName}
                     datasheet={datasheetQuery.data}
+                    endpoints={endpoints}
                     type={type}
                     onTypeChange={setSelectedType}
                     onSubmit={(values) => publishMutation.mutateAsync(values)}

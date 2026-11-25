@@ -16,7 +16,6 @@ type AccessSectionProps = {
     logoUrl?: string;
     /** accès enregistré d’un flux publié : avertissement quand il passe de libre à restreint, ou l’inverse */
     savedAccess?: ServiceAccess;
-    /** alerte de quota affichée sous les accès */
     alert?: ReactNode;
 };
 

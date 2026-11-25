@@ -9,8 +9,10 @@ import { type SldError, validateSld } from "./validateSld";
 
 type T = TranslationFunction<"ServiceForm", ComponentKey>;
 
+type ServiceEndpointType = ConfigurationTypeEnum.WFS | ConfigurationTypeEnum.WMSVECTOR | ConfigurationTypeEnum.WMSRASTER | ConfigurationTypeEnum.WMTSTMS;
+
 /** type de configuration Entrepôt (et d’endpoint) du type de flux */
-export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeEnum> = {
+export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ServiceEndpointType> = {
     wfs: ConfigurationTypeEnum.WFS,
     wms: ConfigurationTypeEnum.WMSVECTOR,
     tms: ConfigurationTypeEnum.WMTSTMS,
@@ -21,7 +23,7 @@ export const SERVICE_CONFIGURATION_TYPES: Record<ServiceType, ConfigurationTypeE
 export const isRasterPyramid = (datasheet: DatasheetDetailed | undefined, storedDataId: string): boolean =>
     (datasheet?.pyramid_raster_list ?? []).some((item) => item._id === storedDataId);
 
-export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean): ConfigurationTypeEnum =>
+export const configurationTypeFor = (type: ServiceType, rasterPyramid: boolean): ServiceEndpointType =>
     type === "wms" && rasterPyramid ? ConfigurationTypeEnum.WMSRASTER : SERVICE_CONFIGURATION_TYPES[type];
 
 /** tables à choisir : WFS, WMS sur une base vecteur ; ni WMS raster, ni WMTS, ni TMS */
@@ -37,7 +39,6 @@ const isFull = (item: DatastoreEndpoint) => item.use >= item.quota;
 const endpointFor = (endpoints: DatastoreEndpoint[], configurationType: ConfigurationTypeEnum, open: boolean) =>
     endpoints.find((item) => item.endpoint.type.toUpperCase() === configurationType && item.endpoint.open === open);
 
-/** endpoint de ce type et de cette ouverture présent et plein */
 export const isEndpointFull = (endpoints: DatastoreEndpoint[] | undefined, configurationType: ConfigurationTypeEnum, open: boolean): boolean => {
     const item = endpoints && endpointFor(endpoints, configurationType, open);
     return item !== undefined && isFull(item);
@@ -60,10 +61,8 @@ export const availableServiceAccesses = (
     return SERVICE_ACCESSES.filter((access) => usable(access === "public"));
 };
 
-export type ServiceEndpointType = ConfigurationTypeEnum.WFS | ConfigurationTypeEnum.WMSVECTOR | ConfigurationTypeEnum.WMSRASTER | ConfigurationTypeEnum.WMTSTMS;
-
 // WMS : vecteur ou raster selon la donnée choisie
-const endpointTypesOf = (type: ServiceType) => [...new Set([false, true].map((raster) => configurationTypeFor(type, raster) as ServiceEndpointType))];
+const endpointTypesOf = (type: ServiceType) => [...new Set([false, true].map((raster) => configurationTypeFor(type, raster)))];
 
 /** carte de type désactivée : tous les endpoints présents derrière elle sont pleins ; un type sans endpoint est ignoré */
 export const isServiceTypeFull = (endpoints: DatastoreEndpoint[] | undefined, type: ServiceType): boolean => {

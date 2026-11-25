@@ -17,9 +17,7 @@ const dataKinds: Record<ServiceType, ("vector" | "raster")[]> = {
 type ServiceTypeSectionProps = {
     value: ServiceType;
     onChange: (type: ServiceType) => void;
-    /** types dont les endpoints sont tous pleins */
     disabledTypes: readonly ServiceType[];
-    /** alerte de quota affichée sous les cartes */
     alert?: ReactNode;
 };
 

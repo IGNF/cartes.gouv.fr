@@ -6,9 +6,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { type DatasheetDetailed, StoredDataStatusEnum } from "@/@types/app";
+import { type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum } from "@/@types/app";
 import api from "@/entrepot/api";
-import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
 import useServiceRights from "@/hooks/useServiceRights";
@@ -48,6 +47,8 @@ type ServiceFormProps = {
     datastoreId: string;
     datasheetName: string;
     datasheet: DatasheetDetailed;
+    /** endpoints relus par la page ; absents si la lecture a échoué : le formulaire fait alors sans quotas */
+    endpoints: DatastoreEndpoint[] | undefined;
     /** type de flux tenu par la page : il décide des requêtes et du schéma */
     type: ServiceType;
     onTypeChange: (type: ServiceType) => void;
@@ -55,7 +56,7 @@ type ServiceFormProps = {
     onSubmit: (values: ServiceFormOutput) => Promise<unknown>;
 };
 
-export default function ServiceForm({ datastoreId, datasheetName, datasheet, type, onTypeChange, onSubmit }: ServiceFormProps) {
+export default function ServiceForm({ datastoreId, datasheetName, datasheet, endpoints, type, onTypeChange, onSubmit }: ServiceFormProps) {
     const { t } = useTranslation("ServiceForm");
     const queryClient = useQueryClient();
     // tenu à part : le schéma en dépend et se construit avant le formulaire
@@ -73,9 +74,6 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, configurationType, { signal }),
         staleTime: delta.minutes(1),
     });
-    const endpointsQuery = useQuery(datastoreEndpointsQueryOptions(datastoreId));
-    // lecture en échec : la copie persistée peut dater, le formulaire fait sans quotas
-    const endpoints = endpointsQuery.isSuccess ? endpointsQuery.data : undefined;
 
     const disabledTypes = useMemo(() => SERVICE_TYPES.filter((serviceType) => isServiceTypeFull(endpoints, serviceType)), [endpoints]);
     const allFull = disabledTypes.length === SERVICE_TYPES.length;
