@@ -18,6 +18,8 @@ const valid = (): MetadataFormValues => ({
     file_identifier: "ign.fiche",
     producers: [{ organization_name: "Organisme", organization_email: "orga@example.test", role: "pointOfContact", address_postal_code: "" }],
     date_creation: new Date(2026, 0, 15, 0, 30),
+    date_publication: new Date(2026, 1, 1),
+    date_revision: new Date(2026, 2, 1),
     update_frequency: "monthly",
     territories: [{ id: "COMMUNE_TEST_1", title: "Commune test", bbox: [2.25, 48.8, 2.45, 48.9] }],
     scale: 25000,
@@ -131,11 +133,15 @@ describe("buildMetadataFormData", () => {
         const formData = buildMetadataFormData(await schema().parseAsync({ ...valid(), thumbnail: null }));
         const data = JSON.parse(formData.get("data") as string) as {
             date_creation: string;
+            date_publication: string;
+            date_revision: string;
             producers: { role: string }[];
             resource_constraints: { constraints: object[] }[];
         };
 
         expect(data.date_creation).toBe("2026-01-15");
+        expect(data.date_publication).toBe("2026-02-01");
+        expect(data.date_revision).toBe("2026-03-01");
         expect(data.producers.map((producer) => producer.role)).toEqual(["pointOfContact", "custodian", "contact"]);
         expect(data.resource_constraints[0].constraints).toEqual([
             { type: "useConstraints", restriction_code: "license" },
@@ -172,6 +178,9 @@ describe("withLockedFlags et mapMetadataToFormValues", () => {
         );
 
         expect(values.date_creation?.getDate()).toBe(15);
+        // dates absentes de la fiche : préremplies à aujourd’hui
+        expect(values.date_publication?.toDateString()).toBe(new Date().toDateString());
+        expect(values.date_revision?.toDateString()).toBe(new Date().toDateString());
         expect(values.name).toBe("Fiche");
         expect(values.resource_constraints?.[0].constraints[0]).toEqual({ type: "useLimitation", url: "", description: "Usage interne", locked: true });
     });

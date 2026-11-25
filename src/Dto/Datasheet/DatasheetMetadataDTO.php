@@ -79,6 +79,14 @@ class DatasheetMetadataDTO
         #[Assert\Date(message: 'La date de création {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
         public readonly string $date_creation = '',
 
+        #[Assert\NotBlank(message: 'La date de publication est obligatoire')]
+        #[Assert\Date(message: 'La date de publication {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
+        public readonly string $date_publication = '',
+
+        #[Assert\NotBlank(message: 'La date de révision est obligatoire')]
+        #[Assert\Date(message: 'La date de révision {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
+        public readonly string $date_revision = '',
+
         #[Assert\NotBlank(message: 'La fréquence de mise à jour est obligatoire')]
         #[Assert\Choice(choices: self::UPDATE_FREQUENCIES, message: 'La fréquence de mise à jour est invalide')]
         public readonly string $update_frequency = '',

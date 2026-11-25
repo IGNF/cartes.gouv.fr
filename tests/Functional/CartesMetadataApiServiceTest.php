@@ -319,6 +319,8 @@ final class CartesMetadataApiServiceTest extends KernelTestCase
             file_identifier: $fileIdentifier,
             producers: [new ProducerDTO('Organisme', 'orga@example.test', 'pointOfContact')],
             date_creation: '2026-01-15',
+            date_publication: '2026-02-01',
+            date_revision: '2026-03-01',
             update_frequency: 'monthly',
             territories: [new TerritoryDTO('COMMUNE_TEST_1', 'Commune test', [2.25, 48.8, 2.45, 48.9])],
             scale: 25000,

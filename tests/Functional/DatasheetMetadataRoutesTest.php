@@ -104,6 +104,8 @@ final class DatasheetMetadataRoutesTest extends WebTestCase
             'file_identifier' => 'ign.fiche',
             'producers' => [['organization_name' => 'Organisme', 'organization_email' => 'orga@example.test', 'role' => 'pointOfContact']],
             'date_creation' => '2026-01-15',
+            'date_publication' => '2026-02-01',
+            'date_revision' => '2026-03-01',
             'update_frequency' => 'monthly',
             'territories' => [['id' => 'COMMUNE_TEST_1', 'title' => 'Commune test', 'bbox' => [2.25, 48.8, 2.45, 48.9]]],
             'scale' => 25000,

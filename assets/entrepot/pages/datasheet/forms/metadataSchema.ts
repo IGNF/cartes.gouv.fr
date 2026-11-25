@@ -205,6 +205,8 @@ export const buildMetadataSchema = ({
 
         // section dates
         date_creation: z.date(t("validation.dateCreation")),
+        date_publication: z.date(t("validation.datePublication")),
+        date_revision: z.date(t("validation.dateRevision")),
         update_frequency: z.enum(UPDATE_FREQUENCIES, t("validation.updateFrequency")),
 
         // section emprise spatiale
@@ -256,6 +258,8 @@ export const defaultMetadataValues: Partial<MetadataFormValues> = {
     hierarchy_level: MetadataHierarchyLevel.Dataset,
     charset: "utf8",
     date_creation: new Date(),
+    date_publication: new Date(),
+    date_revision: new Date(),
     language: { code: "fre", language: "français" },
 };
 
@@ -351,13 +355,15 @@ function withPointOfContactCopies(producers: MetadataValues["producers"]): Metad
  * fichier `thumbnail` pour remplacer la vignette, champ `delete_thumbnail` pour la supprimer.
  */
 export function buildMetadataFormData(values: MetadataValues): FormData {
-    const { thumbnail, date_creation, producers, resource_constraints, ...rest } = values;
+    const { thumbnail, date_creation, date_publication, date_revision, producers, resource_constraints, ...rest } = values;
 
     const data = {
         ...rest,
         producers: withPointOfContactCopies(producers),
         // date locale (B4) : toISOString décalerait d’un jour avant 2 h du matin en heure d’été
         date_creation: format(date_creation, "yyyy-MM-dd"),
+        date_publication: format(date_publication, "yyyy-MM-dd"),
+        date_revision: format(date_revision, "yyyy-MM-dd"),
         resource_constraints: resource_constraints.map((condition) => ({
             type: condition.type,
             constraints: condition.constraints.map(({ locked: _locked, ...sub }) => ("url" in sub && sub.url === "" ? { ...sub, url: undefined } : sub)),
@@ -375,13 +381,18 @@ export function buildMetadataFormData(values: MetadataValues): FormData {
     return formData;
 }
 
+// date absente ou illisible de la fiche : préremplie à aujourd’hui comme en création
+function parseDateOrToday(value: string | undefined): Date {
+    const date = value ? parseISO(value) : undefined;
+    return date && isValid(date) ? date : new Date();
+}
+
 /** Valeurs initiales du formulaire en modification, depuis la fiche de métadonnées lue par le serveur */
 export function mapMetadataToFormValues(csw: CswMetadata | undefined, datasheetName: string): Partial<MetadataFormValues> {
     if (csw === undefined) {
         return { ...defaultMetadataValues, name: datasheetName };
     }
 
-    const dateCreation = csw.date_creation ? parseISO(csw.date_creation) : undefined;
     const producers = (csw.producers ?? []).map((producer) => ({
         organization_name: producer.organization_name,
         organization_email: producer.organization_email,
@@ -403,7 +414,9 @@ export function mapMetadataToFormValues(csw: CswMetadata | undefined, datasheetN
         // fiche sans point de contact (fichier ancien) : carte vide en tête, à compléter
         producers:
             producers[0]?.role === "pointOfContact" ? producers : [{ organization_name: "", organization_email: "", role: "pointOfContact" }, ...producers],
-        date_creation: dateCreation && isValid(dateCreation) ? dateCreation : undefined,
+        date_creation: parseDateOrToday(csw.date_creation),
+        date_publication: parseDateOrToday(csw.date_publication),
+        date_revision: parseDateOrToday(csw.date_revision),
         update_frequency: (UPDATE_FREQUENCIES as readonly string[]).includes(csw.update_frequency ?? "")
             ? (csw.update_frequency as UpdateFrequency)
             : undefined,
