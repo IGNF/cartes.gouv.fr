@@ -1,4 +1,4 @@
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, type UseQueryResult } from "@tanstack/react-query";
 
 import { DatastoreEndpoint } from "@/@types/app";
 import api from "@/entrepot/api";
@@ -11,3 +11,7 @@ export function datastoreEndpointsQueryOptions(datastoreId: string) {
         queryFn: ({ signal }) => api.datastore.getEndpoints(datastoreId, {}, { signal }),
     });
 }
+
+/** endpoints relus avec succès depuis le montage : la copie persistée (localStorage) peut dater de 24 h */
+export const freshEndpoints = (query: UseQueryResult<DatastoreEndpoint[]>): DatastoreEndpoint[] | undefined =>
+    query.isSuccess && query.isFetchedAfterMount ? query.data : undefined;

@@ -3,7 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import ImageFieldUpload from "@/components/Input/ImageFieldUpload";
@@ -24,10 +24,17 @@ export default function AccessSection({ availableAccesses, logoUrl, savedAccess,
     const {
         register,
         control,
+        getValues,
+        resetField,
         formState: { errors },
     } = useFormContext<ServiceFormValues>();
     const attributionEnabled = useWatch({ control, name: "attribution.enabled" });
     const access = useWatch({ control, name: "access" });
+    // accès coché devenu indisponible (type, donnée ou relecture des endpoints) : décoché, ou accès enregistré en modification
+    useEffect(() => {
+        const checked = getValues("access");
+        if (checked && !availableAccesses.includes(checked)) resetField("access");
+    }, [availableAccesses, getValues, resetField]);
     const endpointChange = savedAccess !== undefined && (savedAccess === "public") !== (access === "public");
 
     return (

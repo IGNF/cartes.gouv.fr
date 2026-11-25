@@ -22,7 +22,7 @@ import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetQueryOptions } from "@/hooks/queries/datasheetQueryOptions";
 import { datasheetServiceListQueryOptions } from "@/hooks/queries/datasheetServiceListQueryOptions";
-import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
+import { datastoreEndpointsQueryOptions, freshEndpoints } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { serviceQueryOptions } from "@/hooks/queries/serviceQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
 import useExploreMapsClock from "@/hooks/useExploreMapsClock";
@@ -211,8 +211,8 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
         );
     }, [configuration.styles, values.tables]);
 
-    // relus avec succès par cette page seulement : changer d’endpoint supprime l’offre avant de la recréer
-    const endpoints = endpointsQuery.isSuccess && endpointsQuery.isFetchedAfterMount ? endpointsQuery.data : undefined;
+    // changer d’endpoint supprime l’offre avant de la recréer : jamais de données périmées
+    const endpoints = freshEndpoints(endpointsQuery);
     // l’accès enregistré reste proposé : le flux tient déjà sa place sur son endpoint
     const availableAccesses = useMemo(
         () => availableServiceAccesses(endpoints, configuration.type, values.access),
@@ -294,6 +294,14 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
     useIsModalOpen(leaveModal, { onConceal: () => blocker.reset?.() });
 
     const submit = form.handleSubmit(async (formValues) => {
+        // changement d’endpoint : quotas relus juste avant, la page a pu rester ouverte longtemps
+        if ((formValues.access === "public") !== savedOpen) {
+            const { data, isSuccess } = await endpointsQuery.refetch();
+            if (!isSuccess || isEndpointFull(data, configuration.type, !savedOpen)) {
+                form.setError("access", { message: tForm("validation.access.unavailable") });
+                return;
+            }
+        }
         try {
             await editMutation.mutateAsync(formValues);
         } catch (error) {

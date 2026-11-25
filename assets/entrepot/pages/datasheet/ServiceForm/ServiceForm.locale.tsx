@@ -188,7 +188,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "type.raster": "Raster",
     "type.quota_reached": "Quota atteint",
     "quota.full": ({ service, access }) => `Le quota des ${service} en accès ${access} est atteint.`,
-    "quota.switch_full": ({ access }) => `Le quota des flux en accès ${access} est atteint : impossible de changer d’accès.`,
+    "quota.switch_full": ({ access }) => `Le quota des flux en accès ${access} est atteint.`,
     "quota.all_full":
         "Les quotas de publication de cet entrepôt sont atteints pour tous les types de flux. Supprimez un flux existant ou contactez le support afin de demander plus de quota.",
     "quota.service.WFS": "flux WFS",
@@ -344,7 +344,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "type.raster": "Raster",
     "type.quota_reached": "Quota reached",
     "quota.full": ({ service, access }) => `The quota for ${service} with ${access} access is reached.`,
-    "quota.switch_full": ({ access }) => `The quota for services with ${access} access is reached: the access cannot be changed.`,
+    "quota.switch_full": ({ access }) => `The quota for services with ${access} access is reached.`,
     "quota.all_full":
         "This datastore has reached its publication quotas for every service type. Delete an existing service or contact support to request more quota.",
     "quota.service.WFS": "WFS services",

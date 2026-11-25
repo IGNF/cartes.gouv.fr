@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { ConfigurationTypeEnum, type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum } from "@/@types/app";
+import { type DatasheetDetailed, type DatastoreEndpoint, StoredDataStatusEnum } from "@/@types/app";
 import api from "@/entrepot/api";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
 import { vectorDbQueryOptions } from "@/hooks/queries/vectorDbQueryOptions";
@@ -100,13 +100,7 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, end
         reValidateMode: "onBlur",
         defaultValues: serviceFormDefaultValues,
     });
-    const { handleSubmit, setError, setValue, getValues, resetField, control } = form;
-
-    // un accès coché que le nouveau type d’endpoint n’offre pas est décoché
-    const clearUnavailableAccess = (nextConfigurationType: ConfigurationTypeEnum) => {
-        const access = getValues("access");
-        if (access && !availableServiceAccesses(endpoints, nextConfigurationType).includes(access)) resetField("access");
-    };
+    const { handleSubmit, setError, setValue, getValues, control } = form;
 
     const storedDataId = useWatch({ control, name: "stored_data_id" });
     const vectorDbQuery = useQuery(vectorDbQueryOptions(datastoreId, withTables ? storedDataId : ""));
@@ -117,7 +111,6 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, end
         setValue("tables", []);
         const raster = isRasterPyramid(datasheet, id);
         setRasterPyramidSelected(raster);
-        clearUnavailableAccess(configurationTypeFor(type, raster));
         if (id === "" || !hasTables(type, raster)) return;
         queryClient
             .query(vectorDbQueryOptions(datastoreId, id))
@@ -134,7 +127,6 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, end
         setValue("stored_data_id", "");
         setValue("tables", []);
         setRasterPyramidSelected(false);
-        clearUnavailableAccess(configurationTypeFor(next, false));
         onTypeChange(next);
     };
 
