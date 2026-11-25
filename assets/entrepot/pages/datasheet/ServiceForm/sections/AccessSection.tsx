@@ -3,6 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { type ReactNode } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import ImageFieldUpload from "@/components/Input/ImageFieldUpload";
@@ -15,9 +16,11 @@ type AccessSectionProps = {
     logoUrl?: string;
     /** accès enregistré d’un flux publié : avertissement quand il passe de libre à restreint, ou l’inverse */
     savedAccess?: ServiceAccess;
+    /** alerte de quota affichée sous les accès */
+    alert?: ReactNode;
 };
 
-export default function AccessSection({ availableAccesses, logoUrl, savedAccess }: AccessSectionProps) {
+export default function AccessSection({ availableAccesses, logoUrl, savedAccess, alert }: AccessSectionProps) {
     const { t } = useTranslation("ServiceForm");
     const {
         register,
@@ -40,6 +43,7 @@ export default function AccessSection({ availableAccesses, logoUrl, savedAccess 
                     nativeInputProps: { ...register("access"), value: access, disabled: !availableAccesses.includes(access) },
                 }))}
             />
+            {alert && <div className={fr.cx("fr-mb-3w")}>{alert}</div>}
             {endpointChange && (
                 <Alert
                     className={fr.cx("fr-mb-3w")}

@@ -10,13 +10,14 @@ import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { datasheetMetadataQueryOptions } from "@/hooks/queries/datasheetMetadataQueryOptions";
+import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { useTranslation } from "@/i18n";
 import { getApiErrorMessage } from "@/modules/apiError";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { type ApiError } from "@/modules/jsonFetch";
 import { buildServiceFormData } from "../ServiceForm/buildServiceFormData";
 import ServiceForm from "../ServiceForm/ServiceForm";
-import { configurationTypeFor, isRasterPyramid, type ServiceFormOutput, type ServiceType } from "../ServiceForm/serviceFormSchema";
+import { configurationTypeFor, isRasterPyramid, type ServiceFormOutput, type ServiceType, startServiceType } from "../ServiceForm/serviceFormSchema";
 
 type ServiceAddPageProps = {
     datastoreId: string;
@@ -30,7 +31,11 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     const { t } = useTranslation("ServiceForm");
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const [type, setType] = useState(initialType);
+    const endpointsQuery = useQuery(datastoreEndpointsQueryOptions(datastoreId));
+    // type de départ fixé une fois les endpoints relus (le cache persisté peut dater) : un type qui se remplit ensuite reste coché
+    const [chosenType, setChosenType] = useState<ServiceType>();
+    if (chosenType === undefined && endpointsQuery.isFetchedAfterMount) setChosenType(startServiceType(endpointsQuery.data, initialType));
+    const type = chosenType ?? initialType;
 
     const datasheetQuery = useQuery<DatasheetDetailed, ApiError>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
@@ -62,7 +67,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     });
 
     const renderContent = () => {
-        if (datasheetQuery.isPending || metadataQuery.isPending) {
+        if (datasheetQuery.isPending || metadataQuery.isPending || chosenType === undefined) {
             return <LoadingText as="p" message={t("loading")} withSpinnerIcon />;
         }
         if (datasheetQuery.isError) {
@@ -102,7 +107,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
                     datasheetName={datasheetName}
                     datasheet={datasheetQuery.data}
                     type={type}
-                    onTypeChange={setType}
+                    onTypeChange={setChosenType}
                     onSubmit={(values) => publishMutation.mutateAsync(values)}
                 />
             </>

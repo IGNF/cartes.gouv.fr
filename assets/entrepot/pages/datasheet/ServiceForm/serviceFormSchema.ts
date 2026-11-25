@@ -30,14 +30,79 @@ export const hasTables = (type: ServiceType, rasterPyramid: boolean): boolean =>
 export { SERVICE_ACCESSES, type ServiceAccess };
 export { SERVICE_TYPES, type ServiceType };
 
-/** accès offerts par les endpoints de l’entrepôt pour ce type de configuration ; tous tant que les endpoints ne sont pas lus (le back refuse un accès sans endpoint) */
-export const availableServiceAccesses = (endpoints: DatastoreEndpoint[] | undefined, configurationType: ConfigurationTypeEnum): readonly ServiceAccess[] => {
-    if (!endpoints) return SERVICE_ACCESSES;
-    const ofType = endpoints.filter((item) => item.endpoint.type.toUpperCase() === configurationType);
-    const hasOpen = ofType.some((item) => item.endpoint.open);
-    const hasPrivate = ofType.some((item) => !item.endpoint.open);
-    return SERVICE_ACCESSES.filter((access) => (access === "public" ? hasOpen : hasPrivate));
+const isFull = (item: DatastoreEndpoint) => item.use >= item.quota;
+
+// premier endpoint du type et de l’ouverture, comme le back
+const endpointFor = (endpoints: DatastoreEndpoint[], configurationType: ConfigurationTypeEnum, open: boolean) =>
+    endpoints.find((item) => item.endpoint.type.toUpperCase() === configurationType && item.endpoint.open === open);
+
+/** endpoint de ce type et de cette ouverture présent et plein */
+export const isEndpointFull = (endpoints: DatastoreEndpoint[] | undefined, configurationType: ConfigurationTypeEnum, open: boolean): boolean => {
+    const item = endpoints && endpointFor(endpoints, configurationType, open);
+    return item !== undefined && isFull(item);
 };
+
+/**
+ * accès offerts par les endpoints non pleins de l’entrepôt pour ce type de configuration (le back refuse un accès sans endpoint) ;
+ * `savedAccess` : l’endpoint du flux enregistré reste proposé, et seul lui tant que les endpoints ne sont pas lus
+ */
+export const availableServiceAccesses = (
+    endpoints: DatastoreEndpoint[] | undefined,
+    configurationType: ConfigurationTypeEnum,
+    savedAccess?: ServiceAccess
+): readonly ServiceAccess[] => {
+    const savedOpen = savedAccess === undefined ? undefined : savedAccess === "public";
+    const usable = (open: boolean) => {
+        if (open === savedOpen) return true;
+        if (!endpoints) return savedOpen === undefined;
+        const item = endpointFor(endpoints, configurationType, open);
+        return item !== undefined && !isFull(item);
+    };
+    return SERVICE_ACCESSES.filter((access) => usable(access === "public"));
+};
+
+/** types d’endpoint qu’un flux du formulaire peut utiliser */
+export type ServiceEndpointType = ConfigurationTypeEnum.WFS | ConfigurationTypeEnum.WMSVECTOR | ConfigurationTypeEnum.WMSRASTER | ConfigurationTypeEnum.WMTSTMS;
+
+// WMS : vecteur ou raster selon la donnée choisie
+const endpointTypesOf = (type: ServiceType) => [...new Set([false, true].map((raster) => configurationTypeFor(type, raster) as ServiceEndpointType))];
+
+/** carte de type désactivée : tous les endpoints présents derrière elle sont pleins ; un type sans endpoint est ignoré */
+export const isServiceTypeFull = (endpoints: DatastoreEndpoint[] | undefined, type: ServiceType): boolean => {
+    if (!endpoints) return false;
+    const present = endpointTypesOf(type).flatMap((configurationType) =>
+        [true, false].flatMap((open) => endpointFor(endpoints, configurationType, open) ?? [])
+    );
+    return present.length > 0 && present.every(isFull);
+};
+
+export type ServiceQuotaWarning = {
+    configurationType: ServiceEndpointType;
+    open: boolean;
+    remaining: number;
+    full: boolean;
+    /** l’endpoint de l’autre ouverture existe et n’est pas plein */
+    otherAvailable: boolean;
+};
+
+/** endpoints à 90 % ou plus derrière la carte de type, ouvert avant privé ; une seule entrée par type quand les deux sont pleins */
+export const serviceQuotaWarnings = (endpoints: DatastoreEndpoint[] | undefined, type: ServiceType): ServiceQuotaWarning[] => {
+    if (!endpoints) return [];
+    return endpointTypesOf(type).flatMap((configurationType) =>
+        [true, false].flatMap((open) => {
+            const item = endpointFor(endpoints, configurationType, open);
+            if (!item || item.use < 0.9 * item.quota) return [];
+            const other = endpointFor(endpoints, configurationType, !open);
+            // les deux pleins : l’entrée de l’endpoint ouvert suffit
+            if (!open && isFull(item) && other && isFull(other)) return [];
+            return [{ configurationType, open, remaining: Math.max(0, item.quota - item.use), full: isFull(item), otherAvailable: !!other && !isFull(other) }];
+        })
+    );
+};
+
+/** type coché à l’ouverture du formulaire : celui demandé, sinon le premier qui a de la place, sinon celui demandé */
+export const startServiceType = (endpoints: DatastoreEndpoint[] | undefined, requested: ServiceType): ServiceType =>
+    isServiceTypeFull(endpoints, requested) ? (SERVICE_TYPES.find((type) => !isServiceTypeFull(endpoints, type)) ?? requested) : requested;
 
 /** même regex que WfsTableFormDTO : nom technique d’une table WFS en minuscules */
 export const WFS_TABLE_TECHNICAL_NAME_REGEX = /^[a-z_][a-z0-9_.-]*$/;

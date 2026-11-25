@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,7 +34,10 @@ import {
     configurationTypeFor,
     hasTables,
     isRasterPyramid,
+    isServiceTypeFull,
+    SERVICE_TYPES,
     serviceFormDefaultValues,
+    serviceQuotaWarnings,
     type ServiceFormOutput,
     type ServiceFormValues,
     type ServiceType,
@@ -70,6 +74,10 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
         staleTime: delta.minutes(1),
     });
     const endpointsQuery = useQuery(datastoreEndpointsQueryOptions(datastoreId));
+
+    const disabledTypes = useMemo(() => SERVICE_TYPES.filter((serviceType) => isServiceTypeFull(endpointsQuery.data, serviceType)), [endpointsQuery.data]);
+    const allFull = disabledTypes.length === SERVICE_TYPES.length;
+    const quotaWarnings = serviceQuotaWarnings(endpointsQuery.data, type);
 
     const availableAccesses = useMemo(() => availableServiceAccesses(endpointsQuery.data, configurationType), [endpointsQuery.data, configurationType]);
 
@@ -141,7 +149,39 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
             <form onSubmit={(e) => void submit(e)} noValidate>
                 <MetadataSectionsContainer>
                     <MetadataSection title={t("section.type")}>
-                        <ServiceTypeSection value={type} onChange={changeType} />
+                        <ServiceTypeSection value={type} onChange={changeType} disabledTypes={disabledTypes}>
+                            {allFull ? (
+                                <Alert severity="warning" small description={t("quota.all_full")} />
+                            ) : (
+                                quotaWarnings.length > 0 && (
+                                    <Alert
+                                        severity="warning"
+                                        small
+                                        description={
+                                            <ul className={fr.cx("fr-raw-list")}>
+                                                {quotaWarnings.map((warning) => {
+                                                    const service = t(`quota.service.${warning.configurationType}`);
+                                                    const access = t(warning.open ? "quota.access.open" : "quota.access.private");
+                                                    return (
+                                                        <li key={`${warning.configurationType}-${warning.open}`}>
+                                                            {!warning.full
+                                                                ? t("quota.near", { remaining: warning.remaining, service, access })
+                                                                : warning.otherAvailable
+                                                                  ? t("quota.full", {
+                                                                        service,
+                                                                        access,
+                                                                        other: t(warning.open ? "quota.access.private" : "quota.access.open"),
+                                                                    })
+                                                                  : t("quota.full_both", { service })}
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
+                                        }
+                                    />
+                                )
+                            )}
+                        </ServiceTypeSection>
                     </MetadataSection>
                     <MetadataSection title={t("section.description")}>
                         <ServiceDescriptionSection
@@ -198,7 +238,8 @@ export default function ServiceForm({ datastoreId, datasheetName, datasheet, typ
                                 search: { activeTab: "services" },
                             },
                         },
-                        { children: t("submit"), type: "submit" },
+                        // quotas tous atteints : rien à publier
+                        ...(allFull ? [] : [{ children: t("submit"), type: "submit" as const }]),
                     ]}
                     inlineLayoutWhen="always"
                     alignment="right"

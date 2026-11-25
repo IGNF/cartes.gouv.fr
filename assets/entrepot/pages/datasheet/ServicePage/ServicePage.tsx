@@ -56,6 +56,7 @@ import TablesSection from "../ServiceForm/sections/TablesSection";
 import {
     availableServiceAccesses,
     buildServiceEditFormSchema,
+    isEndpointFull,
     SERVICE_ACCESSES,
     type ServiceEditFormOutput,
     type ServiceEditFormValues,
@@ -210,16 +211,26 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
         );
     }, [configuration.styles, values.tables]);
 
+    // relus par cette page seulement : changer d’endpoint supprime l’offre avant de la recréer
+    const endpoints = endpointsQuery.isFetchedAfterMount ? endpointsQuery.data : undefined;
+    // l’accès enregistré reste proposé : le flux tient déjà sa place sur son endpoint
+    const availableAccesses = useMemo(
+        () => availableServiceAccesses(endpoints, configuration.type, values.access),
+        [endpoints, configuration.type, values.access]
+    );
+    const savedOpen = values.access === "public";
+    const switchFull = editable && isEndpointFull(endpoints, configuration.type, !savedOpen);
+
     const schema = useMemo(
         () =>
             buildServiceEditFormSchema({
                 t: tForm,
                 type: formType,
                 rasterPyramid,
-                availableAccesses: availableServiceAccesses(endpointsQuery.data, configuration.type),
+                availableAccesses,
                 savedTablePublicNames,
             }),
-        [tForm, formType, rasterPyramid, endpointsQuery.data, configuration.type, savedTablePublicNames]
+        [tForm, formType, rasterPyramid, availableAccesses, savedTablePublicNames]
     );
     const form = useForm<ServiceEditFormValues, unknown, ServiceEditFormOutput>(
         editable ? { resolver: zodResolver(schema), mode: "onSubmit", reValidateMode: "onBlur", defaultValues: values } : { values, disabled: true }
@@ -401,9 +412,20 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
                     <MetadataSection title={tForm("section.access")}>
                         <fieldset disabled={!editable} className={classes.fieldset}>
                             <AccessSection
-                                availableAccesses={editable ? availableServiceAccesses(endpointsQuery.data, configuration.type) : SERVICE_ACCESSES}
+                                availableAccesses={editable ? availableAccesses : SERVICE_ACCESSES}
                                 logoUrl={configuration.attribution?.logo?.url}
                                 savedAccess={editable ? values.access : undefined}
+                                alert={
+                                    switchFull && (
+                                        <Alert
+                                            severity="warning"
+                                            small
+                                            description={tForm("quota.switch_full", {
+                                                access: tForm(savedOpen ? "quota.access.private" : "quota.access.open"),
+                                            })}
+                                        />
+                                    )
+                                }
                             />
                         </fieldset>
                         {!service.open && !unavailable && (

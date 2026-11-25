@@ -36,6 +36,18 @@ const { i18n } = declareComponentKeys<
     | "type.wmts.description"
     | "type.vector"
     | "type.raster"
+    | "type.quota_reached"
+    | { K: "quota.near"; P: { remaining: number; service: string; access: string }; R: string }
+    | { K: "quota.full"; P: { service: string; access: string; other: string }; R: string }
+    | { K: "quota.full_both"; P: { service: string }; R: string }
+    | { K: "quota.switch_full"; P: { access: string }; R: string }
+    | "quota.all_full"
+    | "quota.service.WFS"
+    | "quota.service.WMS-VECTOR"
+    | "quota.service.WMS-RASTER"
+    | "quota.service.WMTS-TMS"
+    | "quota.access.open"
+    | "quota.access.private"
     | "stored_data.label"
     | "stored_data.label_pyramid"
     | "stored_data.placeholder"
@@ -177,6 +189,19 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "type.wmts.description": "Web Map Tile Service",
     "type.vector": "Vecteur",
     "type.raster": "Raster",
+    "type.quota_reached": "Quota atteint",
+    "quota.near": ({ remaining, service, access }) => `Il reste ${remaining} publication(s) en accès ${access} pour les ${service}.`,
+    "quota.full": ({ service, access, other }) => `Le quota des ${service} en accès ${access} est atteint : seul l’accès ${other} est possible.`,
+    "quota.full_both": ({ service }) => `Le quota des ${service} est atteint.`,
+    "quota.switch_full": ({ access }) => `Le quota des flux en accès ${access} est atteint : impossible de changer d’accès.`,
+    "quota.all_full":
+        "Les quotas de publication de cet entrepôt sont atteints pour tous les types de flux. Supprimez un flux existant ou contactez le support afin de demander plus de quota.",
+    "quota.service.WFS": "flux WFS",
+    "quota.service.WMS-VECTOR": "flux WMS vecteur",
+    "quota.service.WMS-RASTER": "flux WMS raster",
+    "quota.service.WMTS-TMS": "flux WMTS et TMS",
+    "quota.access.open": "libre",
+    "quota.access.private": "restreint",
     "stored_data.label": "Jeu de données",
     "stored_data.label_pyramid": "Pyramide de données",
     "stored_data.placeholder": "Sélectionner une option",
@@ -323,6 +348,19 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "type.wmts.description": "Web Map Tile Service",
     "type.vector": "Vector",
     "type.raster": "Raster",
+    "type.quota_reached": "Quota reached",
+    "quota.near": ({ remaining, service, access }) => `${remaining} publication(s) left with ${access} access for ${service}.`,
+    "quota.full": ({ service, access, other }) => `The quota for ${service} with ${access} access is reached: only ${other} access is possible.`,
+    "quota.full_both": ({ service }) => `The quota for ${service} is reached.`,
+    "quota.switch_full": ({ access }) => `The quota for services with ${access} access is reached: the access cannot be changed.`,
+    "quota.all_full":
+        "This datastore has reached its publication quotas for every service type. Delete an existing service or contact support to request more quota.",
+    "quota.service.WFS": "WFS services",
+    "quota.service.WMS-VECTOR": "WMS vector services",
+    "quota.service.WMS-RASTER": "WMS raster services",
+    "quota.service.WMTS-TMS": "WMTS and TMS services",
+    "quota.access.open": "open",
+    "quota.access.private": "restricted",
     "stored_data.label": "Dataset",
     "stored_data.label_pyramid": "Data pyramid",
     "stored_data.placeholder": "Select an option",
