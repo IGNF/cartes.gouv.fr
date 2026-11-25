@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Dto\Contact\ContactUsDTO;
 use App\Exception\AppException;
 use App\Security\User;
+use App\Services\GeocaptchaService;
 use App\Services\MailerService;
 use App\Services\MembershipService;
 use Psr\Log\LoggerInterface;
@@ -18,9 +20,13 @@ use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(
-    name: 'cartesgouvfr_contact_',
+    '/api/contact',
+    name: 'cartesgouvfr_api_contact_',
     options: ['expose' => true],
 )]
 class ContactController extends AbstractController
@@ -35,11 +41,10 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/contact_us',
+        '/contact-us',
         name: 'contact_us',
-        options: ['expose' => true],
         methods: ['POST'])]
-    public function contact(Request $request, RateLimiterFactory $contactUsLimiter): JsonResponse
+    public function contact(Request $request, RateLimiterFactory $contactUsLimiter, DenormalizerInterface $serializer, ValidatorInterface $validator, GeocaptchaService $geocaptchaService): JsonResponse
     {
         // avant tout contrôle : les appels de robots comptent aussi ; verrou commun, le compteur reste par adresse IP
         try {
@@ -74,33 +79,40 @@ class ContactController extends AbstractController
             return new JsonResponse();
         }
 
-        $requiredKeys = ['email_contact', 'message', 'first_name', 'last_name', 'category', 'organization'];
-        if ([] !== array_diff($requiredKeys, array_keys($data))) {
+        try {
+            $contact = $serializer->denormalize($data, ContactUsDTO::class);
+        } catch (SerializerExceptionInterface) {
             throw new BadRequestHttpException('Le formulaire de contact est incomplet');
         }
 
-        // Validite de l'email
-        $userEmail = $data['email_contact'];
-        if (!filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
-            throw new BadRequestHttpException("L’adresse électronique n'est pas valide");
+        $violations = $validator->validate($contact);
+        if (count($violations) > 0) {
+            throw new BadRequestHttpException((string) $violations->get(0)->getMessage());
         }
 
-        $message = $data['message'];
-        if ($this->mailerService->containsBannedWords($message)) {
+        $geocaptchaService->check($contact->geocaptchaToken);
+
+        if ($this->mailerService->containsBannedWords($contact->message)) {
             throw new BadRequestHttpException('Votre message contient des mots interdits');
         }
 
-        $supportAddress = $this->getParameter('support_contact_mail');
+        // signalements de contenu : adresse dédiée, hors support
+        [$recipient, $subject] = match ($contact->request_type) {
+            ContactUsDTO::REQUEST_TYPE_ILLEGAL_CONTENT => [$this->getParameter('legal_contact_mail'), '[cartes.gouv.fr] Signalement de contenu illicite'],
+            ContactUsDTO::REQUEST_TYPE_CONTENT_REMOVAL_CLAIM => [$this->getParameter('legal_contact_mail'), '[cartes.gouv.fr] Réclamation suite à suppression de contenu'],
+            default => [$this->getParameter('support_contact_mail'), '[cartes.gouv.fr] Nouvelle demande'],
+        };
         $now = new \DateTime();
 
         $supportMailParams = [
-            'userEmail' => $userEmail,
-            'firstName' => $data['first_name'],
-            'lastName' => $data['last_name'],
-            'category' => $data['category'],
-            'organization' => $data['organization'],
+            'userEmail' => $contact->email_contact,
+            'firstName' => $contact->first_name,
+            'lastName' => $contact->last_name,
+            'category' => $contact->category,
+            'organization' => $contact->organization,
+            'requestType' => $contact->request_type,
             'sendDate' => $now,
-            'message' => $message,
+            'message' => $contact->message,
         ];
 
         if ($user instanceof User) {
@@ -112,12 +124,11 @@ class ContactController extends AbstractController
             'is_authenticated' => $user instanceof User,
         ]);
 
-        // envoi du mail à l'adresse du support
-        $this->mailerService->sendMail($supportAddress, '[cartes.gouv.fr] Nouvelle demande', 'Mailer/contact.html.twig', $supportMailParams);
+        $this->mailerService->sendMail($recipient, $subject, 'Mailer/contact.html.twig', $supportMailParams);
 
         // // envoi du mail d'accusé de réception à l'utilisateur
-        $this->mailerService->sendMail($userEmail, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
-            'message' => $message,
+        $this->mailerService->sendMail($contact->email_contact, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
+            'message' => $contact->message,
             'sendDate' => $now,
         ]);
 
@@ -125,9 +136,8 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/datastore_create_request',
+        '/datastore-create-request',
         name: 'datastore_create_request',
-        options: ['expose' => true],
         methods: ['POST'])]
     public function datastoreCreateRequest(Request $request, MembershipService $membershipService): JsonResponse
     {
@@ -177,9 +187,8 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/join_community',
+        '/join-community',
         name: 'join_community',
-        options: ['expose' => true],
         methods: ['POST'])]
     public function joinCommunity(Request $request): JsonResponse
     {
@@ -225,7 +234,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/accesses_request',
+        '/accesses-request',
         name: 'accesses_request',
         methods: ['POST'],
     )]
@@ -282,7 +291,7 @@ class ContactController extends AbstractController
     }
 
     #[Route(
-        '/api/contact/datastore_deletion_request',
+        '/datastore-deletion-request',
         name: 'datastore_deletion_request',
         methods: ['POST'],
     )]

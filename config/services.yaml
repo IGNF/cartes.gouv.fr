@@ -7,8 +7,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    # frontière API (regex sans délimiteurs, partagée avec security.yaml) : /contact_us reste à la racine, appelé par le site de documentation
-    app.api_path_pattern: "^/(api|contact_us)(/|$)"
+    # frontière API (regex sans délimiteurs, partagée avec security.yaml)
+    app.api_path_pattern: "^/api(/|$)"
     # documentation OpenAPI (dev) : hors garde et hors contrôle d'accès
     app.api_doc_path_pattern: "^/api/doc(\\.json)?$"
 
@@ -51,6 +51,10 @@ services:
     app.api_client.espaceco_style:
         class: App\ApiClient\ApiClient
         factory: ['@App\ApiClient\ApiClientFactory', "createEspaceCoStyleClient"]
+
+    app.api_client.geocaptcha:
+        class: App\ApiClient\ApiClient
+        factory: ['@App\ApiClient\ApiClientFactory', "createGeocaptchaClient"]
 
     # Compte de service privilégié : réservé à SandboxService, qui vérifie lui-même l'appartenance de l'utilisateur.
     # Tout autre appel amont porte le token de l'utilisateur, l'autorisation est déléguée à l'Entrepôt (cf. AGENTS.md).

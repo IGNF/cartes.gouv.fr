@@ -26,6 +26,11 @@ final class EntrepotMockResponseFactory
     public const LAYER_WITHOUT_LEGEND = 'couche_sans_legende';
     public const LEGEND_PNG = "\x89PNG légende";
     private const ENTREPOT_HOST = 'entrepot.test';
+    private const GEOCAPTCHA_HOST = 'geocaptcha.test';
+    public const GEOCAPTCHA_RESOLVED_TOKEN = 'resolved-token';
+    public const GEOCAPTCHA_UNRESOLVED_TOKEN = 'unresolved-token';
+    public const GEOCAPTCHA_DOWN_TOKEN = 'down-token';
+    public const GEOCAPTCHA_FORBIDDEN_TOKEN = 'forbidden-token';
     private const METADATA_FIXTURES_DIR = __DIR__.'/../Fixture/metadata';
 
     /** @var list<array{method: string, path: string, body: string}> requêtes d’écriture reçues, conservées entre redémarrages du noyau */
@@ -249,6 +254,10 @@ final class EntrepotMockResponseFactory
             return new MockResponse('<WFS_Capabilities><FeatureTypeList>'.$featureTypes.'<FeatureType><Name>other:table</Name></FeatureType></FeatureTypeList></WFS_Capabilities>', ['http_code' => 200]);
         }
 
+        if (self::GEOCAPTCHA_HOST === $host) {
+            return $this->geocaptchaValidation($path, $options);
+        }
+
         // l’Entrepôt autorise par le jeton de l’utilisateur : une requête sans le jeton attendu est refusée comme en vrai
         $authorization = $options['normalized_headers']['authorization'][0] ?? '';
         if ('Authorization: Bearer '.FakeKeycloakClient::ACCESS_TOKEN !== $authorization) {
@@ -299,6 +308,23 @@ final class EntrepotMockResponseFactory
         }
 
         return $this->json(['error' => 'NotFound', 'error_description' => "Aucune réponse simulée pour $method $path"], 404);
+    }
+
+    /** @param array<string, mixed> $options */
+    private function geocaptchaValidation(string $path, array $options): MockResponse
+    {
+        // réponses de l’API GéoCaptcha réelle (dépôt IGNF/GeoCaptchaAPI, challengeRoute.js et auth.js)
+        if (!isset($options['normalized_headers']['x-api-key'], $options['normalized_headers']['x-app-id'])) {
+            return $this->json(['msg' => 'Authentication error'], 403);
+        }
+
+        return match ($path) {
+            '/api/v1/challenge/'.self::GEOCAPTCHA_RESOLVED_TOKEN.'/validation' => $this->json(['result' => true, 'msg' => ['success' => true, 'attempts' => 1, 'available' => false]]),
+            '/api/v1/challenge/'.self::GEOCAPTCHA_UNRESOLVED_TOKEN.'/validation' => $this->json(['result' => false, 'msg' => ['success' => false, 'attempts' => 1, 'available' => false]]),
+            '/api/v1/challenge/'.self::GEOCAPTCHA_DOWN_TOKEN.'/validation' => $this->json(['msg' => 'no challenge available'], 500),
+            '/api/v1/challenge/'.self::GEOCAPTCHA_FORBIDDEN_TOKEN.'/validation' => $this->json(['msg' => 'Authentication error'], 403),
+            default => $this->json(['msg' => 'Challenge ID parsing error'], 400),
+        };
     }
 
     /**

@@ -53,11 +53,11 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_contact_contact_us": {
+        "cartesgouvfr_api_contact_contact_us": {
             "tokens": [
                 [
                     "text",
-                    "\/contact_us"
+                    "\/api\/contact\/contact-us"
                 ]
             ],
             "defaults": [],
@@ -68,11 +68,11 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_contact_datastore_create_request": {
+        "cartesgouvfr_api_contact_datastore_create_request": {
             "tokens": [
                 [
                     "text",
-                    "\/api\/contact\/datastore_create_request"
+                    "\/api\/contact\/datastore-create-request"
                 ]
             ],
             "defaults": [],
@@ -83,11 +83,11 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_contact_join_community": {
+        "cartesgouvfr_api_contact_join_community": {
             "tokens": [
                 [
                     "text",
-                    "\/api\/contact\/join_community"
+                    "\/api\/contact\/join-community"
                 ]
             ],
             "defaults": [],
@@ -98,11 +98,11 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_contact_accesses_request": {
+        "cartesgouvfr_api_contact_accesses_request": {
             "tokens": [
                 [
                     "text",
-                    "\/api\/contact\/accesses_request"
+                    "\/api\/contact\/accesses-request"
                 ]
             ],
             "defaults": [],
@@ -113,11 +113,11 @@
             ],
             "schemes": []
         },
-        "cartesgouvfr_contact_datastore_deletion_request": {
+        "cartesgouvfr_api_contact_datastore_deletion_request": {
             "tokens": [
                 [
                     "text",
-                    "\/api\/contact\/datastore_deletion_request"
+                    "\/api\/contact\/datastore-deletion-request"
                 ]
             ],
             "defaults": [],

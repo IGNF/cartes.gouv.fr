@@ -82,7 +82,7 @@ export default function CreateNewDatastore({ classes }: CreateNewDatastoreProps)
 
     const datastoreRequestMutation = useMutation<{ success: boolean }, ApiError | Error, object>({
         mutationFn: (values: object) =>
-            jsonFetch<{ success: boolean }>(SymfonyRouting.generate("cartesgouvfr_contact_datastore_create_request"), { method: "POST" }, values),
+            jsonFetch<{ success: boolean }>(SymfonyRouting.generate("cartesgouvfr_api_contact_datastore_create_request"), { method: "POST" }, values),
         onSuccess() {
             successModal.open();
         },
