@@ -124,6 +124,20 @@ class DatasheetMetadataDTO
     ) {
     }
 
+    // dates au format YYYY-MM-DD : la comparaison de chaînes suit l’ordre chronologique
+    #[Assert\Callback]
+    public function validateDatesNotInFuture(ExecutionContextInterface $context): void
+    {
+        $today = (new \DateTimeImmutable('today'))->format('Y-m-d');
+        foreach (['date_creation' => $this->date_creation, 'date_publication' => $this->date_publication, 'date_revision' => $this->date_revision] as $path => $date) {
+            if ($date > $today) {
+                $context->buildViolation('La date ne peut pas être dans le futur')
+                    ->atPath($path)
+                    ->addViolation();
+            }
+        }
+    }
+
     // le premier producteur est le point de contact, verrouillé dans le formulaire
     #[Assert\Callback]
     public function validateFirstProducerRole(ExecutionContextInterface $context): void

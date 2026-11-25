@@ -1,4 +1,4 @@
-import { format, isValid, parseISO } from "date-fns";
+import { endOfToday, format, isValid, parseISO } from "date-fns";
 import { type TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { z } from "zod";
 
@@ -204,9 +204,9 @@ export const buildMetadataSchema = ({
             }),
 
         // section dates
-        date_creation: z.date(t("validation.dateCreation")),
-        date_publication: z.date(t("validation.datePublication")),
-        date_revision: z.date(t("validation.dateRevision")),
+        date_creation: z.date(t("validation.dateCreation")).refine((date) => date <= endOfToday(), t("validation.date.future")),
+        date_publication: z.date(t("validation.datePublication")).refine((date) => date <= endOfToday(), t("validation.date.future")),
+        date_revision: z.date(t("validation.dateRevision")).refine((date) => date <= endOfToday(), t("validation.date.future")),
         update_frequency: z.enum(UPDATE_FREQUENCIES, t("validation.updateFrequency")),
 
         // section emprise spatiale

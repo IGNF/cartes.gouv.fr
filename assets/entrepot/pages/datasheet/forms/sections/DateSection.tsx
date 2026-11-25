@@ -30,6 +30,7 @@ export default function DateSection() {
                         <DatePicker
                             label={t(label)}
                             hintText={t("field.date.hint")}
+                            disableFuture
                             value={value instanceof Date ? value : undefined}
                             onChange={onChange}
                             state={errors[name] ? "error" : "default"}

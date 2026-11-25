@@ -38,6 +38,10 @@ const valid = (): MetadataFormValues => ({
     charset: "utf8",
 });
 
+afterEach(() => {
+    vi.useRealTimers();
+});
+
 const issuePaths = async (values: MetadataFormValues, deps = {}) => {
     const result = await schema(deps).safeParseAsync(values);
     return result.success ? [] : result.error.issues.map((issue) => `${issue.path.join(".")} ${issue.message}`);
@@ -82,6 +86,18 @@ describe("buildMetadataSchema", () => {
             "resource_constraints.0.constraints.1.url validation.url",
             "resource_constraints.0.constraints.1.description validation.constraintDescription",
         ]);
+    });
+
+    it("refuse les dates futures et accepte la date du jour", async () => {
+        vi.useFakeTimers({ now: new Date(2026, 10, 25, 9, 0) });
+        const values = {
+            ...valid(),
+            date_creation: new Date(2026, 10, 25, 23, 59),
+            date_publication: new Date(2026, 10, 26),
+            date_revision: new Date(2027, 0, 1),
+        };
+
+        expect(await issuePaths(values)).toEqual(["date_publication validation.date.future", "date_revision validation.date.future"]);
     });
 
     it("refuse une résolution négative et une échelle hors liste", async () => {
@@ -153,10 +169,6 @@ describe("buildMetadataFormData", () => {
 });
 
 describe("withLockedFlags et mapMetadataToFormValues", () => {
-    afterEach(() => {
-        vi.useRealTimers();
-    });
-
     it("recalcule les compagnes depuis l’ordre renvoyé par le serveur", () => {
         const condition = withLockedFlags({
             type: "legal",

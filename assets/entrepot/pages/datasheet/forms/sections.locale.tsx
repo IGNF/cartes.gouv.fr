@@ -126,6 +126,7 @@ const { i18n } = declareComponentKeys<
     | "validation.dateCreation"
     | "validation.datePublication"
     | "validation.dateRevision"
+    | "validation.date.future"
     | "validation.updateFrequency"
     | "validation.territories"
     | "validation.scale"
@@ -337,6 +338,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "validation.dateCreation": "La date de création est obligatoire",
     "validation.datePublication": "La date de publication est obligatoire",
     "validation.dateRevision": "La date de dernière révision est obligatoire",
+    "validation.date.future": "La date ne peut pas être dans le futur",
     "validation.updateFrequency": "La fréquence de mise à jour est obligatoire",
     "validation.territories": "Sélectionnez au moins un territoire",
     "validation.scale": "L’échelle est obligatoire",
@@ -547,6 +549,7 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "validation.dateCreation": "The creation date is required",
     "validation.datePublication": "The publication date is required",
     "validation.dateRevision": "The last revision date is required",
+    "validation.date.future": "The date cannot be in the future",
     "validation.updateFrequency": "The update frequency is required",
     "validation.territories": "Select at least one territory",
     "validation.scale": "The scale is required",

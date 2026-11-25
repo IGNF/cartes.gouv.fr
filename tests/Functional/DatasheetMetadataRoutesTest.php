@@ -65,6 +65,18 @@ final class DatasheetMetadataRoutesTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
     }
 
+    public function testFutureDatesAnswer422OnEachDateField(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+        $tomorrow = (new \DateTimeImmutable('tomorrow'))->format('Y-m-d');
+        $payload = ['date_publication' => $tomorrow, 'date_revision' => $tomorrow] + $this->payload();
+
+        $client->xmlHttpRequest('POST', self::DATASTORE_URL.'/datasheet', ['data' => json_encode($payload, JSON_THROW_ON_ERROR)]);
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['date_publication', 'date_revision'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+    }
+
     // le motif du nom ne vaut qu’à la création : un titre déjà enregistré reste modifiable
     public function testNamePatternAppliesToCreationOnly(): void
     {
