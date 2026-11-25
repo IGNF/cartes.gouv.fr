@@ -19,9 +19,9 @@ Toutes les briques de cartes.gouv.fr :
 | Téléchargement                          | [IGNF/cartes.gouv.fr-telechargement](https://github.com/IGNF/cartes.gouv.fr-telechargement)              | T2 2025              |
 | Aide                                    | [IGNF/cartes.gouv.fr-documentation](https://github.com/IGNF/cartes.gouv.fr-documentation)                | T3 2025              |
 | Pages éditoriales                       | [IGNF/cartes.gouv.fr-edito](https://github.com/IGNF/cartes.gouv.fr-edito)                                | T1 2026              |
-| Extraction                              | à ouvrir                                                                                                 | à venir courant 2026 |
-| Guichet collaboratif                    | [IGNF/cartes.gouv.fr-guichet-collaboratif](https://github.com/IGNF/cartes.gouv.fr-guichet-collaboratif/) | à venir courant 2026 |
-| Editeur                                 | [IGNF/cartes.gouv.fr-editeur-carto](https://github.com/IGNF/cartes.gouv.fr-editeur-carto)                | à venir courant 2027 |
+| Extraction                              | [IGNF/cartes.gouv.fr-extraction](https://github.com/IGNF/cartes.gouv.fr-extraction)                      | T4 2026              |
+| Guichet collaboratif                    | [IGNF/cartes.gouv.fr-guichet-collaboratif](https://github.com/IGNF/cartes.gouv.fr-guichet-collaboratif/) | T4 2026              |
+| Editeur                                 | [IGNF/cartes.gouv.fr-editeur-carto](https://github.com/IGNF/cartes.gouv.fr-editeur-carto)                | T4 2026              |
 
 ## Fonctionnalités gérées dans ce dépôt
 
