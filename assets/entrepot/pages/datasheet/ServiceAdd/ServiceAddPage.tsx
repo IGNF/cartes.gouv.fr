@@ -32,7 +32,7 @@ export default function ServiceAddPage({ datastoreId, datasheetName, type: initi
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     // un échec ne bloque pas la page : sans quotas plutôt que des relances, ou une attente sans fin hors ligne
-    const endpointsQuery = useQuery({ ...datastoreEndpointsQueryOptions(datastoreId), retry: false, networkMode: "always" });
+    const endpointsQuery = useQuery({ ...datastoreEndpointsQueryOptions(datastoreId), retry: false, networkMode: "always", refetchOnReconnect: true });
     // lecture en échec : la page fait sans quotas
     const endpoints = freshEndpoints(endpointsQuery);
     const [type, setType] = useState(initialType);

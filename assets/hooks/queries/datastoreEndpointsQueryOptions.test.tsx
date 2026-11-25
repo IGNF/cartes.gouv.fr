@@ -17,7 +17,7 @@ const persisted = [{ endpoint: { type: "WFS", open: true }, use: 10, quota: 10 }
 const fresh = [{ endpoint: { type: "WFS", open: true }, use: 0, quota: 10 }] as unknown as DatastoreEndpoint[];
 
 // cache restauré du localStorage, puis relecture par la page
-const render = async (read: () => Promise<DatastoreEndpoint[]>) => {
+const render = async (read: () => Promise<DatastoreEndpoint[]>, rereadFails = false) => {
     vi.mocked(api.datastore.getEndpoints).mockImplementation(read);
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     queryClient.setQueryData(RQKeys.datastore_endpoints("ds"), persisted);
@@ -36,6 +36,11 @@ const render = async (read: () => Promise<DatastoreEndpoint[]>) => {
     );
     // laisse la relecture aboutir
     await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+    if (rereadFails) {
+        vi.mocked(api.datastore.getEndpoints).mockRejectedValue(new Error("503"));
+        await act(async () => queryClient.refetchQueries({ queryKey: RQKeys.datastore_endpoints("ds") }));
+        await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+    }
     act(() => root.unmount());
     return seen;
 };
@@ -51,5 +56,11 @@ describe("freshEndpoints", () => {
     it("ignore la copie persistée quand la relecture échoue", async () => {
         const seen = await render(() => Promise.reject(new Error("503")));
         expect(seen.every((endpoints) => endpoints === undefined)).toBe(true);
+    });
+
+    it("abandonne les endpoints lus quand une relecture échoue ensuite", async () => {
+        const seen = await render(() => Promise.resolve(fresh), true);
+        expect(seen).toContainEqual(fresh);
+        expect(seen.at(-1)).toBeUndefined();
     });
 });

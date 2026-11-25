@@ -7,7 +7,7 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { notFound, useBlocker, useNavigate } from "@tanstack/react-router";
-import { Fragment, type ReactNode, useEffect, useId, useMemo } from "react";
+import { Fragment, type ReactNode, useEffect, useId, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import { tss } from "tss-react";
@@ -179,7 +179,16 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
 
     const services = useQuery(datasheetServiceListQueryOptions(datastoreId, datasheetName)).data?.services;
     const { data: datasheet } = useQuery(datasheetQueryOptions(datastoreId, datasheetName));
-    const endpointsQuery = useQuery({ ...datastoreEndpointsQueryOptions(datastoreId), enabled: editable });
+    // échec immédiat, même hors ligne : seul l’accès enregistré est alors proposé
+    const endpointsQuery = useQuery({
+        ...datastoreEndpointsQueryOptions(datastoreId),
+        enabled: editable,
+        retry: false,
+        networkMode: "always",
+        refetchOnReconnect: true,
+    });
+    // refus affiché en haut de page, près du bouton « Enregistrer »
+    const [switchRefused, setSwitchRefused] = useState(false);
 
     const unavailable = isOfferingUnavailable(service.status);
 
@@ -294,11 +303,13 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
     useIsModalOpen(leaveModal, { onConceal: () => blocker.reset?.() });
 
     const submit = form.handleSubmit(async (formValues) => {
+        setSwitchRefused(false);
         // changement d’endpoint : quotas relus juste avant, la page a pu rester ouverte longtemps
         if ((formValues.access === "public") !== savedOpen) {
             const { data, isSuccess } = await endpointsQuery.refetch();
             if (!isSuccess || !availableServiceAccesses(data, configuration.type, values.access).includes(formValues.access)) {
                 form.setError("access", { message: tForm("validation.access.unavailable") });
+                setSwitchRefused(true);
                 return;
             }
         }
@@ -351,6 +362,9 @@ function ServiceSheet({ datastoreId, datasheetName, service, readAt, values, fea
             )}
             {editMutation.isError && (
                 <Alert className={fr.cx("fr-mt-2w")} severity="error" title={t("edit.error")} description={getApiErrorMessage(editMutation.error)} small />
+            )}
+            {switchRefused && (
+                <Alert className={fr.cx("fr-mt-2w")} severity="error" title={t("edit.error")} description={tForm("validation.access.unavailable")} small />
             )}
 
             {/* champs hors du formulaire HTML : seul le bouton « Enregistrer » le soumet, pas la touche Entrée ni les boutons des autres sections */}
