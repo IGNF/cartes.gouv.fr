@@ -42,6 +42,7 @@ const { i18n } = declareComponentKeys<
     | { K: "quota.full_both"; P: { service: string }; R: string }
     | { K: "quota.switch_full"; P: { access: string }; R: string }
     | "quota.all_full"
+    | "quota.read_error"
     | "quota.service.WFS"
     | "quota.service.WMS-VECTOR"
     | "quota.service.WMS-RASTER"
@@ -195,6 +196,7 @@ export const ServiceFormFrTranslations: Translations<"fr">["ServiceForm"] = {
     "quota.switch_full": ({ access }) => `Le quota des flux en accès ${access} est atteint : impossible de changer d’accès.`,
     "quota.all_full":
         "Les quotas de publication de cet entrepôt sont atteints pour tous les types de flux. Supprimez un flux existant ou contactez le support afin de demander plus de quota.",
+    "quota.read_error": "Impossible de vérifier les quotas : changement d’accès indisponible.",
     "quota.service.WFS": "flux WFS",
     "quota.service.WMS-VECTOR": "flux WMS vecteur",
     "quota.service.WMS-RASTER": "flux WMS raster",
@@ -353,6 +355,7 @@ export const ServiceFormEnTranslations: Translations<"en">["ServiceForm"] = {
     "quota.switch_full": ({ access }) => `The quota for services with ${access} access is reached: the access cannot be changed.`,
     "quota.all_full":
         "This datastore has reached its publication quotas for every service type. Delete an existing service or contact support to request more quota.",
+    "quota.read_error": "Quotas could not be checked: the access cannot be changed.",
     "quota.service.WFS": "WFS services",
     "quota.service.WMS-VECTOR": "WMS vector services",
     "quota.service.WMS-RASTER": "WMS raster services",
