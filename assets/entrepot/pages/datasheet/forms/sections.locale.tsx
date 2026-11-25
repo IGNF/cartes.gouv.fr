@@ -47,7 +47,7 @@ const { i18n } = declareComponentKeys<
     | "producer.custodianHint"
     // Section date
     | "field.creationDate"
-    | "field.creationDate.hint"
+    | "field.date.hint"
     | "field.publicationDate"
     | "field.revisionDate"
     | "field.updateFrequency"
@@ -192,7 +192,7 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
         "Ce contact sera également utilisé comme gestionnaire de la donnée et comme contact des métadonnées, sauf si vous ajoutez des producteurs dédiés avec ces rôles (« Gestionnaire » et « Contact des métadonnées »).",
 
     "field.creationDate": "Date de création",
-    "field.creationDate.hint": "Format attendu : JJ/MM/AAAA",
+    "field.date.hint": "Format attendu : JJ/MM/AAAA",
     "field.publicationDate": "Date de publication",
     "field.revisionDate": "Date de dernière révision",
     "field.updateFrequency": "Fréquence de mise à jour",
@@ -403,7 +403,7 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
         "This contact will also be used as the data custodian and as the metadata contact, unless you add dedicated producers with those roles (« Custodian » and « Metadata contact »).",
 
     "field.creationDate": "Creation date",
-    "field.creationDate.hint": "Expected format: DD/MM/YYYY",
+    "field.date.hint": "Expected format: DD/MM/YYYY",
     "field.publicationDate": "Publication date",
     "field.revisionDate": "Last revision date",
     "field.updateFrequency": "Update frequency",

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MetadataHierarchyLevel } from "@/@types/app";
 import { buildMetadataFormData, buildMetadataSchema, mapMetadataToFormValues, type MetadataFormValues, withLockedFlags } from "./metadataSchema";
@@ -153,6 +153,10 @@ describe("buildMetadataFormData", () => {
 });
 
 describe("withLockedFlags et mapMetadataToFormValues", () => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     it("recalcule les compagnes depuis l’ordre renvoyé par le serveur", () => {
         const condition = withLockedFlags({
             type: "legal",
@@ -178,11 +182,17 @@ describe("withLockedFlags et mapMetadataToFormValues", () => {
         );
 
         expect(values.date_creation?.getDate()).toBe(15);
-        // dates absentes de la fiche : préremplies à aujourd’hui
-        expect(values.date_publication?.toDateString()).toBe(new Date().toDateString());
-        expect(values.date_revision?.toDateString()).toBe(new Date().toDateString());
         expect(values.name).toBe("Fiche");
         expect(values.resource_constraints?.[0].constraints[0]).toEqual({ type: "useLimitation", url: "", description: "Usage interne", locked: true });
+    });
+
+    it("préremplit à aujourd’hui les dates absentes de la fiche", () => {
+        vi.useFakeTimers({ now: new Date(2026, 10, 25, 23, 59) });
+        const values = mapMetadataToFormValues({ date_creation: "2026-01-15" }, "Fiche");
+
+        expect(values.date_creation).toEqual(new Date(2026, 0, 15));
+        expect(values.date_publication).toEqual(new Date(2026, 10, 25, 23, 59));
+        expect(values.date_revision).toEqual(new Date(2026, 10, 25, 23, 59));
     });
 
     // valeurs initiales égales à celles du DOM : le formulaire n’est pas modifié dès son chargement

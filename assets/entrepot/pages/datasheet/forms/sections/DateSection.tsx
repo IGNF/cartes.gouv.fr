@@ -29,7 +29,7 @@ export default function DateSection() {
                     render={({ field: { value, onChange } }) => (
                         <DatePicker
                             label={t(label)}
-                            hintText={t("field.creationDate.hint")}
+                            hintText={t("field.date.hint")}
                             value={value instanceof Date ? value : undefined}
                             onChange={onChange}
                             state={errors[name] ? "error" : "default"}

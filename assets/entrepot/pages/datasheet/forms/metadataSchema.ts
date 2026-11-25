@@ -244,7 +244,8 @@ export type ProducerFormValues = MetadataFormValues["producers"][number];
 export type ResourceConstraintFormValues = MetadataFormValues["resource_constraints"][number];
 export type SubConstraintFormValues = ResourceConstraintFormValues["constraints"][number];
 
-export const defaultMetadataValues: Partial<MetadataFormValues> = {
+// fonction : les dates valent le jour de l’ouverture du formulaire, pas celui du chargement de la page
+export const getDefaultMetadataValues = (): Partial<MetadataFormValues> => ({
     name: "",
     description: "",
     themes: [],
@@ -261,7 +262,7 @@ export const defaultMetadataValues: Partial<MetadataFormValues> = {
     date_publication: new Date(),
     date_revision: new Date(),
     language: { code: "fre", language: "français" },
-};
+});
 
 // ---------------------------------------------------------------------------
 // Conditions d’utilisation : valeurs ajoutées par le formulaire
@@ -390,8 +391,10 @@ function parseDateOrToday(value: string | undefined): Date {
 /** Valeurs initiales du formulaire en modification, depuis la fiche de métadonnées lue par le serveur */
 export function mapMetadataToFormValues(csw: CswMetadata | undefined, datasheetName: string): Partial<MetadataFormValues> {
     if (csw === undefined) {
-        return { ...defaultMetadataValues, name: datasheetName };
+        return { ...getDefaultMetadataValues(), name: datasheetName };
     }
+
+    const defaults = getDefaultMetadataValues();
 
     const producers = (csw.producers ?? []).map((producer) => ({
         organization_name: producer.organization_name,
@@ -404,7 +407,7 @@ export function mapMetadataToFormValues(csw: CswMetadata | undefined, datasheetN
     }));
 
     return {
-        ...defaultMetadataValues,
+        ...defaults,
         name: csw.name ?? datasheetName,
         description: csw.description ?? "",
         file_identifier: csw.file_identifier ?? "",
@@ -440,7 +443,7 @@ export function mapMetadataToFormValues(csw: CswMetadata | undefined, datasheetN
         ),
         resource_genealogy: csw.resource_genealogy ?? "",
         hierarchy_level: csw.hierarchy_level ?? MetadataHierarchyLevel.Dataset,
-        language: csw.language ?? defaultMetadataValues.language,
-        charset: csw.charset ?? defaultMetadataValues.charset,
+        language: csw.language ?? defaults.language,
+        charset: csw.charset ?? defaults.charset,
     };
 }

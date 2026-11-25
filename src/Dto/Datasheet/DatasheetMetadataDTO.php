@@ -83,8 +83,8 @@ class DatasheetMetadataDTO
         #[Assert\Date(message: 'La date de publication {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
         public readonly string $date_publication = '',
 
-        #[Assert\NotBlank(message: 'La date de révision est obligatoire')]
-        #[Assert\Date(message: 'La date de révision {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
+        #[Assert\NotBlank(message: 'La date de dernière révision est obligatoire')]
+        #[Assert\Date(message: 'La date de dernière révision {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
         public readonly string $date_revision = '',
 
         #[Assert\NotBlank(message: 'La fréquence de mise à jour est obligatoire')]
