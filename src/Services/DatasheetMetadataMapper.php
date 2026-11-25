@@ -10,18 +10,13 @@ use App\Dto\Datasheet\SubConstraintDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswLanguage;
 use App\Dto\Metadata\CswMetadata;
-use Psr\Clock\ClockInterface;
 
 /**
  * Seul rédacteur des champs saisis de la fiche de métadonnées : le formulaire remplace ces champs, le serveur garde ce qu’il dérive.
  */
 class DatasheetMetadataMapper
 {
-    public function __construct(private readonly ClockInterface $clock)
-    {
-    }
-
-    // ressources en ligne, vignette, identifiant et date de publication viennent de la fiche existante
+    // ressources en ligne, vignette et identifiant viennent de la fiche existante
     public function map(DatasheetMetadataDTO $dto, ?CswMetadata $existing = null): CswMetadata
     {
         $metadata = $existing instanceof CswMetadata ? clone $existing : new CswMetadata();
@@ -33,7 +28,8 @@ class DatasheetMetadataMapper
         $metadata->name = $dto->name;
         $metadata->description = $dto->description;
         $metadata->date_creation = $dto->date_creation;
-        $metadata->date_revision = $existing instanceof CswMetadata ? $this->clock->now()->format('Y-m-d') : null;
+        $metadata->date_publication = $dto->date_publication;
+        $metadata->date_revision = $dto->date_revision;
         $metadata->resource_genealogy = $dto->resource_genealogy;
         $metadata->keywords_inspire = array_values($dto->keywords_inspire);
         $metadata->keywords_additional = array_values($dto->keywords_additional);

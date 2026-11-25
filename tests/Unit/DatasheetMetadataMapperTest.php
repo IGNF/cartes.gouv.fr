@@ -14,7 +14,6 @@ use App\Dto\Metadata\CswLanguage;
 use App\Services\DatasheetMetadataMapper;
 use App\Tests\Support\CswMetadataFixtures;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Clock\MockClock;
 
 final class DatasheetMetadataMapperTest extends TestCase
 {
@@ -22,7 +21,7 @@ final class DatasheetMetadataMapperTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->mapper = new DatasheetMetadataMapper(new MockClock(CswMetadataFixtures::NOW));
+        $this->mapper = new DatasheetMetadataMapper();
     }
 
     public function testCreationCopiesEveryEnteredField(): void
@@ -37,7 +36,8 @@ final class DatasheetMetadataMapperTest extends TestCase
         self::assertSame('Fiche', $metadata->name);
         self::assertSame('Description', $metadata->description);
         self::assertSame('2026-01-15', $metadata->date_creation);
-        self::assertNull($metadata->date_revision);
+        self::assertSame('2026-02-01', $metadata->date_publication);
+        self::assertSame('2026-03-01', $metadata->date_revision);
         self::assertSame(['Occupation des terres'], $metadata->keywords_inspire);
         self::assertSame(['libre'], $metadata->keywords_additional);
         self::assertSame(['environment'], $metadata->themes);
@@ -50,7 +50,7 @@ final class DatasheetMetadataMapperTest extends TestCase
         self::assertSame([], $metadata->online_resources);
     }
 
-    // le formulaire remplace les champs saisis ; ressources, vignette, identifiant et date de publication restent ceux de la fiche
+    // le formulaire remplace les champs saisis ; ressources, vignette et identifiant restent ceux de la fiche
     public function testReplacementKeepsWhatTheServerDerives(): void
     {
         $existing = CswMetadataFixtures::full();
@@ -60,8 +60,8 @@ final class DatasheetMetadataMapperTest extends TestCase
         self::assertSame('fid', $metadata->file_identifier);
         self::assertEquals($existing->online_resources, $metadata->online_resources);
         self::assertSame($existing->thumbnail_url, $metadata->thumbnail_url);
-        self::assertSame('2024-02-01', $metadata->date_publication);
-        self::assertSame('2026-11-09', $metadata->date_revision);
+        self::assertSame('2026-02-01', $metadata->date_publication);
+        self::assertSame('2026-03-01', $metadata->date_revision);
         self::assertSame('Fiche', $metadata->name);
         // la fiche existante n’est pas modifiée
         self::assertSame('Titre', $existing->name);
@@ -100,6 +100,8 @@ final class DatasheetMetadataMapperTest extends TestCase
             file_identifier: 'ign.fiche',
             producers: [new ProducerDTO('Organisme', 'orga@example.test', 'pointOfContact')],
             date_creation: '2026-01-15',
+            date_publication: '2026-02-01',
+            date_revision: '2026-03-01',
             update_frequency: 'monthly',
             territories: [new TerritoryDTO('COMMUNE_TEST_1', 'Commune test', [2.25, 48.8, 2.45, 48.9])],
             scale: 25000,

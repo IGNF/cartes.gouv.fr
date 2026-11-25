@@ -47,7 +47,9 @@ const { i18n } = declareComponentKeys<
     | "producer.custodianHint"
     // Section date
     | "field.creationDate"
-    | "field.creationDate.hint"
+    | "field.date.hint"
+    | "field.publicationDate"
+    | "field.revisionDate"
     | "field.updateFrequency"
     | { K: "field.updateFrequency.option"; P: { code: UpdateFrequency }; R: string }
     | "field.updateFrequency.placeholder"
@@ -122,6 +124,9 @@ const { i18n } = declareComponentKeys<
     | "validation.producers.firstIsPointOfContact"
     | "validation.producers.uniqueRoles"
     | "validation.dateCreation"
+    | "validation.datePublication"
+    | "validation.dateRevision"
+    | "validation.date.future"
     | "validation.updateFrequency"
     | "validation.territories"
     | "validation.scale"
@@ -188,7 +193,9 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
         "Ce contact sera également utilisé comme gestionnaire de la donnée et comme contact des métadonnées, sauf si vous ajoutez des producteurs dédiés avec ces rôles (« Gestionnaire » et « Contact des métadonnées »).",
 
     "field.creationDate": "Date de création",
-    "field.creationDate.hint": "Format attendu : JJ/MM/AAAA",
+    "field.date.hint": "Format attendu : JJ/MM/AAAA",
+    "field.publicationDate": "Date de publication",
+    "field.revisionDate": "Date de dernière révision",
     "field.updateFrequency": "Fréquence de mise à jour",
     "field.updateFrequency.option": ({ code }) => {
         const labels: Record<UpdateFrequency, string> = {
@@ -329,6 +336,9 @@ export const DatasheetSectionsFrTranslations: Translations<"fr">["DatasheetSecti
     "validation.producers.firstIsPointOfContact": "Le premier producteur doit être le point de contact",
     "validation.producers.uniqueRoles": "Chaque rôle ne peut être attribué qu’à un seul producteur",
     "validation.dateCreation": "La date de création est obligatoire",
+    "validation.datePublication": "La date de publication est obligatoire",
+    "validation.dateRevision": "La date de dernière révision est obligatoire",
+    "validation.date.future": "La date ne peut pas être dans le futur",
     "validation.updateFrequency": "La fréquence de mise à jour est obligatoire",
     "validation.territories": "Sélectionnez au moins un territoire",
     "validation.scale": "L’échelle est obligatoire",
@@ -395,7 +405,9 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
         "This contact will also be used as the data custodian and as the metadata contact, unless you add dedicated producers with those roles (« Custodian » and « Metadata contact »).",
 
     "field.creationDate": "Creation date",
-    "field.creationDate.hint": "Expected format: DD/MM/YYYY",
+    "field.date.hint": "Expected format: DD/MM/YYYY",
+    "field.publicationDate": "Publication date",
+    "field.revisionDate": "Last revision date",
     "field.updateFrequency": "Update frequency",
     "field.updateFrequency.option": ({ code }) => {
         const labels: Record<UpdateFrequency, string> = {
@@ -535,6 +547,9 @@ export const DatasheetSectionsEnTranslations: Translations<"en">["DatasheetSecti
     "validation.producers.firstIsPointOfContact": "The first producer must be the point of contact",
     "validation.producers.uniqueRoles": "Each role can only be given to one producer",
     "validation.dateCreation": "The creation date is required",
+    "validation.datePublication": "The publication date is required",
+    "validation.dateRevision": "The last revision date is required",
+    "validation.date.future": "The date cannot be in the future",
     "validation.updateFrequency": "The update frequency is required",
     "validation.territories": "Select at least one territory",
     "validation.scale": "The scale is required",

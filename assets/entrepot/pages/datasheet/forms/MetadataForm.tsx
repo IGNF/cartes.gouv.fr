@@ -14,7 +14,7 @@ import { setApiFormErrors } from "@/modules/setApiFormErrors";
 import { delta } from "@/utils/delta";
 import MetadataSection from "./MetadataSection";
 import MetadataSectionsContainer from "./MetadataSectionsContainer";
-import { buildMetadataSchema, defaultMetadataValues, type MetadataFormValues, type MetadataValues } from "./metadataSchema";
+import { buildMetadataSchema, getDefaultMetadataValues, type MetadataFormValues, type MetadataValues } from "./metadataSchema";
 import DateSection from "./sections/DateSection";
 import DescriptionSection from "./sections/DescriptionSection";
 import LicenseSection from "./sections/LicenseSection";
@@ -53,7 +53,7 @@ function MetadataFormWithPrefix(props: MetadataFormProps) {
 function MetadataFormContent({
     datastoreId,
     mode = "create",
-    defaultValues = defaultMetadataValues,
+    defaultValues = getDefaultMetadataValues(),
     onSubmit,
     disabled = false,
     renderTopActions,
@@ -134,7 +134,7 @@ function MetadataFormContent({
                 size="small"
                 onClick={() =>
                     reset({
-                        ...defaultMetadataValues,
+                        ...getDefaultMetadataValues(),
                         name: "test-design-2026",
                         file_identifier: "SANDBOX_test-design-2026",
                         description: "test-design-2026-description",

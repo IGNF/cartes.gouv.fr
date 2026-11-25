@@ -65,6 +65,18 @@ final class DatasheetMetadataRoutesTest extends WebTestCase
         self::assertSame([], EntrepotMockResponseFactory::stored('annexes'));
     }
 
+    public function testFutureDatesAnswer422OnEachDateField(): void
+    {
+        $client = self::createClient();
+        $this->logIn($client);
+        $tomorrow = (new \DateTimeImmutable('tomorrow'))->format('Y-m-d');
+        $payload = ['date_publication' => $tomorrow, 'date_revision' => $tomorrow] + $this->payload();
+
+        $client->xmlHttpRequest('POST', self::DATASTORE_URL.'/datasheet', ['data' => json_encode($payload, JSON_THROW_ON_ERROR)]);
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['date_publication', 'date_revision'], array_column($this->jsonResponse($client)['violations'], 'propertyPath'));
+    }
+
     // le motif du nom ne vaut qu’à la création : un titre déjà enregistré reste modifiable
     public function testNamePatternAppliesToCreationOnly(): void
     {
@@ -104,6 +116,8 @@ final class DatasheetMetadataRoutesTest extends WebTestCase
             'file_identifier' => 'ign.fiche',
             'producers' => [['organization_name' => 'Organisme', 'organization_email' => 'orga@example.test', 'role' => 'pointOfContact']],
             'date_creation' => '2026-01-15',
+            'date_publication' => '2026-02-01',
+            'date_revision' => '2026-03-01',
             'update_frequency' => 'monthly',
             'territories' => [['id' => 'COMMUNE_TEST_1', 'title' => 'Commune test', 'bbox' => [2.25, 48.8, 2.45, 48.9]]],
             'scale' => 25000,

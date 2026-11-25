@@ -79,6 +79,14 @@ class DatasheetMetadataDTO
         #[Assert\Date(message: 'La date de création {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
         public readonly string $date_creation = '',
 
+        #[Assert\NotBlank(message: 'La date de publication est obligatoire')]
+        #[Assert\Date(message: 'La date de publication {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
+        public readonly string $date_publication = '',
+
+        #[Assert\NotBlank(message: 'La date de dernière révision est obligatoire')]
+        #[Assert\Date(message: 'La date de dernière révision {{ value }} n’est pas une date valide (YYYY-MM-DD)')]
+        public readonly string $date_revision = '',
+
         #[Assert\NotBlank(message: 'La fréquence de mise à jour est obligatoire')]
         #[Assert\Choice(choices: self::UPDATE_FREQUENCIES, message: 'La fréquence de mise à jour est invalide')]
         public readonly string $update_frequency = '',
@@ -114,6 +122,20 @@ class DatasheetMetadataDTO
         #[Assert\NotBlank(message: 'Le jeu de caractères est obligatoire')]
         public readonly string $charset = '',
     ) {
+    }
+
+    // dates au format YYYY-MM-DD : la comparaison de chaînes suit l’ordre chronologique
+    #[Assert\Callback]
+    public function validateDatesNotInFuture(ExecutionContextInterface $context): void
+    {
+        $today = (new \DateTimeImmutable('today'))->format('Y-m-d');
+        foreach (['date_creation' => $this->date_creation, 'date_publication' => $this->date_publication, 'date_revision' => $this->date_revision] as $path => $date) {
+            if ($date > $today) {
+                $context->buildViolation('La date ne peut pas être dans le futur')
+                    ->atPath($path)
+                    ->addViolation();
+            }
+        }
     }
 
     // le premier producteur est le point de contact, verrouillé dans le formulaire

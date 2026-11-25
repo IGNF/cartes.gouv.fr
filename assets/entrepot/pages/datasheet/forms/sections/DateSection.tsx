@@ -5,6 +5,12 @@ import DatePicker from "@/components/Input/DatePicker";
 import { useTranslation } from "@/i18n/i18n";
 import { MetadataFormValues, UPDATE_FREQUENCIES } from "../metadataSchema";
 
+const DATE_FIELDS = [
+    { name: "date_creation", label: "field.creationDate" },
+    { name: "date_publication", label: "field.publicationDate" },
+    { name: "date_revision", label: "field.revisionDate" },
+] as const;
+
 export default function DateSection() {
     const { t } = useTranslation("DatasheetSections");
     const {
@@ -15,20 +21,23 @@ export default function DateSection() {
 
     return (
         <div>
-            <Controller
-                control={control}
-                name="date_creation"
-                render={({ field: { value, onChange } }) => (
-                    <DatePicker
-                        label={t("field.creationDate")}
-                        hintText={t("field.creationDate.hint")}
-                        value={value instanceof Date ? value : undefined}
-                        onChange={onChange}
-                        state={errors.date_creation ? "error" : "default"}
-                        stateRelatedMessage={errors.date_creation?.message}
-                    />
-                )}
-            />
+            {DATE_FIELDS.map(({ name, label }) => (
+                <Controller
+                    key={name}
+                    control={control}
+                    name={name}
+                    render={({ field: { value, onChange } }) => (
+                        <DatePicker
+                            label={t(label)}
+                            hintText={t("field.date.hint")}
+                            value={value instanceof Date ? value : undefined}
+                            onChange={onChange}
+                            state={errors[name] ? "error" : "default"}
+                            stateRelatedMessage={errors[name]?.message}
+                        />
+                    )}
+                />
+            ))}
 
             <Select
                 label={t("field.updateFrequency")}
