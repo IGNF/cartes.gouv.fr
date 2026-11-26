@@ -7,7 +7,7 @@ import SidePanelMain from "@/components/Layout/SidePanelMain";
 import CommunityListFilters from "@/espaceco/pages/communities/CommunityListFilters";
 import { useTranslation } from "@/i18n/i18n";
 
-export const Route = createFileRoute("/_private/contribuer-aux-donnees/guichets/_panneau")({
+export const Route = createFileRoute("/_private/_cgu-espaceco/contribuer-aux-donnees/guichets/_panneau")({
     component: PanelLayout,
 });
 

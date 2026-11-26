@@ -9,7 +9,7 @@ import api from "@/espaceco/api";
 import RQKeys from "@/modules/espaceco/RQKeys";
 import SearchCommunity from "./SearchCommunity";
 
-const routeApi = getRouteApi("/_private/contribuer-aux-donnees/guichets/_panneau/");
+const routeApi = getRouteApi("/_private/_cgu-espaceco/contribuer-aux-donnees/guichets/_panneau/");
 
 export default function CommunityListFilters() {
     const { t } = useTranslation("EspaceCoCommunityList");

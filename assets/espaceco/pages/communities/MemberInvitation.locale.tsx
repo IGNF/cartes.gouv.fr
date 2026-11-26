@@ -12,7 +12,6 @@ const { i18n } = declareComponentKeys<
     | { K: "community_name"; P: { name: string }; R: JSX.Element }
     | { K: "community_description"; P: { description: string | null }; R: JSX.Element }
     | { K: "invitation"; R: JSX.Element }
-    | { K: "espaceco_accept_cgu"; P: { url: string | undefined }; R: JSX.Element }
     | "already_member"
     | "not_member"
     | "accept"
@@ -38,24 +37,6 @@ export const MemberInvitationFrTranslations: Translations<"fr">["MemberInvitatio
         return description ? <p dangerouslySetInnerHTML={{ __html: description }} /> : <p>Aucune description</p>;
     },
     invitation: <p>Vous avez reçu une invitation à rejoindre le guichet :</p>,
-    espaceco_accept_cgu: ({ url }) => (
-        <div>
-            <p>{"Bonjour, vous n'avez pas encore accepté les conditions générales d'utilisation de l'espace collaboratif."}</p>
-            <p>
-                {"Veuillez vous connecter avec votre nom d'utilisateur sur "}
-                {url ? (
-                    <a href={url} target="_blank" rel="noreferrer">
-                        {"l'espace collaboratif"}
-                    </a>
-                ) : (
-                    "l'espace collaboratif"
-                )}
-                {" et accepter les CGU."}
-                <br />
-                {"Vous pourrez ensuite continuer la navigation sur cartes.gouv.fr."}
-            </p>
-        </div>
-    ),
     already_member: "Vous êtes déjà membre de ce guichet",
     not_member: "Vous n'êtes pas membre de ce guichet",
     accept: "Accepter et rejoindre le guichet",
@@ -78,7 +59,6 @@ export const MemberInvitationEnTranslations: Translations<"en">["MemberInvitatio
     ),
     community_description: undefined,
     invitation: undefined,
-    espaceco_accept_cgu: ({ url }) => <p>{url}</p>,
     already_member: undefined,
     not_member: undefined,
     accept: undefined,

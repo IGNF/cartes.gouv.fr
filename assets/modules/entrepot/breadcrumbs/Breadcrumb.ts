@@ -48,10 +48,10 @@ const breadcrumbNameByRouteId = {
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/visualisation": "datastore_service_view",
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/ajout": "datastore_service_style_add",
     "/_private/tableau-de-bord/entrepots/$datastoreId/service/$offeringId/style/$styleTechnicalName/modification": "datastore_service_style_edit",
-    "/_private/contribuer-aux-donnees/guichets/_panneau/": "espaceco_community_list",
-    "/_private/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet": "espaceco_create_community",
-    "/_private/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet": "espaceco_manage_community",
-    "/_private/contribuer-aux-donnees/guichets/$communityId/invitation": "espaceco_member_invitation",
+    "/_private/_cgu-espaceco/contribuer-aux-donnees/guichets/_panneau/": "espaceco_community_list",
+    "/_private/_cgu-espaceco/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet": "espaceco_create_community",
+    "/_private/_cgu-espaceco/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet": "espaceco_manage_community",
+    "/_private/_cgu-espaceco/contribuer-aux-donnees/guichets/$communityId/invitation": "espaceco_member_invitation",
 } as const satisfies Partial<Record<RouteId, string>>;
 
 /** paramètres de chemin et de recherche fusionnés par l’appelant */

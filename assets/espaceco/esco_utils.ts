@@ -41,4 +41,10 @@ const getThumbnail = async (file: File): Promise<string | null> => {
     });
 };
 
-export { getFileURI, getThumbnailFromFileName, getThumbnail };
+// l’API espaceco redirige toute requête vers une erreur 403 tant que les CGU ne sont pas acceptées
+const isTermsNotAcceptedError = (error: unknown): boolean => {
+    const { status, detail } = (error ?? {}) as { status?: unknown; detail?: unknown };
+    return status === 403 && typeof detail === "string" && detail.includes("CGU");
+};
+
+export { getFileURI, getThumbnailFromFileName, getThumbnail, isTermsNotAcceptedError };

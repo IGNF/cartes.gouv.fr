@@ -4,7 +4,7 @@ import { arrCommunityListFilters, type CommunityListFilter } from "@/@types/app_
 import Communities from "@/espaceco/pages/communities/Communities";
 import { enumParam, positiveIntegerParam } from "@/router/searchParams";
 
-export const Route = createFileRoute("/_private/contribuer-aux-donnees/guichets/_panneau/")({
+export const Route = createFileRoute("/_private/_cgu-espaceco/contribuer-aux-donnees/guichets/_panneau/")({
     validateSearch: (
         search: { page?: number; filter?: CommunityListFilter; community?: number } & SearchSchemaInput
     ): { page: number; filter: CommunityListFilter; community?: number } => ({

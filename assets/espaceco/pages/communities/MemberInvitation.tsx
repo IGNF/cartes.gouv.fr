@@ -20,7 +20,6 @@ import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "..
 import api from "../../api";
 import "../../../../assets/sass/pages/espaceco/member_invitation.scss";
 import useUserMe from "@/espaceco/hooks/useUserMe";
-import { espaceCoSiteUrl } from "@/env";
 
 type MemberInvitationProps = {
     communityId: number;
@@ -37,15 +36,10 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
 
     const { t } = useTranslation("MemberInvitation");
 
-    const espaceCoLoginUrl = espaceCoSiteUrl ? `${espaceCoSiteUrl}/login` : undefined;
-
     const errorMessage: ErrorMessage | undefined = useMemo(() => {
         if (!isMeError) return undefined;
-        if (meError.status === 403 && meError.detail?.includes("CGU")) {
-            return { message: t("espaceco_accept_cgu", { url: espaceCoLoginUrl }), type: "warning" };
-        }
         return { message: getApiErrorMessage(meError), type: "warning" };
-    }, [espaceCoLoginUrl, isMeError, meError, t]);
+    }, [isMeError, meError]);
 
     const query = useQuery<CommunityResponseDTO, ApiError>({
         queryKey: RQKeys.community(communityId),
