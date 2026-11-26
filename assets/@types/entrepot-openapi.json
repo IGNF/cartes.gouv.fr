@@ -1615,6 +1615,28 @@
         ],
         "title": "API-FEATURES"
       },
+      "ConfigurationApiMarkerAbscissaDetailsContent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ConfigurationDetailsContent"
+          },
+          {
+            "properties": {
+              "used_data": {
+                "items": {
+                  "$ref": "#/components/schemas/ConfigurationUsedDataApiMarkerAbscissaDetailsContent"
+                },
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "required": [
+          "used_data"
+        ]
+      },
       "ConfigurationAttribution": {
         "description": "Métadonnées liées au propriétaire de la configuration",
         "properties": {
@@ -1746,7 +1768,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -1757,6 +1780,9 @@
               },
               {
                 "$ref": "#/components/schemas/ConfigurationApiFeatureDetailsContent"
+              },
+              {
+                "$ref": "#/components/schemas/ConfigurationApiMarkerAbscissaDetailsContent"
               },
               {
                 "$ref": "#/components/schemas/ConfigurationDownloadDetailsContent"
@@ -1960,7 +1986,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -1971,6 +1998,9 @@
               },
               {
                 "$ref": "#/components/schemas/ConfigurationApiFeatureDetailsContent"
+              },
+              {
+                "$ref": "#/components/schemas/ConfigurationApiMarkerAbscissaDetailsContent"
               },
               {
                 "$ref": "#/components/schemas/ConfigurationDownloadDetailsContent"
@@ -2097,7 +2127,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -2146,7 +2177,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -2157,6 +2189,9 @@
               },
               {
                 "$ref": "#/components/schemas/ConfigurationApiFeatureDetailsContent"
+              },
+              {
+                "$ref": "#/components/schemas/ConfigurationApiMarkerAbscissaDetailsContent"
               },
               {
                 "$ref": "#/components/schemas/ConfigurationDownloadDetailsContent"
@@ -2321,6 +2356,35 @@
           }
         }
       },
+      "ConfigurationMarkerApiMarkerAbscissaDetailsContent": {
+        "properties": {
+          "geometry": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "queryables": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "section": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "geometry",
+          "name",
+          "queryables",
+          "section"
+        ]
+      },
       "ConfigurationMetadata": {
         "description": "Informations sur la métadonnée liée à la configuration",
         "properties": {
@@ -2417,6 +2481,27 @@
         ],
         "title": "SEARCH"
       },
+      "ConfigurationSectionApiMarkerAbscissaDetailsContent": {
+        "properties": {
+          "geometry": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "geometry",
+          "id",
+          "name"
+        ]
+      },
       "ConfigurationStandardDetailResponseDto": {
         "description": "Informations détaillées sur la configuration",
         "properties": {
@@ -2478,7 +2563,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -2489,6 +2575,9 @@
               },
               {
                 "$ref": "#/components/schemas/ConfigurationApiFeatureDetailsContent"
+              },
+              {
+                "$ref": "#/components/schemas/ConfigurationApiMarkerAbscissaDetailsContent"
               },
               {
                 "$ref": "#/components/schemas/ConfigurationDownloadDetailsContent"
@@ -2598,7 +2687,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -2690,6 +2780,36 @@
         "required": [
           "abstract",
           "relation",
+          "stored_data",
+          "title"
+        ]
+      },
+      "ConfigurationUsedDataApiMarkerAbscissaDetailsContent": {
+        "properties": {
+          "abstract": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "marker": {
+            "$ref": "#/components/schemas/ConfigurationMarkerApiMarkerAbscissaDetailsContent"
+          },
+          "section": {
+            "$ref": "#/components/schemas/ConfigurationSectionApiMarkerAbscissaDetailsContent"
+          },
+          "stored_data": {
+            "description": "Identifiant de la donnée stockée",
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "abstract",
+          "marker",
+          "section",
           "stored_data",
           "title"
         ]
@@ -2811,7 +2931,8 @@
             "enum": [
               "auto",
               "auto_shorter",
-              "pedestrian"
+              "pedestrian",
+              "multimodal"
             ],
             "type": "string"
           },
@@ -4081,7 +4202,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -4160,7 +4282,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -4272,7 +4395,8 @@
               "ALTIMETRY",
               "METADATA",
               "SEARCH",
-              "OAPIF"
+              "OAPIF",
+              "MARKER_ABSCISSA"
             ],
             "type": "string"
           },
@@ -4890,7 +5014,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -5027,7 +5152,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -5135,7 +5261,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -5228,7 +5355,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -5319,7 +5447,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -5914,7 +6043,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -5992,7 +6122,8 @@
               "ALTIMETRY",
               "SEARCH",
               "VECTOR-TMS",
-              "API-FEATURES"
+              "API-FEATURES",
+              "API-MARKER-ABSCISSA"
             ],
             "type": "string"
           },
@@ -9839,7 +9970,7 @@
     "description": "Ce service permet de téléverser, transformer et diffuser des données géographiques (raster, vecteur, archives, index...).",
     "termsOfService": "https://cartes.gouv.fr/cgu",
     "title": "API Géoplateforme - Alimentation, traitement et publication",
-    "version": "1.0.0"
+    "version": "5.20.1"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -10229,7 +10360,7 @@
     },
     "/administrator/checks/{check}": {
       "delete": {
-        "operationId": "delete_18",
+        "operationId": "delete_19",
         "parameters": [
           {
             "description": "Identifiant vérification",
@@ -10561,7 +10692,7 @@
     "/administrator/communities/{community}": {
       "delete": {
         "description": "La communauté ne doit plus posséder d'entrepôt ni de permissions.",
-        "operationId": "delete_17",
+        "operationId": "delete_18",
         "parameters": [
           {
             "description": "Identifiant de la communauté à supprimer",
@@ -10742,7 +10873,8 @@
                 "ALTIMETRY",
                 "SEARCH",
                 "VECTOR-TMS",
-                "API-FEATURES"
+                "API-FEATURES",
+                "API-MARKER-ABSCISSA"
               ],
               "type": "string"
             }
@@ -11065,7 +11197,7 @@
     },
     "/administrator/datastores/{datastore}": {
       "delete": {
-        "operationId": "delete_16",
+        "operationId": "delete_17",
         "parameters": [
           {
             "description": "Identifiant du entrepôt à supprimer",
@@ -11212,7 +11344,8 @@
                 "ALTIMETRY",
                 "SEARCH",
                 "VECTOR-TMS",
-                "API-FEATURES"
+                "API-FEATURES",
+                "API-MARKER-ABSCISSA"
               ],
               "type": "string"
             }
@@ -11341,7 +11474,7 @@
     },
     "/administrator/endpoints/{endpoint}": {
       "delete": {
-        "operationId": "delete_15",
+        "operationId": "delete_16",
         "parameters": [
           {
             "description": "Identifiant du point d'accès à supprimer",
@@ -11740,7 +11873,7 @@
     "/administrator/nomenclatures/{nomenclature}": {
       "delete": {
         "description": "Supprime la nomenclature",
-        "operationId": "delete_14",
+        "operationId": "delete_15",
         "parameters": [
           {
             "description": "Identifiant de la nomenclature à supprimer",
@@ -11936,7 +12069,8 @@
                 "ALTIMETRY",
                 "SEARCH",
                 "VECTOR-TMS",
-                "API-FEATURES"
+                "API-FEATURES",
+                "API-MARKER-ABSCISSA"
               ],
               "type": "string"
             }
@@ -12308,7 +12442,7 @@
     },
     "/administrator/organizations/{organization}": {
       "delete": {
-        "operationId": "delete_13",
+        "operationId": "delete_14",
         "parameters": [
           {
             "description": "Identifiant de l'organisme à supprimer",
@@ -13977,7 +14111,7 @@
     },
     "/administrator/storages/{storage}": {
       "delete": {
-        "operationId": "delete_12",
+        "operationId": "delete_13",
         "parameters": [
           {
             "description": "Identifiant du stockage à supprimer",
@@ -14810,7 +14944,75 @@
         ]
       }
     },
+    "/administrator/users/unsynchronized": {
+      "get": {
+        "operationId": "getAbsentFromKeycloak",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Lecture OK"
+          }
+        },
+        "security": [
+          {
+            "Keycloak-Authentication": []
+          }
+        ],
+        "summary": "Liste les utilisateurs de l'entrepôt absents de Keycloak",
+        "tags": [
+          "Accès administrateur"
+        ]
+      }
+    },
     "/administrator/users/{user}": {
+      "delete": {
+        "operationId": "delete_12",
+        "parameters": [
+          {
+            "description": "Identifiant de l'utilisateur à supprimer",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDetailsResponseDto"
+                }
+              }
+            },
+            "description": "Suppression OK"
+          },
+          "404": {
+            "description": "Utilisateur inconnu"
+          }
+        },
+        "security": [
+          {
+            "Keycloak-Authentication": []
+          }
+        ],
+        "summary": "Supprime un utilisateur de l'entrepôt",
+        "tags": [
+          "Accès administrateur"
+        ]
+      },
       "get": {
         "operationId": "get_13",
         "parameters": [
@@ -15260,7 +15462,8 @@
                     "ALTIMETRY",
                     "SEARCH",
                     "VECTOR-TMS",
-                    "API-FEATURES"
+                    "API-FEATURES",
+                    "API-MARKER-ABSCISSA"
                   ],
                   "type": "string"
                 }
@@ -17193,7 +17396,8 @@
                 "ALTIMETRY",
                 "SEARCH",
                 "VECTOR-TMS",
-                "API-FEATURES"
+                "API-FEATURES",
+                "API-MARKER-ABSCISSA"
               ],
               "type": "string"
             }
@@ -18305,7 +18509,8 @@
                 "ALTIMETRY",
                 "SEARCH",
                 "VECTOR-TMS",
-                "API-FEATURES"
+                "API-FEATURES",
+                "API-MARKER-ABSCISSA"
               ],
               "type": "string"
             }
@@ -19193,7 +19398,8 @@
                 "ALTIMETRY",
                 "SEARCH",
                 "VECTOR-TMS",
-                "API-FEATURES"
+                "API-FEATURES",
+                "API-MARKER-ABSCISSA"
               ],
               "type": "string"
             }
@@ -24632,7 +24838,8 @@
                 "ALTIMETRY",
                 "SEARCH",
                 "VECTOR-TMS",
-                "API-FEATURES"
+                "API-FEATURES",
+                "API-MARKER-ABSCISSA"
               ],
               "type": "string"
             }
@@ -24829,7 +25036,8 @@
                 "ALTIMETRY",
                 "SEARCH",
                 "VECTOR-TMS",
-                "API-FEATURES"
+                "API-FEATURES",
+                "API-MARKER-ABSCISSA"
               ],
               "type": "string"
             }
@@ -25006,7 +25214,8 @@
                 "ALTIMETRY",
                 "SEARCH",
                 "VECTOR-TMS",
-                "API-FEATURES"
+                "API-FEATURES",
+                "API-MARKER-ABSCISSA"
               ],
               "type": "string"
             }
@@ -27726,7 +27935,8 @@
                 "ALTIMETRY",
                 "SEARCH",
                 "VECTOR-TMS",
-                "API-FEATURES"
+                "API-FEATURES",
+                "API-MARKER-ABSCISSA"
               ],
               "type": "string"
             }

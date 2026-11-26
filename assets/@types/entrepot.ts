@@ -32,6 +32,7 @@ export enum ConfigurationType {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 export enum ConfigurationStatus {
@@ -952,6 +953,11 @@ export type ConfigurationApiFeatureDetailsContent = ConfigurationDetailsContent 
     used_data: ConfigurationUsedDataApiFeatureDetailsContent[];
 };
 
+export type ConfigurationApiMarkerAbscissaDetailsContent = ConfigurationDetailsContent & {
+    /** @minItems 1 */
+    used_data: ConfigurationUsedDataApiMarkerAbscissaDetailsContent[];
+};
+
 /** Métadonnées liées au propriétaire de la configuration */
 export interface ConfigurationAttribution {
     /** Logo du propriétaire */
@@ -1040,6 +1046,7 @@ export interface ConfigurationCreateDto {
     type_infos:
         | ConfigurationAltimetryDetailsContent
         | ConfigurationApiFeatureDetailsContent
+        | ConfigurationApiMarkerAbscissaDetailsContent
         | ConfigurationDownloadDetailsContent
         | ConfigurationItineraryIsocurveDetailsContent
         | ConfigurationSearchDetailsContent
@@ -1134,6 +1141,7 @@ export interface ConfigurationExtendedDetailResponseDto {
     type_infos:
         | ConfigurationAltimetryDetailsContent
         | ConfigurationApiFeatureDetailsContent
+        | ConfigurationApiMarkerAbscissaDetailsContent
         | ConfigurationDownloadDetailsContent
         | ConfigurationItineraryIsocurveDetailsContent
         | ConfigurationSearchDetailsContent
@@ -1219,6 +1227,7 @@ export interface ConfigurationFullUpdateDto {
     type_infos:
         | ConfigurationAltimetryDetailsContent
         | ConfigurationApiFeatureDetailsContent
+        | ConfigurationApiMarkerAbscissaDetailsContent
         | ConfigurationDownloadDetailsContent
         | ConfigurationItineraryIsocurveDetailsContent
         | ConfigurationSearchDetailsContent
@@ -1310,6 +1319,17 @@ export interface ConfigurationLimitsItineraryIsocurveDetailsContent {
     steps?: number;
 }
 
+export interface ConfigurationMarkerApiMarkerAbscissaDetailsContent {
+    /** @minLength 1 */
+    geometry: string;
+    /** @minLength 1 */
+    name: string;
+    /** @minItems 1 */
+    queryables: string[];
+    /** @minLength 1 */
+    section: string;
+}
+
 /** Informations sur la métadonnée liée à la configuration */
 export interface ConfigurationMetadata {
     /**
@@ -1363,6 +1383,15 @@ export type ConfigurationSearchDetailsContent = ConfigurationDetailsContent & {
     used_data: ConfigurationUsedDataSearchDetailsContent[];
 };
 
+export interface ConfigurationSectionApiMarkerAbscissaDetailsContent {
+    /** @minLength 1 */
+    geometry: string;
+    /** @minLength 1 */
+    id: string;
+    /** @minLength 1 */
+    name: string;
+}
+
 /** Informations détaillées sur la configuration */
 export interface ConfigurationStandardDetailResponseDto {
     /**
@@ -1394,6 +1423,7 @@ export interface ConfigurationStandardDetailResponseDto {
     type_infos:
         | ConfigurationAltimetryDetailsContent
         | ConfigurationApiFeatureDetailsContent
+        | ConfigurationApiMarkerAbscissaDetailsContent
         | ConfigurationDownloadDetailsContent
         | ConfigurationItineraryIsocurveDetailsContent
         | ConfigurationSearchDetailsContent
@@ -1483,6 +1513,20 @@ export interface ConfigurationUsedDataApiFeatureDetailsContent {
     title: string;
     total?: boolean;
     writable?: boolean;
+}
+
+export interface ConfigurationUsedDataApiMarkerAbscissaDetailsContent {
+    /** @minLength 1 */
+    abstract: string;
+    marker: ConfigurationMarkerApiMarkerAbscissaDetailsContent;
+    section: ConfigurationSectionApiMarkerAbscissaDetailsContent;
+    /**
+     * Identifiant de la donnée stockée
+     * @format uuid
+     */
+    stored_data: string;
+    /** @minLength 1 */
+    title: string;
 }
 
 export interface ConfigurationUsedDataAttributeItineraryIsocurveDetailsContent {
@@ -5317,6 +5361,7 @@ export enum ConfigurationUsedDataItineraryIsocurveDetailsContentCostingEnum {
     Auto = "auto",
     AutoShorter = "auto_shorter",
     Pedestrian = "pedestrian",
+    Multimodal = "multimodal",
 }
 
 /**
@@ -5345,6 +5390,7 @@ export enum EndpointCreateDtoTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Type du point d'accès */
@@ -5360,6 +5406,7 @@ export enum EndpointDetailResponseDtoTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Type de l'URL du point d'accès */
@@ -5375,6 +5422,7 @@ export enum EndpointUrlTypeEnum {
     METADATA = "METADATA",
     SEARCH = "SEARCH",
     OAPIF = "OAPIF",
+    MARKER_ABSCISSA = "MARKER_ABSCISSA",
 }
 
 export enum MetadataExtendedResponseDtoLevelEnum {
@@ -5928,6 +5976,7 @@ export enum GetAll28ParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Statut des configurations */
@@ -5950,6 +5999,7 @@ export enum GetAll11ParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Type de famille à laquelle appartient la nomenclature */
@@ -5988,6 +6038,7 @@ export enum GetAll27ParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Statut des offres */
@@ -6202,6 +6253,7 @@ export enum GetCommunityPermissionsParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Filtre sur les droits de l'utlisateur */
@@ -6258,6 +6310,7 @@ export enum GetAll6ParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Statut des configurations */
@@ -6295,6 +6348,7 @@ export enum GetEndpoints1ParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Quel type de métadonnées (INSPIRE, ISOAP...) veut-on voir */
@@ -6342,6 +6396,7 @@ export enum GetAll18ParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Statut des offres */
@@ -6495,6 +6550,7 @@ export enum GetConfigurationsParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Statut des configurations */
@@ -6517,6 +6573,7 @@ export enum GetEndpointsParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 export enum GetOfferings1ParamsFieldsEnum {
@@ -6546,6 +6603,7 @@ export enum GetOfferings1ParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 /** Statut des offres */
@@ -6694,6 +6752,7 @@ export enum GetUserPermissionsParamsTypeEnum {
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
     APIFEATURES = "API-FEATURES",
+    APIMARKERABSCISSA = "API-MARKER-ABSCISSA",
 }
 
 export enum GetStoredDatasParamsFieldsEnum {
