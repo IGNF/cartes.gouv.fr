@@ -245,7 +245,7 @@ const Reports: FC = () => {
         datas.attributes = formatAttributesForApi(datas.attributes);
         updateCommunity(datas, () => {
             if (mode === "creation" && !saveOnly) {
-                void navigate({ to: "/espace-collaboratif" });
+                void navigate({ to: "/contribuer-aux-donnees/guichets" });
             }
         });
     };

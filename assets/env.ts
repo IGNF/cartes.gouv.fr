@@ -10,6 +10,8 @@ const rootDataset = (document.getElementById("root") as HTMLDivElement)?.dataset
 // APP_ENV de Symfony : "prod" sur toute image déployée, "dev" en local
 export const appEnv = rootDataset?.["appEnv"] ?? "dev";
 export const espaceCoUrl = rootDataset?.["apiEspacecoUrl"] ?? null;
+// site de l’espace collaboratif : URL de son API sans le suffixe /gcms/api
+export const espaceCoSiteUrl = espaceCoUrl?.replace(/\/gcms\/api\/?$/, "") ?? null;
 export const catalogueUrl = rootDataset?.["catalogueUrl"] ?? basePath + "/rechercher-une-donnee";
 export const configCommunityId = rootDataset?.["configCommunityId"] ?? null;
 export const configTechnicalName = rootDataset?.["configTechnicalName"] ?? null;

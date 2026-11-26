@@ -15,7 +15,7 @@ import isEmail from "validator/lib/isEmail";
 import * as yup from "yup";
 
 import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
-import DatastoreMain from "@/components/Layout/DatastoreMain";
+import SidePanelPage from "@/components/Layout/SidePanelPage";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
@@ -145,7 +145,7 @@ export default function CommunityInfo({ communityId }: { communityId: string }) 
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: community.name, isSandbox }) })}>
+        <SidePanelPage title={t("title", { datastoreName: tCommon("datastore_name", { name: community.name, isSandbox }) })}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>
                 <div
                     className={fr.cx("fr-col-12", "fr-py-0")}
@@ -304,6 +304,6 @@ export default function CommunityInfo({ communityId }: { communityId: string }) 
                     </div>
                 </Wait>
             )}
-        </DatastoreMain>
+        </SidePanelPage>
     );
 }

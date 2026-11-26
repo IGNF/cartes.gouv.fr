@@ -4,7 +4,7 @@ import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useNavigate } from "@tanstack/react-router";
 import { tss } from "tss-react";
 
-import DatastoreMain from "@/components/Layout/DatastoreMain";
+import SidePanelPage from "@/components/Layout/SidePanelPage";
 import { useTranslation } from "@/i18n";
 import CreateNewDatastore from "./CreateNewDatastore";
 import JoinExistingDatastore from "./JoinExistingDatastore/JoinExistingDatastore";
@@ -19,7 +19,7 @@ export default function DatastoreAdd({ mode }: DatastoreAddProps) {
     const navigate = useNavigate();
 
     return (
-        <DatastoreMain title={t("title")}>
+        <SidePanelPage title={t("title")}>
             <div className={cx(classes.content)}>
                 <div className={cx(classes.head)}>
                     <div className={fr.cx("fr-grid-row")}>
@@ -63,7 +63,7 @@ export default function DatastoreAdd({ mode }: DatastoreAddProps) {
                     </div>
                 )}
             </div>
-        </DatastoreMain>
+        </SidePanelPage>
     );
 }
 

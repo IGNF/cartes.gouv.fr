@@ -1,27 +1,30 @@
 import { declareComponentKeys } from "i18nifty";
 
-import { CommunityListFilter } from "../../../@types/app_espaceco";
+import { CommunityListFilter, Role } from "../../../@types/app_espaceco";
 import { Translations } from "../../../i18n/types";
 
 // traductions
 const { i18n } = declareComponentKeys<
     | "title"
+    | "panel_title"
+    | "panel_description"
+    | "beta_badge"
     | "filters"
     | "open_community"
     | "all_public_communities"
     | "communities_as_member"
     | "pending_membership"
     | { K: "no_result"; P: { filter: CommunityListFilter }; R: string }
-    | "show_details"
-    | "community_creation"
-    | "create_community"
     | "append_community"
-    | "no_description"
+    | { K: "role"; P: { role: Role }; R: string }
 >()("EspaceCoCommunityList");
 export type I18n = typeof i18n;
 
 export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCommunityList"] = {
     title: "Liste des guichets",
+    panel_title: "Mes guichets",
+    panel_description: "Consulter les guichets et y participer",
+    beta_badge: "Service bêta",
     filters: "Filtres",
     open_community: "Ouvrir",
     all_public_communities: "Tous les guichets publics",
@@ -31,28 +34,37 @@ export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCo
         filter === "listed"
             ? "Aucun guichet public"
             : filter === "iam_member"
-              ? "Vous n'êtes membre d’aucun guichet"
+              ? "Vous n’êtes membre d’aucun guichet"
               : filter === "affiliation"
                 ? "Aucune affiliation en cours"
                 : "[TODO]",
-    show_details: "Afficher les détails",
-    community_creation: "Création du guichet en cours ...",
-    create_community: "Création d'un guichet",
     append_community: "Reprendre la configuration de ce guichet",
-    no_description: "Aucune description n’a été renseignée sur ce guichet",
+    role: ({ role }) =>
+        ({
+            member: "Membre",
+            admin: "Gestionnaire",
+            pending: "En attente",
+            invited: "Invité",
+        })[role],
 };
 
 export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCommunityList"] = {
     title: "List of communities",
+    panel_title: "My communities",
+    panel_description: "Browse communities and take part in them",
+    beta_badge: "Beta service",
     filters: "Filters",
     open_community: "Access",
     all_public_communities: undefined,
     communities_as_member: undefined,
     pending_membership: undefined,
     no_result: ({ filter }) => `[TODO] ${filter}`,
-    show_details: undefined,
-    community_creation: undefined,
-    create_community: undefined,
     append_community: undefined,
-    no_description: undefined,
+    role: ({ role }) =>
+        ({
+            member: "Member",
+            admin: "Manager",
+            pending: "Pending",
+            invited: "Invited",
+        })[role],
 };

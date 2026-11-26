@@ -1,4 +1,3 @@
-import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { addNoticeTranslations } from "@codegouvfr/react-dsfr/Notice";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 import { useSeoMeta } from "@unhead/react";
@@ -30,17 +29,13 @@ const HiddenElements: FC = () => {
 
 const HiddenElementsMemoized = memo(HiddenElements);
 
-export interface AppLayoutProps {
-    navItems?: MainNavigationProps.Item[];
-}
-
-const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems }) => {
+const AppLayout: FC<PropsWithChildren> = ({ children }) => {
     useSeoMeta({ robots: "index,follow" }, { tagPriority: "low" });
 
     return (
         <>
             <HiddenElementsMemoized />
-            <AppHeader navItems={navItems} />
+            <AppHeader />
             {children}
             <NewsletterBanner />
             <AppFooter />
