@@ -17,7 +17,7 @@ import api from "../../api";
 import CommunityList from "./CommunityList";
 import Skeleton from "../../../components/Utils/Skeleton";
 
-const routeApi = getRouteApi("/_private/contribuer-aux-donnees/guichets/_panneau/");
+const routeApi = getRouteApi("/_private/_cgu-espaceco/contribuer-aux-donnees/guichets/_panneau/");
 
 const defaultLimit = 10;
 

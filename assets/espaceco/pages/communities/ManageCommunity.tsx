@@ -21,7 +21,7 @@ import Tools from "./management/Tools";
 import ZoomAndCentering from "./management/ZoomAndCentering";
 import { getApiErrorMessage } from "../../../modules/apiError";
 
-const routeApi = getRouteApi("/_private/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet");
+const routeApi = getRouteApi("/_private/_cgu-espaceco/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet");
 
 const ManageCommunity: FC = () => {
     const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();

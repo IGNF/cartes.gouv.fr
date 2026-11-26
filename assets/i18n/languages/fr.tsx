@@ -43,6 +43,7 @@ import { PermissionsFrTranslations } from "../../entrepot/pages/users/permission
 import { CreateCommunityFrTranslations } from "../../espaceco/pages/communities/CreateCommunity.locale";
 import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunity.locale";
 import { MemberInvitationFrTranslations } from "../../espaceco/pages/communities/MemberInvitation.locale";
+import { EspaceCoTermsGateFrTranslations } from "../../espaceco/components/EspaceCoTermsGate.locale";
 import { ManageCommunityValidationsFrTranslations } from "../../espaceco/pages/communities/management/ManageCommunityValidations.locale";
 import { EscoCommunityMembersFrTranslations } from "../../espaceco/pages/communities/management/Members.locale";
 import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports.locale";
@@ -120,6 +121,7 @@ export const translations: Translations<"fr"> = {
     AutofillDialog: AutofillDialogFrTranslations,
     LoginDisabled: LoginDisabledFrTranslations,
     MemberInvitation: MemberInvitationFrTranslations,
+    EspaceCoTermsGate: EspaceCoTermsGateFrTranslations,
     Reports: ReportsFrTranslations,
     Databases: DatabasesFrTranslations,
     Functionalities: FunctionalitiesFrTranslations,

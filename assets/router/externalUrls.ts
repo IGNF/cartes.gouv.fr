@@ -1,6 +1,6 @@
 import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 
-import { basePath as appRoot, catalogueUrl } from "@/env";
+import { basePath as appRoot, catalogueUrl, espaceCoSiteUrl } from "@/env";
 import SymfonyRouting from "@/modules/Routing";
 
 export const externalUrls = {
@@ -30,6 +30,7 @@ export const externalUrls = {
     sitemap: appRoot + "/plan-du-site",
     newsletterSubscription: appRoot + "/lettre-d-information",
     community_geopf_cartesgouvfr_expertises_territoires: "https://www.expertises-territoires.fr/jcms/pl1_557493/fr/communaute-geoplateforme-et-cartes-gouv",
+    espacecoTerms: (espaceCoSiteUrl ?? "https://espacecollaboratif.ign.fr") + "/cgu/",
     login: SymfonyRouting.generate("cartesgouvfr_security_login"),
     logout: SymfonyRouting.generate("cartesgouvfr_security_logout"),
 } as const;
