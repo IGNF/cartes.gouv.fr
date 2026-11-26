@@ -75,7 +75,7 @@ export default function DiscoverContribute() {
                                     {
                                         iconId: "fr-icon-arrow-right-s-line",
                                         iconPosition: "right",
-                                        linkProps: user ? { to: "/espace-collaboratif" } : { href: externalUrls.login },
+                                        linkProps: user ? { to: "/contribuer-aux-donnees/guichets" } : { href: externalUrls.login },
                                         children: user ? "Voir mes guichets" : "Connectez-vous pour commencer",
                                     },
                                 ].filter(Boolean) as ButtonsGroupProps["buttons"]

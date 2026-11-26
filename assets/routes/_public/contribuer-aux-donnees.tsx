@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_public/contribuer-aux-donnees")({
     validateSearch: (search: { login_failed?: number } & SearchSchemaInput): { login_failed?: number } => ({
         login_failed: integerParam(search.login_failed),
     }),
-    staticData: { matomoLabel: "Contribuer aux données" },
+    staticData: { space: "contribute", matomoLabel: "Contribuer aux données" },
     // page d’accueil : rendue sans attendre de chunk, comme avant la bascule
     codeSplitGroupings: [],
     component: RouteComponent,

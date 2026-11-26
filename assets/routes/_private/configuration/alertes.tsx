@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_private/configuration/alertes")({
         }
         return { configCommunityId };
     },
-    staticData: { matomoLabel: "Configuration des alertes" },
+    staticData: { space: "publish", matomoLabel: "Configuration des alertes" },
     component: RouteComponent,
 });
 

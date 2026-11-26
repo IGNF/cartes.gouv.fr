@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PrivateRouteRouteImport } from './routes/_private/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as PrivatePanneauRouteRouteImport } from './routes/_private/_panneau/route'
-import { Route as PrivateEspaceCollaboratifRouteRouteImport } from './routes/_private/espace-collaboratif/route'
 import { Route as PrivateMesDocumentsRouteImport } from './routes/_private/mes-documents'
 import { Route as PrivateMesPermissionsRouteImport } from './routes/_private/mes-permissions'
 import { Route as PrivateMonCompteRouteImport } from './routes/_private/mon-compte'
@@ -22,20 +21,22 @@ import { Route as PublicContribuerAuxDonneesRouteImport } from './routes/_public
 import { Route as PublicPublierUneDonneeRouteImport } from './routes/_public/publier-une-donnee'
 import { Route as PrivatePanneauRejoindreDesCommunautesRouteImport } from './routes/_private/_panneau/rejoindre-des-communautes'
 import { Route as PrivateConfigurationAlertesRouteImport } from './routes/_private/configuration/alertes'
+import { Route as PrivateContribuerAuxDonneesGuichetsRouteRouteImport } from './routes/_private/contribuer-aux-donnees/guichets/route'
 import { Route as PrivateDemandeAccesFileIdentifierRouteImport } from './routes/_private/demande-acces.$fileIdentifier'
-import { Route as PrivateEspaceCollaboratifIndexRouteImport } from './routes/_private/espace-collaboratif/index'
 import { Route as PrivateMesClesIndexRouteImport } from './routes/_private/mes-cles/index'
 import { Route as PrivateMesClesAjoutRouteImport } from './routes/_private/mes-cles/ajout'
 import { Route as PrivateTableauDeBordIndexRouteImport } from './routes/_private/tableau-de-bord/index'
 import { Route as PrivateTableauDeBordStatistiquesDeConsommationRouteImport } from './routes/_private/tableau-de-bord/statistiques-de-consommation'
-import { Route as PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRouteImport } from './routes/_private/espace-collaboratif/$communityId.creer-un-guichet'
-import { Route as PrivateEspaceCollaboratifCommunityIdGererLeGuichetRouteImport } from './routes/_private/espace-collaboratif/$communityId.gerer-le-guichet'
-import { Route as PrivateEspaceCollaboratifCommunityIdInvitationRouteImport } from './routes/_private/espace-collaboratif/$communityId.invitation'
+import { Route as PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteImport } from './routes/_private/contribuer-aux-donnees/guichets/_panneau/route'
 import { Route as PrivateMesClesKeyIdModificationRouteImport } from './routes/_private/mes-cles/$keyId.modification'
 import { Route as PrivateTableauDeBordCommunauteCommunityIdRouteRouteImport } from './routes/_private/tableau-de-bord/communaute/$communityId/route'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdRouteRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/route'
 import { Route as PrivatePanneauTableauDeBordEntrepotsIndexRouteImport } from './routes/_private/_panneau/tableau-de-bord/entrepots/index'
 import { Route as PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRouteImport } from './routes/_private/_panneau/tableau-de-bord/entrepots/demande-de-creation'
+import { Route as PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRouteImport } from './routes/_private/contribuer-aux-donnees/guichets/$communityId.creer-un-guichet'
+import { Route as PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRouteImport } from './routes/_private/contribuer-aux-donnees/guichets/$communityId.gerer-le-guichet'
+import { Route as PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRouteImport } from './routes/_private/contribuer-aux-donnees/guichets/$communityId.invitation'
+import { Route as PrivateContribuerAuxDonneesGuichetsPanneauIndexRouteImport } from './routes/_private/contribuer-aux-donnees/guichets/_panneau/index'
 import { Route as PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteImport } from './routes/_private/tableau-de-bord/communaute/$communityId/_onglets/route'
 import { Route as PrivateTableauDeBordCommunauteCommunityIdInfoRouteImport } from './routes/_private/tableau-de-bord/communaute/$communityId/info'
 import { Route as PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRouteImport } from './routes/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/route'
@@ -81,12 +82,6 @@ const PrivatePanneauRouteRoute = PrivatePanneauRouteRouteImport.update({
   id: '/_panneau',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
-const PrivateEspaceCollaboratifRouteRoute =
-  PrivateEspaceCollaboratifRouteRouteImport.update({
-    id: '/espace-collaboratif',
-    path: '/espace-collaboratif',
-    getParentRoute: () => PrivateRouteRoute,
-  } as any)
 const PrivateMesDocumentsRoute = PrivateMesDocumentsRouteImport.update({
   id: '/mes-documents',
   path: '/mes-documents',
@@ -136,17 +131,17 @@ const PrivateConfigurationAlertesRoute =
     path: '/configuration/alertes',
     getParentRoute: () => PrivateRouteRoute,
   } as any)
+const PrivateContribuerAuxDonneesGuichetsRouteRoute =
+  PrivateContribuerAuxDonneesGuichetsRouteRouteImport.update({
+    id: '/contribuer-aux-donnees/guichets',
+    path: '/contribuer-aux-donnees/guichets',
+    getParentRoute: () => PrivateRouteRoute,
+  } as any)
 const PrivateDemandeAccesFileIdentifierRoute =
   PrivateDemandeAccesFileIdentifierRouteImport.update({
     id: '/demande-acces/$fileIdentifier',
     path: '/demande-acces/$fileIdentifier',
     getParentRoute: () => PrivateRouteRoute,
-  } as any)
-const PrivateEspaceCollaboratifIndexRoute =
-  PrivateEspaceCollaboratifIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => PrivateEspaceCollaboratifRouteRoute,
   } as any)
 const PrivateMesClesIndexRoute = PrivateMesClesIndexRouteImport.update({
   id: '/mes-cles/',
@@ -170,23 +165,10 @@ const PrivateTableauDeBordStatistiquesDeConsommationRoute =
     path: '/tableau-de-bord/statistiques-de-consommation',
     getParentRoute: () => PrivateRouteRoute,
   } as any)
-const PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRoute =
-  PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRouteImport.update({
-    id: '/$communityId/creer-un-guichet',
-    path: '/$communityId/creer-un-guichet',
-    getParentRoute: () => PrivateEspaceCollaboratifRouteRoute,
-  } as any)
-const PrivateEspaceCollaboratifCommunityIdGererLeGuichetRoute =
-  PrivateEspaceCollaboratifCommunityIdGererLeGuichetRouteImport.update({
-    id: '/$communityId/gerer-le-guichet',
-    path: '/$communityId/gerer-le-guichet',
-    getParentRoute: () => PrivateEspaceCollaboratifRouteRoute,
-  } as any)
-const PrivateEspaceCollaboratifCommunityIdInvitationRoute =
-  PrivateEspaceCollaboratifCommunityIdInvitationRouteImport.update({
-    id: '/$communityId/invitation',
-    path: '/$communityId/invitation',
-    getParentRoute: () => PrivateEspaceCollaboratifRouteRoute,
+const PrivateContribuerAuxDonneesGuichetsPanneauRouteRoute =
+  PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteImport.update({
+    id: '/_panneau',
+    getParentRoute: () => PrivateContribuerAuxDonneesGuichetsRouteRoute,
   } as any)
 const PrivateMesClesKeyIdModificationRoute =
   PrivateMesClesKeyIdModificationRouteImport.update({
@@ -217,6 +199,34 @@ const PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRoute =
     id: '/tableau-de-bord/entrepots/demande-de-creation',
     path: '/tableau-de-bord/entrepots/demande-de-creation',
     getParentRoute: () => PrivatePanneauRouteRoute,
+  } as any)
+const PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRoute =
+  PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRouteImport.update(
+    {
+      id: '/$communityId/creer-un-guichet',
+      path: '/$communityId/creer-un-guichet',
+      getParentRoute: () => PrivateContribuerAuxDonneesGuichetsRouteRoute,
+    } as any,
+  )
+const PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRoute =
+  PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRouteImport.update(
+    {
+      id: '/$communityId/gerer-le-guichet',
+      path: '/$communityId/gerer-le-guichet',
+      getParentRoute: () => PrivateContribuerAuxDonneesGuichetsRouteRoute,
+    } as any,
+  )
+const PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRoute =
+  PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRouteImport.update({
+    id: '/$communityId/invitation',
+    path: '/$communityId/invitation',
+    getParentRoute: () => PrivateContribuerAuxDonneesGuichetsRouteRoute,
+  } as any)
+const PrivateContribuerAuxDonneesGuichetsPanneauIndexRoute =
+  PrivateContribuerAuxDonneesGuichetsPanneauIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => PrivateContribuerAuxDonneesGuichetsPanneauRouteRoute,
   } as any)
 const PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRoute =
   PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteImport.update({
@@ -458,7 +468,6 @@ const PrivateTableauDeBordEntrepotsDatastoreIdServiceOfferingIdStyleStyleTechnic
 
 export interface FileRoutesByFullPath {
   '/': typeof PrivatePanneauRouteRouteWithChildren
-  '/espace-collaboratif': typeof PrivateEspaceCollaboratifRouteRouteWithChildren
   '/mes-documents': typeof PrivateMesDocumentsRoute
   '/mes-permissions': typeof PrivateMesPermissionsRoute
   '/mon-compte': typeof PrivateMonCompteRoute
@@ -466,23 +475,24 @@ export interface FileRoutesByFullPath {
   '/connexion-desactivee': typeof PublicConnexionDesactiveeRoute
   '/contribuer-aux-donnees': typeof PublicContribuerAuxDonneesRoute
   '/publier-une-donnee': typeof PublicPublierUneDonneeRoute
+  '/contribuer-aux-donnees/guichets': typeof PrivateContribuerAuxDonneesGuichetsRouteRouteWithChildren
   '/rejoindre-des-communautes': typeof PrivatePanneauRejoindreDesCommunautesRoute
   '/configuration/alertes': typeof PrivateConfigurationAlertesRoute
   '/demande-acces/$fileIdentifier': typeof PrivateDemandeAccesFileIdentifierRoute
   '/mes-cles/ajout': typeof PrivateMesClesAjoutRoute
   '/tableau-de-bord/statistiques-de-consommation': typeof PrivateTableauDeBordStatistiquesDeConsommationRoute
-  '/espace-collaboratif/': typeof PrivateEspaceCollaboratifIndexRoute
   '/mes-cles/': typeof PrivateMesClesIndexRoute
   '/tableau-de-bord/': typeof PrivateTableauDeBordIndexRoute
   '/tableau-de-bord/communaute/$communityId': typeof PrivateTableauDeBordCommunauteCommunityIdRouteRouteWithChildren
   '/tableau-de-bord/entrepots/$datastoreId': typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRouteWithChildren
-  '/espace-collaboratif/$communityId/creer-un-guichet': typeof PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRoute
-  '/espace-collaboratif/$communityId/gerer-le-guichet': typeof PrivateEspaceCollaboratifCommunityIdGererLeGuichetRoute
-  '/espace-collaboratif/$communityId/invitation': typeof PrivateEspaceCollaboratifCommunityIdInvitationRoute
   '/mes-cles/$keyId/modification': typeof PrivateMesClesKeyIdModificationRoute
   '/tableau-de-bord/entrepots/demande-de-creation': typeof PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRoute
+  '/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet': typeof PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRoute
+  '/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet': typeof PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRoute
+  '/contribuer-aux-donnees/guichets/$communityId/invitation': typeof PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRoute
   '/tableau-de-bord/communaute/$communityId/info': typeof PrivateTableauDeBordCommunauteCommunityIdInfoRoute
   '/tableau-de-bord/entrepots/': typeof PrivatePanneauTableauDeBordEntrepotsIndexRoute
+  '/contribuer-aux-donnees/guichets/': typeof PrivateContribuerAuxDonneesGuichetsPanneauIndexRoute
   '/tableau-de-bord/communaute/$communityId/membres': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsMembresRoute
   '/tableau-de-bord/entrepots/$datastoreId/consommation': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsConsommationRoute
   '/tableau-de-bord/entrepots/$datastoreId/info': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsInfoRoute
@@ -522,21 +532,21 @@ export interface FileRoutesByTo {
   '/connexion-desactivee': typeof PublicConnexionDesactiveeRoute
   '/contribuer-aux-donnees': typeof PublicContribuerAuxDonneesRoute
   '/publier-une-donnee': typeof PublicPublierUneDonneeRoute
+  '/contribuer-aux-donnees/guichets': typeof PrivateContribuerAuxDonneesGuichetsPanneauIndexRoute
   '/rejoindre-des-communautes': typeof PrivatePanneauRejoindreDesCommunautesRoute
   '/configuration/alertes': typeof PrivateConfigurationAlertesRoute
   '/demande-acces/$fileIdentifier': typeof PrivateDemandeAccesFileIdentifierRoute
   '/mes-cles/ajout': typeof PrivateMesClesAjoutRoute
   '/tableau-de-bord/statistiques-de-consommation': typeof PrivateTableauDeBordStatistiquesDeConsommationRoute
-  '/espace-collaboratif': typeof PrivateEspaceCollaboratifIndexRoute
   '/mes-cles': typeof PrivateMesClesIndexRoute
   '/tableau-de-bord': typeof PrivateTableauDeBordIndexRoute
   '/tableau-de-bord/communaute/$communityId': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsIndexRoute
   '/tableau-de-bord/entrepots/$datastoreId': typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRouteWithChildren
-  '/espace-collaboratif/$communityId/creer-un-guichet': typeof PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRoute
-  '/espace-collaboratif/$communityId/gerer-le-guichet': typeof PrivateEspaceCollaboratifCommunityIdGererLeGuichetRoute
-  '/espace-collaboratif/$communityId/invitation': typeof PrivateEspaceCollaboratifCommunityIdInvitationRoute
   '/mes-cles/$keyId/modification': typeof PrivateMesClesKeyIdModificationRoute
   '/tableau-de-bord/entrepots/demande-de-creation': typeof PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRoute
+  '/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet': typeof PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRoute
+  '/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet': typeof PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRoute
+  '/contribuer-aux-donnees/guichets/$communityId/invitation': typeof PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRoute
   '/tableau-de-bord/communaute/$communityId/info': typeof PrivateTableauDeBordCommunauteCommunityIdInfoRoute
   '/tableau-de-bord/entrepots': typeof PrivatePanneauTableauDeBordEntrepotsIndexRoute
   '/tableau-de-bord/communaute/$communityId/membres': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsMembresRoute
@@ -573,7 +583,6 @@ export interface FileRoutesById {
   '/_private': typeof PrivateRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
   '/_private/_panneau': typeof PrivatePanneauRouteRouteWithChildren
-  '/_private/espace-collaboratif': typeof PrivateEspaceCollaboratifRouteRouteWithChildren
   '/_private/mes-documents': typeof PrivateMesDocumentsRoute
   '/_private/mes-permissions': typeof PrivateMesPermissionsRoute
   '/_private/mon-compte': typeof PrivateMonCompteRoute
@@ -581,25 +590,27 @@ export interface FileRoutesById {
   '/_public/connexion-desactivee': typeof PublicConnexionDesactiveeRoute
   '/_public/contribuer-aux-donnees': typeof PublicContribuerAuxDonneesRoute
   '/_public/publier-une-donnee': typeof PublicPublierUneDonneeRoute
+  '/_private/contribuer-aux-donnees/guichets': typeof PrivateContribuerAuxDonneesGuichetsRouteRouteWithChildren
   '/_private/_panneau/rejoindre-des-communautes': typeof PrivatePanneauRejoindreDesCommunautesRoute
   '/_private/configuration/alertes': typeof PrivateConfigurationAlertesRoute
   '/_private/demande-acces/$fileIdentifier': typeof PrivateDemandeAccesFileIdentifierRoute
   '/_private/mes-cles/ajout': typeof PrivateMesClesAjoutRoute
   '/_private/tableau-de-bord/statistiques-de-consommation': typeof PrivateTableauDeBordStatistiquesDeConsommationRoute
-  '/_private/espace-collaboratif/': typeof PrivateEspaceCollaboratifIndexRoute
   '/_private/mes-cles/': typeof PrivateMesClesIndexRoute
   '/_private/tableau-de-bord/': typeof PrivateTableauDeBordIndexRoute
+  '/_private/contribuer-aux-donnees/guichets/_panneau': typeof PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteWithChildren
   '/_private/tableau-de-bord/communaute/$communityId': typeof PrivateTableauDeBordCommunauteCommunityIdRouteRouteWithChildren
   '/_private/tableau-de-bord/entrepots/$datastoreId': typeof PrivateTableauDeBordEntrepotsDatastoreIdRouteRouteWithChildren
-  '/_private/espace-collaboratif/$communityId/creer-un-guichet': typeof PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRoute
-  '/_private/espace-collaboratif/$communityId/gerer-le-guichet': typeof PrivateEspaceCollaboratifCommunityIdGererLeGuichetRoute
-  '/_private/espace-collaboratif/$communityId/invitation': typeof PrivateEspaceCollaboratifCommunityIdInvitationRoute
   '/_private/mes-cles/$keyId/modification': typeof PrivateMesClesKeyIdModificationRoute
   '/_private/tableau-de-bord/communaute/$communityId/_onglets': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteWithChildren
   '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsRouteRouteWithChildren
   '/_private/_panneau/tableau-de-bord/entrepots/demande-de-creation': typeof PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRoute
+  '/_private/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet': typeof PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRoute
+  '/_private/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet': typeof PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRoute
+  '/_private/contribuer-aux-donnees/guichets/$communityId/invitation': typeof PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRoute
   '/_private/tableau-de-bord/communaute/$communityId/info': typeof PrivateTableauDeBordCommunauteCommunityIdInfoRoute
   '/_private/_panneau/tableau-de-bord/entrepots/': typeof PrivatePanneauTableauDeBordEntrepotsIndexRoute
+  '/_private/contribuer-aux-donnees/guichets/_panneau/': typeof PrivateContribuerAuxDonneesGuichetsPanneauIndexRoute
   '/_private/tableau-de-bord/communaute/$communityId/_onglets/membres': typeof PrivateTableauDeBordCommunauteCommunityIdOngletsMembresRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsConsommationRoute
   '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/info': typeof PrivateTableauDeBordEntrepotsDatastoreIdOngletsInfoRoute
@@ -634,7 +645,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/espace-collaboratif'
     | '/mes-documents'
     | '/mes-permissions'
     | '/mon-compte'
@@ -642,23 +652,24 @@ export interface FileRouteTypes {
     | '/connexion-desactivee'
     | '/contribuer-aux-donnees'
     | '/publier-une-donnee'
+    | '/contribuer-aux-donnees/guichets'
     | '/rejoindre-des-communautes'
     | '/configuration/alertes'
     | '/demande-acces/$fileIdentifier'
     | '/mes-cles/ajout'
     | '/tableau-de-bord/statistiques-de-consommation'
-    | '/espace-collaboratif/'
     | '/mes-cles/'
     | '/tableau-de-bord/'
     | '/tableau-de-bord/communaute/$communityId'
     | '/tableau-de-bord/entrepots/$datastoreId'
-    | '/espace-collaboratif/$communityId/creer-un-guichet'
-    | '/espace-collaboratif/$communityId/gerer-le-guichet'
-    | '/espace-collaboratif/$communityId/invitation'
     | '/mes-cles/$keyId/modification'
     | '/tableau-de-bord/entrepots/demande-de-creation'
+    | '/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet'
+    | '/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet'
+    | '/contribuer-aux-donnees/guichets/$communityId/invitation'
     | '/tableau-de-bord/communaute/$communityId/info'
     | '/tableau-de-bord/entrepots/'
+    | '/contribuer-aux-donnees/guichets/'
     | '/tableau-de-bord/communaute/$communityId/membres'
     | '/tableau-de-bord/entrepots/$datastoreId/consommation'
     | '/tableau-de-bord/entrepots/$datastoreId/info'
@@ -698,21 +709,21 @@ export interface FileRouteTypes {
     | '/connexion-desactivee'
     | '/contribuer-aux-donnees'
     | '/publier-une-donnee'
+    | '/contribuer-aux-donnees/guichets'
     | '/rejoindre-des-communautes'
     | '/configuration/alertes'
     | '/demande-acces/$fileIdentifier'
     | '/mes-cles/ajout'
     | '/tableau-de-bord/statistiques-de-consommation'
-    | '/espace-collaboratif'
     | '/mes-cles'
     | '/tableau-de-bord'
     | '/tableau-de-bord/communaute/$communityId'
     | '/tableau-de-bord/entrepots/$datastoreId'
-    | '/espace-collaboratif/$communityId/creer-un-guichet'
-    | '/espace-collaboratif/$communityId/gerer-le-guichet'
-    | '/espace-collaboratif/$communityId/invitation'
     | '/mes-cles/$keyId/modification'
     | '/tableau-de-bord/entrepots/demande-de-creation'
+    | '/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet'
+    | '/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet'
+    | '/contribuer-aux-donnees/guichets/$communityId/invitation'
     | '/tableau-de-bord/communaute/$communityId/info'
     | '/tableau-de-bord/entrepots'
     | '/tableau-de-bord/communaute/$communityId/membres'
@@ -748,7 +759,6 @@ export interface FileRouteTypes {
     | '/_private'
     | '/_public'
     | '/_private/_panneau'
-    | '/_private/espace-collaboratif'
     | '/_private/mes-documents'
     | '/_private/mes-permissions'
     | '/_private/mon-compte'
@@ -756,25 +766,27 @@ export interface FileRouteTypes {
     | '/_public/connexion-desactivee'
     | '/_public/contribuer-aux-donnees'
     | '/_public/publier-une-donnee'
+    | '/_private/contribuer-aux-donnees/guichets'
     | '/_private/_panneau/rejoindre-des-communautes'
     | '/_private/configuration/alertes'
     | '/_private/demande-acces/$fileIdentifier'
     | '/_private/mes-cles/ajout'
     | '/_private/tableau-de-bord/statistiques-de-consommation'
-    | '/_private/espace-collaboratif/'
     | '/_private/mes-cles/'
     | '/_private/tableau-de-bord/'
+    | '/_private/contribuer-aux-donnees/guichets/_panneau'
     | '/_private/tableau-de-bord/communaute/$communityId'
     | '/_private/tableau-de-bord/entrepots/$datastoreId'
-    | '/_private/espace-collaboratif/$communityId/creer-un-guichet'
-    | '/_private/espace-collaboratif/$communityId/gerer-le-guichet'
-    | '/_private/espace-collaboratif/$communityId/invitation'
     | '/_private/mes-cles/$keyId/modification'
     | '/_private/tableau-de-bord/communaute/$communityId/_onglets'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets'
     | '/_private/_panneau/tableau-de-bord/entrepots/demande-de-creation'
+    | '/_private/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet'
+    | '/_private/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet'
+    | '/_private/contribuer-aux-donnees/guichets/$communityId/invitation'
     | '/_private/tableau-de-bord/communaute/$communityId/info'
     | '/_private/_panneau/tableau-de-bord/entrepots/'
+    | '/_private/contribuer-aux-donnees/guichets/_panneau/'
     | '/_private/tableau-de-bord/communaute/$communityId/_onglets/membres'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/consommation'
     | '/_private/tableau-de-bord/entrepots/$datastoreId/_onglets/info'
@@ -832,13 +844,6 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof PrivatePanneauRouteRouteImport
-      parentRoute: typeof PrivateRouteRoute
-    }
-    '/_private/espace-collaboratif': {
-      id: '/_private/espace-collaboratif'
-      path: '/espace-collaboratif'
-      fullPath: '/espace-collaboratif'
-      preLoaderRoute: typeof PrivateEspaceCollaboratifRouteRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
     '/_private/mes-documents': {
@@ -904,19 +909,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateConfigurationAlertesRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
+    '/_private/contribuer-aux-donnees/guichets': {
+      id: '/_private/contribuer-aux-donnees/guichets'
+      path: '/contribuer-aux-donnees/guichets'
+      fullPath: '/contribuer-aux-donnees/guichets'
+      preLoaderRoute: typeof PrivateContribuerAuxDonneesGuichetsRouteRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
     '/_private/demande-acces/$fileIdentifier': {
       id: '/_private/demande-acces/$fileIdentifier'
       path: '/demande-acces/$fileIdentifier'
       fullPath: '/demande-acces/$fileIdentifier'
       preLoaderRoute: typeof PrivateDemandeAccesFileIdentifierRouteImport
       parentRoute: typeof PrivateRouteRoute
-    }
-    '/_private/espace-collaboratif/': {
-      id: '/_private/espace-collaboratif/'
-      path: '/'
-      fullPath: '/espace-collaboratif/'
-      preLoaderRoute: typeof PrivateEspaceCollaboratifIndexRouteImport
-      parentRoute: typeof PrivateEspaceCollaboratifRouteRoute
     }
     '/_private/mes-cles/': {
       id: '/_private/mes-cles/'
@@ -946,26 +951,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateTableauDeBordStatistiquesDeConsommationRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
-    '/_private/espace-collaboratif/$communityId/creer-un-guichet': {
-      id: '/_private/espace-collaboratif/$communityId/creer-un-guichet'
-      path: '/$communityId/creer-un-guichet'
-      fullPath: '/espace-collaboratif/$communityId/creer-un-guichet'
-      preLoaderRoute: typeof PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRouteImport
-      parentRoute: typeof PrivateEspaceCollaboratifRouteRoute
-    }
-    '/_private/espace-collaboratif/$communityId/gerer-le-guichet': {
-      id: '/_private/espace-collaboratif/$communityId/gerer-le-guichet'
-      path: '/$communityId/gerer-le-guichet'
-      fullPath: '/espace-collaboratif/$communityId/gerer-le-guichet'
-      preLoaderRoute: typeof PrivateEspaceCollaboratifCommunityIdGererLeGuichetRouteImport
-      parentRoute: typeof PrivateEspaceCollaboratifRouteRoute
-    }
-    '/_private/espace-collaboratif/$communityId/invitation': {
-      id: '/_private/espace-collaboratif/$communityId/invitation'
-      path: '/$communityId/invitation'
-      fullPath: '/espace-collaboratif/$communityId/invitation'
-      preLoaderRoute: typeof PrivateEspaceCollaboratifCommunityIdInvitationRouteImport
-      parentRoute: typeof PrivateEspaceCollaboratifRouteRoute
+    '/_private/contribuer-aux-donnees/guichets/_panneau': {
+      id: '/_private/contribuer-aux-donnees/guichets/_panneau'
+      path: ''
+      fullPath: '/contribuer-aux-donnees/guichets'
+      preLoaderRoute: typeof PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteImport
+      parentRoute: typeof PrivateContribuerAuxDonneesGuichetsRouteRoute
     }
     '/_private/mes-cles/$keyId/modification': {
       id: '/_private/mes-cles/$keyId/modification'
@@ -1001,6 +992,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/tableau-de-bord/entrepots/demande-de-creation'
       preLoaderRoute: typeof PrivatePanneauTableauDeBordEntrepotsDemandeDeCreationRouteImport
       parentRoute: typeof PrivatePanneauRouteRoute
+    }
+    '/_private/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet': {
+      id: '/_private/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet'
+      path: '/$communityId/creer-un-guichet'
+      fullPath: '/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet'
+      preLoaderRoute: typeof PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRouteImport
+      parentRoute: typeof PrivateContribuerAuxDonneesGuichetsRouteRoute
+    }
+    '/_private/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet': {
+      id: '/_private/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet'
+      path: '/$communityId/gerer-le-guichet'
+      fullPath: '/contribuer-aux-donnees/guichets/$communityId/gerer-le-guichet'
+      preLoaderRoute: typeof PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRouteImport
+      parentRoute: typeof PrivateContribuerAuxDonneesGuichetsRouteRoute
+    }
+    '/_private/contribuer-aux-donnees/guichets/$communityId/invitation': {
+      id: '/_private/contribuer-aux-donnees/guichets/$communityId/invitation'
+      path: '/$communityId/invitation'
+      fullPath: '/contribuer-aux-donnees/guichets/$communityId/invitation'
+      preLoaderRoute: typeof PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRouteImport
+      parentRoute: typeof PrivateContribuerAuxDonneesGuichetsRouteRoute
+    }
+    '/_private/contribuer-aux-donnees/guichets/_panneau/': {
+      id: '/_private/contribuer-aux-donnees/guichets/_panneau/'
+      path: '/'
+      fullPath: '/contribuer-aux-donnees/guichets/'
+      preLoaderRoute: typeof PrivateContribuerAuxDonneesGuichetsPanneauIndexRouteImport
+      parentRoute: typeof PrivateContribuerAuxDonneesGuichetsPanneauRouteRoute
     }
     '/_private/tableau-de-bord/communaute/$communityId/_onglets': {
       id: '/_private/tableau-de-bord/communaute/$communityId/_onglets'
@@ -1247,27 +1266,43 @@ const PrivatePanneauRouteRouteChildren: PrivatePanneauRouteRouteChildren = {
 const PrivatePanneauRouteRouteWithChildren =
   PrivatePanneauRouteRoute._addFileChildren(PrivatePanneauRouteRouteChildren)
 
-interface PrivateEspaceCollaboratifRouteRouteChildren {
-  PrivateEspaceCollaboratifIndexRoute: typeof PrivateEspaceCollaboratifIndexRoute
-  PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRoute: typeof PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRoute
-  PrivateEspaceCollaboratifCommunityIdGererLeGuichetRoute: typeof PrivateEspaceCollaboratifCommunityIdGererLeGuichetRoute
-  PrivateEspaceCollaboratifCommunityIdInvitationRoute: typeof PrivateEspaceCollaboratifCommunityIdInvitationRoute
+interface PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteChildren {
+  PrivateContribuerAuxDonneesGuichetsPanneauIndexRoute: typeof PrivateContribuerAuxDonneesGuichetsPanneauIndexRoute
 }
 
-const PrivateEspaceCollaboratifRouteRouteChildren: PrivateEspaceCollaboratifRouteRouteChildren =
+const PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteChildren: PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteChildren =
   {
-    PrivateEspaceCollaboratifIndexRoute: PrivateEspaceCollaboratifIndexRoute,
-    PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRoute:
-      PrivateEspaceCollaboratifCommunityIdCreerUnGuichetRoute,
-    PrivateEspaceCollaboratifCommunityIdGererLeGuichetRoute:
-      PrivateEspaceCollaboratifCommunityIdGererLeGuichetRoute,
-    PrivateEspaceCollaboratifCommunityIdInvitationRoute:
-      PrivateEspaceCollaboratifCommunityIdInvitationRoute,
+    PrivateContribuerAuxDonneesGuichetsPanneauIndexRoute:
+      PrivateContribuerAuxDonneesGuichetsPanneauIndexRoute,
   }
 
-const PrivateEspaceCollaboratifRouteRouteWithChildren =
-  PrivateEspaceCollaboratifRouteRoute._addFileChildren(
-    PrivateEspaceCollaboratifRouteRouteChildren,
+const PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteWithChildren =
+  PrivateContribuerAuxDonneesGuichetsPanneauRouteRoute._addFileChildren(
+    PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteChildren,
+  )
+
+interface PrivateContribuerAuxDonneesGuichetsRouteRouteChildren {
+  PrivateContribuerAuxDonneesGuichetsPanneauRouteRoute: typeof PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteWithChildren
+  PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRoute: typeof PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRoute
+  PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRoute: typeof PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRoute
+  PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRoute: typeof PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRoute
+}
+
+const PrivateContribuerAuxDonneesGuichetsRouteRouteChildren: PrivateContribuerAuxDonneesGuichetsRouteRouteChildren =
+  {
+    PrivateContribuerAuxDonneesGuichetsPanneauRouteRoute:
+      PrivateContribuerAuxDonneesGuichetsPanneauRouteRouteWithChildren,
+    PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRoute:
+      PrivateContribuerAuxDonneesGuichetsCommunityIdCreerUnGuichetRoute,
+    PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRoute:
+      PrivateContribuerAuxDonneesGuichetsCommunityIdGererLeGuichetRoute,
+    PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRoute:
+      PrivateContribuerAuxDonneesGuichetsCommunityIdInvitationRoute,
+  }
+
+const PrivateContribuerAuxDonneesGuichetsRouteRouteWithChildren =
+  PrivateContribuerAuxDonneesGuichetsRouteRoute._addFileChildren(
+    PrivateContribuerAuxDonneesGuichetsRouteRouteChildren,
   )
 
 interface PrivateTableauDeBordCommunauteCommunityIdOngletsRouteRouteChildren {
@@ -1416,10 +1451,10 @@ const PrivateTableauDeBordEntrepotsDatastoreIdRouteRouteWithChildren =
 
 interface PrivateRouteRouteChildren {
   PrivatePanneauRouteRoute: typeof PrivatePanneauRouteRouteWithChildren
-  PrivateEspaceCollaboratifRouteRoute: typeof PrivateEspaceCollaboratifRouteRouteWithChildren
   PrivateMesDocumentsRoute: typeof PrivateMesDocumentsRoute
   PrivateMesPermissionsRoute: typeof PrivateMesPermissionsRoute
   PrivateMonCompteRoute: typeof PrivateMonCompteRoute
+  PrivateContribuerAuxDonneesGuichetsRouteRoute: typeof PrivateContribuerAuxDonneesGuichetsRouteRouteWithChildren
   PrivateConfigurationAlertesRoute: typeof PrivateConfigurationAlertesRoute
   PrivateDemandeAccesFileIdentifierRoute: typeof PrivateDemandeAccesFileIdentifierRoute
   PrivateMesClesAjoutRoute: typeof PrivateMesClesAjoutRoute
@@ -1433,11 +1468,11 @@ interface PrivateRouteRouteChildren {
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivatePanneauRouteRoute: PrivatePanneauRouteRouteWithChildren,
-  PrivateEspaceCollaboratifRouteRoute:
-    PrivateEspaceCollaboratifRouteRouteWithChildren,
   PrivateMesDocumentsRoute: PrivateMesDocumentsRoute,
   PrivateMesPermissionsRoute: PrivateMesPermissionsRoute,
   PrivateMonCompteRoute: PrivateMonCompteRoute,
+  PrivateContribuerAuxDonneesGuichetsRouteRoute:
+    PrivateContribuerAuxDonneesGuichetsRouteRouteWithChildren,
   PrivateConfigurationAlertesRoute: PrivateConfigurationAlertesRoute,
   PrivateDemandeAccesFileIdentifierRoute:
     PrivateDemandeAccesFileIdentifierRoute,

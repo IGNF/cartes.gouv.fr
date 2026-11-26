@@ -1,4 +1,6 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
+
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import CommunityListItem from "./CommunityListItem";
 
@@ -8,12 +10,13 @@ type CommunityListProps = {
 
 const CommunityList: FC<CommunityListProps> = ({ communities }) => {
     return (
-        <>
-            {communities.map((community, index) => {
-                const className = index % 2 === 0 ? "frx-community-even" : "";
-                return <CommunityListItem key={community.id} className={className} community={community} />;
-            })}
-        </>
+        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+            {communities.map((community) => (
+                <div className={fr.cx("fr-col-12")} key={community.id}>
+                    <CommunityListItem community={community} />
+                </div>
+            ))}
+        </div>
     );
 };
 

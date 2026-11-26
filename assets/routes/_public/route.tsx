@@ -3,7 +3,6 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import AppLayout from "@/components/Layout/AppLayout";
 import Main from "@/components/Layout/Main";
 import LoadingText from "@/components/Utils/LoadingText";
-import { defaultNavItems } from "@/config/navItems/navItems";
 import PageNotFound from "@/pages/error/PageNotFound";
 
 export const Route = createFileRoute("/_public")({
@@ -18,7 +17,7 @@ export const Route = createFileRoute("/_public")({
 
 function PublicLayout() {
     return (
-        <AppLayout navItems={defaultNavItems()}>
+        <AppLayout>
             <Outlet />
         </AppLayout>
     );
@@ -26,7 +25,7 @@ function PublicLayout() {
 
 function PublicNotFound() {
     return (
-        <AppLayout navItems={defaultNavItems()}>
+        <AppLayout>
             <PageNotFound />
         </AppLayout>
     );
@@ -34,7 +33,7 @@ function PublicNotFound() {
 
 function PublicLayoutPending() {
     return (
-        <AppLayout navItems={defaultNavItems()}>
+        <AppLayout>
             <Main>
                 <LoadingText withSpinnerIcon />
             </Main>
