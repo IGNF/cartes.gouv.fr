@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
     '/rss',
     name: 'cartesgouvfr_rss_feed_',
     options: ['expose' => true],
+    methods: ['GET']
 )]
 class RSSFeedController extends AbstractController
 {
@@ -28,5 +29,19 @@ class RSSFeedController extends AbstractController
         } catch (\Throwable $th) {
             return new Response($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    #[Route('/actualites', name: 'articles')]
+    #[Route('/actualites.json', name: 'articles_json')]
+    public function articles(): Response
+    {
+        // Le scraper des articles dépose ce fichier sur le S3 ; la passerelle S3 fournit le cache et le 404
+        $response = $this->forward(CartesS3Controller::class.'::getContent', ['path' => 'articles/rss.json']);
+
+        if ($response->isSuccessful()) {
+            $response->headers->set('Content-Type', 'application/feed+json');
+        }
+
+        return $response;
     }
 }

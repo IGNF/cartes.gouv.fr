@@ -5288,7 +5288,39 @@
             "defaults": [],
             "requirements": [],
             "hosttokens": [],
-            "methods": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_rss_feed_articles": {
+            "tokens": [
+                [
+                    "text",
+                    "\/rss\/actualites"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
+            "schemes": []
+        },
+        "cartesgouvfr_rss_feed_articles_json": {
+            "tokens": [
+                [
+                    "text",
+                    "\/rss\/actualites.json"
+                ]
+            ],
+            "defaults": [],
+            "requirements": [],
+            "hosttokens": [],
+            "methods": [
+                "GET"
+            ],
             "schemes": []
         },
         "cartesgouvfr_security_login": {
