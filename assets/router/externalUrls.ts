@@ -1,6 +1,6 @@
 import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 
-import { basePath as appRoot, catalogueUrl } from "@/env";
+import { basePath as appRoot, catalogueUrl, espaceCoSiteUrl } from "@/env";
 import SymfonyRouting from "@/modules/Routing";
 
 export const externalUrls = {
@@ -14,14 +14,14 @@ export const externalUrls = {
     helpUserGuideCreateKeys: appRoot + "/aide/fr/guides-utilisateur/creation-des-cles-et-integration-sig/",
     catalogue: catalogueUrl ?? appRoot + "/rechercher-une-donnee",
     maps: appRoot + "/explorer-les-cartes",
+    editor: appRoot + "/creer-une-carte",
+    myMaps: appRoot + "/creer-une-carte/mes-cartes",
+    extraction: appRoot + "/extraire-une-donnee",
+    myExtractions: appRoot + "/extraire-une-donnee/mes-extractions",
     contact_us: appRoot + "/aide/fr/nous-ecrire",
     discover_cartesgouvfr: appRoot + "/decouvrir",
-    present_service_maps: appRoot + "/decouvrir/explorer-les-cartes",
-    present_service_catalogue: appRoot + "/decouvrir/rechercher-une-donnee",
-    present_service_publish: appRoot + "/decouvrir/publier-une-donnee",
     offers: appRoot + "/offres",
     join_cartesgouvfr_community: appRoot + "/nous-rejoindre",
-    news_list: appRoot + "/actualites",
     service_status: appRoot + "/aide/fr/niveau-de-service",
     personal_data: appRoot + "/donnees-personnelles",
     accessibility: appRoot + "/accessibilite",
@@ -30,7 +30,7 @@ export const externalUrls = {
     sitemap: appRoot + "/plan-du-site",
     newsletterSubscription: appRoot + "/lettre-d-information",
     community_geopf_cartesgouvfr_expertises_territoires: "https://www.expertises-territoires.fr/jcms/pl1_557493/fr/communaute-geoplateforme-et-cartes-gouv",
-    roadmap: appRoot + "/evolutions",
+    espacecoTerms: (espaceCoSiteUrl ?? "https://espacecollaboratif.ign.fr") + "/cgu/",
     login: SymfonyRouting.generate("cartesgouvfr_security_login"),
     logout: SymfonyRouting.generate("cartesgouvfr_security_logout"),
 } as const;

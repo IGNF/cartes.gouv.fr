@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { FC } from "react";
 
-import DatastoreMain from "@/components/Layout/DatastoreMain";
+import SidePanelPage from "@/components/Layout/SidePanelPage";
 import useMembership from "@/hooks/useMembership";
 import { useTranslation } from "../../../../i18n/i18n";
 import AnnexeUsage from "./storages/AnnexeUsage";
@@ -40,7 +40,7 @@ const DatastoreManageStorage: FC = () => {
     });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}>
+        <SidePanelPage title={t("title", { datastoreName: tCommon("datastore_name", { name: datastore?.name, isSandbox }) })}>
             <div className={fr.cx("fr-grid-row", "fr-mt-6v", "fr-mb-16v")}>
                 <div className={fr.cx("fr-col-12")}>
                     <Tabs
@@ -97,7 +97,7 @@ const DatastoreManageStorage: FC = () => {
                     </Tabs>
                 </div>
             </div>
-        </DatastoreMain>
+        </SidePanelPage>
     );
 };
 

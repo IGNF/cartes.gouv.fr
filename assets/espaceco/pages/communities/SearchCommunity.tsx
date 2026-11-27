@@ -11,10 +11,12 @@ import api from "../../api";
 type SearchCommunityProps = {
     filter: CommunityListFilter;
     label?: string;
+    // guichet affiché ; absent, le champ n’est pas contrôlé
+    value?: CommunityResponseDTO | null;
     onChange: (value: CommunityResponseDTO | null) => void;
 };
 
-const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange, label }) => {
+const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange, label, value }) => {
     const { t } = useTranslation("SearchCommunity");
 
     const [search, setSearch] = useDebouncedState("", 500);
@@ -37,6 +39,7 @@ const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange, label }) 
             filterOptions={(x) => x}
             isOptionEqualToValue={(option, v) => option.id === v.id}
             onInputChange={(_, v) => setSearch(v)}
+            value={value}
             onChange={(_, selectedValue) => onChange(selectedValue)}
             multiple={false}
             freeSolo={false}

@@ -42,9 +42,9 @@ import { UserKeysListTabEnTranslations } from "../../entrepot/pages/users/keys/U
 import { MeEnTranslations } from "../../entrepot/pages/users/me/Me.locale";
 import { PermissionsEnTranslations } from "../../entrepot/pages/users/permissions/Permissions.locale";
 import { CreateCommunityEnTranslations } from "../../espaceco/pages/communities/CreateCommunity.locale";
-import { CreateCommunityDialogEnTranslations } from "../../espaceco/pages/communities/CreateCommunityDialog.locale";
 import { ManageCommunityEnTranslations } from "../../espaceco/pages/communities/ManageCommunity.locale";
 import { MemberInvitationEnTranslations } from "../../espaceco/pages/communities/MemberInvitation.locale";
+import { EspaceCoTermsGateEnTranslations } from "../../espaceco/components/EspaceCoTermsGate.locale";
 import { ManageCommunityValidationsEnTranslations } from "../../espaceco/pages/communities/management/ManageCommunityValidations.locale";
 import { EscoCommunityMembersEnTranslations } from "../../espaceco/pages/communities/management/Members.locale";
 import { ReportsEnTranslations } from "../../espaceco/pages/communities/management/Reports.locale";
@@ -111,7 +111,6 @@ export const translations: Translations<"en"> = {
     EspaceCoCommunityList: EspaceCoCommunityListEnTranslations,
     SearchCommunity: SearchCommunityEnTranslations,
     ReuseCommunityConfig: ReuseCommunityConfigEnTranslations,
-    CreateCommunityDialog: CreateCommunityDialogEnTranslations,
     CreateCommunity: CreateCommunityEnTranslations,
     ManageCommunity: ManageCommunityEnTranslations,
     ManageCommunityValidations: ManageCommunityValidationsEnTranslations,
@@ -122,6 +121,7 @@ export const translations: Translations<"en"> = {
     AccessRestrictions: AccessRestrictionsEnTranslations,
     LoginDisabled: LoginDisabledEnTranslations,
     MemberInvitation: MemberInvitationEnTranslations,
+    EspaceCoTermsGate: EspaceCoTermsGateEnTranslations,
     Theme: ThemeEnTranslations,
     Functionalities: FunctionalitiesEnTranslations,
     LayerTools: LayerToolsEnTranslations,

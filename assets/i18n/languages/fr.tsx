@@ -41,9 +41,9 @@ import { UserKeysListTabFrTranslations } from "../../entrepot/pages/users/keys/U
 import { MeFrTranslations } from "../../entrepot/pages/users/me/Me.locale";
 import { PermissionsFrTranslations } from "../../entrepot/pages/users/permissions/Permissions.locale";
 import { CreateCommunityFrTranslations } from "../../espaceco/pages/communities/CreateCommunity.locale";
-import { CreateCommunityDialogFrTranslations } from "../../espaceco/pages/communities/CreateCommunityDialog.locale";
 import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunity.locale";
 import { MemberInvitationFrTranslations } from "../../espaceco/pages/communities/MemberInvitation.locale";
+import { EspaceCoTermsGateFrTranslations } from "../../espaceco/components/EspaceCoTermsGate.locale";
 import { ManageCommunityValidationsFrTranslations } from "../../espaceco/pages/communities/management/ManageCommunityValidations.locale";
 import { EscoCommunityMembersFrTranslations } from "../../espaceco/pages/communities/management/Members.locale";
 import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports.locale";
@@ -115,13 +115,13 @@ export const translations: Translations<"fr"> = {
     SearchCommunity: SearchCommunityFrTranslations,
     ReuseCommunityConfig: ReuseCommunityConfigFrTranslations,
     ManageCommunity: ManageCommunityFrTranslations,
-    CreateCommunityDialog: CreateCommunityDialogFrTranslations,
     CreateCommunity: CreateCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
     AutofillKeywords: AutofillKeywordsFrTranslations,
     AutofillDialog: AutofillDialogFrTranslations,
     LoginDisabled: LoginDisabledFrTranslations,
     MemberInvitation: MemberInvitationFrTranslations,
+    EspaceCoTermsGate: EspaceCoTermsGateFrTranslations,
     Reports: ReportsFrTranslations,
     Databases: DatabasesFrTranslations,
     Functionalities: FunctionalitiesFrTranslations,

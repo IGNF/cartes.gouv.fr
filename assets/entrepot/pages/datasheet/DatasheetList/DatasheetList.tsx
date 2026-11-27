@@ -13,7 +13,7 @@ import { FC, useId, useMemo } from "react";
 import { tss } from "tss-react";
 import { useToggle } from "@mantine/hooks";
 
-import DatastoreMain from "@/components/Layout/DatastoreMain";
+import SidePanelPage from "@/components/Layout/SidePanelPage";
 import { ListHeader } from "@/components/Layout/ListHeader";
 import { datasheetListQueryOptions } from "@/hooks/queries/datasheetListQueryOptions";
 import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
@@ -89,7 +89,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const datastoreName = tCommon("datastore_name", { name: membership?.community?.name, isSandbox: membership?.isSandbox });
 
     return (
-        <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })}>
+        <SidePanelPage title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })}>
             {hasCreationRights && isQuotaError && datastore === undefined && (
                 <div className={fr.cx("fr-mt-6v")}>
                     <Alert severity="error" small description={t("metadata_endpoint_quota_unavailable")} className={fr.cx("fr-mb-2v")} />
@@ -325,7 +325,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                     )}
                 </>
             )}
-        </DatastoreMain>
+        </SidePanelPage>
     );
 };
 

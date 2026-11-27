@@ -10,6 +10,7 @@ Le front utilise [TanStack Router](https://tanstack.com/router) en routage par f
     - `_public` : pages accessibles sans connexion (`staticData.public`).
     - `_private` : pages connectées. Son `beforeLoad` redirige vers la connexion Keycloak, en navigation pleine page, si `user_me` est absent du cache.
     - `_private/_panneau` : panneau « Mes entrepôts » (sélection, demande de création, rejoindre une communauté).
+    - `_private/contribuer-aux-donnees/guichets/_panneau` : panneau des guichets (filtres et recherche de guichet) autour de la liste des guichets.
     - `.../$datastoreId/_onglets` et `.../$communityId/_onglets` : panneau, nom de l’entrepôt et onglets. Ils restent montés quand on change d’onglet.
 - Le chemin de base de l’installation vient de `basePath` (`assets/env.ts`), passé à `createRouter` dans `assets/router/index.tsx`.
 
@@ -43,11 +44,12 @@ Le front utilise [TanStack Router](https://tanstack.com/router) en routage par f
 
 ## Métadonnées de route (`staticData`)
 
-| Clé              | Rôle                                                                                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------- |
-| `requiredRights` | droits exigés sur la communauté                                                                         |
-| `public`         | layout des pages sans connexion (badge, alerte de session expirée)                                      |
-| `matomoLabel`    | titre de la page vue Matomo, obligatoire sur chaque feuille (test `assets/router/matomoLabels.test.ts`) |
+| Clé              | Rôle                                                                                                                                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `requiredRights` | droits exigés sur la communauté                                                                                                                                                                                           |
+| `public`         | layout des pages sans connexion (badge, alerte de session expirée)                                                                                                                                                        |
+| `matomoLabel`    | titre de la page vue Matomo, obligatoire sur chaque feuille (test `assets/router/matomoLabels.test.ts`)                                                                                                                   |
+| `space`          | espace de la page, optionnel : `"publish"` ou `"contribute"`. Le badge d’en-tête et le préfixe Matomo lisent le match le plus profond qui le déclare. Sans espace, Matomo préfixe par `[Publier]` et le badge est masqué. |
 
 ## Attente, erreurs, découpage
 

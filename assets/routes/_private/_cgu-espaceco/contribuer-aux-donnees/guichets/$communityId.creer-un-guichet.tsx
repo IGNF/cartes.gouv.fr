@@ -3,7 +3,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { CommunityProvider } from "@/espaceco/contexts/CommunityContext";
 import CreateCommunity from "@/espaceco/pages/communities/CreateCommunity";
 
-export const Route = createFileRoute("/_private/espace-collaboratif/$communityId/creer-un-guichet")({
+export const Route = createFileRoute("/_private/_cgu-espaceco/contribuer-aux-donnees/guichets/$communityId/creer-un-guichet")({
     staticData: { matomoLabel: "Création d’un guichet" },
     params: {
         parse: (raw) => ({ communityId: Number(raw.communityId) }),

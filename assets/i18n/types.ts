@@ -59,7 +59,6 @@ export type ComponentKey =
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
     | import("../espaceco/pages/communities/CommunityList.locale").I18n
     | import("../espaceco/pages/communities/SearchCommunity.locale").I18n
-    | import("../espaceco/pages/communities/CreateCommunityDialog.locale").I18n
     | import("../espaceco/pages/communities/CreateCommunity.locale").I18n
     | import("../espaceco/pages/communities/ManageCommunity.locale").I18n
     | import("../espaceco/pages/communities/ReuseCommunityConfig.locale").I18n
@@ -81,6 +80,7 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/management/reports/AutofillDialog.locale").I18n
     | import("../espaceco/pages/communities/management/databases/Databases.locale").I18n
     | import("../espaceco/pages/communities/MemberInvitation.locale").I18n
+    | import("../espaceco/components/EspaceCoTermsGate.locale").I18n
     | import("../components/Input/InputCollection/InputCollection.locale").I18n
     | import("../entrepot/pages/config/Alerts.locale").I18n
     | import("../components/Input/KeyValueList.locale").I18n

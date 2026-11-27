@@ -14,6 +14,9 @@ import contributorSvgUrl from "@/img/pictograms/contributor.svg?no-inline";
 import keyManagerSvgUrl from "@/img/pictograms/key-manager.svg?no-inline";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg?no-inline";
 import statsSvgUrl from "@/img/pictograms/stats.svg?no-inline";
+import editorSvgUrl from "@/img/pictograms/editor.svg?no-inline";
+import extractionSvgUrl from "@/img/pictograms/extraction.svg?no-inline";
+import { externalUrls } from "@/router/externalUrls";
 
 export default function Dashboard() {
     const { data: user } = useUserQuery();
@@ -42,6 +45,80 @@ export default function Dashboard() {
             <p className={fr.cx("fr-text--xl")}>Bienvenue {user?.first_name ?? user?.user_name}</p>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Tile
+                        linkProps={{ href: externalUrls.myMaps }}
+                        imageUrl={editorSvgUrl}
+                        title="Mes cartes"
+                        desc="Constuler, gérer et modifier des cartes interactives"
+                        start={
+                            <Badge className={fr.cx("fr-badge--yellow-tournesol")} noIcon={true} as="span" small={true}>
+                                <span className={fr.cx("fr-icon--sm", "fr-icon-brush-fill", "fr-mr-1v")} aria-hidden="true" />
+                                Créer
+                            </Badge>
+                        }
+                        orientation="vertical"
+                        classes={{
+                            img: fr.cx("fr-mb-0"),
+                        }}
+                    />
+                </div>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Tile
+                        linkProps={{ href: externalUrls.myExtractions }}
+                        imageUrl={extractionSvgUrl}
+                        title="Mes extractions"
+                        desc="Télécharger les données extraites, relancer des extractions"
+                        start={
+                            <Badge className={fr.cx("fr-badge--pink-macaron")} noIcon={true} as="span" small={true}>
+                                <span className={fr.cx("fr-icon--sm", "ri-contacts-book-upload-line", "fr-mr-1v")} aria-hidden="true" />
+                                Extraire
+                            </Badge>
+                        }
+                        orientation="vertical"
+                        classes={{
+                            img: fr.cx("fr-mb-0"),
+                        }}
+                    />
+                </div>
+                {isApiEspaceCoDefined() && (
+                    <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                        <Tile
+                            linkProps={{ to: "/contribuer-aux-donnees/guichets" }}
+                            imageUrl={contributorSvgUrl}
+                            title="Mes guichets"
+                            desc="Consulter les guichets et y participer"
+                            start={
+                                <Badge className={fr.cx("fr-badge--green-bourgeon")} noIcon={true} as="span" small={true}>
+                                    <span className={fr.cx("fr-icon--sm", "fr-icon-message-2-fill", "fr-mr-1v")} aria-hidden="true" />
+                                    Contribuer
+                                </Badge>
+                            }
+                            orientation="vertical"
+                            classes={{
+                                img: fr.cx("fr-mb-0"),
+                            }}
+                        />
+                    </div>
+                )}
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    <Tile
+                        linkProps={{ to: "/tableau-de-bord/entrepots" }}
+                        imageUrl={uploaderSvgUrl}
+                        title="Mes entrepôts"
+                        desc="Gérer mes entrepôts et mes fiches de données"
+                        start={
+                            <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
+                                <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} aria-hidden="true" />
+                                Publier
+                            </Badge>
+                        }
+                        orientation="vertical"
+                        classes={{
+                            img: fr.cx("fr-mb-0"),
+                        }}
+                    />
+                </div>
                 <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                     <Tile
                         linkProps={{ to: "/mon-compte" }}
@@ -78,38 +155,7 @@ export default function Dashboard() {
                         }}
                     />
                 </div>
-                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                    <Tile
-                        linkProps={{ to: "/tableau-de-bord/entrepots" }}
-                        imageUrl={uploaderSvgUrl}
-                        title="Mes entrepôts"
-                        desc="Gérer mes entrepôts et mes fiches de données"
-                        start={
-                            <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
-                                <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} aria-hidden="true" />
-                                Publier
-                            </Badge>
-                        }
-                        orientation="vertical"
-                        classes={{
-                            img: fr.cx("fr-mb-0"),
-                        }}
-                    />
-                </div>
-                {isApiEspaceCoDefined() && (
-                    <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                        <Tile
-                            linkProps={{ to: "/espace-collaboratif" }}
-                            imageUrl={contributorSvgUrl}
-                            title="Mes guichets"
-                            desc="Créer, modifier et partager mes guichets"
-                            orientation="vertical"
-                            classes={{
-                                img: fr.cx("fr-mb-0"),
-                            }}
-                        />
-                    </div>
-                )}
+
                 {canShowConfig && (
                     <div key={configDatastore?.community?.datastore} className={fr.cx("fr-col-12", "fr-col-md-4")}>
                         <Tile

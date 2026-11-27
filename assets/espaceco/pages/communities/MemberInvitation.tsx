@@ -20,7 +20,6 @@ import { getApiErrorTitle, getApiErrorDescription, getApiErrorMessage } from "..
 import api from "../../api";
 import "../../../../assets/sass/pages/espaceco/member_invitation.scss";
 import useUserMe from "@/espaceco/hooks/useUserMe";
-import { useApiEspaceCoStore } from "@/espaceco/stores/ApiEspaceCoStore";
 
 type MemberInvitationProps = {
     communityId: number;
@@ -37,16 +36,10 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
 
     const { t } = useTranslation("MemberInvitation");
 
-    const apiEspaceCoUrl = useApiEspaceCoStore((state) => state.api_espaceco_url);
-    const espaceCoUrl = useMemo(() => (apiEspaceCoUrl ? apiEspaceCoUrl.replace("/gcms/api", "/login") : undefined), [apiEspaceCoUrl]);
-
     const errorMessage: ErrorMessage | undefined = useMemo(() => {
         if (!isMeError) return undefined;
-        if (meError.status === 403 && meError.detail?.includes("CGU")) {
-            return { message: t("espaceco_accept_cgu", { url: espaceCoUrl }), type: "warning" };
-        }
         return { message: getApiErrorMessage(meError), type: "warning" };
-    }, [espaceCoUrl, isMeError, meError, t]);
+    }, [isMeError, meError]);
 
     const query = useQuery<CommunityResponseDTO, ApiError>({
         queryKey: RQKeys.community(communityId),
@@ -85,7 +78,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
             }
             return Promise.resolve(undefined);
         },
-        onSuccess: () => void navigate({ to: "/espace-collaboratif" }),
+        onSuccess: () => void navigate({ to: "/contribuer-aux-donnees/guichets" }),
     });
 
     const community = useMemo(() => query.data, [query.data]);

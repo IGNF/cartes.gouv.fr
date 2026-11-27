@@ -9,12 +9,12 @@ import { sandboxCommunityId } from "@/env";
 import useUserQuery from "@/hooks/queries/useUserQuery";
 import { externalUrls } from "@/router/externalUrls";
 
-import classes from "./DiscoverPublish.module.css";
+import classes from "../Discover.module.css";
 
-import background1200 from "@/img/discover/publish/background-1200.webp";
-import background1600 from "@/img/discover/publish/background-1600.webp";
-import background2160 from "@/img/discover/publish/background-2160.webp";
-import background800 from "@/img/discover/publish/background-800.webp";
+import background1200 from "@/img/discover/background-1200.webp";
+import background1600 from "@/img/discover/background-1600.webp";
+import background2160 from "@/img/discover/background-2160.webp";
+import background800 from "@/img/discover/background-800.webp";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
 
 const routeApi = getRouteApi("/_public/publier-une-donnee");

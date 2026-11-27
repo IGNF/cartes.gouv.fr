@@ -1,5 +1,4 @@
 import Header from "@codegouvfr/react-dsfr/Header";
-import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
 import { FC, memo } from "react";
 
@@ -9,10 +8,7 @@ import SiteBadge from "./Header/SiteBadge";
 
 import "../../sass/components/header.scss";
 
-type AppHeaderProps = {
-    navItems?: MainNavigationProps.Item[];
-};
-const AppHeader: FC<AppHeaderProps> = ({ navItems }) => {
+const AppHeader: FC = () => {
     const { isDark } = useIsDark();
 
     return (
@@ -49,7 +45,6 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems }) => {
             // renderSearchInput={({ className, id, name, placeholder, type }) => (
             //     <input className={className} id={id} name={name} placeholder={placeholder} type={type} />
             // )}
-            navigation={navItems}
         />
     );
 };
