@@ -100,7 +100,8 @@ final readonly class ResponsePromise
     /**
      * Consomme plusieurs ResponsePromises en parallèle (équivalent de Promise.all).
      * Toutes les réponses doivent provenir de la même instance de HttpClient pour permettre le streaming.
-     * Les erreurs sont ignorées si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
+     * Les erreurs HTTP et les timeouts sont ignorés si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
+     * Sinon, la première réponse en erreur lève son ApiException (statut amont) et toutes les réponses du lot sont annulées.
      *
      * @param array<int|string,ResponsePromise> $pendingsByKey
      *
@@ -126,42 +127,56 @@ final readonly class ResponsePromise
             $responseKeyMap[spl_object_id($response)] = ['key' => $key, 'pending' => $pending];
         }
 
-        foreach ($httpClient->stream($responseList) as $response => $chunk) {
-            $responseId = spl_object_id($response);
-            $entry = $responseKeyMap[$responseId] ?? null;
+        $processedIds = [];
 
-            if (null === $entry) {
-                continue;
-            }
+        try {
+            foreach ($httpClient->stream($responseList) as $response => $chunk) {
+                $responseId = spl_object_id($response);
+                $entry = $responseKeyMap[$responseId] ?? null;
 
-            if ($chunk->isTimeout()) {
-                if (!$continueOnError) {
-                    throw new ApiException('Timeout de stream lors de la résolution asynchrone', Response::HTTP_GATEWAY_TIMEOUT, ['key' => $entry['key']]);
+                if (null === $entry || isset($processedIds[$responseId])) {
+                    continue;
                 }
 
-                $logger?->warning('Timeout de stream détecté lors de la résolution asynchrone', [
-                    'key' => $entry['key'],
-                ]);
+                if ($chunk->isTimeout()) {
+                    if (!$continueOnError) {
+                        throw new ApiException('Timeout de stream lors de la résolution asynchrone', Response::HTTP_GATEWAY_TIMEOUT, ['key' => $entry['key']]);
+                    }
 
-                continue;
-            }
+                    $logger?->warning('Timeout de stream détecté lors de la résolution asynchrone', [
+                        'key' => $entry['key'],
+                    ]);
 
-            if (!$chunk->isLast()) {
-                continue;
-            }
-
-            try {
-                $resolved[$entry['key']] = $entry['pending']->array();
-            } catch (\Throwable $exception) {
-                if (!$continueOnError) {
-                    throw $exception;
+                    continue;
                 }
 
-                $logger?->warning('Requête asynchrone ignorée après échec', [
-                    'key' => $entry['key'],
-                    'error' => $exception->getMessage(),
-                ]);
+                // statut lu au premier bloc : sinon le flux lève l’erreur HTTP brute (500) au lieu de l’ApiException
+                $failed = $chunk->isFirst() && $response->getStatusCode() >= 300;
+                if (!$failed && !$chunk->isLast()) {
+                    continue;
+                }
+
+                $processedIds[$responseId] = true;
+                try {
+                    $resolved[$entry['key']] = $entry['pending']->array();
+                } catch (\Throwable $exception) {
+                    if (!$continueOnError) {
+                        throw $exception;
+                    }
+
+                    $logger?->warning('Requête asynchrone ignorée après échec', [
+                        'key' => $entry['key'],
+                        'error' => $exception->getMessage(),
+                    ]);
+                }
             }
+        } catch (\Throwable $exception) {
+            // une réponse du lot détruite sans lecture lèverait son erreur HTTP à la place de celle-ci
+            foreach ($responseList as $pendingResponse) {
+                $pendingResponse->cancel();
+            }
+
+            throw $exception;
         }
 
         ksort($resolved);

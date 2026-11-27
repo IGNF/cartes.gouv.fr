@@ -15,5 +15,5 @@ export const Route = createFileRoute("/_private/tableau-de-bord/entrepots/$datas
 function RouteComponent() {
     const params = Route.useParams();
     const search = Route.useSearch();
-    return <DatasheetUploadIntegrationPage datastoreId={params.datastoreId} uploadId={search.uploadId} datasheetName={search.datasheetName} />;
+    return <DatasheetUploadIntegrationPage datastoreId={params.datastoreId} uploadId={search.uploadId} />;
 }

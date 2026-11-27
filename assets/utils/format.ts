@@ -75,34 +75,6 @@ export const formatDateWithoutTimeFromISO = (isoDateString: string): string => {
     return formatDate(d);
 };
 
-export const trimObject = (obj: object): object => {
-    if (typeof obj !== "object" || obj === null) {
-        return obj;
-    }
-
-    if (Array.isArray(obj)) {
-        return (obj as unknown[]).map((elem) => {
-            if (typeof elem === "string") {
-                return elem.trim();
-            }
-            return typeof elem === "object" && elem !== null ? trimObject(elem) : elem;
-        });
-    }
-
-    const newObject = Object.keys(obj).reduce((acc, key) => {
-        let value: unknown = (obj as Record<string, unknown>)[key];
-
-        if (typeof value === "string") {
-            value = value.trim();
-        } else if (typeof value === "object" && value !== null) {
-            value = trimObject(value);
-        }
-        return { ...acc, [key]: value };
-    }, {});
-
-    return newObject;
-};
-
 export function formatErrors(errors: unknown): string | undefined {
     if (errors instanceof Array) {
         const message = errors

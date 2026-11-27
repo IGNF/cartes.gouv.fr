@@ -14,6 +14,8 @@ import { ReactNode, Ref, SyntheticEvent, useId } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { useStyles } from "tss-react/mui";
 
+import { useTranslation } from "@/i18n/i18n";
+
 interface AutocompleteSelectExtraProps<T> {
     id?: string;
     label: ReactNode;
@@ -51,6 +53,7 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
         stateRelatedMessage,
         searchFilter = defaultSearchFilter,
         placeholder,
+        noOptionsText,
         options,
         multiple,
         value,
@@ -71,6 +74,7 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
         // gardant le générique public pour que l'inférence de T bénéficie aux sites d'appel.
     } = props as AutocompleteSelectBaseProps & { ref?: Ref<HTMLInputElement> };
 
+    const { t } = useTranslation("AutocompleteSelect");
     const generatedId = useId();
     const inputId = id ?? `${symToStr({ AutocompleteSelect })}-${generatedId}`;
 
@@ -151,6 +155,7 @@ function AutocompleteSelect<T, M extends boolean | undefined = true, D extends b
                         <TextField {...params} inputRef={ref} variant={"filled"} size={"small"} error={state === "error"} placeholder={placeholder} />
                     )}
                     renderValue={resolvedRenderValue}
+                    noOptionsText={noOptionsText ?? t("no_options")}
                     popupIcon={popupIcon}
                     clearIcon={clearIcon}
                     forcePopupIcon={forcePopupIcon}

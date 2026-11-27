@@ -12,7 +12,7 @@ Ce traitement permet de stocker dans les bases de données PostgreSQL de la plat
 
 [Exemple de corps de requête JSON](./examples/integration_vector_data_to_db_postgres.json)
 
-**Lien du formulaire** : https\://cartes.gouv.fr/entrepot/`datastore`/donnees/televersement
+**Lien du formulaire** : https\://cartes.gouv.fr/tableau-de-bord/entrepots/`datastore`/donnees/`fiche`/televersement
 
 Une livraison (`upload`) est créée à la soumission de ce formulaire. Une fois que toutes les vérifications associées à la livraison sont validées, le traitement est exécuté en arrière-plan par cartes.gouv.fr.
 

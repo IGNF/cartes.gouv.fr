@@ -5,7 +5,7 @@ framework:
             policy: sliding_window
             limit: 5
             interval: "10 minutes"
-            # verrou unique pris par le contrôleur : un verrou par clé laisserait un fichier par adresse IP dans /tmp
+            # verrou unique pris par le contrôleur : un verrou par clé laisserait un fichier par adresse IP dans var/data/locks
             lock_factory: null
 
 when@test:

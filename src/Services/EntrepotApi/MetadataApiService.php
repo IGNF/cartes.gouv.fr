@@ -5,6 +5,7 @@ namespace App\Services\EntrepotApi;
 use App\ApiClient\ApiClient;
 use App\ApiClient\PaginatedPromise;
 use App\ApiClient\PaginatedResponse;
+use App\ApiClient\RequestOptions;
 use App\ApiClient\ResponsePromise;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -32,11 +33,6 @@ final readonly class MetadataApiService
     public function getList(string $datastoreId, array $query = []): PaginatedResponse
     {
         return $this->api->get("datastores/$datastoreId/metadata", $query)->arrayWithHeaders();
-    }
-
-    public function get(string $datastoreId, string $metadataId): ResponsePromise
-    {
-        return $this->api->get("datastores/$datastoreId/metadata/$metadataId");
     }
 
     /**
@@ -98,6 +94,12 @@ final readonly class MetadataApiService
     public function removeTags(string $datastoreId, string $metadataId, array $tags): ResponsePromise
     {
         return $this->api->delete("datastores/$datastoreId/metadata/$metadataId/tags", ['tags' => $tags]);
+    }
+
+    // 204 si l’identifiant est libre, 409 s’il est pris
+    public function checkFileIdentifier(string $datastoreId, string $fileIdentifier): ResponsePromise
+    {
+        return $this->api->request('HEAD', "datastores/$datastoreId/metadata", RequestOptions::query(['file_identifier' => $fileIdentifier]));
     }
 
     public function publish(string $datastoreId, string $fileIdentifier, string $endpointId): ResponsePromise

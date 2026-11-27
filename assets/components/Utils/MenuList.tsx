@@ -151,7 +151,12 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items, disabled = fa
 
                             if (item.linkProps && !item.disabled) {
                                 return (
-                                    <Link key={item.text} {...item.linkProps}>
+                                    <Link
+                                        key={item.text}
+                                        {...item.linkProps}
+                                        // l’entrée porte sa propre icône : pas celle que le DSFR ajoute aux liens target="_blank"
+                                        className={css({ "&[target=_blank]::after": { content: "none" } })}
+                                    >
                                         {itemContent}
                                     </Link>
                                 );

@@ -3,21 +3,18 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
-use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
 use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
-use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
 use App\Security\User;
-use App\Services\CapabilitiesService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
-use App\Services\EntrepotApi\CartesServiceApiService;
-use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
+use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -27,29 +24,21 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
     '/api/datastores/{datastoreId}/pyramid-vector',
     name: 'cartesgouvfr_api_pyramid_vector_',
     options: ['expose' => true])]
-#[OA\Tag(name: '[cartes.gouv.fr] pyramid-vector', description: 'Génération de pyramides de tuiles vectorielles et création/modification des services associés')]
-class PyramidVectorController extends ServiceController implements ApiControllerInterface
+#[OA\Tag(name: '[cartes.gouv.fr] pyramid-vector', description: 'Génération de pyramides de tuiles vectorielles')]
+final class PyramidVectorController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
-        private readonly ConfigurationApiService $configurationApiService,
         private readonly StoredDataApiService $storedDataApiService,
         private readonly ProcessingApiService $processingApiService,
-        SandboxService $sandboxService,
-        private readonly CartesServiceApiService $cartesServiceApiService,
-        CapabilitiesService $capabilitiesService,
-        CartesMetadataApiService $cartesMetadataApiService,
+        private readonly SandboxService $sandboxService,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly LoggerInterface $logger,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, #[MapRequestPayload] PyramidVectorGenerateDTO $dto): JsonResponse
     {
-        // TODO
-        // $samplePyramidId = $request->query->get('samplePyramidId', null);
-
         $vectordb = $this->storedDataApiService->get($datastoreId, $dto->vectordb_id)->array();
 
         // TODO Suppression de l'upload ?
@@ -73,10 +62,6 @@ class PyramidVectorController extends ServiceController implements ApiController
             'top_level' => strval($levels[0]),
             'tippecanoe_options' => $dto->tippecanoe,
         ];
-
-        if (!is_null($dto->area)) {
-            $parameters['area'] = $dto->area;
-        }
 
         $processing = $this->sandboxService->getProcGeneratePyramidVector($datastoreId);
 
@@ -103,9 +88,9 @@ class PyramidVectorController extends ServiceController implements ApiController
                     'type' => 'email',
                     'to_address' => [$userEmail],
                     'entity_url' => sprintf(
-                        '%stableau-de-bord/entrepots/{{ datastore }}/donnees/{{ output }}/details?datasheetName=%s',
+                        '%stableau-de-bord/entrepots/{{ datastore }}/donnees/%s/donnees/{{ output }}',
                         $baseUrl,
-                        urlencode($datasheetName)
+                        rawurlencode($datasheetName)
                     ),
                 ];
             }
@@ -115,91 +100,34 @@ class PyramidVectorController extends ServiceController implements ApiController
         $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->array();
         $pyramidId = $processingExecution['output']['stored_data']['_id'];
 
-        $pyramidTags = [
-            CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
-            'upload_id' => $vectordb['tags']['upload_id'],
-            'proc_int_id' => $vectordb['tags']['proc_int_id'],
-            'vectordb_id' => $dto->vectordb_id,
-            'proc_pyr_creat_id' => $processingExecution['_id'],
-            'is_sample' => is_null($dto->area) ? 'false' : 'true',
-        ];
-        if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
-            $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
-        }
-        if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
-            $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
-        }
+        try {
+            // base vecteur créée hors du parcours de dépôt : tags de lignée absents
+            $pyramidTags = array_filter([
+                ...UploadIntegrationWorkflow::forwardedTags($vectordb['tags'] ?? []),
+                StoredDataTags::UPLOAD_ID => $vectordb['tags'][StoredDataTags::UPLOAD_ID] ?? null,
+                StoredDataTags::PROC_INT_ID => $vectordb['tags'][StoredDataTags::PROC_INT_ID] ?? null,
+                StoredDataTags::VECTORDB_ID => $dto->vectordb_id,
+                StoredDataTags::PROC_PYR_CREAT_ID => $processingExecution['_id'],
+            ], fn ($value) => null !== $value);
 
-        $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
-        $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->await();
+            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->await();
+        } catch (\Throwable $th) {
+            // l’échec de l’annulation est journalisé : l’erreur d’origine reste celle renvoyée ; supprimer l’exécution non lancée supprime sa pyramide (mesuré le 10/11/2026)
+            try {
+                $this->processingApiService->removeExecution($datastoreId, $processingExecution['_id'])->await();
+            } catch (\Throwable $e) {
+                $this->logger->warning('{class}: Failed to remove processing execution {executionId} after a failed pyramid generation: {error}', [
+                    'class' => self::class,
+                    'executionId' => $processingExecution['_id'],
+                    'exception' => $e,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+            throw $th;
+        }
 
         return new JsonResponse();
-    }
-
-    #[Route('/{pyramidId}/tms', name: 'tms_add', methods: ['POST'])]
-    public function addTms(
-        string $datastoreId,
-        string $pyramidId,
-        #[MapRequestPayload] PyramidVectorTmsServiceDTO $dto,
-    ): JsonResponse {
-        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
-
-        // TODO Suppression de l'Upload ?
-        // TODO Suppression de la base de donnees
-        // NOTE on peut difficilement supprimer la base de données parce qu'il y a peut-être d'autres entités qui en dépendent
-
-        // création de requête pour la config
-        $typeInfos = $this->getConfigTypeInfos($dto, $pyramid);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMTSTMS, $dto, $typeInfos);
-
-        $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, ConfigurationTypes::WMTSTMS, $configRequestBody);
-
-        return $this->json($offering);
-    }
-
-    #[Route('/{pyramidId}/tms/{offeringId}/edit', name: 'tms_edit', methods: ['POST'])]
-    public function editTms(
-        string $datastoreId,
-        string $pyramidId,
-        string $offeringId,
-        #[MapRequestPayload] PyramidVectorTmsServiceDTO $dto,
-    ): JsonResponse {
-        // récup config et offering existants
-        $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->array();
-        $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->array();
-        $oldOffering['configuration'] = $oldConfiguration;
-
-        $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->array();
-
-        // création de requête pour la config
-        $typeInfos = $this->getConfigTypeInfos($dto, $pyramid);
-        $configRequestBody = $this->getConfigRequestBody(ConfigurationTypes::WMTSTMS, $dto, $typeInfos, $oldConfiguration);
-
-        $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, ConfigurationTypes::WMTSTMS, $configRequestBody, $oldOffering);
-
-        return $this->json($offering);
-    }
-
-    /**
-     * @param array<mixed> $pyramid
-     *
-     * @return array<mixed>
-     */
-    private function getConfigTypeInfos(PyramidVectorTmsServiceDTO $dto, array $pyramid): array
-    {
-        // Recherche de bottom_level et top_level
-        $levels = $this->getPyramidZoomLevels($pyramid);
-
-        return [
-            'title' => $dto->service_name,
-            'abstract' => json_encode($dto->description),
-            'keywords' => [...$dto->category, ...$dto->keywords, ...$dto->free_keywords],
-            'used_data' => [[
-                'bottom_level' => $levels['bottom_level'],
-                'top_level' => $levels['top_level'],
-                'stored_data' => $pyramid['_id'],
-            ]],
-        ];
     }
 
     /**

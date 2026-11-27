@@ -46,8 +46,7 @@ function StylesList(props: StylesListProps) {
         },
         onSuccess(styles) {
             if (service) {
-                void queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
-                queryClient.setQueryData<Service>(RQKeys.datastore_offering(datastoreId, offeringId), (oldService) => {
+                queryClient.setQueryData<Service>(RQKeys.datastore_service(datastoreId, offeringId), (oldService) => {
                     if (oldService) {
                         return {
                             ...oldService,
@@ -72,7 +71,7 @@ function StylesList(props: StylesListProps) {
         },
         onSuccess(styles) {
             if (service) {
-                queryClient.setQueryData<Service>(RQKeys.datastore_offering(datastoreId, offeringId), (oldService) => {
+                queryClient.setQueryData<Service>(RQKeys.datastore_service(datastoreId, offeringId), (oldService) => {
                     if (oldService) {
                         return {
                             ...oldService,

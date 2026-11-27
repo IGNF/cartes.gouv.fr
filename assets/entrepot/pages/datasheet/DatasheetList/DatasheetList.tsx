@@ -16,7 +16,7 @@ import { useToggle } from "@mantine/hooks";
 import DatastoreMain from "@/components/Layout/DatastoreMain";
 import { ListHeader } from "@/components/Layout/ListHeader";
 import { datasheetListQueryOptions } from "@/hooks/queries/datasheetListQueryOptions";
-import { datastoreQueryOptions } from "@/hooks/queries/datastoreQueryOptions";
+import { datastoreEndpointsQueryOptions } from "@/hooks/queries/datastoreEndpointsQueryOptions";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import useMembership from "@/hooks/useMembership";
 import { usePagination } from "@/hooks/usePagination";
@@ -47,30 +47,28 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatasheetList");
     const { t: tCommon } = useTranslation("Common");
     const membership = useMembership({ datastoreId });
-    // le quota vient du DTO entrepôt, chargé à part : la liste ne l’attend pas
+    // le quota vient des points d’accès, chargés à part : la liste ne les attend pas
     const {
-        data: datastore,
+        data: endpoints,
         isPending: isQuotaPending,
         isError: isQuotaError,
         isFetching: isQuotaFetching,
         refetch: refetchQuota,
-    } = useQuery(datastoreQueryOptions(datastoreId));
+    } = useQuery(datastoreEndpointsQueryOptions(datastoreId));
 
     const datasheetListQuery = useQuery(datasheetListQueryOptions(datastoreId));
     const { data: datasheetList, dataUpdatedAt, isFetching, isLoading, refetch } = datasheetListQuery;
 
-    const metadataEndpoint = useMemo(
-        () => datastore?.endpoints?.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA),
-        [datastore?.endpoints]
-    );
+    const metadataEndpoint = useMemo(() => endpoints?.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA), [endpoints]);
 
     const datasheetCreationImpossible = Boolean(
         metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use
     );
     const { communityMember, isSupervisor } = useCommunityRights();
-    const hasCreationRights = isSupervisor || hasRights(communityMember, [CommunityMemberDtoRightsEnum.UPLOAD, CommunityMemberDtoRightsEnum.PROCESSING]);
+    // droits de la page de création : fiche de métadonnées (BROADCAST) et vignette (ANNEX)
+    const hasCreationRights = isSupervisor || hasRights(communityMember, [CommunityMemberDtoRightsEnum.BROADCAST, CommunityMemberDtoRightsEnum.ANNEX]);
     // création proposée seulement avec les droits, quand le quota est connu et non atteint
-    const canCreateDatasheet = hasCreationRights && datastore !== undefined && !datasheetCreationImpossible;
+    const canCreateDatasheet = hasCreationRights && endpoints !== undefined && !datasheetCreationImpossible;
 
     const { page, limit } = routeApi.useSearch();
     const navigate = routeApi.useNavigate();
@@ -90,7 +88,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     return (
         <DatastoreMain title={t("title", { datastoreName, page: totalPages > 1 ? page : undefined })}>
-            {hasCreationRights && isQuotaError && datastore === undefined && (
+            {hasCreationRights && isQuotaError && endpoints === undefined && (
                 <div className={fr.cx("fr-mt-6v")}>
                     <Alert severity="error" small description={t("metadata_endpoint_quota_unavailable")} className={fr.cx("fr-mb-2v")} />
                     <Button priority="secondary" size="small" disabled={isQuotaFetching} onClick={() => void refetchQuota()}>
@@ -121,7 +119,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 ) : (
                                     canCreateDatasheet && (
                                         <Button
-                                            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees/televersement", params: { datastoreId } }}
+                                            linkProps={{ to: "/tableau-de-bord/entrepots/$datastoreId/donnees/creer", params: { datastoreId } }}
                                             iconId="fr-icon-add-line"
                                             iconPosition="right"
                                             className={fr.cx("fr-ml-auto")}

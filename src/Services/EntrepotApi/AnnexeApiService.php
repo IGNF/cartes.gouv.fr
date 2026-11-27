@@ -78,18 +78,20 @@ final readonly class AnnexeApiService
      */
     public function add(string $datastoreId, string $annexeFilePath, array $paths, ?array $labels = null, bool $published = true): array
     {
-        $response = $this->api->sendFile('POST', "datastores/$datastoreId/annexes", $annexeFilePath, [
+        $formFields = [
             'published' => $published ? 'true' : 'false',
             'paths' => implode(',', $paths), // ici on fait un join parce que c'est un FormData, qui ne gère pas bien les virgules
-        ])->array();
-
-        if (null !== $labels) {
-            $response = $this->modify($datastoreId, $response['_id'], null, $labels)->array();
+        ];
+        // étiquettes posées à la création : une annexe sans étiquette serait invisible aux recherches concurrentes
+        foreach ($labels ?? [] as $label) {
+            $formFields[] = ['labels' => $label];
         }
 
-        $this->filesystem->remove($annexeFilePath);
-
-        return $response;
+        try {
+            return $this->api->sendFile('POST', "datastores/$datastoreId/annexes", $annexeFilePath, $formFields)->array();
+        } finally {
+            $this->filesystem->remove($annexeFilePath);
+        }
     }
 
     /**
@@ -120,11 +122,11 @@ final readonly class AnnexeApiService
      */
     public function replaceFile(string $datastoreId, string $annexeId, string $annexeFilePath): array
     {
-        $response = $this->api->sendFile('PUT', "datastores/$datastoreId/annexes/$annexeId", $annexeFilePath)->array();
-
-        $this->filesystem->remove($annexeFilePath);
-
-        return $response;
+        try {
+            return $this->api->sendFile('PUT', "datastores/$datastoreId/annexes/$annexeId", $annexeFilePath)->array();
+        } finally {
+            $this->filesystem->remove($annexeFilePath);
+        }
     }
 
     public function publish(string $datastoreId, string $annexeId): ResponsePromise

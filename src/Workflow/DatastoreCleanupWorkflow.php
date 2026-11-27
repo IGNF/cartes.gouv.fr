@@ -235,6 +235,7 @@ class DatastoreCleanupWorkflow
                 return true;
 
             case self::ENTITY_OFFERINGS:
+                // sans updateCapabilities : le nettoyage supprime ensuite toutes les annexes, capabilities comprises
                 $this->cartesServiceApiService->unpublish($datastoreId, $item['_id']);
 
                 return true;

@@ -23,16 +23,6 @@ class ProcessingController extends AbstractController implements ApiControllerIn
     ) {
     }
 
-    #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getList(string $datastoreId, Request $request): JsonResponse
-    {
-        $query = $request->query->all();
-
-        $uploadList = $this->processingApiService->getAll($datastoreId, $query)->resolve();
-
-        return $this->json($uploadList);
-    }
-
     #[Route('/executions', name: 'execution_get_list', methods: ['GET'])]
     public function getExecutionList(string $datastoreId, Request $request, #[MapQueryParameter] ?bool $detailed = false,
     ): JsonResponse {

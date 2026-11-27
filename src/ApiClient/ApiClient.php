@@ -97,8 +97,8 @@ final readonly class ApiClient
     /**
      * Envoie un fichier via une requête multipart/form-data. Utile pour les endpoints d'upload de fichiers.
      *
-     * @param array<string,mixed> $formFields
-     * @param array<string,mixed> $query
+     * @param array<int|string,mixed> $formFields clé entière : [nom => valeur], pour répéter un champ
+     * @param array<string,mixed>     $query
      */
     public function sendFile(string $method, string $url, string $filepath, array $formFields = [], array $query = [], string $fieldName = 'file'): ResponsePromise
     {
@@ -108,9 +108,9 @@ final readonly class ApiClient
     /**
      * Envoie plusieurs fichiers via une requête multipart/form-data. Utile pour les endpoints d'upload de fichiers.
      *
-     * @param array<string,string> $filepaths  (field name => file path)
-     * @param array<string,mixed>  $formFields
-     * @param array<string,mixed>  $query
+     * @param array<string,string>    $filepaths  (field name => file path)
+     * @param array<int|string,mixed> $formFields
+     * @param array<string,mixed>     $query
      */
     public function sendFiles(string $method, string $url, array $filepaths, array $formFields = [], array $query = []): ResponsePromise
     {
@@ -200,8 +200,8 @@ final readonly class ApiClient
     }
 
     /**
-     * Consomme les réponses et retourne un tableau de résultats (clé => payload) ou lève une ApiException si l'une des réponses est une erreur.
-     * Les erreurs sont ignorées si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
+     * Consomme les réponses et retourne un tableau de résultats (clé => payload) ou lève l'ApiException (statut amont) de la première réponse en erreur, en annulant les autres.
+     * Les erreurs HTTP et les timeouts sont ignorés si $continueOnError=true, auquel cas les réponses en erreur auront une valeur null dans le tableau de résultats.
      *
      * @param array<int|string,ResponsePromise> $pendingsByKey
      *

@@ -10,10 +10,12 @@ use App\Services\MailerService;
 use App\Services\MembershipService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Lock\Exception\ExceptionInterface as LockException;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
@@ -32,6 +34,9 @@ class ContactController extends AbstractController
     public function __construct(
         private readonly MailerService $mailerService,
         private readonly LoggerInterface $logger,
+        /** @var \Closure(): LockFactory résolu à l'usage : le formulaire fonctionne sans le stockage des verrous */
+        #[AutowireServiceClosure('lock.factory')]
+        private readonly \Closure $lockFactory,
     ) {
     }
 
@@ -39,15 +44,23 @@ class ContactController extends AbstractController
         '/contact-us',
         name: 'contact_us',
         methods: ['POST'])]
-    public function contact(Request $request, RateLimiterFactory $contactUsLimiter, LockFactory $lockFactory, DenormalizerInterface $serializer, ValidatorInterface $validator, GeocaptchaService $geocaptchaService): JsonResponse
+    public function contact(Request $request, RateLimiterFactory $contactUsLimiter, DenormalizerInterface $serializer, ValidatorInterface $validator, GeocaptchaService $geocaptchaService): JsonResponse
     {
         // avant tout contrôle : les appels de robots comptent aussi ; verrou commun, le compteur reste par adresse IP
-        $lock = $lockFactory->createLock('contact_us_limiter');
-        $lock->acquire(true);
+        try {
+            $lock = ($this->lockFactory)()->createLock('contact_us_limiter');
+            $lock->acquire(true);
+        } catch (LockException) {
+            // stockage des verrous indisponible : le formulaire reste ouvert, la limite s'applique sans verrou
+            $lock = null;
+        }
         try {
             $limit = $contactUsLimiter->create($request->getClientIp())->consume();
         } finally {
-            $lock->release();
+            try {
+                $lock?->release();
+            } catch (LockException) {
+            }
         }
         if (!$limit->isAccepted()) {
             throw new AppException('Trop de demandes, réessayez plus tard', Response::HTTP_TOO_MANY_REQUESTS, headers: ['Retry-After' => (string) max(1, $limit->getRetryAfter()->getTimestamp() - time())]);

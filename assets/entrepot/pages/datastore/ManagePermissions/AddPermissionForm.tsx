@@ -19,6 +19,7 @@ import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
+import { invalidateServiceAccess } from "../../../../modules/entrepot/invalidateServiceAccess";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { isOfferingUnavailable } from "../../../../utils";
 import "../../../../sass/pages/permission.scss";
@@ -79,6 +80,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                     return [...oldPermissions, ...permissions];
                 }
             });
+            invalidateServiceAccess(queryClient, datastoreId);
             void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params: { datastoreId } });
         },
     });

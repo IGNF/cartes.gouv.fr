@@ -6,19 +6,28 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Datasheet\DatasheetMetadataDTO;
 use App\Exception\AppException;
 use App\Services\EntrepotApi\AnnexeApiService;
+use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\CartesStoredDataApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
+use App\Services\MultipartPayloadMapper;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/datasheet',
@@ -35,7 +44,70 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         private readonly CartesServiceApiService $cartesServiceApiService,
         private readonly MetadataApiService $metadataApiService,
         private readonly CartesStoredDataApiService $cartesStoredDataApiService,
+        private readonly CartesMetadataApiService $cartesMetadataApiService,
+        private readonly MultipartPayloadMapper $multipartPayloadMapper,
+        private readonly ValidatorInterface $validator,
     ) {
+    }
+
+    // multipart : champ `data` (DatasheetMetadataDTO en JSON) et fichier `thumbnail` facultatif
+    #[Route('', name: 'add', methods: ['POST'])]
+    public function add(string $datastoreId, Request $request): JsonResponse
+    {
+        $dto = $this->multipartPayloadMapper->map($request, DatasheetMetadataDTO::class, groups: ['Default', DatasheetMetadataDTO::CREATION]);
+
+        return $this->json($this->cartesMetadataApiService->create($datastoreId, $dto, $this->thumbnail($request)), Response::HTTP_CREATED);
+    }
+
+    // remplacement complet des champs saisis ; vignette : fichier `thumbnail` = remplacer, champ `delete_thumbnail` = supprimer, aucun = garder
+    #[Route('/{datasheetName}', name: 'replace', methods: ['POST'])]
+    public function replace(string $datastoreId, string $datasheetName, Request $request): JsonResponse
+    {
+        $dto = $this->multipartPayloadMapper->map($request, DatasheetMetadataDTO::class);
+
+        return $this->json($this->cartesMetadataApiService->replace(
+            $datastoreId,
+            $datasheetName,
+            $dto,
+            fn () => $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName),
+            $this->thumbnail($request),
+            $request->request->getBoolean('delete_thumbnail'),
+        ));
+    }
+
+    // répond les points d’accès de publication : la fiche de métadonnées relue juste après peut ne pas encore les porter
+    #[Route('/{datasheetName}/publish', name: 'publish', methods: ['POST'])]
+    public function publish(string $datastoreId, string $datasheetName): JsonResponse
+    {
+        return $this->json($this->cartesMetadataApiService->publish($datastoreId, $datasheetName));
+    }
+
+    #[Route('/{datasheetName}/publish', name: 'unpublish', methods: ['DELETE'])]
+    public function unpublish(string $datastoreId, string $datasheetName): Response
+    {
+        $this->cartesMetadataApiService->unpublish($datastoreId, $datasheetName);
+
+        return new Response(null, Response::HTTP_NO_CONTENT);
+    }
+
+    private function thumbnail(Request $request): ?UploadedFile
+    {
+        $thumbnail = $request->files->get('thumbnail');
+        if (null === $thumbnail) {
+            return null;
+        }
+
+        $violations = $this->validator->startContext()->atPath('thumbnail')->validate($thumbnail, new Assert\File(
+            maxSize: '2M',
+            mimeTypes: ['image/jpeg', 'image/png', 'image/svg+xml', 'image/svg'],
+            maxSizeMessage: 'La vignette ne peut pas dépasser {{ limit }} {{ suffix }}',
+            mimeTypesMessage: 'La vignette doit être une image JPEG, PNG ou SVG',
+        ))->getViolations();
+        if (count($violations) > 0) {
+            throw new UnprocessableEntityHttpException('Validation Failed', new ValidationFailedException($thumbnail, $violations));
+        }
+
+        return $thumbnail;
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
@@ -160,43 +232,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('/{datasheetName}/services', name: 'get_services', methods: ['GET'])]
     public function getServices(string $datastoreId, string $datasheetName): JsonResponse
     {
-        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-            'fields' => 'status', // on n'a besoin que de l'_id qui est toujours présent, mais on ne peut pas demander "_id" via "fields", donc "status" parce que c'est un champ léger et qui est toujours présent
-        ])->resolve();
-
-        $offeringsById = $this->getOfferingsOfStoredData($datastoreId, $storedDataList);
-        $offeringsById = $this->cartesServiceApiService->getServicesFromOfferings($datastoreId, $offeringsById, false);
-
-        return $this->json(array_values($offeringsById));
-    }
-
-    /**
-     * Offerings détaillées publiées à partir des stored_data données, listes lancées en parallèle.
-     *
-     * @param array<array<mixed>> $storedDataList
-     *
-     * @return array<string,array<mixed>> clé : offeringId, valeur : offering
-     */
-    private function getOfferingsOfStoredData(string $datastoreId, array $storedDataList): array
-    {
-        $pendingAllByStoredData = [];
-        foreach ($storedDataList as $storedData) {
-            $pendingAllByStoredData[] = $this->configurationApiService->getAllOfferingsDetailed($datastoreId, [
-                'stored_data' => $storedData['_id'],
-            ]);
-        }
-
-        $offeringsById = [];
-        foreach ($pendingAllByStoredData as $pendingAll) {
-            foreach ($pendingAll->resolve() as $offering) {
-                $offeringsById[$offering['_id']] = $offering;
-            }
-        }
-
-        return $offeringsById;
+        return $this->json($this->cartesServiceApiService->getDatasheetServiceList($datastoreId, $datasheetName));
     }
 
     /**
@@ -265,14 +301,17 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             throw new AppException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
         }
 
-        // suppr des services (config et offering)
-        foreach ($this->getOfferingsOfStoredData($datastoreId, $storedDataList) as $offering) {
-            $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id'], $offering);
+        // suppr des services (offre puis configuration), puis des configurations sans offre
+        $datasheetServices = $this->cartesServiceApiService->getDatasheetServices($datastoreId, $datasheetName);
+        $this->cartesServiceApiService->unpublishAll($datastoreId, array_values($datasheetServices->offeringsById));
+        foreach ($datasheetServices->configurationsWithoutOffering() as $configuration) {
+            $this->cartesServiceApiService->removeConfiguration($datastoreId, $configuration);
         }
 
         // suppr des uploads
         foreach ($uploadList as $upload) {
-            $this->uploadApiService->remove($datastoreId, $upload['_id'], $upload)->await();
+            // pas la livraison de la liste : elle ne porte pas `extra`, que remove() doit préserver
+            $this->uploadApiService->remove($datastoreId, $upload['_id'])->await();
         }
 
         // suppr des stored_data (bases vecteur et pyramides)

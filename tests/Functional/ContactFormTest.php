@@ -4,11 +4,13 @@ namespace App\Tests\Functional;
 
 use App\Security\ApiAuthenticationEntryPoint;
 use App\Services\GeocaptchaService;
+use App\Tests\Double\BrokenLockStore;
 use App\Tests\Double\EntrepotMockResponseFactory;
 use App\Tests\Double\FakeKeycloakClient;
 use App\Tests\Support\KeycloakLoginTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Mime\RawMessage;
 
 /**
@@ -55,6 +57,16 @@ final class ContactFormTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertEmailCount(0);
+    }
+
+    public function testContactUsStillAnswersWhenTheLockStorageIsDown(): void
+    {
+        $client = self::createClient();
+        self::getContainer()->set('lock.default.factory', new LockFactory(new BrokenLockStore()));
+
+        $client->xmlHttpRequest('POST', self::BASE.'/api/contact/contact-us', content: $this->json(['importance' => '1']));
+
+        self::assertResponseIsSuccessful();
     }
 
     public function testContactUsRefusesTheSixthCallFromTheSameIpWithin10Minutes(): void

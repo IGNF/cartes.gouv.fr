@@ -1,7 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\Dto\Datasheet\ProducerDTO;
+use App\Dto\Datasheet\ResourceConditionDTO;
+use App\Dto\Datasheet\SubConstraintDTO;
+use App\Dto\Datasheet\TerritoryDTO;
 use App\Dto\Metadata\CswHierarchyLevel;
 use App\Dto\Metadata\CswLanguage;
 use App\Dto\Metadata\CswMetadata;
@@ -23,6 +29,7 @@ class CswMetadataXmlReader
     ];
 
     private const IDENTIFICATION = 'gmd:identificationInfo/gmd:MD_DataIdentification';
+    private const CITATION_DATE = self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date';
     private const ONLINE_RESOURCES = 'gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine';
     private const RESTRICTED_ACCESS_PROFILE = 'http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceType/other';
 
@@ -30,14 +37,12 @@ class CswMetadataXmlReader
     private const TEXT_FIELDS = [
         'file_identifier' => 'gmd:fileIdentifier/gco:CharacterString',
         'charset' => 'gmd:characterSet/gmd:MD_CharacterSetCode/@codeListValue',
-        'title' => self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString',
-        'abstract' => self::IDENTIFICATION.'/gmd:abstract/gco:CharacterString',
-        'creation_date' => self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="creation"]/gmd:date/gco:Date',
+        'name' => self::IDENTIFICATION.'/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString',
+        'description' => self::IDENTIFICATION.'/gmd:abstract/gco:CharacterString',
+        'date_creation' => self::CITATION_DATE.'[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="creation"]/gmd:date/gco:Date',
+        'date_publication' => self::CITATION_DATE.'[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="publication"]/gmd:date/gco:Date',
+        'date_revision' => self::CITATION_DATE.'[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue="revision"]/gmd:date/gco:Date',
         'resource_genealogy' => 'gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:statement/gco:CharacterString',
-        'contact_email' => 'gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString',
-        'organisation_name' => self::IDENTIFICATION.'/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString',
-        'organisation_email' => self::IDENTIFICATION.'/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString',
-        'resolution' => self::IDENTIFICATION.'/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer',
         'thumbnail_url' => self::IDENTIFICATION.'/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString',
     ];
 
@@ -61,11 +66,19 @@ class CswMetadataXmlReader
 
         $frequencyCode = $this->text($xpath, self::IDENTIFICATION.'/gmd:resourceMaintenance/gmd:MD_MaintenanceInformation/gmd:maintenanceAndUpdateFrequency/gmd:MD_MaintenanceFrequencyCode/@codeListValue', $root);
         // fiches publiées avec l’ancienne faute de frappe « quaterly »
-        $metadata->frequency_code = 'quaterly' === $frequencyCode ? 'quarterly' : $frequencyCode;
+        $metadata->update_frequency = 'quaterly' === $frequencyCode ? 'quarterly' : $frequencyCode;
 
-        $metadata->topic_categories = $this->texts($xpath, self::IDENTIFICATION.'/gmd:topicCategory/gmd:MD_TopicCategoryCode', $root);
-        [$metadata->inspire_keywords, $metadata->free_keywords] = $this->keywords($xpath, $root);
-        $metadata->bbox = $this->bbox($xpath, $root);
+        // premier bloc de chaque sorte : échelle équivalente, distance en mètres
+        $scale = $this->text($xpath, self::IDENTIFICATION.'/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer', $root);
+        $metadata->scale = null === $scale ? null : (int) $scale;
+        $resolution = $this->text($xpath, self::IDENTIFICATION.'/gmd:spatialResolution/gmd:MD_Resolution/gmd:distance/gco:Distance', $root);
+        $metadata->resolution = null === $resolution ? null : (float) $resolution;
+
+        $metadata->producers = $this->producers($xpath, $root);
+        $metadata->resource_constraints = $this->resourceConstraints($xpath, $root);
+        $metadata->themes = $this->texts($xpath, self::IDENTIFICATION.'/gmd:topicCategory/gmd:MD_TopicCategoryCode', $root);
+        [$metadata->keywords_inspire, $metadata->keywords_additional] = $this->keywords($xpath, $root);
+        $metadata->territories = $this->territories($xpath, $root);
         $metadata->online_resources = $this->onlineResources($xpath, $root);
 
         return $metadata;
@@ -165,27 +178,148 @@ class CswMetadataXmlReader
     }
 
     /**
-     * @return array{west: float, east: float, south: float, north: float}|null
+     * Points de contact de la ressource, puis le contact des métadonnées sous le rôle contact.
+     *
+     * @return list<ProducerDTO>
      */
-    private function bbox(\DOMXPath $xpath, \DOMElement $root): ?array
+    private function producers(\DOMXPath $xpath, \DOMElement $root): array
     {
-        $bbox = $this->elements($xpath, self::IDENTIFICATION.'/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', $root)[0] ?? null;
-        if (null === $bbox) {
-            return null;
+        $producers = [];
+        foreach ($this->elements($xpath, self::IDENTIFICATION.'/gmd:pointOfContact/gmd:CI_ResponsibleParty', $root) as $party) {
+            // fichier d’avant la refonte : organisation unique sans rôle
+            $producers[] = $this->producer($xpath, $party, $this->text($xpath, 'gmd:role/gmd:CI_RoleCode/@codeListValue', $party) ?: 'pointOfContact');
+        }
+        // le formulaire verrouille le point de contact en première position
+        usort($producers, fn (ProducerDTO $a, ProducerDTO $b) => ('pointOfContact' === $b->role) <=> ('pointOfContact' === $a->role));
+
+        $contact = $this->elements($xpath, 'gmd:contact/gmd:CI_ResponsibleParty', $root)[0] ?? null;
+        if (null !== $contact) {
+            $producers[] = $this->producer($xpath, $contact, 'contact');
         }
 
-        $coordinate = function (string $tagName) use ($xpath, $bbox): float {
-            $value = $this->text($xpath, "gmd:$tagName/gco:Decimal", $bbox);
+        // gestionnaire et contact sont copiés du point de contact à la soumission : la copie est repliée à la lecture
+        $pointOfContact = $producers[0] ?? null;
 
-            return floatval($value ?? throw new InvalidCswMetadataException("coordonnée $tagName absente de l’emprise"));
-        };
+        return array_values(array_filter($producers, fn (ProducerDTO $producer) => !(
+            $pointOfContact instanceof ProducerDTO
+            && 'pointOfContact' === $pointOfContact->role
+            && in_array($producer->role, ['contact', 'custodian'], true)
+            && $producer->sameOrganizationAs($pointOfContact)
+        )));
+    }
 
-        return [
-            'west' => $coordinate('westBoundLongitude'),
-            'east' => $coordinate('eastBoundLongitude'),
-            'south' => $coordinate('southBoundLatitude'),
-            'north' => $coordinate('northBoundLatitude'),
-        ];
+    private function producer(\DOMXPath $xpath, \DOMElement $party, string $role): ProducerDTO
+    {
+        $address = 'gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/';
+
+        return new ProducerDTO(
+            $this->text($xpath, 'gmd:organisationName/gco:CharacterString', $party) ?? '',
+            $this->text($xpath, $address.'gmd:electronicMailAddress/gco:CharacterString', $party) ?? '',
+            $role,
+            $this->text($xpath, $address.'gmd:deliveryPoint/gco:CharacterString', $party),
+            $this->text($xpath, $address.'gmd:postalCode/gco:CharacterString', $party),
+            $this->text($xpath, $address.'gmd:city/gco:CharacterString', $party),
+        );
+    }
+
+    /**
+     * @return list<ResourceConditionDTO>
+     */
+    private function resourceConstraints(\DOMXPath $xpath, \DOMElement $root): array
+    {
+        $types = ['MD_LegalConstraints' => 'legal', 'MD_SecurityConstraints' => 'security', 'MD_Constraints' => 'other'];
+        $conditions = [];
+        foreach ($this->elements($xpath, self::IDENTIFICATION.'/gmd:resourceConstraints/*', $root) as $element) {
+            $type = $types[$element->localName] ?? null;
+            if (null === $type) {
+                continue;
+            }
+            $constraints = $this->pairedSubConstraints($this->subConstraints($xpath, $element));
+            if ([] !== $constraints) {
+                $conditions[] = new ResourceConditionDTO($type, $constraints);
+            }
+        }
+
+        return $conditions;
+    }
+
+    /**
+     * @return list<SubConstraintDTO> dans l’ordre du fichier (ordre ISO 19139)
+     */
+    private function subConstraints(\DOMXPath $xpath, \DOMElement $element): array
+    {
+        $constraints = [];
+        foreach ($this->elements($xpath, 'gmd:*', $element) as $child) {
+            $code = $this->text($xpath, '*/@codeListValue', $child);
+            $anchor = $this->text($xpath, 'gmx:Anchor/@xlink:href', $child);
+            $text = $this->text($xpath, 'gmx:Anchor|gco:CharacterString', $child);
+
+            $constraints[] = match ($child->localName) {
+                'useLimitation' => new SubConstraintDTO('useLimitation', url: $anchor, description: $text),
+                'useConstraints', 'accessConstraints' => new SubConstraintDTO($child->localName, restriction_code: $code),
+                // le code INSPIRE est le dernier segment de l’URI du vocabulaire
+                'otherConstraints' => new SubConstraintDTO('otherConstraints', limitation_code: null !== $anchor ? basename($anchor) : $text),
+                'classification' => new SubConstraintDTO('classification', classification_code: $code),
+                default => null,
+            };
+        }
+
+        return array_values(array_filter($constraints));
+    }
+
+    /**
+     * Le formulaire attend chaque restriction d’usage ou d’accès suivie de sa compagne : otherConstraints pour otherRestrictions, useLimitation sinon.
+     *
+     * @param list<SubConstraintDTO> $constraints
+     *
+     * @return list<SubConstraintDTO>
+     */
+    private function pairedSubConstraints(array $constraints): array
+    {
+        $ofType = fn (string ...$types) => array_values(array_filter($constraints, fn (SubConstraintDTO $c) => in_array($c->type, $types, true)));
+        $limitations = $ofType('useLimitation');
+        $others = $ofType('otherConstraints');
+
+        $paired = [];
+        foreach ($ofType('accessConstraints', 'useConstraints') as $restriction) {
+            $paired[] = $restriction;
+            $companion = 'otherRestrictions' === $restriction->restriction_code ? array_shift($others) : array_shift($limitations);
+            if (null !== $companion) {
+                $paired[] = $companion;
+            }
+        }
+
+        return [...$paired, ...$limitations, ...$others, ...$ofType('classification')];
+    }
+
+    /**
+     * @return list<TerritoryDTO>
+     */
+    private function territories(\DOMXPath $xpath, \DOMElement $root): array
+    {
+        $territories = [];
+        foreach ($this->elements($xpath, self::IDENTIFICATION.'/gmd:extent/gmd:EX_Extent', $root) as $extent) {
+            $id = $this->text($xpath, 'gmd:geographicElement/gmd:EX_GeographicDescription/gmd:geographicIdentifier/gmd:MD_Identifier/gmd:code/gco:CharacterString', $extent);
+            $box = $this->elements($xpath, 'gmd:geographicElement/gmd:EX_GeographicBoundingBox', $extent)[0] ?? null;
+            // emprise calculée d’avant la refonte, sans identifiant géographique : ignorée
+            if (null === $id || null === $box) {
+                continue;
+            }
+
+            $coordinate = function (string $tagName) use ($xpath, $box): float {
+                $value = $this->text($xpath, "gmd:$tagName/gco:Decimal", $box);
+
+                return (float) ($value ?? throw new InvalidCswMetadataException("coordonnée $tagName absente de l’emprise"));
+            };
+
+            $territories[] = new TerritoryDTO(
+                $id,
+                $this->text($xpath, 'gmd:description/gco:CharacterString', $extent) ?? $id,
+                [$coordinate('westBoundLongitude'), $coordinate('southBoundLatitude'), $coordinate('eastBoundLongitude'), $coordinate('northBoundLatitude')],
+            );
+        }
+
+        return $territories;
     }
 
     /**

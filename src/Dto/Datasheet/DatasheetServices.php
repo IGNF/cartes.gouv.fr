@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Dto\Datasheet;
 
 use App\Utils;
@@ -33,6 +35,16 @@ final readonly class DatasheetServices
     public function offeringOfConfiguration(string $configurationId): ?array
     {
         return Utils::array_find($this->offeringsById, fn (array $offering) => ($offering['configuration']['_id'] ?? null) === $configurationId);
+    }
+
+    /**
+     * Configurations de la fiche qui n’ont aucune offre, quel que soit leur statut.
+     *
+     * @return list<array<mixed>>
+     */
+    public function configurationsWithoutOffering(): array
+    {
+        return array_values(array_filter($this->configurationsById, fn (array $configuration) => null === $this->offeringOfConfiguration($configuration['_id'])));
     }
 
     /**

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Dto\Metadata\CswMetadata;
@@ -29,7 +31,7 @@ class CswMetadataXmlWriter
         /** @var array<string, mixed> $variables le gabarit lit les clés snake_case du sérialiseur */
         $variables = $this->normalizer->normalize($metadata);
         // gmd:dateStamp : date de la métadonnée, posée à chaque écriture et jamais relue
-        $variables['date_stamp'] = $this->clock->now()->format('Y-m-d\TH:i:s');
+        $variables['date_stamp'] = $this->clock->now()->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d\TH:i:s.u\Z');
 
         return $this->twig->render('metadata/metadata_dataset_iso.xml.twig', $variables);
     }

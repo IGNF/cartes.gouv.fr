@@ -13,6 +13,7 @@ import DatePicker from "../../../../components/Input/DatePicker";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
+import { invalidateServiceAccess } from "../../../../modules/entrepot/invalidateServiceAccess";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import ScrollOfferingList from "./ScrollOfferingList";
 import { getEditSchema } from "./ValidationSchemas";
@@ -54,6 +55,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                 const newPermissions = oldPermissions?.filter((p) => p._id !== permissionId) || [];
                 return [...newPermissions, permission];
             });
+            invalidateServiceAccess(queryClient, datastoreId);
             void navigate({ to: "/tableau-de-bord/entrepots/$datastoreId/permissions", params: { datastoreId } });
         },
     });

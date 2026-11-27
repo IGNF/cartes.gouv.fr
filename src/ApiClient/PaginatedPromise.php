@@ -29,6 +29,14 @@ final class PaginatedPromise
     }
 
     /**
+     * Abandonne la lecture, à n’appeler qu’en fin d’usage : la réponse annulée ne peut plus être lue.
+     */
+    public function cancel(): void
+    {
+        $this->page1Pending->getResponse()->cancel();
+    }
+
+    /**
      * Applique une transformation sur le tableau résolu, en restant lazy.
      *
      * @param callable(array<mixed>): array<mixed> $transform
